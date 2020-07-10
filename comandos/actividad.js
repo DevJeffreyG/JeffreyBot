@@ -1,0 +1,56 @@
+const Discord = require("discord.js");
+const Config = require(".././base.json");
+const bot = new Discord.Client({disableEveryone: true});
+let prefix = Config.prefix;
+const jeffreygID = Config.jeffreygID;
+const jgServer = Config.jgServer;
+const offtopicChannel = Config.offtopicChannel;
+const mainChannel = Config.mainChannel;
+
+module.exports.run = async (bot, message, args) => {
+
+    if(!message.content.startsWith(prefix))return;
+
+    let argcustom = args.join(" ");
+  
+    let wrongembed = new Discord.MessageEmbed()
+    .setColor(0xED0C0C)
+    .setAuthor(`| ERROR`, Config.errorPng)
+    .setDescription(`${message.author}, No eres desarrollador para hacer esto.`);
+
+  if (message.author.id != jeffreygID) {
+    return message.channel.send(wrongembed);
+  }
+  
+  if(argcustom == "default") {
+      let setgamembed2 = new Discord.MessageEmbed()
+        .setColor(0x07DE47)
+        .setAuthor(`| Actividad seleccionada sin problemas.`, Config.bienPng)
+        .setDescription(`${bot.user.username} tiene el juego por DEFAULT.`)
+        .setFooter(`Puesto por ${message.author.username}.`, message.author.avatarURL);
+        bot.user.setActivity(`${prefix}ayuda┊${prefix}soporte - Viendo a ${bot.users.size} usuarios🔎`);
+        return message.channel.send(setgamembed2);
+  }
+
+  let specifyembed = new Discord.MessageEmbed()
+    .setColor(0xED0C0C)
+    .setAuthor(`| Error al poner nueva actividad`, Config.errorPng)
+    .setDescription(`${message.author}, Por favor, pon un juego para jugar.`);
+
+  let setgamembed = new Discord.MessageEmbed()
+    .setColor(0x07DE47)
+    .setAuthor(`| Actividad seleccionada sin problemas.`, Config.bienPng)
+    .setDescription(`${bot.user.username} ahora juega \`${argcustom}\`.`)
+    .setFooter(`Puesto por ${message.author.username}.`, message.author.avatarURL);
+
+
+  if (!argcustom[0]) return message.channel.send(specifyembed);
+
+  bot.user.setActivity(argcustom);
+  console.log(`${bot.user.username} Ahora juega ${argcustom}.`);
+  message.channel.send(setgamembed);
+}
+
+module.exports.help = {
+    name: "actividad"
+}
