@@ -28,7 +28,7 @@ const Ignore = require("../modelos/ignore.js")
 
 module.exports.run = async (bot, message, args) => {
   if (!message.content.startsWith(prefix)) return;
-  //if (message.author.id != jeffreygID) return;
+  if (message.author.id != jeffreygID) return;
   // Variables
   let author = message.author;
   const guild = message.guild;
@@ -91,12 +91,7 @@ module.exports.run = async (bot, message, args) => {
                         x => x.id === Config.lvl20
                       )
                     ) {
-                      precio = `~~${precio}~~ ${Math.floor(items[i].itemPrice) +
-                        all.quantity * interest -
-                        ((Math.floor(items[i].itemPrice) +
-                          all.quantity * interest) /
-                          100) *
-                          15}`;
+                      precio = `~~${precio}~~ ${Math.floor(items[i].itemPrice) + all.quantity * interest - ((Math.floor(items[i].itemPrice) + all.quantity * interest) / 100) * 15}`;
                     }
                   } else {
                     if (
@@ -468,13 +463,7 @@ module.exports.run = async (bot, message, args) => {
                             x => x.id === Config.lvl20
                           )
                         ) {
-                          precio =
-                            Math.floor(item.itemPrice) +
-                            all.quantity * interest -
-                            ((Math.floor(item.itemPrice) +
-                              all.quantity * interest) /
-                              100) *
-                              15;
+                          precio = Math.floor(item.itemPrice) + all.quantity * interest - ((Math.floor(item.itemPrice) + all.quantity * interest) / 100) * 15;
                         }
                       } else {
                         if (
@@ -549,7 +538,7 @@ module.exports.run = async (bot, message, args) => {
                           }
                           // revisando que tenga el dinero para pagar
 
-                          if (currency.jeffros < item.itemPrice)
+                          if (currency.jeffros < precio)
                             return message.channel.send(doesntHaveEnough);
 
                           Purchased.findOne(
