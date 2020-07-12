@@ -28,7 +28,7 @@ const Ignore = require("../modelos/ignore.js")
 
 module.exports.run = async (bot, message, args) => {
   if (!message.content.startsWith(prefix)) return;
-  if (message.author.id != jeffreygID) return;
+  
   // Variables
   let author = message.author;
   const guild = message.guild;
