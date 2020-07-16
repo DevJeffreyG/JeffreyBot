@@ -55,12 +55,8 @@ module.exports.run = async (bot, message, args) => {
 
       let wRazon;
 
-      if(wUser.roles.cache.has(staffRole)){
+      if(wUser.roles.cache.find(x => x.id === staffRole.id)){
         return message.reply("¿tas bobo o qué?");
-      }
-
-      if(wUser.id === author.id){
-        return message.reply("pero... ¿por qué harías eso?");
       }
   
       if(!args[2]){
