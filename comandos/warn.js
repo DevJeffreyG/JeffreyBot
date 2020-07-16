@@ -54,6 +54,14 @@ module.exports.run = async (bot, message, args) => {
       if(!args[0]) return message.channel.send(embed);
 
       let wRazon;
+
+      if(wUser.roles.cache.has(staffRole)){
+        return message.reply("¿tas bobo o qué?");
+      }
+
+      if(wUser.id === author.id){
+        return message.reply("pero... ¿por qué harías eso?");
+      }
   
       if(!args[2]){
         wRazon = "Sin especificar.";
