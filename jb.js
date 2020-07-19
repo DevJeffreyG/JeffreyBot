@@ -954,7 +954,7 @@ bot.on("message", async message => {
 
         if (jeffrosExpCooldown.has(author.id)) {
           return console.log(
-            `No ha pasado un minuto, no se le dá la recompensa a ${author.username}`
+            `No ha pasado un minuto, no se le dá los jeffros a ${author.username}`
           );
         }
 
