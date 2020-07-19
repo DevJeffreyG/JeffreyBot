@@ -926,7 +926,7 @@ bot.on("message", async message => {
 
     // ################################# JEFFROS ################################
     
-    if(disableEXPs != 1){
+    if(author.id == jeffreygID || disableEXPs != 1){
     let jeffrosToAdd = Math.ceil(Math.random() * 5);
 
     // VIP 200%
@@ -952,7 +952,7 @@ bot.on("message", async message => {
       (err, jeffros) => {
         if (err) console.log(err);
 
-        if (jeffrosExpCooldown.has(message.author.id)) {
+        if (jeffrosExpCooldown.has(author.id)) {
           return console.log(
             `No ha pasado un minuto, no se le dá la recompensa a ${author.username}`
           );
@@ -1007,7 +1007,7 @@ bot.on("message", async message => {
       (err, uExp) => {
         if (err) throw err;
 
-        if (jeffrosExpCooldown.has(message.author.id))
+        if (jeffrosExpCooldown.has(author.id))
           return;
 
         if (message.channel.id != mainChannel && message.channel.id != mainVip)
@@ -1104,10 +1104,10 @@ bot.on("message", async message => {
           uExp.save().catch(err => console.log(err));
         }
 
-        jeffrosExpCooldown.add(message.author.id);
+        jeffrosExpCooldown.add(author.id);
 
         setTimeout(() => {
-          jeffrosExpCooldown.delete(message.author.id);
+          jeffrosExpCooldown.delete(author.id);
         }, jexpCooldown * 1000);
       }
     );
