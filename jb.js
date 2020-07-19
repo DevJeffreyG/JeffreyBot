@@ -43,6 +43,7 @@ const repCooldown = 86400;
 const workCooldown = new Set();
 
 const active = new Map();
+const disableEXPs = 1;
 
 // WEAS PARA EVENTOS:
 
@@ -924,7 +925,8 @@ bot.on("message", async message => {
     );
 
     // ################################# JEFFROS ################################
-
+    
+    if(disableEXPs != 1){
     let jeffrosToAdd = Math.ceil(Math.random() * 5);
 
     // VIP 200%
@@ -1109,6 +1111,9 @@ bot.on("message", async message => {
         }, jexpCooldown * 1000);
       }
     );
+  } else {
+    return console.log("A Y");
+  }
   }
 });
 
