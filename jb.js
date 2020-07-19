@@ -47,7 +47,7 @@ const disableEXPs = 0;
 
 // WEAS PARA EVENTOS:
 
-let multiplier = 1; // multiplicador de jeffros & exp
+let multiplier = 0; // multiplicador de jeffros & exp
 
 var cumplidos = [
   "Tifón",
