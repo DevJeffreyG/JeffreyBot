@@ -43,7 +43,7 @@ const repCooldown = 86400;
 const workCooldown = new Set();
 
 const active = new Map();
-const disableEXPs = 0;
+const disableEXPs = 1;
 
 // WEAS PARA EVENTOS:
 
