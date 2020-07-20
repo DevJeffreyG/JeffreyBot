@@ -41,7 +41,7 @@ const workCooldown = new Set();
 
 
 const active = new Map();
-const disableEXPs = 0;
+const disableEXPs = 1;
 
 // WEAS PARA EVENTOS:
 
@@ -886,7 +886,6 @@ bot.on("message", async message => {
 
     if(jeffrosExpCooldown.has(author.id)){
       console.log(author.tag + " aún tiene cooldown")
-      console.log(jexpCooldown)
     }
     else if (message.member.roles.cache.find(x => x.id === Config.lvl40)){
       jexpCooldown = jexpCooldown / 2;
@@ -963,9 +962,7 @@ bot.on("message", async message => {
         if (err) console.log(err);
 
         if (jeffrosExpCooldown.has(author.id)) {
-          return console.log(
-            `No ha pasado un minuto, no se le dá los jeffros a ${author.username}`
-          );
+          return;
         }
 
         if (message.channel.id != mainChannel && message.channel.id != mainVip)
@@ -1016,7 +1013,7 @@ bot.on("message", async message => {
             if (err) throw err;
 
             if (jeffrosExpCooldown.has(author.id))
-              return console.log("sigue teniendo cooldown");
+              return;
 
             if (message.channel.id != mainChannel && message.channel.id != mainVip)
               return;
@@ -1113,7 +1110,6 @@ bot.on("message", async message => {
             }
 
             jeffrosExpCooldown.add(author.id);
-            console.log(jeffrosExpCooldown.has(author.id) + "#### " + author.tag + " ahora tiene un cooldown de " + jexpCooldown*1000 +"ms")
 
             setTimeout(() => {
               console.log(author.id + " ya puede ganar exp y jeffros")
