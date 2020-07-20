@@ -53,24 +53,16 @@ module.exports.run = async (bot, message, args) => {
   let mensaje = args.join(" ").slice(args[0].length + 1);
   if(!args[1]) return message.channel.send(embed).then(a => a.delete(ms('30s')));
   
-  if(!message.content.includes("{nombre}")){
-    mdMember.send(`${mensaje}`)
-    .then(a => message.react("✅"))
-    .catch(e => {
-      return message.reply(`Usuario con los MDs desactivados.`).then(a => a.delete(ms('20s')));
-    })
-    
-    
-  } else {
     let str = args.join(" ").slice(args[0].length + 1);
-    let finalStr = str.replace(new RegExp('{nombre}', "g"), `**${author.tag}**`);
+    let yoStr = str.replace(new RegExp('{yo}', "g"), `**${author.tag}**`);
+    let finalStr = yoStr.replace(new RegExp('{user}', "g"), `**${mdMember.tag}**`);
 
     mdMember.send(`${finalStr}`)
     .then(a => message.react("✅"))
     .catch(e => {
       return message.reply(`Usuario con los MDs desactivados.`).then(a => a.delete(ms('20s')));
     })
-  }
+  
 }
 
 module.exports.help = {
