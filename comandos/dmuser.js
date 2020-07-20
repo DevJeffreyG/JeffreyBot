@@ -57,7 +57,13 @@ module.exports.run = async (bot, message, args) => {
     let yoStr = str.replace(new RegExp('{yo}', "g"), `**${author.tag}**`);
     let finalStr = yoStr.replace(new RegExp('{user}', "g"), `**${mdMember.user.tag}**`);
 
-    mdMember.send(`${finalStr}`)
+    let finalEmbed = new Discord.MessageEmbed()
+    .setAuthor(`| Hola`, "https://i.pinimg.com/originals/85/7f/d7/857fd79dfd7bd025e4cbb2169cd46e03.png")
+    .setDescription(`${finalStr}`)
+    .setFooter("Este es un mensaje directamente del staff del servidor.")
+    .setColor(Colores.verde);
+
+    mdMember.send(finalEmbed)
     .then(a => message.react("✅"))
     .catch(e => {
       return message.reply(`Usuario con los MDs desactivados.`).then(a => a.delete(ms('20s')));
