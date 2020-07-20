@@ -1105,6 +1105,7 @@ bot.on("message", async message => {
         }
 
         jeffrosExpCooldown.add(author.id);
+        console.log("####"+jeffrosExpCooldown.has(author))
 
         setTimeout(() => {
           jeffrosExpCooldown.delete(author.id);
