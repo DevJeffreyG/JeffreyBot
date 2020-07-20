@@ -34,14 +34,6 @@ const botsVip = Config.botsVip;
 const staffComandos = Config.staffComandos;
 const staffChat = Config.staffChat;
 
-const commandsCooldown = new Set();
-const cmdCooldown = 5;
-const jeffrosExpCooldown = new Set();
-let jexpCooldown = 60;
-const repCool = new Set();
-const repCooldown = 86400;
-const workCooldown = new Set();
-
 const active = new Map();
 const disableEXPs = 0;
 
@@ -646,6 +638,14 @@ bot.on("message", async message => {
   let args = messageArray.slice(1);
   let guild = message.guild;
   let author = message.author;
+
+  const commandsCooldown = new Set();
+  const cmdCooldown = 5;
+  const jeffrosExpCooldown = new Set();
+  let jexpCooldown = 60;
+  const repCool = new Set();
+  const repCooldown = 86400;
+  const workCooldown = new Set();
 
   // Captcha.
   if (message.author.bot) return;
