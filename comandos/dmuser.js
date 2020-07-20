@@ -44,11 +44,6 @@ module.exports.run = async (bot, message, args) => {
   .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}mduser`);
   
   if(member.roles.cache.find(x => x.id === staffRole.id)){} else return;
-  
-  let mdMember = guild.member(message.guild.members.cache.get(args[0]) || message.mentions.users.first());
-  if(!mdMember) return message.channel.send(embed).then(a => a.delete(ms('30s')));
-  
-  if(mdMember.user.bot) return;
 
   if(args[0].toLowerCase("help")){
     let help = new Discord.MessageEmbed()
@@ -56,7 +51,14 @@ module.exports.run = async (bot, message, args) => {
     .setColor(Colores.nocolor)
     .setDescription(`▸ {yo}: Se cambia "{yo}" por tu nombre.\n▸ {user}: Se cambia "{user}" por el usuario al que se le envía el md.`)
     .setFooter(`Es NECESARIO usar los corchetes {} para que pueda ser cambiado.`);
+
+    return message.channel.send(help);
   }
+  
+  let mdMember = guild.member(message.guild.members.cache.get(args[0]) || message.mentions.users.first());
+  if(!mdMember) return message.channel.send(embed).then(a => a.delete(ms('30s')));
+  
+  if(mdMember.user.bot) return;
   
   let mensaje = args.join(" ").slice(args[0].length + 1);
   if(!args[1]) return message.channel.send(embed).then(a => a.delete(ms('30s')));
