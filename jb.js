@@ -884,7 +884,11 @@ bot.on("message", async message => {
 
     if (message.member.roles.cache.find(x => x.id === Config.lvl40)) {
       jexpCooldown = jexpCooldown / 2;
+      console.log(author.tag + " es nivel 40, su cooldown es de " + jexpCooldown)
+    } else {
+      console.log(author.tag + " NO es nivel 40, su cooldown es de " + jexpCooldown)
     }
+    
 
     // ############################ CREACION DEL PERFIL ###################################
     Cuenta.findOne(
@@ -1103,7 +1107,7 @@ bot.on("message", async message => {
             }
 
             jeffrosExpCooldown.add(author.id);
-            console.log("####"+jeffrosExpCooldown.has(author.id))
+            console.log(jeffrosExpCooldown.has(author.id) + "#### " + author.tag + " ahora tiene un cooldown de " + jexpCooldown*1000 +"ms")
 
             setTimeout(() => {
               console.log(author.id + " ya puede ganar exp y jeffros")
