@@ -50,6 +50,7 @@ module.exports.run = async (bot, message, args) => {
     .setTitle(`Ayuda: ${prefix}dmuser`)
     .setColor(Colores.nocolor)
     .setDescription(`▸ {yo}: Se cambia "{yo}" por tu nombre.\n▸ {user}: Se cambia "{user}" por el usuario al que se le envía el md.`)
+    .addField(`Ejemplo:`, `▸ \`/dmuser @JeffreyG {user}, no es necesario que envíes la misma oración dos veces.\`.\n\n▸ JeffreyG#2225, no es necesario que envíes la misma oración dos veces.`)
     .setFooter(`Es NECESARIO usar los corchetes {} para que pueda ser cambiado.`);
 
     return message.channel.send(help);
@@ -68,7 +69,7 @@ module.exports.run = async (bot, message, args) => {
     let finalStr = yoStr.replace(new RegExp('{user}', "g"), `**${mdMember.user.tag}**`);
 
     let finalEmbed = new Discord.MessageEmbed()
-    .setAuthor(`| Hola, ${mdMember.user.tag}:`, "https://i.pinimg.com/originals/85/7f/d7/857fd79dfd7bd025e4cbb2169cd46e03.png")
+    .setAuthor(`| Hola:`, "https://i.pinimg.com/originals/85/7f/d7/857fd79dfd7bd025e4cbb2169cd46e03.png")
     .setDescription(`${finalStr}`)
     .setFooter("Este es un mensaje directamente del staff del servidor.")
     .setColor(Colores.verde);
