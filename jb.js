@@ -1106,6 +1106,7 @@ bot.on("message", async message => {
             console.log("####"+jeffrosExpCooldown.has(author.id))
 
             setTimeout(() => {
+              console.log(author.id + " ya puede ganar exp y jeffros")
               jeffrosExpCooldown.delete(author.id);
             }, jexpCooldown * 1000);
           }
