@@ -45,7 +45,7 @@ module.exports.run = async (bot, message, args) => {
   
   if(member.roles.cache.find(x => x.id === staffRole.id)){} else return;
 
-  if(args[0].toLowerCase("help")){
+  if(args[0].toLowerCase() === "help"){
     let help = new Discord.MessageEmbed()
     .setTitle(`Ayuda: ${prefix}dmuser`)
     .setColor(Colores.nocolor)
