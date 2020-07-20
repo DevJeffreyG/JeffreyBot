@@ -43,7 +43,7 @@ module.exports.run = async (bot, message, args) => {
   .setDescription(`▸ El uso correcto es: ${prefix}dmuser <@usuario> <mensaje a enviar por MD> \n▸ Le envio un mensaje directo a X usuario.`)
   .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}mduser`);
   
-  if(member.roles.find(x => x.id === staffRole.id)){} else return;
+  if(member.roles.cache.find(x => x.id === staffRole.id)){} else return;
   
   let mdMember = guild.member(message.guild.members.cache.get(args[0]) || message.mentions.users.first());
   if(!mdMember) return message.channel.send(embed).then(a => a.delete(ms('30s')));
