@@ -40,7 +40,7 @@ module.exports.run = async (bot, message, args) => {
   let embed = new Discord.MessageEmbed()
   .setTitle(`Ayuda: ${prefix}dmuser`)
   .setColor(Colores.nocolor)
-  .setDescription(`▸ El uso correcto es: ${prefix}dmuser <@usuario> <mensaje a enviar por MD> \n▸ Le envio un mensaje directo a X usuario.`)
+  .setDescription(`▸ El uso correcto es: ${prefix}dmuser (help) <@usuario> <mensaje a enviar por MD> \n▸ Le envio un mensaje directo a X usuario.`)
   .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}mduser`);
   
   if(member.roles.cache.find(x => x.id === staffRole.id)){} else return;
@@ -49,6 +49,14 @@ module.exports.run = async (bot, message, args) => {
   if(!mdMember) return message.channel.send(embed).then(a => a.delete(ms('30s')));
   
   if(mdMember.user.bot) return;
+
+  if(args[0].toLowerCase("help")){
+    let help = new Discord.MessageEmbed()
+    .setTitle(`Ayuda: ${prefix}dmuser`)
+    .setColor(Colores.nocolor)
+    .setDescription(`▸ {yo}: Se cambia "{yo}" por tu nombre.\n▸ {user}: Se cambia "{user}" por el usuario al que se le envía el md.`)
+    .setFooter(`Es NECESARIO usar los corchetes {} para que pueda ser cambiado.`);
+  }
   
   let mensaje = args.join(" ").slice(args[0].length + 1);
   if(!args[1]) return message.channel.send(embed).then(a => a.delete(ms('30s')));
