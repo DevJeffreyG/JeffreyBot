@@ -882,7 +882,7 @@ bot.on("message", async message => {
       return;
     }
 
-    if (message.member.roles.cache.find(x => x.id === Config.lvl40)) {
+    if (message.member.roles.cache.find(x => x.id === Config.lvl40) && !jeffrosExpCooldown.has(author.id)) {
       jexpCooldown = jexpCooldown / 2;
       console.log(author.tag + " es nivel 40, su cooldown es de " + jexpCooldown)
     } else {
