@@ -55,7 +55,7 @@ module.exports.run = async (bot, message, args) => {
   
     let str = args.join(" ").slice(args[0].length + 1);
     let yoStr = str.replace(new RegExp('{yo}', "g"), `**${author.tag}**`);
-    let finalStr = yoStr.replace(new RegExp('{user}', "g"), `**${mdMember.tag}**`);
+    let finalStr = yoStr.replace(new RegExp('{user}', "g"), `**${mdMember.user.tag}**`);
 
     mdMember.send(`${finalStr}`)
     .then(a => message.react("✅"))
