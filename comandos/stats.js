@@ -59,7 +59,7 @@ module.exports.run = async (bot, message, args) => {
     }, (err2, jeffros) => {
       if(err2) throw err2;
       
-      if(!jeffros){
+      if(!jeffros || !exp){
         message.reply(`No tienen Jeffros, EXP, habla en <#${mainChannel}> para ganarlos.`)
       } else {
         
