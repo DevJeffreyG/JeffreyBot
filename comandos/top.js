@@ -688,9 +688,6 @@ module.exports.run = async (bot, message, args) => {
               n++;  
 
               noMore = true;
-              
-              console.log("n = "+n)
-              console.log("i = "+i) 
             }
 
             if (res[n].userID === author.id) {
