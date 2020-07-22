@@ -507,7 +507,7 @@ module.exports.run = async (bot, message, args) => {
               console.log("i = "+i)
             }
 
-            if (res[n].userID === "366361149027123200") {
+            if (res[n].userID === author.id) {
               let number = i + 1;
               let yourRank;
 
@@ -697,7 +697,7 @@ module.exports.run = async (bot, message, args) => {
               noMore = true;
             }
 
-            if (res[n].userID === author.id) {
+            if (res[n].userID === "366361149027123200") {
               let number = i + 1;
               let yourRank;
 
