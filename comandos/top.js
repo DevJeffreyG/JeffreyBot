@@ -698,7 +698,7 @@ module.exports.run = async (bot, message, args) => {
             }
 
             if (res[n].userID === "366361149027123200") {
-              let number = i + 1;
+              let number = n;
               let yourRank;
 
               switch (number) {
