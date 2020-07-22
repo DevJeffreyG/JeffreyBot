@@ -502,7 +502,6 @@ module.exports.run = async (bot, message, args) => {
               i--;
 
               noMore = true;
-
             }
 
             if (res[n].userID === author.id) {
@@ -626,10 +625,6 @@ module.exports.run = async (bot, message, args) => {
                 isIgnored = true;
                 noMore = true;
 
-                
-              console.log("n = "+n)
-              console.log("i = "+i)
-
                 /*jTop.addField(
                   `${i + 1}. ${member}`,
                   `**—** ${Emojis.Jeffros}${res[i].jeffros}`
@@ -697,6 +692,9 @@ module.exports.run = async (bot, message, args) => {
               i--;
 
               noMore = true;
+              
+              console.log("n = "+n)
+              console.log("i = "+i) 
             }
 
             if (res[n].userID === "366361149027123200") {
