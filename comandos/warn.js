@@ -161,6 +161,8 @@ module.exports.run = async (bot, message, args) => {
 **—** Razón de ban (AutoMod): **${wRazon}**.`)
           .setColor(Colores.rojo);
           
+
+          wUser.send(autoMod);
           wUser.ban(`AutoMod. (${wRazon})`);
           
           setTimeout(function() {
@@ -180,6 +182,7 @@ module.exports.run = async (bot, message, args) => {
           .setColor(Colores.rojo);
 
           logC.send(autoMod);
+          wUser.send(autoMod)
         }
           
         message.react("✅")
