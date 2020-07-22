@@ -502,9 +502,12 @@ module.exports.run = async (bot, message, args) => {
               i--;
 
               noMore = true;
+
+              console.log("n = "+n)
+              console.log("i = "+i)
             }
 
-            if (res[n].userID === author.id) {
+            if (res[n].userID === "366361149027123200") {
               let number = i + 1;
               let yourRank;
 
