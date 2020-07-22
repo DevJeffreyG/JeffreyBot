@@ -178,7 +178,6 @@ module.exports.run = async (bot, message, args) => {
 **—** Warn por última vez: **${numWarns}**.
 **—** Razón de ban (AutoMod): **${wRazon}**.`)
           .setColor(Colores.rojo);
-          wUser.ban(`AutoMod. (${wRazon})`);
 
           logC.send(autoMod);
         }
@@ -200,6 +199,7 @@ module.exports.run = async (bot, message, args) => {
             message.channel.send("¡Usuario con MDs desactivados! **¡No sabe cuántos WARNS tiene!**");
           });
           
+          wUser.ban(`AutoMod. (${wRazon})`);
           
         }
     })
