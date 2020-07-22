@@ -688,7 +688,7 @@ module.exports.run = async (bot, message, args) => {
               message.guild.members.cache.get(res[n].userID) ||
               "(Dejó el servidor)";
             if (member === "(Dejó el servidor)") {
-              n++;
+              n++;  
 
               noMore = true;
               
@@ -696,7 +696,7 @@ module.exports.run = async (bot, message, args) => {
               console.log("i = "+i) 
             }
 
-            if (res[n].userID === "366361149027123200") {
+            if (res[n].userID === author.id) {
               let number = i + 1;
               let yourRank;
 
