@@ -110,7 +110,6 @@ module.exports.run = async (bot, message, args) => {
                     "(Dejó el servidor)";
                   if (member === "(Dejó el servidor)") {
                     n++;
-                    i--;
 
                     noMore = true;
                   }
@@ -304,7 +303,6 @@ module.exports.run = async (bot, message, args) => {
                     "(Dejó el servidor)";
                   if (member === "(Dejó el servidor)") {
                     n++;
-                    i--;
 
                     noMore = true;
                   }
@@ -499,7 +497,6 @@ module.exports.run = async (bot, message, args) => {
               "(Dejó el servidor)";
             if (member === "(Dejó el servidor)") {
               n++;
-              i--;
 
               noMore = true;
             }
