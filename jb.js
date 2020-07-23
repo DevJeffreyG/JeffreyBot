@@ -198,78 +198,7 @@ bot.on("raw", async event => {
     let newKey = changes.new;
     const executor = entry.executor;
 
-    function getChanges(entryChanges) {
-      switch (entryChanges.key) {
-        case "afk_timeout":
-          oldKey = `**${entryChanges.old / 60}** minutos`;
-          newKey = `**${entryChanges.new / 60}** minutos`;
-
-          break;
-
-        case "mfa_level":
-          oldKey = entryChanges.old ? "**Sí**" : "**No**";
-          newKey = entryChanges.new ? "**Sí**" : "**No**";
-          break;
-
-        case "verification_level":
-          oldKey = `Nivel **${entryChanges.old}**`;
-          newKey = `Nivel **${entryChanges.new}**`;
-          break;
-
-        case "explicit_content_filter":
-          oldKey = `Nivel **${entryChanges.old + 1}**`;
-          newKey = `Nivel **${entryChanges.new + 1}**`;
-          break;
-
-        case "default_message_notifications":
-          oldKey =
-            entryChanges.old === 1
-              ? `**Sólo menciones**`
-              : `**Todos los mensajes**`;
-          newKey =
-            entryChanges.new === 1
-              ? `**Sólo menciones**`
-              : `**Todos los mensajes**`;
-          break;
-
-        case "prune_delete_days":
-          oldKey = `**${entryChanges.old}** días`;
-          newKey = `**${entryChanges.new}** días`;
-          break;
-
-        case "afk_channel_id":
-          oldKey = guild.channels.cache.get(entryChanges.old)
-            ? `**${guild.channels.cache.get(entryChanges.old)}**`
-            : "**Nulo**";
-          newKey = guild.channels.cache.get(entryChanges.new)
-            ? `**${guild.channels.cache.get(entryChanges.new)}**`
-            : "**Nulo**";
-          break;
-
-        case "owner_id":
-          oldKey = guild.members.cache.get(entryChanges.old)
-            ? `**${guild.members.cache.get(entryChanges.old)}**`
-            : "**Nulo**";
-          newKey = guild.members.cache.get(entryChanges.new)
-            ? `**${guild.members.cache.get(entryChanges.new)}**`
-            : "**Nulo**";
-          break;
-
-        case "rate_limit_per_user":
-          oldKey = entryChanges.old
-            ? `**${entryChanges.old}** segundos`
-            : "**Nulo**";
-          newKey = entryChanges.new
-            ? `**${entryChanges.new}** segundos`
-            : "**Nulo**";
-          break;
-
-        default:
-          oldKey = "**" + entryChanges.old + "**" || "**Nulo**";
-          newKey = "**" + entryChanges.new + "**" || "**Nulo**";
-      }
-      return { old: oldKey, new: newKey };
-    }
+    
 
     let embed = new Discord.MessageEmbed();
     let keys = getChanges(changes); 
@@ -430,6 +359,79 @@ bot.on("channelUpdate", (oldChannel, newChannel) => {
   let e = guild.fetchAuditLogs().then(audit => {
     const entry = audit.entries.first();
     const executor = entry.executor;
+
+    function getChanges(entryChanges) {
+      switch (entryChanges.key) {
+        case "afk_timeout":
+          oldKey = `**${entryChanges.old / 60}** minutos`;
+          newKey = `**${entryChanges.new / 60}** minutos`;
+
+          break;
+
+        case "mfa_level":
+          oldKey = entryChanges.old ? "**Sí**" : "**No**";
+          newKey = entryChanges.new ? "**Sí**" : "**No**";
+          break;
+
+        case "verification_level":
+          oldKey = `Nivel **${entryChanges.old}**`;
+          newKey = `Nivel **${entryChanges.new}**`;
+          break;
+
+        case "explicit_content_filter":
+          oldKey = `Nivel **${entryChanges.old + 1}**`;
+          newKey = `Nivel **${entryChanges.new + 1}**`;
+          break;
+
+        case "default_message_notifications":
+          oldKey =
+            entryChanges.old === 1
+              ? `**Sólo menciones**`
+              : `**Todos los mensajes**`;
+          newKey =
+            entryChanges.new === 1
+              ? `**Sólo menciones**`
+              : `**Todos los mensajes**`;
+          break;
+
+        case "prune_delete_days":
+          oldKey = `**${entryChanges.old}** días`;
+          newKey = `**${entryChanges.new}** días`;
+          break;
+
+        case "afk_channel_id":
+          oldKey = guild.channels.cache.get(entryChanges.old)
+            ? `**${guild.channels.cache.get(entryChanges.old)}**`
+            : "**Nulo**";
+          newKey = guild.channels.cache.get(entryChanges.new)
+            ? `**${guild.channels.cache.get(entryChanges.new)}**`
+            : "**Nulo**";
+          break;
+
+        case "owner_id":
+          oldKey = guild.members.cache.get(entryChanges.old)
+            ? `**${guild.members.cache.get(entryChanges.old)}**`
+            : "**Nulo**";
+          newKey = guild.members.cache.get(entryChanges.new)
+            ? `**${guild.members.cache.get(entryChanges.new)}**`
+            : "**Nulo**";
+          break;
+
+        case "rate_limit_per_user":
+          oldKey = entryChanges.old
+            ? `**${entryChanges.old}** segundos`
+            : "**Nulo**";
+          newKey = entryChanges.new
+            ? `**${entryChanges.new}** segundos`
+            : "**Nulo**";
+          break;
+
+        default:
+          oldKey = "**" + entryChanges.old + "**" || "**Nulo**";
+          newKey = "**" + entryChanges.new + "**" || "**Nulo**";
+      }
+      return { old: oldKey, new: newKey };
+    }
 
     if(oldChannel.permissionOverwrites != newChannel.permissionOverwrites){
 
