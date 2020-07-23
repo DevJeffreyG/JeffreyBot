@@ -351,7 +351,7 @@ bot.on("raw", async event => {
             if(entry.action === "CHANNEL_OVERWRITE_UPDATE"){
 
               console.log("SE HAN ACTUALIZADO PERMISOS EN UN CANAL");
-              console.log(entry);
+              console.log(event);
 
               embed.setAuthor(`— Se han actualizado los permisos de una canal`, guild.iconURL());
               embed.setColor(Colores.verde);
