@@ -420,6 +420,58 @@ bot.on("raw", async event => {
   });
 });
 
+bot.on("channelUpdate", (oldChannel, newChannel) => {
+ // if (!lKeys.hasOwnProperty(newChannel.changes[0].key)) return;
+
+  const log = guild.channels.cache.get(logChannel);
+
+  if(entry.action != event.t){
+
+    if(oldChannel.permissionOverwrites != newChannel.permissionOverwrites){
+
+      console.log("SE HAN ACTUALIZADO PERMISOS EN UN CANAL");
+      
+      console.log(oldChannel.permissionOverwrites)
+      console.log(newChannel.permissionOverwrites)
+
+      embed.setAuthor(`— Se han actualizado los permisos de una canal`, guild.iconURL());
+      embed.setColor(Colores.verde);
+      embed.setFooter(
+        `Actualizado por ${executor.tag}`,
+        executor.displayAvatarURL()
+      );
+      embed.setTimestamp();
+
+    }
+
+  }
+
+  embed.setAuthor(`— Se ha actualizado un canal`, guild.iconURL());
+  embed.setColor(Colores.verde);
+  embed.setFooter(
+    `Eliminado por ${executor.tag}`,
+    executor.displayAvatarURL()
+  );
+  embed.setTimestamp();
+
+  if (entry.changes.length > 1) {
+    for (let i = 0; i < entry.changes.length; i++) {
+      let keys = getChanges(entry.changes[i]);
+      embed.addField(
+        `— ${lKeys[entry.changes[i].key]}`,
+        `**—** Ahora: ${keys.new}.\n**—** Antes: ${keys.old}.`
+      );
+    }
+  } else {
+    embed.addField(
+      `— ${key}`,
+      `**—** Ahora: ${keys.new}.\n**—** Antes: ${keys.old}.`
+    );
+  }
+
+  log.send(embed);
+})
+
 /*bot.on("messageUpdate", async (oldMessage, newMessage) => {
   if (newMessage.author.bot) return;
   if(oldMessage.content === newMessage.content) return;
