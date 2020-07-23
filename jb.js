@@ -182,7 +182,9 @@ const lKeys = {
 
 bot.on("raw", async event => {
   if (lEvents.hasOwnProperty(event.t)) return;
-  console.log("EVENTO: "+event);
+  
+  console.log("EVENTO:");
+  console.log(event);
   const guild = bot.guilds.cache.get("447797737216278528");
   const log = guild.channels.cache.get(logChannel);
   let e = guild.fetchAuditLogs().then(audit => {
@@ -351,8 +353,12 @@ bot.on("raw", async event => {
             if(entry.action === "CHANNEL_OVERWRITE_UPDATE"){
 
               console.log("SE HAN ACTUALIZADO PERMISOS EN UN CANAL");
-              console.log("EVENT.D: " + event.d);
-              console.log("keys: "+keys);
+              
+              console.log("EVENT.D:");
+              console.log(event.d);
+              
+              console.log("keys:");
+              console.log(keys);
 
               embed.setAuthor(`— Se han actualizado los permisos de una canal`, guild.iconURL());
               embed.setColor(Colores.verde);
