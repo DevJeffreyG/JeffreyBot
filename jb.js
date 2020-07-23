@@ -426,8 +426,6 @@ bot.on("channelUpdate", (oldChannel, newChannel) => {
   const guild = bot.guilds.cache.get("447797737216278528");
   const log = guild.channels.cache.get(logChannel);
 
-  if(entry.action != event.t){
-
     if(oldChannel.permissionOverwrites != newChannel.permissionOverwrites){
 
       console.log("SE HAN ACTUALIZADO PERMISOS EN UN CANAL");
@@ -445,7 +443,6 @@ bot.on("channelUpdate", (oldChannel, newChannel) => {
 
     }
 
-  }
 
   embed.setAuthor(`— Se ha actualizado un canal`, guild.iconURL());
   embed.setColor(Colores.verde);
