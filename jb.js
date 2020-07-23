@@ -422,7 +422,8 @@ bot.on("raw", async event => {
 
 bot.on("channelUpdate", (oldChannel, newChannel) => {
  // if (!lKeys.hasOwnProperty(newChannel.changes[0].key)) return;
-
+  
+  const guild = bot.guilds.cache.get("447797737216278528");
   const log = guild.channels.cache.get(logChannel);
 
   if(entry.action != event.t){
