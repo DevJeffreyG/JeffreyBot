@@ -473,6 +473,12 @@ bot.on("messageDelete", async message => {
   l.send(embed);
 });
 
+*/
+bot.on("channelUpdate", async (oldC, newC) => {
+  console.log(oldC)
+  console.log(newC)
+})
+
 /* ############################ LOGGER ################################ */
 
 bot.on("guildMemberRemove", member => {
