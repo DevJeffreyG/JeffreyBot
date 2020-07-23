@@ -425,6 +425,7 @@ bot.on("channelUpdate", (oldChannel, newChannel) => {
   
   const guild = bot.guilds.cache.get("447797737216278528");
   const log = guild.channels.cache.get(logChannel);
+  let embed = new Discord.MessageEmbed();
 
     if(oldChannel.permissionOverwrites != newChannel.permissionOverwrites){
 
