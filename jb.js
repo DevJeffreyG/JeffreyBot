@@ -270,13 +270,15 @@ bot.on("raw", async event => {
     }
 
     let embed = new Discord.MessageEmbed();
-    let keys = getChanges(changes);
+    let keys = getChanges(changes); 
 
     if (entry.action != event.t) {
-      console.log(event.t);
+      console.log("accion: "+entry.action)
+      return console.log("evento: "+event.t);
       switch (entry.action) {
         case "CHANNEL_OVERWRITE_UPDATE":
           if (!lKeys.hasOwnProperty(entry.changes[0].key)) return;
+          console.log(entry.changes[0].key);
 
           let per = {
             CREATE_INSTANT_INVITE: 1,
