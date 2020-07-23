@@ -272,111 +272,6 @@ bot.on("raw", async event => {
     let embed = new Discord.MessageEmbed();
     let keys = getChanges(changes); 
 
-    if (entry.action != event.t) {
-      console.log("accion: "+entry.action)
-      return console.log("evento: "+event.t);
-      switch (entry.action) {
-        case "CHANNEL_OVERWRITE_UPDATE":
-          if (!lKeys.hasOwnProperty(entry.changes[0].key)) return;
-          console.log(entry.changes[0].key);
-
-          let per = {
-            CREATE_INSTANT_INVITE: 1,
-            KICK_MEMBERS: 2,
-            BAN_MEMBERS: 4,
-            ADMINISTRATOR: 8,
-            MANAGE_CHANNELS: 16,
-            MANAGE_GUILD: 32,
-            ADD_REACTIONS: 64,
-            VIEW_AUDIT_LOG: 128,
-            VIEW_CHANNEL: 1024,
-            SEND_MESSAGES: 2048,
-            SEND_TTS_MESSAGES: 4096,
-            MANAGE_MESSAGES: 8192,
-            EMBED_LINKS: 16384,
-            ATTACH_FILES: 32768,
-            READ_MESSAGE_HISTORY: 65536,
-            MENTION_EVERYONE: 131072,
-            USE_EXTERNAL_EMOJIS: 262144,
-            VIEW_GUILD_INSIGHTS: 524288,
-            CONNECT: 1048576,
-            SPEAK: 2097152,
-            MUTE_MEMBERS: 4194304,
-            DEAFEN_MEMBERS: 8388608,
-            MOVE_MEMBERS: 16777216,
-            USE_VAD: 33554432,
-            PRIORITY_SPEAKER: 256,
-            STREAM: 512,
-            CHANGE_NICKNAME: 67108864,
-            MANAGE_NICKNAMES: 134217728,
-            MANAGE_ROLES: 268435456,
-            MANAGE_WEBHOOKS: 536870912,
-            MANAGE_EMOJIS: 1073741824
-          };
-
-          embed.setAuthor(
-            `— Se han actualizado permisos en un canal`,
-            guild.iconURL()
-          );
-          embed.setColor(Colores.verde);
-          embed.setDescription(
-            `**—** ${guild.roles.cache.get(entry.extra.id) ||
-              guild.members.cache.get(entry.extra.id)}`
-          );
-          embed.setFooter(
-            `Cambio por ${executor.tag}`,
-            executor.displayAvatarURL()
-          );
-          embed.setTimestamp();
-
-          if (entry.changes.length > 1) {
-            for (let i = 0; i < entry.changes.length; i++) {
-              console.log(entry.changes[i]);
-              let changed =
-                entry.changes[i].new - entry.changes[i].old > 0
-                  ? new Discord.Permissions(
-                      entry.changes[i].new - entry.changes[i].old
-                    ).toArray()
-                  : undefined;
-
-              if (!changed) {
-                changed = new Discord.Permissions(
-                  Math.abs(entry.changes[i].new - entry.changes[i].old)
-                ).toArray();
-                embed.addField(`— Neutral`, `**—** ${changed}.`);
-              } else {
-                embed.addField(
-                  `— ${lKeys[entry.changes[i].key]}`,
-                  `**—** ${changed}.`
-                );
-              }
-            }
-          } else {
-            console.log(entry.changes[0]);
-            let changed =
-              entry.changes[0].new - entry.changes[0].old > 0
-                ? new Discord.Permissions(
-                    entry.changes[0].new - entry.changes[0].old
-                  ).toArray()
-                : undefined;
-
-            if (!changed) {
-              changed = new Discord.Permissions(
-                Math.abs(entry.changes[0].new - entry.changes[0].old)
-              ).toArray();
-              embed.addField(`— Neutral`, `**—** ${changed}.`);
-            } else {
-              embed.addField(`— ${key}`, `**—** ${changed}.`);
-            }
-          }
-
-          log.send(embed);
-          break;
-
-        default:
-          return;
-      }
-    } else {
       switch (event.t) {
         case "GUILD_UPDATE":
           if (!lKeys.hasOwnProperty(entry.changes[0].key)) return;
@@ -451,6 +346,25 @@ bot.on("raw", async event => {
         case "CHANNEL_UPDATE":
           if (!lKeys.hasOwnProperty(entry.changes[0].key)) return;
 
+          if(entry.action != event.t){
+
+            if(entry.action === "CHANNEL_OVERWRITE_UPDATE"){
+
+              console.log("SE HAN ACTUALIZADO PERMISOS EN UN CANAL");
+              console.log(entry);
+
+              embed.setAuthor(`— Se han actualizado los permisos de una canal`, guild.iconURL());
+              embed.setColor(Colores.verde);
+              embed.setFooter(
+                `Actualizado por ${executor.tag}`,
+                executor.displayAvatarURL()
+              );
+              embed.setTimestamp();
+
+            }
+
+          }
+
           embed.setAuthor(`— Se ha actualizado un canal`, guild.iconURL());
           embed.setColor(Colores.verde);
           embed.setFooter(
@@ -496,7 +410,6 @@ bot.on("raw", async event => {
           log.send(embed);
           break;
       }
-    }
   });
 });
 
