@@ -427,6 +427,10 @@ bot.on("channelUpdate", (oldChannel, newChannel) => {
   const log = guild.channels.cache.get(logChannel);
   let embed = new Discord.MessageEmbed();
 
+  let e = guild.fetchAuditLogs().then(audit => {
+    const entry = audit.entries.first();
+    const executor = entry.executor;
+
     if(oldChannel.permissionOverwrites != newChannel.permissionOverwrites){
 
       console.log("SE HAN ACTUALIZADO PERMISOS EN UN CANAL");
@@ -469,6 +473,8 @@ bot.on("channelUpdate", (oldChannel, newChannel) => {
   }
 
   log.send(embed);
+})
+
 })
 
 /*bot.on("messageUpdate", async (oldMessage, newMessage) => {
