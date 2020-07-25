@@ -43,12 +43,13 @@ module.exports.run = async (bot, message, args) => {
   .setDescription(`▸ El uso correcto es: ${prefix}kick <@usuario> <razón> \n▸ Kickeas a alguien.`)
   .setFooter(`<> Obligatorio () Opcional`);
   
+  if(message.member.roles.cache.find(x => x.id === jeffreyRole.id)){} else if(message.member.roles.cache.find(x => x.id === adminRole.id)){} else if(message.member.roles.cache.find(x => x.id === modRole.id)){} else {return;}
+
   let kUser = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[0]));
   if(!kUser) return message.channel.send(embed);
   let kRazon = args.join(" ").slice(args[0].length + 1);
   if(!kRazon) return message.channel.send(embed);
   
-  if(message.member.roles.cache.find(x => x.id === jeffreyRole.id)){} else if(message.member.roles.cache.find(x => x.id === adminRole.id)){} else if(message.member.roles.cache.find(x => x.id === modRole.id)){} else {return;}
   // Si el usuario a banear tiene el permiso de banear también
   if(kUser.roles.cache.has(staffRole)) return console.log("NO.");
   if(kUser.id === author.id) return message.reply("Tú eres tonto.");

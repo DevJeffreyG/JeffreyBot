@@ -43,6 +43,9 @@ module.exports.run = async (bot, message, args) => {
   .setDescription(`▸ El uso correcto es: ${prefix}ban <@usuario> (razón) \n▸ Baneas a alguien.`)
   .setFooter(`<> Obligatorio () Opcional`);
 
+  // Si el usuario no tiene permiso de banear
+  if(message.member.roles.cache.find(x => x.id === jeffreyRole.id)){} else if(message.member.roles.cache.find(x => x.id === adminRole.id)){} else if(message.member.roles.cache.find(x => x.id === modRole.id)){} else {return;}
+  
     if(!args[0]) return message.channel.send(embed);
     
     let bUser = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[0]));
@@ -50,9 +53,6 @@ module.exports.run = async (bot, message, args) => {
   
     if(!args[1]) {bRazon = "Sin especificar."}
 
-    // Si el usuario no tiene permiso de banear
-    if(message.member.roles.cache.find(x => x.id === jeffreyRole.id)){} else if(message.member.roles.cache.find(x => x.id === adminRole.id)){} else if(message.member.roles.cache.find(x => x.id === modRole.id)){} else {return;}
-  
     // Si el usuario a banear tiene el permiso de banear también
     if(bUser.roles.cache.has(staffRole)) return console.log("NO.");
     if(bUser.id === author.id) return message.reply("Tú eres tonto.");
