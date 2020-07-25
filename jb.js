@@ -647,8 +647,8 @@ bot.on("message", async message => {
     if (message.channel.id === botsChannel) {
     } else if (message.channel.id === staffComandos) {
     } else if (message.channel.id === botsVip) {
-    } else if (message.channel.id === offtopicChannel) {
-    } else if (message.content.startsWith(prefix + "clear")) {
+    }/* else if (message.channel.id === offtopicChannel) {
+    }*/ else if (message.content.startsWith(prefix + "clear")) {
     } else if (message.content.startsWith(`${prefix}encuesta`)) {
     } else if (message.content.startsWith(`${prefix}poll`)) {
     } else if (message.member.roles.cache.find(x => x.id === staffRole.id)) {
