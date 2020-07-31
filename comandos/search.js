@@ -44,7 +44,7 @@ module.exports.run = async (bot, message, args, active) => {
     let videos = res.videos.slice(0, 10);
 
     if(videos.length === 0){
-      console.log(videos)
+      console.log(args.join(" "))
        return message.channel.send(errorE1)
     
       }
