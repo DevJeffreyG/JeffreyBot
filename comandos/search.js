@@ -20,7 +20,7 @@ module.exports.run = async (bot, message, args, active) => {
   .setAuthor(`| Error`, Config.errorPng)
   .setColor(Colores.rojo)
   .setDescription(`Los comandos de música de Jeffrey Bot están desactivados debido a problemas con el host.\n[▸ Anuncio](https://discordapp.com/channels/447797737216278528/485191462422577182/733704080714629160)`)
-  return message.channel.send(sadface)
+  //return message.channel.send(sadface)
 
   // Variables
   let author = message.author;
