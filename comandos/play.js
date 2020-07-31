@@ -87,7 +87,7 @@ module.exports.run = async (bot, message, args, active) => {
 
   //añadir cancion a la cola
   data.queue.push({
-    songTitle: info.title,
+    songTitle: info.videoDetails.title,
     requester: author.tag,
     url: args[0],
     announceChannel: message.channel.id
