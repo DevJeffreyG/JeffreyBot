@@ -40,7 +40,6 @@ module.exports.run = async (bot, message, args, active) => {
     .setColor(Colores.rojo);
 
   search(args.join(" "), function(err, res) {
-    console.log(err);
     console.log(res)
     if (err) throw err;
     let videos = res.videos.slice(0, 10);
