@@ -43,7 +43,11 @@ module.exports.run = async (bot, message, args, active) => {
     if (err) throw err;
     let videos = res.videos.slice(0, 10);
 
-    if(videos.length === 0) return message.channel.send(errorE1)
+    if(videos.length === 0){
+      console.log(videos)
+       return message.channel.send(errorE1)
+    
+      }
     
     let resp = "";
     for (var i in videos) {

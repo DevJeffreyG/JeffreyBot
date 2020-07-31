@@ -99,7 +99,7 @@ module.exports.run = async (bot, message, args, active) => {
     // pero, si ya existe
     let addQueue = new Discord.MessageEmbed()
       .setDescription(
-        `***️⃣ | Añadido a la cola: \`${info.title}\`, pedido por: ${author.tag}**`
+        `***️⃣ | Añadido a la cola: \`${info.videoDetails.title}\`, pedido por: ${author.tag}**`
       )
       .setColor(Colores.verde);
     message.channel.send(addQueue);
