@@ -100,6 +100,7 @@ const Jeffros = require("./modelos/jeffros.js");
 const Exp = require("./modelos/exp.js");
 const Cuenta = require("./modelos/cuenta.js");
 const AutoRole = require("./modelos/autorole.js");
+const Dark = require("../modelos/globalDark.js");
 
 /* ##### MONGOOSE ######## */
 
@@ -618,6 +619,31 @@ bot.on("ready", async () => {
 
   let channel = bot.channels.cache.get(logChannel);
   channel.send("Reviví.");
+
+  // inflacion DARKSHOP
+
+  Dark.findOne({
+
+  }, (err, dark) => {
+    if(err) throw err;
+
+    if(!dark){
+
+      inflation = (Math.random() * 10).toFixed(2);
+      date = new Date() // hoy
+      duration = Math.floor(Math.random() * 30); // duración máxima 30 días.
+      const newInflation = new Dark({
+        inflation: inflation,
+        since: date,
+        duration: duration
+      });
+
+      newInflation.save();
+    } else {
+      // leer y cambiar si es necesario
+    }
+  })
+
 });
 
 //main

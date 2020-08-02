@@ -22,7 +22,7 @@ const Warn = require("../modelos/warn.js");
 
 const Stats = require("../modelos/darkstats.js");
 const Items = require("../modelos/darkitems.js");
-
+const Dark = require("../modelos/globalDark.js");
 
 /* ##### MONGOOSE ######## */
 
