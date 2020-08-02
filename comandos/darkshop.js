@@ -233,15 +233,15 @@ module.exports.run = async (bot, message, args) => {
                                                     guild.iconURL()
                                                     );
 
+                                                    console.log(`INICIO: ${inicio}, FIN: ${fin}`)
+
                                                     for (let i = inicio; i < fin + 1; i++) {
-                                                        console.log("i + 1 = "+ (i+1));
+                                                        console.log(i + 1 === fin);
                                                         let precio = items[i].itemPrice;
                                                         embed.addField(
                                                             `— { ${items[i].id} } ${items[i].itemName}`,
                                                             `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}`
                                                         );
-
-                                                        console.log("fin + 1 = "+ (fin + 1));
                                                         if (i + 1 === fin) {
                                                             msg.edit(embed);
                                                         }
