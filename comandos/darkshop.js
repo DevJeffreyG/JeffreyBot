@@ -201,7 +201,7 @@ module.exports.run = async (bot, message, args) => {
                                                 pagn++;
 
                                                 let embed = new Discord.MessageEmbed()
-                                                .setAuthor(`| DarkShop`, "https://cdn.discordapp.com/emojis/739557718343548958.png)
+                                                .setAuthor(`| DarkShop`, "https://cdn.discordapp.com/emojis/739557718343548958.png")
                                                 .setColor(Colores.negro)
                                                 .setDescription(`**—** Bienvenido a la DarkShop. \`${prefix}darkshop <ID del item>\`.
 **—** Para tener más información del item usa \`${prefix}darkshop info <id>\`.
