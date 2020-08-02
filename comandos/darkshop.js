@@ -182,14 +182,14 @@ module.exports.run = async (bot, message, args) => {
 
                                                     console.log(`INICIO: ${inicio}, FIN: ${fin}`)
                                                     for (let i = inicio; i < fin + 1; i++) {
-                                                        console.log(i + 1 === fin)
+                                                        console.log(i + 1 === fin + 1)
                                                         let precio = items[i].itemPrice;
                                                         embed.addField(
                                                             `— { ${items[i].id} } ${items[i].itemName}`,
                                                             `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}`
                                                         );
 
-                                                        if (i + 1 === fin) {
+                                                        if (i + 1 === fin + 1) {
                                                             return msg.edit(embed);
                                                         }
                                                     }
