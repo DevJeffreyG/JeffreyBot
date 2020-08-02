@@ -39,15 +39,14 @@ module.exports.run = async (bot, message, args) => {
   let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
 
-  if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
-  let member = args[0] || author.id;
+  if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return console.log("noxD");
 
   const itemPerPage = 3;
 
   // ¿es nivel 5?
   
   Exp.findOne({
-      userID: member
+      userID: author.id
   }, (err, exp) => {
       if(err) throw err;
 
