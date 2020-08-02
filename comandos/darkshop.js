@@ -128,7 +128,7 @@ module.exports.run = async (bot, message, args) => {
                                     `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}`
                                 );
 
-                                if (i + 1 === items.length){
+                                if (i + 1 === itemPerPage){
                                     message.channel.send(tienda).then(msg => {
                                         msg.react("⏪").then(r => {
                                             msg.react("⏩");
@@ -295,7 +295,7 @@ module.exports.run = async (bot, message, args) => {
                         let errorEmbed = new Discord.MessageEmbed()
                         .setAuthor(`| Error`, Config.errorPng)
                         .setDescription(
-                            `▸ El uso correcto es: /shop add <nombre> <precio> (@role requerido o ID)
+                            `▸ El uso correcto es: /darkshop add <nombre> <precio> (@role requerido o ID)
 **—** Para los roles, si no se necesita, rellenar con "\`na\`".`
                         )
                         .setColor(Colores.nocolor);
