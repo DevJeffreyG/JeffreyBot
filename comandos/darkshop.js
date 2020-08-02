@@ -95,7 +95,7 @@ module.exports.run = async (bot, message, args) => {
                             }
                         }
                     } else { // hay más de itemPerPage
-                        let pagn = "1";
+                        let pagn = 1;
                         let totalpags;
 
                         Items.countDocuments({}, (err, c) => {
@@ -143,7 +143,7 @@ module.exports.run = async (bot, message, args) => {
 
                                             // si se reacciona atrás
                                             backwards.on("collect", r => {
-                                                if(pagn === "1") return;
+                                                if(pagn === 1) return;
 
                                                 pagn--;
 
