@@ -136,7 +136,9 @@ const lEvents = {
   GUILD_MEMBER_UPDATE: "",
   VOICE_SERVER_UPDATE: "",
   VOICE_STATE_UPDATE: "",
-  null: ""
+  null: "",
+  MESSAGE_REACTION_ADD: "",
+  MESSAGE_REACTION_DELETE: ""
 };
 
 const lKeys = {
@@ -181,7 +183,7 @@ const lKeys = {
 };
 
 bot.on("raw", async event => {
-  if (!lEvents.hasOwnProperty(event.t)) return;
+  if (lEvents.hasOwnProperty(event.t)) return;
   
   console.log("EVENTO:");
   console.log(event);
