@@ -301,7 +301,7 @@ module.exports.run = async (bot, message, args) => {
                                     );
 
                                     if (i + 1 === fin + 1) {
-                                      msg.edit(embed);
+                                      return msg.edit(embed);
                                     }
                                   }
                                 );
@@ -332,13 +332,9 @@ module.exports.run = async (bot, message, args) => {
 
                               inicio = inicio - 1;
 
-                              if (items.length < fin - 1) {
-                                fin = items.length - 1;
-                              } else if (items.length === fin - 1) {
-                                fin = items.length - 1;
-                              } else {
-                                fin = fin - 1;
-                              }
+                              if (items.length <= fin - 1) {
+                                fin = items.length;
+                                }
 
                               embed.setFooter(
                                 `| Tienda oficial - Página ${pagn} de ${totalpags}`,
@@ -392,8 +388,8 @@ module.exports.run = async (bot, message, args) => {
                                       `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
                                     );
 
-                                    if (i + 1 === fin + 1) {
-                                      msg.edit(embed);
+                                    if (i + 1 === fin) {
+                                      return msg.edit(embed);
                                     }
                                   }
                                 );
