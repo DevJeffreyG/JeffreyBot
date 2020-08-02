@@ -45,7 +45,13 @@ module.exports.run = async (bot, message, args) => {
       userID: member
   }, (err, exp) => {
       if(exp.level >= 5){
-
+        let tienda = new Discord.MessageEmbed()
+        .setAuthor(`| Darkshop`, author.displayAvatarURL())
+        .setColor(Colores.negro)
+        .setDescription(`**—** Bienvenido a la DarkShop. \`${prefix}darkshop <ID del item>\`.
+**—** Para tener más información del item usa \`${prefix}darkshop info <id>\`.
+**—** Esta tienda __**NO**__ usa los Jeffros convencionales, usa \`${prefix}darkshop bal\` para saber tu saldo.`)
+        .setFooter(`— Alias: ${prefix}ds`)
       } else {
           r = [
               "{you}... No estás listo.",
@@ -53,11 +59,16 @@ module.exports.run = async (bot, message, args) => {
               "Esto no va a terminar bien para ti, {you}."
           ];
 
-          res = Math.floor(Math.random() * r.length);
+          res = r[Math.floor(Math.random() * r.length)];
+
+          let desc = res.replace(
+            new RegExp("{you}", "g"),
+            `**${author.tag}**`
+          );
 
           let notReady = new Discord.MessageEmbed()
           .setColor(Colores.rojo)
-          .setDescription(r[res])
+          .setDescription(desc)
           .setFooter("▸ Vuelve cuando seas nivel 5.");
 
           return message.channel.send(notReady);
@@ -67,5 +78,6 @@ module.exports.run = async (bot, message, args) => {
 }
 
 module.exports.help = {
-    name: "darkshop"
+    name: "darkshop",
+    alias: "ds"
 }

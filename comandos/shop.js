@@ -50,7 +50,8 @@ module.exports.run = async (bot, message, args) => {
       (err, items) => {
         if (err) throw err;
 
-        let embed = new Discord.MessageEmbed().setAuthor(
+        let embed = new Discord.MessageEmbed()
+        .setAuthor(
           `| Shop`,
           author.displayAvatarURL()
         )
