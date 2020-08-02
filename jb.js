@@ -629,8 +629,7 @@ bot.on("ready", async () => {
 
     if(!dark){
 
-      inflation = (Math.random() * 10).toFixed(2);
-      if(inflation < 1) inflation += 1;
+      inflation = (( Math.random() * 10 ) + 1).toFixed(2);
       date = new Date() // hoy
       duration = Math.floor(Math.random() * 30); // duración máxima 30 días.
 
