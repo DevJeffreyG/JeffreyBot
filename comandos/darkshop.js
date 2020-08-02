@@ -270,6 +270,71 @@ module.exports.run = async (bot, message, args) => {
 
             case "add":
                 // añadir un darkitem
+                if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
+                
+                let plus = 1;
+                Items.countDocuments({}, (err, c) => {
+                    Items.findOne(
+                    {
+                        id: c + plus
+                    },
+                    (err, found) => {
+                        if (err) throw err;
+
+                        if (!found) {
+                        } else {
+                        while (c + plus === found.id) {
+                            c += plus + 1;
+                            console.log("equal id");
+                        }
+                        }
+
+                        // /shop add nombre precio rolerequerido
+                        // /shop  0    1      2         3
+
+                        let errorEmbed = new Discord.MessageEmbed()
+                        .setAuthor(`| Error`, Config.errorPng)
+                        .setDescription(
+                            `▸ El uso correcto es: /shop add <nombre> <precio> (@role requerido o ID)
+**—** Para los roles, si no se necesita, rellenar con "\`na\`".`
+                        )
+                        .setColor(Colores.nocolor);
+
+                        if (!args[1]) return message.channel.send(errorEmbed);
+                        if (!args[2]) return message.channel.send(errorEmbed);
+                        if (!args[3]) return message.channel.send(errorEmbed);
+
+                        let nameItem = args[1];
+                        let priceItem = args[2];
+
+                        let lastID = c + plus;
+
+                        const newItem = new Items({
+                        serverID: guild.id,
+                        itemName: nameItem,
+                        itemPrice: priceItem,
+                        itemDescription: "na",
+                        replyMessage: "¡Item usado con éxito!",
+                        id: lastID
+                        });
+
+                        newItem.save();
+                        let goodEmbed = new Discord.MessageEmbed()
+                        .setAuthor(`| Listo`, Config.bienPng)
+                        .setDescription(`**—** Para personalizar la información del item usa \`${prefix}shop edit <id> <nombre, precio, etc...> <nuevo>\`.
+
+**—** Nombre: \`${nameItem}\`.
+**—** Precio: ${Emojis.Jeffros}${priceItem}.
+**—** Descripción: \`na\`.
+**—** Mensaje después de comprar: \`¡Item usado con éxito!\`.
+**—** ID: \`${lastID}\`.`
+                        )
+                        .setColor(Colores.verde);
+                        return message.channel.send(goodEmbed);
+                    
+                    });
+                });
+
                 break;
 
             case "remove":
