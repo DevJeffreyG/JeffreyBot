@@ -143,7 +143,7 @@ module.exports.run = async (bot, message, args) => {
 
                                             // si se reacciona atrás
                                             backwards.on("collect", r => {
-                                                if(pagn === 1) return;
+                                                if(pagn === "1") return;
 
                                                 pagn--;
 
@@ -323,10 +323,10 @@ module.exports.run = async (bot, message, args) => {
                         newItem.save();
                         let goodEmbed = new Discord.MessageEmbed()
                         .setAuthor(`| Listo`, Config.bienPng)
-                        .setDescription(`**—** Para personalizar la información del item usa \`${prefix}shop edit <id> <nombre, precio, etc...> <nuevo>\`.
+                        .setDescription(`**—** Para personalizar la información del item usa \`${prefix}darkshop edit <id> <nombre, precio, etc...> <nuevo>\`.
 
 **—** Nombre: \`${nameItem}\`.
-**—** Precio: ${Emojis.Jeffros}${priceItem}.
+**—** Precio: ${Emojis.Dark}${priceItem}.
 **—** Descripción: \`na\`.
 **—** Mensaje después de comprar: \`¡Item usado con éxito!\`.
 **—** ID: \`${lastID}\`.`
