@@ -632,6 +632,9 @@ bot.on("ready", async () => {
       inflation = (Math.random() * 10).toFixed(2);
       date = new Date() // hoy
       duration = Math.floor(Math.random() * 30); // duración máxima 30 días.
+
+      console.log(inflation, date, duration);
+      
       const newInflation = new Dark({
         inflation: inflation,
         since: date,
