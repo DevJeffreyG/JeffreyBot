@@ -282,8 +282,8 @@ module.exports.run = async (bot, message, args) => {
                         }
                         }
 
-                        // /shop add nombre precio rolerequerido
-                        // /shop  0    1      2         3
+                        // /shop add nombre precio
+                        // /shop  0    1      2
 
                         let errorEmbed = new Discord.MessageEmbed()
                         .setAuthor(`| Error`, Config.errorPng)
@@ -295,7 +295,6 @@ module.exports.run = async (bot, message, args) => {
 
                         if (!args[1]) return message.channel.send(errorEmbed);
                         if (!args[2]) return message.channel.send(errorEmbed);
-                        if (!args[3]) return message.channel.send(errorEmbed);
 
                         let nameItem = args[1];
                         let priceItem = args[2];
@@ -332,10 +331,164 @@ module.exports.run = async (bot, message, args) => {
 
             case "remove":
                 // eliminar un darkitem
+                if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
+                // /shop remove id
+                // /shop    0    1
+
+                let errorEmbed = new Discord.MessageEmbed()
+                    .setAuthor(`| Error`, Config.errorPng)
+                    .setDescription(`▸ El uso correcto es: /darkshop remove <id del item>`)
+                    .setColor(Colores.nocolor);
+
+                if (!args[1]) return message.channel.send(errorEmbed);
+
+                Items.findOneAndDelete(
+                    {
+                    id: args[1]
+                    },
+                    (err, data) => {
+                    if (err) throw err;
+
+                    if (!data) {
+                        return message.reply(`no he encontrado ese item con ese id.`);
+                    } else {
+                        return message.reply(`se ha eliminado!`);
+                    }
+                    }
+                );
                 break;
+
+            case "info":
+                let errorEmbed = new Discord.MessageEmbed()
+                .setAuthor(`| Error`, Config.errorPng)
+                .setDescription(`▸ El uso correcto es: /shop remove <id del item>`);
+
+                if (!args[1]) return message.channel.send(errorEmbed);
+
+                Items.findOne(
+                    {
+                    serverID: guild.id,
+                    id: args[1]
+                    },
+                    (err, data) => {
+                        if (err) throw err;
+
+                        if (!data) {
+                            return message.reply(`no he encontrado ese item, revisa la id.`);
+                        } else {
+                            let reqrole = guild.roles.cache.find(
+                            x => x.id === data.roleRequired
+                            );
+
+                            if (!reqrole) {
+                            reqrole = "Ninguno";
+                            }
+
+                            let embed = new Discord.MessageEmbed()
+                            .setAuthor(`| Item ${data.id}`, guild.iconURL())
+                            .setDescription(`**—** Si quieres cambiar algo usa el comando \`${prefix}shop edit <id> <nombre, precio, etc> <nuevo>\`.
+
+**—** Nombre: \`${data.itemName}\`.
+**—** Precio: ${Emojis.Dark}${data.itemPrice}.
+**—** Descripción: \`${data.itemDescription}\`.
+**—** Mensaje respuesta (lo que se envía después de comprar): \`${data.replyMessage}\`.
+**—** ID: \`${data.id}\`.`
+                            )
+                            .setColor(Colores.negro);
+
+                            return message.channel.send(embed);
+                        }
+                    });
 
             case "edit":
                 // editar un darkitem
+                if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
+                let errorEmbed = new Discord.MessageEmbed()
+                  .setAuthor(`| Error`, Config.errorPng)
+                  .setDescription(
+                    `▸ El uso correcto es: /shop edit <id> <nombre, precio, etc> <nuevo>`
+                  );
+          
+                if (!args[1]) return message.channel.send(errorEmbed);
+                if (!args[2]) return message.channel.send(errorEmbed);
+                if (!args[3]) return message.channel.send(errorEmbed);
+          
+                let idItem = args[1];
+                let toEdit = args[2].toLowerCase();
+                let newData;
+          
+                Items.findOne(
+                  {
+                    serverID: guild.id,
+                    id: idItem
+                  },
+                  (err, data) => {
+                    if (err) throw err;
+          
+                    if (!data) {
+                      return message.reply(`no he encontrado este item.`);
+                    } else {
+                      let embed = new Discord.MessageEmbed()
+                        .setAuthor(`| Listo`, Config.bienPng)
+                        .setColor(Colores.verde);
+          
+                      switch (toEdit) {
+                        case "name":
+                        case "nombre":
+                          newData = args
+                            .join(" ")
+                            .slice(args[0].length + args[1].length + args[2].length + 3);
+                          data.itemName = newData;
+                          embed.setDescription(
+                            `**—** Nombre: \`${newData}\`.\n**—** ID: \`${data.id}\`.`
+                          );
+                          break;
+          
+                        case "price":
+                        case "precio":
+                        case "jeffros":
+                          newData = args[3];
+                          data.itemPrice = newData;
+                          embed.setDescription(
+                            `**—** Precio: \`${newData}\`.\n**—** ID: \`${data.id}\`.`
+                          );
+                          break;
+          
+                        case "description":
+                        case "descripcion":
+                        case "desc":
+                          newData = args
+                            .join(" ")
+                            .slice(args[0].length + args[1].length + args[2].length + 3);
+                          data.itemDescription = newData;
+                          embed.setDescription(
+                            `**—** Descripción: \`${newData}\`.\n**—** ID: \`${data.id}\`.`
+                          );
+                          break;
+          
+                        case "reply":
+                        case "respuesta":
+                        case "resp":
+                          newData = args
+                            .join(" ")
+                            .slice(args[0].length + args[1].length + args[2].length + 3);
+                          data.replyMessage = newData;
+                          embed.setDescription(
+                            `**—** Mensaje respuesta: \`${newData}\`.\n**—** ID: \`${data.id}\`.`
+                          );
+                          break;
+          
+                        default:
+                          return message.reply(
+                            `\`${toEdit}\` no es una forma válida de editar los items.`
+                          );
+                      }
+          
+                      data.save();
+                      return message.channel.send(embed);
+                    }
+                  });
+                  
                 break;
 
             default:

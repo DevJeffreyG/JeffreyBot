@@ -858,7 +858,6 @@ module.exports.run = async (bot, message, args) => {
               case "reply":
               case "respuesta":
               case "resp":
-              case "إجابة":
                 newData = args
                   .join(" ")
                   .slice(args[0].length + args[1].length + args[2].length + 3);
