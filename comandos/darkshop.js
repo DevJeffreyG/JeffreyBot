@@ -242,7 +242,7 @@ module.exports.run = async (bot, message, args) => {
                                                         );
 
                                                         console.log("fin + 1 = "+ (fin + 1));
-                                                        if (i + 1 === fin + 1) {
+                                                        if (i + 1 === fin) {
                                                             msg.edit(embed);
                                                         }
                                                     }
