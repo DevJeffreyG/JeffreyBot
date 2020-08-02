@@ -100,7 +100,7 @@ const Jeffros = require("./modelos/jeffros.js");
 const Exp = require("./modelos/exp.js");
 const Cuenta = require("./modelos/cuenta.js");
 const AutoRole = require("./modelos/autorole.js");
-const Dark = require("../modelos/globalDark.js");
+const Dark = require("./modelos/globalDark.js");
 
 /* ##### MONGOOSE ######## */
 
