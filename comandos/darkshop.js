@@ -267,7 +267,7 @@ module.exports.run = async (bot, message, args) => {
 **— Items**: ?`)
                         .setColor(Colores.negro);
 
-                        message.channel.send(stats)
+                        message.channel.send(error)
                     } else {
                         let stats = new Discord.MessageEmbed()
                         .setAuthor(`| Estadísiticas del usuario N°${author.id}`)
