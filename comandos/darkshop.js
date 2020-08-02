@@ -262,18 +262,20 @@ module.exports.run = async (bot, message, args) => {
                     if(!stats){
                         let error = new Discord.MessageEmbed()
                         .setAuthor(`| Error`, Config.darkLogoPng)
-                        .setDescription(`**—** DarkJeffros**: ?
+                        .setDescription(`**— DarkJeffros**: ?
 **— Precisión**: ?
 **— Items**: ?`)
+                        .setThumbnail(Config.darkLogoPng)
                         .setColor(Colores.negro);
 
                         message.channel.send(error)
                     } else {
                         let stats = new Discord.MessageEmbed()
                         .setAuthor(`| Estadísiticas del usuario N°${author.id}`)
-                        .setDescription(`**—** DarkJeffros**: ${Emojis.Dark}${stats.djeffros}.
+                        .setDescription(`**— DarkJeffros**: ${Emojis.Dark}${stats.djeffros}.
 **— Precisión**: ${stats.accuracy}%
 **— Items**: Usa \`${prefix}d̶̪͍̏̉̉͒a̸̺͖͓͉̯̝̔̒͛̏͝r̴͖̗͉̬̼̊̇͝ͅk̸̢͕̠͊̄̀̊̐͜s̵̲̅͑̓h̴̢̰̻̜͙́o̶̱͒́̾p̷̮̞͍̲͐̏̉̊͋̂ ̷̹̃̑̇͘̚í̷̯t̶̮̙̙͙͎͉̑̈̌̀̈e̴̛̜̱͛̌m̴̙͕͇̻̹̭͑̌s̵̡̧̻̯̐̈́͌̆̆͝\``)
+                        .setThumbnail(Config.darkLogoPng)
                         .setColor(Colores.negro);
                         
                         message.channel.send(stats)
