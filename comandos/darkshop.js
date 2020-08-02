@@ -215,7 +215,7 @@ module.exports.run = async (bot, message, args) => {
                                                     if (!Number.isInteger(c / itemPerPage))
                                                     totalpags++;
 
-                                                    let inicio = itemPerPage * pagn - itemPerPage + 1;
+                                                    let inicio = itemPerPage * pagn - itemPerPage;
                                                     let fin = itemPerPage * pagn;
 
                                                     inicio = inicio - 1;
