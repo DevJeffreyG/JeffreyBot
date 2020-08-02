@@ -182,6 +182,7 @@ module.exports.run = async (bot, message, args) => {
                                                     );
 
                                                     for (let i = inicio; i < fin + 1; i++) {
+                                                        console.log(i)
                                                         let precio = items[i].itemPrice;
                                                         embed.addField(
                                                             `— { ${items[i].id} } ${items[i].itemName}`,
@@ -235,6 +236,7 @@ module.exports.run = async (bot, message, args) => {
                                                     );
 
                                                     for (let i = inicio; i < fin + 1; i++) {
+                                                        console.log(i);
                                                         let precio = items[i].itemPrice;
                                                         embed.addField(
                                                             `— { ${items[i].id} } ${items[i].itemName}`,
