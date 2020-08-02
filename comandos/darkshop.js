@@ -253,10 +253,6 @@ module.exports.run = async (bot, message, args) => {
         }
 
         switch(args[0]){
-            case "info":
-                // buscar la info del darkitem
-                break;
-
             case "bal":
                 // buscar el saldo del usuario
                 break;
@@ -359,11 +355,11 @@ module.exports.run = async (bot, message, args) => {
                 break;
 
             case "info":
-                let errorEmbed = new Discord.MessageEmbed()
+                let errorEmbed2 = new Discord.MessageEmbed()
                 .setAuthor(`| Error`, Config.errorPng)
                 .setDescription(`▸ El uso correcto es: /shop remove <id del item>`);
 
-                if (!args[1]) return message.channel.send(errorEmbed);
+                if (!args[1]) return message.channel.send(errorEmbed2);
 
                 Items.findOne(
                     {
@@ -403,15 +399,15 @@ module.exports.run = async (bot, message, args) => {
             case "edit":
                 // editar un darkitem
                 if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
-                let errorEmbed = new Discord.MessageEmbed()
+                let errorEmbed3 = new Discord.MessageEmbed()
                   .setAuthor(`| Error`, Config.errorPng)
                   .setDescription(
                     `▸ El uso correcto es: /shop edit <id> <nombre, precio, etc> <nuevo>`
                   );
           
-                if (!args[1]) return message.channel.send(errorEmbed);
-                if (!args[2]) return message.channel.send(errorEmbed);
-                if (!args[3]) return message.channel.send(errorEmbed);
+                if (!args[1]) return message.channel.send(errorEmbed3);
+                if (!args[2]) return message.channel.send(errorEmbed3);
+                if (!args[3]) return message.channel.send(errorEmbed3);
           
                 let idItem = args[1];
                 let toEdit = args[2].toLowerCase();
@@ -488,7 +484,7 @@ module.exports.run = async (bot, message, args) => {
                       return message.channel.send(embed);
                     }
                   });
-                  
+
                 break;
 
             default:
