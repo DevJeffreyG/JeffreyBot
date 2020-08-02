@@ -55,7 +55,7 @@ module.exports.run = async (bot, message, args) => {
         // si no hay args, muestra la página principal
         if(!args[0]){
             let tienda = new Discord.MessageEmbed()
-            .setAuthor(`| Darkshop`, author.displayAvatarURL())
+            .setAuthor(`| DarkShop`, "https://cdn.discordapp.com/emojis/739557718343548958.png")
             .setColor(Colores.negro)
             .setDescription(`**—** Bienvenido a la DarkShop. \`${prefix}darkshop <ID del item>\`.
 **—** Para tener más información del item usa \`${prefix}darkshop info <id>\`.
@@ -148,7 +148,7 @@ module.exports.run = async (bot, message, args) => {
                                                 pagn--;
 
                                                 let embed = new Discord.MessageEmbed()
-                                                .setAuthor(`| Darkshop`, author.displayAvatarURL())
+                                                .setAuthor(`| DarkShop`, "https://cdn.discordapp.com/emojis/739557718343548958.png")
                                                 .setColor(Colores.negro)
                                                 .setDescription(`**—** Bienvenido a la DarkShop. \`${prefix}darkshop <ID del item>\`.
 **—** Para tener más información del item usa \`${prefix}darkshop info <id>\`.
@@ -201,7 +201,7 @@ module.exports.run = async (bot, message, args) => {
                                                 pagn++;
 
                                                 let embed = new Discord.MessageEmbed()
-                                                .setAuthor(`| Darkshop`, author.displayAvatarURL())
+                                                .setAuthor(`| DarkShop`, "https://cdn.discordapp.com/emojis/739557718343548958.png)
                                                 .setColor(Colores.negro)
                                                 .setDescription(`**—** Bienvenido a la DarkShop. \`${prefix}darkshop <ID del item>\`.
 **—** Para tener más información del item usa \`${prefix}darkshop info <id>\`.
