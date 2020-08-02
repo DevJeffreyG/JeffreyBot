@@ -44,15 +44,19 @@ module.exports.run = async (bot, message, args) => {
   Exp.findOne({
       userID: member
   }, (err, exp) => {
-      if(exp.level >= 5){
+      if(err) throw err;
+
+      if(exp.level >= 5){ // si cumple los requisitos
         let tienda = new Discord.MessageEmbed()
         .setAuthor(`| Darkshop`, author.displayAvatarURL())
         .setColor(Colores.negro)
         .setDescription(`**—** Bienvenido a la DarkShop. \`${prefix}darkshop <ID del item>\`.
 **—** Para tener más información del item usa \`${prefix}darkshop info <id>\`.
 **—** Esta tienda __**NO**__ usa los Jeffros convencionales, usa \`${prefix}darkshop bal\` para saber tu saldo.`)
-        .setFooter(`— Alias: ${prefix}ds`)
-      } else {
+        .setFooter(`— Alias: ${prefix}ds`);
+
+        message.channel.send(tienda);
+      } else { // si no los cumple
           r = [
               "{you}... No estás listo.",
               "No tienes el valor para hacerlo.",
