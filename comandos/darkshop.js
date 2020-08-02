@@ -224,7 +224,7 @@ module.exports.run = async (bot, message, args) => {
                                                     if (items.length <= fin - 1) {
                                                     fin = items.length;
                                                     } else {
-                                                    fin = fin - 1;
+                                                    fin = fin + 1;
                                                     }
 
                                                     embed.setFooter(
