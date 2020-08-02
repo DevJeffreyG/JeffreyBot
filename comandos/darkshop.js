@@ -75,6 +75,8 @@ module.exports.run = async (bot, message, args) => {
                         `— No hay nada`,
                         `Sal antes de que alguien te vea...`
                     );
+
+                    return message.channel.send(tienda);
                 } else {
                     // hay menos de itemPerPage
 
