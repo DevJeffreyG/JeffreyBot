@@ -181,7 +181,7 @@ const lKeys = {
 };
 
 bot.on("raw", async event => {
-  if (lEvents.hasOwnProperty(event.t)) return;
+  if (!lEvents.hasOwnProperty(event.t)) return;
   
   console.log("EVENTO:");
   console.log(event);
