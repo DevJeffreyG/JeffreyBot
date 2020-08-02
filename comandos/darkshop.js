@@ -165,7 +165,7 @@ module.exports.run = async (bot, message, args) => {
                                                     let inicio = itemPerPage * pagn - itemPerPage + 1;
                                                     let fin = itemPerPage * pagn;
 
-                                                    inicio = inicio - 1;
+                                                    inicio = inicio - 1; // 0
 
                                                     if (items.length < fin - 1) {
                                                     fin = items.length;
@@ -180,8 +180,9 @@ module.exports.run = async (bot, message, args) => {
                                                     guild.iconURL()
                                                     );
 
+                                                    console.log(`INICIO: ${inicio}, FIN: ${fin}`)
                                                     for (let i = inicio; i < fin + 1; i++) {
-                                                        console.log(i)
+                                                        console.log(i + 1 === fin)
                                                         let precio = items[i].itemPrice;
                                                         embed.addField(
                                                             `— { ${items[i].id} } ${items[i].itemName}`,
