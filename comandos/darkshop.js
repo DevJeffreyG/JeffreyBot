@@ -17,11 +17,10 @@ const version = Config.version;
 /* ##### MONGOOSE ######## */
 
 const Jeffros = require("../modelos/jeffros.js");
-const Reporte = require("../modelos/reporte.js");
 const Exp = require("../modelos/exp.js");
 const Warn = require("../modelos/warn.js");
-const Banned = require("../modelos/banned.js");
 
+const Stats = require("../modelos/darkstats.js");
 const Items = require("../modelos/darkitems.js");
 
 
@@ -55,7 +54,7 @@ module.exports.run = async (bot, message, args) => {
         // si no hay args, muestra la página principal
         if(!args[0]){
             let tienda = new Discord.MessageEmbed()
-            .setAuthor(`| DarkShop`, "https://cdn.discordapp.com/emojis/739557718343548958.png")
+            .setAuthor(`| DarkShop`, Config.darkLogoPng)
             .setColor(Colores.negro)
             .setDescription(`**—** Bienvenido a la DarkShop. \`${prefix}darkshop <ID del item>\`.
 **—** Para tener más información del item usa \`${prefix}darkshop info <id>\`.
@@ -148,7 +147,7 @@ module.exports.run = async (bot, message, args) => {
                                                 pagn--;
 
                                                 let embed = new Discord.MessageEmbed()
-                                                .setAuthor(`| DarkShop`, "https://cdn.discordapp.com/emojis/739557718343548958.png")
+                                                .setAuthor(`| DarkShop`, Config.darkLogoPng)
                                                 .setColor(Colores.negro)
                                                 .setDescription(`**—** Bienvenido a la DarkShop. \`${prefix}darkshop <ID del item>\`.
 **—** Para tener más información del item usa \`${prefix}darkshop info <id>\`.
@@ -200,7 +199,7 @@ module.exports.run = async (bot, message, args) => {
                                                 pagn++;
 
                                                 let embed = new Discord.MessageEmbed()
-                                                .setAuthor(`| DarkShop`, "https://cdn.discordapp.com/emojis/739557718343548958.png")
+                                                .setAuthor(`| DarkShop`, Config.darkLogoPng)
                                                 .setColor(Colores.negro)
                                                 .setDescription(`**—** Bienvenido a la DarkShop. \`${prefix}darkshop <ID del item>\`.
 **—** Para tener más información del item usa \`${prefix}darkshop info <id>\`.
@@ -255,12 +254,38 @@ module.exports.run = async (bot, message, args) => {
         switch(args[0]){
             case "bal":
                 // buscar el saldo del usuario
+                Stats.findOne({
+                    userID: author.id
+                }, (err, stats) => {
+                    if(err) throw err;
+
+                    if(!stats){
+                        let error = new Discord.MessageEmbed()
+                        .setAuthor(`| Error`, Config.darkLogoPng)
+                        .setDescription(`**—** DarkJeffros**: ?
+**— Precisión**: ?
+**— Items**: ?`)
+                        .setColor(Colores.negro);
+
+                        message.channel.send(stats)
+                    } else {
+                        let stats = new Discord.MessageEmbed()
+                        .setAuthor(`| Estadísiticas del usuario N°${author.id}`)
+                        .setDescription(`**—** DarkJeffros**: ${Emojis.Dark}${stats.djeffros}.
+**— Precisión**: ${stats.accuracy}%
+**— Items**: Usa \`${prefix}d̶̪͍̏̉̉͒a̸̺͖͓͉̯̝̔̒͛̏͝r̴͖̗͉̬̼̊̇͝ͅk̸̢͕̠͊̄̀̊̐͜s̵̲̅͑̓h̴̢̰̻̜͙́o̶̱͒́̾p̷̮̞͍̲͐̏̉̊͋̂ ̷̹̃̑̇͘̚í̷̯t̶̮̙̙͙͎͉̑̈̌̀̈e̴̛̜̱͛̌m̴̙͕͇̻̹̭͑̌s̵̡̧̻̯̐̈́͌̆̆͝\``)
+                        .setColor(Colores.negro);
+                        
+                        message.channel.send(stats)
+
+                    }
+                })
                 break;
 
             case "add":
                 // añadir un darkitem
                 if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
-                
+
                 let plus = 1;
                 Items.countDocuments({}, (err, c) => {
                     Items.findOne(
