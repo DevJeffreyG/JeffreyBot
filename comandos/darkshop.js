@@ -166,7 +166,6 @@ module.exports.run = async (bot, message, args) => {
                                                     let fin = itemPerPage * pagn;
 
                                                     inicio = inicio - 1;
-                                                    console.log(inicio);
 
                                                     if (items.length < fin - 1) {
                                                     fin = items.length;
@@ -220,7 +219,6 @@ module.exports.run = async (bot, message, args) => {
                                                     let fin = itemPerPage * pagn;
 
                                                     inicio = inicio - 1;
-                                                    console.log(inicio);
 
                                                     if (items.length < fin - 1) {
                                                     fin = items.length;
