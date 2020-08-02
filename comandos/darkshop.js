@@ -188,8 +188,8 @@ module.exports.run = async (bot, message, args) => {
                                                             `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}`
                                                         );
 
-                                                        if (i + 1 === fin + 1) {
-                                                            msg.edit(embed);
+                                                        if (i + 1 === fin) {
+                                                            return msg.edit(embed);
                                                         }
                                                     }
                                                 });
@@ -243,7 +243,7 @@ module.exports.run = async (bot, message, args) => {
                                                             `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}`
                                                         );
                                                         if (i + 1 === fin) {
-                                                            msg.edit(embed);
+                                                            return msg.edit(embed);
                                                         }
                                                     }
                                                 });
