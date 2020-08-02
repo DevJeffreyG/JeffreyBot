@@ -36,6 +36,7 @@ module.exports.run = async (bot, message, args) => {
   let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
 
+  if (!message.member.roles.cache.has(staffRole)) return;
   let member = args[0] || author.id;
 
   // ¿es nivel 5?
@@ -66,6 +67,5 @@ module.exports.run = async (bot, message, args) => {
 }
 
 module.exports.help = {
-    name: "nombre",
-    alias: "alias"
+    name: "darkshop"
 }
