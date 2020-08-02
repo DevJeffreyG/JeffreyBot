@@ -39,7 +39,7 @@ module.exports.run = async (bot, message, args) => {
   let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
 
-  if (!message.member.roles.cache.has(staffRole)) return;
+  if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
   let member = args[0] || author.id;
 
   const itemPerPage = 3;
@@ -247,7 +247,7 @@ module.exports.run = async (bot, message, args) => {
                                                 });
                                             });
 
-                                            
+
                                         })
                                     })
                                 }
@@ -265,6 +265,18 @@ module.exports.run = async (bot, message, args) => {
 
             case "bal":
                 // buscar el saldo del usuario
+                break;
+
+            case "add":
+                // añadir un darkitem
+                break;
+
+            case "remove":
+                // eliminar un darkitem
+                break;
+
+            case "edit":
+                // editar un darkitem
                 break;
 
             default:
