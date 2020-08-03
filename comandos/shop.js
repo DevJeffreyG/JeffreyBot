@@ -749,7 +749,7 @@ module.exports.run = async (bot, message, args) => {
     } else if (action === "info") {
       let errorEmbed = new Discord.MessageEmbed()
         .setAuthor(`| Error`, Config.errorPng)
-        .setDescription(`▸ El uso correcto es: /shop remove <id del item>`);
+        .setDescription(`▸ El uso correcto es: /shop info <id del item>`);
 
       if (!args[1]) return message.channel.send(errorEmbed);
 
