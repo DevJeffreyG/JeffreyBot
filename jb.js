@@ -627,13 +627,12 @@ bot.on("ready", async () => {
   }, (err, dark) => {
     if(err) throw err;
 
+    inflation = Number(Math.random() * 10).toFixed(2);
+    if(Number(inflation) < 1) inflation = Number(inflation) + 1;
+    date = new Date() // hoy
+    duration = Math.floor(Math.random() * 30); // duración máxima 30 días.
+
     if(!dark){
-
-      inflation = Number(Math.random() * 10).toFixed(2);
-      if(Number(inflation) < 1) inflation = Number(inflation) + 1;
-      date = new Date() // hoy
-      duration = Math.floor(Math.random() * 30); // duración máxima 30 días.
-
       console.log(inflation, date, duration);
 
       const newInflation = new Dark({
@@ -649,10 +648,18 @@ bot.on("ready", async () => {
       let oldDate = new Date(dark.since);
       let newDate = new Date()
 
-      let diference1 = oldDate.getTime() - newDate.getTime();
-      let diference = diference1 / (1000 * 3600 * 24);
+      let diference1 = newDate.getTime() - oldDate.getTime();
+      let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
 
-      console.log(diference);
+      if(pastDays => dark.duration){
+        console.log(inflation, date, duration);
+
+        dark.since = date;
+        dark.duration = duration;
+        dark.inflation = inflation;
+
+        dark.save();
+      }
     }
   })
 
