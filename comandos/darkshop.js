@@ -317,7 +317,7 @@ module.exports.run = async (bot, message, args) => {
                             let stonksEmbed = new Discord.MessageEmbed()
                             .setAuthor(`| Cálculo`, Config.darkLogoPng)
                             .setDescription(`${stonks} **— ${dark.inflation}%**.
-**— ${Emojis.Dark}${stats.djeffros} = ${Emojis.Jeffros}${Math.floor(stats.djeffros*dark.inflation)}**.`)
+**— ${Emojis.Dark}${stats.djeffros} = ${Emojis.Jeffros}${Math.floor(stats.djeffros*200*dark.inflation)}**.`)
                             .setColor(Colores.negro);
 
                             message.channel.send(stonksEmbed);
