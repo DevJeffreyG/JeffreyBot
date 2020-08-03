@@ -456,7 +456,11 @@ module.exports.run = async (bot, message, args) => {
                             })
 
                             break;
-
+                        
+                        case "stats":
+                        case "stat":
+                        case "me":
+                        case "yo":
                         case "bal":
                             // buscar el saldo del usuario
                             Stats.findOne({
@@ -476,7 +480,7 @@ module.exports.run = async (bot, message, args) => {
                                     message.channel.send(error)
                                 } else {
                                     let statsEmbed = new Discord.MessageEmbed()
-                                    .setAuthor(`| Estadísiticas del usuario N°${author.id}`)
+                                    .setAuthor(`| Estadísiticas del usuario N°${author.id}`, author.displayAvatarURL())
                                     .setDescription(`**— DarkJeffros**: ${Emojis.Dark}${stats.djeffros}.
             **— Precisión**: ${stats.accuracy}%
             **— Items**: Usa \`${prefix}d̶̪͍̏̉̉͒a̸̺͖͓͉̯̝̔̒͛̏͝r̴͖̗͉̬̼̊̇͝ͅk̸̢͕̠͊̄̀̊̐͜s̵̲̅͑̓h̴̢̰̻̜͙́o̶̱͒́̾p̷̮̞͍̲͐̏̉̊͋̂ ̷̹̃̑̇͘̚í̷̯t̶̮̙̙͙͎͉̑̈̌̀̈e̴̛̜̱͛̌m̴̙͕͇̻̹̭͑̌s̵̡̧̻̯̐̈́͌̆̆͝\``)
