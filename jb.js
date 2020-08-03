@@ -636,6 +636,7 @@ bot.on("ready", async () => {
       console.log(inflation, date, duration);
 
       const newInflation = new Dark({
+        oldinflation: 1,
         inflation: inflation,
         since: date,
         duration: duration
@@ -654,6 +655,7 @@ bot.on("ready", async () => {
       if(pastDays => dark.duration){
         console.log(inflation, date, duration);
 
+        dark.oldinflation = dark.inflation;
         dark.since = date;
         dark.duration = duration;
         dark.inflation = inflation;
