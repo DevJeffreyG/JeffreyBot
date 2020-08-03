@@ -649,10 +649,10 @@ bot.on("ready", async () => {
       let oldDate = new Date(dark.since);
       let newDate = new Date()
 
-      let diference1 = oldDate.getTime() - newDate.getDate();
+      let diference1 = oldDate.getTime() - newDate.getTime();
       let diference = diference1 / (1000 * 3600 * 24);
 
-      console.log(ms(diference));
+      console.log(diference);
     }
   })
 
