@@ -264,6 +264,7 @@ module.exports.run = async (bot, message, args) => {
                         .setAuthor(`| Comandos`, Config.darkLogoPng)
                         .setDescription(`**—** \`${prefix}ds bal\`: Mira tus estadísticas.
         **—** \`${prefix}ds status\`: Mira el estado de la moneda.
+        **—** \`${prefix}ds calc\`: Determina automáticamente cuantos Jeffros tienes actualmente.
         **—** \`${prefix}ds info\`: Mira la información de un item.
         **—** \`${prefix}ds <id>\`: Compra uno de los items.`)
                         .setColor(Colores.negro);
@@ -287,7 +288,43 @@ module.exports.run = async (bot, message, args) => {
 **—** Antes era de un \`${dark.oldinflation}%\`.`)
                         .setColor(Colores.negro);
 
-                        return message.channel.send(stonksEmbed);
+                        message.channel.send(stonksEmbed);
+                        break;
+                        
+                    case "calc":
+                    case "calculator":
+                        Stats.findOne({
+                            userID: author.id
+                        }, (err, stats) => {
+                            let stonks;
+                            
+                            if(dark.oldinflation <= dark.inflation){
+                                stonks = "📈";
+                            } else {
+                                stonks = "📉";
+                            }
+
+                            if(!stats || stats.djeffros === 0){
+                                let stonksEmbed = new Discord.MessageEmbed()
+                                .setAuthor(`| Cálculo`, Config.darkLogoPng)
+                                .setDescription(`${stonks} **— ${dark.inflation}%**.
+**— ${Emojis.Dark}? = ${Emojis.Jeffros}?**.`)
+                                .setColor(Colores.negro);
+
+                            message.channel.send(stonksEmbed);
+                            }
+
+                            let stonksEmbed = new Discord.MessageEmbed()
+                            .setAuthor(`| Cálculo`, Config.darkLogoPng)
+                            .setDescription(`${stonks} **— ${dark.inflation}%**.
+**— ${Emojis.Dark}${stats.djeffros} = ${Emojis.Jeffros}${Math.floor(stats.djeffros*dark.inflation)}**.`)
+                            .setColor(Colores.negro);
+
+                            message.channel.send(stonksEmbed);
+                        })
+
+                        break;
+
                     case "bal":
                         // buscar el saldo del usuario
                         Stats.findOne({
