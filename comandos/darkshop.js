@@ -367,13 +367,13 @@ module.exports.run = async (bot, message, args) => {
                         case "with":
                         case "withdraw":
                         case "retirar":
-                            let instructions = new Discord.MessageEmbed()
+                            let instructions2 = new Discord.MessageEmbed()
                             .setAuthor(`| Error`, Config.darkLogoPng)
                             .setColor(Colores.negro)
                             .setDescription(`▸ El uso correcto es: /darkshop withdraw <DarkJeffros>
                             **—** Se cambiarán los DarkJeffros especificados, por Jeffros.`)
 
-                            if(!args[1]) return message.channel.send(instructions);
+                            if(!args[1]) return message.channel.send(instructions2);
 
                             let changing = Math.floor(args[1]);
 
