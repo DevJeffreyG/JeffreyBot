@@ -652,7 +652,7 @@ bot.on("ready", async () => {
       let diference1 = newDate.getTime() - oldDate.getTime();
       let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
 
-      if(pastDays => dark.duration){
+      if(pastDays >= dark.duration){
         console.log(inflation, date, duration);
 
         dark.oldinflation = dark.inflation;
