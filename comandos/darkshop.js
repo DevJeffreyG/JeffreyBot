@@ -282,7 +282,8 @@ module.exports.run = async (bot, message, args) => {
 
                         let stonksEmbed = new Discord.MessageEmbed()
                         .setAuthor(`| Estado`, Config.darkLogoPng)
-                        .setDescription(`${stonks} **—** La inflación actual de los Dark${Emojis.Dark}effros es de un **${dark.inflation}%**, antes era de un \`${dark.oldinflation}%\``)
+                        .setDescription(`${stonks} **—** La inflación actual de los DarkJeffros es de un **${dark.inflation}%**.
+**—** Antes era de un \`${dark.oldinflation}%\`.`)
                         .setColor(Colores.negro);
 
                         return message.channel.send(stonksEmbed);
