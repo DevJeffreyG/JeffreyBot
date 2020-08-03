@@ -461,10 +461,10 @@ module.exports.run = async (bot, message, args) => {
                             // buscar el saldo del usuario
                             Stats.findOne({
                                 userID: author.id
-                            }, (err, stats) => {
+                            }, (err, stats2) => {
                                 if(err) throw err;
 
-                                if(!stats){
+                                if(!stats2){
                                     let error = new Discord.MessageEmbed()
                                     .setAuthor(`| Error`, Config.darkLogoPng)
                                     .setDescription(`**— DarkJeffros**: ?
@@ -475,15 +475,15 @@ module.exports.run = async (bot, message, args) => {
 
                                     message.channel.send(error)
                                 } else {
-                                    let stats = new Discord.MessageEmbed()
+                                    let stats2 = new Discord.MessageEmbed()
                                     .setAuthor(`| Estadísiticas del usuario N°${author.id}`)
-                                    .setDescription(`**— DarkJeffros**: ${Emojis.Dark}${stats.djeffros}.
-            **— Precisión**: ${stats.accuracy}%
+                                    .setDescription(`**— DarkJeffros**: ${Emojis.Dark}${stats2.djeffros}.
+            **— Precisión**: ${stats2.accuracy}%
             **— Items**: Usa \`${prefix}d̶̪͍̏̉̉͒a̸̺͖͓͉̯̝̔̒͛̏͝r̴͖̗͉̬̼̊̇͝ͅk̸̢͕̠͊̄̀̊̐͜s̵̲̅͑̓h̴̢̰̻̜͙́o̶̱͒́̾p̷̮̞͍̲͐̏̉̊͋̂ ̷̹̃̑̇͘̚í̷̯t̶̮̙̙͙͎͉̑̈̌̀̈e̴̛̜̱͛̌m̴̙͕͇̻̹̭͑̌s̵̡̧̻̯̐̈́͌̆̆͝\``)
                                     .setThumbnail(Config.darkLogoPng)
                                     .setColor(Colores.negro);
                                     
-                                    message.channel.send(stats)
+                                    message.channel.send(stats2)
 
                                 }
                             })
