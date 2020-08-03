@@ -296,6 +296,7 @@ module.exports.run = async (bot, message, args) => {
                         Stats.findOne({
                             userID: author.id
                         }, (err, stats) => {
+                            if (err) throw err;
                             let stonks;
                             
                             if(dark.oldinflation <= dark.inflation){
@@ -304,23 +305,24 @@ module.exports.run = async (bot, message, args) => {
                                 stonks = "📉";
                             }
 
-                            if(!stats || stats.djeffros === 0){
+                            if(!stats){
                                 let stonksEmbed = new Discord.MessageEmbed()
                                 .setAuthor(`| Cálculo`, Config.darkLogoPng)
                                 .setDescription(`${stonks} **— ${dark.inflation}%**.
 **— ${Emojis.Dark}? = ${Emojis.Jeffros}?**.`)
                                 .setColor(Colores.negro);
 
-                            message.channel.send(stonksEmbed);
-                            }
+                                return message.channel.send(stonksEmbed);
+                            } else {
 
-                            let stonksEmbed = new Discord.MessageEmbed()
-                            .setAuthor(`| Cálculo`, Config.darkLogoPng)
-                            .setDescription(`${stonks} **— ${dark.inflation}%**.
+                                let stonksEmbed = new Discord.MessageEmbed()
+                                .setAuthor(`| Cálculo`, Config.darkLogoPng)
+                                .setDescription(`${stonks} **— ${dark.inflation}%**.
 **— ${Emojis.Dark}${stats.djeffros} = ${Emojis.Jeffros}${Math.floor(stats.djeffros*200*dark.inflation)}**.`)
-                            .setColor(Colores.negro);
+                                .setColor(Colores.negro);
 
-                            message.channel.send(stonksEmbed);
+                                message.channel.send(stonksEmbed);
+                            }
                         })
 
                         break;
