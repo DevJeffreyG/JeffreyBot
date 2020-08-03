@@ -645,6 +645,13 @@ bot.on("ready", async () => {
       newInflation.save();
     } else {
       // leer y cambiar si es necesario
+
+      let oldDate = new Date(dark.since);
+      let newDate = new Date()
+
+      let diference = oldDate.getTime() - newDate.getDate();
+
+      console.log(diference);
     }
   })
 
