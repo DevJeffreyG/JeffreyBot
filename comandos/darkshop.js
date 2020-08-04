@@ -829,7 +829,7 @@ module.exports.run = async (bot, message, args) => {
                                             // buscar si hay algún item con esa id
                                             if(stats.items != undefined){
                                                 let hasItems = Object.keys(stats.items);
-                                                return console.log(hasItems)
+                                                if(hasItems.find(x => x === args[0])) return message.reply("ya tienes ese objeto cRACK.");
                                             } else { // si no tiene ese item
                                                 // confirmar pago
                                                 let buyEmbed = new Discord.MessageEmbed()
