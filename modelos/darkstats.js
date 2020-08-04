@@ -5,7 +5,7 @@ const dStatsSchema = mongoose.Schema({
   userID: String,
   djeffros: Number,
   accuracy: Number, // porcentaje de posibilidad de que funcione
-  items: Array
+  items: Object
 
 })
 

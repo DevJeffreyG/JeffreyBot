@@ -343,7 +343,7 @@ module.exports.run = async (bot, message, args) => {
                                         userID: author.id,
                                         djeffros: wanted,
                                         accuracy: Number(Number(Math.random() * 15).toFixed(1)),
-                                        items: []
+                                        items: {}
                                     });
 
                                     jeffros.jeffros -= totalJeffros;
@@ -795,6 +795,7 @@ module.exports.run = async (bot, message, args) => {
                                     }, (err, stats) => {
                                         if(err) throw err;
 
+                                        if(!stats) return message.reply("aún no tienes una cuenta, cambia unos cuantos Jeffros por DarkJeffros antes de venir a comprar.");
                                         
                                         if(!item){
                                             return message.reply("ese item no existe.")
@@ -823,13 +824,23 @@ module.exports.run = async (bot, message, args) => {
                                             // tiene darkjeffros suficientes?
                                             if(stats.djeffros < precio) return message.channel.send(doesntHaveEnough);
 
-                                            // momento:   A R R A Y S en M O N G O O S E
-                                            console.log(stats.items)
+                                            // verificar que tipo de cosa se está comprando
+                                            switch(use.thing){
+                                                case "item":
+                                                    /* ##### ESTRUCTURA POR ITEM #####
 
-                                            stats.items.push({"testeo": "si funciona me pongo lol"})
-                                            stats.save()
-                                            .catch(e => console.log(e))
-                                            .then(x => console.log(x));
+                                                        {
+                                                            id: {
+                                                                name: name
+                                                            }
+                                                        }
+
+                                                    */
+                                                    // verificar si ya tiene ese item
+                                                    if(stats.items.find(item => item === itemID)) return message.reply("ya tienes este item.");
+                                                    console.log(stats.items);
+                                                    break;
+                                            }
                                         }
                                     })
                                 })
