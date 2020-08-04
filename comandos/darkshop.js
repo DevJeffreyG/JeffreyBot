@@ -889,15 +889,7 @@ module.exports.run = async (bot, message, args) => {
                                                         stats.save()
                                                     } else {
                                                         // no sé como hacer esto ayuda
-                                                        console.log(stats.items)
-                                                        stats.items += {
-                                                            [item.id]: {
-                                                                "name": item.itemName
-                                                            }
-                                                        }
-
-                                                        stats.save()
-                                                        console.log(stats.items)
+                                                        return console.log(stats.items[0])
                                                     }
 
                                                     let useEmbed = new Discord.MessageEmbed()
