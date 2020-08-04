@@ -877,9 +877,10 @@ module.exports.run = async (bot, message, args) => {
 
                                                 yes.on("collect", r => {
                                                     // agregar a la lista de items
+
                                                     if(!stats.items){
                                                         stats.items = {
-                                                            itemID = {
+                                                            [item.id]: {
                                                                 "name": item.itemName
                                                             }
                                                         }
