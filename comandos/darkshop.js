@@ -726,19 +726,19 @@ module.exports.run = async (bot, message, args) => {
 
                         case "adduse":
                             if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
-                            let plus = 5325;
+                            let plus2 = 5325;
                             DarkUse.countDocuments({}, (err, c) => {
                                 DarkUse.findOne(
                                 {
-                                  id: c + plus
+                                  id: c + plus2
                                 },
                                 (err, found) => {
                                   if (err) throw err;
                         
                                   if (!found) {
                                   } else {
-                                    while (c + plus === found.id) {
-                                      c += plus + 1;
+                                    while (c + plus2 === found.id) {
+                                      c += plus2 + 1;
                                       console.log("equal id");
                                     }
                                   }
@@ -763,7 +763,7 @@ module.exports.run = async (bot, message, args) => {
                                     action: args[2].toLowerCase(),
                                     thing: args[3].toLowerCase(),
                                     thingID: cosaID,
-                                    id: c + plus
+                                    id: c + plus2
                                   });
                         
                                   newUse.save().catch(e => console.log(e));
