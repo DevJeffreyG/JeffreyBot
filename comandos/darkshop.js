@@ -829,8 +829,10 @@ module.exports.run = async (bot, message, args) => {
                                             // buscar si hay algún item con esa id
                                             for (let x = 0; x <= stats.items.length; x++){
                                                 if(stats.items != undefined && stats.items[x].id === item.id){
+                                                    x = stats.items.length;
                                                     return message.reply("ya tienes ese objeto cRACK.");
                                                 } else { // si no tiene ese item
+                                                    x = stats.items.length;
                                                     // confirmar pago
                                                     let buyEmbed = new Discord.MessageEmbed()
                                                     .setAuthor(`| Compra`, Config.darkLogoPng)
