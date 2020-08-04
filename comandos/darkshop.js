@@ -824,30 +824,100 @@ module.exports.run = async (bot, message, args) => {
                                             // tiene darkjeffros suficientes?
                                             if(stats.djeffros < precio) return message.channel.send(doesntHaveEnough);
 
-                                            // verificar que tipo de cosa se está comprando
-                                            switch(use.thing){
-                                                case "item":
-                                                    /* ##### ESTRUCTURA POR ITEM #####
+                                            // verificar si ya tiene lo que está comprando
 
-                                                        {
-                                                            id: {
-                                                                name: name
+                                            // buscar si hay algún item con esa id
+                                            if(stats.items.find(x => x === args[0])){
+                                                return ("ya tienes ese item crack");
+                                            } else { // si no tiene ese item
+                                                // confirmar pago
+                                                let buyEmbed = new Discord.MessageEmbed()
+                                                .setAuthor(`| Compra`, Config.darkLogoPng)
+                                                .setColor(Colores.blanco)
+                                                .setDescription(
+                                                    `
+                \`▸\` ¿Estás seguro de comprar \`${item.itemName}\` por **${Emojis.Dark}${precio}**?
+                \`▸\` Reacciona de acuerdo a tu preferencia.`
+                                                )
+                                                .setFooter(
+                                                    `▸ Esta compra no se puede devolver.`,
+                                                    "https://cdn.discordapp.com/emojis/494267320097570837.png"
+                                                );
+
+                                                message.channel.send(buyEmbed).then(msg => {
+                                                msg
+                                                    .react(":allow:558084462232076312")
+                                                    .then(r => {
+                                                    msg.react(":denegar:558084461686947891");
+                                                    });
+
+                                                let cancelEmbed = new Discord.MessageEmbed()
+                                                    .setDescription(`Cancelado.`)
+                                                    .setColor(Colores.nocolor);
+
+                                                const yesFilter = (reaction, user) =>
+                                                    reaction.emoji.id ===
+                                                    "558084462232076312" &&
+                                                    user.id === message.author.id;
+                                                const noFilter = (reaction, user) =>
+                                                    reaction.emoji.id ===
+                                                    "558084461686947891" &&
+                                                    user.id === message.author.id;
+
+                                                const yes = msg.createReactionCollector(
+                                                    yesFilter,
+                                                    { time: 60000 }
+                                                );
+                                                const no = msg.createReactionCollector(
+                                                    noFilter,
+                                                    {
+                                                    time: 60000
+                                                    }
+                                                );
+
+                                                yes.on("collect", r => {
+                                                    // agregar a la lista de items
+                                                    if(!stats.items){
+                                                        stats.items = {
+                                                            itemID = {
+                                                                "name": item.itemName
                                                             }
                                                         }
 
-                                                    */
-                                                    // verificar si ya tiene ese item
-                                                    
-                                                    console.log(stats.items);
-                                                    if(stats.items.find(item => item === itemID)) return message.reply("ya tienes este item.");
-                                                    console.log(stats.items);
-                                                    break;
+                                                        stats.save()
+                                                    } else {
+                                                        // no sé como hacer esto ayuda
+                                                    }
+
+                                                    let useEmbed = new Discord.MessageEmbed()
+                                                    .setAuthor(`| Listo!`, guild.iconURL())
+                                                    .setDescription(
+                                                        `
+                \`▸\` Pago realizado con éxito.
+                \`▸\` Compraste: \`${item.itemName}\` por **${Emojis.Jeffros}${precio}**.
+                \`▸ Úsalo con '${prefix}usar ${item.id}'\`.
+                \`▸\` Ahora tienes: **${Emojis.Jeffros}${currency.jeffros}**.`
+                                                    )
+                                                    .setColor(Colores.verde);
+
+                                                    return msg.edit(useEmbed).then(() => {
+                                                    msg.reactions.removeAll();
+                                                    });
+                                                });
+
+                                                no.on("collect", r => {
+                                                    return msg.edit(cancelEmbed).then(a => {
+                                                    msg.reactions.removeAll();
+                                                    message.delete();
+                                                    a.delete({timeout: ms("20s")});
+                                                    });
+                                                });
+                                            });
                                             }
                                         }
                                     })
                                 })
                             })
-                            // comprar un item
                     }
                 }
                     
