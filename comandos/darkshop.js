@@ -827,8 +827,7 @@ module.exports.run = async (bot, message, args) => {
                                             // verificar si ya tiene lo que está comprando
 
                                             // buscar si hay algún item con esa id
-                                            let hasItems = Object.keys(stats.items) || undefined;
-                                            if(hasItems != undefined && hasItems.find(x => x === args[0])){
+                                            if(stats.items != undefined && stats.items.find(x => x === args[0])){
                                                 return message.reply("ya tienes ese objeto cRACK.");
                                             } else { // si no tiene ese item
                                                 // confirmar pago
@@ -880,17 +879,20 @@ module.exports.run = async (bot, message, args) => {
                                                     // agregar a la lista de items
 
                                                     if(!stats.items){
-                                                        stats.items = {
-                                                            [item.id]: {
+                                                        stats.items = [
+                                                            {
+                                                                "id": item.id,
                                                                 "name": item.itemName
                                                             }
-                                                        }
+                                                        ];
 
-                                                        stats.save()
+                                                        stats.save();
                                                     } else {
-                                                        // no sé como hacer esto ayuda
-                                                        return console.log(stats.items[0])
+                                                        stats.items.push({"id": item.id, "name": item.itemName})
+                                                        stats.save()
                                                     }
+
+                                                    console.log(stats);
 
                                                     let useEmbed = new Discord.MessageEmbed()
                                                     .setAuthor(`| Listo!`, guild.iconURL())
