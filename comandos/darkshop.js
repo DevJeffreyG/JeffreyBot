@@ -837,6 +837,8 @@ module.exports.run = async (bot, message, args) => {
 
                                                     */
                                                     // verificar si ya tiene ese item
+                                                    
+                                                    console.log(stats.items);
                                                     if(stats.items.find(item => item === itemID)) return message.reply("ya tienes este item.");
                                                     console.log(stats.items);
                                                     break;
