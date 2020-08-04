@@ -817,7 +817,7 @@ module.exports.run = async (bot, message, args) => {
                                             let hasThisItem = new Discord.MessageEmbed()
                                             .setAuthor(`| Error`, Config.darkLogoPng)
                                             .setDescription(
-                                            `**—** Ya tienes \`${item.itemName}\`, úsalo con \`${prefix}usar ${item.id}\`.`
+                                            `**—** Ya tienes \`${item.itemName}\`, úsalo con \`${prefix}ds items ${item.id}\`.`
                                             )
                                             .setColor(Colores.negro);
 
@@ -829,7 +829,7 @@ module.exports.run = async (bot, message, args) => {
                                             // buscar si hay algún item con esa id
                                             for (let x = 0; x < stats.items.length; x++){
                                                 if(stats.items != undefined && stats.items[x].id === item.id){
-                                                    return message.reply("ya tienes ese objeto cRACK.");
+                                                    return message.channel.send(hasThisItem);
                                                 }
                                             }
                                                     
@@ -896,6 +896,9 @@ module.exports.run = async (bot, message, args) => {
                                                         stats.items.push({"id": item.id, "name": item.itemName})
                                                         stats.save()
                                                     }
+
+                                                    stats.djeffros -= precio;
+                                                    stats.save();
 
                                                     let useEmbed = new Discord.MessageEmbed()
                                                     .setAuthor(`| Listo!`, guild.iconURL())
