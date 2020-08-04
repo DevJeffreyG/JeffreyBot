@@ -826,7 +826,14 @@ module.exports.run = async (bot, message, args) => {
                                             // momento:   A R R A Y S en M O N G O O S E
                                             console.log(stats.items)
 
-                                            stats.items = [["test", "test"], ["aa", "aa"]];
+                                            stats.items = [
+                                                {
+                                                    "test": "equisde"
+                                                },
+                                                {
+                                                    "aaa": "aa",
+                                                    "estoy": "lol"
+                                                }];
                                             stats.save()
                                             .catch(e => console.log(e))
                                             .then(x => console.log(x));
