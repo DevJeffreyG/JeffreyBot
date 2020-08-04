@@ -827,7 +827,7 @@ module.exports.run = async (bot, message, args) => {
                                             // verificar si ya tiene lo que está comprando
 
                                             // buscar si hay algún item con esa id
-                                            if(stats.items.find(x => x === args[0])){
+                                            if(stats.items != undefined && stats.items.find(x => x === args[0])){
                                                 return ("ya tienes ese item crack");
                                             } else { // si no tiene ese item
                                                 // confirmar pago
