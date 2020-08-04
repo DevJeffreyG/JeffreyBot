@@ -139,7 +139,8 @@ const lEvents = {
   VOICE_STATE_UPDATE: "",
   null: "",
   MESSAGE_REACTION_ADD: "",
-  MESSAGE_REACTION_REMOVE: ""
+  MESSAGE_REACTION_REMOVE: "",
+  MESSAGE_REACTION_REMOVE_ALL: ""
 };
 
 const lKeys = {
