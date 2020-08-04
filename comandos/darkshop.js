@@ -827,9 +827,9 @@ module.exports.run = async (bot, message, args) => {
                                             // verificar si ya tiene lo que está comprando
 
                                             // buscar si hay algún item con esa id
-                                            if(stats.items != undefined){
-                                                let hasItems = Object.keys(stats.items);
-                                                if(hasItems.find(x => x === args[0])) return message.reply("ya tienes ese objeto cRACK.");
+                                            let hasItems = Object.keys(stats.items) || undefined;
+                                            if(hasItems != undefined && hasItems.find(x => x === args[0])){
+                                                return message.reply("ya tienes ese objeto cRACK.");
                                             } else { // si no tiene ese item
                                                 // confirmar pago
                                                 let buyEmbed = new Discord.MessageEmbed()
@@ -897,11 +897,11 @@ module.exports.run = async (bot, message, args) => {
                                                     .setDescription(
                                                         `
                 \`▸\` Pago realizado con éxito.
-                \`▸\` Compraste: \`${item.itemName}\` por **${Emojis.Jeffros}${precio}**.
-                \`▸ Úsalo con '${prefix}usar ${item.id}'\`.
-                \`▸\` Ahora tienes: **${Emojis.Jeffros}${stats.djeffros}**.`
+                \`▸\` Compraste: \`${item.itemName}\` por **${Emojis.Dark}${precio}**.
+                \`▸ Úsalo con '${prefix}ds items ${item.id}'\`.
+                \`▸\` Ahora tienes: **${Emojis.Dark}${stats.djeffros}**.`
                                                     )
-                                                    .setColor(Colores.verde);
+                                                    .setColor(Colores.negro);
 
                                                     return msg.edit(useEmbed).then(() => {
                                                     msg.reactions.removeAll();
