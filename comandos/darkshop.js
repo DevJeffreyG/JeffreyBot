@@ -258,7 +258,7 @@ module.exports.run = async (bot, message, args) => {
                                 }
                             }
                         })
-                    }
+                    } else {
 
                     switch(args[0]){
                         case "help":
@@ -836,6 +836,7 @@ module.exports.run = async (bot, message, args) => {
                             })
                             // comprar un item
                     }
+                }
                     
                 } else { // si no los cumple
                     r = [
