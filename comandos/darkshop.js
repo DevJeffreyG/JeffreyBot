@@ -724,6 +724,59 @@ module.exports.run = async (bot, message, args) => {
 
                             break;
 
+                        case "adduse":
+                            if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
+                            let plus = 5325;
+                            DarkUse.countDocuments({}, (err, c) => {
+                                DarkUse.findOne(
+                                {
+                                  id: c + plus
+                                },
+                                (err, found) => {
+                                  if (err) throw err;
+                        
+                                  if (!found) {
+                                  } else {
+                                    while (c + plus === found.id) {
+                                      c += plus + 1;
+                                      console.log("equal id");
+                                    }
+                                  }
+                        
+                                  if (!args[1]) return message.reply(`falta la id.`);
+                                  if (!args[2]) return message.reply(`falta la acción (add o delete).`);
+                                  if (!args[3])
+                                    return message.reply(
+                                      `que se va a agregar o eliminar? (jeffros, warns, role)`
+                                    );
+                        
+                                  let cosaID = "na";
+                                  if (args[3].toLowerCase() === "role" && !args[4]) {
+                                    return message.reply(`falta la id del role.`);
+                                  } else if (args[3].toLowerCase() === "role") {
+                                    cosaID = args[4];
+                                  }
+                        
+                                  const newUse = new DarkUse({
+                                    serverID: guild.id,
+                                    itemID: args[1],
+                                    action: args[2].toLowerCase(),
+                                    thing: args[3].toLowerCase(),
+                                    thingID: cosaID,
+                                    id: c + plus
+                                  });
+                        
+                                  newUse.save().catch(e => console.log(e));
+                                  return message.react("✅");
+                                }
+                              );
+                            });
+                            break;
+
+                        case "deluse":
+                            if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
+                            break;
+
                         default:
                             itemID = args[0];
 
