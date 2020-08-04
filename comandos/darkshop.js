@@ -827,11 +827,10 @@ module.exports.run = async (bot, message, args) => {
                                             // verificar si ya tiene lo que está comprando
 
                                             // buscar si hay algún item con esa id
-                                            for (let x = 0; x <= stats.items.length; x++){
+                                            for (let x = 0; x < stats.items.length; x++){
                                                 if(stats.items != undefined && stats.items[x].id === item.id){
-                                                    x = stats.items.length;
                                                     return message.reply("ya tienes ese objeto cRACK.");
-                                                 }
+                                                }
                                             }
                                                     
                                                 // si no tiene ese item
