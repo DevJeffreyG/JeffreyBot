@@ -827,98 +827,99 @@ module.exports.run = async (bot, message, args) => {
                                             // verificar si ya tiene lo que está comprando
 
                                             // buscar si hay algún item con esa id
-                                            if(stats.items != undefined && stats.items.find(x => x === args[0])){
-                                                return message.reply("ya tienes ese objeto cRACK.");
-                                            } else { // si no tiene ese item
-                                                // confirmar pago
-                                                let buyEmbed = new Discord.MessageEmbed()
-                                                .setAuthor(`| Compra`, Config.darkLogoPng)
-                                                .setColor(Colores.blanco)
-                                                .setDescription(
-                                                    `
-                \`▸\` ¿Estás seguro de comprar \`${item.itemName}\` por **${Emojis.Dark}${precio}**?
-                \`▸\` Reacciona de acuerdo a tu preferencia.`
-                                                )
-                                                .setFooter(
-                                                    `▸ Esta compra no se puede devolver.`,
-                                                    "https://cdn.discordapp.com/emojis/494267320097570837.png"
-                                                );
-
-                                                message.channel.send(buyEmbed).then(msg => {
-                                                msg
-                                                    .react(":allow:558084462232076312")
-                                                    .then(r => {
-                                                    msg.react(":denegar:558084461686947891");
-                                                    });
-
-                                                let cancelEmbed = new Discord.MessageEmbed()
-                                                    .setDescription(`Cancelado.`)
-                                                    .setColor(Colores.nocolor);
-
-                                                const yesFilter = (reaction, user) =>
-                                                    reaction.emoji.id ===
-                                                    "558084462232076312" &&
-                                                    user.id === message.author.id;
-                                                const noFilter = (reaction, user) =>
-                                                    reaction.emoji.id ===
-                                                    "558084461686947891" &&
-                                                    user.id === message.author.id;
-
-                                                const yes = msg.createReactionCollector(
-                                                    yesFilter,
-                                                    { time: 60000 }
-                                                );
-                                                const no = msg.createReactionCollector(
-                                                    noFilter,
-                                                    {
-                                                    time: 60000
-                                                    }
-                                                );
-
-                                                yes.on("collect", r => {
-                                                    // agregar a la lista de items
-
-                                                    if(!stats.items){
-                                                        stats.items = [
-                                                            {
-                                                                "id": item.id,
-                                                                "name": item.itemName
-                                                            }
-                                                        ];
-
-                                                        stats.save();
-                                                    } else {
-                                                        stats.items.push({"id": item.id, "name": item.itemName})
-                                                        stats.save()
-                                                    }
-
-                                                    console.log(stats);
-
-                                                    let useEmbed = new Discord.MessageEmbed()
-                                                    .setAuthor(`| Listo!`, guild.iconURL())
+                                            for (let x = 0; x <= stats.items.length; x++){
+                                                if(stats.items != undefined && stats.items[x].find(e => e === args[0])){
+                                                    return message.reply("ya tienes ese objeto cRACK.");
+                                                } else { // si no tiene ese item
+                                                    // confirmar pago
+                                                    let buyEmbed = new Discord.MessageEmbed()
+                                                    .setAuthor(`| Compra`, Config.darkLogoPng)
+                                                    .setColor(Colores.blanco)
                                                     .setDescription(
                                                         `
-                \`▸\` Pago realizado con éxito.
-                \`▸\` Compraste: \`${item.itemName}\` por **${Emojis.Dark}${precio}**.
-                \`▸ Úsalo con '${prefix}ds items ${item.id}'\`.
-                \`▸\` Ahora tienes: **${Emojis.Dark}${stats.djeffros}**.`
+                    \`▸\` ¿Estás seguro de comprar \`${item.itemName}\` por **${Emojis.Dark}${precio}**?
+                    \`▸\` Reacciona de acuerdo a tu preferencia.`
                                                     )
-                                                    .setColor(Colores.negro);
-
-                                                    return msg.edit(useEmbed).then(() => {
-                                                    msg.reactions.removeAll();
+                                                    .setFooter(
+                                                        `▸ Esta compra no se puede devolver.`,
+                                                        "https://cdn.discordapp.com/emojis/494267320097570837.png"
+                                                    );
+    
+                                                    message.channel.send(buyEmbed).then(msg => {
+                                                    msg
+                                                        .react(":allow:558084462232076312")
+                                                        .then(r => {
+                                                        msg.react(":denegar:558084461686947891");
+                                                        });
+    
+                                                    let cancelEmbed = new Discord.MessageEmbed()
+                                                        .setDescription(`Cancelado.`)
+                                                        .setColor(Colores.nocolor);
+    
+                                                    const yesFilter = (reaction, user) =>
+                                                        reaction.emoji.id ===
+                                                        "558084462232076312" &&
+                                                        user.id === message.author.id;
+                                                    const noFilter = (reaction, user) =>
+                                                        reaction.emoji.id ===
+                                                        "558084461686947891" &&
+                                                        user.id === message.author.id;
+    
+                                                    const yes = msg.createReactionCollector(
+                                                        yesFilter,
+                                                        { time: 60000 }
+                                                    );
+                                                    const no = msg.createReactionCollector(
+                                                        noFilter,
+                                                        {
+                                                        time: 60000
+                                                        }
+                                                    );
+    
+                                                    yes.on("collect", r => {
+                                                        // agregar a la lista de items
+    
+                                                        if(!stats.items){
+                                                            stats.items = [
+                                                                {
+                                                                    "id": item.id,
+                                                                    "name": item.itemName
+                                                                }
+                                                            ];
+    
+                                                            stats.save();
+                                                        } else {
+                                                            stats.items.push({"id": item.id, "name": item.itemName})
+                                                            stats.save()
+                                                        }
+    
+                                                        let useEmbed = new Discord.MessageEmbed()
+                                                        .setAuthor(`| Listo!`, guild.iconURL())
+                                                        .setDescription(
+                                                            `
+                    \`▸\` Pago realizado con éxito.
+                    \`▸\` Compraste: \`${item.itemName}\` por **${Emojis.Dark}${precio}**.
+                    \`▸ Úsalo con '${prefix}ds items ${item.id}'\`.
+                    \`▸\` Ahora tienes: **${Emojis.Dark}${stats.djeffros}**.`
+                                                        )
+                                                        .setColor(Colores.negro);
+    
+                                                        return msg.edit(useEmbed).then(() => {
+                                                        msg.reactions.removeAll();
+                                                        });
+                                                    });
+    
+                                                    no.on("collect", r => {
+                                                        return msg.edit(cancelEmbed).then(a => {
+                                                        msg.reactions.removeAll();
+                                                        message.delete();
+                                                        a.delete({timeout: ms("20s")});
+                                                        });
                                                     });
                                                 });
-
-                                                no.on("collect", r => {
-                                                    return msg.edit(cancelEmbed).then(a => {
-                                                    msg.reactions.removeAll();
-                                                    message.delete();
-                                                    a.delete({timeout: ms("20s")});
-                                                    });
-                                                });
-                                            });
+                                                }
                                             }
+                                            
                                         }
                                     })
                                 })
