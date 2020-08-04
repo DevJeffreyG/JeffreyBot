@@ -618,7 +618,7 @@ module.exports.run = async (bot, message, args) => {
                                         }
 
                                         let embed = new Discord.MessageEmbed()
-                                        .setAuthor(`| Item ${data.id}`, guild.iconURL())
+                                        .setAuthor(`| Item ${data.id}`, Config.darkLogoPng)
                                         .setDescription(`**—** Si quieres cambiar algo usa el comando \`${prefix}shop edit <id> <nombre, precio, etc> <nuevo>\`.
 
             **—** Nombre: \`${data.itemName}\`.
@@ -901,7 +901,7 @@ module.exports.run = async (bot, message, args) => {
                                                     stats.save();
 
                                                     let useEmbed = new Discord.MessageEmbed()
-                                                    .setAuthor(`| Listo!`, guild.iconURL())
+                                                    .setAuthor(`| Listo!`, Config.darkLogoPng)
                                                     .setDescription(
                                                         `
                 \`▸\` Pago realizado con éxito.
