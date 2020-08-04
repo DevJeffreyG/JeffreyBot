@@ -832,6 +832,7 @@ module.exports.run = async (bot, message, args) => {
                                                     x = stats.items.length;
                                                     return message.reply("ya tienes ese objeto cRACK.");
                                                  }
+                                            }
                                                     
                                                 // si no tiene ese item
                                                 x = stats.items.length;
@@ -921,8 +922,6 @@ module.exports.run = async (bot, message, args) => {
                                                     });
                                                 });
                                             });
-                                            }
-                                            
                                         }
                                     })
                                 })
