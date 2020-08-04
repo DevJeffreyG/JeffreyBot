@@ -23,6 +23,7 @@ const Warn = require("../modelos/warn.js");
 const Stats = require("../modelos/darkstats.js");
 const Items = require("../modelos/darkitems.js");
 const Dark = require("../modelos/globalDark.js");
+const DarkUse = require("../modelos/darkUse.js");
 
 /* ##### MONGOOSE ######## */
 
@@ -724,6 +725,62 @@ module.exports.run = async (bot, message, args) => {
                             break;
 
                         default:
+                            itemID = args[0];
+
+                            DarkUse.findOne({
+                                itemID: itemID
+                            }, (err, use) => {
+                                if(err) throw err;
+
+                                Items.findOne({
+                                    id: itemID
+                                }, (err, item) => {
+                                    if(err) throw err;
+
+                                    Stats.findOne({
+                                        userID: author.id
+                                    }, (err, stats) => {
+                                        if(err) throw err;
+
+                                        
+                                        if(!item){
+                                            return message.reply("ese item no existe.")
+                                        } else {
+                                            if(!use){ // si no está listo para usar
+                                                return message.channel.send(`Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas comprar tu item :)`);
+                                            }
+
+                                            // variables & embeds
+                                            let precio = Number(item.itemPrice);
+                                            
+                                            let doesntHaveEnough = new Discord.MessageEmbed()
+                                            .setAuthor(`| Error`, Config.darkLogoPng)
+                                            .setDescription(
+                                            `**—** Necesitas **${Emojis.Dark}${precio}** para comprar \`${item.itemName}\`. Tienes **${Emojis.Dark}${stats.djeffros}**.`
+                                            )
+                                            .setColor(Colores.negro);
+
+                                            let hasThisItem = new Discord.MessageEmbed()
+                                            .setAuthor(`| Error`, Config.darkLogoPng)
+                                            .setDescription(
+                                            `**—** Ya tienes \`${item.itemName}\`, úsalo con \`${prefix}usar ${item.id}\`.`
+                                            )
+                                            .setColor(Colores.negro);
+
+                                            // tiene darkjeffros suficientes?
+                                            if(stats.djeffros < precio) return message.channel.send(doesntHaveEnough);
+
+                                            // momento:   A R R A Y S en M O N G O O S E
+                                            console.log(stats.items)
+
+                                            stats.items = [["test", "test"], ["aa", "aa"]];
+                                            stats.save()
+                                            .catch(e => console.log(e))
+                                            .then(x => console.log(x));
+                                        }
+                                    })
+                                })
+                            })
                             // comprar un item
                     }
                     
