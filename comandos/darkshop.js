@@ -828,7 +828,7 @@ module.exports.run = async (bot, message, args) => {
 
                                             // buscar si hay algún item con esa id
                                             for (let x = 0; x <= stats.items.length; x++){
-                                                if(stats.items != undefined && stats.items[x].find(e => e === args[0])){
+                                                if(stats.items != undefined && stats.items[x].id === item.id){
                                                     return message.reply("ya tienes ese objeto cRACK.");
                                                 } else { // si no tiene ese item
                                                     // confirmar pago
