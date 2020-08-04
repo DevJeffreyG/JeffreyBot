@@ -888,6 +888,7 @@ module.exports.run = async (bot, message, args) => {
                                                         stats.save()
                                                     } else {
                                                         // no sé como hacer esto ayuda
+                                                        console.log(stats.items)
                                                     }
 
                                                     let useEmbed = new Discord.MessageEmbed()
@@ -897,7 +898,7 @@ module.exports.run = async (bot, message, args) => {
                 \`▸\` Pago realizado con éxito.
                 \`▸\` Compraste: \`${item.itemName}\` por **${Emojis.Jeffros}${precio}**.
                 \`▸ Úsalo con '${prefix}usar ${item.id}'\`.
-                \`▸\` Ahora tienes: **${Emojis.Jeffros}${currency.jeffros}**.`
+                \`▸\` Ahora tienes: **${Emojis.Jeffros}${stats.djeffros}**.`
                                                     )
                                                     .setColor(Colores.verde);
 
