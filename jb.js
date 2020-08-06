@@ -878,10 +878,12 @@ bot.on("message", async message => {
           if (err) throw err;
 
           let startMS;
+          let left;
           function empiezaTimer(){
             startMS = new Date().getTime();
 
             setTimeout(() => {
+              left = prettyms(new Date().getTime() - startMS);
               workCooldown.delete(message.author.id);
             }, ms("5s")); 
           }
@@ -889,7 +891,6 @@ bot.on("message", async message => {
           empiezaTimer();
 
           if (workCooldown.has(message.author.id)){
-            let left = prettyms(new Date().getTime() - startMS);
             return message.reply(
               `Usa este comando en ${left}, ${randomCumplidos}`
             );
