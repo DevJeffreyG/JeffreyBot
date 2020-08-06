@@ -893,8 +893,6 @@ bot.on("message", async message => {
           workCooldown.add(message.author.id);
           let timeMS = new Date().getTime();
           coolded.set(author.id, timeMS);
-          console.log(coolded);
-
 
           if (!jeffros) {
             const newJeffros = new Jeffros({
