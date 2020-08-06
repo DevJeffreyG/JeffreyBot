@@ -887,12 +887,12 @@ bot.on("message", async message => {
               workCooldown.delete(message.author.id);
             }, ms("5s")); 
           }
-
-          let timer = empiezaTimer();
+          
+          empiezaTimer();
 
           if (workCooldown.has(message.author.id)){
             return message.reply(
-              `Usa este comando en ${timer.left}, ${randomCumplidos}`
+              `Usa este comando en ${empiezaTimer().left}, ${randomCumplidos}`
             );
           }
 
