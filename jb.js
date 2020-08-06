@@ -40,7 +40,7 @@ const jeffrosExpCooldown = new Set();
 const repCool = new Set();
 const workCooldown = new Set();
 
-
+const coolded = new Map();
 const active = new Map();
 const disableEXPs = 0;
 
@@ -876,22 +876,24 @@ bot.on("message", async message => {
         },
         (err, jeffros) => {
           if (err) throw err;
-            
-          let w;
+
           let timer = setTimeout(() => {
-            w = "AAA"
+            coolded.get(author.id).shift();
             workCooldown.delete(message.author.id);
           }, ms("5s"));
 
           if (workCooldown.has(message.author.id)){
-            console.log(w);
-            let left = prettyms(Math.ceil((timer._idleStart + timer._idleTimeout - Date.now())));
+            let timer = coolded.get(author.id)
+            let left = prettyms(new Date().getTime() - timer.timeMS);
             return message.reply(
               `Usa este comando en ${left}, ${randomCumplidos}`
             );
           }
 
           workCooldown.add(message.author.id);
+          let timeMS = new Date().getTime();
+          coolded.set(author.id, timeMS);
+          console.log(coolded);
 
 
           if (!jeffros) {
