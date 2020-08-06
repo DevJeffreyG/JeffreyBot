@@ -883,8 +883,8 @@ bot.on("message", async message => {
 
           if (workCooldown.has(message.author.id)){
             console.log(timer);
-            console.log(timer._idleStart, timer._idleTimeout, Date.getTime());
-            let left = prettyms(Math.ceil((timer._idleStart + timer._idleTimeout - Date.getTime())));
+            console.log(timer._idleStart, timer._idleTimeout, new Date().getTime());
+            let left = prettyms(Math.ceil((timer._idleStart + timer._idleTimeout - new Date().getTime())));
             return message.reply(
               `Usa este comando en ${left}, ${randomCumplidos}`
             );
