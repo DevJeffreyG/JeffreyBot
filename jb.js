@@ -876,23 +876,18 @@ bot.on("message", async message => {
         },
         (err, jeffros) => {
           if (err) throw err;
-
-          let startMS;
-          let left;
-          function empiezaTimer(){
-            startMS = new Date().getTime();
-
-            setTimeout(() => {
-              this.left = prettyms(new Date().getTime() - startMS);
-              workCooldown.delete(message.author.id);
-            }, ms("5s")); 
-          }
-          
-          empiezaTimer();
+            
+          let w;
+          let timer = setTimeout(() => {
+            w = "AAA"
+            workCooldown.delete(message.author.id);
+          }, ms("5s"));
 
           if (workCooldown.has(message.author.id)){
+            console.log(w);
+            let left = prettyms(Math.ceil((timer._idleStart + timer._idleTimeout - Date.now())));
             return message.reply(
-              `Usa este comando en ${empiezaTimer().left}, ${randomCumplidos}`
+              `Usa este comando en ${left}, ${randomCumplidos}`
             );
           }
 
