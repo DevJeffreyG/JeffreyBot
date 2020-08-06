@@ -16,6 +16,7 @@ const Colores = require("./colores.json");
 const Emojis = require("./emojis.json");
 const Discord = require("discord.js");
 const anyBase = require("any-base");
+const prettyms = require("pretty-ms");
 const dec2hex = anyBase(anyBase.DEC, anyBase.HEX);
 const bot = new Discord.Client({ disableMentions: "everyone" });
 const fs = require("fs");
@@ -817,6 +818,7 @@ bot.on("message", async message => {
     if (commandFile) commandFile.run(bot, message, args, active);
 
     if (message.content === `${prefix}coins`) {
+      if(message.author.id != jeffreygID) return message.reply("Comando en mantenimiento, vuelve más tarde!");
       let money = Math.ceil(Math.random() * 20);
       let tmoney = `**${Emojis.Jeffros}${money}**`;
       let randommember = guild.members.cache.random();
@@ -867,11 +869,6 @@ bot.on("message", async message => {
         .setColor(Colores.rojo)
         .setDescription(text);
 
-      if (workCooldown.has(message.author.id))
-        return message.reply(
-          `Sólo puedes usar este comando cada 10 minutos, ${randomCumplidos}`
-        );
-
       Jeffros.findOne(
         {
           serverID: guild.id,
@@ -879,6 +876,24 @@ bot.on("message", async message => {
         },
         (err, jeffros) => {
           if (err) throw err;
+
+          setTimeout(() => {
+            workCooldown.delete(message.author.id);
+          }, ms("10m"));
+
+          let timer = setTimeout(() => {
+          }, ms("10m"));
+
+          if (workCooldown.has(message.author.id)){
+            let left = prettyms(Math.ceil((timer._idleStart + timer._idleTimeout - Date.now())));
+            return message.reply(
+              `Usa este comando en ${left}, ${randomCumplidos}`
+            );
+          }
+
+          workCooldown.add(message.author.id);
+
+
           if (!jeffros) {
             const newJeffros = new Jeffros({
               userID: author.id,
@@ -892,11 +907,6 @@ bot.on("message", async message => {
             jeffros.save();
           }
 
-          workCooldown.add(message.author.id);
-
-          setTimeout(() => {
-            workCooldown.delete(message.author.id);
-          }, ms("10m"));
 
           message.channel.send(embed);
         }
