@@ -819,7 +819,7 @@ bot.on("message", async message => {
 
     if (message.content === `${prefix}coins`) {
       if(message.author.id != jeffreygID) return message.reply("Comando en mantenimiento, vuelve más tarde!");
-      let money = Math.ceil(Math.random() * 20);
+      let money = Math.ceil(Math.random() * 0);
       let tmoney = `**${Emojis.Jeffros}${money}**`;
       let randommember = guild.members.cache.random();
       randommember = `**${randommember.user.tag}**`;
@@ -877,14 +877,12 @@ bot.on("message", async message => {
         (err, jeffros) => {
           if (err) throw err;
 
-          setTimeout(() => {
-            workCooldown.delete(message.author.id);
-          }, ms("10m"));
-
           let timer = setTimeout(() => {
-          }, ms("10m"));
+            workCooldown.delete(message.author.id);
+          }, ms("5s"));
 
           if (workCooldown.has(message.author.id)){
+            console.log(Math.ceil((timer._idleStart + timer._idleTimeout - Date.now())))
             let left = prettyms(Math.ceil((timer._idleStart + timer._idleTimeout - Date.now())));
             return message.reply(
               `Usa este comando en ${left}, ${randomCumplidos}`
