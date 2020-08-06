@@ -877,10 +877,10 @@ bot.on("message", async message => {
         (err, jeffros) => {
           if (err) throw err;
 
-          let timer = setTimeout(() => {
-            coolded.get(author.id).shift();
+          setTimeout(() => {
+            coolded.delete(author.id)
             workCooldown.delete(message.author.id);
-          }, ms("5s"));
+          }, ms("10m"));
 
           if (workCooldown.has(message.author.id)){
             let timer = coolded.get(author.id)
