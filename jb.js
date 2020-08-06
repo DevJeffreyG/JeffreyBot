@@ -877,13 +877,19 @@ bot.on("message", async message => {
         (err, jeffros) => {
           if (err) throw err;
 
-          let timer = setTimeout(() => {
-            this.startMS = new Date().getTime();
-            workCooldown.delete(message.author.id);
-          }, ms("5s"));
+          let startMS;
+          function empiezaTimer(){
+            startMS = new Date().getTime();
+
+            setTimeout(() => {
+              workCooldown.delete(message.author.id);
+            }, ms("5s")); 
+          }
+
+          empiezaTimer();
 
           if (workCooldown.has(message.author.id)){
-            let left = prettyms(new Date().getTime() - timer.startMS);
+            let left = prettyms(new Date().getTime() - startMS);
             return message.reply(
               `Usa este comando en ${left}, ${randomCumplidos}`
             );
