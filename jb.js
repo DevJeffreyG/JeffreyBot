@@ -878,13 +878,12 @@ bot.on("message", async message => {
           if (err) throw err;
 
           let timer = setTimeout(() => {
+            this.startMS = new Date().getTime();
             workCooldown.delete(message.author.id);
           }, ms("5s"));
 
           if (workCooldown.has(message.author.id)){
-            console.log(timer);
-            console.log(timer._idleStart, timer._idleTimeout, new Date().getTime());
-            let left = prettyms(Math.ceil((timer._idleStart + timer._idleTimeout - new Date().getTime())));
+            let left = prettyms(new Date().getTime() - timer.startMS);
             return message.reply(
               `Usa este comando en ${left}, ${randomCumplidos}`
             );
