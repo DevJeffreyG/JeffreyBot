@@ -884,7 +884,7 @@ bot.on("message", async message => {
 
           if (workCooldown.has(message.author.id)){
             let timer = coolded.get(author.id)
-            let left = prettyms(new Date().getTime() - timer.timeMS);
+            let left = prettyms(new Date().getTime() - timer);
             return message.reply(
               `Usa este comando en ${left}, ${randomCumplidos}`
             );
