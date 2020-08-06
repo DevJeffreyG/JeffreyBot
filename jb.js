@@ -883,16 +883,16 @@ bot.on("message", async message => {
             startMS = new Date().getTime();
 
             setTimeout(() => {
-              left = prettyms(new Date().getTime() - startMS);
+              this.left = prettyms(new Date().getTime() - startMS);
               workCooldown.delete(message.author.id);
             }, ms("5s")); 
           }
 
-          empiezaTimer();
+          let timer = empiezaTimer();
 
           if (workCooldown.has(message.author.id)){
             return message.reply(
-              `Usa este comando en ${left}, ${randomCumplidos}`
+              `Usa este comando en ${timer.left}, ${randomCumplidos}`
             );
           }
 
