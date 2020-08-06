@@ -818,8 +818,8 @@ bot.on("message", async message => {
     if (commandFile) commandFile.run(bot, message, args, active);
 
     if (message.content === `${prefix}coins`) {
-      if(message.author.id != jeffreygID) return message.reply("Comando en mantenimiento, vuelve más tarde!");
-      let money = Math.ceil(Math.random() * 0);
+      //if(message.author.id != jeffreygID) return message.reply("Comando en mantenimiento, vuelve más tarde!");
+      let money = Math.ceil(Math.random() * 20);
       let tmoney = `**${Emojis.Jeffros}${money}**`;
       let randommember = guild.members.cache.random();
       randommember = `**${randommember.user.tag}**`;
