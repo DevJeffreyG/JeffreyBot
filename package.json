@@ -27,7 +27,8 @@
     "discord.js": "^12.2.0",
     "chance": "^1.1.6",
     "any-base": "^1.1.0",
-    "pretty-ms": "^7.0.0"
+    "pretty-ms": "^7.0.0",
+    "tmi.js": "^1.5.0"
   },
   "repository": {
     "type": "git",
