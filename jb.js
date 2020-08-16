@@ -98,6 +98,7 @@ mongoose.connect(`${process.env.MONGOCONNECT}`, {
 });
 
 const Jeffros = require("./modelos/jeffros.js");
+const Commands = require("./modelos/tvCommands.js");
 const Exp = require("./modelos/exp.js");
 const Cuenta = require("./modelos/cuenta.js");
 const AutoRole = require("./modelos/autorole.js");
@@ -1728,11 +1729,20 @@ const client = new tmi.Client({
 client.connect();
 
 client.on('message', (channel, user, message, self) => {
-	// Ignore echoed messages.
-	if(self) return;
 
-	if(message.toLowerCase() === '!hello') {
-		// "@alca, heya!"
-		client.say(channel, `@${user.username}, heya!`);
-	}
+  if(self) return;
+
+  //comandos default
+	switch(Config.tvPrefix+message.toLowerCase()){
+    case "comandos":
+      Commands.find({
+
+      }, (err, cmds) => {
+        if(err) throw err;
+
+        if(!cmds){
+          return client.say(channel, `aún no hay comandos :(`);
+        }
+      })
+  }
 });

@@ -1,5 +1,6 @@
 {
     "prefix": "/",
+    "tvPrefix": "!",
     "mantenimiento": 0,
     "version": "> • La música ha vuelto.\n> • Ya puedes ver cuanto tiempo hace falta para volver a usar `/coins`.",
     "bienPng": "http://i.imgur.com/M6hqbcc.png",
