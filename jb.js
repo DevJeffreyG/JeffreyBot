@@ -1740,6 +1740,8 @@ client.on('message', (channel, user, message, self) => {
       }, (err, cmds) => {
         if(err) throw err;
 
+        console.log(cmds);
+        
         if(!cmds){
           return client.say(channel, `aún no hay comandos :(`);
         } else {
