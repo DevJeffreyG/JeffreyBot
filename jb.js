@@ -1705,3 +1705,34 @@ if (process.env.mantenimiento != 1) {
 } else {
   console.log("########## BOT EN MANTENIMIENTO, NO LOGEADO #############");
 }
+
+
+
+////////////////////////// ################# JEFFREY BOT . TV ###################################################################
+
+const tmi = require('tmi.js');
+
+const client = new tmi.Client({
+	options: { debug: true },
+	connection: {
+		secure: true,
+		reconnect: true
+	},
+	identity: {
+		username: 'jeffreybot_tv',
+		password: 'oauth:z1d49zb1cw3e8vaqy5eoxdk13zg82l'
+	},
+	channels: [ 'jeffreyg_' ]
+});
+
+client.connect();
+
+client.on('message', (channel, user, message, self) => {
+	// Ignore echoed messages.
+	if(self) return;
+
+	if(message.toLowerCase() === '!hello') {
+		// "@alca, heya!"
+		client.say(channel, `@${user.username}, heya!`);
+	}
+});
