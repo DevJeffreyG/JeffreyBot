@@ -1733,8 +1733,8 @@ client.on('message', (channel, user, message, self) => {
   if(self) return;
 
   //comandos default
-	switch(Config.tvPrefix+message.toLowerCase()){
-    case "comandos":
+	switch(message.toLowerCase()){
+    case `${Config.tvPrefix}comandos`:
       Commands.find({
 
       }, (err, cmds) => {
@@ -1742,6 +1742,8 @@ client.on('message', (channel, user, message, self) => {
 
         if(!cmds){
           return client.say(channel, `aún no hay comandos :(`);
+        } else {
+          return client.say(channel, "pole");
         }
       })
   }
