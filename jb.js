@@ -1740,9 +1740,9 @@ client.on('message', (channel, user, message, self) => {
       }, (err, cmds) => {
         if(err) throw err;
 
-        console.log(cmds);
-        
-        if(!cmds){
+        console.log(!cmds);
+
+        if(cmds.length === 0){
           return client.say(channel, `aún no hay comandos :(`);
         } else {
           return client.say(channel, "pole");
