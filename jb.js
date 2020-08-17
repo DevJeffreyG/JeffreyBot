@@ -1728,24 +1728,44 @@ const client = new tmi.Client({
 
 client.connect();
 
-client.on('message', (channel, user, message, self) => {
+client.on('message', (channel, author, message, self) => {
 
   if(self) return;
 
+  console.log(message);
+
+  let messageArray = message.split(" ");
+  let args = messageArray.slice(1);
   //comandos default
 	switch(message.toLowerCase()){
     case `${Config.tvPrefix}comandos`:
+
+    if(args[0] === "new"){
+      // !comandos new titulo | mensaje | userLevel | cooldown | (alias)
+      let a = [];
+
+      var matches = [];
+      message.replace(/|(.*?)|/g, function(g0,g1){
+        a.push(g1);
+      });
+
+      return console.log(a);
+    }
       Commands.find({
 
       }, (err, cmds) => {
         if(err) throw err;
 
-        console.log(!cmds);
-
         if(cmds.length === 0){
-          return client.say(channel, `aún no hay comandos :(`);
+          return client.say(channel, `@${author.username} -> aún no hay comandos :(`);
         } else {
-          return client.say(channel, "pole");
+          let allCommands;
+
+          for(let i; i < cmds.length; i++){
+            allCommands += `・${cmds[i].command}`;
+          }
+
+          return client.say(channel, `@${author.username} -> estos son los comandos disponibles: ${allCommands}`);
         }
       })
   }
