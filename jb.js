@@ -1774,7 +1774,7 @@ client.on('message', (channel, author, message, self) => {
 
               newCommand.save();
 
-              return client.say(channel, `@${sender} -> He ha creado un nuevo comando "${Config.tvPrefix}${args[1]}" (para configurar su comportamiento usa ${Config.tvPrefix}comandos edit ${c+plus})`);
+              return client.say(channel, `@${sender} -> He creado un nuevo comando "${Config.tvPrefix}${args[1]}" (para configurar su comportamiento usa ${Config.tvPrefix}comandos edit ${c+plus})`);
             })
         })
       } else {
