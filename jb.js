@@ -1833,7 +1833,8 @@ client.on('message', (channel, author, message, self) => {
             let allCommands;
 
             for(let i; i < cmds.length; i++){
-              allCommands += `・${cmds[i].title}`;
+              allCommands = allCommands.concat(`\n・${cmds[i].title}`);
+              console.log(allCommands);
             }
 
             return client.say(channel, `@${sender} -> Estos son los comandos disponibles: ${allCommands}`);
