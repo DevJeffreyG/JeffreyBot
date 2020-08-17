@@ -1736,6 +1736,9 @@ client.on('message', (channel, author, message, self) => {
 
   let messageArray = message.split(" ");
   let args = messageArray.slice(1);
+
+  console.log(args);
+  
   //comandos default
 	switch(message.toLowerCase()){
     case `${Config.tvPrefix}comandos`:
@@ -1744,14 +1747,13 @@ client.on('message', (channel, author, message, self) => {
         // !comandos new titulo | mensaje | userLevel | cooldown | (alias)
         let a = [];
 
-        var matches = [];
         message.replace(/|(.*?)|/g, function(g0,g1){
           a.push(g1);
         });
 
         return client.say(channel, a);
       }
-      
+
       Commands.find({
 
       }, (err, cmds) => {
