@@ -1738,6 +1738,8 @@ client.on('message', (channel, author, message, self) => {
   let cmd = messageArray[0];
   let args = messageArray.slice(1);
 
+  console.log(author);
+
   //comandos default
 	switch(cmd){
     case `${Config.tvPrefix}comandos`:
@@ -1745,55 +1747,56 @@ client.on('message', (channel, author, message, self) => {
       if(args[0] === "new"){
 
         let plus = 1;
-      Commands.countDocuments({}, (err, c) => {
-        Commands.findOne(
-          {
-            id: c + plus
-          },
-          (err, found) => {
-            if (err) throw err;
-
-            if (!found) {
-            } else {
-              while (c + plus === found.id) {
-                c += plus + 1;
-                console.log("equal id");
-              }
-            }
-          
-    
-            const newCommand = new Commands({
-              title: args[0],
-              message: "na",
-              userLevel: "na",
-              cooldown: "na",
-              alias: "na",
+        Commands.countDocuments({}, (err, c) => {
+          Commands.findOne(
+            {
               id: c + plus
-            });
+            },
+            (err, found) => {
+              if (err) throw err;
 
-            newCommand.save();
+              if (!found) {
+              } else {
+                while (c + plus === found.id) {
+                  c += plus + 1;
+                  console.log("equal id");
+                }
+              }
+            
+      
+              const newCommand = new Commands({
+                title: args[0],
+                message: "na",
+                userLevel: "na",
+                cooldown: "na",
+                alias: "na",
+                id: c + plus
+              });
 
-            return client.say(channel, `@${author.display-name} -> He ha creado un nuevo comando "${Config.tvPrefix}${args[0]}" (para configurar su comportamiento usa ${Config.tvPrefix}comandos edit ${c+plus})`);
-          })
+              newCommand.save();
+
+              return client.say(channel, `@${author.display-name} -> He ha creado un nuevo comando "${Config.tvPrefix}${args[0]}" (para configurar su comportamiento usa ${Config.tvPrefix}comandos edit ${c+plus})`);
+            })
         })
-      }
+      } else {
 
-      Commands.find({
+        Commands.find({
 
-      }, (err, cmds) => {
-        if(err) throw err;
+        }, (err, cmds) => {
+          if(err) throw err;
 
-        if(cmds.length === 0){
-          return client.say(channel, `@${author.display-name} -> Aún no hay comandos :(`);
-        } else {
-          let allCommands;
+          if(cmds.length === 0){
+            return client.say(channel, `@${author.display-name} -> Aún no hay comandos :(`);
+          } else {
+            let allCommands;
 
-          for(let i; i < cmds.length; i++){
-            allCommands += `・${cmds[i].title}`;
+            for(let i; i < cmds.length; i++){
+              allCommands += `・${cmds[i].title}`;
+            }
+
+            return client.say(channel, `@${author.display-name} -> Estos son los comandos disponibles: ${allCommands}`);
           }
-
-          return client.say(channel, `@${author.display-name} -> Estos son los comandos disponibles: ${allCommands}`);
-        }
       })
+    }
   }
 });
