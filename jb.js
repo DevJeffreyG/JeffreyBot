@@ -1830,14 +1830,14 @@ client.on('message', (channel, author, message, self) => {
           if(cmds.length === 0){
             return client.say(channel, `@${sender} -> Aún no hay comandos :(`);
           } else {
-            let allCommands;
+            let allCommands = "Estos son los comandos disponibles:";
 
             for(let i = 0; i < cmds.length; i++){
               allCommands = allCommands.concat(`\n・${cmds[i].title}`);
               console.log(allCommands);
             }
 
-            return client.say(channel, `@${sender} -> Estos son los comandos disponibles: ${allCommands}`);
+            return client.say(channel, `@${sender} -> ${allCommands}`);
           }
         })
       }
