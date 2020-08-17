@@ -1856,7 +1856,8 @@ client.on('message', (channel, author, message, self) => {
           console.log(author);
 
           if(command.userLevel != "na"){
-            if(author.badges[command.userLevel] != 1) return console.log(author.badges[command.userLevel]);
+            let level = command.userLevel;
+            if(author.badges[level] != 1) return console.log(author.badges);
           }
           return client.say(channel, `${command.message}`);
         }
