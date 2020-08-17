@@ -1771,8 +1771,7 @@ client.on('message', (channel, author, message, self) => {
                     title: args[1],
                     message: "na",
                     userLevel: "everyone",
-                    cooldown: "5",
-                    alias: "na",
+                    cooldown: "5"
                     id: c + plus
                   });
     

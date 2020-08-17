@@ -6,7 +6,6 @@ const commandSchema = mongoose.Schema({
   message: String,
   userLevel: String,
   cooldown: String,
-  alias: String,
   id: Number
 
 })
