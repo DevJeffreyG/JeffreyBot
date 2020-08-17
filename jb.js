@@ -1750,7 +1750,7 @@ client.on('message', (channel, author, message, self) => {
           a.push(g1);
         });
 
-        return client.say(channel, a);
+        return client.say(channel, `${a}`);
       }
 
       Commands.find({
