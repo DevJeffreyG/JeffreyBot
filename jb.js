@@ -1832,14 +1832,15 @@ client.on('message', (channel, author, message, self) => {
           } else {
             let allCommands;
 
-            for(let i; i < cmds.length; i++){
+            for(let i = 0; i < cmds.length; i++){
               allCommands = allCommands.concat(`\n・${cmds[i].title}`);
               console.log(allCommands);
             }
 
             return client.say(channel, `@${sender} -> Estos son los comandos disponibles: ${allCommands}`);
           }
-      })
-    }
+        })
+      }
+      break;
   }
 });
