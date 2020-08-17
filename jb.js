@@ -1856,8 +1856,65 @@ client.on('message', (channel, author, message, self) => {
           console.log(author);
 
           if(command.userLevel != "everyone"){
-            let level = command.userLevel;
-            if(author.badges[level] != 1) return console.log(author.badges);
+            let reqLevel;
+            let actualLevel;
+            /*
+
+            4. Owner
+            3. Moderator
+            2. VIP
+            1. Sub
+            0. Everyone
+            
+            */
+
+            // getting reqlevel
+            switch(command.userLevel){
+              case "owner":
+                reqLevel = 4;
+                break;
+
+              case "moderator":
+                reqLevel = 3;
+                break;
+
+              case "vip":
+                reqLevel = 2;
+                break;
+
+              case "sub":
+                reqLevel = 1;
+                break;
+
+              default:
+                reqLevel = 0;
+                break;
+            }
+
+            // getting actuallevel
+            switch(true){
+              case author.badges.broadcaster:
+                actualLevel = 4;
+                break;
+
+              case author.badges.moderator:
+                actualLevel = 3;
+                break;
+
+              case author.badges.vip:
+                actualLevel = 2;
+                break;
+
+              case author.badges.subscriber:
+                actualLevel = 1;
+                break;
+
+              default:
+                actualLevel = 0;
+                break;
+            }
+            
+            if(actualLevel < reqLevel) return console.log(author.badges);
             
             return client.say(channel, `${command.message}`);
           }
