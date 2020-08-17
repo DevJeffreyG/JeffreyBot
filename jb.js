@@ -1737,8 +1737,7 @@ client.on('message', (channel, author, message, self) => {
   let messageArray = message.split(" ");
   let cmd = messageArray[0];
   let args = messageArray.slice(1);
-
-  console.log(author);
+  let sender = author['display-name'];
 
   //comandos default
 	switch(cmd){
@@ -1775,7 +1774,7 @@ client.on('message', (channel, author, message, self) => {
 
               newCommand.save();
 
-              return client.say(channel, `@${author.display-name} -> He ha creado un nuevo comando "${Config.tvPrefix}${args[0]}" (para configurar su comportamiento usa ${Config.tvPrefix}comandos edit ${c+plus})`);
+              return client.say(channel, `@${sender} -> He ha creado un nuevo comando "${Config.tvPrefix}${args[0]}" (para configurar su comportamiento usa ${Config.tvPrefix}comandos edit ${c+plus})`);
             })
         })
       } else {
@@ -1786,7 +1785,7 @@ client.on('message', (channel, author, message, self) => {
           if(err) throw err;
 
           if(cmds.length === 0){
-            return client.say(channel, `@${author.display-name} -> Aún no hay comandos :(`);
+            return client.say(channel, `@${sender} -> Aún no hay comandos :(`);
           } else {
             let allCommands;
 
@@ -1794,7 +1793,7 @@ client.on('message', (channel, author, message, self) => {
               allCommands += `・${cmds[i].title}`;
             }
 
-            return client.say(channel, `@${author.display-name} -> Estos son los comandos disponibles: ${allCommands}`);
+            return client.say(channel, `@${sender} -> Estos son los comandos disponibles: ${allCommands}`);
           }
       })
     }
