@@ -1735,12 +1735,13 @@ client.on('message', (channel, author, message, self) => {
   //console.log(message);
 
   let messageArray = message.split(" ");
+  let cmd = messageArray[0];
   let args = messageArray.slice(1);
 
   console.log(args);
-  
+
   //comandos default
-	switch(message.toLowerCase()){
+	switch(cmd){
     case `${Config.tvPrefix}comandos`:
 
       if(args[0] === "new"){
