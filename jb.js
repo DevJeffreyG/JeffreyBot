@@ -1892,7 +1892,7 @@ client.on('message', (channel, author, message, self) => {
             }
 
             // getting actuallevel
-            switch(true){
+            switch('1'){
               case author.badges.broadcaster:
                 actualLevel = 4;
                 break;
