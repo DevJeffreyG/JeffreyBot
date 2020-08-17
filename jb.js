@@ -1914,7 +1914,7 @@ client.on('message', (channel, author, message, self) => {
                 break;
             }
             
-            if(actualLevel < reqLevel) return console.log(author.badges);
+            if(actualLevel < reqLevel) return;
             
             return client.say(channel, `${command.message}`);
           }
