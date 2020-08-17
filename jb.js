@@ -1764,7 +1764,7 @@ client.on('message', (channel, author, message, self) => {
             
       
               const newCommand = new Commands({
-                title: args[0],
+                title: args[1],
                 message: "na",
                 userLevel: "na",
                 cooldown: "na",
@@ -1774,7 +1774,7 @@ client.on('message', (channel, author, message, self) => {
 
               newCommand.save();
 
-              return client.say(channel, `@${sender} -> He ha creado un nuevo comando "${Config.tvPrefix}${args[0]}" (para configurar su comportamiento usa ${Config.tvPrefix}comandos edit ${c+plus})`);
+              return client.say(channel, `@${sender} -> He ha creado un nuevo comando "${Config.tvPrefix}${args[1]}" (para configurar su comportamiento usa ${Config.tvPrefix}comandos edit ${c+plus})`);
             })
         })
       } else {
