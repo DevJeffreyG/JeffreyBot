@@ -1844,7 +1844,7 @@ client.on('message', (channel, author, message, self) => {
 
     default:
       if(!message.startsWith(Config.tvPrefix)) return;
-      
+
       Commands.findOne({
         title: cmd.slice(Config.tvPrefix.length)
       }, (err, command) => {
@@ -1855,6 +1855,9 @@ client.on('message', (channel, author, message, self) => {
         } else {
           console.log(author);
 
+          if(command.userLevel != "na"){
+            if(author.badges[command.userLevel] != 1) return console.log(author.badges[command.userLevel]);
+          }
           return client.say(channel, `${command.message}`);
         }
       })
