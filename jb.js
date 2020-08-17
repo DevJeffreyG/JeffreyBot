@@ -1833,7 +1833,7 @@ client.on('message', (channel, author, message, self) => {
             let allCommands = "Estos son los comandos disponibles:";
 
             for(let i = 0; i < cmds.length; i++){
-              allCommands = allCommands.concat(`\n・${cmds[i].title}`);
+              allCommands = allCommands.concat(`・${Config.tvPrefix}${cmds[i].title}`);
               console.log(allCommands);
             }
 
