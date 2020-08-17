@@ -1743,14 +1743,39 @@ client.on('message', (channel, author, message, self) => {
     case `${Config.tvPrefix}comandos`:
 
       if(args[0] === "new"){
-        // !comandos new titulo | mensaje | userLevel | cooldown | (alias)
-        let a = [];
 
-        message.replace(/|(.*?)|/g, function(g0,g1){
-          a.push(g1);
-        });
+        let plus = 1;
+      Commands.countDocuments({}, (err, c) => {
+        Commands.findOne(
+          {
+            id: c + plus
+          },
+          (err, found) => {
+            if (err) throw err;
 
-        return client.say(channel, `${a}`);
+            if (!found) {
+            } else {
+              while (c + plus === found.id) {
+                c += plus + 1;
+                console.log("equal id");
+              }
+            }
+          
+    
+            const newCommand = new Commands({
+              title: args[0],
+              message: "na",
+              userLevel: "na",
+              cooldown: "na",
+              alias: "na",
+              id: c + plus
+            });
+
+            newCommand.save();
+
+            return client.say(channel, `@${author.display-name} -> He ha creado un nuevo comando "${Config.tvPrefix}${args[0]}" (para configurar su comportamiento usa ${Config.tvPrefix}comandos edit ${c+plus})`);
+          })
+        })
       }
 
       Commands.find({
@@ -1759,15 +1784,15 @@ client.on('message', (channel, author, message, self) => {
         if(err) throw err;
 
         if(cmds.length === 0){
-          return client.say(channel, `@${author.username} -> aún no hay comandos :(`);
+          return client.say(channel, `@${author.display-name} -> Aún no hay comandos :(`);
         } else {
           let allCommands;
 
           for(let i; i < cmds.length; i++){
-            allCommands += `・${cmds[i].command}`;
+            allCommands += `・${cmds[i].title}`;
           }
 
-          return client.say(channel, `@${author.username} -> estos son los comandos disponibles: ${allCommands}`);
+          return client.say(channel, `@${author.display-name} -> Estos son los comandos disponibles: ${allCommands}`);
         }
       })
   }

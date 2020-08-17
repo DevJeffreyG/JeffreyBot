@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const commandSchema = mongoose.Schema({
 
-  command: String,
+  title: String,
   message: String,
   userLevel: String,
   cooldown: String,
