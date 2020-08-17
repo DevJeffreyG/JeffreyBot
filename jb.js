@@ -1738,8 +1738,6 @@ client.on('message', (channel, author, message, self) => {
   let cmd = messageArray[0];
   let args = messageArray.slice(1);
 
-  console.log(args);
-
   //comandos default
 	switch(cmd){
     case `${Config.tvPrefix}comandos`:
