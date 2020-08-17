@@ -1778,26 +1778,26 @@ client.on('message', (channel, author, message, self) => {
     
                   newCommand.save();
     
-                  return client.say(channel, `@${sender}, he creado un nuevo comando "${Config.tvPrefix}${args[1]}" (para configurar su comportamiento usa "${Config.tvPrefix}comandos edit ${c+plus}") :)`);    
+                  return client.say(channel, `@${sender}, he creado un nuevo comando "${Config.tvPrefix}${args[1]}" (para configurar su comportamiento usa "${Config.tvPrefix}comandos edit ${args[1]}") :)`);    
                 } else {
-                  return client.say(channel, `@${sender}, el comando "${Config.tvPrefix}${args[1]}" (id: ${command.id}) ya existe :(`);
+                  return client.say(channel, `@${sender}, el comando "${Config.tvPrefix}${args[1]}" ya existe :(`);
                 }
               })
             })
         })
       } else if(args[0] === "edit"){
         Commands.findOne({
-          id: args[1]
+          title: args[1]
         }, (err, command) => {
           if(err) throw err;
 
           if(!command){
-            return client.say(channel, `@${sender}, no encontré un comando con esa id "${args[1]}"... :(`);
+            return client.say(channel, `@${sender}, no encontré el comando "${Config.tvPrefix}${args[1]}"... :(`);
           } else {
-            let toEdit = args[2].toLowerCase();
+            let toEdit = args[2] || "na";
             let data = args[3];
 
-            switch(toEdit){
+            switch(toEdit.toLowerCase()){
               case "mensaje":
 
                 if(!args[3]) return client.say(channel, `@${sender}, parámetros incorrectos. Escribe el nuevo mensaje para este comando.`);
