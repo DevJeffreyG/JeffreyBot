@@ -1750,8 +1750,7 @@ client.on('message', (channel, author, message, self) => {
           Commands.findOne(
             {
               id: c + plus
-            },
-            (err, found) => {
+            }, (err, found) => {
               if (err) throw err;
 
               if (!found) {
@@ -1762,19 +1761,26 @@ client.on('message', (channel, author, message, self) => {
                 }
               }
             
-      
-              const newCommand = new Commands({
-                title: args[1],
-                message: "na",
-                userLevel: "na",
-                cooldown: "na",
-                alias: "na",
-                id: c + plus
-              });
-
-              newCommand.save();
-
-              return client.say(channel, `@${sender} -> He creado un nuevo comando "${Config.tvPrefix}${args[1]}" (para configurar su comportamiento usa ${Config.tvPrefix}comandos edit ${c+plus})`);
+              Commands.findOne({
+                title: args[1]
+              }, (err, comd) => {
+                if(!comd){
+                  const newCommand = new Commands({
+                    title: args[1],
+                    message: "na",
+                    userLevel: "na",
+                    cooldown: "na",
+                    alias: "na",
+                    id: c + plus
+                  });
+    
+                  newCommand.save();
+    
+                  return client.say(channel, `@${sender} -> He creado un nuevo comando "${Config.tvPrefix}${args[1]}" (para configurar su comportamiento usa ${Config.tvPrefix}comandos edit ${c+plus}) :)`);    
+                } else {
+                  return client.say(channel, `@${sender} -> El comando "${Config.tvPrefix}${args[1]}" ya existe :(`);
+                }
+              })
             })
         })
       } else {
