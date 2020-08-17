@@ -1763,8 +1763,10 @@ client.on('message', (channel, author, message, self) => {
             
               Commands.findOne({
                 title: args[1]
-              }, (err, comd) => {
-                if(!comd){
+              }, (err, command) => {
+                if(err) throw err;
+
+                if(!command){
                   const newCommand = new Commands({
                     title: args[1],
                     message: "na",
@@ -1776,13 +1778,33 @@ client.on('message', (channel, author, message, self) => {
     
                   newCommand.save();
     
-                  return client.say(channel, `@${sender} -> He creado un nuevo comando "${Config.tvPrefix}${args[1]}" (para configurar su comportamiento usa ${Config.tvPrefix}comandos edit ${c+plus}) :)`);    
+                  return client.say(channel, `@${sender} -> He creado un nuevo comando "${Config.tvPrefix}${args[1]}" (para configurar su comportamiento usa "${Config.tvPrefix}comandos edit ${c+plus}") :)`);    
                 } else {
-                  return client.say(channel, `@${sender} -> El comando "${Config.tvPrefix}${args[1]}" ya existe :(`);
+                  return client.say(channel, `@${sender} -> El comando "${Config.tvPrefix}${args[1]}" (id: ${command.id}) ya existe :(`);
                 }
               })
             })
         })
+      } else if(args[0] === "edit"){
+        Commands.findOne({
+          id: args[1]
+        }, (err, command) => {
+          if(err) throw err;
+
+          if(!command){
+            return client.say(channel, `@${sender} -> No encontré un comando con esa id... :(`);
+          } else {
+            let toEdit = args[2];
+
+            switch(toEdit){
+              default:
+                return client.say(channel, `@${sender} -> Parámetros incorrectos. Usa: mensaje/nivel/cooldown/alias`);
+            }
+
+          }
+        })
+      } else if(args[0] === "del"){
+
       } else {
 
         Commands.find({
