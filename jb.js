@@ -1843,6 +1843,8 @@ client.on('message', (channel, author, message, self) => {
       break;
 
     default:
+      if(!message.startsWith(Config.tvPrefix)) return;
+      
       Commands.findOne({
         title: cmd.slice(Config.tvPrefix.length)
       }, (err, command) => {
