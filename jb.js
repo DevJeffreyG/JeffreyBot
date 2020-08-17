@@ -1834,13 +1834,28 @@ client.on('message', (channel, author, message, self) => {
 
             for(let i = 0; i < cmds.length; i++){
               allCommands = allCommands.concat(`・${Config.tvPrefix}${cmds[i].title}`);
-              console.log(allCommands);
             }
 
             return client.say(channel, `@${sender} -> ${allCommands}`);
           }
         })
       }
+      break;
+
+    default:
+      Commands.findOne({
+        title: cmd.slice(Config.tvPrefix.length)
+      }, (err, command) => {
+        if(err) throw err;
+
+        if(!command){
+          return client.say(channel, `@${sender} -> he buscado por todas partes, pero no encuentro "${Config.tvPrefix}${cmd.slice(Config.tvPrefix.length)}"... :(`);
+        } else {
+          console.log(author);
+
+          return client.say(channel, `${command.message}`);
+        }
+      })
       break;
   }
 });
