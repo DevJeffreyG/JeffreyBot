@@ -1770,8 +1770,8 @@ client.on('message', (channel, author, message, self) => {
                   const newCommand = new Commands({
                     title: args[1],
                     message: "na",
-                    userLevel: "na",
-                    cooldown: "na",
+                    userLevel: "everyone",
+                    cooldown: "5",
                     alias: "na",
                     id: c + plus
                   });
@@ -1855,10 +1855,13 @@ client.on('message', (channel, author, message, self) => {
         } else {
           console.log(author);
 
-          if(command.userLevel != "na"){
+          if(command.userLevel != "everyone"){
             let level = command.userLevel;
             if(author.badges[level] != 1) return console.log(author.badges);
+            
+            return client.say(channel, `${command.message}`);
           }
+
           return client.say(channel, `${command.message}`);
         }
       })
