@@ -1732,7 +1732,7 @@ client.on('message', (channel, author, message, self) => {
 
   if(self) return;
 
-  console.log(message);
+  //console.log(message);
 
   let messageArray = message.split(" ");
   let args = messageArray.slice(1);
@@ -1740,17 +1740,18 @@ client.on('message', (channel, author, message, self) => {
 	switch(message.toLowerCase()){
     case `${Config.tvPrefix}comandos`:
 
-    if(args[0] === "new"){
-      // !comandos new titulo | mensaje | userLevel | cooldown | (alias)
-      let a = [];
+      if(args[0] === "new"){
+        // !comandos new titulo | mensaje | userLevel | cooldown | (alias)
+        let a = [];
 
-      var matches = [];
-      message.replace(/|(.*?)|/g, function(g0,g1){
-        a.push(g1);
-      });
+        var matches = [];
+        message.replace(/|(.*?)|/g, function(g0,g1){
+          a.push(g1);
+        });
 
-      return console.log(a);
-    }
+        return client.say(channel, a);
+      }
+      
       Commands.find({
 
       }, (err, cmds) => {
