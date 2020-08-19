@@ -1652,7 +1652,7 @@ bot.on("messageUpdate", message => {
   if (author.bot) return;
   if (message.channel.type === "dm") return;
 
-  if (message.member.hasPermission("EMBED_LINKS")) {
+  if (message.member.hasPermission("EMBED_LINKS") || channel.id === Config.offtopicChannel) {
     return;
   }
 
