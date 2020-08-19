@@ -1614,7 +1614,7 @@ bot.on("message", message => {
   if (author.bot) return;
   if (!message.member) return;
 
-  if (message.member.hasPermission("EMBED_LINKS")) {
+  if (message.member.hasPermission("EMBED_LINKS") || channel.id != Config.offtopicChannel) {
     return;
   }
 
@@ -1993,7 +1993,7 @@ client.on('message', (channel, author, message, self) => {
             tvcooldown.delete(author.username)
             cooldowns.delete(author.username);
           }, command.cooldown * 1000);
-          
+
           return client.say(channel, `${command.message}`);
         }
       })
