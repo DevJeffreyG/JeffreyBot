@@ -1785,6 +1785,7 @@ client.on('message', (channel, author, message, self) => {
             })
         })
       } else if(args[0] === "edit"){
+        if(author.badges.moderator != 1 && author.badges.broadcaster != 1) return; // si no es mod
         if (!args[1]) return client.say(channel, `@${sender}, parámetros incorrectos. Escribe el nombre del comando a editar.`);
         Commands.findOne({
           title: args[1]
