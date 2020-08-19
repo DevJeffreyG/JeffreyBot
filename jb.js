@@ -1963,6 +1963,7 @@ client.on('message', (channel, author, message, self) => {
             
             if(actualLevel < reqLevel) return;
             
+            console.log(cooldowns);
             if(cooldowns.has(author.username)){
               let timer = coolded.get(author.username)
               let left = prettyms((command.cooldown*1000) - (new Date().getTime() - timer), {secondsDecimalDigits: 0 });
@@ -1972,10 +1973,11 @@ client.on('message', (channel, author, message, self) => {
             let timeMS = new Date().getTime();
             tvcooldown.set(author.username, timeMS);
             cooldowns.add(author.username);
+            console.log(cooldowns);
 
             setTimeout(() => {
               tvcooldown.delete(author.username)
-              jeffrosExpCooldown.delete(author.username);
+              cooldowns.delete(author.username);
             }, command.cooldown * 1000);
 
             return client.say(channel, `${command.message}`);
