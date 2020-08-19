@@ -1614,6 +1614,7 @@ bot.on("message", message => {
   if (author.bot) return;
   if (!message.member) return;
 
+  console.log(channel.id === Config.offtopicChannel);
   if (message.member.hasPermission("EMBED_LINKS") || channel.id === Config.offtopicChannel) {
     return;
   }
