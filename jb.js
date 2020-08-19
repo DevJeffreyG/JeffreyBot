@@ -1846,10 +1846,11 @@ client.on('message', (channel, author, message, self) => {
                     break;
                 }
 
-                command.message = data;
+                command.userLevel = data;
                 command.save();
 
                 return client.say(channel, `@${sender}, actualicé el nivel requerido del comando "${Config.tvPrefix}${command.title}" -> "${data}". :)`);
+
               case "cooldown":
                 if(!args[3] || isNaN(args[3])) return client.say(channel, `@${sender}, parámetros incorrectos. Determina el tiempo de cooldown en segundos.`);
 
@@ -1970,7 +1971,7 @@ client.on('message', (channel, author, message, self) => {
 
             let timeMS = new Date().getTime();
             tvcooldown.set(author.username, timeMS);
-            jeffrosExpCooldown.add(author.username);
+            cooldowns.add(author.username);
 
             setTimeout(() => {
               tvcooldown.delete(author.username)
