@@ -1614,7 +1614,7 @@ bot.on("message", message => {
   if (author.bot) return;
   if (!message.member) return;
 
-  if (message.member.hasPermission("EMBED_LINKS") || channel.id != Config.offtopicChannel) {
+  if (message.member.hasPermission("EMBED_LINKS") || channel.id === Config.offtopicChannel) {
     return;
   }
 
@@ -1980,7 +1980,7 @@ client.on('message', (channel, author, message, self) => {
           }
 
           if(cooldowns.has(author.username)){
-            let timer = coolded.get(author.username)
+            let timer = tvcooldown.get(author.username)
             let left = prettyms((command.cooldown*1000) - (new Date().getTime() - timer), {secondsDecimalDigits: 0 });
             return client.say(channel `@${sender}, usa este comando en ${left}`)
           }
