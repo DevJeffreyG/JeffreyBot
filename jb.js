@@ -1785,6 +1785,7 @@ client.on('message', (channel, author, message, self) => {
             })
         })
       } else if(args[0] === "edit"){
+        if (!args[1]) return client.say(channel, `@${sender}, parámetros incorrectos. Escribe el nombre del comando a editar.`);
         Commands.findOne({
           title: args[1]
         }, (err, command) => {
@@ -1794,7 +1795,9 @@ client.on('message', (channel, author, message, self) => {
             return client.say(channel, `@${sender}, no encontré el comando "${Config.tvPrefix}${args[1]}"... :(`);
           } else {
             let toEdit = args[2] || "na";
-            let data = args.join(" ").slice(args[0].length + args[1].length + args[2].length + 3);
+            
+            let data;
+            if(args[2]) data = args.join(" ").slice(args[0].length + args[1].length + args[2].length + 3);
 
             switch(toEdit.toLowerCase()){
               case "mensaje":
@@ -1851,7 +1854,7 @@ client.on('message', (channel, author, message, self) => {
                 command.save()
 
                 return client.say(channel, `@${sender}, actualicé el cooldown del comando "${Config.tvPrefix}${command.title}" -> "${data}s`);
-                
+
               default:
                 return client.say(channel, `@${sender}, parámetros incorrectos. Usa: mensaje/nivel/cooldown/alias`);
             }
