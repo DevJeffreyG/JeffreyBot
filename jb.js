@@ -1900,8 +1900,6 @@ client.on('message', (channel, author, message, self) => {
         if(!command){
           return client.say(channel, `@${sender} -> he buscado por todas partes, pero no encuentro "${Config.tvPrefix}${cmd.slice(Config.tvPrefix.length)}"... :(`);
         } else {
-          console.log(author);
-
           if(command.userLevel != "everyone"){
             let reqLevel;
             let actualLevel;
@@ -1963,7 +1961,6 @@ client.on('message', (channel, author, message, self) => {
             
             if(actualLevel < reqLevel) return;
             
-            console.log(cooldowns);
             if(cooldowns.has(author.username)){
               let timer = coolded.get(author.username)
               let left = prettyms((command.cooldown*1000) - (new Date().getTime() - timer), {secondsDecimalDigits: 0 });
@@ -1973,7 +1970,6 @@ client.on('message', (channel, author, message, self) => {
             let timeMS = new Date().getTime();
             tvcooldown.set(author.username, timeMS);
             cooldowns.add(author.username);
-            console.log(cooldowns);
 
             setTimeout(() => {
               tvcooldown.delete(author.username)
@@ -1983,6 +1979,21 @@ client.on('message', (channel, author, message, self) => {
             return client.say(channel, `${command.message}`);
           }
 
+          if(cooldowns.has(author.username)){
+            let timer = coolded.get(author.username)
+            let left = prettyms((command.cooldown*1000) - (new Date().getTime() - timer), {secondsDecimalDigits: 0 });
+            return client.say(channel `@${sender}, usa este comando en ${left}`)
+          }
+
+          let timeMS = new Date().getTime();
+          tvcooldown.set(author.username, timeMS);
+          cooldowns.add(author.username);
+
+          setTimeout(() => {
+            tvcooldown.delete(author.username)
+            cooldowns.delete(author.username);
+          }, command.cooldown * 1000);
+          
           return client.say(channel, `${command.message}`);
         }
       })
