@@ -1806,11 +1806,52 @@ client.on('message', (channel, author, message, self) => {
 
                 return client.say(channel, `@${sender}, actualicé el mensaje del comando "${Config.tvPrefix}${command.title}" -> "${data}". :)`);
               case "nivel":
+                if(!args[3]) return client.say(channel, `@${sender}, parámetros incorrectos. Usa: owner/mod/vip/sub/everyone`);
 
+                switch(args[3].toLowerCase()){
+                  case "owner":
+                  case "jeffrey":
+                  case "jeff":
+                  case "j":
+                    data = "owner";
+                    break;
+
+                  case "mod":
+                  case "moderador":
+                  case "moderator":
+                  case "staff":
+                    data = "moderator";
+                    break;
+                    
+                  case "vip":
+                    data = "vip";
+                    break;
+
+                  case "sub":
+                  case "prime":
+                  case "suscriptor":
+                    data = "sub";
+                    break;
+
+                  case "todos":
+                  case "everyone":
+                  case "na":
+                    data = "everyone";
+                    break;
+                }
+
+                command.message = data;
+                command.save();
+
+                return client.say(channel, `@${sender}, actualicé el nivel requerido del comando "${Config.tvPrefix}${command.title}" -> "${data}". :)`);
               case "cooldown":
+                if(!args[3] || isNaN(args[3])) return client.say(channel, `@${sender}, parámetros incorrectos. Determina el tiempo de cooldown en segundos.`);
 
-              case "alias":
+                command.cooldown = data;
+                command.save()
 
+                return client.say(channel, `@${sender}, actualicé el cooldown del comando "${Config.tvPrefix}${command.title}" -> "${data}s`);
+                
               default:
                 return client.say(channel, `@${sender}, parámetros incorrectos. Usa: mensaje/nivel/cooldown/alias`);
             }
