@@ -1712,6 +1712,8 @@ if (process.env.mantenimiento != 1) {
 ////////////////////////// ################# JEFFREY BOT . TV ###################################################################
 
 const tmi = require('tmi.js');
+const cooldowns = new Set();
+const tvcooldown = new Map();
 
 const client = new tmi.Client({
 	options: { debug: true },
@@ -1854,7 +1856,7 @@ client.on('message', (channel, author, message, self) => {
                 command.cooldown = data;
                 command.save()
 
-                return client.say(channel, `@${sender}, actualicé el cooldown del comando "${Config.tvPrefix}${command.title}" -> "${data}s`);
+                return client.say(channel, `@${sender}, actualicé el cooldown del comando "${Config.tvPrefix}${command.title}" -> "${data}s"`);
 
               default:
                 return client.say(channel, `@${sender}, parámetros incorrectos. Usa: mensaje/nivel/cooldown/alias`);
@@ -1960,6 +1962,21 @@ client.on('message', (channel, author, message, self) => {
             
             if(actualLevel < reqLevel) return;
             
+            if(cooldowns.has(author.username)){
+              let timer = coolded.get(author.id)
+              let left = prettyms((command.cooldown*1000) - (new Date().getTime() - timer), {secondsDecimalDigits: 0 });
+              return client.say(channel `@${sender}, usa este comando en ${left}`)
+            }
+
+            let timeMS = new Date().getTime();
+            tvcooldown.set(author.username, timeMS);
+            jeffrosExpCooldown.add(author.username);
+
+            setTimeout(() => {
+              tvcooldown.delete(author.username)
+              jeffrosExpCooldown.delete(author.username);
+            }, command.cooldown * 1000);
+              
             return client.say(channel, `${command.message}`);
           }
 
