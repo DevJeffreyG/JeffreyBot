@@ -820,7 +820,7 @@ module.exports.run = async (bot, message, args) => {
                                                 .setColor(Colores.negro);
 
                                                 for(let i = 0; i < stats.items.length; i++){
-                                                    itemsEmbed.addField(`— ${stats.items[i].name}`, `**— ID**: ${stats.items[i].id}.`)
+                                                    itemsEmbed.addField(`— ${stats.items[i].name}`, `**— ID**: \`${stats.items[i].id}\`.`)
                                                 }
 
                                                 message.channel.send(itemsEmbed);
