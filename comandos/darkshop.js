@@ -923,7 +923,7 @@ module.exports.run = async (bot, message, args) => {
                                                 yes.on("collect", r => {
                                                     // agregar a la lista de items
 
-                                                    if(!stats.items){
+                                                    if(!stats.items[0].id){
                                                         stats.items = [
                                                             {
                                                                 "id": item.id,
