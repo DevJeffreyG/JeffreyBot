@@ -810,7 +810,7 @@ module.exports.run = async (bot, message, args) => {
                                         if(!stats){
                                             return message.channel.send(noStats)
                                         } else { // tiene cuenta
-                                            console.log(stats.items)
+                                            console.log(stats.items[1]);
                                         }
                                     })
                                 }
@@ -931,10 +931,8 @@ module.exports.run = async (bot, message, args) => {
                                                             }
                                                         ];
 
-                                                        stats.save();
                                                     } else {
                                                         stats.items.push({"id": item.id, "name": item.itemName})
-                                                        stats.save()
                                                     }
 
                                                     stats.djeffros -= precio;
