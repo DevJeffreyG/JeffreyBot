@@ -857,25 +857,16 @@ module.exports.run = async (bot, message, args) => {
                                                             break;
 
                                                         case "item":
-                                                            console.log("se viene");
+                                                            console.log(stats.items.indexOf(item));
                                                             let action = use.action;
                                                             if(item.active === 0 && action === "add"){ // entonces activarlo.
                                                                 // buscarlo
 
-                                                                item.active = 1;
+                                                                stats.items[stats.items.indexOf(item)].active = 1;
 
                                                                 stats.save()
                                                                 .then(a => console.log(a));
                                                                 return console.log(stats.items);
-                                                                for(let i = 0; i < items.length; i++){
-                                                                    if(items[i].id != use.id){
-
-                                                                    } else { // cuando se encuentre el item en la cuenta del usuario
-                                                                        
-
-
-                                                                    }
-                                                                }
                                                             } else {
                                                                 return message.reply("este item ya está activo en tu cuenta.")
                                                             }
