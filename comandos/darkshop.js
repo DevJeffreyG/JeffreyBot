@@ -862,7 +862,7 @@ module.exports.run = async (bot, message, args) => {
                                                                 // buscarlo
 
                                                                 stats.items[stats.items.indexOf(item)].active = 1;
-
+                                                                stats.markModified("items");
                                                                 return stats.save()
                                                                 .then(a => console.log(a))
                                                                 .catch(err => console.log(err));
@@ -881,7 +881,7 @@ module.exports.run = async (bot, message, args) => {
                             
                             break;
                         default:
-                            itemID = args[1];
+                            itemID = args[0];
 
                             DarkUse.findOne({
                                 itemID: itemID
