@@ -815,17 +815,17 @@ module.exports.run = async (bot, message, args) => {
                                             if(!args[1]){
                                                 let itemsEmbed = new Discord.MessageEmbed()
                                                 .setAuthor(`| Items del usuario N°${author.id}`, author.displayAvatarURL())
-                                                .setDescription(`**— Items**:`)
                                                 .setThumbnail(Config.darkLogoPng)
+                                                .setFooter(`${prefix}ds items {ID} para usar un item.`)
                                                 .setColor(Colores.negro);
 
                                                 for(let i = 0; i < stats.items.length; i++){
-                                                    itemsEmbed.addField(`— ${stats.items[i].id}`, `**—** ${stats.items[i].name}`)
+                                                    itemsEmbed.addField(`— ${stats.items[i].name}`, `**— ID**: ${stats.items[i].id}.`)
                                                 }
 
                                                 message.channel.send(itemsEmbed);
                                             } else {
-                                                
+
                                             }
                                         }
                                     })
