@@ -787,6 +787,13 @@ module.exports.run = async (bot, message, args) => {
                             )
                             .setColor(Colores.negro);
 
+                            let noItem = new Discord.MessageEmbed()
+                            .setAuthor(`| Error`, Config.darkLogoPng)
+                            .setDescription(
+                            `**—** No encontré ese item en esta cuenta...`
+                            )
+                            .setColor(Colores.negro);
+
                             let noStats = new Discord.MessageEmbed()
                             .setAuthor(`| Error`, Config.darkLogoPng)
                             .setDescription(
@@ -825,7 +832,58 @@ module.exports.run = async (bot, message, args) => {
 
                                                 message.channel.send(itemsEmbed);
                                             } else {
+                                                // USAR UN ITEM
 
+                                                let items = stats.items;
+                                                let idUse = args[1];
+
+                                                DarkUse.findOne({
+                                                    itemID: idUse
+                                                }, (err, use) => {
+                                                    if(err) throw err;
+
+                                                    // verificar que tenga ese item
+                                                    if(!items.find(x => x.id === idUse)) return message.channel.send(noItem);
+
+                                                    if(!use) return message.channel.send(`[02] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas usar tu item... :)`)
+
+                                                    let item = items.find(x => x.id === idUse);
+                                                    switch(use.thing){
+                                                        case "jeffros":
+                                                            break;
+
+                                                        case "warns":
+                                                            break;
+
+                                                        case "role":
+                                                            break;
+
+                                                        case "items":
+                                                            let action = use.action;
+                                                            if(item.active === 0){ // entonces activarlo.
+                                                                // buscarlo
+
+                                                                item.active = 1;
+
+                                                                item.save()
+                                                                .then(a => console.log(a));
+                                                                return console.log(stats.items);
+                                                                for(let i = 0; i < items.length; i++){
+                                                                    if(items[i].id != use.id){
+
+                                                                    } else { // cuando se encuentre el item en la cuenta del usuario
+                                                                        
+
+
+                                                                    }
+                                                                }
+                                                            } else {
+                                                                return message.reply("este item ya está activo en tu cuenta.")
+                                                            }
+                                                            break;
+                                                    }
+                                                })
+                                                
                                             }
                                         }
                                     })
@@ -943,12 +1001,13 @@ module.exports.run = async (bot, message, args) => {
                                                         stats.items = [
                                                             {
                                                                 "id": item.id,
-                                                                "name": item.itemName
+                                                                "name": item.itemName,
+                                                                "active": 0
                                                             }
                                                         ];
 
                                                     } else {
-                                                        stats.items.push({"id": item.id, "name": item.itemName})
+                                                        stats.items.push({"id": item.id, "name": item.itemName, "active": 0})
                                                     }
 
                                                     stats.djeffros -= precio;
