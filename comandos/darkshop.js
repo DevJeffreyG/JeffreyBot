@@ -783,7 +783,7 @@ module.exports.run = async (bot, message, args) => {
                             let noItems = new Discord.MessageEmbed()
                             .setAuthor(`| Error`, Config.darkLogoPng)
                             .setDescription(
-                            `**—** Aún no está listo...`
+                            `**—** No encontré ningún item asociado a esta cuenta...`
                             )
                             .setColor(Colores.negro);
 
@@ -810,7 +810,23 @@ module.exports.run = async (bot, message, args) => {
                                         if(!stats){
                                             return message.channel.send(noStats)
                                         } else { // tiene cuenta
-                                            console.log(stats.items[1]);
+                                            if(!stats.items[0].id) return message.channel.send(noItems);
+
+                                            if(!args[1]){
+                                                let itemsEmbed = new Discord.MessageEmbed()
+                                                .setAuthor(`| Items del usuario N°${author.id}`, author.displayAvatarURL())
+                                                .setDescription(`**— Items**:`)
+                                                .setThumbnail(Config.darkLogoPng)
+                                                .setColor(Colores.negro);
+
+                                                for(let i = 0; i < stats.items.length; i++){
+                                                    itemsEmbed.addField(`— ${stats.items[i].id}`, `**—** ${stats.items[i].name}`)
+                                                }
+
+                                                message.channel.send(itemsEmbed);
+                                            } else {
+                                                
+                                            }
                                         }
                                     })
                                 }
