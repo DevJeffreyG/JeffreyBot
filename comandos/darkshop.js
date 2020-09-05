@@ -845,7 +845,7 @@ module.exports.run = async (bot, message, args) => {
 
                                                     if(!use) return message.channel.send(`[02] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas usar tu item... :)`)
 
-                                                    let item = stats.items.find(x => x.id.$numberInt === idUse);
+                                                    let item = stats.items.find(x => x.id === Number(idUse));
                                                     switch(use.thing){
                                                         case "jeffros":
                                                             break;
@@ -857,6 +857,7 @@ module.exports.run = async (bot, message, args) => {
                                                             break;
 
                                                         case "items":
+                                                            console.log("se viene");
                                                             let action = use.action;
                                                             if(item.active === 0 && action === "add"){ // entonces activarlo.
                                                                 // buscarlo
