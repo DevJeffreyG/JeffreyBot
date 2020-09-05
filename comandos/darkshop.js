@@ -891,7 +891,7 @@ module.exports.run = async (bot, message, args) => {
                             
                             break;
                         default:
-                            itemID = args[0];
+                            itemID = args[1];
 
                             DarkUse.findOne({
                                 itemID: itemID
