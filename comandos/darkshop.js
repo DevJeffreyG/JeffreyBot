@@ -863,7 +863,7 @@ module.exports.run = async (bot, message, args) => {
 
                                                                 stats.items[stats.items.indexOf(item)].active = 1;
 
-                                                                stats.save()
+                                                                return stats.save()
                                                                 .then(a => console.log(a))
                                                                 .catch(err => console.log(err));
                                                             } else {
