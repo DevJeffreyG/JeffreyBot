@@ -864,7 +864,7 @@ module.exports.run = async (bot, message, args) => {
 
                                                                 item.active = 1;
 
-                                                                item.save()
+                                                                stats.save()
                                                                 .then(a => console.log(a));
                                                                 return console.log(stats.items);
                                                                 for(let i = 0; i < items.length; i++){
