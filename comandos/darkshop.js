@@ -841,13 +841,13 @@ module.exports.run = async (bot, message, args) => {
                                                     if(err) throw err;
 
                                                     // verificar que tenga ese item
-                                                    console.log(idUse.toString());
-                                                    console.log(stats.items.find(x => x.id.$numberInt === idUse.toString()));
-                                                    if(!stats.items.find(x => x.id.$numberInt === idUse.toString())) return message.channel.send(noItem);
+                                                    console.log(idUse);
+                                                    console.log(stats.items.find(x => x.id.$numberInt === idUse));
+                                                    if(!stats.items.find(x => x.id.$numberInt === idUse)) return message.channel.send(noItem);
 
                                                     if(!use) return message.channel.send(`[02] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas usar tu item... :)`)
 
-                                                    let item = stats.items.find(x => x.id.$numberInt === idUse.toString());
+                                                    let item = stats.items.find(x => x.id.$numberInt === idUse);
                                                     switch(use.thing){
                                                         case "jeffros":
                                                             break;
