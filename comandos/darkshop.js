@@ -846,6 +846,7 @@ module.exports.run = async (bot, message, args) => {
                                                     if(!use) return message.channel.send(`[02] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas usar tu item... :)`)
 
                                                     let item = stats.items.find(x => x.id === Number(idUse));
+                                                    
                                                     switch(use.thing){
                                                         case "jeffros":
                                                             break;
@@ -858,18 +859,24 @@ module.exports.run = async (bot, message, args) => {
 
                                                         case "item":
                                                             let action = use.action;
+                                                            let index = stats.items.indexOf(item);
                                                             if(item.active === 0 && action === "add"){ // entonces activarlo.
                                                                 // buscarlo
 
-                                                                stats.items[stats.items.indexOf(item)].active = 1;
+                                                                stats.items[index].active = 1;
                                                                 stats.markModified("items");
-                                                                return stats.save()
+                                                                stats.save()
                                                                 .then(a => console.log(a))
                                                                 .catch(err => console.log(err));
+
+                                                                let activated = new Discord.MessageEmbed()
+                                                                .setAuthor(`| Listo`, Config.darkLogoPng)
+                                                                .setDescription(`**—** Se ha activado el item **${stats.items[index].name}**.`)
+                                                                .setColor(Colores.negro);
+                                                                return message.channel.send(activated)
                                                             } else {
                                                                 return message.reply("este item ya está activo en tu cuenta.")
                                                             }
-                                                            break;
                                                     }
                                                 })
                                                 
