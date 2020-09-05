@@ -841,7 +841,7 @@ module.exports.run = async (bot, message, args) => {
                                                     if(err) throw err;
 
                                                     // verificar que tenga ese item
-                                                    console.log(idUse);
+                                                    console.log(stats.items.id.$numberInt);
                                                     console.log(stats.items.find(x => x.id.$numberInt === idUse));
                                                     if(!stats.items.find(x => x.id.$numberInt === idUse)) return message.channel.send(noItem);
 
