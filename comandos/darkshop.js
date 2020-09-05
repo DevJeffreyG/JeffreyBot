@@ -856,7 +856,7 @@ module.exports.run = async (bot, message, args) => {
                                                         case "role":
                                                             break;
 
-                                                        case "items":
+                                                        case "item":
                                                             console.log("se viene");
                                                             let action = use.action;
                                                             if(item.active === 0 && action === "add"){ // entonces activarlo.
