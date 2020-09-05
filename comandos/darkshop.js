@@ -843,11 +843,11 @@ module.exports.run = async (bot, message, args) => {
                                                     if(err) throw err;
 
                                                     // verificar que tenga ese item
-                                                    if(!stats.items.find(x => x.id === idUse)) return message.channel.send(noItem);
+                                                    if(!items.find(x => x.id.$numberInt === idUse.toString())) return message.channel.send(noItem);
 
                                                     if(!use) return message.channel.send(`[02] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas usar tu item... :)`)
 
-                                                    let item = items.find(x => x.id === idUse);
+                                                    let item = items.find(x => x.id.$numberInt === idUse.toString());
                                                     switch(use.thing){
                                                         case "jeffros":
                                                             break;
