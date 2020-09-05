@@ -843,8 +843,8 @@ module.exports.run = async (bot, message, args) => {
                                                     // verificar que tenga ese item
                                                     console.log(stats.items[0].id.$numberInt);
                                                     console.log(stats.items[0].id);
-                                                    console.log(stats.items.find(x => x.id.$numberInt === idUse));
-                                                    if(!stats.items.find(x => x.id.$numberInt === idUse)) return message.channel.send(noItem);
+                                                    console.log(stats.items.find(x => x.id === idUse));
+                                                    if(!stats.items.find(x => x.id === idUse)) return message.channel.send(noItem);
 
                                                     if(!use) return message.channel.send(`[02] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas usar tu item... :)`)
 
