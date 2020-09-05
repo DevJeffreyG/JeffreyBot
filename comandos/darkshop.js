@@ -24,6 +24,7 @@ const Stats = require("../modelos/darkstats.js");
 const Items = require("../modelos/darkitems.js");
 const Dark = require("../modelos/globalDark.js");
 const DarkUse = require("../modelos/darkUse.js");
+const darkstats = require("../modelos/darkstats.js");
 
 /* ##### MONGOOSE ######## */
 
@@ -777,6 +778,45 @@ module.exports.run = async (bot, message, args) => {
                             if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
                             break;
 
+                        case "items":
+                            // embeds
+                            let noItems = new Discord.MessageEmbed()
+                            .setAuthor(`| Error`, Config.darkLogoPng)
+                            .setDescription(
+                            `**—** Aún no está listo...`
+                            )
+                            .setColor(Colores.negro);
+
+                            let noStats = new Discord.MessageEmbed()
+                            .setAuthor(`| Error`, Config.darkLogoPng)
+                            .setDescription(
+                            `**—** No he podido encontrar una cuenta con tu ID. Intenta cambiando unos cuántos Jeffros por DarkJeffros.`
+                            )
+                            .setColor(Colores.negro);
+
+                            DarkUse.find({
+
+                            }, (err, uses) => {
+                                if(err) throw err;
+
+                                if(!uses){
+                                    return message.channel.send(`[01] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas ver tus items... :)`);
+                                } else {
+                                    Stats.findOne({
+                                        userID: author.id
+                                    }, (err, stats) => {
+                                        if(err) throw err;
+
+                                        if(!stats){
+                                            return message.channel.send(noStats)
+                                        } else { // tiene cuenta
+                                            console.log(stats.items)
+                                        }
+                                    })
+                                }
+                            })
+                            
+                            break;
                         default:
                             itemID = args[0];
 

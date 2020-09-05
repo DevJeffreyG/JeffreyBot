@@ -102,7 +102,10 @@ const Commands = require("./modelos/tvCommands.js");
 const Exp = require("./modelos/exp.js");
 const Cuenta = require("./modelos/cuenta.js");
 const AutoRole = require("./modelos/autorole.js");
+
 const Dark = require("./modelos/globalDark.js");
+const Stats = require("./modelos/darkstats.js");
+
 
 /* ##### MONGOOSE ######## */
 
@@ -655,6 +658,9 @@ bot.on("ready", async () => {
       let diference1 = newDate.getTime() - oldDate.getTime();
       let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
 
+      // interés
+      let interest = dark.inflation / 2; // CON LA INFLACIÓN VIEJA.
+
       if(pastDays >= dark.duration){
         console.log(inflation, date, duration);
 
@@ -664,6 +670,30 @@ bot.on("ready", async () => {
         dark.inflation = inflation;
 
         dark.save();
+
+        // quitar darkjeffros según la tasa
+        Stats.find({
+
+        }, (err, stats) => {
+          if(err) throw err;
+
+          if(!stats) return;
+          
+          let c = stats.length;
+
+          for(let i = 0; i < c; i++){
+            // verificar si tiene más de 0 DarkJ.
+            if(stats[i].djeffros > 0){
+              stats[i].djeffros = stats[i].djeffros * interest;
+              stats.save()
+              .then(a => console.log(a));
+            } else {
+              return;
+            }
+          }
+        })
+        
+
       }
     }
   })
