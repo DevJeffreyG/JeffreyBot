@@ -89,6 +89,14 @@ font-family: exo, sans-serif;
 font-weight: bold;
 }
 
+p.coming-soon {
+    margin-top: 0;
+    font-size: 500%;
+    font-family: exo, sans-serif;
+    font-weight: bold;
+    color: white;
+}
+
 .contenedor{
     position: relative;
     text-align: center;
