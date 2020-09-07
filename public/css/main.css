@@ -212,3 +212,7 @@ nav .nav-right-brand-text {
 	transform: translatey(0px);
 	animation: float 6s ease-in-out infinite;
 }
+
+.no-link {
+    text-decoration: none;
+}
