@@ -6,7 +6,7 @@ function doHeader(){
     </div>
     <div class="nav-left-brand-text">Jeffrey Bot</a></div>
     <a href ="https://www.youtube.com/JeffreyG" target="_blank"><div class="nav-bar-right">
-        <img src="https://cdn.glitch.com/2c61ee42-4a04-4a21-b074-65934d0afc88%2FLogoJeffreyG--1-04-2019.jpg?1554335398036" alt="Jeffrey Logo" class="j-logo">
+        <img src="https://pbs.twimg.com/media/EXH_bsHXkAUNUp_?format=jpg&name=4096x4096" alt="Jeffrey Logo" class="j-logo">
     </div></a>
     <div class="nav-right-brand-text">
         By <a href ="https://www.youtube.com/JeffreyG" style="color:WHITE;" target="_blank">JeffreyG</a>
