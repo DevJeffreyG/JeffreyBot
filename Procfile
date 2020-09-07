@@ -1,1 +1,2 @@
-web: node jb.js
+web: node server.js
+worker: node jb.js

@@ -1,11 +1,15 @@
+const http = require("http");
 const express = require("express");
 const app = express();
 
-app.get("/", (request, response) => {
-  response.sendStatus(200);
-});
+var port = process.env.PORT || 8080
 
-// listen for requests :)
-const listener = app.listen(process.env.PORT, function() {
-  console.log('Your app is listening on port ' + listener.address().port);
-});
+app.use(express.static(__dirname + "/public"));
+
+app.get("/", function(req, res) {
+  res.render("index");
+})
+
+app.listen(port, function(){
+  console.log("me prendi"); 
+})
