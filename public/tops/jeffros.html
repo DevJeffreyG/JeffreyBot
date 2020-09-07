@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Jeffrey Bot</title>
+    <link id="favicon" rel="icon" href="https://cdn.glitch.com/2c61ee42-4a04-4a21-b074-65934d0afc88%2FJBLogo.ico?1553650131111" type="image/x-icon">
+<link rel="stylesheet" href="../css/main.css">
+</head>  
+<body>
+<script type="text/javascript" src="../header.js"></script>
+<script>doHeader()</script>
+        <div>
+
+            <a href="#"><button class="grow">Top de usuarios por Jeffros</button></a>
+            <br><br><br>
+          
+            <table>
+              <thead>
+                <tr>
+                  <th>Place</th>
+                  <th>User</th>
+                  <th>Jeffros</th>
+                </tr>
+              </thead>
+              <tbody id="tabla">
+              </tbody>
+            </table>
+          
+            <script type="text/javascript">
+          
+              const Discord = require("discord.js");
+              const bot = new Discord.Client();
+              const mongoose = require("mongoose");
+              mongoose.connect(`${process.env.MONGOCONNECT}`, {
+                useNewUrlParser: true
+              });
+
+
+              const Jeffros = require("../modelos/jeffros.js");
+              
+              Jeffros.find({}, (err, docs) => {
+                console.log(docs);
+                docs.forEach((doc) => {
+                  var usuario = bot.users.get(doc.userID);
+                  var tabla = document.getElementById("tabla");
+                  
+                  tabla.innerHTML = `<tr><<td>${usuario.tag}</td></</tr>`
+                })
+              })
+
+              /*
+              Jeffros.find({
+                serverID: 447797737216278528
+              }).sort([['jeffros', 'descending']
+              ]).exec((err, res) => {
+                  if(err) throw err;
+
+                  document.write("<table><tr><th>Usuario</th><th>Jeffros</th></tr>");
+                  // output data of each row
+                  for(var i = 0; i < res.lenght; i++) {
+                    let guildo = bot.guilds.get("447797737216278528");
+                    let member = guildo.members.get(res[i].userID) || "User left";
+                    if(member === "User left"){
+                      document.write("<tr><td>"+member+"</td><td>"+res[i].jeffros+"</td></tr>");
+                    } else {
+                      document.write("<tr><td>"+member.user.username+"</td><td>"+res[i].jeffros+"</td></tr>");
+                    }
+                  }
+                  document.write("</table>");
+                });*/
+              
+              bot.login(process.env.TOKEN);
+            </script>
+        </div>
+
+        <div class="contenedor">
+        <svg class="selfServeStepsWave-_t0iR4 wave-38gW17" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 1440 267"><path d="M1440,71.5c-18.11-3.24-46.81,5.09-81.79,16.37-32.68,10.54-73.32,23.63-122.86,32.24-50.66,8.8-73.87-9.64-104.17-33.74-31.93-25.39-71.75-57-159.92-69.7C854.11-.14,759.57,31.7,682.83,57.54,647,69.6,615.1,80.35,586.56,84.24c-47.22,6.45-81.17-4.35-115.95-15.42-31.29-10-63.26-20.13-106.19-18.14-40,1.86-72.54,28.27-102.9,52.89-38.47,31.19-73.39,59.5-115.3,31.33C71.23,84.5,0,113.86,0,113.86V267H1440Z" fill="#18191c"></path></svg>
+            <div class="centrado2">(c) JeffreyG - 2018 - presente</div>
+        </div>
+</body>
+</html>
