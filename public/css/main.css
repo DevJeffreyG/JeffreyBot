@@ -114,6 +114,10 @@ font-weight: bold;
     color: #99AAB5;
 }
 
+.centrado2 a {
+    color:#99AAB5;
+}
+
 a {
     text-decoration: none;
 }
@@ -211,8 +215,4 @@ nav .nav-right-brand-text {
 	box-shadow: 0 5px 15px 0px rgba(0,0,0,0.6);
 	transform: translatey(0px);
 	animation: float 6s ease-in-out infinite;
-}
-
-.no-link {
-    text-decoration: none;
 }
