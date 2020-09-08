@@ -9,7 +9,13 @@ app.get("/", (request, response) => {
 app.listen(process.env.PORT);
 setInterval(() => {
   http.get(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
-}, 280000);*/
+}, 280000);
+
+let http = require(“http”); 
+setInterval(() =>{
+http.get(“http://<your app name>.herokuapp.com”);
+}, 60000); // every minute
+*/
 
 const Config = require("./base.json");
 const Rainbow = require("./rainbow.json");

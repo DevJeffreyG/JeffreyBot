@@ -65,7 +65,7 @@ module.exports.run = async (bot, message, args) => {
       `)
     .setColor(Colores.rojo);
 
-    guild.ban(bUser, {reason: `${bRazon}`}).then(x => message.react("✅")); // Baneado
+    message.guild.members.ban(bUser, {reason: bRazon}).then(x => message.react("✅")); // Baneado
     logC.send(bEmbed);
 
 }
