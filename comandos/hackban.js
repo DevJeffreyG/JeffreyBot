@@ -40,7 +40,7 @@ module.exports.run = async (bot, message, args) => {
   let embed = new Discord.MessageEmbed()
   .setTitle(`Ayuda: ${prefix}hackban`)
   .setColor(Colores.nocolor)
-  .setDescription(`▸ El uso correcto es: ${prefix}hackban <ID> (razón) \n▸ Baneas a alguien que no está en el servidor.`)
+  .setDescription(`▸ El uso correcto es: ${prefix}hackban <ID> <razón> \n▸ Baneas a alguien que no está en el servidor.`)
   .setFooter(`<> Obligatorio () Opcional`);
 
     if(!args[0]) return message.channel.send(embed);
