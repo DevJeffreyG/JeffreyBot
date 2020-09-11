@@ -1651,7 +1651,7 @@ bot.on("message", message => {
   if (author.bot) return;
   if (!message.member) return;
 
-  if (message.member.hasPermission("EMBED_LINKS") || channel.id === Config.offtopicChannel) {
+  if (message.member.hasPermission("EMBED_LINKS") || channel.id === Config.offtopicChannel || channel.id === Config.gdpsSupportChannel) {
     return;
   }
 
@@ -1688,7 +1688,7 @@ bot.on("messageUpdate", message => {
   if (author.bot) return;
   if (message.channel.type === "dm") return;
 
-  if (message.member.hasPermission("EMBED_LINKS") || channel.id === Config.offtopicChannel) {
+  if (message.member.hasPermission("EMBED_LINKS") || channel.id === Config.offtopicChannel || channel.id === Config.gdpsSupportChannel) {
     return;
   }
 
