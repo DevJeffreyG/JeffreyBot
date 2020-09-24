@@ -64,7 +64,7 @@ module.exports.run = async (bot, message, args) => {
   let note = args.join(" ").slice(args[0].length + args[1].length + 2) || "na";
 
   SoftWarn.findOne({
-      userID: member
+      userID: member.id
   }, (err, swarn) =>  {
         if(err) throw err;
 
