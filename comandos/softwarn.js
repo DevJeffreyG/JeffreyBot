@@ -71,20 +71,13 @@ module.exports.run = async (bot, message, args) => {
         if(!swarn){
             const newSoft = new SoftWarn({
                 userID: member.id,
-                warns: {}
-            });
-
-            newSoft.save();
-        }
-
-        if(!swarn.warns[0].id){
-            swarn.warns = [
-                {
+                warns: {
                     "rule": rule,
                     "note": note
                 }
-            ];
+            });
 
+            return newSoft.save();
         } else {
             swarn.warns.push({"rule": rule, "note": note})
         }
