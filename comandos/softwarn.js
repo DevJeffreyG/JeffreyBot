@@ -70,6 +70,7 @@ module.exports.run = async (bot, message, args) => {
   //agregar cada regla de la variable de reglas
   for(let i = 1; i === reglas.length; i++){
       rulesEmbed.addField(reglas[i], `N° **${i}**`);
+      console.log(rulesEmbed);
   }
 
   let alreadyWarned = new Discord.MessageEmbed()
@@ -78,6 +79,7 @@ module.exports.run = async (bot, message, args) => {
   .setDescription(`**—** **${member.user.tag}** ya ha sido softwarneado por infringir la regla N°${args[1]}: \`${rule}\`.
 **—** Proceder con \`${prefix}warn\`.`);
 
+console.log("$$$$$$$$$$$$$$$$$$$$$$$$2 "+rulesEmbed);
 
   if(rule === "na") return message.channel.send(rulesEmbed);
 
