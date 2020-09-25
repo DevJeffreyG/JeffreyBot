@@ -59,7 +59,7 @@ module.exports.run = async (bot, message, args) => {
       "7": "Uso correcto de nicknames"
   }
 
-  let rule = reglas[args[1]] || "na";
+  let rule = reglas[args[1]];
   let note = args.join(" ").slice(args[0].length + args[1].length + 2) || "na";
 
   //errores
@@ -75,7 +75,7 @@ module.exports.run = async (bot, message, args) => {
   .setDescription(`**—** **${member.user.tag}** ya ha sido softwarneado por infringir la regla N°${args[1]}: \`${rule}\`.
 **—** Proceder con \`${prefix}warn\`.`);
 
-  if(rule === "na"){
+  if(!rule){
         //agregar cada regla de la variable de reglas
         for(let a = 0; a < reglas.length; a++){
             rulesEmbed.addField(reglas[a+1], `N°**${a+1}**`);
