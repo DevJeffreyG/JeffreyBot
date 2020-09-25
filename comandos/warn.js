@@ -49,6 +49,11 @@ module.exports.run = async (bot, message, args) => {
   .setDescription(`▸ El uso correcto es: ${prefix}warn <@usuario> <N° Regla> (nota adicional) \n▸ Warneas a alguien.`)
   .setFooter(`<> Obligatorio () Opcional`);
     
+  //agregar cada regla de la variable de reglas
+  for(let i = 1; i <= size; i++){
+    embed.addField(reglas[i], `N° **${i}**`);
+  }
+
   if(!args[0]) return message.channel.send(embed);
   if(!args[1]) return message.channel.send(embed);
 
@@ -62,17 +67,8 @@ module.exports.run = async (bot, message, args) => {
       if(wUser.roles.cache.find(x => x.id === staffRole.id)){
         return message.reply("¿tas bobo o qué?");
       }
-      
-      let rulesEmbed = new Discord.MessageEmbed()
-      .setColor(Colores.nocolor)
-      .setDescription(`▸ Usa el comando como \`${prefix}warn ${wUser.id} <N° Regla>\`.`)
-      .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}warn`);
-      //agregar cada regla de la variable de reglas
-      for(let i = 1; i <= size; i++){
-          rulesEmbed.addField(reglas[i], `N° **${i}**`);
-      }
 
-      if(rule === "na") return message.channel.send(rulesEmbed);
+      if(rule === "na") return message.channel.send(embed);
 
       Warn.findOne({
         userID: wUser.id
@@ -211,7 +207,7 @@ module.exports.run = async (bot, message, args) => {
 
                     swarns.warns.splice(i, 1);
                     swarns.save();
-                    
+
                   }
                 }
               })
