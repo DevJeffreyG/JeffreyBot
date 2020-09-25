@@ -53,6 +53,7 @@ module.exports.run = async (bot, message, args) => {
 
       let rule = reglas[args[1]] || "na";
       if(!rule) return message.channel.send(rulesEmbed);
+      if(rule === "na") return message.channel.send(rulesEmbed);
 
       let wUser = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[0]));
       if(!args[0]) return message.channel.send(embed);
