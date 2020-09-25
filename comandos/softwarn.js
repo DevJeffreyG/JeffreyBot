@@ -98,24 +98,6 @@ module.exports.run = async (bot, message, args) => {
   }, (err, swarn) =>  {
         if(err) throw err;
 
-        if(!swarn){
-            const newSoft = new SoftWarn({
-                userID: member.id,
-                warns: {
-                    "rule": rule,
-                    "note": note
-                }
-            });
-        } else {
-            for(let i = 0; i < swarn.warns.length; i++){
-                if(swarn.warns[i].rule === rule){
-                    return message.channel.send(alreadyWarned);
-                }
-            }
-
-            swarn.warns.push({"rule": rule, "note": note});
-        }
-
         // confirmación madre mia
         let confirmation = new Discord.MessageEmbed()
         .setAuthor(`| Softwarn?`, guild.iconURL())
@@ -141,13 +123,26 @@ module.exports.run = async (bot, message, args) => {
 
             yes.on("collect", r => {
               
-                //
-                if(newSoft){
+                if(!swarn){
+                    const newSoft = new SoftWarn({
+                        userID: member.id,
+                        warns: {
+                            "rule": rule,
+                            "note": note
+                        }
+                    });
+
                     newSoft.save();
-                } else{
+                } else {
+                    for(let i = 0; i < swarn.warns.length; i++){
+                        if(swarn.warns[i].rule === rule){
+                            return message.channel.send(alreadyWarned);
+                        }
+                    }
+        
+                    swarn.warns.push({"rule": rule, "note": note});
                     swarn.save();
                 }
-                //
 
                 let warnedEmbed = new Discord.MessageEmbed()
                 .setAuthor(`| SOFTWarn`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
