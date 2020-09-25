@@ -112,16 +112,6 @@ module.exports.run = async (bot, message, args) => {
                 newWarn.save()
                 .catch(e => console.log(e));
                   message.react("✅");
-
-                let wEmbed = new Discord.MessageEmbed()
-                .setAuthor(`| Warn`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
-                .setDescription(`**—** Warneado: **${wUser}**.
-      **—** Canal: **${message.channel}**.
-      **—** Warns actuales: **1**.
-      **—** Por infringir la regla: **${rule}**.`)
-                .setColor(Colores.rojo);
-
-                logC.send(wEmbed);
                 
                 let warnedEmbed = new Discord.MessageEmbed()
                 .setAuthor(`| Warn`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
@@ -141,16 +131,6 @@ module.exports.run = async (bot, message, args) => {
                 warns.warns = warns.warns + 1;
                 warns.save()
                 .catch(e => console.log(e));
-
-                let wEmbed = new Discord.MessageEmbed()
-                .setAuthor(`| Warn`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
-                .setDescription(`**—** Warneado: **${wUser}**.
-      **—** Canal: **${message.channel}**.
-      **—** Warns actuales: **${warns.warns}**.
-      **—** Por infringir la regla: **${rule}**.`)
-                .setColor(Colores.rojo);
-
-                logC.send(wEmbed);
                 
                 /*if(warns.warns === 2){
                   let infoEmbed = new Discord.MessageEmbed()
@@ -218,6 +198,18 @@ module.exports.run = async (bot, message, args) => {
                   message.channel.send("¡Usuario con MDs desactivados! **¡No sabe cuántos WARNS tiene!**");
                 });          
               }
+
+              let wEmbed = new Discord.MessageEmbed()
+              .setAuthor(`| Warn`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
+              .setDescription(`**—** Warneado: **${wUser}**.
+    **—** Canal: **${message.channel}**.
+    **—** Warns actuales: **${warns.warns || 1}**.
+    **—** Por infringir la regla: **${rule}**.`)
+              .setColor(Colores.rojo);
+
+              return msg.edit(wEmbed).then(() => {
+                msg.reactions.removeAll();
+              });
              });
 
              no.on("collect", r => {
