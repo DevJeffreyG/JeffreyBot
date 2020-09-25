@@ -106,8 +106,6 @@ module.exports.run = async (bot, message, args) => {
                     "note": note
                 }
             });
-
-            return newSoft.save();
         } else {
             for(let i = 0; i < swarn.warns.length; i++){
                 if(swarn.warns[i].rule === rule){
@@ -116,8 +114,75 @@ module.exports.run = async (bot, message, args) => {
             }
 
             swarn.warns.push({"rule": rule, "note": note});
-            return swarn.save()
         }
+
+        // confirmación madre mia
+        let confirmation = new Discord.MessageEmbed()
+        .setAuthor(`| Softwarn?`, guild.iconURL())
+        .setDescription(`\`▸\` ¿Estás seguro de softwarnear a **${member.user.tag}**?
+        \`▸\` Razón: Infringir la regla N°${args[1]} (${rule})`)
+        .setColor(Colores.verde);
+
+        message.channel.send(confirmation).then(msg => {
+            msg.react(":allow:558084462232076312")
+            .then(r => {
+                msg.react(":denegar:558084461686947891");
+            });
+
+            let cancelEmbed = new Discord.MessageEmbed()
+              .setDescription(`Cancelado.`)
+              .setColor(Colores.nocolor);
+
+            const yesFilter = (reaction, user) => reaction.emoji.id === "558084462232076312" && user.id === message.author.id;
+            const noFilter = (reaction, user) => reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
+
+            const yes = msg.createReactionCollector(yesFilter, { time: 60000 });
+            const no = msg.createReactionCollector(noFilter, { time: 60000 });
+
+            yes.on("collect", r => {
+              
+                //
+                if(newSoft){
+                    newSoft.save();
+                } else{
+                    swarn.save();
+                }
+                //
+
+                let warnedEmbed = new Discord.MessageEmbed()
+                .setAuthor(`| SOFTWarn`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
+                .setDescription(`
+      **—** Has sido __SOFTwarneado__ por el STAFF.
+      **—** Por infringir la regla: **${rule}**.`)
+                .setColor(Colores.rojo)
+                .setFooter(`Si vuelves a cometer otra falla serás warneado, ten cuidado.`, 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png');
+                
+                member.send(warnedEmbed)
+                .catch(e => {
+                  console.log('Tiene los MDs desactivados.')
+                });
+              
+              let warned = new Discord.MessageEmbed()
+              .setAuthor(`| Warn`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
+              .setDescription(`**—** Softwarneado: **${member}**.
+**—** Mod: **${author.user.tag}**
+**—** Canal: **${message.channel}**.
+**—** Por infringir la regla: **${rule}**.`)
+          .setColor(Colores.rojo);
+
+              return msg.edit(warned).then(() => {
+                msg.reactions.removeAll();
+              });
+            });
+
+            no.on("collect", r => {
+              return msg.edit(cancelEmbed).then(a => {
+                msg.reactions.removeAll();
+                message.delete();
+                a.delete({timeout: ms("20s")});
+              });
+            });
+          });
 
   })
 }
