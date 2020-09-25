@@ -76,9 +76,11 @@ module.exports.run = async (bot, message, args) => {
   .setDescription(`**—** **${member.user.tag}** ya ha sido softwarneado por infringir la regla N°${args[1]}: \`${rule}\`.
 **—** Proceder con \`${prefix}warn\`.`);
 
-  if(!rule){
+  if(!rule || rule == undefined){
+      console.log("pole")
         //agregar cada regla de la variable de reglas
         for(let a = 0; a < reglas.length; a++){
+            console.log(a);
             rulesEmbed.addField(reglas[a+1], `N°**${a+1}**`);
             
             if(a + 1 == reglas.length) return message.channel.send(rulesEmbed)
