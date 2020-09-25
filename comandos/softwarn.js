@@ -67,11 +67,7 @@ module.exports.run = async (bot, message, args) => {
   .setColor(Colores.nocolor)
   .setDescription(`▸ Usa el comando como \`${prefix}softwarn ${member} <N° Regla>\`.`)
   .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}swarn`);
-  //agregar cada regla de la variable de reglas
-  for(let a = 0; a < reglas.length; a++){
-      rulesEmbed.addField(reglas[a+1], `N°**${a+1}**`);
-      console.log(rulesEmbed);
-  }
+  
 
   let alreadyWarned = new Discord.MessageEmbed()
   .setAuthor(`| Error`, guild.iconURL())
@@ -79,7 +75,14 @@ module.exports.run = async (bot, message, args) => {
   .setDescription(`**—** **${member.user.tag}** ya ha sido softwarneado por infringir la regla N°${args[1]}: \`${rule}\`.
 **—** Proceder con \`${prefix}warn\`.`);
 
-  if(rule === "na") return message.channel.send(rulesEmbed);
+  if(rule === "na"){
+        //agregar cada regla de la variable de reglas
+        for(let a = 0; a < reglas.length; a++){
+            rulesEmbed.addField(reglas[a+1], `N°**${a+1}**`);
+            
+            if(a + 1 == reglas.length) return message.channel.send(rulesEmbed)
+        }
+  }
 
   SoftWarn.findOne({
       userID: member.id
