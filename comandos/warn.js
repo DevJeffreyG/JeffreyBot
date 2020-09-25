@@ -48,15 +48,14 @@ module.exports.run = async (bot, message, args) => {
   .setDescription(`▸ El uso correcto es: ${prefix}warn <@usuario> <N° Regla> (nota adicional) \n▸ Warneas a alguien.`)
   .setFooter(`<> Obligatorio () Opcional`);
     
+  if(!args[0]) return message.channel.send(embed);
+  if(!args[1]) return message.channel.send(embed);
+
       // Get the size of an object
       var size = Object.keys(reglas).length;
 
       let wUser = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[0]));
-      if(!args[0]) return message.channel.send(embed);
-      
-      let rule = reglas[args[1]];
-      if(!rule) return message.channel.send(rulesEmbed);
-
+      let rule = reglas[args[1]] || "na";
       let notes = args.join(" ").slice(args[0].length + args[1].length + 2) || "Recuerda leer siempre las reglas.";
 
       if(wUser.roles.cache.find(x => x.id === staffRole.id)){
@@ -71,6 +70,8 @@ module.exports.run = async (bot, message, args) => {
       for(let i = 1; i <= size; i++){
           rulesEmbed.addField(reglas[i], `N° **${i}**`);
       }
+
+      if(rule === "na") return message.channel.send(rulesEmbed);
 
       Warn.findOne({
         userID: wUser.id
