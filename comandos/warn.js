@@ -49,6 +49,9 @@ module.exports.run = async (bot, message, args) => {
   .setDescription(`▸ El uso correcto es: ${prefix}warn <@usuario> <N° Regla> (nota adicional) \n▸ Warneas a alguien.`)
   .setFooter(`<> Obligatorio () Opcional`);
     
+  // Get the size of an object
+  var size = Object.keys(reglas).length;
+  
   //agregar cada regla de la variable de reglas
   for(let i = 1; i <= size; i++){
     embed.addField(reglas[i], `N° **${i}**`);
@@ -57,8 +60,7 @@ module.exports.run = async (bot, message, args) => {
   if(!args[0]) return message.channel.send(embed);
   if(!args[1]) return message.channel.send(embed);
 
-      // Get the size of an object
-      var size = Object.keys(reglas).length;
+      
 
       let wUser = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[0]));
       let rule = reglas[args[1]] || "na";
