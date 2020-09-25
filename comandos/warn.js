@@ -51,14 +51,13 @@ module.exports.run = async (bot, message, args) => {
       // Get the size of an object
       var size = Object.keys(reglas).length;
 
-      let rule = reglas[args[1]] || "na";
+      let rule = reglas[args[1]];
       if(!rule) return message.channel.send(rulesEmbed);
-      if(rule === "na") return message.channel.send(rulesEmbed);
 
       let wUser = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[0]));
       if(!args[0]) return message.channel.send(embed);
 
-      let wRazon;
+      let notes = args.join(" ").slice(args[0].length + args[1].length + 2) || "Recuerda leer siempre las reglas.";
 
       if(wUser.roles.cache.find(x => x.id === staffRole.id)){
         return message.reply("¿tas bobo o qué?");
@@ -207,7 +206,8 @@ module.exports.run = async (bot, message, args) => {
                 .setDescription(`
       **—** Has sido __warneado__ por el STAFF.
       **—** Warns actuales: **${warns.warns}**.
-      **—** Por infringir la regla: **${rule}**.`)
+      **—** Por infringir la regla: **${rule}**.
+      **—** Notas / observaciones: **${notes}**.`)
                 .setColor(Colores.rojo)
                 .setFooter(`Ten más cuidado la próxima vez!`, 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png');
                 
