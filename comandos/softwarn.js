@@ -68,8 +68,8 @@ module.exports.run = async (bot, message, args) => {
   .setDescription(`▸ Usa el comando como \`${prefix}softwarn ${member} <N° Regla>\`.`)
   .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}swarn`);
   //agregar cada regla de la variable de reglas
-  for(let a = 1; a <= reglas.length; a++){
-      rulesEmbed.addField(reglas[a], `N°**${a}**`);
+  for(let a = 0; a < reglas.length; a++){
+      rulesEmbed.addField(reglas[a+1], `N°**${a+1}**`);
       console.log(rulesEmbed);
   }
 
