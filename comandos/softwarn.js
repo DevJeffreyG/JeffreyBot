@@ -158,9 +158,9 @@ module.exports.run = async (bot, message, args) => {
                 });
               
               let warned = new Discord.MessageEmbed()
-              .setAuthor(`| Warn`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
+              .setAuthor(`| SoftWarn`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
               .setDescription(`**—** Softwarneado: **${member}**.
-**—** Mod: **${author.user.tag}**
+**—** Mod: **${author.tag}**
 **—** Canal: **${message.channel}**.
 **—** Por infringir la regla: **${rule}**.`)
           .setColor(Colores.rojo);
