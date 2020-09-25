@@ -44,6 +44,8 @@ module.exports.run = async (bot, message, args) => {
   let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
   let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
+  
+  if(message.member.roles.cache.find(x => x.id === jeffreyRole.id)){} else if(message.member.roles.cache.find(x => x.id === adminRole.id)){} else if(message.member.roles.cache.find(x => x.id === modRole.id)){} else {return;}
     
   let embed = new Discord.MessageEmbed()
   .setTitle(`Ayuda: ${prefix}softwarn`)
@@ -76,12 +78,11 @@ module.exports.run = async (bot, message, args) => {
   //errores
   let rulesEmbed = new Discord.MessageEmbed()
   .setColor(Colores.nocolor)
-  .setDescription(`▸ Usa el comando como \`${prefix}softwarn ${member} <N° Regla>\`.`)
+  .setDescription(`▸ Usa el comando como \`${prefix}softwarn ${member.id} <N° Regla>\`.`)
   .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}swarn`);
   //agregar cada regla de la variable de reglas
   for(let i = 1; i <= size; i++){
       rulesEmbed.addField(reglas[i], `N° **${i}**`);
-      console.log(rulesEmbed);
   }
 
   let alreadyWarned = new Discord.MessageEmbed()
@@ -113,9 +114,11 @@ module.exports.run = async (bot, message, args) => {
                     return message.channel.send(alreadyWarned);
                 }
             }
+
+            swarn.warns.push({"rule": rule, "note": note});
+            return swarn.save()
         }
 
-        swarn.save();
   })
 }
 
