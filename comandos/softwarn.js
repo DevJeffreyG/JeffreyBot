@@ -1,5 +1,6 @@
 const Config = require("./../base.json");
 const Colores = require("./../colores.json");
+const reglas = require("./../reglas.json");
 const Emojis = require("./../emojis.json");
 const Discord = require("discord.js");
 const bot = new Discord.Client();
@@ -24,14 +25,6 @@ const Banned = require("../modelos/banned.js");
 const autorole = require("../modelos/autorole");
 
 /* ##### MONGOOSE ######## */
-
-Object.size = function(obj) {
-    var size = 0, key;
-    for (key in obj) {
-        if (obj.hasOwnProperty(key)) size++;
-    }
-    return size;
-};
 
 module.exports.run = async (bot, message, args) => {
 
@@ -58,19 +51,8 @@ module.exports.run = async (bot, message, args) => {
 
   let member = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[0]));
 
-  //determinar regla infringida
-  let reglas = {
-      "1": "Sentido común",
-      "2": "No Contenido NSFW / Comportamiento respetuoso",
-      "3": "Uso correcto de canales",
-      "4": "Problemas personales",
-      "5": "Mencionar sólo cuando sea necesario",
-      "6": "No Flood / Spam",
-      "7": "Uso correcto de nicknames"
-  }
-
   // Get the size of an object
-  var size = Object.size(reglas);
+  var size = Object.keys(reglas).length;
 
   let rule = reglas[args[1]] || "na";
   let note = args.join(" ").slice(args[0].length + args[1].length + 2) || "na";
