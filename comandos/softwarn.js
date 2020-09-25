@@ -59,8 +59,10 @@ module.exports.run = async (bot, message, args) => {
       "7": "Uso correcto de nicknames"
   }
 
-  let rule = reglas[args[1]];
-  console.log(rule);
+  // Get the size of an object
+  var size = Object.size(reglas);
+
+  let rule = reglas[args[1]] || "na";
   let note = args.join(" ").slice(args[0].length + args[1].length + 2) || "na";
 
   //errores
@@ -68,7 +70,11 @@ module.exports.run = async (bot, message, args) => {
   .setColor(Colores.nocolor)
   .setDescription(`▸ Usa el comando como \`${prefix}softwarn ${member} <N° Regla>\`.`)
   .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}swarn`);
-  
+  //agregar cada regla de la variable de reglas
+  for(let i = 1; i <= size; i++){
+      rulesEmbed.addField(reglas[i], `N° **${i}**`);
+      console.log(rulesEmbed);
+  }
 
   let alreadyWarned = new Discord.MessageEmbed()
   .setAuthor(`| Error`, guild.iconURL())
@@ -76,16 +82,7 @@ module.exports.run = async (bot, message, args) => {
   .setDescription(`**—** **${member.user.tag}** ya ha sido softwarneado por infringir la regla N°${args[1]}: \`${rule}\`.
 **—** Proceder con \`${prefix}warn\`.`);
 
-  if(!rule || rule == undefined){
-      console.log("pole")
-        //agregar cada regla de la variable de reglas
-        for(let a = 0; a < reglas.length; a++){
-            console.log(a);
-            rulesEmbed.addField(reglas[a+1], `N°**${a+1}**`);
-            
-            if(a + 1 == reglas.length) return message.channel.send(rulesEmbed)
-        }
-  }
+  if(rule === "na") return message.channel.send(rulesEmbed);
 
   SoftWarn.findOne({
       userID: member.id
@@ -112,6 +109,15 @@ module.exports.run = async (bot, message, args) => {
 
         swarn.save();
   })
+
+
+  Object.size = function(obj) {
+    var size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
+};
 
 }
 
