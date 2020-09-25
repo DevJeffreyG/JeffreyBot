@@ -21,6 +21,7 @@ const Jeffros = require("../modelos/jeffros.js");
 const Reporte = require("../modelos/reporte.js");
 const Exp = require("../modelos/exp.js");
 const Warn = require("../modelos/warn.js");
+const SoftWarn = require("../modelos/softwarn.js");
 const Banned = require("../modelos/banned.js");
 
 /* ##### MONGOOSE ######## */
@@ -198,6 +199,22 @@ module.exports.run = async (bot, message, args) => {
                   message.channel.send("¡Usuario con MDs desactivados! **¡No sabe cuántos WARNS tiene!**");
                 });          
               }
+
+              // quitar el softwarn
+              SoftWarn.findOne({
+                userID: wUser.id
+              }, (err, swarns) => {
+                if (err) throw err;
+
+                for (let i = 0; i < swarns.warns.length; i++){
+                  if(swarns.warns[i].rule === rule){
+
+                    swarns.warns.splice(i, 1);
+                    swarns.save();
+                    
+                  }
+                }
+              })
 
               let wEmbed = new Discord.MessageEmbed()
               .setAuthor(`| Warn`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
