@@ -25,6 +25,14 @@ const autorole = require("../modelos/autorole");
 
 /* ##### MONGOOSE ######## */
 
+Object.size = function(obj) {
+    var size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
+};
+
 module.exports.run = async (bot, message, args) => {
 
   if(!message.content.startsWith(prefix))return;
@@ -109,16 +117,6 @@ module.exports.run = async (bot, message, args) => {
 
         swarn.save();
   })
-
-
-  Object.size = function(obj) {
-    var size = 0, key;
-    for (key in obj) {
-        if (obj.hasOwnProperty(key)) size++;
-    }
-    return size;
-};
-
 }
 
 module.exports.help = {
