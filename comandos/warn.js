@@ -47,7 +47,10 @@ module.exports.run = async (bot, message, args) => {
   .setColor(Colores.nocolor)
   .setDescription(`▸ El uso correcto es: ${prefix}warn <@usuario> <N° Regla> (nota adicional) \n▸ Warneas a alguien.`)
   .setFooter(`<> Obligatorio () Opcional`);
-  
+    
+      // Get the size of an object
+      var size = Object.keys(reglas).length;
+
       let rule = reglas[args[1]] || "na";
       if(!rule) return message.channel.send(rulesEmbed);
 
