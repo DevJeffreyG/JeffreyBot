@@ -68,8 +68,8 @@ module.exports.run = async (bot, message, args) => {
   .setDescription(`▸ Usa el comando como \`${prefix}softwarn ${member} <N° Regla>\`.`)
   .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}swarn`);
   //agregar cada regla de la variable de reglas
-  for(let i = 1; i <= reglas.length; i++){
-      rulesEmbed.addField(reglas[i], `N° **${i}**`);
+  for(let a = 1; a <= reglas.length; a++){
+      rulesEmbed.addField(reglas[a], `N°**${a}**`);
       console.log(rulesEmbed);
   }
 
@@ -78,8 +78,6 @@ module.exports.run = async (bot, message, args) => {
   .setColor(Colores.rojo)
   .setDescription(`**—** **${member.user.tag}** ya ha sido softwarneado por infringir la regla N°${args[1]}: \`${rule}\`.
 **—** Proceder con \`${prefix}warn\`.`);
-
-console.log("$$$$$$$$$$$$$$$$$$$$$$$$2 "+rulesEmbed);
 
   if(rule === "na") return message.channel.send(rulesEmbed);
 
