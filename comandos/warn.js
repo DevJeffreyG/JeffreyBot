@@ -51,11 +51,11 @@ module.exports.run = async (bot, message, args) => {
       // Get the size of an object
       var size = Object.keys(reglas).length;
 
-      let rule = reglas[args[1]];
-      if(!rule) return message.channel.send(rulesEmbed);
-
       let wUser = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[0]));
       if(!args[0]) return message.channel.send(embed);
+      
+      let rule = reglas[args[1]];
+      if(!rule) return message.channel.send(rulesEmbed);
 
       let notes = args.join(" ").slice(args[0].length + args[1].length + 2) || "Recuerda leer siempre las reglas.";
 
