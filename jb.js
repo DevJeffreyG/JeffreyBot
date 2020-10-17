@@ -1048,7 +1048,7 @@ bot.on("message", async message => {
 
               uExp.exp = uExp.exp + expToAdd;
 
-              if (nxtLvl <= uExp.exp) {
+              if (uExp.exp >= nxtLvl) {
                 uExp.level = uExp.level + 1;
 
                 console.log(`${author.username} sube de nivel! (${curLvl + 1})`);
