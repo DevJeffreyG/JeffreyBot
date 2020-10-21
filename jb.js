@@ -1956,8 +1956,7 @@ client.on('message', (channel, author, message, self) => {
       
       function putItem(status, game) {
         return request({
-          baseUrl: 'https://api.twitch.tv/kraken/',
-          url: 'channels/jeffreyg_',
+          url: 'https://api.twitch.tv/kraken/channels/jeffreyg_',
           method: 'PUT',
           headers: {
             Accept: 'application/vnd.twitchtv.v5+json',
