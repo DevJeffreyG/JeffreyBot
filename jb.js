@@ -1781,131 +1781,6 @@ client.on('message', (channel, author, message, self) => {
   //comandos default
 	switch(cmd){
     case `${Config.tvPrefix}comandos`:
-
-      if(args[0] === "new"){
-
-        let plus = 1;
-        Commands.countDocuments({}, (err, c) => {
-          Commands.findOne(
-            {
-              id: c + plus
-            }, (err, found) => {
-              if (err) throw err;
-
-              if (!found) {
-              } else {
-                while (c + plus === found.id) {
-                  c += plus + 1;
-                  console.log("equal id");
-                }
-              }
-            
-              Commands.findOne({
-                title: args[1]
-              }, (err, command) => {
-                if(err) throw err;
-
-                if(!command){
-                  const newCommand = new Commands({
-                    title: args[1],
-                    message: "na",
-                    userLevel: "everyone",
-                    cooldown: "5",
-                    id: c + plus
-                  });
-    
-                  newCommand.save();
-    
-                  return client.say(channel, `@${sender}, he creado un nuevo comando "${Config.tvPrefix}${args[1]}" (para configurar su comportamiento usa "${Config.tvPrefix}comandos edit ${args[1]}") :)`);    
-                } else {
-                  return client.say(channel, `@${sender}, el comando "${Config.tvPrefix}${args[1]}" ya existe :(`);
-                }
-              })
-            })
-        })
-      } else if(args[0] === "edit"){
-        if(author.badges.moderator != 1 && author.badges.broadcaster != 1) return; // si no es mod
-        if (!args[1]) return client.say(channel, `@${sender}, parámetros incorrectos. Escribe el nombre del comando a editar.`);
-        Commands.findOne({
-          title: args[1]
-        }, (err, command) => {
-          if(err) throw err;
-
-          if(!command){
-            return client.say(channel, `@${sender}, no encontré el comando "${Config.tvPrefix}${args[1]}"... :(`);
-          } else {
-            let toEdit = args[2] || "na";
-            
-            let data;
-            if(args[2]) data = args.join(" ").slice(args[0].length + args[1].length + args[2].length + 3);
-
-            switch(toEdit.toLowerCase()){
-              case "mensaje":
-
-                if(!args[3]) return client.say(channel, `@${sender}, parámetros incorrectos. Escribe el nuevo mensaje para este comando.`);
-
-                command.message = data;
-                command.save();
-
-                return client.say(channel, `@${sender}, actualicé el mensaje del comando "${Config.tvPrefix}${command.title}" -> "${data}". :)`);
-              case "nivel":
-                if(!args[3]) return client.say(channel, `@${sender}, parámetros incorrectos. Usa: owner/mod/vip/sub/everyone`);
-
-                switch(args[3].toLowerCase()){
-                  case "owner":
-                  case "jeffrey":
-                  case "jeff":
-                  case "j":
-                    data = "owner";
-                    break;
-
-                  case "mod":
-                  case "moderador":
-                  case "moderator":
-                  case "staff":
-                    data = "moderator";
-                    break;
-                    
-                  case "vip":
-                    data = "vip";
-                    break;
-
-                  case "sub":
-                  case "prime":
-                  case "suscriptor":
-                    data = "sub";
-                    break;
-
-                  case "todos":
-                  case "everyone":
-                  case "na":
-                    data = "everyone";
-                    break;
-                }
-
-                command.userLevel = data;
-                command.save();
-
-                return client.say(channel, `@${sender}, actualicé el nivel requerido del comando "${Config.tvPrefix}${command.title}" -> "${data}". :)`);
-
-              case "cooldown":
-                if(!args[3] || isNaN(args[3])) return client.say(channel, `@${sender}, parámetros incorrectos. Determina el tiempo de cooldown en segundos.`);
-
-                command.cooldown = data;
-                command.save()
-
-                return client.say(channel, `@${sender}, actualicé el cooldown del comando "${Config.tvPrefix}${command.title}" -> "${data}s"`);
-
-              default:
-                return client.say(channel, `@${sender}, parámetros incorrectos. Usa: mensaje/nivel/cooldown`);
-            }
-
-          }
-        })
-      } else if(args[0] === "del"){
-
-      } else {
-
         Commands.find({
 
         }, (err, cmds) => {
@@ -1923,8 +1798,154 @@ client.on('message', (channel, author, message, self) => {
             return client.say(channel, `@${sender} -> ${allCommands}`);
           }
         })
-      }
       break;
+
+    case `${Config.tvPrefix}add`:
+      // añadir comando
+      
+      if(!args[0]) return client.say(channel, `@${sender} -> No puedo crear un comando sin un nombre :(`);
+      let nombre = args[0].toLowerCase();
+      let plus = 1;
+      Commands.countDocuments({}, (err, c) => {
+        Commands.findOne(
+          {
+            id: c + plus
+          }, (err, found) => {
+            if (err) throw err;
+
+            if (!found) {
+            } else {
+              while (c + plus === found.id) {
+                c += plus + 1;
+                console.log("equal id");
+              }
+            }
+          
+            Commands.findOne({
+              title: nombre
+            }, (err, command) => {
+              if(err) throw err;
+
+              if(!command){
+                const newCommand = new Commands({
+                  title: nombre,
+                  message: "na",
+                  userLevel: "everyone",
+                  cooldown: "5",
+                  id: c + plus
+                });
+  
+                newCommand.save();
+  
+                return client.say(channel, `@${sender} -> He creado un nuevo comando "${Config.tvPrefix}${nombre}" (para configurar su comportamiento usa "${Config.tvPrefix}comandos edit ${nombre}") :)`);    
+              } else {
+                return client.say(channel, `@${sender} -> El comando "${Config.tvPrefix}${nombre}" ya existe :(`);
+              }
+            })
+          })
+      })
+
+    case `${Config.tvPrefix}edit`:
+      // editar comando
+      
+      if(author.badges.moderator != 1 && author.badges.broadcaster != 1) return; // si no es mod
+      if (!args[0]) return client.say(channel, `@${sender} -> Parámetros incorrectos. Escribe el nombre del comando a editar.`);
+      Commands.findOne({
+        title: args[0]
+      }, (err, command) => {
+        if(err) throw err;
+
+        if(!command){
+          return client.say(channel, `@${sender} -> No encontré el comando "${Config.tvPrefix}${args[0]}"... :(`);
+        } else {
+          let toEdit = args[1] || "na";
+          
+          let data;
+          if(args[1]) data = args.join(" ").slice(args[0].length + args[1].length + 2); // a partir de args[3]
+
+          switch(toEdit.toLowerCase()){
+            case "mensaje":
+
+              if(!args[2]) return client.say(channel, `@${sender} -> Parámetros incorrectos. Escribe el nuevo mensaje para este comando.`);
+
+              command.message = data;
+              command.save();
+
+              return client.say(channel, `@${sender} -> Actualicé el mensaje del comando "${Config.tvPrefix}${command.title}" -> "${data}". :)`);
+            case "nivel":
+              if(!args[2]) return client.say(channel, `@${sender} -> Parámetros incorrectos. Usa: owner/mod/vip/sub/everyone`);
+
+              switch(args[2].toLowerCase()){
+                case "owner":
+                case "jeffrey":
+                case "jeff":
+                case "j":
+                  data = "owner";
+                  break;
+
+                case "mod":
+                case "moderador":
+                case "moderator":
+                case "staff":
+                  data = "moderator";
+                  break;
+                  
+                case "vip":
+                  data = "vip";
+                  break;
+
+                case "sub":
+                case "prime":
+                case "suscriptor":
+                  data = "sub";
+                  break;
+
+                case "todos":
+                case "everyone":
+                case "na":
+                  data = "everyone";
+                  break;
+              }
+
+              command.userLevel = data;
+              command.save();
+
+              return client.say(channel, `@${sender} -> Actualicé el nivel requerido del comando "${Config.tvPrefix}${command.title}" -> "${data}". :)`);
+
+            case "cooldown":
+              if(!args[2] || isNaN(args[2])) return client.say(channel, `@${sender} -> Parámetros incorrectos. Determina el tiempo de cooldown en segundos.`);
+
+              command.cooldown = data;
+              command.save()
+
+              return client.say(channel, `@${sender} -> Actualicé el cooldown del comando "${Config.tvPrefix}${command.title}" -> "${data}s"`);
+
+            default:
+              return client.say(channel, `@${sender} -> Parámetros incorrectos. Usa: mensaje/nivel/cooldown`);
+          }
+
+        }
+      })
+
+    case `${Config.tvPrefix}del`:
+      // eliminar comando
+
+      if(author.badges.moderator != 1 && author.badges.broadcaster != 1) return; // si no es mod
+      if (!args[0]) return client.say(channel, `@${sender} -> Parámetros incorrectos. Escribe el nombre del comando a eliminar.`);
+
+      Commands.findOne({
+        title: args[0]
+      }, (err, command) => {
+        if (err) throw err;
+
+        if(!command){
+          return client.say(channel, `@${sender} -> No encontré el comando "${Config.tvPrefix}${args[0]}"... :(`)
+        } else {
+          command.remove();
+
+          return client.say(channel, `@${sender} -> Eliminé el comando "${Config.tvPrefix}${args[0]}".`);
+        }
+      })
 
     default:
       if(!message.startsWith(Config.tvPrefix)) return;
@@ -1935,7 +1956,7 @@ client.on('message', (channel, author, message, self) => {
         if(err) throw err;
 
         if(!command){
-          return client.say(channel, `@${sender} -> he buscado por todas partes, pero no encuentro "${Config.tvPrefix}${cmd.slice(Config.tvPrefix.length)}"... :(`);
+          return client.say(channel, `@${sender} -> He buscado por todas partes, pero no encuentro "${Config.tvPrefix}${cmd.slice(Config.tvPrefix.length)}"... :(`);
         } else {
           if(command.userLevel != "everyone"){
             let reqLevel;
@@ -2001,7 +2022,7 @@ client.on('message', (channel, author, message, self) => {
             if(cooldowns.has(author.username)){
               let timer = coolded.get(author.username)
               let left = prettyms((command.cooldown*1000) - (new Date().getTime() - timer), {secondsDecimalDigits: 0 });
-              return client.say(channel, `@${sender}, usa este comando en ${left}`)
+              return client.say(channel, `@${sender} -> Usa este comando en ${left}`)
             }
 
             let timeMS = new Date().getTime();
@@ -2019,7 +2040,7 @@ client.on('message', (channel, author, message, self) => {
           if(cooldowns.has(author.username)){
             let timer = tvcooldown.get(author.username)
             let left = prettyms((command.cooldown*1000) - (new Date().getTime() - timer), {secondsDecimalDigits: 0 });
-            return client.say(channel, `@${sender}, usa este comando en ${left}`)
+            return client.say(channel, `@${sender} -> Usa este comando en ${left}`)
           }
 
           let timeMS = new Date().getTime();
