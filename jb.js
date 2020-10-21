@@ -1749,6 +1749,7 @@ if (process.env.mantenimiento != 1) {
 ////////////////////////// ################# JEFFREY BOT . TV ###################################################################
 
 const tmi = require('tmi.js');
+const request = require("request");
 const cooldowns = new Set();
 const tvcooldown = new Map();
 
@@ -1837,7 +1838,7 @@ client.on('message', (channel, author, message, self) => {
   
                 newCommand.save();
   
-                return client.say(channel, `@${sender} -> He creado un nuevo comando "${Config.tvPrefix}${nombre}" (para configurar su comportamiento usa "${Config.tvPrefix}comandos edit ${nombre}") :)`);    
+                return client.say(channel, `@${sender} -> He creado un nuevo comando "${Config.tvPrefix}${nombre}" (para configurar su comportamiento usa "${Config.tvPrefix}edit ${nombre}") :)`);    
               } else {
                 return client.say(channel, `@${sender} -> El comando "${Config.tvPrefix}${nombre}" ya existe :(`);
               }
@@ -1950,7 +1951,38 @@ client.on('message', (channel, author, message, self) => {
       })
       break;
 
-    default:
+    case `${Config.tvPrefix}info`:
+      putItem("si estás viendo esto, lo siento estoy probado jeffrey bot :) | ~ !internet", "Just Chatting");
+      
+      function putItem(status, game) {
+        return request({
+          baseUrl: 'https://api.twitch.tv/kraken/',
+          url: 'channels/jeffreyg_',
+          method: 'PUT',
+          headers: {
+            Accept: 'application/vnd.twitchtv.v5+json',
+            Authorization: 'OAuth oauth:z1d49zb1cw3e8vaqy5eoxdk13zg82l',
+            'Client-ID': 'jc85rg6306bf0yzxtei6b3vb1pqje6'
+          },
+          json: true,
+          body: {
+            channel: { status, game }
+          }
+        }, (err, { statusCode }, body) => {
+          if(err) {
+            console.log(err);
+          }
+          else if(statusCode !== 200) {
+            console.log({ statusCode, body });
+          }
+          else {
+            console.log(body);
+          }
+        });
+      }
+      break;
+
+    default: // comandos personalizados
       if(!message.startsWith(Config.tvPrefix)) return;
 
       Commands.findOne({
