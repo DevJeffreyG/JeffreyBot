@@ -1844,6 +1844,7 @@ client.on('message', (channel, author, message, self) => {
             })
           })
       })
+      break;
 
     case `${Config.tvPrefix}edit`:
       // editar comando
@@ -1926,6 +1927,7 @@ client.on('message', (channel, author, message, self) => {
 
         }
       })
+      break;
 
     case `${Config.tvPrefix}del`:
       // eliminar comando
@@ -1946,6 +1948,7 @@ client.on('message', (channel, author, message, self) => {
           return client.say(channel, `@${sender} -> Eliminé el comando "${Config.tvPrefix}${args[0]}".`);
         }
       })
+      break;
 
     default:
       if(!message.startsWith(Config.tvPrefix)) return;
