@@ -275,15 +275,13 @@ module.exports.run = async (bot, message, args) => {
         for (let i = 0; i < soft.warns.length; i++){ // revisar cada soft
           if(soft.warns[i].rule === rule){ // si existe
             console.log("FOUND");
-            i = soft.warns.length - 1;
             existsSoft = true;
-            return true;
           }
 
           console.log(`i: ${i}, encontrado: ${existsSoft}`);
 
-          if(i === soft.warns.length - 1 && existsSoft === false){
-            return false;
+          if(existsSoft === true){
+            i = soft.warns.length - 1;
           }
         }
 
