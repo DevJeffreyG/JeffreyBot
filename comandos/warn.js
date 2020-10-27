@@ -88,8 +88,7 @@ module.exports.run = async (bot, message, args) => {
          let errorEmbed = new Discord.MessageEmbed()
          .setAuthor(`| Error`, Config.errorPng)
          .setDescription(`\`▸\` **${wUser.user.tag}** no tiene el softwarn para poder ser warneado.
-         \`▸\` Softwarn necesario: Regla N°${args[1]} (${rule})
-         \`▸\` Notas: \`${notes}\`.`)
+         \`▸\` Softwarn necesario: Regla N°${args[1]} (${rule})`)
          .setColor(Colores.rojo);
  
          message.channel.send(confirmation).then(msg => {
@@ -131,7 +130,8 @@ module.exports.run = async (bot, message, args) => {
                 .setDescription(`
       **—** Has sido __warneado__ por el STAFF.
       **—** Warns actuales: **${numWarns}**.
-      **—** Por infringir la regla: **${rule}**.`)
+      **—** Por infringir la regla: **${rule}**.
+      **—** Notas / observaciones: **${notes}**.`)
                 .setColor(Colores.rojo)
                 .setFooter(`Ten más cuidado la próxima vez!`, 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png');
                 
@@ -268,13 +268,16 @@ module.exports.run = async (bot, message, args) => {
 
         let existsSoft = false;
         for (let i = 0; i < soft.warns.length; i++){ // revisar cada soft
+          console.log(i)
           if(soft.warns[i].rule === rule){ // si existe
             i = soft.warns.length - 1;
             existsSoft = true;
+            console.log("tru")
             return true;
           }
 
           if(i === soft.warns.length - 1 && existsSoft === false){
+            console.log("no encontro nada");
             return false;
           }
         }
