@@ -57,14 +57,14 @@ module.exports.run = async (bot, message, args) => {
     userID: member.id
   }, (err, warns) => {
     if(err) throw err;
-    
-    if(!warns || warns.warns === 0){
-      message.channel.send(error)
-    } else {
       SoftWarn.findOne({
         userID: author.id
       }, (err, soft) => {
         if(err) throw err;
+
+        if(!soft || soft.warns.length === 0){
+          return message.channel.send(error)
+        }
 
         let n = soft.warns.length || 0;
 
@@ -77,7 +77,6 @@ module.exports.run = async (bot, message, args) => {
         return message.channel.send(badguy);
       })
       
-    }
   })
 
 }
