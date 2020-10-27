@@ -274,6 +274,8 @@ module.exports.run = async (bot, message, args) => {
             return true;
           }
 
+          console.log(`i: ${i}, encontrado: ${existsSoft}`);
+          
           if(i === soft.warns.length - 1 && existsSoft === false){
             return false;
           }
