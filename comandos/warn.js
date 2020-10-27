@@ -161,9 +161,31 @@ module.exports.run = async (bot, message, args) => {
                 });
 
               } else {
-                console.log("AYUDA POR FAVORORRRRR");
-                let has = hasSoft(rule, wUser);
-                console.log("me cago en todo lo que viene a ser lo cagable. " + has);
+                // revisar si tiene el softwarn
+                SoftWarn.findOne({
+                  userID: wUser.id
+                }, (err, soft) => {
+                  if (err) throw err;
+                  let existsSoft = false;
+
+                  console.log("SOFT:");
+                  console.log(soft);
+                  if(!soft) return message.channel.send(errorEmbed);
+
+                  for (let i = 0; i < soft.warns.length; i++){ // revisar cada soft
+                    if(soft.warns[i].rule === rule){ // si existe
+                      console.log("FOUND");
+                      existsSoft = true;
+                      break;
+                    }
+
+                    if(existsSoft === true){
+                      break;
+                    }
+                  }
+
+                  if(existsSoft === false) return message.channel.send(errorEmbed);
+                })
 
                 if(!hasSoft(rule, wUser)) {
                   msg.reactions.removeAll();
