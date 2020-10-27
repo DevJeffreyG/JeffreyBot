@@ -155,7 +155,7 @@ module.exports.run = async (bot, message, args) => {
                   
 
                   wUser.send(autoMod);
-                  wUser.ban(`AutoMod. (Infringir "${rule}")`);
+                  //wUser.ban(`AutoMod. (Infringir "${rule}")`);
                   
                   setTimeout(function() {
                     guild.unban(wUser.id)
@@ -176,7 +176,7 @@ module.exports.run = async (bot, message, args) => {
 
                   logC.send(autoMod);
                   wUser.send(autoMod)
-                  wUser.ban(`AutoMod. (Infringir "${rule}")`);
+                  //wUser.ban(`AutoMod. (Infringir "${rule}")`);
                 }
                 
               message.react("✅")
