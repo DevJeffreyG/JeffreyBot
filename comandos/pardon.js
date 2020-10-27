@@ -73,21 +73,19 @@ module.exports.run = async (bot, message, args) => {
   if(rule === "na") return message.channel.send(rulesEmbed);
 
   if(softW){
+    // quitar el softwarn
     SoftWarn.findOne({
-      userID: author.id,
-      "warns.rule": rule
-    }, (err, soft) => {
-      if(err) throw err;
+      userID: wUser.id
+    }, (err, swarns) => {
+      if (err) throw err;
 
-      if(!soft) return message.reply("No encontré ese softwarn registrado en este usuario.")
+      for (let i = 0; i < swarns.warns.length; i++){
+        if(swarns.warns[i].rule === rule){
 
-      if(soft.warns.length > 1){
-        let indexS = soft.warns.findIndex(x => x.rule === rule);
+          swarns.warns.splice(i, 1);
+          swarns.save();
 
-        soft.warns.splice(indexS);
-        soft.save();
-      } else {
-        soft.remove()
+        }
       }
     })
   } else {

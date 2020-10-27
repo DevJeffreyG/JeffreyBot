@@ -109,8 +109,6 @@ module.exports.run = async (bot, message, args) => {
  
              yes.on("collect", r => {
               if(!warns){
-
-                console.log(hasSoft(rule, wUser));
                 if(!hasSoft(rule, wUser)) {
                   msg.reactions.removeAll();
                   return message.channel.send(errorEmbed);
@@ -141,7 +139,6 @@ module.exports.run = async (bot, message, args) => {
                 });
 
               } else {
-                console.log(hasSoft(rule, wUser));
                 if(!hasSoft(rule, wUser)) {
                   msg.reactions.removeAll();
                   return message.channel.send(errorEmbed);
@@ -264,11 +261,14 @@ module.exports.run = async (bot, message, args) => {
       }, (err, soft) => {
         if (err) throw err;
 
+        console.log("SOFT:");
+        console.log(soft);
         if(!soft) return false;
 
         let existsSoft = false;
         for (let i = 0; i < soft.warns.length; i++){ // revisar cada soft
           if(soft.warns[i].rule === rule){ // si existe
+            console.log("FOUND");
             i = soft.warns.length - 1;
             existsSoft = true;
             return true;
@@ -278,6 +278,8 @@ module.exports.run = async (bot, message, args) => {
             return false;
           }
         }
+
+        return existsSoft;
       })
     }
 }
