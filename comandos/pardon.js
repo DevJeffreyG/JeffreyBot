@@ -69,7 +69,7 @@ module.exports.run = async (bot, message, args) => {
   }
   
   if(message.member.roles.cache.find(x => x.id === jeffreyRole.id)){} else if(message.member.roles.cache.find(x => x.id === adminRole.id)){} else if(message.member.roles.cache.find(x => x.id === modRole.id)){} else {return;}
-  let rule = reglas[args[2]] || "na";
+  let rule = reglas[softW] || "na";
   if(rule === "na") return message.channel.send(rulesEmbed);
 
   if(softW){
@@ -90,44 +90,43 @@ module.exports.run = async (bot, message, args) => {
         soft.remove()
       }
     })
+  } else {
+    Warn.findOne({
+      userID: wUser.id
+    }, (err, warns) => {
+      if(err) throw err;
+      
+      if(!warns || warns.warns === 0 || warns.warns-numW <= -1){
+        return;
+      } else {
+        warns.warns = warns.warns - numW;
+        warns.save().then(x => message.react("✅"))
+        .catch(e => console.log(e));
+        
+        let wEmbed = new Discord.MessageEmbed()
+        .setAuthor(`| ¿Me perd0nas?`, "https://cdn.discordapp.com/emojis/537004318667177996.png")
+        .setDescription(`**—** Miembro: ${wUser}
+  **—** Warns actuales: **${warns.warns}**.
+  **—** Mod: ${author}`)
+        .setColor(Colores.verde);
+
+        logC.send(wEmbed);
+        
+        let unwarnedEmbed = new Discord.MessageEmbed()
+            .setAuthor(`| Pardon`, "https://cdn.discordapp.com/emojis/537004318667177996.png")
+            .setDescription(`
+  **—** Has sido perdonado. =)
+  **—** Warns actuales: **${warns.warns}**.`)
+            .setColor(Colores.verde)
+            .setFooter(`Tienes suerte.`, 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png');
+            
+            wUser.send(unwarnedEmbed)
+            .catch(e => {
+              console.log('Tiene los MDs desactivados.')
+            });
+      }
+    })
   }
-
-  Warn.findOne({
-    userID: wUser.id
-  }, (err, warns) => {
-    if(err) throw err;
-    
-    if(!warns || warns.warns === 0 || warns.warns-numW <= -1){
-      return;
-    } else {
-      warns.warns = warns.warns - numW;
-      warns.save().then(x => message.react("✅"))
-      .catch(e => console.log(e));
-      
-      let wEmbed = new Discord.MessageEmbed()
-      .setAuthor(`| ¿Me perd0nas?`, "https://cdn.discordapp.com/emojis/537004318667177996.png")
-      .setDescription(`**—** Miembro: ${wUser}
-**—** Warns actuales: **${warns.warns}**.
-**—** Mod: ${author}`)
-      .setColor(Colores.verde);
-
-      logC.send(wEmbed);
-      
-      let unwarnedEmbed = new Discord.MessageEmbed()
-          .setAuthor(`| Pardon`, "https://cdn.discordapp.com/emojis/537004318667177996.png")
-          .setDescription(`
-**—** Has sido perdonado. =)
-**—** Warns actuales: **${warns.warns}**.`)
-          .setColor(Colores.verde)
-          .setFooter(`Tienes suerte.`, 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png');
-          
-          wUser.send(unwarnedEmbed)
-          .catch(e => {
-            console.log('Tiene los MDs desactivados.')
-          });
-    }
-  })
-
 }
 
 module.exports.help = {
