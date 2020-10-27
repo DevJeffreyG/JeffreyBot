@@ -144,7 +144,7 @@ module.exports.run = async (bot, message, args) => {
               } else {
                 console.log("AYUDA POR FAVORORRRRR");
                 let has = hasSoft(rule, wUser);
-                console.log(has);
+                console.log("me cago en todo lo que viene a ser lo cagable. " + has);
 
                 if(!hasSoft(rule, wUser)) {
                   msg.reactions.removeAll();
