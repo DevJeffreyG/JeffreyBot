@@ -111,7 +111,8 @@ module.exports.run = async (bot, message, args) => {
              yes.on("collect", r => {
               if(!warns){
 
-                if(!hasSoft()) {
+                console.log(hasSoft(rule));
+                if(!hasSoft(rule)) {
                   msg.reactions.removeAll();
                   return message.channel.send(errorEmbed);
                 }
@@ -140,7 +141,7 @@ module.exports.run = async (bot, message, args) => {
                 });
 
               } else {
-                if(!hasSoft()) {
+                if(!hasSoft(rule)) {
                   msg.reactions.removeAll();
                   return message.channel.send(errorEmbed);
                 }
@@ -255,7 +256,7 @@ module.exports.run = async (bot, message, args) => {
           })
     })
 
-    let hasSoft = function(){
+    let hasSoft = function(rule){
       // revisar si tiene el softwarn
       SoftWarn.findOne({
         userID: wUser.id
