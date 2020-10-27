@@ -1,5 +1,6 @@
 const Config = require("./../base.json");
 const Colores = require("./../colores.json");
+const reglas = require("./../reglas.json");
 const Emojis = require("./../emojis.json");
 const Discord = require("discord.js");
 const bot = new Discord.Client();
@@ -21,6 +22,8 @@ const Reporte = require("../modelos/reporte.js");
 const Exp = require("../modelos/exp.js");
 const Warn = require("../modelos/warn.js");
 const Banned = require("../modelos/banned.js");
+const SoftWarn = require("../modelos/softwarn.js");
+const softwarn = require("../modelos/softwarn.js");
 
 /* ##### MONGOOSE ######## */
 
@@ -40,12 +43,22 @@ module.exports.run = async (bot, message, args) => {
   let embed = new Discord.MessageEmbed()
   .setTitle(`Ayuda: ${prefix}pardon`)
   .setColor(Colores.nocolor)
-  .setDescription(`▸ El uso correcto es: ${prefix}pardon <@usuario> (N° de Warns a restar.)`)
+  .setDescription(`▸ El uso correcto es: ${prefix}pardon <@usuario> (N° de Warns a restar.) (n°regla en softwarn)`)
   .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}unwarn`);
+
+  let rulesEmbed = new Discord.MessageEmbed()
+  .setColor(Colores.nocolor)
+  .setDescription(`▸ Usa el comando como \`${prefix}softwarn ${member.id} <N° Regla>\`.`)
+  .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}swarn`);
+  //agregar cada regla de la variable de reglas
+  for(let i = 1; i <= size; i++){
+      rulesEmbed.addField(reglas[i], `N° **${i}**`);
+  }
   
   let wUser = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[0]));
   let numW;
-  
+  let softW = args[2] || undefined;
+
   if(!wUser) return message.channel.send(embed);
   
   if(!args[1]){
@@ -55,7 +68,29 @@ module.exports.run = async (bot, message, args) => {
   }
   
   if(message.member.roles.cache.find(x => x.id === jeffreyRole.id)){} else if(message.member.roles.cache.find(x => x.id === adminRole.id)){} else if(message.member.roles.cache.find(x => x.id === modRole.id)){} else {return;}
-  
+  let rule = reglas[args[2]] || "na";
+  if(rule === "na") return message.channel.send(rulesEmbed);
+
+  if(softW){
+    SoftWarn.findOne({
+      userID: author.id,
+      "warns.rule": rule
+    }, (err, soft) => {
+      if(err) throw err;
+
+      if(!soft) return message.reply("No encontré ese softwarn registrado en este usuario.")
+
+      if(soft.warns.length > 1){
+        let indexS = soft.warns.findIndex(x => x.rule === rule);
+
+        soft.warns.splice(indexS);
+        soft.save();
+      } else {
+        soft.remove()
+      }
+    })
+  }
+
   Warn.findOne({
     userID: wUser.id
   }, (err, warns) => {
