@@ -21,6 +21,7 @@ const Reporte = require("../modelos/reporte.js");
 const Exp = require("../modelos/exp.js");
 const Warn = require("../modelos/warn.js");
 const Banned = require("../modelos/banned.js");
+const SoftWarn = require("../modelos/softwarn.js");
 
 /* ##### MONGOOSE ######## */
 
@@ -60,12 +61,22 @@ module.exports.run = async (bot, message, args) => {
     if(!warns || warns.warns === 0){
       message.channel.send(error)
     } else {
-      let badguy = new Discord.MessageEmbed()
-      .setAuthor(`| ${member.user.tag}'s warns`, member.user.displayAvatarURL())
-      .setDescription(`**Número de warns —** ❛ \`${warns.warns}\` ❜ ¬¬`)
-      .setColor(Colores.verde);
+      SoftWarn.findOne({
+        userID: author.id
+      }, (err, soft) => {
+        if(err) throw err;
+
+        let n = soft.warns.length || 0;
+
+        let badguy = new Discord.MessageEmbed()
+        .setAuthor(`| ${member.user.tag}'s warns`, member.user.displayAvatarURL())
+        .setDescription(`**Número de warns —** ❛ \`${warns.warns}\` ❜
+        **Número de Softwarns —** ❛ \`${n}\` ❜¬¬`)
+        .setColor(Colores.verde);
+        
+        return message.channel.send(badguy);
+      })
       
-      return message.channel.send(badguy);
     }
   })
 
