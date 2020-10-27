@@ -47,7 +47,7 @@ module.exports.run = async (bot, message, args) => {
 
   let rulesEmbed = new Discord.MessageEmbed()
   .setColor(Colores.nocolor)
-  .setDescription(`▸ Usa el comando como \`${prefix}softwarn ${member.id} <N° Regla>\`.`)
+  .setDescription(`▸ Usa el comando como \`${prefix}softwarn <@usuario> <N° Regla>\`.`)
   .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}swarn`);
   //agregar cada regla de la variable de reglas
   for(let i = 1; i <= size; i++){
