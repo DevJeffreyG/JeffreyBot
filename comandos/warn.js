@@ -110,12 +110,31 @@ module.exports.run = async (bot, message, args) => {
              yes.on("collect", r => {
               if(!warns){
                 
-                console.log(hasSoft(rule, wUser));
+                // revisar si tiene el softwarn
+                SoftWarn.findOne({
+                  userID: wUser.id
+                }, (err, soft) => {
+                  if (err) throw err;
+                  let existsSoft = false;
 
-                if(!hasSoft(rule, wUser)) {
-                  msg.reactions.removeAll();
-                  return message.channel.send(errorEmbed);
-                }
+                  console.log("SOFT:");
+                  console.log(soft);
+                  if(!soft) return message.channel.send(errorEmbed);
+
+                  for (let i = 0; i < soft.warns.length; i++){ // revisar cada soft
+                    if(soft.warns[i].rule === rule){ // si existe
+                      console.log("FOUND");
+                      existsSoft = true;
+                      break;
+                    }
+
+                    if(existsSoft === true){
+                      break;
+                    }
+                  }
+
+                  if(existsSoft === false) return message.channel.send(errorEmbed);
+                })
 
                 const newWarn = new Warn({
                   userID: wUser.id,
@@ -262,33 +281,7 @@ module.exports.run = async (bot, message, args) => {
     })
 
     function hasSoft(rule, user){
-      // revisar si tiene el softwarn
-      SoftWarn.findOne({
-        userID: user.id
-      }, (err, soft) => {
-        if (err) throw err;
-        let existsSoft = false;
-
-        console.log("SOFT:");
-        console.log(soft);
-        if(!soft) return existsSoft;
-
-        for (let i = 0; i < soft.warns.length; i++){ // revisar cada soft
-          if(soft.warns[i].rule === rule){ // si existe
-            console.log("FOUND");
-            existsSoft = true;
-          }
-
-          console.log(`i: ${i}, encontrado: ${existsSoft}`);
-
-          if(existsSoft === true){
-            i = soft.warns.length - 1;
-          }
-        }
-
-        console.log("RETURN: " + existsSoft);
-        return existsSoft;
-      })
+      
     }
 }
 
