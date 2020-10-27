@@ -23,7 +23,6 @@ const Exp = require("../modelos/exp.js");
 const Warn = require("../modelos/warn.js");
 const Banned = require("../modelos/banned.js");
 const SoftWarn = require("../modelos/softwarn.js");
-const softwarn = require("../modelos/softwarn.js");
 
 /* ##### MONGOOSE ######## */
 
