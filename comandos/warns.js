@@ -62,7 +62,7 @@ module.exports.run = async (bot, message, args) => {
       }, (err, soft) => {
         if(err) throw err;
 
-        if(!soft || soft.warns.length === 0 && !warns || warns.warns != 0){
+        if((!soft || soft.warns.length === 0) && (!warns || warns.warns === 0)){
           return message.channel.send(error)
         }
 
