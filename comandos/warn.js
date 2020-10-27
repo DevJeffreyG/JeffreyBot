@@ -142,6 +142,7 @@ module.exports.run = async (bot, message, args) => {
                 });
 
               } else {
+                console.log("AYUDA POR FAVORORRRRR");
                 console.log(hasSoft(rule, wUser));
 
                 if(!hasSoft(rule, wUser)) {
