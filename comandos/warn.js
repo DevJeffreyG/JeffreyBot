@@ -88,7 +88,8 @@ module.exports.run = async (bot, message, args) => {
          let errorEmbed = new Discord.MessageEmbed()
          .setAuthor(`| Error`, Config.errorPng)
          .setDescription(`\`▸\` **${wUser.user.tag}** no tiene el softwarn para poder ser warneado.
-         \`▸\` Softwarn necesario: Regla N°${args[1]} (${rule})`)
+         \`▸\` Softwarn necesario: Regla N°${args[1]} (${rule})
+         \`▸\` Notas: \`${notes}\`.`)
          .setColor(Colores.rojo);
  
          message.channel.send(confirmation).then(msg => {
@@ -110,7 +111,10 @@ module.exports.run = async (bot, message, args) => {
              yes.on("collect", r => {
               if(!warns){
 
-                if(!hasSoft()) return message.channel.send(errorEmbed);
+                if(!hasSoft()) {
+                  msg.reactions.removeAll();
+                  return message.channel.send(errorEmbed);
+                }
 
                 const newWarn = new Warn({
                   userID: wUser.id,
@@ -136,7 +140,10 @@ module.exports.run = async (bot, message, args) => {
                 });
 
               } else {
-                if(!hasSoft()) return message.channel.send(errorEmbed);
+                if(!hasSoft()) {
+                  msg.reactions.removeAll();
+                  return message.channel.send(errorEmbed);
+                }
 
                 warns.warns = warns.warns + 1;
                 warns.save()

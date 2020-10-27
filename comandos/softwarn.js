@@ -55,7 +55,7 @@ module.exports.run = async (bot, message, args) => {
   var size = Object.keys(reglas).length;
 
   let rule = reglas[args[1]] || "na";
-  let note = args.join(" ").slice(args[0].length + args[1].length + 2) || "na";
+  let note = args.join(" ").slice(args[0].length + args[1].length + 2) || "Recuerda leer siempre las reglas";
 
   //errores
   let rulesEmbed = new Discord.MessageEmbed()
@@ -84,7 +84,8 @@ module.exports.run = async (bot, message, args) => {
         let confirmation = new Discord.MessageEmbed()
         .setAuthor(`| Softwarn?`, guild.iconURL())
         .setDescription(`\`▸\` ¿Estás seguro de softwarnear a **${member.user.tag}**?
-        \`▸\` Razón: Infringir la regla N°${args[1]} (${rule})`)
+        \`▸\` Razón: Infringir la regla N°${args[1]} (${rule})
+        \`▸\` Notas: \`${note}\`.`)
         .setColor(Colores.verde);
 
         message.channel.send(confirmation).then(msg => {
@@ -130,9 +131,10 @@ module.exports.run = async (bot, message, args) => {
                 .setAuthor(`| SOFTWarn`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
                 .setDescription(`
       **—** Has sido __SOFTwarneado__ por el STAFF.
-      **—** Por infringir la regla: **${rule}**.`)
+      **—** Por infringir la regla: **${rule}**.
+      **—** Notas / observaciones: **${note}**`)
                 .setColor(Colores.rojo)
-                .setFooter(`Si vuelves a cometer otra falla serás warneado, ten cuidado.`, 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png');
+                .setFooter(`Si vuelves a cometer esta misma falla serás warneado, ten cuidado.`, 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png');
                 
                 member.send(warnedEmbed)
                 .catch(e => {
