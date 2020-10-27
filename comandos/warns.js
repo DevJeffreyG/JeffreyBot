@@ -62,7 +62,7 @@ module.exports.run = async (bot, message, args) => {
       }, (err, soft) => {
         if(err) throw err;
 
-        if(!soft || soft.warns.length === 0){
+        if(!soft || soft.warns.length === 0 && !warns || warns.warns != 0){
           return message.channel.send(error)
         }
 
@@ -76,7 +76,7 @@ module.exports.run = async (bot, message, args) => {
         
         if (n != 0){
           for (let i = 0; i < n; i++){
-            badguy.addField(`${i + 1} — ${soft.warns[i]}}`, `**— Nota: ${soft.warns[i].note}**`)
+            badguy.addField(`${i + 1} — ${soft.warns[i].rule}}`, `**— Nota: ${soft.warns[i].note}**`)
           }
         }
 
