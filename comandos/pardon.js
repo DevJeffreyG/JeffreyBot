@@ -45,9 +45,11 @@ module.exports.run = async (bot, message, args) => {
   .setDescription(`▸ El uso correcto es: ${prefix}pardon <@usuario> (N° de Warns a restar.) (n°regla en softwarn)`)
   .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}unwarn`);
 
+  var size = Object.keys(reglas).length;
+
   let rulesEmbed = new Discord.MessageEmbed()
   .setColor(Colores.nocolor)
-  .setDescription(`▸ Usa el comando como \`${prefix}softwarn <@usuario> <N° Regla>\`.`)
+  .setDescription(`▸ Usa el comando como \`${prefix}pardon <@usuario> (N° de Warns a restar.) (N° Regla)\`.`)
   .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}swarn`);
   //agregar cada regla de la variable de reglas
   for(let i = 1; i <= size; i++){
