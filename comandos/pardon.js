@@ -70,7 +70,7 @@ module.exports.run = async (bot, message, args) => {
   
   if(message.member.roles.cache.find(x => x.id === jeffreyRole.id)){} else if(message.member.roles.cache.find(x => x.id === adminRole.id)){} else if(message.member.roles.cache.find(x => x.id === modRole.id)){} else {return;}
   let rule = reglas[softW] || "na";
-  if(rule === "na") return message.channel.send(rulesEmbed);
+  if(rule === "na" && args[2]) return message.channel.send(rulesEmbed);
 
   if(softW){
     // quitar el softwarn

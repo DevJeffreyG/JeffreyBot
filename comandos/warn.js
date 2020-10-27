@@ -125,14 +125,13 @@ module.exports.run = async (bot, message, args) => {
                     if(soft.warns[i].rule === rule){ // si existe
                       console.log("FOUND");
                       existsSoft = true;
-                      break;
                     }
 
                     if(existsSoft === true){
-                      break;
+                      i = soft.warns.length - 1;
                     }
                   }
-
+                  
                   if(existsSoft === false) return message.channel.send(errorEmbed);
                 })
 
