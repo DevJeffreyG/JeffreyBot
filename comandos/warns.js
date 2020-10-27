@@ -70,10 +70,16 @@ module.exports.run = async (bot, message, args) => {
 
         let badguy = new Discord.MessageEmbed()
         .setAuthor(`| ${member.user.tag}'s warns`, member.user.displayAvatarURL())
-        .setDescription(`**Número de warns —** ❛ \`${warns.warns}\` ❜
+        .setDescription(`**Número de warns ** ❛ \`${warns.warns}\` ❜
         **Número de Softwarns —** ❛ \`${n}\` ❜ ¬¬`)
         .setColor(Colores.verde);
         
+        if (n != 0){
+          for (let i = 0; i < n; i++){
+            badguy.addField(`${i + 1} — ${soft.warns[i]}}`, `**— Nota: ${soft.warns[i].note}**`)
+          }
+        }
+
         return message.channel.send(badguy);
       })
       
