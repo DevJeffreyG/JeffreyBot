@@ -141,6 +141,7 @@ module.exports.run = async (bot, message, args) => {
                 });
 
               } else {
+                console.log(hasSoft(rule));
                 if(!hasSoft(rule)) {
                   msg.reactions.removeAll();
                   return message.channel.send(errorEmbed);
