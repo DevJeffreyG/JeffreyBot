@@ -83,6 +83,13 @@ module.exports.run = async (bot, message, args) => {
          .setDescription(`\`▸\` ¿Estás seguro de warnear a **${wUser.user.tag}**?
          \`▸\` Razón: Infringir la regla N°${args[1]} (${rule})`)
          .setColor(Colores.verde);
+
+         // ERROR
+         let err = new Discord.MessageEmbed()
+         .setAuthor(`| Error`, Config.errorPng)
+         .setDescription(`\`▸\` **${wUser.user.tag}** no tiene el softwarn para poder ser warneado.
+         \`▸\` Softwarn necesario: Regla N°${args[1]} (${rule})`)
+         .setColor(Colores.rojo);
  
          message.channel.send(confirmation).then(msg => {
              msg.react(":allow:558084462232076312")
@@ -102,6 +109,8 @@ module.exports.run = async (bot, message, args) => {
  
              yes.on("collect", r => {
               if(!warns){
+
+                if(!hasSoft()) return message.channel.send(err);
 
                 const newWarn = new Warn({
                   userID: wUser.id,
@@ -127,6 +136,8 @@ module.exports.run = async (bot, message, args) => {
                 });
 
               } else {
+                if(!hasSoft()) return message.channel.send(err);
+
                 warns.warns = warns.warns + 1;
                 warns.save()
                 .catch(e => console.log(e));
@@ -236,6 +247,30 @@ module.exports.run = async (bot, message, args) => {
              })
           })
     })
+
+    let hasSoft = function(){
+      // revisar si tiene el softwarn
+      SoftWarn.findOne({
+        userID: wUser.id
+      }, (err, soft) => {
+        if (err) throw err;
+
+        if(!soft) return false;
+
+        let existsSoft = false;
+        for (let i = 0; i < soft.warns.length; i++){ // revisar cada soft
+          if(soft.warns[i].rule === rule){ // si existe
+            i = soft.warns.length - 1;
+            existsSoft = true;
+            return true;
+          }
+
+          if(i === soft.warns.length - 1 && existsSoft === false){
+            return false;
+          }
+        }
+      })
+    }
 }
 
 module.exports.help = {
