@@ -257,7 +257,7 @@ module.exports.run = async (bot, message, args) => {
           })
     })
 
-    let hasSoft = function(rule){
+    function hasSoft(rule){
       // revisar si tiene el softwarn
       SoftWarn.findOne({
         userID: wUser.id
