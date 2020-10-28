@@ -89,9 +89,10 @@ module.exports.run = async (bot, message, args) => {
 ▸ \`${prefix}clear\`: Elimina hasta 100 mensajes en un canal.
 ▸ \`${prefix}unmute\`: Desmuteas a un usuario.
 ▸ \`${prefix}unban\`: Desbaneas a un usuario.
-▸ \`${prefix}warn\`: +X warn(s) a un usuario.
-▸ \`${prefix}pardon\`: -X warn(s) a un usuario.
-▸ \`${prefix}warns\`: Puedes saber cuántos warns tiene un usuario.`)
+▸ \`${prefix}warn\`: Le agregas un warn a un usuario.
+▸ \`${prefix}softwarn\`: Le agregas un softwarn a un usuario.
+▸ \`${prefix}pardon\`: -X warn(s) a un usuario. (Tanto Warns como Softwarns).
+▸ \`${prefix}warns\`: Puedes saber cuántos warns tiene un usuario. (Tanto Warns como Softwarns)`)
 
   .setColor(Colores.rojo);
   
