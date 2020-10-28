@@ -120,7 +120,7 @@ module.exports.run = async (bot, message, args) => {
 
                     console.log("SOFT:");
                     console.log(soft);
-                    if(!soft) return msg.edit(errorEmbed);
+                    if(!soft) return msg.edit(errorEmbed).then(() => msg.reactions.removeAll());
 
                     for (let i = 0; i < soft.warns.length; i++){ // revisar cada soft
                       if(soft.warns[i].rule === rule){ // si existe
@@ -133,7 +133,7 @@ module.exports.run = async (bot, message, args) => {
                       }
                     }
                     
-                    if(existsSoft === false) return msg.edit(errorEmbed);
+                    if(existsSoft === false) return msg.edit(errorEmbed).then(() => msg.reactions.removeAll());
 
                   const newWarn = new Warn({
                     userID: wUser.id,
@@ -141,6 +141,7 @@ module.exports.run = async (bot, message, args) => {
                   })
 
                   newWarn.save()
+                  .then(() => msg.reactions.removeAll())
                   .catch(e => console.log(e));
                     message.react("✅");
                   
@@ -156,7 +157,8 @@ module.exports.run = async (bot, message, args) => {
                   
                   wUser.send(warnedEmbed)
                   .catch(e => {
-                    console.log('Tiene los MDs desactivados.')
+                    message.react("494267320097570837");
+                    message.channel.send("¡Usuario con MDs desactivados! **¡No sabe cuántos WARNS tiene!**");
                   });
                 })
               } else {
@@ -169,7 +171,7 @@ module.exports.run = async (bot, message, args) => {
 
                   console.log("SOFT:");
                   console.log(soft);
-                  if(!soft) return msg.edit(errorEmbed);
+                  if(!soft) return msg.edit(errorEmbed).then(() => msg.reactions.removeAll());
 
                   for (let i = 0; i < soft.warns.length; i++){ // revisar cada soft
                     if(soft.warns[i].rule === rule){ // si existe
@@ -182,10 +184,11 @@ module.exports.run = async (bot, message, args) => {
                     }
                   }
                   
-                  if(existsSoft === false) return msg.edit(errorEmbed);
+                  if(existsSoft === false) return msg.edit(errorEmbed).then(() => msg.reactions.removeAll());
 
                   warns.warns = warns.warns + 1;
                   warns.save()
+                  .then(() => msg.reactions.removeAll())
                   .catch(e => console.log(e));
                   
                   // acciones de automod
@@ -237,7 +240,7 @@ module.exports.run = async (bot, message, args) => {
                     wUser.ban(`AutoMod. (Infringir "${rule}")`);
                   }
                   
-                message.react("✅")
+                message.react("✅");
                   
                   // embed que se le envía al usuario por el warn
                   let warnedEmbed = new Discord.MessageEmbed()
@@ -295,10 +298,6 @@ module.exports.run = async (bot, message, args) => {
              })
           })
     })
-
-    function hasSoft(rule, user){
-      
-    }
 }
 
 module.exports.help = {

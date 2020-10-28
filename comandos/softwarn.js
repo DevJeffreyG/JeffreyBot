@@ -115,7 +115,7 @@ module.exports.run = async (bot, message, args) => {
                         }
                     });
 
-                    newSoft.save();
+                    newSoft.save().then(() => message.react("✅"));
                 } else {
                     for(let i = 0; i < swarn.warns.length; i++){
                         if(swarn.warns[i].rule === rule){
@@ -124,7 +124,7 @@ module.exports.run = async (bot, message, args) => {
                     }
         
                     swarn.warns.push({"rule": rule, "note": note});
-                    swarn.save();
+                    swarn.save().then(() => message.react("✅"));;
                 }
 
                 let warnedEmbed = new Discord.MessageEmbed()
