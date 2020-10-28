@@ -555,7 +555,7 @@ bot.on("guildMemberAdd", member => {
 
 bot.on("ready", async () => {
   console.log(`${bot.user.username} ONLINE`);
-  console.log(bot.users.length);
+  console.log(bot.users.cache);
   bot.user.setActivity(`${prefix}ayuda - ${bot.users.cache.size} usuarios🔎`);
 
   let channel = bot.channels.cache.get(logChannel);
