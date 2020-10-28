@@ -508,7 +508,7 @@ bot.on("guildMemberRemove", member => {
     .setDescription(fBye)
     .setColor("#66a0ff");
 
-  bot.user.setActivity(`${prefix}ayuda - ${bot.users.cache.size} usuarios🔎`);
+  bot.user.setActivity(`${prefix}ayuda - ${member.guild.memberCount} usuarios🔎`);
   return channel.send(embed).then(msg => {
     msg.react(member.guild.emojis.cache.get("524673704655847427"));
   });
@@ -550,13 +550,13 @@ bot.on("guildMemberAdd", member => {
     channel.send(embed);
   });
 
-  bot.user.setActivity(`${prefix}ayuda - ${bot.users.cache.size} usuarios🔎`);
+  bot.user.setActivity(`${prefix}ayuda - ${member.guild.memberCount} usuarios🔎`);
 });
 
 bot.on("ready", async () => {
+  let guild = bot.guilds.cache.find(x => x.id === Config.jgServer);
   console.log(`${bot.user.username} ONLINE`);
-  console.log(bot.users.cache);
-  bot.user.setActivity(`${prefix}ayuda - ${bot.users.cache.size} usuarios🔎`);
+  bot.user.setActivity(`${prefix}ayuda - ${guild.memberCount} usuarios🔎`);
 
   let channel = bot.channels.cache.get(logChannel);
   channel.send("Reviví.");

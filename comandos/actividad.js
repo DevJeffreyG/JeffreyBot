@@ -28,7 +28,7 @@ module.exports.run = async (bot, message, args) => {
         .setAuthor(`| Actividad seleccionada sin problemas.`, Config.bienPng)
         .setDescription(`${bot.user.username} tiene el juego por DEFAULT.`)
         .setFooter(`Puesto por ${message.author.username}.`, message.author.avatarURL);
-        bot.user.setActivity(`${prefix}ayuda┊${prefix}soporte - Viendo a ${bot.users.size} usuarios🔎`);
+        bot.user.setActivity(`${prefix}ayuda - ${guild.memberCount} usuarios🔎`);
         return message.channel.send(setgamembed2);
   }
 
