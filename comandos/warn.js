@@ -81,7 +81,8 @@ module.exports.run = async (bot, message, args) => {
          let confirmation = new Discord.MessageEmbed()
          .setAuthor(`| Warn?`, guild.iconURL())
          .setDescription(`\`▸\` ¿Estás seguro de warnear a **${wUser.user.tag}**?
-         \`▸\` Razón: Infringir la regla N°${args[1]} (${rule})`)
+         \`▸\` Razón: Infringir la regla N°${args[1]} (${rule})
+         \`▸\` Notas: \`${notes}\`.`)
          .setColor(Colores.verde);
 
          // ERROR
@@ -114,51 +115,50 @@ module.exports.run = async (bot, message, args) => {
                 SoftWarn.findOne({
                   userID: wUser.id
                 }, (err, soft) => {
-                  if (err) throw err;
-                  let existsSoft = false;
+                    if (err) throw err;
+                    let existsSoft = false;
 
-                  console.log("SOFT:");
-                  console.log(soft);
-                  if(!soft) return message.channel.send(errorEmbed);
+                    console.log("SOFT:");
+                    console.log(soft);
+                    if(!soft) return msg.edit(errorEmbed);
 
-                  for (let i = 0; i < soft.warns.length; i++){ // revisar cada soft
-                    if(soft.warns[i].rule === rule){ // si existe
-                      console.log("FOUND");
-                      existsSoft = true;
+                    for (let i = 0; i < soft.warns.length; i++){ // revisar cada soft
+                      if(soft.warns[i].rule === rule){ // si existe
+                        console.log("FOUND");
+                        existsSoft = true;
+                      }
+
+                      if(existsSoft === true){
+                        i = soft.warns.length - 1;
+                      }
                     }
+                    
+                    if(existsSoft === false) return msg.edit(errorEmbed);
 
-                    if(existsSoft === true){
-                      i = soft.warns.length - 1;
-                    }
-                  }
+                  const newWarn = new Warn({
+                    userID: wUser.id,
+                    warns: 1
+                  })
+
+                  newWarn.save()
+                  .catch(e => console.log(e));
+                    message.react("✅");
                   
-                  if(existsSoft === false) return message.channel.send(errorEmbed);
+                  let warnedEmbed = new Discord.MessageEmbed()
+                  .setAuthor(`| Warn`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
+                  .setDescription(`
+        **—** Has sido __warneado__ por el STAFF.
+        **—** Warns actuales: **${numWarns}**.
+        **—** Por infringir la regla: **${rule}**.
+        **—** Notas / observaciones: **${notes}**.`)
+                  .setColor(Colores.rojo)
+                  .setFooter(`Ten más cuidado la próxima vez!`, 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png');
+                  
+                  wUser.send(warnedEmbed)
+                  .catch(e => {
+                    console.log('Tiene los MDs desactivados.')
+                  });
                 })
-
-                const newWarn = new Warn({
-                  userID: wUser.id,
-                  warns: 1
-                })
-
-                newWarn.save()
-                .catch(e => console.log(e));
-                  message.react("✅");
-                
-                let warnedEmbed = new Discord.MessageEmbed()
-                .setAuthor(`| Warn`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
-                .setDescription(`
-      **—** Has sido __warneado__ por el STAFF.
-      **—** Warns actuales: **${numWarns}**.
-      **—** Por infringir la regla: **${rule}**.
-      **—** Notas / observaciones: **${notes}**.`)
-                .setColor(Colores.rojo)
-                .setFooter(`Ten más cuidado la próxima vez!`, 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png');
-                
-                wUser.send(warnedEmbed)
-                .catch(e => {
-                  console.log('Tiene los MDs desactivados.')
-                });
-
               } else {
                 // revisar si tiene el softwarn
                 SoftWarn.findOne({
@@ -169,7 +169,7 @@ module.exports.run = async (bot, message, args) => {
 
                   console.log("SOFT:");
                   console.log(soft);
-                  if(!soft) return message.channel.send(errorEmbed);
+                  if(!soft) return msg.edit(errorEmbed);
 
                   for (let i = 0; i < soft.warns.length; i++){ // revisar cada soft
                     if(soft.warns[i].rule === rule){ // si existe
@@ -182,78 +182,80 @@ module.exports.run = async (bot, message, args) => {
                     }
                   }
                   
-                  if(existsSoft === false) return message.channel.send(errorEmbed);
+                  if(existsSoft === false) return msg.edit(errorEmbed);
+
+                  warns.warns = warns.warns + 1;
+                  warns.save()
+                  .catch(e => console.log(e));
+                  
+                  // acciones de automod
+                  if(warns.warns === 2){
+                    let infoEmbed = new Discord.MessageEmbed()
+                    .setAuthor(`| Warn`, "https://cdn.discordapp.com/emojis/494267320097570837.png?v=1")
+                  .setDescription(`**—** ${wUser.user.tag}, este es tu **warn número ❛ \`2\` ❜**
+        *— ¿Qué impacto tendrá este warn?*
+        **—** Tranquilo. Este warn no afectará en nada tu estadía en el servidor, sin embargo; el siguiente warn será un **ban de un día**.
+        **—** Te sugiero comprar un **-1 Warn** en la tienda del servidor. *( \`${prefix}shop items\` para más info de precios, etc. )*`)
+                  .setColor(Colores.rojo);
+                    
+                    wUser.send(infoEmbed);
+                  } else
+
+                  if(warns.warns == 3){
+                    let autoMod = new Discord.MessageEmbed()
+                    .setAuthor(`| TempBan`, "https://cdn.discordapp.com/emojis/537792425129672704.png")
+                    .setDescription(`**—** Ban (24h): **${wUser}**.
+          **—** Warns actuales: **${warns.warns}**.
+          **—** Warn por última vez: **${numWarns}**.
+          **—** Razón de ban (AutoMod): 3 warns acumulados.
+          **—** Último warn por infringir la regla: **${rule}**.`)
+                    .setColor(Colores.rojo);
+                    
+
+                    wUser.send(autoMod);
+                    wUser.ban(`AutoMod. (Infringir "${rule}")`);
+                    
+                    setTimeout(function() {
+                      guild.unban(wUser.id)
+                    }, ms("1d"));
+                    
+                    logC.send(autoMod);
+                  } else
+
+                  if(warns.warns == 4){
+                    let autoMod = new Discord.MessageEmbed()
+                    .setAuthor(`| Ban PERMANENTE.`, "https://cdn.discordapp.com/emojis/537804262600867860.png")
+                    .setDescription(`**—** Baneado: **${wUser}**.
+          **—** Warns actuales: **${warns.warns}**.
+          **—** Warn por última vez: **${numWarns}**.
+          **—** Razón de ban (AutoMod): Muchos warns.
+          **—** Último warn por infringir la regla: **${rule}**.`)
+                    .setColor(Colores.rojo);
+
+                    logC.send(autoMod);
+                    wUser.send(autoMod)
+                    wUser.ban(`AutoMod. (Infringir "${rule}")`);
+                  }
+                  
+                message.react("✅")
+                  
+                  // embed que se le envía al usuario por el warn
+                  let warnedEmbed = new Discord.MessageEmbed()
+                  .setAuthor(`| Warn`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
+                  .setDescription(`
+        **—** Has sido __warneado__ por el STAFF.
+        **—** Warns actuales: **${warns.warns}**.
+        **—** Por infringir la regla: **${rule}**.
+        **—** Notas / observaciones: **${notes}**.`)
+                  .setColor(Colores.rojo)
+                  .setFooter(`Ten más cuidado la próxima vez!`, 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png');
+                  
+                  wUser.send(warnedEmbed)
+                  .catch(e => {
+                    message.react("494267320097570837");
+                    message.channel.send("¡Usuario con MDs desactivados! **¡No sabe cuántos WARNS tiene!**");
+                  });
                 })
-
-                warns.warns = warns.warns + 1;
-                warns.save()
-                .catch(e => console.log(e));
-                
-                if(warns.warns === 2){
-                  let infoEmbed = new Discord.MessageEmbed()
-                  .setAuthor(`| Warn`, "https://cdn.discordapp.com/emojis/494267320097570837.png?v=1")
-                .setDescription(`**—** ${wUser.user.tag}, este es tu **warn número ❛ \`2\` ❜**
-      *— ¿Qué impacto tendrá este warn?*
-      **—** Tranquilo. Este warn no afectará en nada tu estadía en el servidor, sin embargo; el siguiente warn será un **ban de un día**.
-      **—** Te sugiero comprar un **-1 Warn** en la tienda del servidor. *( \`${prefix}shop items\` para más info de precios, etc. )*`)
-                .setColor(Colores.rojo);
-                  
-                  wUser.send(infoEmbed);
-                } else
-
-                if(warns.warns == 3){
-                  let autoMod = new Discord.MessageEmbed()
-                  .setAuthor(`| TempBan`, "https://cdn.discordapp.com/emojis/537792425129672704.png")
-                  .setDescription(`**—** Ban (24h): **${wUser}**.
-        **—** Warns actuales: **${warns.warns}**.
-        **—** Warn por última vez: **${numWarns}**.
-        **—** Razón de ban (AutoMod): 3 warns acumulados.
-        **—** Último warn por infringir la regla: **${rule}**.`)
-                  .setColor(Colores.rojo);
-                  
-
-                  wUser.send(autoMod);
-                  //wUser.ban(`AutoMod. (Infringir "${rule}")`);
-                  
-                  setTimeout(function() {
-                    guild.unban(wUser.id)
-                  }, ms("1d"));
-                  
-                  logC.send(autoMod);
-                } else
-
-                if(warns.warns == 4){
-                  let autoMod = new Discord.MessageEmbed()
-                  .setAuthor(`| Ban PERMANENTE.`, "https://cdn.discordapp.com/emojis/537804262600867860.png")
-                  .setDescription(`**—** Baneado: **${wUser}**.
-        **—** Warns actuales: **${warns.warns}**.
-        **—** Warn por última vez: **${numWarns}**.
-        **—** Razón de ban (AutoMod): Muchos warns.
-        **—** Último warn por infringir la regla: **${rule}**.`)
-                  .setColor(Colores.rojo);
-
-                  logC.send(autoMod);
-                  wUser.send(autoMod)
-                  //wUser.ban(`AutoMod. (Infringir "${rule}")`);
-                }
-                
-              message.react("✅")
-                
-                let warnedEmbed = new Discord.MessageEmbed()
-                .setAuthor(`| Warn`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
-                .setDescription(`
-      **—** Has sido __warneado__ por el STAFF.
-      **—** Warns actuales: **${warns.warns}**.
-      **—** Por infringir la regla: **${rule}**.
-      **—** Notas / observaciones: **${notes}**.`)
-                .setColor(Colores.rojo)
-                .setFooter(`Ten más cuidado la próxima vez!`, 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png');
-                
-                wUser.send(warnedEmbed)
-                .catch(e => {
-                  message.react("494267320097570837");
-                  message.channel.send("¡Usuario con MDs desactivados! **¡No sabe cuántos WARNS tiene!**");
-                });          
               }
 
               // quitar el softwarn
@@ -272,6 +274,7 @@ module.exports.run = async (bot, message, args) => {
                 }
               })
 
+              // embed a editar el mensaje de confirmación
               let wEmbed = new Discord.MessageEmbed()
               .setAuthor(`| Warn`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
               .setDescription(`**—** Warneado: **${wUser}**.
@@ -280,9 +283,7 @@ module.exports.run = async (bot, message, args) => {
     **—** Por infringir la regla: **${rule}**.`)
               .setColor(Colores.rojo);
 
-              return msg.edit(wEmbed).then(() => {
-                msg.reactions.removeAll();
-              });
+              return msg.edit(wEmbed);
              });
 
              no.on("collect", r => {

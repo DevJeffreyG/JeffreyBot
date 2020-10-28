@@ -83,7 +83,9 @@ module.exports.run = async (bot, message, args) => {
         if(swarns.warns[i].rule === rule){
 
           swarns.warns.splice(i, 1);
-          swarns.save();
+          swarns.save().then(() =>
+            message.react("✅")
+          )
 
           let sEmbed = new Discord.MessageEmbed()
         .setAuthor(`| ¿Me perd0nas?`, "https://cdn.discordapp.com/emojis/537004318667177996.png")
@@ -119,7 +121,9 @@ module.exports.run = async (bot, message, args) => {
         return;
       } else {
         warns.warns = warns.warns - numW;
-        warns.save().then(x => message.react("✅"))
+        warns.save().then(() =>
+          message.react("✅")
+        )
         .catch(e => console.log(e));
         
         let wEmbed = new Discord.MessageEmbed()
