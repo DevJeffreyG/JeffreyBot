@@ -82,7 +82,8 @@ module.exports.run = async (bot, message, args) => {
   
   let modEmbed = new Discord.MessageEmbed()
   .setAuthor(`| Comandos de Moderación`, "https://cdn.discordapp.com/emojis/494282181296914432.png")
-  .setDescription(`▸ \`${prefix}ban\`: Baneas a un usuario.
+  .setDescription(`▸ \`${prefix}reglas\`: Envía un embed con las reglas enumeradas que son detectadas por el bot.
+▸ \`${prefix}ban\`: Baneas a un usuario.
 ▸ \`${prefix}kick\`: Kickeas a un usuario.
 ▸ \`${prefix}hackban\`: Baneas a un usuario que no está en el servidor, ideal para los raiders.
 ▸ \`${prefix}mute\`: Muteas temporal o permanentemente a un usuario.
