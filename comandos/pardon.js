@@ -85,6 +85,27 @@ module.exports.run = async (bot, message, args) => {
           swarns.warns.splice(i, 1);
           swarns.save();
 
+          let sEmbed = new Discord.MessageEmbed()
+        .setAuthor(`| ¿Me perd0nas?`, "https://cdn.discordapp.com/emojis/537004318667177996.png")
+        .setDescription(`**—** Miembro: ${wUser}
+  **—** SOFTWarn actuales: **${swarns.warns.length}**.
+  **—** Mod: ${author}`)
+        .setColor(Colores.verde);
+
+        logC.send(sEmbed);
+        
+        let sunwarnedEmbed = new Discord.MessageEmbed()
+            .setAuthor(`| Pardon`, "https://cdn.discordapp.com/emojis/537004318667177996.png")
+            .setDescription(`
+  **—** Has sido perdonado. =)
+  **—** SOFTWarns actuales: **${swarns.warns.length}**.`)
+            .setColor(Colores.verde)
+            .setFooter(`Tienes suerte.`, 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png');
+            
+            wUser.send(sunwarnedEmbed)
+            .catch(e => {
+              console.log('Tiene los MDs desactivados.')
+            });
         }
       }
     })
