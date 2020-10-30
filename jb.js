@@ -555,6 +555,7 @@ bot.on("guildMemberAdd", member => {
 
 bot.on("ready", async () => {
   let guild = bot.guilds.cache.find(x => x.id === Config.jgServer);
+  guild.members.fetch();
   console.log(`${bot.user.username} ONLINE`);
   bot.user.setActivity(`${prefix}ayuda - ${guild.memberCount} usuarios🔎`);
 
@@ -784,9 +785,8 @@ bot.on("message", async message => {
     if (commandFile) commandFile.run(bot, message, args, active);
 
     if (message.content === `${prefix}coins`) {
-      guild.members.fetch();
-      if(message.author.id != jeffreygID) return message.reply("Comando en mantenimiento, vuelve más tarde!");
-      let money = 0;//Math.ceil(Math.random() * 20);
+      //if(message.author.id != jeffreygID) return message.reply("Comando en mantenimiento, vuelve más tarde!");
+      let money = Math.ceil(Math.random() * 20);
       let tmoney = `**${Emojis.Jeffros}${money}**`;
       let randommember = guild.members.cache.random();
       randommember = `**${randommember.user.tag}**`;
@@ -859,9 +859,9 @@ bot.on("message", async message => {
             );
           }
 
-          //workCooldown.add(message.author.id);
-         // let timeMS = new Date().getTime();
-          //coolded.set(author.id, timeMS);
+          workCooldown.add(message.author.id);
+          let timeMS = new Date().getTime();
+          coolded.set(author.id, timeMS);
 
           if (!jeffros) {
             const newJeffros = new Jeffros({
