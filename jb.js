@@ -832,7 +832,7 @@ bot.on("message", async message => {
         `Te cuelgas de la fama de ${randommember} y logras sacar ${tmoney} con el clickbait`
       ];
 
-      let text = responses[3];//Math.floor(Math.random() * responses.length)];
+      let text = Math.floor(Math.random() * responses.length)];
 
       let embed = new Discord.MessageEmbed()
         .setColor(Colores.rojo)
