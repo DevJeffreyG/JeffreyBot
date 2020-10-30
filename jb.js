@@ -788,6 +788,7 @@ bot.on("message", async message => {
       let money = 0;//Math.ceil(Math.random() * 20);
       let tmoney = `**${Emojis.Jeffros}${money}**`;
       let randommember = guild.members.fetch();
+      console.log(randommember);
       randommember = randommember.random();
       randommember = `**${randommember.user.tag}**`;
       if (multiplier != 1) {
