@@ -787,8 +787,7 @@ bot.on("message", async message => {
       if(message.author.id != jeffreygID) return message.reply("Comando en mantenimiento, vuelve más tarde!");
       let money = 0;//Math.ceil(Math.random() * 20);
       let tmoney = `**${Emojis.Jeffros}${money}**`;
-      let randommember = guild.members.fetch().then(a => console.log(a)).catch(err => console.log(err));
-      console.log(randommember);
+      let randommember = guild.members.fetch().then(console.log);
       randommember = randommember.random();
       randommember = `**${randommember.user.tag}**`;
       if (multiplier != 1) {
