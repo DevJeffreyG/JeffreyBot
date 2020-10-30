@@ -785,7 +785,7 @@ bot.on("message", async message => {
 
     if (message.content === `${prefix}coins`) {
       if(message.author.id != jeffreygID) return message.reply("Comando en mantenimiento, vuelve más tarde!");
-      let money = 0 || Math.ceil(Math.random() * 20);
+      let money = 0;//Math.ceil(Math.random() * 20);
       let tmoney = `**${Emojis.Jeffros}${money}**`;
       console.log(guild.members.cache);
       let randommember = guild.members.cache.random();
@@ -830,7 +830,7 @@ bot.on("message", async message => {
         `Te cuelgas de la fama de ${randommember} y logras sacar ${tmoney} con el clickbait`
       ];
 
-      let text = responses[Math.floor(Math.random() * responses.length)];
+      let text = responses[3];//Math.floor(Math.random() * responses.length)];
 
       let embed = new Discord.MessageEmbed()
         .setColor(Colores.rojo)
