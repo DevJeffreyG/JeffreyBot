@@ -29,7 +29,6 @@ const SoftWarn = require("../modelos/softwarn.js");
 module.exports.run = async (bot, message, args) => {
 
   if(!message.content.startsWith(prefix))return;
-  if(message.author.id != jeffreygID) return message.reply("comando en mantenimiento, sólo Jeffrey puede usarlo, si lo necesitas llámalo.");
 
   // Variables
   let author = message.author;
