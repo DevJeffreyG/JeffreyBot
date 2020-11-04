@@ -25,8 +25,8 @@ const Banned = require("../modelos/banned.js");
 /* ##### MONGOOSE ######## */
 
 module.exports.run = async (bot, message, args) => {
-  return;
   if (!message.content.startsWith(prefix)) return;
+  if(message.author.id != jeffreygID) return;
   
   // Variables
   let author = message.author;
@@ -52,6 +52,7 @@ module.exports.run = async (bot, message, args) => {
   let toPay = Math.floor(args[1]);
   if (!toPay) return message.channel.send(embed);
   if (isNaN(toPay)) return message.channel.send(embed);
+  if (toPay<1) return message.channel.send(embed);
   
   if(user.id === author.id){ // te autopagas
     let paidE = new Discord.MessageEmbed()
