@@ -784,12 +784,10 @@ bot.on("message", async message => {
     // handler
     let commandFile = bot.comandos.get(cmd.slice(prefix.length));
 
-
     Toggle.findOne({
       command: cmd.slice(prefix.length)
     }, (err, cmdDisabled) => {
       if(err) throw err;
-      console.log(cmdDisabled)
       if(!cmdDisabled && commandFile){ // si no encuentra un toggle busca el alias
         Toggle.findOne({
           alias: cmd.slice(prefix.length)
