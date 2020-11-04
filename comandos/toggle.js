@@ -36,7 +36,7 @@ module.exports.run = async (bot, message, args) => {
 
   if(!args[0]) return message.channel.send(embed);
 
-  let comando = args[0].toLowerCase();
+  let comando = args[0];
   let alias = args[1] || "na";
 
   Toggle.findOne({
