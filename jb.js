@@ -786,13 +786,13 @@ bot.on("message", async message => {
 
 
     Toggle.findOne({
-      command: cmd
+      command: cmd.slice(prefix.length)
     }, (err, cmdDisabled) => {
       if(err) throw err;
-
+      console.log(cmdDisabled)
       if(!cmdDisabled && commandFile){ // si no encuentra un toggle busca el alias
         Toggle.findOne({
-          alias: cmd
+          alias: cmd.slice(prefix.length)
         }, (err, aliasDisabled) => {
           if(err) throw err;
 
@@ -803,7 +803,7 @@ bot.on("message", async message => {
           }
         })
       } else if(!commandFile){ // si no existe el comando, return
-        return;
+        return console.log("no existe el comando");
       } else if(author.id === jeffreygID) { // si es jeffrey
         if (commandFile) commandFile.run(bot, message, args, active);
       } else { // si encuentra el comando toggleado return nomas
