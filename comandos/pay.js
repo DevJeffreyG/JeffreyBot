@@ -25,6 +25,7 @@ const Banned = require("../modelos/banned.js");
 /* ##### MONGOOSE ######## */
 
 module.exports.run = async (bot, message, args) => {
+  return;
   if (!message.content.startsWith(prefix)) return;
   
   // Variables
