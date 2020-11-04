@@ -102,7 +102,8 @@ module.exports.run = async (bot, message, args) => {
   .setDescription(`▸ \`${prefix}actividad\`: Cambias lo que estoy jugando ahora.
 ▸ \`${prefix}syncMute\`: Sincronizas el rol de Mute en todos los canales.
 ▸ \`${prefix}dbBan\`: Prohíbe a alguien enviar un reporte de bug.
-▸ \`${prefix}role\`: Conoce el ID de un rol por su nombre.`)
+▸ \`${prefix}role\`: Conoce el ID de un rol por su nombre.
+▸ \`${prefix}toggle\`: Deshabilita cualquier comando para uso público sin necesidad de cambiar el código.`)
   .setColor(Colores.nocolor);
   
     if(!via){

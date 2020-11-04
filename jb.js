@@ -109,10 +109,10 @@ const Commands = require("./modelos/tvCommands.js");
 const Exp = require("./modelos/exp.js");
 const Cuenta = require("./modelos/cuenta.js");
 const AutoRole = require("./modelos/autorole.js");
+const Toggle = require("./modelos/toggle.js");
 
 const Dark = require("./modelos/globalDark.js");
 const Stats = require("./modelos/darkstats.js");
-
 
 /* ##### MONGOOSE ######## */
 
@@ -781,8 +781,35 @@ bot.on("message", async message => {
       commandsCooldown.delete(author.id);
     }, cmdCooldown * 1000);
 
+    // handler
     let commandFile = bot.comandos.get(cmd.slice(prefix.length));
-    if (commandFile) commandFile.run(bot, message, args, active);
+
+
+    Toggle.findOne({
+      command: cmd
+    }, (err, cmdDisabled) => {
+      if(err) throw err;
+
+      if(!cmdDisabled && commandFile){ // si no encuentra un toggle busca el alias
+        Toggle.findOne({
+          alias: cmd
+        }, (err, aliasDisabled) => {
+          if(err) throw err;
+
+          if(!aliasDisabled){ // si no encuentra tampoco el alias entonces correr comando
+            if (commandFile) commandFile.run(bot, message, args, active);
+          } else {
+            return message.reply("este comando está deshabilitado.");
+          }
+        })
+      } else if(!commandFile){ // si no existe el comando, return
+        return;
+      } else if(author.id === jeffreygID) { // si es jeffrey
+        if (commandFile) commandFile.run(bot, message, args, active);
+      } else { // si encuentra el comando toggleado return nomas
+        return message.reply("este comando está deshabilitado.");
+      }
+    })
 
     if (message.content === `${prefix}coins`) {
       //if(message.author.id != jeffreygID) return message.reply("Comando en mantenimiento, vuelve más tarde!");
