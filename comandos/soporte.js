@@ -29,7 +29,6 @@ const Banned = require("../modelos/banned.js");
 module.exports.run = async (bot, message, args) => {
 
   if(!message.content.startsWith(prefix))return;
-  if(message.author.id != jeffreygID) return;
   message.delete();
 
   // Variables
