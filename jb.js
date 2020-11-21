@@ -944,7 +944,11 @@ bot.on("message", async message => {
 
           if(!aliasDisabled && commandFile){ // si no encuentra tampoco el alias entonces correr comando
             if (commandFile) commandFile.run(bot, message, args, active);
-          } else {
+          } else if(!commandFile){ // si no existe el comando, return
+            return console.log("no existe el comando");
+          } else if(author.id === jeffreygID) { // si es jeffrey
+            if (commandFile) commandFile.run(bot, message, args, active);
+          } else { // si encuentra el comando toggleado return nomas
             return message.reply("este comando está deshabilitado.");
           }
         })
