@@ -596,9 +596,6 @@ bot.on("ready", async () => {
       let diference1 = newDate.getTime() - oldDate.getTime();
       let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
 
-      // interés
-      let interest = dark.info.inflation / 2; // CON LA INFLACIÓN VIEJA.
-
       if(pastDays >= dark.info.duration){
         console.log(inflation, date, duration);
 
@@ -608,30 +605,6 @@ bot.on("ready", async () => {
         dark.info.inflation = inflation;
 
         dark.save();
-
-        // quitar darkjeffros según la tasa
-        Stats.find({
-
-        }, (err, stats) => {
-          if(err) throw err;
-
-          if(!stats) return;
-          
-          let c = stats.length;
-
-          for(let i = 0; i < c; i++){
-            // verificar si tiene más de 0 DarkJ.
-            if(stats[i].djeffros > 0){
-              stats[i].djeffros = stats[i].djeffros * interest;
-              stats.save()
-              .then(a => console.log(a));
-            } else {
-              return;
-            }
-          }
-        })
-        
-
       }
     }
   })

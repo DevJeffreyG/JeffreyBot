@@ -270,6 +270,7 @@ module.exports.run = async (bot, message, args) => {
                             .setAuthor(`| Comandos`, Config.darkLogoPng)
                             .setDescription(`**—** \`${prefix}ds bal\`: Mira tus estadísticas.
             **—** \`${prefix}ds status\`: Mira el estado de la moneda.
+            **—** \`${prefix}ds duration\`: Miras la fecha/duración que tienen tus DarkJeffros actuales.
             **—** \`${prefix}ds change\`: Cambia tus Jeffros por DarkJeffros.
             **—** \`${prefix}ds withdraw\`: Cambia tus DarkJeffros por Jeffros.
             **—** \`${prefix}ds calc\`: Determina automáticamente cuantos Jeffros tienes actualmente.
@@ -298,7 +299,47 @@ module.exports.run = async (bot, message, args) => {
 
                             message.channel.send(stonksEmbed);
                             break;
-                            
+                        
+                        case "duration":
+                        case "dur":
+                        case "d":
+
+                            let error1 = new Discord.MessageEmbed()
+                            .setAuthor(`| Error`, Config.darkLogoPng)
+                            .setColor(Colores.negro)
+                            .setDescription(`**—** Parece que no se ha generado ninguna fecha de expiración... intenta cambiando algunos Jeffros por DarkJeffros...`)
+                            .setFooter("▸ Si crees que se trata de un error, contacta al Staff.");
+
+                            GlobalData.findOne({
+                                "info.type": "dsDJDuration",
+                                "info.userID": author.id
+                            }, (err, authorData) => {
+                                if(err) throw err;
+
+                                if(!authorData){
+                                    return message.channel.send(error1);
+                                } else {
+                                    // leer y cambiar si es necesario
+
+                                    let oldDate = new Date(authorData.info.since); // fecha del dia inicial
+                                    let newDate = new Date(); // hoy
+
+                                    let diference1 = newDate.getTime() - oldDate.getTime();
+                                    let pastDays = Math.floor(diference1 / (1000 * 3600 * 24)); // dias transcurridos
+
+                                    let embed = new Discord.MessageEmbed()
+                                    .setAuthor(`| Información del usuario N°${author.id}`, author.displayAvatarURL())
+                                    .setDescription(`**— Duración total**: **${authorData.info.duration}** días.
+                                    **— Desde la fecha**: **${authorData.info.since}**.
+                                    **— Han transcurrido**: **${pastDays}**.`)
+                                    .setThumbnail(Config.darkLogoPng)
+                                    .setColor(Colores.negro);
+                                    
+                                    message.channel.send(embed)
+                                }
+                            })
+                            break;
+
                         case "dep":
                         case "deposit":
                         case "depositar":
@@ -349,7 +390,7 @@ module.exports.run = async (bot, message, args) => {
                                     if(err) throw err;
 
                                     date = new Date() // hoy
-                                    duration = Math.floor(Math.random() * 30); // duración máxima 30 días.
+                                    duration = Number(dark.type.duration) + Math.floor(Math.random() * 60); // duración máxima 60 días & minima de la duracion de la inflacion actual.
 
                                     if(!djDuration){ // si no existe ninguna data global de tipo dsDJDuration, simplemente crear una nueva para este usuario
                                         const newData = new GlobalData({
@@ -362,6 +403,8 @@ module.exports.run = async (bot, message, args) => {
                                         })
 
                                         newData.save();
+                                    } else {
+                                        console.log("Ya tiene una duracion de DJ de " + djDuration.info.duration)
                                     }
                                 })
 
