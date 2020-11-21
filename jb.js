@@ -611,7 +611,7 @@ bot.on("ready", async () => {
 
   // ELIMINAR DARKJEFFROS CADUCADOS
   GlobalData.find({
-    "info.type": "dsJDDuration"
+    "info.type": "dsDJDuration"
   }, (err, dark) => {
     if(err) throw err;
 
