@@ -407,12 +407,24 @@ module.exports.run = async (bot, message, args) => {
                                         newData.save();
                                     } else {
                                         console.log("Ya tiene una duracion de DJ de " + djDuration.info.duration)
-                                        
-                                        djDuration.info.since = date;
-                                        djDuration.info.duration = duration;
 
-                                        djDuration.markModified("info");
-                                        djDuration.save();
+                                        // ya pasó el tiempo?
+
+                                        let oldDate = new Date(djDuration.info.since);
+                                        let newDate = new Date()
+
+                                        let diference1 = newDate.getTime() - oldDate.getTime();
+                                        let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
+
+                                        if(pastDays >= djDuration.info.duration){
+                                            djDuration.info.since = date;
+                                            djDuration.info.duration = duration;
+    
+                                            djDuration.markModified("info");
+                                            djDuration.save();
+                                        } else {
+                                            return console.log("aun no ha pasado el tiempo");
+                                        }
                                     }
                                 })
 
