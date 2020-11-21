@@ -589,7 +589,6 @@ bot.on("ready", async () => {
       newInflation.save();
     } else {
       // leer y cambiar si es necesario
-      console.log("LEYENDO DURACIONES")
 
       let oldDate = new Date(dark.info.since);
       let newDate = new Date()
