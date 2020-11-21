@@ -105,7 +105,6 @@ mongoose.connect(`${process.env.MONGOCONNECT}`, {
 });
 
 const Jeffros = require("./modelos/jeffros.js");
-const Commands = require("./modelos/tvCommands.js");
 const Exp = require("./modelos/exp.js");
 const Cuenta = require("./modelos/cuenta.js");
 const AutoRole = require("./modelos/autorole.js");
