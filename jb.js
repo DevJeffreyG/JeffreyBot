@@ -641,7 +641,7 @@ bot.on("ready", async () => {
           let embed = new Discord.MessageEmbed()
           .setAuthor(`| ...`, Config.darkLogoPng)
           .setColor(Colores.negro)
-          .setDescription(`**—** Parece que no has vendido todos tus DarkJeffros. Han sido eliminados de tu cuenta tras haber concluido los días estipulados. (\`${dark.info.duration} días.\`)`)
+          .setDescription(`**—** Parece que no has vendido todos tus DarkJeffros. Han sido eliminados de tu cuenta tras haber concluido los días estipulados. (\`${dark[i].info.duration} días.\`)`)
           .setFooter("▸ Si crees que se trata de un error, contacta al Staff.");
 
           // eliminarlos de la cuenta (0)
