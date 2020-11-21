@@ -54,6 +54,7 @@ module.exports.run = async (bot, message, args) => {
             type: "dsInflation"
         }
     }, (err, dark) => {
+            console.log(dark);
             if (err) throw err;
         
             Exp.findOne({
