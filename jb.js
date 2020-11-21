@@ -589,6 +589,7 @@ bot.on("ready", async () => {
       newInflation.save();
     } else {
       // leer y cambiar si es necesario
+      console.log("LEYENDO DURACIONES")
 
       let oldDate = new Date(dark.info.since);
       let newDate = new Date()
@@ -596,8 +597,9 @@ bot.on("ready", async () => {
       let diference1 = newDate.getTime() - oldDate.getTime();
       let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
 
+      console.log(pastDays, dark.info.date, dark.info.duration);
+
       if(pastDays >= dark.info.duration){
-        console.log(inflation, date, duration);
 
         dark.info.oldinflation = dark.info.inflation;
         dark.info.since = date;
