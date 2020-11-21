@@ -22,8 +22,8 @@ const Warn = require("../modelos/warn.js");
 
 const Stats = require("../modelos/darkstats.js");
 const Items = require("../modelos/darkitems.js");
-const Dark = require("../modelos/globalDark.js");
 const DarkUse = require("../modelos/darkUse.js");
+const GlobalData = require("../modelos/globalData.js");
 const darkstats = require("../modelos/darkstats.js");
 
 /* ##### MONGOOSE ######## */
@@ -49,7 +49,10 @@ module.exports.run = async (bot, message, args) => {
       userID: author.id
   }, (err, jeffros) => {
 
-    Dark.findOne({
+    GlobalData.findOne({
+        info: {
+            type: "dsInflation"
+        }
     }, (err, dark) => {
             if (err) throw err;
         
@@ -322,6 +325,7 @@ module.exports.run = async (bot, message, args) => {
                             .setAuthor(`| Éxito`, Config.darkLogoPng)
                             .setDescription(`**—** Se han restado **${Emojis.Jeffros}${totalJeffros}**.
                             **—** Se añadieron **${Emojis.Dark}${wanted}** a tu cuenta.`)
+                            .setFooter(`Por favor, usa '${prefix}ds duration' para saber el tiempo que tienes para poder vender cambiar tus DarkJeffros.`)
                             .setColor(Colores.negro);
 
                             let nope = new Discord.MessageEmbed()
@@ -338,6 +342,31 @@ module.exports.run = async (bot, message, args) => {
                                 userID: author.id
                             }, (err, stats) => {
                                 if(err) throw err;
+
+                                // agregar una nueva data global: "duracion de darkjeffros"
+                                GlobalData.findOne({
+                                    info: {
+                                        type: "dsDJDuration"
+                                    }
+                                }, (err, djDuration) => {
+                                    if(err) throw err;
+
+                                    date = new Date() // hoy
+                                    duration = Math.floor(Math.random() * 30); // duración máxima 30 días.
+
+                                    if(!djDuration){ // si no existe ninguna data global de tipo dsDJDuration, simplemente crear una nueva para este usuario
+                                        const newData = new GlobalData({
+                                            info: {
+                                                type: "dsDJDuration", // duracion de darkjeffros en la ds
+                                                userID: author.id,
+                                                since: date,
+                                                duration: duration
+                                            }
+                                        })
+
+                                        newData.save();
+                                    }
+                                })
 
                                 if(!stats){
                                     const newStats = new Stats({
@@ -888,6 +917,15 @@ module.exports.run = async (bot, message, args) => {
                             
                             break;
                         default:
+
+                            let error = new Discord.MessageEmbed()
+                            .setAuthor(`| Error`, Config.darkLogoPng)
+                            .setDescription(
+                            `**—** No encontré ningún item para comprar con esa id...`
+                            )
+                            .setColor(Colores.negro);
+
+                            if(isNaN(args[0])) return message.channel.send(error);
                             itemID = args[0];
 
                             DarkUse.findOne({

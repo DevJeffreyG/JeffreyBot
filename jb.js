@@ -111,7 +111,7 @@ const Cuenta = require("./modelos/cuenta.js");
 const AutoRole = require("./modelos/autorole.js");
 const Toggle = require("./modelos/toggle.js");
 
-const Dark = require("./modelos/globalDark.js");
+const GlobalData = require("./modelos/globalData.js");
 const Stats = require("./modelos/darkstats.js");
 
 /* ##### MONGOOSE ######## */
@@ -564,8 +564,10 @@ bot.on("ready", async () => {
 
   // inflacion DARKSHOP
 
-  Dark.findOne({
-
+  GlobalData.findOne({
+    info: {
+      type: "dsInflation"
+    }
   }, (err, dark) => {
     if(err) throw err;
 
@@ -577,11 +579,14 @@ bot.on("ready", async () => {
     if(!dark){
       console.log(inflation, date, duration);
 
-      const newInflation = new Dark({
-        oldinflation: 1,
-        inflation: inflation,
-        since: date,
-        duration: duration
+      const newInflation = new GlobalData({
+        info: {
+          type: "dsInflation",
+          oldinflation: 1,
+          inflation: inflation,
+          since: date,
+          duration: duration
+        }
       });
 
       newInflation.save();
