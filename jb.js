@@ -674,7 +674,7 @@ bot.on("ready", async () => {
         event = "i";
       }
 
-      let inflation;
+      let eventinflation;
       date = new Date() // hoy
       duration = Math.floor(Math.random() * 30); // duración máxima 30 días.
 
@@ -685,10 +685,10 @@ bot.on("ready", async () => {
           if(err) throw err;
 
           if(!inflations){
-            return;
+            return console.log("No hay inflaciones");
           } else {
             let oldInflation = inflations.info.inflation;
-            inflation = Number((Math.random() * 10) + oldInflation).toFixed(2);
+            eventinflation = Number((Math.random() * 10) + oldInflation).toFixed(2);
           }
         })
       } else if(event === "b"){ // si el precio DEBE bajar
@@ -698,10 +698,10 @@ bot.on("ready", async () => {
           if(err) throw err;
 
           if(!inflations){
-            return;
+            return console.log("No hay inflaciones");
           } else {
             let oldInflation = inflations.info.inflation;
-            inflation = Number(Math.random() * oldInflation).toFixed(2);
+            eventinflation = Number(Math.random() * oldInflation).toFixed(2);
           }
         })
       } else { // el precio no cambia
@@ -711,10 +711,10 @@ bot.on("ready", async () => {
           if(err) throw err;
 
           if(!inflations){
-            return;
+            return console.log("No hay inflaciones");
           } else {
             let oldInflation = inflations.info.inflation;
-            inflation = Number(oldInflation);
+            eventinflation = Number(oldInflation);
           }
         })
       }
@@ -723,7 +723,7 @@ bot.on("ready", async () => {
         info: {
           type: "dsEventRandomInflation",
           event: event,
-          inflation: inflation,
+          inflation: eventinflation,
           since: date,
           duration: duration
         }
