@@ -712,6 +712,10 @@ bot.on("ready", async () => {
             return console.log("No hay inflaciones");
           } else {
             let oldInflation = inflations.info.inflation;
+
+            // si es menor a 1
+
+            if(oldInflation < 1) return;
             eventinflation = Number(Math.random() * oldInflation).toFixed(2);
 
             const newData = new GlobalData({
