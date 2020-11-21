@@ -942,7 +942,7 @@ bot.on("message", async message => {
         }, (err, aliasDisabled) => {
           if(err) throw err;
 
-          if(!aliasDisabled){ // si no encuentra tampoco el alias entonces correr comando
+          if(!aliasDisabled && commandFile){ // si no encuentra tampoco el alias entonces correr comando
             if (commandFile) commandFile.run(bot, message, args, active);
           } else {
             return message.reply("este comando está deshabilitado.");
