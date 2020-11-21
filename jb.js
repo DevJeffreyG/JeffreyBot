@@ -689,6 +689,17 @@ bot.on("ready", async () => {
           } else {
             let oldInflation = inflations.info.inflation;
             eventinflation = Number((Math.random() * 10) + oldInflation).toFixed(2);
+
+            const newData = new GlobalData({
+              info: {
+                type: "dsEventRandomInflation",
+                event: event,
+                inflation: eventinflation,
+                since: date,
+                duration: duration
+              }
+            });
+            newData.save();
           }
         })
       } else if(event === "b"){ // si el precio DEBE bajar
@@ -702,6 +713,17 @@ bot.on("ready", async () => {
           } else {
             let oldInflation = inflations.info.inflation;
             eventinflation = Number(Math.random() * oldInflation).toFixed(2);
+
+            const newData = new GlobalData({
+              info: {
+                type: "dsEventRandomInflation",
+                event: event,
+                inflation: eventinflation,
+                since: date,
+                duration: duration
+              }
+            });
+            newData.save();
           }
         })
       } else { // el precio no cambia
@@ -715,21 +737,20 @@ bot.on("ready", async () => {
           } else {
             let oldInflation = inflations.info.inflation;
             eventinflation = Number(oldInflation);
+
+            const newData = new GlobalData({
+              info: {
+                type: "dsEventRandomInflation",
+                event: event,
+                inflation: eventinflation,
+                since: date,
+                duration: duration
+              }
+            });
+            newData.save();
           }
         })
       }
-
-      const newData = new GlobalData({
-        info: {
-          type: "dsEventRandomInflation",
-          event: event,
-          inflation: eventinflation,
-          since: date,
-          duration: duration
-        }
-      });
-
-      newData.save();
     } else { // si ya existe, leerlo y revisar si ya es momento de cambiarlo
       let oldDate = new Date(dark.info.since);
       let newDate = new Date()
