@@ -591,28 +591,22 @@ bot.on("ready", async () => {
       newInflation.save();
     } else {
       // leer y cambiar si es necesario
-      console.log("LEYENDO DURACIONES")
-
       let oldDate = new Date(dark.info.since);
       let newDate = new Date()
 
       let diference1 = newDate.getTime() - oldDate.getTime();
       let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
 
-      console.log(pastDays, dark.info.since, dark.info.duration);
-
       if(pastDays >= dark.info.duration){
 
-        console.log("han pasado más dias de los de la duracion");
 
         dark.info.oldinflation = dark.info.inflation;
         dark.info.since = date;
         dark.info.duration = duration;
         dark.info.inflation = inflation;
 
-        dark.save()
-        .then(a => console.log(a))
-        .catch(err => console.log(err));
+        dark.markModified("info");
+        dark.save();
       }
     }
   })

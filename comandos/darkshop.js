@@ -405,6 +405,12 @@ module.exports.run = async (bot, message, args) => {
                                         newData.save();
                                     } else {
                                         console.log("Ya tiene una duracion de DJ de " + djDuration.info.duration)
+                                        
+                                        djDuration.info.since = date;
+                                        djDuration.info.duration = duration;
+
+                                        djDuration.markModified("info");
+                                        djDuration.save();
                                     }
                                 })
 
