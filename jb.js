@@ -656,6 +656,107 @@ bot.on("ready", async () => {
     }
   })
 
+  // CREAR EVENTO EN UN DIA RANDOM EN UN PLAZO DE 30 DIAS
+  GlobalData.findOne({
+    "info.type": "dsEventRandomInflation"
+  }, (err, dark) => {
+    if (err) throw err;
+
+    if(!dark){ // si no existe un evento random, crearlo
+      let event = "b";
+      let ecuation = Math.random()*100;
+
+      if(ecuation >= 80){ // SUBE EL PRECIO (INFLACION) EN EL EVENTO.
+        event = "s";
+      } else  if(ecuation >= 20){ // BAJA EL PRECIO (INFLACION) EN EL EVENTO. -> EL MÁS PROBABLE A PASAR
+        event = "b";
+      } else { // SI ES MENOR QUE 20 EL PRECIO NO CAMBIA
+        event = "i";
+      }
+
+      let inflation;
+      date = new Date() // hoy
+      duration = Math.floor(Math.random() * 30); // duración máxima 30 días.
+
+      if(event === "s"){ // si el precio DEBE subir
+        GlobalData.findOne({
+          "info.type": "dsInflation"
+        }, (err, inflations) => {
+          if(err) throw err;
+
+          if(!inflations){
+            return;
+          } else {
+            let oldInflation = inflations.info.inflation;
+            inflation = Number((Math.random() * 10) + oldInflation).toFixed(2);
+          }
+        })
+      } else if(event === "b"){ // si el precio DEBE bajar
+        GlobalData.findOne({
+          "info.type": "dsInflation"
+        }, (err, inflations) => {
+          if(err) throw err;
+
+          if(!inflations){
+            return;
+          } else {
+            let oldInflation = inflations.info.inflation;
+            inflation = Number(Math.random() * oldInflation).toFixed(2);
+          }
+        })
+      } else { // el precio no cambia
+        GlobalData.findOne({
+          "info.type": "dsInflation"
+        }, (err, inflations) => {
+          if(err) throw err;
+
+          if(!inflations){
+            return;
+          } else {
+            let oldInflation = inflations.info.inflation;
+            inflation = Number(oldInflation);
+          }
+        })
+      }
+
+      const newData = new GlobalData({
+        info: {
+          type: "dsEventRandomInflation",
+          event: event,
+          inflation: inflation,
+          since: date,
+          duration: duration
+        }
+      });
+
+      newData.save();
+    } else { // si ya existe, leerlo y revisar si ya es momento de cambiarlo
+      let oldDate = new Date(dark.info.since);
+      let newDate = new Date()
+
+      let diference1 = newDate.getTime() - oldDate.getTime();
+      let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
+
+      if(pastDays >= dark.info.duration){
+        // aplicar el evento a la inflacion actual
+        GlobalData.findOne({
+          "info.type": "dsInflation"
+        }, (err, newInflation) => {
+          if(err) throw err;
+          
+          newInflation.info.oldinflation = newInflation.info.inflation;
+          newInflation.info.inflation = dark.info.inflation;
+
+          newInflation.markModified("info");
+          newInflation.save();
+        })
+
+        // eliminar el evento
+        dark.remove();
+      }
+    }
+  })
+
 });
 
 //main
