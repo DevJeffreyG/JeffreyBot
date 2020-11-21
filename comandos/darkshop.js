@@ -329,9 +329,9 @@ module.exports.run = async (bot, message, args) => {
 
                                     let embed = new Discord.MessageEmbed()
                                     .setAuthor(`| Información del usuario N°${author.id}`, author.displayAvatarURL())
-                                    .setDescription(`**— Duración total**: **${authorData.info.duration}** días.
-                                    **— Desde la fecha**: **${authorData.info.since}**.
-                                    **— Han transcurrido**: **${pastDays}**.`)
+                                    .setDescription(`**— Duración total**: \`${authorData.info.duration}\` días.
+                                    **— Desde la fecha**: \`${authorData.info.since}\`.
+                                    **— Han transcurrido**: \`${pastDays}\` días.`)
                                     .setThumbnail(Config.darkLogoPng)
                                     .setColor(Colores.negro);
                                     
@@ -452,7 +452,7 @@ module.exports.run = async (bot, message, args) => {
                             inflation = dark.info.inflation
                             darkjeffro = 200*inflation
 
-                            totalJeffros = darkjeffro * changing;
+                            totalJeffros = Math.floor(darkjeffro * changing);
 
                             Stats.findOne({
                                 userID: author.id
