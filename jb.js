@@ -597,7 +597,7 @@ bot.on("ready", async () => {
       let diference1 = newDate.getTime() - oldDate.getTime();
       let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
 
-      console.log(pastDays, dark.info.date, dark.info.duration);
+      console.log(pastDays, dark.info.since, dark.info.duration);
 
       if(pastDays >= dark.info.duration){
 
