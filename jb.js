@@ -568,6 +568,8 @@ bot.on("ready", async () => {
   }, (err, dark) => {
     if(err) throw err;
 
+    console.log(dark);
+
     inflation = Number(Math.random() * 10).toFixed(2);
     if(Number(inflation) < 1) inflation = Number(inflation) + 1;
     date = new Date() // hoy
