@@ -359,7 +359,7 @@ module.exports.run = async (bot, message, args) => {
                             inflation = dark.info.inflation
                             darkjeffro = 200*inflation
 
-                            totalJeffros = darkjeffro * wanted;
+                            totalJeffros = Math.floor(darkjeffro * wanted);
 
                             let embed = new Discord.MessageEmbed()
                             .setAuthor(`| Éxito`, Config.darkLogoPng)
@@ -390,7 +390,7 @@ module.exports.run = async (bot, message, args) => {
                                     if(err) throw err;
 
                                     date = new Date() // hoy
-                                    duration = Number(dark.type.duration) + Math.floor(Math.random() * 60); // duración máxima 60 días & minima de la duracion de la inflacion actual.
+                                    duration = Number(dark.info.duration) + Math.floor(Math.random() * 60); // duración máxima 60 días & minima de la duracion de la inflacion actual.
 
                                     if(!djDuration){ // si no existe ninguna data global de tipo dsDJDuration, simplemente crear una nueva para este usuario
                                         const newData = new GlobalData({
