@@ -603,6 +603,8 @@ bot.on("ready", async () => {
 
       if(pastDays >= dark.info.duration){
 
+        console.log("han pasado más dias de los de la duracion");
+        
         dark.info.oldinflation = dark.info.inflation;
         dark.info.since = date;
         dark.info.duration = duration;
