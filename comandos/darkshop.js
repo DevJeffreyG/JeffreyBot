@@ -526,16 +526,34 @@ module.exports.run = async (bot, message, args) => {
                                     stonks = "📉";
                                 }
 
-                                if(!stats){
+                                if(!args[1]){
+                                    if(!stats){
+                                        let stonksEmbed = new Discord.MessageEmbed()
+                                        .setAuthor(`| Cálculo`, Config.darkLogoPng)
+                                        .setDescription(`${stonks} **— ${dark.info.inflation}%**.
+        **— ${Emojis.Dark}? = ${Emojis.Jeffros}?**.`)
+                                        .setColor(Colores.negro);
+
+                                        return message.channel.send(stonksEmbed);
+                                    } else {
+
+                                        let stonksEmbed = new Discord.MessageEmbed()
+                                        .setAuthor(`| Cálculo`, Config.darkLogoPng)
+                                        .setDescription(`${stonks} **— ${dark.info.inflation}%**.
+        **— ${Emojis.Dark}${stats.djeffros} = ${Emojis.Jeffros}${Math.floor(stats.djeffros*200*dark.info.inflation)}**.`)
+                                        .setColor(Colores.negro);
+
+                                        message.channel.send(stonksEmbed);
+                                    }
+                                } else if(!isNaN(args[1])){
                                     let stonksEmbed = new Discord.MessageEmbed()
-                                    .setAuthor(`| Cálculo`, Config.darkLogoPng)
-                                    .setDescription(`${stonks} **— ${dark.info.inflation}%**.
-    **— ${Emojis.Dark}? = ${Emojis.Jeffros}?**.`)
-                                    .setColor(Colores.negro);
+                                        .setAuthor(`| Cálculo`, Config.darkLogoPng)
+                                        .setDescription(`${stonks} **— ${dark.info.inflation}%**.
+        **— ${Emojis.Dark}${args[1]} = ${Emojis.Jeffros}${Math.floor(stats.args[1]*200*dark.info.inflation)}**.`)
+                                        .setColor(Colores.negro);
 
-                                    return message.channel.send(stonksEmbed);
+                                        message.channel.send(stonksEmbed);
                                 } else {
-
                                     let stonksEmbed = new Discord.MessageEmbed()
                                     .setAuthor(`| Cálculo`, Config.darkLogoPng)
                                     .setDescription(`${stonks} **— ${dark.info.inflation}%**.
@@ -611,7 +629,7 @@ module.exports.run = async (bot, message, args) => {
                                     let errorEmbed = new Discord.MessageEmbed()
                                     .setAuthor(`| Error`, Config.errorPng)
                                     .setDescription(
-                                        `▸ El uso correcto es: /darkshop add <nombre> <precio> (@role requerido o ID)
+                                        `▸ El uso correcto es: /darkshop add <nombre> <precio>
             **—** Para los roles, si no se necesita, rellenar con "\`na\`".`
                                     )
                                     .setColor(Colores.nocolor);
