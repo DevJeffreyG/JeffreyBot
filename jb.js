@@ -564,9 +564,7 @@ bot.on("ready", async () => {
   // inflacion DARKSHOP
 
   GlobalData.findOne({
-    info: {
-      type: "dsInflation"
-    }
+    "info.type": "dsInflation"
   }, (err, dark) => {
     if(err) throw err;
 

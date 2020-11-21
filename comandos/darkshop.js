@@ -50,9 +50,7 @@ module.exports.run = async (bot, message, args) => {
   }, (err, jeffros) => {
 
     GlobalData.findOne({
-        info: {
-            type: "dsInflation"
-        }
+        "info.type": "dsInflation"
     }, (err, dark) => {
             console.log(dark);
             if (err) throw err;
@@ -346,9 +344,7 @@ module.exports.run = async (bot, message, args) => {
 
                                 // agregar una nueva data global: "duracion de darkjeffros"
                                 GlobalData.findOne({
-                                    info: {
-                                        type: "dsDJDuration"
-                                    }
+                                    "info.type": "dsDJDuration"
                                 }, (err, djDuration) => {
                                     if(err) throw err;
 
