@@ -52,7 +52,6 @@ module.exports.run = async (bot, message, args) => {
     GlobalData.findOne({
         "info.type": "dsInflation"
     }, (err, dark) => {
-            console.log(dark);
             if (err) throw err;
         
             Exp.findOne({
@@ -331,7 +330,9 @@ module.exports.run = async (bot, message, args) => {
                                     .setAuthor(`| Información del usuario N°${author.id}`, author.displayAvatarURL())
                                     .setDescription(`**— Duración total**: \`${authorData.info.duration}\` días.
                                     **— Desde la fecha**: \`${authorData.info.since}\`.
-                                    **— Han transcurrido**: \`${pastDays}\` días.`)
+                                    **— Han transcurrido**: \`${pastDays}\` días.
+                                    
+                                    ***— No te dejes tomar tanto tiempo, consejo de profesional. La zona horaria en la Dark Shop es probable, sea diferente a la tuya. Recuerda: A penas pasen los días estipulados, todos los DarkJeffros que no hayas cambiado por Jeffros serán ELIMINADOS.***`)
                                     .setThumbnail(Config.darkLogoPng)
                                     .setColor(Colores.negro);
                                     
@@ -385,7 +386,8 @@ module.exports.run = async (bot, message, args) => {
 
                                 // agregar una nueva data global: "duracion de darkjeffros"
                                 GlobalData.findOne({
-                                    "info.type": "dsDJDuration"
+                                    "info.type": "dsDJDuration",
+                                    "info.userID": author.id
                                 }, (err, djDuration) => {
                                     if(err) throw err;
 

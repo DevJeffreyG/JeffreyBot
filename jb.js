@@ -568,8 +568,6 @@ bot.on("ready", async () => {
   }, (err, dark) => {
     if(err) throw err;
 
-    console.log(dark);
-
     inflation = Number(Math.random() * 10).toFixed(2);
     if(Number(inflation) < 1) inflation = Number(inflation) + 1;
     date = new Date() // hoy
@@ -608,6 +606,53 @@ bot.on("ready", async () => {
         dark.markModified("info");
         dark.save();
       }
+    }
+  })
+
+  // ELIMINAR DARKJEFFROS CADUCADOS
+  GlobalData.find({
+    "info.type": "dsJDDuration"
+  }, (err, dark) => {
+    if(err) throw err;
+
+    if(!dark) return;
+
+    for(let i = 0; i < dark.length; i++){
+      // variables
+      let id = dark[i].info.userID;
+      let member = guild.members.cache.find(x => x.id === id);
+
+      let oldDate = new Date(dark[i].info.since);
+      let newDate = new Date()
+
+      let diference1 = newDate.getTime() - oldDate.getTime();
+      let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
+
+      // revisar si tiene darkjeffros el usuario
+      Stats.findOne({
+        userID: id
+      }, (err, user) => {
+        if(err) throw err;
+
+        if(user.djeffros === 0) return;
+
+        // si tiene darkjeffros, ¿caducaron?
+        if(pastDays >= dark[i].info.duration){
+          let embed = new Discord.MessageEmbed()
+          .setAuthor(`| ...`, Config.darkLogoPng)
+          .setColor(Colores.negro)
+          .setDescription(`**—** Parece que no has vendido todos tus DarkJeffros. Han sido eliminados de tu cuenta tras haber concluido los días estipulados. (\`${dark.info.duration} días.\`)`)
+          .setFooter("▸ Si crees que se trata de un error, contacta al Staff.");
+
+          // eliminarlos de la cuenta (0)
+          user.djeffros = 0;
+          user.save();
+          // intentar enviar un mensaje al MD.
+          member.send(embed)
+          .catch(err => console.log("Usuario con MDs cerrados, no recibió mensaje de DarkJeffros eliminados."))
+        }
+      })
+
     }
   })
 
