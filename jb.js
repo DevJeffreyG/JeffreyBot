@@ -592,22 +592,22 @@ bot.on("ready", async () => {
     } else {
       // leer y cambiar si es necesario
 
-      let oldDate = new Date(dark.since);
+      let oldDate = new Date(dark.info.since);
       let newDate = new Date()
 
       let diference1 = newDate.getTime() - oldDate.getTime();
       let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
 
       // interés
-      let interest = dark.inflation / 2; // CON LA INFLACIÓN VIEJA.
+      let interest = dark.info.inflation / 2; // CON LA INFLACIÓN VIEJA.
 
-      if(pastDays >= dark.duration){
+      if(pastDays >= dark.info.duration){
         console.log(inflation, date, duration);
 
-        dark.oldinflation = dark.inflation;
-        dark.since = date;
-        dark.duration = duration;
-        dark.inflation = inflation;
+        dark.info.oldinflation = dark.info.inflation;
+        dark.info.since = date;
+        dark.info.duration = duration;
+        dark.info.inflation = inflation;
 
         dark.save();
 

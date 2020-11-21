@@ -285,7 +285,7 @@ module.exports.run = async (bot, message, args) => {
                         case "status":
                         case "estado":
                             let stonks
-                            if(dark.oldinflation <= dark.inflation){
+                            if(dark.info.oldinflation <= dark.info.inflation){
                                 stonks = "📈";
                             } else {
                                 stonks = "📉";
@@ -293,9 +293,9 @@ module.exports.run = async (bot, message, args) => {
 
                             let stonksEmbed = new Discord.MessageEmbed()
                             .setAuthor(`| Estado`, Config.darkLogoPng)
-                            .setDescription(`${stonks} **—** La inflación actual de los DarkJeffros es de un **${dark.inflation}%**.
-    **— ${Emojis.Dark}1 = ${Emojis.Jeffros}${Math.floor(200*dark.inflation)}**.
-    **—** Antes era de un \`${dark.oldinflation}%\`.`)
+                            .setDescription(`${stonks} **—** La inflación actual de los DarkJeffros es de un **${dark.info.inflation}%**.
+    **— ${Emojis.Dark}1 = ${Emojis.Jeffros}${Math.floor(200*dark.info.inflation)}**.
+    **—** Antes era de un \`${dark.info.oldinflation}%\`.`)
                             .setColor(Colores.negro);
 
                             message.channel.send(stonksEmbed);
@@ -317,7 +317,7 @@ module.exports.run = async (bot, message, args) => {
                             let wanted = Math.floor(args[1]);
 
                             // analizando inflación ¿a cuanto equivale un darkjeffro?
-                            inflation = dark.inflation
+                            inflation = dark.info.inflation
                             darkjeffro = 200*inflation
 
                             totalJeffros = darkjeffro * wanted;
@@ -410,7 +410,7 @@ module.exports.run = async (bot, message, args) => {
                             let changing = Math.floor(args[1]);
 
                             // analizando inflación ¿a cuanto equivale un darkjeffro?
-                            inflation = dark.inflation
+                            inflation = dark.info.inflation
                             darkjeffro = 200*inflation
 
                             totalJeffros = darkjeffro * changing;
@@ -461,7 +461,7 @@ module.exports.run = async (bot, message, args) => {
                                 if (err) throw err;
                                 let stonks;
                                 
-                                if(dark.oldinflation <= dark.inflation){
+                                if(dark.info.oldinflation <= dark.info.inflation){
                                     stonks = "📈";
                                 } else {
                                     stonks = "📉";
@@ -470,7 +470,7 @@ module.exports.run = async (bot, message, args) => {
                                 if(!stats){
                                     let stonksEmbed = new Discord.MessageEmbed()
                                     .setAuthor(`| Cálculo`, Config.darkLogoPng)
-                                    .setDescription(`${stonks} **— ${dark.inflation}%**.
+                                    .setDescription(`${stonks} **— ${dark.info.inflation}%**.
     **— ${Emojis.Dark}? = ${Emojis.Jeffros}?**.`)
                                     .setColor(Colores.negro);
 
@@ -479,8 +479,8 @@ module.exports.run = async (bot, message, args) => {
 
                                     let stonksEmbed = new Discord.MessageEmbed()
                                     .setAuthor(`| Cálculo`, Config.darkLogoPng)
-                                    .setDescription(`${stonks} **— ${dark.inflation}%**.
-    **— ${Emojis.Dark}${stats.djeffros} = ${Emojis.Jeffros}${Math.floor(stats.djeffros*200*dark.inflation)}**.`)
+                                    .setDescription(`${stonks} **— ${dark.info.inflation}%**.
+    **— ${Emojis.Dark}${stats.djeffros} = ${Emojis.Jeffros}${Math.floor(stats.djeffros*200*dark.info.inflation)}**.`)
                                     .setColor(Colores.negro);
 
                                     message.channel.send(stonksEmbed);
