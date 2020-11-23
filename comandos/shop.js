@@ -50,13 +50,19 @@ module.exports.run = async (bot, message, args) => {
       (err, items) => {
         if (err) throw err;
 
+        Jeffros.findOne({
+          userID: author.id
+        }, (err, j) => {
+
+
         let embed = new Discord.MessageEmbed()
         .setAuthor(
           `| Shop`,
           author.displayAvatarURL()
         )
           .setDescription(`**—** ¡Bienvenido a la nueva tienda! para comprar items \`${prefix}shop <ID del item>\`.
-**—** Para tener más información del item usa \`${prefix}shop info <id>\`.`);
+**—** Para tener más información del item usa \`${prefix}shop info <id>\`.
+**—** Tienes ${Emojis.Jeffros}**${j.jeffros}**`);
 
         if (items.length === 0) {
           embed.setColor(Colores.rojo);
@@ -225,7 +231,8 @@ module.exports.run = async (bot, message, args) => {
                               .setAuthor(`| Shop`, author.displayAvatarURL())
                               .setColor(Colores.verde)
                               .setDescription(`**—** ¡Bienvenido a la nueva tienda! para comprar items \`${prefix}shop <ID del item>\`.
-**—** Para tener más información del item usa \`${prefix}shop info <id>\`.`);
+**—** Para tener más información del item usa \`${prefix}shop info <id>\`.
+**—** Tienes ${Emojis.Jeffros}**${j.jeffros}**`);
 
                             Items.countDocuments({}, (err, c) => {
                               if (err) throw err;
@@ -317,7 +324,8 @@ module.exports.run = async (bot, message, args) => {
                               .setAuthor(`| Shop`, author.displayAvatarURL())
                               .setColor(Colores.verde)
                               .setDescription(`**—** ¡Bienvenido a la nueva tienda! para comprar items \`${prefix}shop <ID del item>\`.
-**—** Para tener más información del item usa \`${prefix}shop info <id>\`.`);
+**—** Para tener más información del item usa \`${prefix}shop info <id>\`.
+**—** Tienes ${Emojis.Jeffros}**${j.jeffros}**`);
 
                             Items.countDocuments({}, (err, c) => {
                               if (err) throw err;
@@ -405,6 +413,7 @@ module.exports.run = async (bot, message, args) => {
             });
           }
         }
+      })
       }
     );
   } else {
