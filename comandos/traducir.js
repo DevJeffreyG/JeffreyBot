@@ -23,7 +23,8 @@ exports.run = async (bot, message, args) => {
     .setColor(Colores.rojo);
     
     if (!args.includes("$")) {
-        message.channel.send(embed)
+        console.log("no $");
+        message.channel.send(embed);
     } else {
         var toTranslate = args.join(" ").slice(5)
         var lang = args[0].toString();
@@ -36,6 +37,7 @@ exports.run = async (bot, message, args) => {
                 message.channel.send(correctEmbed);
             })
             .catch(err => {
+                console.log(err);
                 message.channel.send(embed);
             })
     }
