@@ -16,6 +16,7 @@ const version = Config.version;
 const translate = require("translate-google");
 
 exports.run = async (bot, message, args) => {
+    return;
   let BRIGGS = message.guild.member("450453034724491266");
 
     var embed = new Discord.MessageEmbed()

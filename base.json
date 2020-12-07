@@ -2,7 +2,7 @@
     "prefix": "/",
     "tvPrefix": "!",
     "mantenimiento": 0,
-    "version": "> • La música ha vuelto.\n> • Ya puedes ver cuanto tiempo hace falta para volver a usar `/coins`.\n> • Cambiado versión 4.X a 1.X.",
+    "version": "> • La música ha vuelto.\n> • Ya puedes ver cuanto tiempo hace falta para volver a usar `/coins`.\n> • Cambiado versión 4.X a 1.X.\n> - Se ha eliminado el comando `/traducir`",
     "bienPng": "http://i.imgur.com/M6hqbcc.png",
     "errorPng": "https://i.imgur.com/obwiHcn.png",
     "jeffreyguildIcon": "https://media.discordapp.net/attachments/464810032081666048/563200897954611219/DiscordLogo2019.png",

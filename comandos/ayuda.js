@@ -46,7 +46,6 @@ module.exports.run = async (bot, message, args) => {
 ▸ \`${prefix}botinfo\`: Información del bot.
 ▸ \`${prefix}serverinfo\`: Información del servidor. __No es lo mismo que ${prefix}soporte__.
 ▸ \`${prefix}rep\`: Dale un punto de reputación a un usuario. ^^
-▸ \`${prefix}traducir\`: Traduce un texto a cualquier idioma.
 ▸ \`${prefix}ping\`: ¡Pong!`)
   .setColor(Colores.verde);
   
