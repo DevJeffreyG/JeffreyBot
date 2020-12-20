@@ -553,10 +553,30 @@ bot.on("guildMemberAdd", member => {
 });
 
 bot.on("ready", async () => {
-  let guild = bot.guilds.cache.find(x => x.id === Config.jgServer);
-  guild.members.fetch();
+  // para cada guild fetchear(?
+  let guilds = bot.guilds.cache.array();
+  //console.log(guilds);
+
+  let totalMembers = 0;
+
+  for (let i = 0; i < guilds.length; i++){
+    let actualGuild = bot.guilds.cache.find(x => x.id === guilds[i].id);
+    console.log(actualGuild.id)
+    actualGuild.members.fetch();
+
+    totalMembers += actualGuild.memberCount;
+
+    if(i+1 === guilds.length){ // final
+
+      bot.user.setActivity(`${prefix}ayuda - ${totalMembers} usuarios🔎`);
+
+      bot.user.setActivity(final);
+
+    }
+  }
+
+  
   console.log(`${bot.user.username} ONLINE`);
-  bot.user.setActivity(`${prefix}ayuda - ${guild.memberCount} usuarios🔎`);
 
   let channel = bot.channels.cache.get(logChannel);
   channel.send("Reviví.");
