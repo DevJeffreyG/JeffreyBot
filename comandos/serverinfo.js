@@ -44,7 +44,7 @@ module.exports.run = async (bot, message, args) => {
   let serverembed = new Discord.MessageEmbed()
   .setTitle(`Información del server — ${message.guild.name}`)
   .setColor(Colores.verde)
-  .setThumbnail(message.guild.displayAvatarURL())
+  .setThumbnail(message.guild.iconURL())
   .setDescription(`**— Creado el:** ${message.guild.createdAt}
   **— Tú te uniste el:** ${message.member.joinedAt}
   **— Miembros totales:** ${message.guild.memberCount}`)
