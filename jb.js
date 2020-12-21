@@ -555,6 +555,7 @@ bot.on("guildMemberAdd", member => {
 bot.on("ready", async () => {
   // para cada guild fetchear(?
   let guilds = bot.guilds.cache.array();
+  let guild = bot.guilds.cache.find(x => x.id === Config.jgServer);
   //console.log(guilds);
 
   let totalMembers = 0;
