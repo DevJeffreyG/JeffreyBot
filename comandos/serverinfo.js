@@ -9,19 +9,46 @@ module.exports.run = async (bot, message, args) => {
 
   // Variables
   const guild = message.guild;
-  let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
   let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
   let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
-  let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
   
+  if(bot.user.id === Config.testingJBID){
+    adminRole = guild.roles.cache.find(x => x.id === "483105079285776384");
+    modRole = guild.roles.cache.find(x => x.id === "483105108607893533");
+  }
+
+  let admins;
+  let mods;
+
+  for(let i = 0; i < adminRole.members.map().length; i++){
+    if(i === 0){
+      let map = adminRole.members.map();
+      admins = `${map[0].tag}`;
+    } else {
+      let map = adminRole.members.map();
+      admins = `${admins}, ${map[i].tag}`;
+    }
+  }
+
+  for(let i = 0; i < modRole.members.map().length; i++){
+    if(i === 0){
+      let map = modRole.members.map();
+      mods = `${map[0].tag}`;
+    } else {
+      let map = modRole.members.map();
+      mods = `${mods}, ${map[i].tag}`;
+    }
+  }
+
   let serverembed = new Discord.MessageEmbed()
-  .setTitle("Información del server")
+  .setTitle(`Información del server — ${message.guild.name}`)
   .setColor(Colores.verde)
   .setThumbnail(message.guild.displayAvatarURL())
-  .addField("▸ Nombre del server", message.guild.name)
-  .addField("▸ Creado en...", message.guild.createdAt)
-  .addField("▸ Tú te uniste...", message.guild.joinedAt)
-  .addField("▸ Miembros en el server...", message.guild.memberCount)
+  .setDescription(`**— Creado el:** ${message.guild.createdAt}
+  **— Tú te uniste el:** ${message.member.joinedAt}
+  **— Miembros totales:** ${message.guild.memberCount}`)
+  .addField(`— ${adminRole.name}`, `${admins}`)
+  .addField(`— ${modRole.name}`, `${mods}`)
   return message.channel.send(serverembed);
 
 }
