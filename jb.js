@@ -830,8 +830,8 @@ bot.on("ready", async () => {
             .setDescription(rSube)
             .setFooter(`La inflación SUBE.`)
 
-            message.channel.send(dsNews).then(() => {
-              message.channel.send(embed)
+            dsChannel.send(dsNews).then(() => {
+              dsChannel.send(embed)
             })
             break;
 
@@ -841,8 +841,8 @@ bot.on("ready", async () => {
             .setDescription(rBaja)
             .setFooter(`La inflación BAJA.`)
 
-            message.channel.send(dsNews).then(() => {
-              message.channel.send(embed2)
+            dsChannel.send(dsNews).then(() => {
+              dsChannel.send(embed2)
             })
             break;
 
@@ -852,8 +852,8 @@ bot.on("ready", async () => {
             .setDescription(rIgual)
             .setFooter(`La inflación se MANTIENE.`)
 
-            message.channel.send(dsNews).then(() => {
-              message.channel.send(embed3)
+            dsChannel.send(dsNews).then(() => {
+              dsChannel.send(embed3)
             })
             break;
         }
