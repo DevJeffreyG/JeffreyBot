@@ -635,7 +635,6 @@ module.exports.run = async (bot, message, args) => {
                                     let lastID = c + plus;
 
                                     const newItem = new Items({
-                                    serverID: guild.id,
                                     itemName: nameItem,
                                     itemPrice: priceItem,
                                     itemDescription: "na",
@@ -700,7 +699,6 @@ module.exports.run = async (bot, message, args) => {
 
                             Items.findOne(
                                 {
-                                serverID: guild.id,
                                 id: args[1]
                                 },
                                 (err, data) => {
@@ -753,7 +751,6 @@ module.exports.run = async (bot, message, args) => {
                     
                             Items.findOne(
                             {
-                                serverID: guild.id,
                                 id: idItem
                             },
                             (err, data) => {
@@ -866,7 +863,6 @@ module.exports.run = async (bot, message, args) => {
                                   }
                         
                                   const newUse = new DarkUse({
-                                    serverID: guild.id,
                                     itemID: args[1],
                                     action: args[2].toLowerCase(),
                                     thing: args[3].toLowerCase(),
