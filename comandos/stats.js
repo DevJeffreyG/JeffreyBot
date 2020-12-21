@@ -18,11 +18,11 @@ module.exports.run = async (bot, message, args) => {
   // Variables
   let author = message.author;
   const guild = message.guild;
-  let mainChannel = guild.channel.cache.find(x => x.id === Config.mainChannel);
+  let mainChannel = guild.channels.cache.find(x => x.id === Config.mainChannel);
   let member;
 
   if(bot.user.id === Config.testingJBID){
-    mainChannel = guild.channel.cache.find(x => x.id === "535500338015502357");
+    mainChannel = guild.channels.cache.find(x => x.id === "535500338015502357");
   }
   
   if(!args[0]){

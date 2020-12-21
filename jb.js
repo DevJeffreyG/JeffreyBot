@@ -577,6 +577,11 @@ bot.on("ready", async () => {
   console.log(`${bot.user.username} ONLINE`);
 
   let channel = bot.channels.cache.get(logChannel);
+
+  if(bot.user.id === Config.testingJBID){
+    channel = bot.channels.cache.get("483108734604804107")
+  }
+  
   channel.send("Reviví.");
 
   // inflacion DARKSHOP
