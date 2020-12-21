@@ -53,8 +53,6 @@ module.exports.run = async (bot, message, args) => {
   .setColor(Colores.rojo)
   .setDescription(`Este usuario no tiene warns :D`);
   
-  console.log(member.id);
-
   Warn.findOne({
     userID: member.id
   }, (err, warns) => {
