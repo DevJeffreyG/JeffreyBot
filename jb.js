@@ -823,6 +823,7 @@ bot.on("ready", async () => {
         let rBaja = rndmEventBAJA[Math.floor(Math.random() * rndmEventBAJA.length)];
         let rIgual = rndmEventIGUAL[Math.floor(Math.random() * rndmEventIGUAL.length)];
 
+        // ENVIA MENSAJE VACIO????
         switch(dark.info.event){
           case "s":
             let embed = new Discord.MessageEmbed()
