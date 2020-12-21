@@ -816,7 +816,7 @@ bot.on("ready", async () => {
         ];
 
         let rndmEventIGUAL = [
-          `Por poco... no han intentado robar en una agencia, la inflación se queda en ${newInflation}`
+          `Por poco... nos han intentado robar en una de nuestras sucursales, la inflación se queda en ${newInflation}`
         ];
 
         let rSube = rndmEventSUBE[Math.floor(Math.random() * rndmEventSUBE.length)];
@@ -828,7 +828,9 @@ bot.on("ready", async () => {
             let embed = new Discord.MessageEmbed()
             .setAuthor(`| Evento`, Config.darkLogoPng)
             .setDescription(rSube)
+            .setColor(Colores.negro)
             .setFooter(`La inflación SUBE.`)
+            .setTimestamp();
 
             dsChannel.send(`${dsNews}`).then(() => {
               dsChannel.send(embed)
@@ -839,7 +841,9 @@ bot.on("ready", async () => {
             let embed2 = new Discord.MessageEmbed()
             .setAuthor(`| Evento`, Config.darkLogoPng)
             .setDescription(rBaja)
+            .setColor(Colores.negro)
             .setFooter(`La inflación BAJA.`)
+            .setTimestamp();
 
             dsChannel.send(`${dsNews}`).then(() => {
               dsChannel.send(embed2)
@@ -850,7 +854,9 @@ bot.on("ready", async () => {
             let embed3 = new Discord.MessageEmbed()
             .setAuthor(`| Evento`, Config.darkLogoPng)
             .setDescription(rIgual)
+            .setColor(Colores.negro)
             .setFooter(`La inflación se MANTIENE.`)
+            .setTimestamp();
 
             dsChannel.send(`${dsNews}`).then(() => {
               dsChannel.send(embed3)
