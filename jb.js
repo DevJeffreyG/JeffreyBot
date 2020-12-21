@@ -587,12 +587,14 @@ bot.on("ready", async () => {
   console.log(`${bot.user.username} ONLINE`);
 
   let channel = bot.channels.cache.get(logChannel);
+  let dsChannel = bot.channels.cache.find(x => x.id === Config.dsChannel);
   let dsNews;
 
   if(bot.user.id === Config.testingJBID){
     channel = bot.channels.cache.get("483108734604804107");
     guild = bot.guilds.cache.find(x => x.id === "482989052136652800");
     dsNews = guild.roles.cache.find(x => x.id === "790431614378704906");
+    dsChannel = bot.channels.cache.find(x => x.id === "790431676970041356");
   } else {
     dsNews = guild.roles.cache.find(x => x.id === Config.dsnews);
   }
