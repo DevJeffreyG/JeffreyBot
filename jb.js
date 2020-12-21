@@ -579,7 +579,8 @@ bot.on("ready", async () => {
   let channel = bot.channels.cache.get(logChannel);
 
   if(bot.user.id === Config.testingJBID){
-    channel = bot.channels.cache.get("483108734604804107")
+    channel = bot.channels.cache.get("483108734604804107");
+    guild = bot.guilds.cache.find(x => x.id === "482989052136652800");
   }
   
   channel.send("Reviví.");
