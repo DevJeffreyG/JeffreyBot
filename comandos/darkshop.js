@@ -732,6 +732,7 @@ module.exports.run = async (bot, message, args) => {
                                         return message.channel.send(embed);
                                     }
                                 });
+                                break;
 
                         case "edit":
                             // editar un darkitem
