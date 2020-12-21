@@ -34,7 +34,7 @@ module.exports.run = async (bot, message, args) => {
   
   if(!args[0]) return message.channel.send(embed);
   if(!args[1]) return message.channel.send(embed);
-  if(!args[2]) {
+  if(!args[2] || args[2] != "1") {
   
   
     /* #### ADDING JEFFROS */

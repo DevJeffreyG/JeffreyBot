@@ -39,7 +39,7 @@ module.exports.run = async (bot, message, args) => {
 	  .setTimestamp()
     .setThumbnail(bot.user.displayAvatarURL());
     
-    jbChannel.send('<@&573308631018110986>~').then(r => {
+    jbChannel.send(jbNRole+`~`).then(r => {
       jbChannel.send(nEmbed);
     }).catch(e => console.log(e));
 
