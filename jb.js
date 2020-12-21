@@ -198,15 +198,15 @@ const lKeys = {
 
 bot.on("raw", async event => {
   if (lEvents.hasOwnProperty(event.t)) return;
-  
-  console.log("EVENTO:");
-  console.log(event);
-  const guild = bot.guilds.cache.get("447797737216278528");
-  const log = guild.channels.cache.get(Config.logChannel);
 
   if(bot.user.id === Config.testingJBID){
     return;
   }
+  
+  console.log("EVENTO:");
+  console.log(event);
+  const guild = bot.guilds.cache.get(Config.jgServer);
+  const log = guild.channels.cache.get(Config.logChannel);
   
   let e = guild.fetchAuditLogs().then(audit => {
     const entry = audit.entries.first();
