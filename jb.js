@@ -569,9 +569,6 @@ bot.on("ready", async () => {
     if(i+1 === guilds.length){ // final
 
       bot.user.setActivity(`${prefix}ayuda - ${totalMembers} usuarios🔎`);
-
-      bot.user.setActivity(final);
-
     }
   }
 
