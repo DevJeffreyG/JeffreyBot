@@ -53,12 +53,13 @@ module.exports.run = async (bot, message, args) => {
   .setColor(Colores.rojo)
   .setDescription(`Este usuario no tiene warns :D`);
   
+  console.log(member);
+
   Warn.findOne({
     userID: member.id
   }, (err, warns) => {
     if(err) throw err;
 
-    console.log(warns);
       SoftWarn.findOne({
         userID: member.id
       }, (err2, soft) => {
