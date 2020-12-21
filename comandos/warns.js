@@ -69,7 +69,12 @@ module.exports.run = async (bot, message, args) => {
           return message.channel.send(error)
         }
 
-        let w = warns.warns || 0;
+        let w;
+        if(!warns){
+          w = 0;
+        } else {
+          w = warns.warns;
+        }
         let n = soft.warns.length || 0;
 
         let badguy = new Discord.MessageEmbed()
