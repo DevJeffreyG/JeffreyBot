@@ -21,10 +21,10 @@ module.exports.run = async (bot, message, args) => {
   let mods;
 
   for(let i = 0; i < adminRole.members.map(user => user).length; i++){
+    console.log(admins);
     if(i === 0){
       let map = adminRole.members.map(user => user);
       admins = `${map[0].tag}`;
-      console.log(map);
     } else {
       let map = adminRole.members.map(user => user);
       admins = `${admins}, ${map[i].tag}`;
