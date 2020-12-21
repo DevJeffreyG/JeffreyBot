@@ -2,17 +2,8 @@ const Config = require("./../base.json");
 const Colores = require("./../colores.json");
 const Emojis = require("./../emojis.json");
 const Discord = require("discord.js");
-const bot = new Discord.Client();
-const fs = require("fs");
 const ms = require("ms");
 const prefix = Config.prefix;
-const jeffreygID = Config.jeffreygID;
-const jgServer = Config.jgServer;
-const offtopicChannel = Config.offtopicChannel;
-const mainChannel = Config.mainChannel;
-const botsChannel = Config.botsChannel;
-const logChannel = Config.logChannel;
-const version = Config.version;
 
 /* ##### MONGOOSE ######## */
 
@@ -27,18 +18,14 @@ module.exports.run = async (bot, message, args) => {
   if (!message.content.startsWith(prefix)) return;
   message.delete({ timeout: ms("5s") });
 
-  /*if (message.author.id != jeffreygID)
-    return message.reply(
-      `la bóveda está cerrada, por ahora. Maestro está buscando algo.`
-    );*/
-
   // Variables
   let author = message.author;
   const guild = message.guild;
-  let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
-  let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
-  let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
+
+  if(bot.user.id === Config.testingJBID){
+    return message.channel.send("Este comando es de uso exclusivo del server por las diferentes variables que se encuentran en código.")
+  }
 
   let embed = new Discord.MessageEmbed()
     .setTitle(`Ayuda: ${prefix}vault`)

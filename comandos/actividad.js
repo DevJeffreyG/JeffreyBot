@@ -1,11 +1,7 @@
 const Discord = require("discord.js");
 const Config = require(".././base.json");
-const bot = new Discord.Client({disableEveryone: true});
 let prefix = Config.prefix;
 const jeffreygID = Config.jeffreygID;
-const jgServer = Config.jgServer;
-const offtopicChannel = Config.offtopicChannel;
-const mainChannel = Config.mainChannel;
 
 module.exports.run = async (bot, message, args) => {
 

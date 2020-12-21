@@ -35,6 +35,13 @@ module.exports.run = async (bot, message, args) => {
   let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
   let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
+
+  if(bot.user.id === Config.testingJBID){
+      jeffreyRole = guild.roles.cache.find(x => x.id === "482992290550382592");
+      adminRole = guild.roles.cache.find(x => x.id === "483105079285776384");
+      modRole = guild.roles.cache.find(x => x.id === "483105108607893533");
+      staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
+  }
     
   let embed = new Discord.MessageEmbed()
   .setTitle(`Ayuda: ${prefix}comando`)

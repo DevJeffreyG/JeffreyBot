@@ -31,17 +31,17 @@ module.exports.run = async (bot, message, args) => {
   if(!message.content.startsWith(prefix))return;
 
   // Variables
-  let author = message.author;
   const guild = message.guild;
-  let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
-  let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
-  let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
-  let muteRole = guild.roles.cache.find(x => x.id === Config.muteRole);
-  let logC = guild.channels.cache.find(x => x.id === Config.logChannel);  
+  let logC = guild.channels.cache.find(x => x.id === Config.logChannel);
+
+  if(bot.user.id === Config.testingJBID){
+    staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
+    logC = guild.channels.cache.find(x => x.id === "483108734604804107");
+  }
   
-  if(message.member.roles.cache.find(x => x.id === jeffreyRole.id)){} else if(message.member.roles.cache.find(x => x.id === adminRole.id)){} else if(message.member.roles.cache.find(x => x.id === modRole.id)){} else {return;}
-  
+  if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
+
   let embed = new Discord.MessageEmbed()
   .setTitle(`Ayuda: ${prefix}warn`)
   .setColor(Colores.nocolor)

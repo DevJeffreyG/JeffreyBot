@@ -1,21 +1,13 @@
 const Config = require("./../base.json");
 const Colores = require("./../colores.json");
 const Discord = require("discord.js");
-const bot = new Discord.Client();
-const fs = require("fs");
-const ms = require("ms");
 const prefix = Config.prefix;
-const jeffreygID = 437668432604037142;
-const jgServer = 447797737216278528;
-const offtopicChannel = 483009038234157057;
-const version = Config.version;
 
 module.exports.run = async (bot, message, args) => {
 
   if(!message.content.startsWith(prefix))return;
 
   // Variables
-  let author = message.author;
   const guild = message.guild;
 
   let embed = new Discord.MessageEmbed()

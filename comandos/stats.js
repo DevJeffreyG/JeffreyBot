@@ -2,25 +2,12 @@ const Config = require("./../base.json");
 const Colores = require("./../colores.json");
 const Emojis = require("./../emojis.json");
 const Discord = require("discord.js");
-const bot = new Discord.Client();
-const fs = require("fs");
-const ms = require("ms");
 const prefix = Config.prefix;
-const jeffreygID = Config.jeffreygID;
-const jgServer = Config.jgServer;
-const offtopicChannel = Config.offtopicChannel;
-const mainChannel = Config.mainChannel;
-const botsChannel = Config.botsChannel;
-const logChannel = Config.logChannel;
-const version = Config.version;
 
 /* ##### MONGOOSE ######## */
 
 const Jeffros = require("../modelos/jeffros.js");
-const Reporte = require("../modelos/reporte.js");
 const Exp = require("../modelos/exp.js");
-const Warn = require("../modelos/warn.js");
-const Banned = require("../modelos/banned.js");
 
 /* ##### MONGOOSE ######## */
 
@@ -31,12 +18,12 @@ module.exports.run = async (bot, message, args) => {
   // Variables
   let author = message.author;
   const guild = message.guild;
-  let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
-  let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
-  let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
-  let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
+  let mainChannel = guild.channel.cache.find(x => x.id === Config.mainChannel);
   let member;
-  
+
+  if(bot.user.id === Config.testingJBID){
+    mainChannel = guild.channel.cache.find(x => x.id === "535500338015502357");
+  }
   
   if(!args[0]){
     member = message.guild.member(author)
@@ -60,7 +47,7 @@ module.exports.run = async (bot, message, args) => {
       if(err2) throw err2;
       
       if(!jeffros || !exp){
-        message.reply(`No tienen Jeffros, EXP, habla en <#${mainChannel}> para ganarlos.`)
+        message.reply(`No tienen Jeffros, EXP, habla en ${mainChannel} para ganarlos.`)
       } else {
         
         

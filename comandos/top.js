@@ -2,48 +2,22 @@ const Config = require("./../base.json");
 const Colores = require("./../colores.json");
 const Discord = require("discord.js");
 const Emojis = require("./../emojis.json");
-const bot = new Discord.Client();
-const fs = require("fs");
-const ms = require("ms");
 const prefix = Config.prefix;
-const jeffreygID = Config.jeffreygID;
-const jgServer = Config.jgServer;
-const offtopicChannel = Config.offtopicChannel;
 const mainChannel = Config.mainChannel;
-const botsChannel = Config.botsChannel;
-const version = Config.version;
 
 /* ##### MONGOOSE ######## */
 
 const Jeffros = require("../modelos/jeffros.js");
-const Reporte = require("../modelos/reporte.js");
 const Exp = require("../modelos/exp.js");
-const Warn = require("../modelos/warn.js");
-const Banned = require("../modelos/banned.js");
 
 /* ##### MONGOOSE ######## */
 
 module.exports.run = async (bot, message, args) => {
   if (!message.content.startsWith(prefix)) return;
-  /*if (
-    message.author.id != jeffreygID &&
-    message.author.id != 460913577105293313
-  )
-    return message.reply(
-      "este comando está en mantenimiento, vuelve más tarde."
-    );*/
 
   // Variables
   let author = message.author;
   const guild = message.guild;
-
-  let embed = new Discord.MessageEmbed()
-    .setTitle(`Ayuda: ${prefix}comando`)
-    .setColor(Colores.nocolor)
-    .setDescription(
-      `▸ El uso correcto es: ${prefix}top <Jeffros o EXP> \n▸ Te muestra el top del servidor, puede ser de Jeffros, o de EXP, dependiendo lo que desees.`
-    )
-    .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}tops`);
 
   let noTopS = new Discord.MessageEmbed()
     .setAuthor(`| Tipo de Top`, author.displayAvatarURL())

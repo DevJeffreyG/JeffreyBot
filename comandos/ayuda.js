@@ -2,57 +2,41 @@ const Config = require("./../base.json");
 const Colores = require("./../colores.json");
 const Emojis = require("./../emojis.json");
 const Discord = require("discord.js");
-const bot = new Discord.Client();
-const fs = require("fs");
-const ms = require("ms");
 const prefix = Config.prefix;
-const jeffreygID = Config.jeffreygID;
-const jgServer = Config.jgServer;
-const offtopicChannel = Config.offtopicChannel;
-const mainChannel = Config.mainChannel;
-const botsChannel = Config.botsChannel;
-const logChannel = Config.logChannel;
-const version = Config.version;
-
-/* ##### MONGOOSE ######## */
-
-const Jeffros = require("../modelos/jeffros.js");
-const Reporte = require("../modelos/reporte.js");
-const Exp = require("../modelos/exp.js");
-const Warn = require("../modelos/warn.js");
-const Banned = require("../modelos/banned.js");
-
-
-/* ##### MONGOOSE ######## */
 
 module.exports.run = async (bot, message, args) => {
 
   if(!message.content.startsWith(prefix))return;
 
+  // embeds*
+
   // Variables
-  let author = message.author;
   const guild = message.guild;
   let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
-  let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
-  let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
   let via = args[0];
+
+  if(bot.user.id === Config.testingJBID){
+    jeffreyRole = guild.roles.cache.find(x => x.id === "482992290550382592");
+    staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
+  }
     
   let ayudaEmbed = new Discord.MessageEmbed()
   .setAuthor(`| Comandos generales`, "https://cdn.discordapp.com/emojis/494282181296914432.png")
   .setDescription(`▸ \`${prefix}ayuda\`: Te muestra este mensaje.
-▸ \`${prefix}soporte\`: Recibe ayuda / información del servidor.
-▸ \`${prefix}bugreport\`: Puedes reportar un bug, para que Jeffrey lo arregle.
-▸ \`${prefix}botinfo\`: Información del bot.
-▸ \`${prefix}serverinfo\`: Información del servidor. __No es lo mismo que ${prefix}soporte__.
+▸ \`${prefix}bugreport\`: Puedes reportar un bug, para que Jeffrey lo revise.
+▸ \`${prefix}botinfo\`: Información del bot: versión y sus últimos cambios.
+▸ \`${prefix}serverinfo\`: Información del servidor.
 ▸ \`${prefix}rep\`: Dale un punto de reputación a un usuario. ^^
+▸ \`${prefix}warns\`: Con este comando puedes revisar un resumen de tus warns (MD).
 ▸ \`${prefix}ping\`: ¡Pong!`)
   .setColor(Colores.verde);
   
   let funEmbed = new Discord.MessageEmbed()
   .setAuthor(`| Comandos de diversión`, "https://cdn.discordapp.com/emojis/494282181296914432.png")
-  .setDescription(`▸ \`${prefix}perfil\`: Accede a tu perfil en la Jeffrey Net. *\`${prefix}perfil config\` para configurarlo.*
-▸ \`${prefix}say\`: Me dices que decir.
+  .setDescription(`▸ \`${prefix}say\`: Me dices que decir.
+▸ \`${prefix}vault\`: Si decifras unos acertijos pre-hechos por el staff podrás ganar Jeffros!
+▸ \`${prefix}avatar\`: Enviaré tu foto o la de otro usuario al canal de texto.
 ▸ \`${prefix}encuesta\`: Puedes hacer una encuesta.
 ▸ \`${prefix}8ball\`: La clásica 8Ball.`)
   .setColor(Colores.verde);
@@ -74,14 +58,20 @@ module.exports.run = async (bot, message, args) => {
   .setAuthor(`| Comandos de economía y EXP`, "https://cdn.discordapp.com/emojis/494282181296914432.png")
   .setDescription(`▸ \`${prefix}top\`: Obten el Top 10 de los ${Emojis.Jeffros}effros o EXP, lo que desees.
 ▸ \`${prefix}shop\`: Compra items en la Jeffrey Shop!
+▸ \`${prefix}usar\`: Usa los items que hayas comprado en la Jeffrey Shop de acuerdo a su ID.
+▸ \`${prefix}darkshop\`: Compra items, e invierte en Dark${Emojis.Dark}effros en la ${Emojis.DarkShop}Dark Shop!
 ▸ \`${prefix}stats\`: Tus estadísticas: EXP, nivel, ${Emojis.Jeffros}effros, etc.
 ▸ \`${prefix}pay\`: Le das de tus ${Emojis.Jeffros}effros a otro usuario.
 `)
   .setColor(Colores.verde);
   
   let modEmbed = new Discord.MessageEmbed()
-  .setAuthor(`| Comandos de Moderación`, "https://cdn.discordapp.com/emojis/494282181296914432.png")
-  .setDescription(`▸ \`${prefix}reglas\`: Envía un embed con las reglas enumeradas que son detectadas por el bot.
+  .setAuthor(`| Comandos de Staff`, "https://cdn.discordapp.com/emojis/494282181296914432.png")
+  .setDescription(`
+▸ \`${prefix}autorole\`: Se inicia proceso de creación de un nuevo autorole.
+▸ \`${prefix}dmuser\`: Jeffrey Bot enviará un mensaje a el usuario con lo que se especifique.
+▸ \`${prefix}jbnews\`: Se crea un anuncio mencionando a el rol de JB News con un embed con la noticia.
+▸ \`${prefix}reglas\`: Se envía un mensaje con las reglas registradas por Jeffrey Bot para ser usadas en comandos como \`${prefix}warn\`, \`${prefix}softwarn\` o \`${prefix}pardon\`.
 ▸ \`${prefix}ban\`: Baneas a un usuario.
 ▸ \`${prefix}kick\`: Kickeas a un usuario.
 ▸ \`${prefix}hackban\`: Baneas a un usuario que no está en el servidor, ideal para los raiders.
@@ -100,8 +90,10 @@ module.exports.run = async (bot, message, args) => {
   .setAuthor(`| Comandos de Desarrollador`, "https://cdn.discordapp.com/emojis/494282181296914432.png")
   .setDescription(`▸ \`${prefix}actividad\`: Cambias lo que estoy jugando ahora.
 ▸ \`${prefix}syncMute\`: Sincronizas el rol de Mute en todos los canales.
+▸ \`${prefix}add-jeffros\`: Añades Jeffros o Dark Jeffros a un usuario.
 ▸ \`${prefix}dbBan\`: Prohíbe a alguien enviar un reporte de bug.
 ▸ \`${prefix}role\`: Conoce el ID de un rol por su nombre.
+▸ \`${prefix}embeds\`: Diferentes embeds preestablecidos para usarlos en los canales de información.
 ▸ \`${prefix}toggle\`: Deshabilita cualquier comando para uso público sin necesidad de cambiar el código.`)
   .setColor(Colores.nocolor);
   

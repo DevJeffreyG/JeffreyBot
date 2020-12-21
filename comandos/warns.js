@@ -1,26 +1,11 @@
 const Config = require("./../base.json");
 const Colores = require("./../colores.json");
-const Emojis = require("./../emojis.json");
 const Discord = require("discord.js");
-const bot = new Discord.Client();
-const fs = require("fs");
-const ms = require("ms");
 const prefix = Config.prefix;
-const jeffreygID = Config.jeffreygID;
-const jgServer = Config.jgServer;
-const offtopicChannel = Config.offtopicChannel;
-const mainChannel = Config.mainChannel;
-const botsChannel = Config.botsChannel;
-const logChannel = Config.logChannel;
-const version = Config.version;
 
 /* ##### MONGOOSE ######## */
 
-const Jeffros = require("../modelos/jeffros.js");
-const Reporte = require("../modelos/reporte.js");
-const Exp = require("../modelos/exp.js");
 const Warn = require("../modelos/warn.js");
-const Banned = require("../modelos/banned.js");
 const SoftWarn = require("../modelos/softwarn.js");
 
 /* ##### MONGOOSE ######## */
@@ -30,12 +15,12 @@ module.exports.run = async (bot, message, args) => {
   if(!message.content.startsWith(prefix))return;
 
   // Variables
-  let author = message.author;
   const guild = message.guild;
-  let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
-  let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
-  let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
+
+  if(bot.user.id === Config.testingJBID){
+    staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
+  }
       
   let embed = new Discord.MessageEmbed()
   .setTitle(`Ayuda: ${prefix}warns`)
@@ -44,7 +29,7 @@ module.exports.run = async (bot, message, args) => {
   .setFooter(`<> Obligatorio () Opcional`);
   
   let member = guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[0]));
-  if((!message.member.roles.cache.find(x => x.id === staffRole.id) && !message.member.roles.cache.find(x => x.id === jeffreyRole.id)) || !args[0]) {
+  if(!message.member.roles.cache.find(x => x.id === staffRole.id) || !args[0]) {
     member = message.member;
   }
   if(!member) return message.channel.send(embed);

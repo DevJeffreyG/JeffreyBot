@@ -1,8 +1,5 @@
 const Config = require("./../base.json");
-const Colores = require("./../colores.json");
-const Emojis = require("./../emojis.json");
 const Discord = require("discord.js");
-const bot = new Discord.Client({disableEveryone: true});
 let prefix = Config.prefix;
 
 module.exports.run = async (bot, message, args) => {
