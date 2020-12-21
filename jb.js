@@ -823,12 +823,6 @@ bot.on("ready", async () => {
         let rBaja = rndmEventBAJA[Math.floor(Math.random() * rndmEventBAJA.length)];
         let rIgual = rndmEventIGUAL[Math.floor(Math.random() * rndmEventIGUAL.length)];
 
-        // ENVIA MENSAJE VACIO????
-        console.log("####")
-        console.log(dark.info.event);
-        console.log("####")
-        console.log(dsNews);
-
         switch(dark.info.event){
           case "s":
             let embed = new Discord.MessageEmbed()
@@ -836,7 +830,7 @@ bot.on("ready", async () => {
             .setDescription(rSube)
             .setFooter(`La inflación SUBE.`)
 
-            dsChannel.send(dsNews).then(() => {
+            dsChannel.send(`${dsNews}`).then(() => {
               dsChannel.send(embed)
             })
             break;
@@ -847,7 +841,7 @@ bot.on("ready", async () => {
             .setDescription(rBaja)
             .setFooter(`La inflación BAJA.`)
 
-            dsChannel.send(dsNews).then(() => {
+            dsChannel.send(`${dsNews}`).then(() => {
               dsChannel.send(embed2)
             })
             break;
@@ -858,7 +852,7 @@ bot.on("ready", async () => {
             .setDescription(rIgual)
             .setFooter(`La inflación se MANTIENE.`)
 
-            dsChannel.send(dsNews).then(() => {
+            dsChannel.send(`${dsNews}`).then(() => {
               dsChannel.send(embed3)
             })
             break;
