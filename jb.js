@@ -735,7 +735,6 @@ bot.on("ready", async () => {
             const newData = new GlobalData({
               info: {
                 type: "dsEventRandomInflation",
-                event: event,
                 inflation: eventinflation,
                 since: date,
                 duration: duration
@@ -763,7 +762,6 @@ bot.on("ready", async () => {
             const newData = new GlobalData({
               info: {
                 type: "dsEventRandomInflation",
-                event: event,
                 inflation: eventinflation,
                 since: date,
                 duration: duration
@@ -787,7 +785,6 @@ bot.on("ready", async () => {
             const newData = new GlobalData({
               info: {
                 type: "dsEventRandomInflation",
-                event: event,
                 inflation: eventinflation,
                 since: date,
                 duration: duration
@@ -823,7 +820,26 @@ bot.on("ready", async () => {
         let rBaja = rndmEventBAJA[Math.floor(Math.random() * rndmEventBAJA.length)];
         let rIgual = rndmEventIGUAL[Math.floor(Math.random() * rndmEventIGUAL.length)];
 
-        switch(dark.info.event){
+        // revisar si baja, sube o se queda igual de acuerdo a la inflación actual
+
+        GlobalData.findOne({
+          "info.type": "dsInflation"
+        }, (err, inflation) => {
+          if(err) throw err;
+          
+          let oldInflation = inflation.info.inflation;
+          let eventInflation = dark.info.inflation;
+          let event;
+
+          if(eventInflation > oldInflation){
+            event = "s";
+          } else if(eventInflation < oldInflation){
+            event = "b";
+          } else {
+            event = "i";
+          }
+
+        switch(event){
           case "s":
             let embed = new Discord.MessageEmbed()
             .setAuthor(`| Evento`, Config.darkLogoPng)
@@ -865,16 +881,12 @@ bot.on("ready", async () => {
         }
 
         // aplicar el evento a la inflacion actual
-        GlobalData.findOne({
-          "info.type": "dsInflation"
-        }, (err, newInflation) => {
-          if(err) throw err;
           
-          newInflation.info.oldinflation = newInflation.info.inflation;
-          newInflation.info.inflation = dark.info.inflation;
+          inflation.info.oldinflation = inflation.info.inflation;
+          inflation.info.inflation = dark.info.inflation;
 
-          newInflation.markModified("info");
-          newInflation.save();
+          inflation.markModified("info");
+          inflation.save();
         })
 
         // eliminar el evento
