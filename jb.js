@@ -379,7 +379,7 @@ bot.on("channelUpdate", (oldChannel, newChannel) => {
   if(bot.user.id === Config.testingJBID){
     return;
   }
-  
+
   let embed = new Discord.MessageEmbed();
 
   let e = guild.fetchAuditLogs().then(audit => {
@@ -830,24 +830,24 @@ bot.on("ready", async () => {
             break;
 
           case "b":
-            let embed = new Discord.MessageEmbed()
+            let embed2 = new Discord.MessageEmbed()
             .setAuthor(`| Evento`, Config.darkLogoPng)
             .setDescription(rBaja)
             .setFooter(`La inflación BAJA.`)
 
             message.channel.send(dsNews).then(() => {
-              message.channel.send(embed)
+              message.channel.send(embed2)
             })
             break;
 
           case "i":
-            let embed = new Discord.MessageEmbed()
+            let embed3 = new Discord.MessageEmbed()
             .setAuthor(`| Evento`, Config.darkLogoPng)
             .setDescription(rIgual)
             .setFooter(`La inflación se MANTIENE.`)
 
             message.channel.send(dsNews).then(() => {
-              message.channel.send(embed)
+              message.channel.send(embed3)
             })
             break;
         }
