@@ -43,7 +43,7 @@ module.exports.run = async (bot, message, args) => {
   .setDescription(`▸ El uso correcto es: ${prefix}warns <@usuario || ID> \n▸ Ves cuántos warns tiene un usuario.`)
   .setFooter(`<> Obligatorio () Opcional`);
   
-  let member = guild.member(message.mentions.users.first()) || message.guild.members.cache.get(args[0]);
+  let member = guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[0]));
   if((!message.member.roles.cache.find(x => x.id === staffRole.id) && !message.member.roles.cache.find(x => x.id === jeffreyRole.id)) || !args[0]) {
     member = message.member;
   }
@@ -53,7 +53,7 @@ module.exports.run = async (bot, message, args) => {
   .setColor(Colores.rojo)
   .setDescription(`Este usuario no tiene warns :D`);
   
-  console.log(member);
+  console.log(member.id);
 
   Warn.findOne({
     userID: member.id
