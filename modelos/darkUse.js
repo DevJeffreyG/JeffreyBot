@@ -6,6 +6,7 @@ const dUseSchema = mongoose.Schema({
   action: String, // "delete" para quitar X cosa || "add" para agregar X cosa
   thing: String, // "jeffros" || "warns" || "role" || "item"
   thingID: String, // id de "thing", id de role, por ejemplo
+  extra: Array, // puede ser por ejemplo; la duración del efecto
   id: Number // id del darkuso
 
 })

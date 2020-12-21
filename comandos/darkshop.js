@@ -852,10 +852,17 @@ module.exports.run = async (bot, message, args) => {
                                     );
                         
                                   let cosaID = "na";
+                                  let extra;
                                   if (args[3].toLowerCase() === "role" && !args[4]) {
                                     return message.reply(`falta la id del role.`);
                                   } else if (args[3].toLowerCase() === "role") {
                                     cosaID = args[4];
+                                  }
+
+                                  if(args[3].toLowerCase() === "role" && !args[5]){
+                                      return message.reply(`falta la duración del efecto (rol)`);
+                                  } else if (args[3].toLowerCase() === "role"){
+                                      extra = args[5];
                                   }
                         
                                   const newUse = new DarkUse({
@@ -864,6 +871,9 @@ module.exports.run = async (bot, message, args) => {
                                     action: args[2].toLowerCase(),
                                     thing: args[3].toLowerCase(),
                                     thingID: cosaID,
+                                    extra: [{
+                                        duration: extra
+                                    }],
                                     id: c + plus2
                                   });
                         
