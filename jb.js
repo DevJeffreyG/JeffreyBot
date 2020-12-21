@@ -151,7 +151,8 @@ const lEvents = {
   null: "",
   MESSAGE_REACTION_ADD: "",
   MESSAGE_REACTION_REMOVE: "",
-  MESSAGE_REACTION_REMOVE_ALL: ""
+  MESSAGE_REACTION_REMOVE_ALL: "",
+  GUILD_MEMBERS_CHUNK: ""
 };
 
 const lKeys = {
