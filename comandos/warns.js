@@ -59,7 +59,7 @@ module.exports.run = async (bot, message, args) => {
     if(err) throw err;
       SoftWarn.findOne({
         userID: member.id
-      }, (err, soft) => {
+      }, (err2, soft) => {
         if(err2) throw err;
 
         if((!soft || soft.warns.length === 0) && (!warns || warns.warns === 0)){
