@@ -563,7 +563,6 @@ bot.on("ready", async () => {
 
   for (let i = 0; i < guilds.length; i++){
     let actualGuild = bot.guilds.cache.find(x => x.id === guilds[i].id);
-    console.log(actualGuild.id)
     actualGuild.members.fetch();
 
     totalMembers += actualGuild.memberCount;

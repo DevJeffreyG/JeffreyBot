@@ -69,11 +69,12 @@ module.exports.run = async (bot, message, args) => {
           return message.channel.send(error)
         }
 
+        let w = warns.warns || 0;
         let n = soft.warns.length || 0;
 
         let badguy = new Discord.MessageEmbed()
         .setAuthor(`| ${member.user.tag}'s warns`, member.user.displayAvatarURL())
-        .setDescription(`**Número de warns ** ❛ \`${warns.warns}\` ❜
+        .setDescription(`**Número de warns ** ❛ \`${w}\` ❜
         **Número de Softwarns —** ❛ \`${n}\` ❜ ¬¬`)
         .setColor(Colores.verde);
         
