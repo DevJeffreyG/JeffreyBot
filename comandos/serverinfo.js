@@ -21,21 +21,22 @@ module.exports.run = async (bot, message, args) => {
   let mods;
 
   for(let i = 0; i < adminRole.members.map(user => user).length; i++){
+    console.log(adminRole.members.map(user => user).length);
     if(i === 0){
-      let map = adminRole.members.map();
+      let map = adminRole.members.map(user => user);
       admins = `${map[0].tag}`;
     } else {
-      let map = adminRole.members.map();
+      let map = adminRole.members.map(user => user);
       admins = `${admins}, ${map[i].tag}`;
     }
   }
 
   for(let i = 0; i < modRole.members.map(user => user).length; i++){
     if(i === 0){
-      let map = modRole.members.map();
+      let map = modRole.members.map(user => user);
       mods = `${map[0].tag}`;
     } else {
-      let map = modRole.members.map();
+      let map = modRole.members.map(user => user);
       mods = `${mods}, ${map[i].tag}`;
     }
   }
