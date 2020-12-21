@@ -202,7 +202,12 @@ bot.on("raw", async event => {
   console.log("EVENTO:");
   console.log(event);
   const guild = bot.guilds.cache.get("447797737216278528");
-  const log = guild.channels.cache.get(logChannel);
+  const log = guild.channels.cache.get(Config.logChannel);
+
+  if(bot.user.id === Config.testingJBID){
+    return;
+  }
+  
   let e = guild.fetchAuditLogs().then(audit => {
     const entry = audit.entries.first();
 
@@ -369,7 +374,12 @@ bot.on("channelUpdate", (oldChannel, newChannel) => {
  // if (!lKeys.hasOwnProperty(newChannel.changes[0].key)) return;
   
   const guild = bot.guilds.cache.get("447797737216278528");
-  const log = guild.channels.cache.get(logChannel);
+  const log = guild.channels.cache.get(Config.logChannel);
+
+  if(bot.user.id === Config.testingJBID){
+    return;
+  }
+  
   let embed = new Discord.MessageEmbed();
 
   let e = guild.fetchAuditLogs().then(audit => {
@@ -577,10 +587,12 @@ bot.on("ready", async () => {
   console.log(`${bot.user.username} ONLINE`);
 
   let channel = bot.channels.cache.get(logChannel);
+  let dsNews = bot.roles.cache.find(x => x.id === Config.dsnews)
 
   if(bot.user.id === Config.testingJBID){
     channel = bot.channels.cache.get("483108734604804107");
     guild = bot.guilds.cache.find(x => x.id === "482989052136652800");
+    dsNews = bot.roles.cache.find(x => x.id === "790431614378704906");
   }
   
   channel.send("Reviví.");
@@ -787,6 +799,59 @@ bot.on("ready", async () => {
       let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
 
       if(pastDays >= dark.info.duration){
+        // enviar mensaje random de evento
+        let newInflation = `**${dark.info.inflation}%**`;
+        let rndmEventSUBE = [
+          `Estamos de suerte, se han devaluado los Jeffros, la inflación ha subido al ${newInflation}`
+        ];
+
+        let rndmEventBAJA = [
+          `Parece que algo en las oficinas ha hecho que la inflación baje al ${newInflation}`
+        ];
+
+        let rndmEventIGUAL = [
+          `Por poco... no han intentado robar en una agencia, la inflación se queda en ${newInflation}`
+        ];
+
+        let rSube = rndmEventSUBE[Math.floor(Math.random() * rndmEventSUBE.length)];
+        let rBaja = rndmEventBAJA[Math.floor(Math.random() * rndmEventBAJA.length)];
+        let rIgual = rndmEventIGUAL[Math.floor(Math.random() * rndmEventIGUAL.length)];
+
+        switch(dark.info.event){
+          case "s":
+            let embed = new Discord.MessageEmbed()
+            .setAuthor(`| Evento`, Config.darkLogoPng)
+            .setDescription(rSube)
+            .setFooter(`La inflación SUBE.`)
+
+            message.channel.send(dsNews).then(() => {
+              message.channel.send(embed)
+            })
+            break;
+
+          case "b":
+            let embed = new Discord.MessageEmbed()
+            .setAuthor(`| Evento`, Config.darkLogoPng)
+            .setDescription(rBaja)
+            .setFooter(`La inflación BAJA.`)
+
+            message.channel.send(dsNews).then(() => {
+              message.channel.send(embed)
+            })
+            break;
+
+          case "i":
+            let embed = new Discord.MessageEmbed()
+            .setAuthor(`| Evento`, Config.darkLogoPng)
+            .setDescription(rIgual)
+            .setFooter(`La inflación se MANTIENE.`)
+
+            message.channel.send(dsNews).then(() => {
+              message.channel.send(embed)
+            })
+            break;
+        }
+
         // aplicar el evento a la inflacion actual
         GlobalData.findOne({
           "info.type": "dsInflation"

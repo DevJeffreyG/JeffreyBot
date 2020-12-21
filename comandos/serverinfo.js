@@ -27,8 +27,8 @@ module.exports.run = async (bot, message, args) => {
   .setDescription(`**— Creado el:** ${message.guild.createdAt}
   **— Tú te uniste el:** ${message.member.joinedAt}
   **— Miembros totales:** ${message.guild.memberCount}`)
-  .addField(`— ${adminRole.name}`, `${admins}`)
-  .addField(`— ${modRole.name}`, `${mods}`)
+  .addField(`— @${adminRole.name}`, `${admins}`)
+  .addField(`— @${modRole.name}`, `${mods}`)
   return message.channel.send(serverembed);
 
 }

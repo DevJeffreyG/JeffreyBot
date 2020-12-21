@@ -11,7 +11,7 @@ module.exports.run = async (bot, message, args) => {
   let author = message.author;
   const guild = message.guild;
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
-  let jbNRole = guild.roles.cache.find(x => x.id === '573308631018110986');
+  let jbNRole = guild.roles.cache.find(x => x.id === Config.jbnews);
   let jbChannel = guild.channels.cache.find(x => x.id === Config.announceChannel);
 
   if(bot.user.id === Config.testingJBID){
