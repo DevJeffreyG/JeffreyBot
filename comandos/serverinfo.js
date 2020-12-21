@@ -20,7 +20,7 @@ module.exports.run = async (bot, message, args) => {
   let admins;
   let mods;
 
-  for(let i = 0; i < adminRole.members.map().length; i++){
+  for(let i = 0; i < adminRole.members.map(user => user).length; i++){
     if(i === 0){
       let map = adminRole.members.map();
       admins = `${map[0].tag}`;
@@ -30,7 +30,7 @@ module.exports.run = async (bot, message, args) => {
     }
   }
 
-  for(let i = 0; i < modRole.members.map().length; i++){
+  for(let i = 0; i < modRole.members.map(user => user).length; i++){
     if(i === 0){
       let map = modRole.members.map();
       mods = `${map[0].tag}`;
