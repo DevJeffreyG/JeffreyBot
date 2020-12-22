@@ -830,137 +830,116 @@ module.exports.run = async (bot, message, args) => {
 
                         case "adduse":
                             if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
-                            let plus2 = 5325;
-                            DarkUse.countDocuments({}, (err, c) => {
-                                DarkUse.findOne(
-                                {
-                                  id: c + plus2
-                                },
-                                (err, found) => {
-                                  if (err) throw err;
                         
-                                  if (!found) {
-                                  } else {
-                                    while (c + plus2 === found.id) {
-                                      c += plus2 + 1;
-                                      console.log("equal id");
-                                    }
-                                  }
-                        
-                                  let useEmbedError = new Discord.MessageEmbed()
-                                  .setDescription(`▸ El uso correcto es: ${prefix}darkshop adduse \`itemID\` \`add || remove\` \`jeffros | warns | role\`
+                            let useEmbedError = new Discord.MessageEmbed()
+                            .setDescription(`▸ El uso correcto es: ${prefix}darkshop adduse \`itemID\` \`add || remove\` \`jeffros | warns | role\`
 
-                                  **— Jeffros —**
-                                  ${prefix}darkshop adduse \`itemID\` \`add || remove\` \`jeffros\` \`# Jeffros\` \`positive | negative\`
-                                  **— Warns —**
-                                  ${prefix}darkshop adduse \`itemID\` \`add || remove\` \`warns\` \`# Warns\` \`positive | negative\`
-                                  **— Role —**
-                                  ${prefix}darkshop adduse \`itemID\` \`add || remove\` \`role\` \`roleID\` \`duración\` \`positive | negative\``)
-                                  .setColor(Colores.negro);
+                            **— Jeffros —**
+                            ${prefix}darkshop adduse \`itemID\` \`add || remove\` \`jeffros\` \`# Jeffros\` \`positive | negative\`
+                            **— Warns —**
+                            ${prefix}darkshop adduse \`itemID\` \`add || remove\` \`warns\` \`# Warns\` \`positive | negative\`
+                            **— Role —**
+                            ${prefix}darkshop adduse \`itemID\` \`add || remove\` \`role\` \`roleID\` \`duración\` \`positive | negative\``)
+                            .setColor(Colores.negro);
 
 
-                                  if (!args[1]){
-                                    useEmbedError.setAuthor(`| Error: itemID`, Config.errorPng);
-                                    return message.channel.send(useEmbedError)
-                                  }
-                                  if (!args[2]) {
-                                    useEmbedError.setAuthor(`| Error: j / w / r`, Config.errorPng);
-                                    return message.channel.send(useEmbedError)
-                                  }
-                                  if (!args[3]){
-                                    useEmbedError.setAuthor(`| Error: itemID`, Config.errorPng);
-                                    return message.channel.send(useEmbedError)
-                                  }
-                        
-                                  let accion = args[2].toLowerCase();
-                                  let cosa = args[3].toLowerCase();
-                                  let cosaID = "na";
-                                  let duracion = "na";
-                                  let cantidad = "na";
-                                  let efecto = "na";
+                            if (!args[1]){
+                            useEmbedError.setAuthor(`| Error: itemID`, Config.errorPng);
+                            return message.channel.send(useEmbedError)
+                            }
+                            if (!args[2]) {
+                            useEmbedError.setAuthor(`| Error: j / w / r`, Config.errorPng);
+                            return message.channel.send(useEmbedError)
+                            }
+                            if (!args[3]){
+                            useEmbedError.setAuthor(`| Error: itemID`, Config.errorPng);
+                            return message.channel.send(useEmbedError)
+                            }
+                
+                            let accion = args[2].toLowerCase();
+                            let cosa = args[3].toLowerCase();
+                            let cosaID = "na";
+                            let duracion = "na";
+                            let cantidad = "na";
+                            let efecto = "na";
 
-                                  // SI ES UN ROLE
-                                  if (args[3].toLowerCase() === "role" && !args[4]) {
-                                    useEmbedError.setAuthor(`| Error: roleID`, Config.errorPng);
-                                    return message.channel.send(useEmbedError)
-                                  } else if (args[3].toLowerCase() === "role") {
-                                    cosaID = args[4];
-                                  }
+                            // SI ES UN ROLE
+                            if (args[3].toLowerCase() === "role" && !args[4]) {
+                            useEmbedError.setAuthor(`| Error: roleID`, Config.errorPng);
+                            return message.channel.send(useEmbedError)
+                            } else if (args[3].toLowerCase() === "role") {
+                            cosaID = args[4];
+                            }
 
-                                  if(args[3].toLowerCase() === "role" && !args[5]){
-                                    useEmbedError.setAuthor(`| Error: duración`, Config.errorPng);
-                                    return message.channel.send(useEmbedError)
-                                  } else if (args[3].toLowerCase() === "role"){
-                                      duracion = Number(ms(args[5].toLowerCase()));
-                                  }
-                                  
-                                    if(args[3].toLowerCase() === "role" && !args[6]){
-                                        useEmbedError.setAuthor(`| Error: negative / positive`, Config.errorPng);
-                                        return message.channel.send(useEmbedError)
-                                    } else if (args[3].toLowerCase() === "role"){
-                                        efecto = args[6].toLowerCase();
-                                    }
+                            if(args[3].toLowerCase() === "role" && !args[5]){
+                            useEmbedError.setAuthor(`| Error: duración`, Config.errorPng);
+                            return message.channel.send(useEmbedError)
+                            } else if (args[3].toLowerCase() === "role"){
+                                duracion = Number(ms(args[5].toLowerCase()));
+                            }
+                            
+                            if(args[3].toLowerCase() === "role" && !args[6]){
+                                useEmbedError.setAuthor(`| Error: negative / positive`, Config.errorPng);
+                                return message.channel.send(useEmbedError)
+                            } else if (args[3].toLowerCase() === "role"){
+                                efecto = args[6].toLowerCase();
+                            }
 
-                                  // SI SON WARNS
+                            // SI SON WARNS
 
-                                  if (args[3].toLowerCase() === "warns" && !args[4] || args[3].toLowerCase() === "warns" && isNaN(args[4])){
-                                    useEmbedError.setAuthor(`| Error: # Warns`, Config.errorPng);
-                                    return message.channel.send(useEmbedError)
-                                  } else {
-                                      cantidad = args[4];
-                                  }
+                            if (args[3].toLowerCase() === "warns" && !args[4] || args[3].toLowerCase() === "warns" && isNaN(args[4])){
+                            useEmbedError.setAuthor(`| Error: # Warns`, Config.errorPng);
+                            return message.channel.send(useEmbedError)
+                            } else {
+                                cantidad = args[4];
+                            }
 
-                                  if (args[3].toLowerCase() === "warns" && !args[5]){
-                                    useEmbedError.setAuthor(`| Error: negative / positive`, Config.errorPng);
-                                    return message.channel.send(useEmbedError)
-                                  } else {
-                                      efecto = args[5].toLowerCase();
-                                  }
+                            if (args[3].toLowerCase() === "warns" && !args[5]){
+                            useEmbedError.setAuthor(`| Error: negative / positive`, Config.errorPng);
+                            return message.channel.send(useEmbedError)
+                            } else {
+                                efecto = args[5].toLowerCase();
+                            }
 
-                                  // SI SON JEFFROS
-                                  if (args[3].toLowerCase() === "jeffros" && !args[4] || args[3].toLowerCase() === "jeffros" && isNaN(args[4])){
-                                    useEmbedError.setAuthor(`| Error: # Jeffros`, Config.errorPng);
-                                    return message.channel.send(useEmbedError)
-                                  } else {
-                                      cantidad = args[4];
-                                  }
+                            // SI SON JEFFROS
+                            if (args[3].toLowerCase() === "jeffros" && !args[4] || args[3].toLowerCase() === "jeffros" && isNaN(args[4])){
+                            useEmbedError.setAuthor(`| Error: # Jeffros`, Config.errorPng);
+                            return message.channel.send(useEmbedError)
+                            } else {
+                                cantidad = args[4];
+                            }
 
-                                  if (args[3].toLowerCase() === "jeffros" && !args[5]){
-                                    useEmbedError.setAuthor(`| Error: negative / positive`, Config.errorPng);
-                                    return message.channel.send(useEmbedError)
-                                  } else {
-                                      efecto = args[5].toLowerCase();
-                                  }
+                            if (args[3].toLowerCase() === "jeffros" && !args[5]){
+                            useEmbedError.setAuthor(`| Error: negative / positive`, Config.errorPng);
+                            return message.channel.send(useEmbedError)
+                            } else {
+                                efecto = args[5].toLowerCase();
+                            }
 
-                                    /*
-                                        action - "delete" para quitar X cosa || "add" para agregar X cosa
-                                        thing - "jeffros" || "warns" || "role" || "item"
-                                        thingID - id de "thing", id de role, por ejemplo
-                                        extra - puede ser por ejemplo; la duración del efecto
-                                    */
-                        
-                                  const newUse = new DarkUse({
-                                    itemID: args[1],
-                                    info: {
-                                        action: accion,
-                                        thing: cosa,
-                                        thingID: cosaID,
-                                        extra: {
-                                            duration: duracion,
-                                            quantity: cantidad,
-                                            effect: efecto
-                                        }
-                                    },
-                                    id: c + plus2
-                                  });
-                        
-                                  newUse.save().catch(e => console.log(e));
-                                  return message.react("✅");
+                            /*
+                                action - "delete" para quitar X cosa || "add" para agregar X cosa
+                                thing - "jeffros" || "warns" || "role" || "item"
+                                thingID - id de "thing", id de role, por ejemplo
+                                extra - puede ser por ejemplo; la duración del efecto
+                            */
+                
+                            const newUse = new DarkUse({
+                            itemID: args[1],
+                            info: {
+                                action: accion,
+                                thing: cosa,
+                                thingID: cosaID,
+                                extra: {
+                                    duration: duracion,
+                                    quantity: cantidad,
+                                    effect: efecto
                                 }
-                              );
+                            }
                             });
-                            break;
-
+                
+                            newUse.save().catch(e => console.log(e));
+                            return message.react("✅");
+                                
                         case "deluse":
                             if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
                             break;
