@@ -429,7 +429,7 @@ module.exports.run = async (bot, message, args) => {
                                         userID: author.id,
                                         djeffros: wanted,
                                         accuracy: Number(Number(Math.random() * 15).toFixed(1)),
-                                        items: {}
+                                        items: []
                                     });
 
                                     jeffros.jeffros -= totalJeffros;
@@ -954,7 +954,7 @@ module.exports.run = async (bot, message, args) => {
                                         if(!stats){
                                             return message.channel.send(noStats)
                                         } else { // tiene cuenta
-                                            if(!stats.items[0].id) return message.channel.send(noItems);
+                                            if(stats.items.legnth === 0) return message.channel.send(noItems);
 
                                             if(!args[1]){
                                                 let itemsEmbed = new Discord.MessageEmbed()
@@ -1038,7 +1038,7 @@ module.exports.run = async (bot, message, args) => {
                                                                             // ni siquiera tiene cuenta de darkshop ¿que debería hacer?
                                                                             dsChannel.send(fail3);
                                                                         } else {
-                                                                            if(!victimStats.items || !victimStats.items[0].id){ // tiene cuenta pero no items, proseguir
+                                                                            if(victimStats.items.length === 0){ // tiene cuenta pero no items, proseguir
                                                                                 dsChannel.send(success3);
                                                                                 victim.roles.add(role);
 
@@ -1250,7 +1250,7 @@ module.exports.run = async (bot, message, args) => {
                                                 yes.on("collect", r => {
                                                     // agregar a la lista de items
 
-                                                    if(!stats.items[0].id){
+                                                    if(stats.items.length === 0){
                                                         stats.items = [
                                                             {
                                                                 "id": item.id,
