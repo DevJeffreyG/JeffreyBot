@@ -1003,7 +1003,7 @@ module.exports.run = async (bot, message, args) => {
                                                             action = use.info.action;
                                                             index = stats.items.indexOf(item);
                                                             efecto = use.info.extra.effect;
-                                                            duracion = use.info.extra.duracion;
+                                                            duracion = use.info.extra.duration;
 
                                                             // /ds items 2 @jefroyt
                                                             // al ser un rol, preguntar a quien quiere agregarse el rol.
