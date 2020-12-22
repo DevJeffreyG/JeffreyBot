@@ -1036,9 +1036,9 @@ module.exports.run = async (bot, message, args) => {
                                                                     }, (err, victimStats) => {
                                                                         if(err) throw err;
 
-                                                                        if(!victimStats && !victim.roles.has(dsRole)){
+                                                                        if(!victimStats && !victim.roles.cache.get(dsRole)){
                                                                             return dsChannel.send(fail3);
-                                                                        } else if(!victimStats && victim.roles.has(dsRole)) {
+                                                                        } else if(!victimStats && victim.roles.cache.get(dsRole)) {
                                                                             dsChannel.send(success3);
                                                                             victim.roles.add(role);
 
