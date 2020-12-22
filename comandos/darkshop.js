@@ -1036,7 +1036,7 @@ module.exports.run = async (bot, message, args) => {
 
                                                                         if(!victimStats){
                                                                             // ni siquiera tiene cuenta de darkshop ¿que debería hacer?
-                                                                            dsChannel.send(fail3);
+                                                                            return dsChannel.send(fail3);
                                                                         } else {
                                                                             if(victimStats.items.length === 0){ // tiene cuenta pero no items, proseguir
                                                                                 dsChannel.send(success3);
@@ -1044,7 +1044,7 @@ module.exports.run = async (bot, message, args) => {
 
                                                                                 //eliminar item del autor
                                                                                 stats.items.splice(index, 1);
-                                                                                stats.save();
+                                                                                return stats.save();
                                                                             }
 
                                                                             if(victimStats.items.find(x => x.name === "Firewall")){ // si encuentra un item con nombre "Firewall", revisar si está activo
@@ -1061,14 +1061,14 @@ module.exports.run = async (bot, message, args) => {
 
                                                                                     //eliminar item del autor
                                                                                     stats.items.splice(index, 1);
-                                                                                    stats.save();
+                                                                                    return stats.save();
                                                                                 } else {
                                                                                     dsChannel.send(success3);
                                                                                     victim.roles.add(role);
 
                                                                                     //eliminar item del autor
                                                                                     stats.items.splice(index, 1);
-                                                                                    stats.save();
+                                                                                    return stats.save();
                                                                                 }
                                                                             } else { // no tienen ningun item con nombre firewall
                                                                                 dsChannel.send(success3);
@@ -1076,7 +1076,7 @@ module.exports.run = async (bot, message, args) => {
 
                                                                                 //eliminar item del autor
                                                                                 stats.items.splice(index, 1);
-                                                                                stats.save();
+                                                                                return stats.save();
                                                                             }
                                                                         }
                                                                     })
@@ -1097,6 +1097,7 @@ module.exports.run = async (bot, message, args) => {
 
                                                                     } else {
                                                                         // es permanente, no hacer nada
+                                                                        return;
                                                                     }
                                                                 }
                                                             }
