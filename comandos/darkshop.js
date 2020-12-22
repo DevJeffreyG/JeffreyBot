@@ -871,7 +871,7 @@ module.exports.run = async (bot, message, args) => {
                                   if(args[3].toLowerCase() === "role" && !args[5]){
                                       return message.reply(`falta la duración del efecto (rol)`);
                                   } else if (args[3].toLowerCase() === "role"){
-                                      duracion = args[5].toLowerCase();
+                                      duracion = Number(ms(args[5].toLowerCase()));
                                   }
                                   
                                   if(args[3].toLowerCase() === "role" && !args[6]){
@@ -1045,7 +1045,10 @@ module.exports.run = async (bot, message, args) => {
     
                                                                                 //eliminar item del autor
                                                                                 stats.items.splice(index, 1);
-                                                                                return stats.save();
+                                                                                stats.save();
+
+                                                                                // tiene una duración?
+                                                                                return Duration(duracion, role.id, victim.id);
                                                                             }
                                                                         } else {
                                                                             if(victimStats.items.length === 0){ // tiene cuenta pero no items, proseguir
@@ -1054,7 +1057,10 @@ module.exports.run = async (bot, message, args) => {
 
                                                                                 //eliminar item del autor
                                                                                 stats.items.splice(index, 1);
-                                                                                return stats.save();
+                                                                                stats.save();
+
+                                                                                // tiene una duración?
+                                                                                return Duration(duracion, role.id, victim.id);
                                                                             }
 
                                                                             if(victimStats.items.find(x => x.name === "Firewall")){ // si encuentra un item con nombre "Firewall", revisar si está activo
@@ -1078,7 +1084,10 @@ module.exports.run = async (bot, message, args) => {
 
                                                                                     //eliminar item del autor
                                                                                     stats.items.splice(index, 1);
-                                                                                    return stats.save();
+                                                                                    stats.save();
+
+                                                                                    // tiene una duración?
+                                                                                    return Duration(duracion, role.id, victim.id);
                                                                                 }
                                                                             } else { // no tienen ningun item con nombre firewall
                                                                                 dsChannel.send(success3);
@@ -1086,7 +1095,10 @@ module.exports.run = async (bot, message, args) => {
 
                                                                                 //eliminar item del autor
                                                                                 stats.items.splice(index, 1);
-                                                                                return stats.save();
+                                                                                stats.save();
+
+                                                                                // tiene una duración?
+                                                                                return Duration(duracion, role.id, victim.id);
                                                                             }
                                                                         }
                                                                     })
@@ -1100,15 +1112,30 @@ module.exports.run = async (bot, message, args) => {
                                                                     stats.save();
 
                                                                     // tiene una duración?
-                                                                    if(duracion != "permanent"){
-                                                                        // agregar una global data con la fecha
+                                                                    return Duration(duracion, role.id, victim.id);
+                                                                    
+                                                                }
+                                                            }
 
+                                                            function Duration(roleDuration, roleID){
+                                                                if(roleDuration != "permanent"){
+                                                                    // agregar una global data con la fecha
 
+                                                                    const newData = new GlobalData({
+                                                                        info: {
+                                                                            type: "roleDuration",
+                                                                            roleID: roleID,
+                                                                            userID: victim.id,
+                                                                            since: hoy,
+                                                                            duration: roleDuration
+                                                                        }
+                                                                    })
 
-                                                                    } else {
-                                                                        // es permanente, no hacer nada
-                                                                        return;
-                                                                    }
+                                                                    return newData.save();
+
+                                                                } else {
+                                                                    // es permanente, no hacer nada
+                                                                    return;
                                                                 }
                                                             }
 

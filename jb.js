@@ -611,6 +611,19 @@ bot.on("ready", async () => {
   
   channel.send("Reviví.");
 
+  // buscar muteados
+  GlobalData.find({
+    "info.type": "roleDuration"
+  }, (err, roled) => {
+    if(err) throw err;
+
+    if(!roled) return;
+
+    for (let i = 0; i < roled.length; i++){
+      
+    }
+  })
+
   // inflacion DARKSHOP
 
   GlobalData.findOne({
