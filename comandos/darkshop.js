@@ -1117,7 +1117,7 @@ module.exports.run = async (bot, message, args) => {
                                                                 }
                                                             }
 
-                                                            function Duration(roleDuration, roleID){
+                                                            function Duration(roleDuration, roleID, victimID){
                                                                 if(roleDuration != "permanent"){
                                                                     // agregar una global data con la fecha
 
@@ -1125,7 +1125,7 @@ module.exports.run = async (bot, message, args) => {
                                                                         info: {
                                                                             type: "roleDuration",
                                                                             roleID: roleID,
-                                                                            userID: victim.id,
+                                                                            userID: victimID,
                                                                             since: hoy,
                                                                             duration: roleDuration
                                                                         }
