@@ -12,7 +12,7 @@ const offtopicChannel = Config.offtopicChannel;
 const mainChannel = Config.mainChannel;
 const botsChannel = Config.botsChannel;
 const logChannel = Config.logChannel;
-const version = Config.version;
+const changes = Config.changes;
 
 /* ##### MONGOOSE ######## */
 

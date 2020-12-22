@@ -3,7 +3,7 @@ const Package = require("./../package.json");
 const Colores = require("./../colores.json");
 const Discord = require("discord.js");
 const prefix = Config.prefix;
-const versioninfo = Config.version;
+const changes = Config.changes;
 
 module.exports.run = async (bot, message, args) => {
 
