@@ -993,23 +993,23 @@ module.exports.run = async (bot, message, args) => {
 
                                                         case "role":
                                                             let action3 = use.info.action;
-                                                            let roleID = use.info.cosaID;
-                                                            let index = stats.items.indexOf(item);
-                                                            let efecto = use.info.extra.effect;
-                                                            let duracion = use.info.extra.duracion;
+                                                            let roleID3 = use.info.cosaID;
+                                                            let index3 = stats.items.indexOf(item);
+                                                            let efecto3 = use.info.extra.effect;
+                                                            let duracion3 = use.info.extra.duracion;
 
-                                                            let success = new Discord.MessageEmbed()
+                                                            let success3 = new Discord.MessageEmbed()
                                                             .setAuthor(`| Interacción`, Config.darkLogoPng)
-                                                            .setDescription(`**—** ¡**${author.tag}** ha usado el item \`${stats.items[index].name}\` en **${victim.tag}**!`)
+                                                            .setDescription(`**—** ¡**${author.tag}** ha usado el item \`${stats.items[index3].name}\` en **${victim.tag}**!`)
                                                             .setColor(Colores.negro)
-                                                            .setFooter(`${stats.items[index].name} para ${victim.tag}`)
+                                                            .setFooter(`${stats.items[index3].name} para ${victim.tag}`)
                                                             .setTimestamp();
 
-                                                            let fail = new Discord.MessageEmbed()
+                                                            let fail3 = new Discord.MessageEmbed()
                                                             .setAuthor(`| Amenaza`, Config.darkLogoPng)
-                                                            .setDescription(`**—** ¡**${author.tag}** ha querido usar el item \`${stats.items[index].name}\` en **${victim.tag}** pero NO HA FUNCIONADO!`)
+                                                            .setDescription(`**—** ¡**${author.tag}** ha querido usar el item \`${stats.items[index3].name}\` en **${victim.tag}** pero NO HA FUNCIONADO!`)
                                                             .setColor(Colores.negro)
-                                                            .setFooter(`${stats.items[index].name} para ${victim.tag}`)
+                                                            .setFooter(`${stats.items[index3].name} para ${victim.tag}`)
                                                             .setTimestamp();
 
                                                             // /ds items 2 @jefroyt
@@ -1020,7 +1020,7 @@ module.exports.run = async (bot, message, args) => {
                                                                 let victim = message.guild.member(message.mentions.users.first());
 
                                                                 // revisar si el efecto es negativo.
-                                                                if(efecto === "negative"){
+                                                                if(efecto3 === "negative"){
                                                                     // es negativo, entonces revisar si "victim" tiene firewall ACTIVA.
 
                                                                     Stats.findOne({
@@ -1030,11 +1030,11 @@ module.exports.run = async (bot, message, args) => {
 
                                                                         if(!victimStats){
                                                                             // ni siquiera tiene cuenta de darkshop ¿que debería hacer?
-                                                                            dsChannel.send(fail);
+                                                                            dsChannel.send(fail3);
                                                                         } else {
                                                                             if(!victimStats.items[0].id){ // tiene cuenta pero no items, proseguir
-                                                                                dsChannel.send(success);
-                                                                                victim.roles.add(roleID);
+                                                                                dsChannel.send(success3);
+                                                                                victim.roles.add(roleID3);
                                                                             }
 
                                                                             if(victimStats.items.find(x => x.name === "Firewall")){ // si encuentra un item con nombre "Firewall", revisar si está activo
@@ -1043,21 +1043,21 @@ module.exports.run = async (bot, message, args) => {
 
                                                                                 if(victimStats.items[firewallIndex].active === 1){
                                                                                     // tiene la firewall activa
-                                                                                    dsChannel.send(fail);
+                                                                                    dsChannel.send(fail3);
                                                                                 } else {
-                                                                                    dsChannel.send(success);
-                                                                                    victim.roles.add(roleID);
+                                                                                    dsChannel.send(success3);
+                                                                                    victim.roles.add(roleID3);
                                                                                 }
                                                                             }
                                                                         }
                                                                     })
                                                                 } else {
                                                                     // no es negativo, dar el rol
-                                                                    victim.roles.add(roleID);
-                                                                    dsChannel.send(success);
+                                                                    victim.roles.add(roleID3);
+                                                                    dsChannel.send(success3);
 
                                                                     // tiene una duración?
-                                                                    if(duracion != "permanent"){
+                                                                    if(duracion3 != "permanent"){
                                                                         // agregar una global data con la fecha
 
 
@@ -1073,11 +1073,11 @@ module.exports.run = async (bot, message, args) => {
 
                                                         case "item":
                                                             let action4 = use.info.action;
-                                                            let index = stats.items.indexOf(item);
+                                                            let index4 = stats.items.indexOf(item);
                                                             if(item.active === 0 && action4 === "add"){ // entonces activarlo.
                                                                 // buscarlo
 
-                                                                stats.items[index].active = 1;
+                                                                stats.items[index4].active = 1;
                                                                 stats.markModified("items");
                                                                 stats.save()
                                                                 .then(a => console.log(a))
