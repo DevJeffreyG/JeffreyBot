@@ -848,8 +848,12 @@ module.exports.run = async (bot, message, args) => {
                                       `que se va a agregar o eliminar? (jeffros, warns, role)`
                                     );
                         
+                                  let accion = args[2].toLowerCase();
+                                  let cosa = args[3].toLowerCase();
                                   let cosaID = "na";
                                   let extra;
+
+                                  // SI ES UN ROLE
                                   if (args[3].toLowerCase() === "role" && !args[4]) {
                                     return message.reply(`falta la id del role.`);
                                   } else if (args[3].toLowerCase() === "role") {
@@ -859,17 +863,30 @@ module.exports.run = async (bot, message, args) => {
                                   if(args[3].toLowerCase() === "role" && !args[5]){
                                       return message.reply(`falta la duración del efecto (rol)`);
                                   } else if (args[3].toLowerCase() === "role"){
-                                      extra = args[5];
+                                      duracion = args[5].toLowerCase();
                                   }
+
+                                  // SI SON WARNS
+
+                                  // SI SON JEFFROS
+
+                                    /*
+                                        action - "delete" para quitar X cosa || "add" para agregar X cosa
+                                        thing - "jeffros" || "warns" || "role" || "item"
+                                        thingID - id de "thing", id de role, por ejemplo
+                                        extra - puede ser por ejemplo; la duración del efecto
+                                    */
                         
                                   const newUse = new DarkUse({
                                     itemID: args[1],
-                                    action: args[2].toLowerCase(),
-                                    thing: args[3].toLowerCase(),
-                                    thingID: cosaID,
-                                    extra: [{
-                                        duration: extra
-                                    }],
+                                    info: {
+                                        action: accion,
+                                        thing: cosa,
+                                        thingID: cosaID,
+                                        extra: {
+                                            duration: duracion
+                                        }
+                                    },
                                     id: c + plus2
                                   });
                         
