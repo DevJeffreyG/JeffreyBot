@@ -28,10 +28,12 @@ module.exports.run = async (bot, message, args) => {
   const guild = message.guild;
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
   let dsChannel = guild.channels.cache.find(x => x.id === Config.dsChannel);
+  let dsRole = guild.channels.cache.find(x => x.id === Config.dsRole);
 
   if(bot.user.id === Config.testingJBID){
     staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
-    dsChannel = guild.channels.cache.find(x => x.id === "790431676970041356")
+    dsRole = guild.roles.cache.find(x => x.id === "791006500973576262");
+    dsChannel = guild.channels.cache.find(x => x.id === "790431676970041356");
   }
 
   if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return console.log("Un usuario ha intentado usar /darkshop: "+ author.tag);
@@ -1034,9 +1036,15 @@ module.exports.run = async (bot, message, args) => {
                                                                     }, (err, victimStats) => {
                                                                         if(err) throw err;
 
-                                                                        if(!victimStats){
-                                                                            // ni siquiera tiene cuenta de darkshop ¿que debería hacer?
+                                                                        if(!victimStats && !victim.roles.has(dsRole)){
                                                                             return dsChannel.send(fail3);
+                                                                        } else if(!victimStats && victim.roles.has(dsRole)) {
+                                                                            dsChannel.send(success3);
+                                                                            victim.roles.add(role);
+
+                                                                            //eliminar item del autor
+                                                                            stats.items.splice(index, 1);
+                                                                            return stats.save();
                                                                         } else {
                                                                             if(victimStats.items.length === 0){ // tiene cuenta pero no items, proseguir
                                                                                 dsChannel.send(success3);
