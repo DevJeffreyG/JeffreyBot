@@ -27,9 +27,11 @@ module.exports.run = async (bot, message, args) => {
   let author = message.author;
   const guild = message.guild;
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
+  let dsChannel = guild.channels.cache.find(x => x.id === Config.dsChannel);
 
   if(bot.user.id === Config.testingJBID){
     staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
+    dsChannel = guild.channels.cache.find(x => x.id === "790431676970041356")
   }
 
   if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return console.log("Un usuario ha intentado usar /darkshop: "+ author.tag);
@@ -855,6 +857,7 @@ module.exports.run = async (bot, message, args) => {
                                   let cosaID = "na";
                                   let duracion = "na";
                                   let cantidad = "na";
+                                  let efecto = "na";
 
                                   // SI ES UN ROLE
                                   if (args[3].toLowerCase() === "role" && !args[4]) {
@@ -868,6 +871,12 @@ module.exports.run = async (bot, message, args) => {
                                   } else if (args[3].toLowerCase() === "role"){
                                       duracion = args[5].toLowerCase();
                                   }
+                                  
+                                  if(args[3].toLowerCase() === "role" && !args[6]){
+                                    return message.reply(`falta el efecto al usar el item (negative o positive)`);
+                                    } else if (args[3].toLowerCase() === "role"){
+                                        efecto = args[6].toLowerCase();
+                                    }
 
                                   // SI SON WARNS
 
@@ -888,7 +897,8 @@ module.exports.run = async (bot, message, args) => {
                                         thingID: cosaID,
                                         extra: {
                                             duration: duracion,
-                                            quantity: cantidad
+                                            quantity: cantidad,
+                                            effect: efecto
                                         }
                                     },
                                     id: c + plus2
@@ -982,6 +992,83 @@ module.exports.run = async (bot, message, args) => {
                                                             break;
 
                                                         case "role":
+                                                            let action = use.info.action;
+                                                            let roleID = use.info.cosaID;
+                                                            let index = stats.items.indexOf(item);
+                                                            let efecto = use.info.extra.effect;
+                                                            let duracion = use.info.extra.duracion;
+
+                                                            let success = new Discord.MessageEmbed()
+                                                            .setAuthor(`| Interacción`, Config.darkLogoPng)
+                                                            .setDescription(`**—** ¡**${author.tag}** ha usado el item \`${stats.items[index].name}\` en **${victim.tag}**!`)
+                                                            .setColor(Colores.negro)
+                                                            .setFooter(`${stats.items[index].name} para ${victim.tag}`)
+                                                            .setTimestamp();
+
+                                                            let fail = new Discord.MessageEmbed()
+                                                            .setAuthor(`| Amenaza`, Config.darkLogoPng)
+                                                            .setDescription(`**—** ¡**${author.tag}** ha querido usar el item \`${stats.items[index].name}\` en **${victim.tag}** pero NO HA FUNCIONADO!`)
+                                                            .setColor(Colores.negro)
+                                                            .setFooter(`${stats.items[index].name} para ${victim.tag}`)
+                                                            .setTimestamp();
+
+                                                            // /ds items 2 @jefroyt
+                                                            // al ser un rol, preguntar a quien quiere agregarse el rol.
+                                                            if(!message.mentions.users.first()){
+                                                                return message.reply(`menciona a quien quieras darle el role. \`${prefix}darkshop info ${use.itemID}\`.`)
+                                                            } else {
+                                                                let victim = message.guild.member(message.mentions.users.first());
+
+                                                                // revisar si el efecto es negativo.
+                                                                if(efecto === "negative"){
+                                                                    // es negativo, entonces revisar si "victim" tiene firewall ACTIVA.
+
+                                                                    Stats.findOne({
+                                                                        userID: victim.id
+                                                                    }, (err, victimStats) => {
+                                                                        if(err) throw err;
+
+                                                                        if(!victimStats){
+                                                                            // ni siquiera tiene cuenta de darkshop ¿que debería hacer?
+                                                                            dsChannel.send(fail);
+                                                                        } else {
+                                                                            if(!victimStats.items[0].id){ // tiene cuenta pero no items, proseguir
+                                                                                dsChannel.send(success);
+                                                                                victim.roles.add(roleID);
+                                                                            }
+
+                                                                            if(victimStats.items.find(x => x.name === "Firewall")){ // si encuentra un item con nombre "Firewall", revisar si está activo
+                                                                                let firewall = stats.items.find(x => x.id === Number(idUse));    
+                                                                                let firewallIndex = stats.items.indexOf(firewall);
+
+                                                                                if(victimStats.items[firewallIndex].active === 1){
+                                                                                    // tiene la firewall activa
+                                                                                    dsChannel.send(fail);
+                                                                                } else {
+                                                                                    dsChannel.send(success);
+                                                                                    victim.roles.add(roleID);
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    })
+                                                                } else {
+                                                                    // no es negativo, dar el rol
+                                                                    victim.roles.add(roleID);
+                                                                    dsChannel.send(success);
+
+                                                                    // tiene una duración?
+                                                                    if(duracion != "permanent"){
+                                                                        // agregar una global data con la fecha
+
+
+
+                                                                    } else {
+                                                                        // es permanente, no hacer nada
+                                                                    }
+                                                                }
+                                                            }
+
+
                                                             break;
 
                                                         case "item":
@@ -1004,6 +1091,7 @@ module.exports.run = async (bot, message, args) => {
                                                             } else {
                                                                 return message.reply("este item ya está activo en tu cuenta.")
                                                             }
+                                                            break;
                                                     }
                                                 })
                                                 
