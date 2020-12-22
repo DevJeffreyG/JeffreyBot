@@ -1007,16 +1007,16 @@ module.exports.run = async (bot, message, args) => {
 
                                                                 let success3 = new Discord.MessageEmbed()
                                                                 .setAuthor(`| Interacción`, Config.darkLogoPng)
-                                                                .setDescription(`**—** ¡**${author.tag}** ha usado el item \`${stats.items[index3].name}\` en **${victim.tag}**!`)
+                                                                .setDescription(`**—** ¡**${author.tag}** ha usado el item \`${stats.items[index3].name}\` en **${victim.user.tag}**!`)
                                                                 .setColor(Colores.negro)
-                                                                .setFooter(`${stats.items[index3].name} para ${victim.tag}`)
+                                                                .setFooter(`${stats.items[index3].name} para ${victim.user.tag}`)
                                                                 .setTimestamp();
 
                                                                 let fail3 = new Discord.MessageEmbed()
                                                                 .setAuthor(`| Amenaza`, Config.darkLogoPng)
-                                                                .setDescription(`**—** ¡**${author.tag}** ha querido usar el item \`${stats.items[index3].name}\` en **${victim.tag}** pero NO HA FUNCIONADO!`)
+                                                                .setDescription(`**—** ¡**${author.tag}** ha querido usar el item \`${stats.items[index3].name}\` en **${victim.user.tag}** pero NO HA FUNCIONADO!`)
                                                                 .setColor(Colores.negro)
-                                                                .setFooter(`${stats.items[index3].name} para ${victim.tag}`)
+                                                                .setFooter(`${stats.items[index3].name} para ${victim.user.tag}`)
                                                                 .setTimestamp();
 
 
