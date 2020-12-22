@@ -993,7 +993,7 @@ module.exports.run = async (bot, message, args) => {
 
                                                         case "role":
                                                             let action3 = use.info.action;
-                                                            let roleID = guild.roles.find(x => x.id === use.info.cosaID);
+                                                            let roleID = guild.roles.cache.find(x => x.id === use.info.cosaID);
                                                             let index3 = stats.items.indexOf(item);
                                                             let efecto3 = use.info.extra.effect;
                                                             let duracion3 = use.info.extra.duracion;
