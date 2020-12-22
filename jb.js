@@ -620,7 +620,13 @@ bot.on("ready", async () => {
     if(!roled) return;
 
     for (let i = 0; i < roled.length; i++){
-      
+      let role = guild.roles.cache.find(x => x.id === roled[i].info.roleID);
+      let member = guild.members.cache.find(x => x.id === roled[i].info.userID);
+      let since = roled[i].info.since;
+      let realDuration = roled[i].info.duration;
+      let today = new Date();
+
+      console.log(since - today);
     }
   })
 
