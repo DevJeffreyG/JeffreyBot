@@ -847,12 +847,30 @@ module.exports.run = async (bot, message, args) => {
                                     }
                                   }
                         
-                                  if (!args[1]) return message.reply(`falta la id.`);
-                                  if (!args[2]) return message.reply(`falta la acción (add o delete).`);
-                                  if (!args[3])
-                                    return message.reply(
-                                      `que se va a agregar o eliminar? (jeffros, warns, role)`
-                                    );
+                                  let useEmbedError = new Discord.MessageEmbed()
+                                  .setDescription(`▸ El uso correcto es: ${prefix}darkshop adduse \`itemID\` \`add || remove\` \`jeffros | warns | role\`
+
+                                  **— Jeffros —**
+                                  ${prefix}darkshop adduse \`itemID\` \`add || remove\` \`jeffros\` \`# Jeffros\` \`positive | negative\`
+                                  **— Warns —**
+                                  ${prefix}darkshop adduse \`itemID\` \`add || remove\` \`warns\` \`# Warns\` \`positive | negative\`
+                                  **— Role —**
+                                  ${prefix}darkshop adduse \`itemID\` \`add || remove\` \`role\` \`roleID\` \`duración\` \`positive | negative\``)
+                                  .setColor(Colores.negro);
+
+
+                                  if (!args[1]){
+                                    useEmbedError.setAuthor(`| Error: itemID`, Config.errorPng);
+                                    return message.channel.send(useEmbedError)
+                                  }
+                                  if (!args[2]) {
+                                    useEmbedError.setAuthor(`| Error: j / w / r`, Config.errorPng);
+                                    return message.channel.send(useEmbedError)
+                                  }
+                                  if (!args[3]){
+                                    useEmbedError.setAuthor(`| Error: itemID`, Config.errorPng);
+                                    return message.channel.send(useEmbedError)
+                                  }
                         
                                   let accion = args[2].toLowerCase();
                                   let cosa = args[3].toLowerCase();
@@ -863,26 +881,48 @@ module.exports.run = async (bot, message, args) => {
 
                                   // SI ES UN ROLE
                                   if (args[3].toLowerCase() === "role" && !args[4]) {
-                                    return message.reply(`falta la id del role.`);
+                                    useEmbedError.setAuthor(`| Error: roleID`, Config.errorPng);
+                                    return message.channel.send(useEmbedError)
                                   } else if (args[3].toLowerCase() === "role") {
                                     cosaID = args[4];
                                   }
 
                                   if(args[3].toLowerCase() === "role" && !args[5]){
-                                      return message.reply(`falta la duración del efecto (rol)`);
+                                    useEmbedError.setAuthor(`| Error: duración`, Config.errorPng);
+                                    return message.channel.send(useEmbedError)
                                   } else if (args[3].toLowerCase() === "role"){
                                       duracion = Number(ms(args[5].toLowerCase()));
                                   }
                                   
-                                  if(args[3].toLowerCase() === "role" && !args[6]){
-                                    return message.reply(`falta el efecto al usar el item (negative o positive)`);
+                                    if(args[3].toLowerCase() === "role" && !args[6]){
+                                        useEmbedError.setAuthor(`| Error: negative / positive`, Config.errorPng);
+                                        return message.channel.send(useEmbedError)
                                     } else if (args[3].toLowerCase() === "role"){
                                         efecto = args[6].toLowerCase();
                                     }
 
                                   // SI SON WARNS
 
+                                  if (args[3].toLowerCase() === "warns" && !args[4]){
+                                    useEmbedError.setAuthor(`| Error: # Warns`, Config.errorPng);
+                                    return message.channel.send(useEmbedError)
+                                  }
+
+                                  if (args[3].toLowerCase() === "warns" && !args[5]){
+                                    useEmbedError.setAuthor(`| Error: negative / positive`, Config.errorPng);
+                                    return message.channel.send(useEmbedError)
+                                  }
+
                                   // SI SON JEFFROS
+                                  if (args[3].toLowerCase() === "jeffros" && !args[4]){
+                                    useEmbedError.setAuthor(`| Error: # Jeffros`, Config.errorPng);
+                                    return message.channel.send(useEmbedError)
+                                  }
+
+                                  if (args[3].toLowerCase() === "warns" && !args[5]){
+                                    useEmbedError.setAuthor(`| Error: negative / positive`, Config.errorPng);
+                                    return message.channel.send(useEmbedError)
+                                  }
 
                                     /*
                                         action - "delete" para quitar X cosa || "add" para agregar X cosa
@@ -986,24 +1026,21 @@ module.exports.run = async (bot, message, args) => {
 
                                                     let item = stats.items.find(x => x.id === Number(idUse));
 
-                                                    let action;
-                                                    let index;
-                                                    let efecto;
-                                                    let duracion;
+                                                    let action = use.info.action;;
+                                                    let index = stats.items.indexOf(item);
+                                                    let efecto = use.info.extra.effect;
+                                                    let duracion = use.info.extra.duration;
                                                     
                                                     switch(use.info.thing){
                                                         case "jeffros":
                                                             break;
 
                                                         case "warns":
+                                                            // /ds items 3 @jefstj
                                                             break;
 
                                                         case "role":
                                                             let role = guild.roles.cache.find(x => x.id === use.info.thingID);
-                                                            action = use.info.action;
-                                                            index = stats.items.indexOf(item);
-                                                            efecto = use.info.extra.effect;
-                                                            duracion = use.info.extra.duration;
 
                                                             // /ds items 2 @jefroyt
                                                             // al ser un rol, preguntar a quien quiere agregarse el rol.
