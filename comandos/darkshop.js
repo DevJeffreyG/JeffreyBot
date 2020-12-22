@@ -992,7 +992,7 @@ module.exports.run = async (bot, message, args) => {
                                                             break;
 
                                                         case "role":
-                                                            let action = use.info.action;
+                                                            let action3 = use.info.action;
                                                             let roleID = use.info.cosaID;
                                                             let index = stats.items.indexOf(item);
                                                             let efecto = use.info.extra.effect;
@@ -1072,9 +1072,9 @@ module.exports.run = async (bot, message, args) => {
                                                             break;
 
                                                         case "item":
-                                                            let action = use.info.action;
+                                                            let action4 = use.info.action;
                                                             let index = stats.items.indexOf(item);
-                                                            if(item.active === 0 && action === "add"){ // entonces activarlo.
+                                                            if(item.active === 0 && action4 === "add"){ // entonces activarlo.
                                                                 // buscarlo
 
                                                                 stats.items[index].active = 1;
