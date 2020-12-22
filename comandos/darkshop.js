@@ -1039,8 +1039,8 @@ module.exports.run = async (bot, message, args) => {
                                                                             }
 
                                                                             if(victimStats.items.find(x => x.name === "Firewall")){ // si encuentra un item con nombre "Firewall", revisar si está activo
-                                                                                let firewall = stats.items.find(x => x.id === Number(idUse));    
-                                                                                let firewallIndex = stats.items.indexOf(firewall);
+                                                                                let firewall = victimStats.items.find(x => x.name === "Firewall");    
+                                                                                let firewallIndex = victimStats.items.indexOf(firewall);
 
                                                                                 if(victimStats.items[firewallIndex].active === 1){
                                                                                     // tiene la firewall activa
