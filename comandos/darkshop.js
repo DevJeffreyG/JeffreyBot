@@ -998,26 +998,27 @@ module.exports.run = async (bot, message, args) => {
                                                             let efecto3 = use.info.extra.effect;
                                                             let duracion3 = use.info.extra.duracion;
 
-                                                            let success3 = new Discord.MessageEmbed()
-                                                            .setAuthor(`| Interacción`, Config.darkLogoPng)
-                                                            .setDescription(`**—** ¡**${author.tag}** ha usado el item \`${stats.items[index3].name}\` en **${victim.tag}**!`)
-                                                            .setColor(Colores.negro)
-                                                            .setFooter(`${stats.items[index3].name} para ${victim.tag}`)
-                                                            .setTimestamp();
-
-                                                            let fail3 = new Discord.MessageEmbed()
-                                                            .setAuthor(`| Amenaza`, Config.darkLogoPng)
-                                                            .setDescription(`**—** ¡**${author.tag}** ha querido usar el item \`${stats.items[index3].name}\` en **${victim.tag}** pero NO HA FUNCIONADO!`)
-                                                            .setColor(Colores.negro)
-                                                            .setFooter(`${stats.items[index3].name} para ${victim.tag}`)
-                                                            .setTimestamp();
-
                                                             // /ds items 2 @jefroyt
                                                             // al ser un rol, preguntar a quien quiere agregarse el rol.
                                                             if(!message.mentions.users.first()){
                                                                 return message.reply(`menciona a quien quieras darle el role. \`${prefix}darkshop info ${use.itemID}\`.`)
                                                             } else {
                                                                 let victim = message.guild.member(message.mentions.users.first());
+
+                                                                let success3 = new Discord.MessageEmbed()
+                                                                .setAuthor(`| Interacción`, Config.darkLogoPng)
+                                                                .setDescription(`**—** ¡**${author.tag}** ha usado el item \`${stats.items[index3].name}\` en **${victim.tag}**!`)
+                                                                .setColor(Colores.negro)
+                                                                .setFooter(`${stats.items[index3].name} para ${victim.tag}`)
+                                                                .setTimestamp();
+
+                                                                let fail3 = new Discord.MessageEmbed()
+                                                                .setAuthor(`| Amenaza`, Config.darkLogoPng)
+                                                                .setDescription(`**—** ¡**${author.tag}** ha querido usar el item \`${stats.items[index3].name}\` en **${victim.tag}** pero NO HA FUNCIONADO!`)
+                                                                .setColor(Colores.negro)
+                                                                .setFooter(`${stats.items[index3].name} para ${victim.tag}`)
+                                                                .setTimestamp();
+
 
                                                                 // revisar si el efecto es negativo.
                                                                 if(efecto3 === "negative"){
