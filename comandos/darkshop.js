@@ -1038,7 +1038,7 @@ module.exports.run = async (bot, message, args) => {
                                                                             // ni siquiera tiene cuenta de darkshop ¿que debería hacer?
                                                                             dsChannel.send(fail3);
                                                                         } else {
-                                                                            if(!victimStats.items[0].id){ // tiene cuenta pero no items, proseguir
+                                                                            if(!victimStats.items || !victimStats.items[0].id){ // tiene cuenta pero no items, proseguir
                                                                                 dsChannel.send(success3);
                                                                                 victim.roles.add(role);
 
