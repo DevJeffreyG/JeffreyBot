@@ -1121,6 +1121,7 @@ module.exports.run = async (bot, message, args) => {
                                                                 if(roleDuration != "permanent"){
                                                                     // agregar una global data con la fecha
 
+                                                                    let hoy = new Date();
                                                                     const newData = new GlobalData({
                                                                         info: {
                                                                             type: "roleDuration",
