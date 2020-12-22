@@ -851,7 +851,8 @@ module.exports.run = async (bot, message, args) => {
                                   let accion = args[2].toLowerCase();
                                   let cosa = args[3].toLowerCase();
                                   let cosaID = "na";
-                                  let extra;
+                                  let duracion = "na";
+                                  let cantidad = "na";
 
                                   // SI ES UN ROLE
                                   if (args[3].toLowerCase() === "role" && !args[4]) {
@@ -884,7 +885,8 @@ module.exports.run = async (bot, message, args) => {
                                         thing: cosa,
                                         thingID: cosaID,
                                         extra: {
-                                            duration: duracion
+                                            duration: duracion,
+                                            quantity: cantidad
                                         }
                                     },
                                     id: c + plus2
