@@ -903,25 +903,33 @@ module.exports.run = async (bot, message, args) => {
 
                                   // SI SON WARNS
 
-                                  if (args[3].toLowerCase() === "warns" && !args[4]){
+                                  if (args[3].toLowerCase() === "warns" && !args[4] || args[3].toLowerCase() === "warns" && isNaN(args[4])){
                                     useEmbedError.setAuthor(`| Error: # Warns`, Config.errorPng);
                                     return message.channel.send(useEmbedError)
+                                  } else {
+                                      cantidad = args[4];
                                   }
 
                                   if (args[3].toLowerCase() === "warns" && !args[5]){
                                     useEmbedError.setAuthor(`| Error: negative / positive`, Config.errorPng);
                                     return message.channel.send(useEmbedError)
+                                  } else {
+                                      efecto = args[5].toLowerCase();
                                   }
 
                                   // SI SON JEFFROS
-                                  if (args[3].toLowerCase() === "jeffros" && !args[4]){
+                                  if (args[3].toLowerCase() === "jeffros" && !args[4] || args[3].toLowerCase() === "jeffros" && isNaN(args[4])){
                                     useEmbedError.setAuthor(`| Error: # Jeffros`, Config.errorPng);
                                     return message.channel.send(useEmbedError)
+                                  } else {
+                                      cantidad = args[4];
                                   }
 
-                                  if (args[3].toLowerCase() === "warns" && !args[5]){
+                                  if (args[3].toLowerCase() === "jeffros" && !args[5]){
                                     useEmbedError.setAuthor(`| Error: negative / positive`, Config.errorPng);
                                     return message.channel.send(useEmbedError)
+                                  } else {
+                                      efecto = args[5].toLowerCase();
                                   }
 
                                     /*
