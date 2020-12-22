@@ -983,6 +983,11 @@ module.exports.run = async (bot, message, args) => {
                                                     if(!use) return message.channel.send(`[02] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas usar tu item... :)`)
 
                                                     let item = stats.items.find(x => x.id === Number(idUse));
+
+                                                    let action;
+                                                    let index;
+                                                    let efecto;
+                                                    let duracion;
                                                     
                                                     switch(use.info.thing){
                                                         case "jeffros":
@@ -992,11 +997,11 @@ module.exports.run = async (bot, message, args) => {
                                                             break;
 
                                                         case "role":
-                                                            let action3 = use.info.action;
                                                             let role = guild.roles.cache.find(x => x.id === use.info.thingID);
-                                                            let index3 = stats.items.indexOf(item);
-                                                            let efecto3 = use.info.extra.effect;
-                                                            let duracion3 = use.info.extra.duracion;
+                                                            action = use.info.action;
+                                                            index = stats.items.indexOf(item);
+                                                            efecto = use.info.extra.effect;
+                                                            duracion = use.info.extra.duracion;
 
                                                             // /ds items 2 @jefroyt
                                                             // al ser un rol, preguntar a quien quiere agregarse el rol.
@@ -1007,21 +1012,21 @@ module.exports.run = async (bot, message, args) => {
 
                                                                 let success3 = new Discord.MessageEmbed()
                                                                 .setAuthor(`| Interacción`, Config.darkLogoPng)
-                                                                .setDescription(`**—** ¡**${author.tag}** ha usado el item \`${stats.items[index3].name}\` en **${victim.user.tag}**!`)
+                                                                .setDescription(`**—** ¡**${author.tag}** ha usado el item \`${stats.items[index].name}\` en **${victim.user.tag}**!`)
                                                                 .setColor(Colores.negro)
-                                                                .setFooter(`${stats.items[index3].name} para ${victim.user.tag}`)
+                                                                .setFooter(`${stats.items[index].name} para ${victim.user.tag}`)
                                                                 .setTimestamp();
 
                                                                 let fail3 = new Discord.MessageEmbed()
                                                                 .setAuthor(`| Amenaza`, Config.darkLogoPng)
-                                                                .setDescription(`**—** ¡**${author.tag}** ha querido usar el item \`${stats.items[index3].name}\` en **${victim.user.tag}** pero NO HA FUNCIONADO!`)
+                                                                .setDescription(`**—** ¡**${author.tag}** ha querido usar el item \`${stats.items[index].name}\` en **${victim.user.tag}** pero NO HA FUNCIONADO!`)
                                                                 .setColor(Colores.negro)
-                                                                .setFooter(`${stats.items[index3].name} para ${victim.user.tag}`)
+                                                                .setFooter(`${stats.items[index].name} para ${victim.user.tag}`)
                                                                 .setTimestamp();
 
 
                                                                 // revisar si el efecto es negativo.
-                                                                if(efecto3 === "negative"){
+                                                                if(efecto === "negative"){
                                                                     // es negativo, entonces revisar si "victim" tiene firewall ACTIVA.
 
                                                                     Stats.findOne({
@@ -1036,6 +1041,10 @@ module.exports.run = async (bot, message, args) => {
                                                                             if(!victimStats.items[0].id){ // tiene cuenta pero no items, proseguir
                                                                                 dsChannel.send(success3);
                                                                                 victim.roles.add(role);
+
+                                                                                //eliminar item del autor
+                                                                                stats.items.splice(index, 1);
+                                                                                stats.save();
                                                                             }
 
                                                                             if(victimStats.items.find(x => x.name === "Firewall")){ // si encuentra un item con nombre "Firewall", revisar si está activo
@@ -1045,10 +1054,29 @@ module.exports.run = async (bot, message, args) => {
                                                                                 if(victimStats.items[firewallIndex].active === true){
                                                                                     // tiene la firewall activa
                                                                                     dsChannel.send(fail3);
+
+                                                                                    // eliminar firewall
+                                                                                    victimStats.items.splice(firewallIndex, 1);
+                                                                                    victimStats.save();
+
+                                                                                    //eliminar item del autor
+                                                                                    stats.items.splice(index, 1);
+                                                                                    stats.save();
                                                                                 } else {
                                                                                     dsChannel.send(success3);
                                                                                     victim.roles.add(role);
+
+                                                                                    //eliminar item del autor
+                                                                                    stats.items.splice(index, 1);
+                                                                                    stats.save();
                                                                                 }
+                                                                            } else { // no tienen ningun item con nombre firewall
+                                                                                dsChannel.send(success3);
+                                                                                victim.roles.add(role);
+
+                                                                                //eliminar item del autor
+                                                                                stats.items.splice(index, 1);
+                                                                                stats.save();
                                                                             }
                                                                         }
                                                                     })
@@ -1057,8 +1085,12 @@ module.exports.run = async (bot, message, args) => {
                                                                     victim.roles.add(role);
                                                                     dsChannel.send(success3);
 
+                                                                    //eliminar item del autor
+                                                                    stats.items.splice(index, 1);
+                                                                    stats.save();
+
                                                                     // tiene una duración?
-                                                                    if(duracion3 != "permanent"){
+                                                                    if(duracion != "permanent"){
                                                                         // agregar una global data con la fecha
 
 
