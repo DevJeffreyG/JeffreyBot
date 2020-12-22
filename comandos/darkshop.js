@@ -1042,7 +1042,7 @@ module.exports.run = async (bot, message, args) => {
                                                                                 let firewall = victimStats.items.find(x => x.name === "Firewall");    
                                                                                 let firewallIndex = victimStats.items.indexOf(firewall);
 
-                                                                                if(victimStats.items[firewallIndex].active === 1){
+                                                                                if(victimStats.items[firewallIndex].active === true){
                                                                                     // tiene la firewall activa
                                                                                     dsChannel.send(fail3);
                                                                                 } else {
@@ -1075,10 +1075,10 @@ module.exports.run = async (bot, message, args) => {
                                                         case "item":
                                                             let action4 = use.info.action;
                                                             let index4 = stats.items.indexOf(item);
-                                                            if(item.active === 0 && action4 === "add"){ // entonces activarlo.
+                                                            if(item.active === false && action4 === "add"){ // entonces activarlo.
                                                                 // buscarlo
 
-                                                                stats.items[index4].active = 1;
+                                                                stats.items[index4].active = true;
                                                                 stats.markModified("items");
                                                                 stats.save()
                                                                 .then(a => console.log(a))
@@ -1223,12 +1223,12 @@ module.exports.run = async (bot, message, args) => {
                                                             {
                                                                 "id": item.id,
                                                                 "name": item.itemName,
-                                                                "active": 0
+                                                                "active": false
                                                             }
                                                         ];
 
                                                     } else {
-                                                        stats.items.push({"id": item.id, "name": item.itemName, "active": 0})
+                                                        stats.items.push({"id": item.id, "name": item.itemName, "active": false})
                                                     }
 
                                                     stats.djeffros -= precio;
