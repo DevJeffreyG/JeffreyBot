@@ -993,7 +993,7 @@ module.exports.run = async (bot, message, args) => {
 
                                                         case "role":
                                                             let action3 = use.info.action;
-                                                            let roleID = guild.roles.cache.find(x => x.id === use.info.cosaID);
+                                                            let role = guild.roles.cache.find(x => x.id === use.info.thingID);
                                                             let index3 = stats.items.indexOf(item);
                                                             let efecto3 = use.info.extra.effect;
                                                             let duracion3 = use.info.extra.duracion;
@@ -1035,7 +1035,7 @@ module.exports.run = async (bot, message, args) => {
                                                                         } else {
                                                                             if(!victimStats.items[0].id){ // tiene cuenta pero no items, proseguir
                                                                                 dsChannel.send(success3);
-                                                                                victim.roles.add(roleID);
+                                                                                victim.roles.add(role);
                                                                             }
 
                                                                             if(victimStats.items.find(x => x.name === "Firewall")){ // si encuentra un item con nombre "Firewall", revisar si está activo
@@ -1047,14 +1047,14 @@ module.exports.run = async (bot, message, args) => {
                                                                                     dsChannel.send(fail3);
                                                                                 } else {
                                                                                     dsChannel.send(success3);
-                                                                                    victim.roles.add(roleID);
+                                                                                    victim.roles.add(role);
                                                                                 }
                                                                             }
                                                                         }
                                                                     })
                                                                 } else {
                                                                     // no es negativo, dar el rol
-                                                                    victim.roles.add(roleID);
+                                                                    victim.roles.add(role);
                                                                     dsChannel.send(success3);
 
                                                                     // tiene una duración?
