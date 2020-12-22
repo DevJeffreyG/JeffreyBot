@@ -626,7 +626,15 @@ bot.on("ready", async () => {
       let realDuration = roled[i].info.duration;
       let today = new Date();
 
-      console.log(since - today);
+      if(today - since >= realDuration){
+        // sacarle el role
+        member.roles.remove(role);
+
+        // eliminar global data
+        return roled[i].remove();
+      } else {
+        // nada XD
+      }
     }
   })
 
