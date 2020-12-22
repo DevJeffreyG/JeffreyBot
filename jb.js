@@ -373,12 +373,12 @@ bot.on("raw", async event => {
 bot.on("channelUpdate", (oldChannel, newChannel) => {
  // if (!lKeys.hasOwnProperty(newChannel.changes[0].key)) return;
   
-  const guild = bot.guilds.cache.get("447797737216278528");
-  const log = guild.channels.cache.get(Config.logChannel);
-
   if(bot.user.id === Config.testingJBID){
     return;
   }
+
+  const guild = bot.guilds.cache.get("447797737216278528");
+  const log = guild.channels.cache.get(Config.logChannel);
 
   let embed = new Discord.MessageEmbed();
 
@@ -495,6 +495,10 @@ bot.on("messageDelete", async message => {
 /* ############################ LOGGER ################################ */
 
 bot.on("guildMemberRemove", member => {
+  if(bot.user.id === Config.testingJBID){
+    return;
+  }
+
   let channel = member.guild.channels.cache.find(x => x.id === mainChannel);
   let logC = member.guild.channels.cache.find(x => x.id === logChannel);
   let tag = member.user.tag;
@@ -525,6 +529,10 @@ bot.on("guildMemberRemove", member => {
 });
 
 bot.on("guildMemberAdd", member => {
+  if(bot.user.id === Config.testingJBID){
+    return;
+  }
+  
   let channel = member.guild.channels.cache.find(x => x.id === mainChannel);
   let tag = member.user.tag;
   let reglasC = member.guild.channels.cache.find(
@@ -680,6 +688,22 @@ bot.on("ready", async () => {
 
         // si tiene darkjeffros, ¿caducaron?
         if(pastDays >= dark[i].info.duration){
+          let staffCID = "514124198205980713";
+          if(bot.user.id === Config.testingJBID){
+            staffCID = "537095712102416384";
+          }
+
+          let staffC = guild.channels.cache.find(x => x.id === staffCID);
+          let memberD = guild.members.cache.find(x => x.id === user.userID);
+
+          let staffEmbed = new Discord.MessageEmbed()
+          .setColor(Colores.verde)
+          .setDescription(`**—** Se han elimando los Dark Jeffros de ${memberD.tag}.`)
+          .addField(`— Desde`, `${dark[i].info.since}`, true)
+          .addField(`— Duración`, `${dark[i].info.duration}`, true)
+          .setFooter("Mensaje enviado a la vez que al usuario")
+          .setTimestamp();
+
           let embed = new Discord.MessageEmbed()
           .setAuthor(`| ...`, Config.darkLogoPng)
           .setColor(Colores.negro)
@@ -691,7 +715,11 @@ bot.on("ready", async () => {
           user.save();
           // intentar enviar un mensaje al MD.
           member.send(embed)
-          .catch(err => console.log("Usuario con MDs cerrados, no recibió mensaje de DarkJeffros eliminados."))
+          .catch(err => {
+            staffC.send(`**${member.tag} no recibió MD de DarkJeffros eliminados.**\n\`\`\`javascript\n${err}\`\`\``)
+          });
+
+          staffCID.send(staffEmbed);
         }
       })
 
