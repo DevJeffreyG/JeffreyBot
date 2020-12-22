@@ -1037,11 +1037,9 @@ module.exports.run = async (bot, message, args) => {
                                                                         if(err) throw err;
 
                                                                         if(!victimStats){
-                                                                            if(!victim.roles.cache.get(dsRole)){
-                                                                                console.log("no tiene el role")
+                                                                            if(!victim.roles.cache.find(x => x.id === dsRole.id)){
                                                                                 return dsChannel.send(fail3);
                                                                             } else {
-                                                                                console.log("tiene el role")
                                                                                 dsChannel.send(success3);
                                                                                 victim.roles.add(role);
     
