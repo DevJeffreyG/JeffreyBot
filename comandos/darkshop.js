@@ -954,7 +954,7 @@ module.exports.run = async (bot, message, args) => {
                                         if(!stats){
                                             return message.channel.send(noStats)
                                         } else { // tiene cuenta
-                                            if(stats.items.legnth === 0) return message.channel.send(noItems);
+                                            if(stats.items.length === 0) return message.channel.send(noItems);
 
                                             if(!args[1]){
                                                 let itemsEmbed = new Discord.MessageEmbed()
