@@ -38,6 +38,7 @@ module.exports.run = async (bot, message, args) => {
 
   // ¿es nivel 5?
   Jeffros.findOne({
+      serverID: guild.id,
       userID: author.id
   }, (err, jeffros) => {
 
@@ -47,6 +48,7 @@ module.exports.run = async (bot, message, args) => {
             if (err) throw err;
         
             Exp.findOne({
+                serverID: guild.id,
                 userID: author.id
             }, (err, exp) => {
                 if(err) throw err;
@@ -972,7 +974,7 @@ module.exports.run = async (bot, message, args) => {
 
                                                     let item = stats.items.find(x => x.id === Number(idUse));
                                                     
-                                                    switch(use.thing){
+                                                    switch(use.info.thing){
                                                         case "jeffros":
                                                             break;
 
@@ -983,7 +985,7 @@ module.exports.run = async (bot, message, args) => {
                                                             break;
 
                                                         case "item":
-                                                            let action = use.action;
+                                                            let action = use.info.action;
                                                             let index = stats.items.indexOf(item);
                                                             if(item.active === 0 && action === "add"){ // entonces activarlo.
                                                                 // buscarlo
