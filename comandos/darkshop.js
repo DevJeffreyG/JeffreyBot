@@ -1036,15 +1036,17 @@ module.exports.run = async (bot, message, args) => {
                                                                     }, (err, victimStats) => {
                                                                         if(err) throw err;
 
-                                                                        if(!victimStats && !victim.roles.cache.get(dsRole)){
-                                                                            return dsChannel.send(fail3);
-                                                                        } else if(!victimStats && victim.roles.cache.get(dsRole)) {
-                                                                            dsChannel.send(success3);
-                                                                            victim.roles.add(role);
-
-                                                                            //eliminar item del autor
-                                                                            stats.items.splice(index, 1);
-                                                                            return stats.save();
+                                                                        if(!victimStats){
+                                                                            if(!victim.roles.cache.get(dsRole)){
+                                                                                return dsChannel.send(fail3);
+                                                                            } else {
+                                                                                dsChannel.send(success3);
+                                                                                victim.roles.add(role);
+    
+                                                                                //eliminar item del autor
+                                                                                stats.items.splice(index, 1);
+                                                                                return stats.save();
+                                                                            }
                                                                         } else {
                                                                             if(victimStats.items.length === 0){ // tiene cuenta pero no items, proseguir
                                                                                 dsChannel.send(success3);
