@@ -860,7 +860,7 @@ module.exports.run = async (bot, message, args) => {
                             let cosa = args[3].toLowerCase();
                             let cosaID = "na";
                             let duracion = "na";
-                            let cantidad = "na";
+                            let cantidad = 0;
                             let efecto = "na";
 
                             // SI ES UN ROLE
@@ -891,7 +891,7 @@ module.exports.run = async (bot, message, args) => {
                             useEmbedError.setAuthor(`| Error: # Warns`, Config.errorPng);
                             return message.channel.send(useEmbedError)
                             } else {
-                                cantidad = args[4];
+                                cantidad = Number(args[4]);
                             }
 
                             if (args[3].toLowerCase() === "warns" && !args[5]){
@@ -906,7 +906,7 @@ module.exports.run = async (bot, message, args) => {
                             useEmbedError.setAuthor(`| Error: # Jeffros`, Config.errorPng);
                             return message.channel.send(useEmbedError)
                             } else {
-                                cantidad = args[4];
+                                cantidad = Number(args[4]);
                             }
 
                             if (args[3].toLowerCase() === "jeffros" && !args[5]){
@@ -1017,7 +1017,7 @@ module.exports.run = async (bot, message, args) => {
                                                     let index = stats.items.indexOf(item);
                                                     let efecto = use.info.extra.effect;
                                                     let duracion = use.info.extra.duration;
-                                                    let cantidad = use.info.extra.duration;
+                                                    let cantidad = use.info.extra.quantity;
                                                     let victim;
                                                     
                                                     switch(use.info.thing){
