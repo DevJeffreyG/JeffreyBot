@@ -58,7 +58,13 @@ module.exports.run = async (bot, message, args) => {
         } else {
           w = warns.warns;
         }
-        let n = soft.warns.length || 0;
+
+        let n;
+        if(!soft){
+          n = 0;
+        } else {
+          n = soft.warns.length;
+        }
 
         let badguy = new Discord.MessageEmbed()
         .setAuthor(`| ${member.user.tag}'s warns`, member.user.displayAvatarURL())
