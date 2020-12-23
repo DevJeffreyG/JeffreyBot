@@ -699,7 +699,7 @@ module.exports.run = async (bot, message, args) => {
                         case "info":
                             let errorEmbed2 = new Discord.MessageEmbed()
                             .setAuthor(`| Error`, Config.errorPng)
-                            .setDescription(`▸ El uso correcto es: /darkshop info <id del item>`);
+                            .setDescription(`▸ El uso correcto es: ${prefix}darkshop info <id del item>`);
 
                             if (!args[1]) return message.channel.send(errorEmbed2);
 
@@ -744,7 +744,7 @@ module.exports.run = async (bot, message, args) => {
                             let errorEmbed3 = new Discord.MessageEmbed()
                             .setAuthor(`| Error`, Config.errorPng)
                             .setDescription(
-                                `▸ El uso correcto es: /shop edit <id> <nombre, precio, etc> <nuevo>`
+                                `▸ El uso correcto es: ${prefix}darkshop edit <id> <nombre, precio, etc> <nuevo>`
                             );
                     
                             if (!args[1]) return message.channel.send(errorEmbed3);
@@ -1017,6 +1017,8 @@ module.exports.run = async (bot, message, args) => {
                                                     let index = stats.items.indexOf(item);
                                                     let efecto = use.info.extra.effect;
                                                     let duracion = use.info.extra.duration;
+                                                    let cantidad = use.info.extra.duration;
+                                                    let victim;
                                                     
                                                     switch(use.info.thing){
                                                         case "jeffros":
@@ -1024,17 +1026,127 @@ module.exports.run = async (bot, message, args) => {
 
                                                         case "warns":
                                                             // /ds items 3 @jefstj
+                                                            if(!message.mentions.users.first()){
+                                                                return message.reply(`menciona con quien quieras interactuar con este item. \`${prefix}darkshop info ${use.itemID}\`.`)
+                                                            } else {
+                                                                victim = message.guild.member(message.mentions.users.first());
+
+                                                                let success2 = new Discord.MessageEmbed()
+                                                                .setAuthor(`| Interacción`, Config.darkLogoPng)
+                                                                .setDescription(`**—** ¡**${author.tag}** ha usado el item \`${stats.items[index].name}\` en **${victim.user.tag}**!`)
+                                                                .setColor(Colores.negro)
+                                                                .setFooter(`${stats.items[index].name} para ${victim.user.tag}`)
+                                                                .setTimestamp();
+
+                                                                let fail2 = new Discord.MessageEmbed()
+                                                                .setAuthor(`| Amenaza`, Config.darkLogoPng)
+                                                                .setDescription(`**—** ¡**${author.tag}** ha querido usar el item \`${stats.items[index].name}\` en **${victim.user.tag}** pero NO HA FUNCIONADO!`)
+                                                                .setColor(Colores.negro)
+                                                                .setFooter(`${stats.items[index].name} para ${victim.user.tag}`)
+                                                                .setTimestamp();
+
+                                                                // revisar qué tipo de efecto tiene
+                                                                if(efecto === "negative"){
+                                                                    // revisar si victim tiene un firewall activa
+                                                                    Stats.findOne({
+                                                                        userID: victim.id
+                                                                    }, (err, victimStats) => {
+                                                                        if(err) throw err;
+
+                                                                        if(!victimStats){
+                                                                            if(!victim.roles.cache.find(x => x.id === dsRole.id)){
+                                                                                return dsChannel.send(fail2);
+                                                                            } else {
+                                                                                Warns(victim, cantidad);
+
+                                                                                dsChannel.send(success2);
+        
+                                                                                //eliminar item del autor
+                                                                                stats.items.splice(index, 1);
+                                                                                return stats.save();
+                                                                            }
+                                                                        } else {
+                                                                            if(victimStats.items.length === 0){ // tiene cuenta pero no items, proseguir
+                                                                                Warns(victim, cantidad);                                                                                
+                                                                                dsChannel.send(success2);
+
+                                                                                //eliminar item del autor
+                                                                                stats.items.splice(index, 1);
+                                                                                return stats.save();
+                                                                            }
+
+                                                                            if(victimStats.items.find(x => x.name === "Firewall")){ // si encuentra un item con nombre "Firewall", revisar si está activo
+                                                                                let firewall = victimStats.items.find(x => x.name === "Firewall");    
+                                                                                let firewallIndex = victimStats.items.indexOf(firewall);
+
+                                                                                if(victimStats.items[firewallIndex].active === true){
+                                                                                    // tiene la firewall activa
+                                                                                    dsChannel.send(fail2);
+
+                                                                                    // eliminar firewall
+                                                                                    victimStats.items.splice(firewallIndex, 1);
+                                                                                    victimStats.save();
+
+                                                                                    //eliminar item del autor
+                                                                                    stats.items.splice(index, 1);
+                                                                                    return stats.save();
+                                                                                } else {
+                                                                                    Warns(victim, cantidad);                                                                                
+                                                                                    dsChannel.send(success2);
+
+                                                                                    //eliminar item del autor
+                                                                                    stats.items.splice(index, 1);
+                                                                                    return stats.save();
+                                                                                }
+                                                                            } else { // no tienen ningun item con nombre firewall
+                                                                                Warns(victim, cantidad);                                                                                
+                                                                                dsChannel.send(success2);
+
+                                                                                //eliminar item del autor
+                                                                                stats.items.splice(index, 1);
+                                                                                return stats.save();
+                                                                            }
+                                                                        }
+                                                                    })
+                                                                } else {
+                                                                    // no es negativo, dar el rol
+                                                                    Warns();
+                                                                    dsChannel.send(success2);
+
+                                                                    //eliminar item del autor
+                                                                    stats.items.splice(index, 1);
+                                                                    return stats.save();
+                                                                }
+                                                            }
+
+                                                            function Warns(v, c){
+                                                                Warn.findOne({
+                                                                    userID: v.id
+                                                                }, (err, victimWarns) => {
+                                                                    if(err) throw err;
+
+                                                                    if(!victimWarns) {
+                                                                        const newWarn = new Warn({
+                                                                            userID: v.id,
+                                                                            warns: c
+                                                                        });
+                                                                        newWarn.save();
+                                                                    } else {
+                                                                        victimWarns.warns += cantidad;
+                                                                        victimWarns.save();
+                                                                    }
+                                                                })
+                                                            }
                                                             break;
 
                                                         case "role":
                                                             let role = guild.roles.cache.find(x => x.id === use.info.thingID);
 
                                                             // /ds items 2 @jefroyt
-                                                            // al ser un rol, preguntar a quien quiere agregarse el rol.
                                                             if(!message.mentions.users.first()){
-                                                                return message.reply(`menciona a quien quieras darle el role. \`${prefix}darkshop info ${use.itemID}\`.`)
+                                                                return message.reply(`menciona con quien quieras interactuar con este item. \`${prefix}darkshop info ${use.itemID}\`.`)
                                                             } else {
-                                                                let victim = message.guild.member(message.mentions.users.first());
+                                                                victim = message.guild.member(message.mentions.users.first());
 
                                                                 let success3 = new Discord.MessageEmbed()
                                                                 .setAuthor(`| Interacción`, Config.darkLogoPng)
