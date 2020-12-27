@@ -1091,6 +1091,8 @@ module.exports.run = async (bot, message, args) => {
                                                                                 if(victimStats.items[firewallIndex].active === true){
                                                                                     let skip2 = SkipFirewall();
 
+                                                                                    console.log(skip2);
+
                                                                                     if(skip2 == true){ // skip firewall
                                                                                         Warns(victim, cantidad);                                                                                
                                                                                         dsChannel.send(skipped2);
