@@ -1232,7 +1232,7 @@ module.exports.run = async (bot, message, args) => {
                                                                                     let skip3 = SkipFirewall();
 
                                                                                     if(skip3 == true){ // skip firewall
-                                                                                        dsChannel.send(success3);
+                                                                                        dsChannel.send(skipped3);
                                                                                         victim.roles.add(role);
 
                                                                                         //eliminar item del autor
@@ -1557,7 +1557,11 @@ module.exports.run = async (bot, message, args) => {
             if(err) throw err;
 
             let accu = attacker.accuracy;
-            return chance.bool({likelihood: accu});
+            let sk = chance.bool({likelihood: accu});
+            
+            console.log(sk);
+            
+            return sk;
         })
     }
 }
