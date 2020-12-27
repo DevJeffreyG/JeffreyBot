@@ -2,7 +2,8 @@ const Config = require("./../base.json");
 const Colores = require("./../colores.json");
 const Emojis = require("./../emojis.json");
 const Discord = require("discord.js");
-const chance = require("chance");
+var Chance = require("chance");
+var chance = new Chance();
 const ms = require("ms");
 const prefix = Config.prefix;
 
@@ -1089,7 +1090,6 @@ module.exports.run = async (bot, message, args) => {
 
                                                                                 if(victimStats.items[firewallIndex].active === true){
                                                                                     let skip2 = SkipFirewall();
-                                                                                    console.log(skip2);
 
                                                                                     if(skip2 == true){ // skip firewall
                                                                                         Warns(victim, cantidad);                                                                                
@@ -1558,11 +1558,7 @@ module.exports.run = async (bot, message, args) => {
             if(err) throw err;
 
             let accu = attacker.accuracy;
-            let sk = chance.bool({likelihood: accu});
-            
-            console.log(sk);
-            
-            return sk;
+            return chance.bool({likelihood: accu});
         })
     }
 }
