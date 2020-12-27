@@ -1089,11 +1089,10 @@ module.exports.run = async (bot, message, args) => {
                                                                                 let firewallIndex = victimStats.items.indexOf(firewall);
 
                                                                                 if(victimStats.items[firewallIndex].active === true){
-                                                                                    let skip2 = SkipFirewall();
+                                                                                    let accu2 = stats.accuracy;
+                                                                                    let skip2 = chance.bool({likelihood: accu2});
 
-                                                                                    console.log(skip2);
-
-                                                                                    if(skip2 == true){ // skip firewall
+                                                                                    if(skip2 === true){ // skip firewall
                                                                                         Warns(victim, cantidad);                                                                                
                                                                                         dsChannel.send(skipped2);
 
@@ -1232,7 +1231,8 @@ module.exports.run = async (bot, message, args) => {
                                                                                 let firewallIndex = victimStats.items.indexOf(firewall);
 
                                                                                 if(victimStats.items[firewallIndex].active === true){
-                                                                                    let skip3 = SkipFirewall();
+                                                                                    let accu3 = stats.accuracy;
+                                                                                    let skip3 = chance.bool({likelihood: accu3});
 
                                                                                     if(skip3 == true){ // skip firewall
                                                                                         dsChannel.send(skipped3);
@@ -1552,20 +1552,6 @@ module.exports.run = async (bot, message, args) => {
     })
 
   })
-
-    function SkipFirewall(){
-        Stats.findOne({
-            userID: author.id
-        }, (err, attacker) => {
-            if(err) throw err;
-
-            let accu = attacker.accuracy;
-            let sk = chance.bool({likelihood: accu});
-
-            console.log(sk);
-            return sk;
-        })
-    }
 }
 
 module.exports.help = {
