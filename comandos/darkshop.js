@@ -2,6 +2,7 @@ const Config = require("./../base.json");
 const Colores = require("./../colores.json");
 const Emojis = require("./../emojis.json");
 const Discord = require("discord.js");
+const chance = require("chance");
 const ms = require("ms");
 const prefix = Config.prefix;
 
@@ -847,15 +848,15 @@ module.exports.run = async (bot, message, args) => {
                             useEmbedError.setAuthor(`| Error: itemID`, Config.errorPng);
                             return message.channel.send(useEmbedError)
                             }
-                            if (!args[2]) {
+                            if (!args[2]){
+                                useEmbedError.setAuthor(`| Error: add / remove`, Config.errorPng);
+                                return message.channel.send(useEmbedError)
+                            }
+                            if (!args[3]) {
                             useEmbedError.setAuthor(`| Error: j / w / r`, Config.errorPng);
                             return message.channel.send(useEmbedError)
                             }
-                            if (!args[3]){
-                            useEmbedError.setAuthor(`| Error: itemID`, Config.errorPng);
-                            return message.channel.send(useEmbedError)
-                            }
-                
+                            
                             let accion = args[2].toLowerCase();
                             let cosa = args[3].toLowerCase();
                             let cosaID = "na";
@@ -1031,6 +1032,13 @@ module.exports.run = async (bot, message, args) => {
                                                             } else {
                                                                 victim = message.guild.member(message.mentions.users.first());
 
+                                                                let skipped2 = new Discord.MessageEmbed()
+                                                                .setAuthor(`| Interacción`, Config.darkLogoPng)
+                                                                .setDescription(`**—** ¡**${author.tag}** se ha volado la Firewall \`(${stats.accuracy}%)\` y ha usado el item \`${stats.items[index].name}\` en **${victim.user.tag}**!`)
+                                                                .setColor(Colores.negro)
+                                                                .setFooter(`${stats.items[index].name} para ${victim.user.tag}`)
+                                                                .setTimestamp();
+
                                                                 let success2 = new Discord.MessageEmbed()
                                                                 .setAuthor(`| Interacción`, Config.darkLogoPng)
                                                                 .setDescription(`**—** ¡**${author.tag}** ha usado el item \`${stats.items[index].name}\` en **${victim.user.tag}**!`)
@@ -1080,16 +1088,26 @@ module.exports.run = async (bot, message, args) => {
                                                                                 let firewallIndex = victimStats.items.indexOf(firewall);
 
                                                                                 if(victimStats.items[firewallIndex].active === true){
-                                                                                    // tiene la firewall activa
-                                                                                    dsChannel.send(fail2);
+                                                                                    let skip2 = SkipFirewall();
 
-                                                                                    // eliminar firewall
-                                                                                    victimStats.items.splice(firewallIndex, 1);
-                                                                                    victimStats.save();
+                                                                                    if(skip2 == true){ // skip firewall
+                                                                                        Warns(victim, cantidad);                                                                                
+                                                                                        dsChannel.send(skipped2);
 
-                                                                                    //eliminar item del autor
-                                                                                    stats.items.splice(index, 1);
-                                                                                    return stats.save();
+                                                                                        //eliminar item del autor
+                                                                                        stats.items.splice(index, 1);
+                                                                                        return stats.save();
+                                                                                    } else {
+                                                                                        dsChannel.send(fail2);
+
+                                                                                        // eliminar firewall
+                                                                                        victimStats.items.splice(firewallIndex, 1);
+                                                                                        victimStats.save();
+
+                                                                                        //eliminar item del autor
+                                                                                        stats.items.splice(index, 1);
+                                                                                        return stats.save();
+                                                                                    }
                                                                                 } else {
                                                                                     Warns(victim, cantidad);                                                                                
                                                                                     dsChannel.send(success2);
@@ -1148,6 +1166,13 @@ module.exports.run = async (bot, message, args) => {
                                                             } else {
                                                                 victim = message.guild.member(message.mentions.users.first());
 
+                                                                let skipped3 = new Discord.MessageEmbed()
+                                                                .setAuthor(`| Interacción`, Config.darkLogoPng)
+                                                                .setDescription(`**—** ¡**${author.tag}** se ha volado la Firewall \`(${stats.accuracy}%)\` y ha usado el item \`${stats.items[index].name}\` en **${victim.user.tag}**!`)
+                                                                .setColor(Colores.negro)
+                                                                .setFooter(`${stats.items[index].name} para ${victim.user.tag}`)
+                                                                .setTimestamp();
+
                                                                 let success3 = new Discord.MessageEmbed()
                                                                 .setAuthor(`| Interacción`, Config.darkLogoPng)
                                                                 .setDescription(`**—** ¡**${author.tag}** ha usado el item \`${stats.items[index].name}\` en **${victim.user.tag}**!`)
@@ -1204,16 +1229,29 @@ module.exports.run = async (bot, message, args) => {
                                                                                 let firewallIndex = victimStats.items.indexOf(firewall);
 
                                                                                 if(victimStats.items[firewallIndex].active === true){
-                                                                                    // tiene la firewall activa
-                                                                                    dsChannel.send(fail3);
+                                                                                    let skip3 = SkipFirewall();
 
-                                                                                    // eliminar firewall
-                                                                                    victimStats.items.splice(firewallIndex, 1);
-                                                                                    victimStats.save();
+                                                                                    if(skip3 == true){ // skip firewall
+                                                                                        dsChannel.send(success3);
+                                                                                        victim.roles.add(role);
 
-                                                                                    //eliminar item del autor
-                                                                                    stats.items.splice(index, 1);
-                                                                                    return stats.save();
+                                                                                        //eliminar item del autor
+                                                                                        stats.items.splice(index, 1);
+                                                                                        stats.save();
+
+                                                                                        // tiene una duración?
+                                                                                        return Duration(duracion, role.id, victim);
+                                                                                    } else {
+                                                                                        dsChannel.send(fail3);
+
+                                                                                        // eliminar firewall
+                                                                                        victimStats.items.splice(firewallIndex, 1);
+                                                                                        victimStats.save();
+
+                                                                                        //eliminar item del autor
+                                                                                        stats.items.splice(index, 1);
+                                                                                        return stats.save();
+                                                                                    }
                                                                                 } else {
                                                                                     dsChannel.send(success3);
                                                                                     victim.roles.add(role);
@@ -1512,8 +1550,16 @@ module.exports.run = async (bot, message, args) => {
 
   })
 
+    function SkipFirewall(){
+        Stats.findOne({
+            userID: author.id
+        }, (err, attacker) => {
+            if(err) throw err;
 
-
+            let accu = attacker.accuracy;
+            return chance.bool({likelihood: accu});
+        })
+    }
 }
 
 module.exports.help = {
