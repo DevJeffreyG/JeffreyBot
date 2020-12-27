@@ -1558,7 +1558,10 @@ module.exports.run = async (bot, message, args) => {
             if(err) throw err;
 
             let accu = attacker.accuracy;
-            return chance.bool({likelihood: accu});
+            let sk = chance.bool({likelihood: accu});
+
+            console.log(sk);
+            return sk;
         })
     }
 }
