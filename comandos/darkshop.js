@@ -262,6 +262,7 @@ module.exports.run = async (bot, message, args) => {
                                                                         itemID: items[i].id,
                                                                         isDarkShop: true
                                                                     }, (err, all) => {
+                                                                        if(err) throw err;
                                                                         let precio = all ? Number(items[i].itemPrice) + interest * all.quantity : items[i].itemPrice;
                             
                                                                         tienda.addField(
