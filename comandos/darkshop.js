@@ -1450,7 +1450,7 @@ module.exports.run = async (bot, message, args) => {
 
                                                                 let activated2 = new Discord.MessageEmbed()
                                                                 .setAuthor(`| Listo`, Config.darkLogoPng)
-                                                                .setDescription(`**—** Se ha usado el item **${stats.items[index].name}**.`)
+                                                                .setDescription(`**—** Se ha usado el item **${item.name}**.`)
                                                                 .setColor(Colores.negro);
                                                                 return message.channel.send(activated2);
                                                             } else
