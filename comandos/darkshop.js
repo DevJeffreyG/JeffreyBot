@@ -1433,7 +1433,7 @@ module.exports.run = async (bot, message, args) => {
 
                                             All.findOne({
                                                 userID: author.id,
-                                                itemID: items[i].id,
+                                                itemID: item.id,
                                                 isDarkShop: true
                                             }, (err, all) => {
                                                 precio = all ? Number(item.itemPrice) + interest * all.quantity : item.itemPrice;
