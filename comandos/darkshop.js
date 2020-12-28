@@ -1442,6 +1442,9 @@ module.exports.run = async (bot, message, args) => {
                                                                 let randomPercentage = Number(Number(Math.random() * 5).toFixed(1));
                                                                 stats.accuracy += randomPercentage;
 
+                                                                // revisar si se ignora el interes o no
+                                                                Interest(idUse);
+
                                                                 if(stats.accuracy + randomPercentage > 90) stats.accuracy = 90;
                                                                 stats.save();
 
