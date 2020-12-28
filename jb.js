@@ -607,8 +607,6 @@ bot.on("ready", async () => {
     dsNews = guild.roles.cache.find(x => x.id === Config.dsnews);
   }
 
-
-  
   channel.send("Reviví.");
 
   // buscar muteados
@@ -616,8 +614,6 @@ bot.on("ready", async () => {
     "info.type": "roleDuration"
   }, (err, roled) => {
     if(err) throw err;
-
-    console.log(roled);
 
     if(!roled) return;
 
