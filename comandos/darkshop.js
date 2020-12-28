@@ -256,7 +256,7 @@ module.exports.run = async (bot, message, args) => {
                                                                 );
 
                                                                 for (let i = inicio; i < fin + 1; i++) {
-                                                                    console.log(items[i]);
+                                                                    if(!items[i]) return message.channel.send(tienda);
                                                                     All.findOne({
                                                                         userID: author.id,
                                                                         itemID: items[i].id,
