@@ -8,10 +8,31 @@ const changes = Config.changes;
 module.exports.run = async (bot, message, args) => {
 
   if(!message.content.startsWith(prefix))return;
+
+  let added;
+  let removed;
+  let bugfix;
+  let updated;
   
   let embed = new Discord.MessageEmbed()
-  .setDescription(`**Jeffrey Bot v\`${Package.version}\`**.\n\n${versioninfo}\n\n*El bot puede tener cambios. Para saberlos, usa este mismo comando.*`)
+  .setDescription(`**Jeffrey Bot v\`${Package.version}\` — Últimos cambios hechos al bot.**`)
   .setColor(Colores.verde);
+
+  for(let i = 0; i < changes.length; i++){
+    switch(changes[i].type){
+      case "added":
+        embed.addField(changes[i].title, changes[i].desc)
+        break;
+
+      case "updated":
+        embed.addField(changes[i].title, changes[i].desc)
+        break;
+
+      case "removed":
+        embed.addField(changes[i].title, changes[i].desc)
+        break;
+    }
+  }
   
   message.channel.send(embed);
 

@@ -6,18 +6,17 @@
     [
         {
             "type": "added",
+            "title": "DarkShop",
             "desc": "Se ha habilitado la darkshop para los usuarios nivel 5"
         },
-        { 
-            "type": "add",
-            "desc": "Se ha actualizado el comando `/serverinfo`"
-        },
         {
-            "type": "extra",
-            "desc": "Arreglos internos del bot"
+            "type": "updated",
+            "title": "Bugfixes & more",
+            "desc": "Arreglos internos del bot. Se ha actualizado el comando `/botinfo`. Se ha actualizado el comando `/serverinfo`."
         },
         {
             "type": "removed",
+            "title": "Comandos eliminados",
             "desc": "Se han eliminado los comandos `/traducir`, `/perfil`, `/soporte`"
         }
     ],
