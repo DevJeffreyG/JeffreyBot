@@ -932,14 +932,14 @@ module.exports.run = async (bot, message, args) => {
                             if (args[3].toLowerCase() === "warns" && !args[4] || args[3].toLowerCase() === "warns" && isNaN(args[4])){
                             useEmbedError.setAuthor(`| Error: # Warns`, Config.errorPng);
                             return message.channel.send(useEmbedError)
-                            } else {
+                            } else if(args[3].toLowerCase() === "warns"){
                                 cantidad = Number(args[4]);
                             }
 
                             if (args[3].toLowerCase() === "warns" && !args[5]){
                             useEmbedError.setAuthor(`| Error: negative / positive`, Config.errorPng);
                             return message.channel.send(useEmbedError)
-                            } else {
+                            } else if(args[3].toLowerCase() === "warns"){
                                 efecto = args[5].toLowerCase();
                             }
 
@@ -947,14 +947,14 @@ module.exports.run = async (bot, message, args) => {
                             if (args[3].toLowerCase() === "jeffros" && !args[4] || args[3].toLowerCase() === "jeffros" && isNaN(args[4])){
                             useEmbedError.setAuthor(`| Error: # Jeffros`, Config.errorPng);
                             return message.channel.send(useEmbedError)
-                            } else {
+                            } else if(args[3].toLowerCase() === "jeffros"){
                                 cantidad = Number(args[4]);
                             }
 
                             if (args[3].toLowerCase() === "jeffros" && !args[5]){
                             useEmbedError.setAuthor(`| Error: negative / positive`, Config.errorPng);
                             return message.channel.send(useEmbedError)
-                            } else {
+                            } else if(args[3].toLowerCase() === "jeffros"){
                                 efecto = args[5].toLowerCase();
                             }
 
