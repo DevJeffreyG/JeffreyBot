@@ -76,7 +76,8 @@ module.exports.run = async (bot, message, args) => {
               All.findOne(
                 {
                   userID: author.id,
-                  itemID: items[i].id
+                  itemID: items[i].id,
+                  isDarkShop: false
                 },
                 (err, all) => {
                   let precio = items[i].itemPrice;
@@ -150,7 +151,8 @@ module.exports.run = async (bot, message, args) => {
                 All.findOne(
                   {
                     userID: author.id,
-                    itemID: items[i].id
+                    itemID: items[i].id,
+                    isDarkShop: false
                   },
                   (err, all) => {
                     let precio = items[i].itemPrice;
@@ -256,7 +258,8 @@ module.exports.run = async (bot, message, args) => {
                                 All.findOne(
                                   {
                                     userID: author.id,
-                                    itemID: items[i].id
+                                    itemID: items[i].id,
+                                    isDarkShop: false
                                   },
                                   (err, all) => {
                                     let precio = items[i].itemPrice;
@@ -345,7 +348,8 @@ module.exports.run = async (bot, message, args) => {
                                 All.findOne(
                                   {
                                     userID: author.id,
-                                    itemID: items[i].id
+                                    itemID: items[i].id,
+                                    isDarkShop: false
                                   },
                                   (err, all) => {
                                     let precio = items[i].itemPrice;
@@ -449,7 +453,8 @@ module.exports.run = async (bot, message, args) => {
                   All.findOne(
                     {
                       userID: author.id,
-                      itemID: action
+                      itemID: action,
+                      isDarkShop: false
                     },
                     (err, all) => {
                       if (all) {
@@ -928,14 +933,21 @@ module.exports.run = async (bot, message, args) => {
       );
     } else 
       if(action === "ignore"){
-        if(!args[1]) return message.reply("¿cuál es la id del item que se va a evitar subir el precio por compra?")
+        if(!args[1]) return message.reply("¿cuál es la id del item que se va a evitar subir el precio por compra?");
+        let darkshopBool = true;
+        if(!args[2]) darkshopBool = false;
         const newIgnore = new Ignore({
-          itemID: args[1]
+          itemID: args[1],
+          isDarkShop: darkshopBool
         });
         
         newIgnore.save();
         
-        message.react("✅")
+        message.react("✅").then(() => {
+          if(darkshopBool){
+            message.react("739625446961840129")
+          }
+        })
       }
   }
 };

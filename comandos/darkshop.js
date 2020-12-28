@@ -17,7 +17,8 @@ const Stats = require("../modelos/darkstats.js");
 const Items = require("../modelos/darkitems.js");
 const DarkUse = require("../modelos/darkUse.js");
 const GlobalData = require("../modelos/globalData.js");
-const darkstats = require("../modelos/darkstats.js");
+const All = require("../modelos/allpurchases.js");
+const Ignore = require("../modelos/ignore.js")
 
 /* ##### MONGOOSE ######## */
 
@@ -31,6 +32,8 @@ module.exports.run = async (bot, message, args) => {
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
   let dsChannel = guild.channels.cache.find(x => x.id === Config.dsChannel);
   let dsRole = guild.channels.cache.find(x => x.id === Config.dsRole);
+
+  const interest = 5;
 
   if(bot.user.id === Config.testingJBID){
     staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
@@ -94,15 +97,22 @@ module.exports.run = async (bot, message, args) => {
                                     tienda.setFooter(`| DarkShop - Página 1 de 1 | Alias: ${prefix}ds`, guild.iconURL());
                                 
                                     for(let i = 0; i < items.length; i++){
-                                        let precio = items[i].itemPrice;
-                                        tienda.addField(
-                                            `— { ${items[i].id} } ${items[i].itemName}`,
-                                            `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}`
-                                        );
+                                        All.findOne({
+                                            userID: author.id,
+                                            itemID: items[i].id,
+                                            isDarkShop: true
+                                        }, (err, all) => {
+                                            let precio = all ? Number(items[i].itemPrice) + interest * all.quantity : items[i].itemPrice;
 
-                                        if (i + 1 === items.length){
-                                            return message.channel.send(tienda);
-                                        }
+                                            tienda.addField(
+                                                `— { ${items[i].id} } ${items[i].itemName}`,
+                                                `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}`
+                                            );
+
+                                            if (i + 1 === items.length){
+                                                return message.channel.send(tienda);
+                                            }
+                                        })
                                     }
                                 } else { // hay más de itemPerPage
                                     let pagn = 1;
@@ -191,15 +201,22 @@ module.exports.run = async (bot, message, args) => {
                                                                 );
 
                                                                 for (let i = inicio; i < fin + 1; i++) {
-                                                                    let precio = items[i].itemPrice;
-                                                                    embed.addField(
-                                                                        `— { ${items[i].id} } ${items[i].itemName}`,
-                                                                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}`
-                                                                    );
-
-                                                                    if (i + 1 === fin + 1) {
-                                                                        return msg.edit(embed);
-                                                                    }
+                                                                    All.findOne({
+                                                                        userID: author.id,
+                                                                        itemID: items[i].id,
+                                                                        isDarkShop: true
+                                                                    }, (err, all) => {
+                                                                        let precio = all ? Number(items[i].itemPrice) + interest * all.quantity : items[i].itemPrice;
+                            
+                                                                        tienda.addField(
+                                                                            `— { ${items[i].id} } ${items[i].itemName}`,
+                                                                            `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}`
+                                                                        );
+                            
+                                                                        if (i + 1 === fin + 1){
+                                                                            return message.channel.send(tienda);
+                                                                        }
+                                                                    })
                                                                 }
                                                             });
                                                         });
@@ -239,14 +256,22 @@ module.exports.run = async (bot, message, args) => {
                                                                 );
 
                                                                 for (let i = inicio; i < fin + 1; i++) {
-                                                                    let precio = items[i].itemPrice;
-                                                                    embed.addField(
-                                                                        `— { ${items[i].id} } ${items[i].itemName}`,
-                                                                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}`
-                                                                    );
-                                                                    if (i + 1 === fin) {
-                                                                        return msg.edit(embed);
-                                                                    }
+                                                                    All.findOne({
+                                                                        userID: author.id,
+                                                                        itemID: items[i].id,
+                                                                        isDarkShop: true
+                                                                    }, (err, all) => {
+                                                                        let precio = all ? Number(items[i].itemPrice) + interest * all.quantity : items[i].itemPrice;
+                            
+                                                                        tienda.addField(
+                                                                            `— { ${items[i].id} } ${items[i].itemName}`,
+                                                                            `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}`
+                                                                        );
+                            
+                                                                        if (i + 1 === fin){
+                                                                            return message.channel.send(tienda);
+                                                                        }
+                                                                    })
                                                                 }
                                                             });
                                                         });
@@ -1400,9 +1425,17 @@ module.exports.run = async (bot, message, args) => {
                                             if(!use){ // si no está listo para usar
                                                 return message.channel.send(`Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas comprar tu item :)`);
                                             }
+                                            let precio;
 
-                                            // variables & embeds
-                                            let precio = Number(item.itemPrice);
+                                            All.findOne({
+                                                userID: author.id,
+                                                itemID: items[i].id,
+                                                isDarkShop: true
+                                            }, (err, all) => {
+                                                precio = all ? Number(item.itemPrice) + interest * all.quantity : item.itemPrice;
+                                            })
+
+                                            return console.log(precio); // cual es el precio
                                             
                                             let doesntHaveEnough = new Discord.MessageEmbed()
                                             .setAuthor(`| Error`, Config.darkLogoPng)
