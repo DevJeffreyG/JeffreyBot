@@ -18,19 +18,20 @@ module.exports.run = async (bot, message, args) => {
   .setColor(Colores.verde);
 
   for(let i = 0; i < changes.length; i++){
+    let addToDesc;
     switch(changes[i].type){
       case "added":
-        let addToDesc = `**• ${changes[i].title}**\n${added} ${changes[i].desc}.`;
+        addToDesc = `**• ${changes[i].title}**\n${added} ${changes[i].desc}.`;
         embed.setDescription(embed.description + addToDesc)
         break;
 
       case "updated":
-        let addToDesc = `**• ${changes[i].title}**\n${updated} ${changes[i].desc}.`;
+        addToDesc = `**• ${changes[i].title}**\n${updated} ${changes[i].desc}.`;
         embed.setDescription(embed.description + addToDesc)
         break;
 
       case "removed":
-        let addToDesc = `**• ${changes[i].title}**\n${removed} ${changes[i].desc}.`;
+        addToDesc = `**• ${changes[i].title}**\n${removed} ${changes[i].desc}.`;
         embed.setDescription(embed.description + addToDesc)
         break;
     }
