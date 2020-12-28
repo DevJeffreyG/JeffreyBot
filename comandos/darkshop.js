@@ -257,7 +257,6 @@ module.exports.run = async (bot, message, args) => {
                                                                 );
 
                                                                 for (let i = inicio; i < fin + 1; i++) {
-                                                                    console.log(items[i]);
                                                                     if(!items[i]) return msg.edit(embed);
                                                                     All.findOne({
                                                                         userID: author.id,
@@ -865,8 +864,10 @@ module.exports.run = async (bot, message, args) => {
                             if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
                         
                             let useEmbedError = new Discord.MessageEmbed()
-                            .setDescription(`▸ El uso correcto es: ${prefix}darkshop adduse \`itemID\` \`add || remove\` \`jeffros | warns | role\`
+                            .setDescription(`▸ El uso correcto es: ${prefix}darkshop adduse \`itemID\` \`add || remove\` \`item | jeffros | warns | role\`
 
+                            **— Item —**
+                            ${prefix}darkshop adduse \`itemID\` \`add || remove\` \`item\` \`positive | negative\`
                             **— Jeffros —**
                             ${prefix}darkshop adduse \`itemID\` \`add || remove\` \`jeffros\` \`# Jeffros\` \`positive | negative\`
                             **— Warns —**
@@ -885,7 +886,7 @@ module.exports.run = async (bot, message, args) => {
                                 return message.channel.send(useEmbedError)
                             }
                             if (!args[3]) {
-                            useEmbedError.setAuthor(`| Error: j / w / r`, Config.errorPng);
+                            useEmbedError.setAuthor(`| Error: i / j / w / r`, Config.errorPng);
                             return message.channel.send(useEmbedError)
                             }
                             
@@ -895,6 +896,14 @@ module.exports.run = async (bot, message, args) => {
                             let duracion = "na";
                             let cantidad = 0;
                             let efecto = "na";
+
+                            // SI ES UN ITEM
+                            if (args[3].toLowerCase() === "item" && !args[4]) {
+                            useEmbedError.setAuthor(`| Error: negative / positive`, Config.errorPng);
+                            return message.channel.send(useEmbedError)
+                            } else if (args[3].toLowerCase() === "item") {
+                            efecto = args[4].toLowerCase();
+                            }
 
                             // SI ES UN ROLE
                             if (args[3].toLowerCase() === "role" && !args[4]) {
