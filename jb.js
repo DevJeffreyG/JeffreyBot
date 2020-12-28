@@ -617,6 +617,8 @@ bot.on("ready", async () => {
   }, (err, roled) => {
     if(err) throw err;
 
+    console.log(roled);
+
     if(!roled) return;
 
     for (let i = 0; i < roled.length; i++){
