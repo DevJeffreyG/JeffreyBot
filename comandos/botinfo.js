@@ -16,13 +16,14 @@ module.exports.run = async (bot, message, args) => {
   let embed = new Discord.MessageEmbed()
   .setDescription(`**Jeffrey Bot v\`${Package.version}\` — Últimos cambios hechos al bot.**\n`)
   .setColor(Colores.verde);
+  
+  let addCounter = 0;
+  let removeCounter = 0;
+  let updateCounter = 0;
 
   for(let i = 0; i < changes.length; i++){
     let addToDesc;
 
-    let addCounter = 0;
-    let removeCounter = 0;
-    let updateCounter = 0;
     switch(changes[i].type){
       case "added":
         if(addCounter == 0){
