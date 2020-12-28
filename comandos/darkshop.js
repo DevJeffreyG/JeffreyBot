@@ -209,7 +209,7 @@ module.exports.run = async (bot, message, args) => {
                                                                     }, (err, all) => {
                                                                         let precio = all ? Number(items[i].itemPrice) + interest * all.quantity : items[i].itemPrice;
                             
-                                                                        tienda.addField(
+                                                                        embed.addField(
                                                                             `— { ${items[i].id} } ${items[i].itemName}`,
                                                                             `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}`
                                                                         );
@@ -257,6 +257,7 @@ module.exports.run = async (bot, message, args) => {
                                                                 );
 
                                                                 for (let i = inicio; i < fin + 1; i++) {
+                                                                    console.log(items[i]);
                                                                     if(!items[i]) return msg.edit(embed);
                                                                     All.findOne({
                                                                         userID: author.id,
@@ -266,7 +267,7 @@ module.exports.run = async (bot, message, args) => {
                                                                         if(err) throw err;
                                                                         let precio = all ? Number(items[i].itemPrice) + interest * all.quantity : items[i].itemPrice;
                             
-                                                                        tienda.addField(
+                                                                        embed.addField(
                                                                             `— { ${items[i].id} } ${items[i].itemName}`,
                                                                             `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}`
                                                                         );
