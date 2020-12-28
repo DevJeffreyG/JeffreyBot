@@ -1435,7 +1435,7 @@ module.exports.run = async (bot, message, args) => {
                                                 itemID: item.id,
                                                 isDarkShop: true
                                             }, (err, all) => {
-                                                let precio = all ? Number(item.itemPrice) + interest * all.quantity : item.itemPrice;
+                                                let precio = all ? Number(item.itemPrice) + interest * all.quantity : Number(item.itemPrice);
 
                                             
                                                 let doesntHaveEnough = new Discord.MessageEmbed()
