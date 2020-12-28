@@ -1429,138 +1429,137 @@ module.exports.run = async (bot, message, args) => {
                                             if(!use){ // si no está listo para usar
                                                 return message.channel.send(`Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas comprar tu item :)`);
                                             }
-                                            let precio;
 
                                             All.findOne({
                                                 userID: author.id,
                                                 itemID: item.id,
                                                 isDarkShop: true
                                             }, (err, all) => {
-                                                precio = all ? Number(item.itemPrice) + interest * all.quantity : item.itemPrice;
-                                            })
+                                                let precio = all ? Number(item.itemPrice) + interest * all.quantity : item.itemPrice;
 
-                                            return console.log(precio); // cual es el precio
                                             
-                                            let doesntHaveEnough = new Discord.MessageEmbed()
-                                            .setAuthor(`| Error`, Config.darkLogoPng)
-                                            .setDescription(
-                                            `**—** Necesitas **${Emojis.Dark}${precio}** para comprar \`${item.itemName}\`. Tienes **${Emojis.Dark}${stats.djeffros}**.`
-                                            )
-                                            .setColor(Colores.negro);
-
-                                            let hasThisItem = new Discord.MessageEmbed()
-                                            .setAuthor(`| Error`, Config.darkLogoPng)
-                                            .setDescription(
-                                            `**—** Ya tienes \`${item.itemName}\`, úsalo con \`${prefix}ds items ${item.id}\`.`
-                                            )
-                                            .setColor(Colores.negro);
-
-                                            // tiene darkjeffros suficientes?
-                                            if(stats.djeffros < precio) return message.channel.send(doesntHaveEnough);
-
-                                            // verificar si ya tiene lo que está comprando
-
-                                            // buscar si hay algún item con esa id
-                                            for (let x = 0; x < stats.items.length; x++){
-                                                if(stats.items != undefined && stats.items[x].id === item.id){
-                                                    return message.channel.send(hasThisItem);
-                                                }
-                                            }
-                                                    
-                                                // si no tiene ese item
-                                                x = stats.items.length;
-                                                // confirmar pago
-                                                let buyEmbed = new Discord.MessageEmbed()
-                                                .setAuthor(`| Compra`, Config.darkLogoPng)
-                                                .setColor(Colores.blanco)
+                                                let doesntHaveEnough = new Discord.MessageEmbed()
+                                                .setAuthor(`| Error`, Config.darkLogoPng)
                                                 .setDescription(
-                                                    `
-                \`▸\` ¿Estás seguro de comprar \`${item.itemName}\` por **${Emojis.Dark}${precio}**?
-                \`▸\` Reacciona de acuerdo a tu preferencia.`
+                                                `**—** Necesitas **${Emojis.Dark}${precio}** para comprar \`${item.itemName}\`. Tienes **${Emojis.Dark}${stats.djeffros}**.`
                                                 )
-                                                .setFooter(
-                                                    `▸ Esta compra no se puede devolver.`,
-                                                    "https://cdn.discordapp.com/emojis/494267320097570837.png"
-                                                );
+                                                .setColor(Colores.negro);
 
-                                                message.channel.send(buyEmbed).then(msg => {
-                                                msg
-                                                    .react(":allow:558084462232076312")
-                                                    .then(r => {
-                                                    msg.react(":denegar:558084461686947891");
-                                                    });
+                                                let hasThisItem = new Discord.MessageEmbed()
+                                                .setAuthor(`| Error`, Config.darkLogoPng)
+                                                .setDescription(
+                                                `**—** Ya tienes \`${item.itemName}\`, úsalo con \`${prefix}ds items ${item.id}\`.`
+                                                )
+                                                .setColor(Colores.negro);
 
-                                                let cancelEmbed = new Discord.MessageEmbed()
-                                                    .setDescription(`Cancelado.`)
-                                                    .setColor(Colores.nocolor);
+                                                // tiene darkjeffros suficientes?
+                                                if(stats.djeffros < precio) return message.channel.send(doesntHaveEnough);
 
-                                                const yesFilter = (reaction, user) =>
-                                                    reaction.emoji.id ===
-                                                    "558084462232076312" &&
-                                                    user.id === message.author.id;
-                                                const noFilter = (reaction, user) =>
-                                                    reaction.emoji.id ===
-                                                    "558084461686947891" &&
-                                                    user.id === message.author.id;
+                                                // verificar si ya tiene lo que está comprando
 
-                                                const yes = msg.createReactionCollector(
-                                                    yesFilter,
-                                                    { time: 60000 }
-                                                );
-                                                const no = msg.createReactionCollector(
-                                                    noFilter,
-                                                    {
-                                                    time: 60000
+                                                // buscar si hay algún item con esa id
+                                                for (let x = 0; x < stats.items.length; x++){
+                                                    if(stats.items != undefined && stats.items[x].id === item.id){
+                                                        return message.channel.send(hasThisItem);
                                                     }
-                                                );
-
-                                                yes.on("collect", r => {
-                                                    // agregar a la lista de items
-
-                                                    if(stats.items.length === 0){
-                                                        stats.items = [
-                                                            {
-                                                                "id": item.id,
-                                                                "name": item.itemName,
-                                                                "active": false
-                                                            }
-                                                        ];
-
-                                                    } else {
-                                                        stats.items.push({"id": item.id, "name": item.itemName, "active": false})
-                                                    }
-
-                                                    stats.djeffros -= precio;
-                                                    stats.save();
-
-                                                    let useEmbed = new Discord.MessageEmbed()
-                                                    .setAuthor(`| Listo!`, Config.darkLogoPng)
+                                                }
+                                                        
+                                                    // si no tiene ese item
+                                                    x = stats.items.length;
+                                                    // confirmar pago
+                                                    let buyEmbed = new Discord.MessageEmbed()
+                                                    .setAuthor(`| Compra`, Config.darkLogoPng)
+                                                    .setColor(Colores.blanco)
                                                     .setDescription(
                                                         `
-                \`▸\` Pago realizado con éxito.
-                \`▸\` Compraste: \`${item.itemName}\` por **${Emojis.Dark}${precio}**.
-                \`▸ Úsalo con '${prefix}ds items ${item.id}'\`.
-                \`▸\` Ahora tienes: **${Emojis.Dark}${stats.djeffros}**.`
+                    \`▸\` ¿Estás seguro de comprar \`${item.itemName}\` por **${Emojis.Dark}${precio}**?
+                    \`▸\` Reacciona de acuerdo a tu preferencia.`
                                                     )
-                                                    .setColor(Colores.negro);
+                                                    .setFooter(
+                                                        `▸ Esta compra no se puede devolver.`,
+                                                        "https://cdn.discordapp.com/emojis/494267320097570837.png"
+                                                    );
 
-                                                    return msg.edit(useEmbed).then(() => {
-                                                    msg.reactions.removeAll();
+                                                    message.channel.send(buyEmbed).then(msg => {
+                                                    msg
+                                                        .react(":allow:558084462232076312")
+                                                        .then(r => {
+                                                        msg.react(":denegar:558084461686947891");
+                                                        });
+
+                                                    let cancelEmbed = new Discord.MessageEmbed()
+                                                        .setDescription(`Cancelado.`)
+                                                        .setColor(Colores.nocolor);
+
+                                                    const yesFilter = (reaction, user) =>
+                                                        reaction.emoji.id ===
+                                                        "558084462232076312" &&
+                                                        user.id === message.author.id;
+                                                    const noFilter = (reaction, user) =>
+                                                        reaction.emoji.id ===
+                                                        "558084461686947891" &&
+                                                        user.id === message.author.id;
+
+                                                    const yes = msg.createReactionCollector(
+                                                        yesFilter,
+                                                        { time: 60000 }
+                                                    );
+                                                    const no = msg.createReactionCollector(
+                                                        noFilter,
+                                                        {
+                                                        time: 60000
+                                                        }
+                                                    );
+
+                                                    yes.on("collect", r => {
+                                                        // agregar a la lista de items
+
+                                                        if(stats.items.length === 0){
+                                                            stats.items = [
+                                                                {
+                                                                    "id": item.id,
+                                                                    "name": item.itemName,
+                                                                    "active": false
+                                                                }
+                                                            ];
+
+                                                        } else {
+                                                            stats.items.push({"id": item.id, "name": item.itemName, "active": false})
+                                                        }
+
+                                                        stats.djeffros -= precio;
+                                                        stats.save();
+
+                                                        let useEmbed = new Discord.MessageEmbed()
+                                                        .setAuthor(`| Listo!`, Config.darkLogoPng)
+                                                        .setDescription(
+                                                            `
+                    \`▸\` Pago realizado con éxito.
+                    \`▸\` Compraste: \`${item.itemName}\` por **${Emojis.Dark}${precio}**.
+                    \`▸ Úsalo con '${prefix}ds items ${item.id}'\`.
+                    \`▸\` Ahora tienes: **${Emojis.Dark}${stats.djeffros}**.`
+                                                        )
+                                                        .setColor(Colores.negro);
+
+                                                        return msg.edit(useEmbed).then(() => {
+                                                        msg.reactions.removeAll();
+                                                        });
+                                                    });
+
+                                                    no.on("collect", r => {
+                                                        return msg.edit(cancelEmbed).then(a => {
+                                                        msg.reactions.removeAll();
+                                                        message.delete();
+                                                        a.delete({timeout: ms("20s")});
+                                                        });
                                                     });
                                                 });
-
-                                                no.on("collect", r => {
-                                                    return msg.edit(cancelEmbed).then(a => {
-                                                    msg.reactions.removeAll();
-                                                    message.delete();
-                                                    a.delete({timeout: ms("20s")});
-                                                    });
-                                                });
-                                            });
+                                            })
                                         }
                                     })
                                 })
                             })
+                            
                     }
                 }
                     
