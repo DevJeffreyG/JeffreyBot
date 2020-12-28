@@ -21,17 +21,17 @@ module.exports.run = async (bot, message, args) => {
     let addToDesc;
     switch(changes[i].type){
       case "added":
-        addToDesc = `**• ${changes[i].title}**\n${added} ${changes[i].desc}.`;
+        addToDesc = `${added} ${changes[i].desc}.\n\n`;
         embed.setDescription(embed.description + addToDesc)
         break;
 
       case "updated":
-        addToDesc = `**• ${changes[i].title}**\n${updated} ${changes[i].desc}.`;
+        addToDesc = `${updated} ${changes[i].desc}.\n\n`;
         embed.setDescription(embed.description + addToDesc)
         break;
 
       case "removed":
-        addToDesc = `**• ${changes[i].title}**\n${removed} ${changes[i].desc}.`;
+        addToDesc = `${removed} ${changes[i].desc}.\n\n`;
         embed.setDescription(embed.description + addToDesc)
         break;
     }
