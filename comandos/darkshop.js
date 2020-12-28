@@ -1438,7 +1438,6 @@ module.exports.run = async (bot, message, args) => {
                                                             let index4 = stats.items.indexOf(item);
                                                             if(item.id === 4){ // es stackoverflow
                                                                 stats.items.splice(index4, 1); // borrarlo
-                                                                stats.save();
 
                                                                 let randomPercentage = Number(Number(Math.random() * 5).toFixed(1));
                                                                 stats.accuracy += randomPercentage;
