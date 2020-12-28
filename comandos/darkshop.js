@@ -201,6 +201,7 @@ module.exports.run = async (bot, message, args) => {
                                                                 );
 
                                                                 for (let i = inicio; i < fin + 1; i++) {
+                                                                    if(!items[i]) return msg.edit(embed);
                                                                     All.findOne({
                                                                         userID: author.id,
                                                                         itemID: items[i].id,
@@ -214,7 +215,7 @@ module.exports.run = async (bot, message, args) => {
                                                                         );
                             
                                                                         if (i + 1 === fin + 1){
-                                                                            return message.channel.send(tienda);
+                                                                            return return msg.edit(embed);
                                                                         }
                                                                     })
                                                                 }
@@ -256,7 +257,7 @@ module.exports.run = async (bot, message, args) => {
                                                                 );
 
                                                                 for (let i = inicio; i < fin + 1; i++) {
-                                                                    if(!items[i]) return message.channel.send(tienda);
+                                                                    if(!items[i]) return msg.edit(embed);
                                                                     All.findOne({
                                                                         userID: author.id,
                                                                         itemID: items[i].id,
@@ -271,7 +272,7 @@ module.exports.run = async (bot, message, args) => {
                                                                         );
                             
                                                                         if (i + 1 === fin){
-                                                                            return message.channel.send(tienda);
+                                                                            return msg.edit(embed);
                                                                         }
                                                                     })
                                                                 }
