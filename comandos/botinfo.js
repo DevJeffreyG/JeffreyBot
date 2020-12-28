@@ -14,24 +14,44 @@ module.exports.run = async (bot, message, args) => {
   let updated = "<:Update:792966881690648576>";
   
   let embed = new Discord.MessageEmbed()
-  .setDescription(`**Jeffrey Bot v\`${Package.version}\` — Últimos cambios hechos al bot.**\n\n`)
+  .setDescription(`**Jeffrey Bot v\`${Package.version}\` — Últimos cambios hechos al bot.**`)
   .setColor(Colores.verde);
 
   for(let i = 0; i < changes.length; i++){
     let addToDesc;
+
+    let addCounter = 0;
+    let removeCounter = 0;
+    let updateCounter = 0;
     switch(changes[i].type){
       case "added":
-        addToDesc = `${added} ${changes[i].desc}.\n\n`;
+        addCounter++;
+        if(addCounter == 0){
+          addToDesc = `\n\n**• Agregado**\n${added} ${changes[i].desc}.\n`;
+        } else {
+          addToDesc = `${added} ${changes[i].desc}.\n`;
+        }
         embed.setDescription(embed.description + addToDesc)
         break;
 
       case "updated":
+        updateCounter++;
+        if(updateCounter == 0){
+          addToDesc = `\n\n**• Actualizado**\n${added} ${changes[i].desc}.\n`;
+        } else {
+          addToDesc = `${added} ${changes[i].desc}.\n`;
+        }
         addToDesc = `${updated} ${changes[i].desc}.\n\n`;
         embed.setDescription(embed.description + addToDesc)
         break;
 
       case "removed":
-        addToDesc = `${removed} ${changes[i].desc}.\n\n`;
+        removeCounter++;
+        if(removeCounter == 0){
+          addToDesc = `\n\n**• Eliminado**\n${removed} ${changes[i].desc}.\n`;
+        } else {
+          addToDesc = `${removed} ${changes[i].desc}.\n`;
+        }
         embed.setDescription(embed.description + addToDesc)
         break;
     }
