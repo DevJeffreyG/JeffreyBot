@@ -1024,7 +1024,7 @@ module.exports.run = async (bot, message, args) => {
                                                 }
 
                                                 message.channel.send(itemsEmbed);
-                                            } else {
+                                            } else {    
                                                 // USAR UN ITEM
                                                 let idUse = args[1];
 
@@ -1097,6 +1097,10 @@ module.exports.run = async (bot, message, args) => {
         
                                                                                 //eliminar item del autor
                                                                                 stats.items.splice(index, 1);
+
+                                                                                // revisar si se ignora el interes o no
+                                                                                Interest(idUse);
+
                                                                                 return stats.save();
                                                                             }
                                                                         } else {
@@ -1106,6 +1110,10 @@ module.exports.run = async (bot, message, args) => {
 
                                                                                 //eliminar item del autor
                                                                                 stats.items.splice(index, 1);
+                                                                                
+                                                                                // revisar si se ignora el interes o no
+                                                                                Interest(idUse);
+                                                                                
                                                                                 return stats.save();
                                                                             }
 
@@ -1123,6 +1131,10 @@ module.exports.run = async (bot, message, args) => {
 
                                                                                         //eliminar item del autor
                                                                                         stats.items.splice(index, 1);
+
+                                                                                        // revisar si se ignora el interes o no
+                                                                                        Interest(idUse);
+                                                                                        
                                                                                         return stats.save();
                                                                                     } else {
                                                                                         dsChannel.send(fail2);
@@ -1133,6 +1145,10 @@ module.exports.run = async (bot, message, args) => {
 
                                                                                         //eliminar item del autor
                                                                                         stats.items.splice(index, 1);
+
+                                                                                        // revisar si se ignora el interes o no
+                                                                                        Interest(idUse);
+                                                                                        
                                                                                         return stats.save();
                                                                                     }
                                                                                 } else {
@@ -1141,6 +1157,10 @@ module.exports.run = async (bot, message, args) => {
 
                                                                                     //eliminar item del autor
                                                                                     stats.items.splice(index, 1);
+
+                                                                                    // revisar si se ignora el interes o no
+                                                                                    Interest(idUse);
+                                                                                    
                                                                                     return stats.save();
                                                                                 }
                                                                             } else { // no tienen ningun item con nombre firewall
@@ -1149,6 +1169,10 @@ module.exports.run = async (bot, message, args) => {
 
                                                                                 //eliminar item del autor
                                                                                 stats.items.splice(index, 1);
+
+                                                                                // revisar si se ignora el interes o no
+                                                                                Interest(idUse);
+                                                                                
                                                                                 return stats.save();
                                                                             }
                                                                         }
@@ -1160,6 +1184,10 @@ module.exports.run = async (bot, message, args) => {
 
                                                                     //eliminar item del autor
                                                                     stats.items.splice(index, 1);
+                                                                    
+                                                                    // revisar si se ignora el interes o no
+                                                                    Interest(idUse);
+                                                                    
                                                                     return stats.save();
                                                                 }
                                                             }
@@ -1235,6 +1263,10 @@ module.exports.run = async (bot, message, args) => {
                                                                                 stats.items.splice(index, 1);
                                                                                 stats.save();
 
+                                                                                // revisar si se ignora el interes o no
+                                                                                Interest(idUse);
+                                                                                
+
                                                                                 // tiene una duración?
                                                                                 return Duration(duracion, role.id, victim);
                                                                             }
@@ -1247,6 +1279,9 @@ module.exports.run = async (bot, message, args) => {
                                                                                 stats.items.splice(index, 1);
                                                                                 stats.save();
 
+                                                                                // revisar si se ignora el interes o no
+                                                                                Interest(idUse);
+                                                                                
                                                                                 // tiene una duración?
                                                                                 return Duration(duracion, role.id, victim);
                                                                             }
@@ -1267,6 +1302,10 @@ module.exports.run = async (bot, message, args) => {
                                                                                         stats.items.splice(index, 1);
                                                                                         stats.save();
 
+                                                                                        // revisar si se ignora el interes o no
+                                                                                        Interest(idUse);
+                                                                                        
+
                                                                                         // tiene una duración?
                                                                                         return Duration(duracion, role.id, victim);
                                                                                     } else {
@@ -1278,6 +1317,10 @@ module.exports.run = async (bot, message, args) => {
 
                                                                                         //eliminar item del autor
                                                                                         stats.items.splice(index, 1);
+
+                                                                                        // revisar si se ignora el interes o no
+                                                                                        Interest(idUse);
+                                                                                        
                                                                                         return stats.save();
                                                                                     }
                                                                                 } else {
@@ -1287,6 +1330,10 @@ module.exports.run = async (bot, message, args) => {
                                                                                     //eliminar item del autor
                                                                                     stats.items.splice(index, 1);
                                                                                     stats.save();
+
+                                                                                    // revisar si se ignora el interes o no
+                                                                                    Interest(idUse);
+                                                                                    
 
                                                                                     // tiene una duración?
                                                                                     return Duration(duracion, role.id, victim);
@@ -1298,6 +1345,10 @@ module.exports.run = async (bot, message, args) => {
                                                                                 //eliminar item del autor
                                                                                 stats.items.splice(index, 1);
                                                                                 stats.save();
+
+                                                                                // revisar si se ignora el interes o no
+                                                                                Interest(idUse);
+                                                                                
 
                                                                                 // tiene una duración?
                                                                                 return Duration(duracion, role.id, victim);
@@ -1312,6 +1363,10 @@ module.exports.run = async (bot, message, args) => {
                                                                     //eliminar item del autor
                                                                     stats.items.splice(index, 1);
                                                                     stats.save();
+
+                                                                    // revisar si se ignora el interes o no
+                                                                    Interest(idUse);
+                                                                    
 
                                                                     // tiene una duración?
                                                                     return Duration(duracion, role.id, victim);
@@ -1375,12 +1430,19 @@ module.exports.run = async (bot, message, args) => {
                                                                 .then(a => console.log(a))
                                                                 .catch(err => console.log(err));
 
+                                                                // revisar si se ignora el interes o no
+                                                                Interest(idUse);
+                                                                
+
                                                                 let activated = new Discord.MessageEmbed()
                                                                 .setAuthor(`| Listo`, Config.darkLogoPng)
                                                                 .setDescription(`**—** Se ha activado el item **${stats.items[index].name}**.`)
                                                                 .setColor(Colores.negro);
                                                                 return message.channel.send(activated)
                                                             } else {
+                                                                // revisar si se ignora el interes o no
+                                                                Interest(idUse);
+                                                                
                                                                 return message.reply("este item ya está activo en tu cuenta.")
                                                             }
                                                             break;
@@ -1588,6 +1650,35 @@ module.exports.run = async (bot, message, args) => {
     })
 
   })
+
+  function Interest (idUse) {
+    Items.findOne({
+        id: idUse
+    }, (err, item) => {
+        All.findOne({
+            userID: author.id,
+            itemID: idUse
+        }, (err, alli) => {
+
+            if(item.ignoreInterest == false && !alli){
+                const newAll = new All({
+                    userID: author.id,
+                    itemID: idUse,
+                    quantity: 1,
+                    isDarkShop: true
+                });
+
+                return newAll.save();
+            } else if (item.ignoreInterest == false && alli){
+                alli.quantity += 1;
+                return alli.save();
+            } else {
+                // no hacer nada, se ignora el interés
+                return;
+            }
+        })
+    })
+  }
 }
 
 module.exports.help = {
