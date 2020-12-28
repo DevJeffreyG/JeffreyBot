@@ -25,17 +25,16 @@ module.exports.run = async (bot, message, args) => {
     let updateCounter = 0;
     switch(changes[i].type){
       case "added":
-        addCounter++;
         if(addCounter == 0){
           addToDesc = `\n\n**• Agregado**\n${added} ${changes[i].desc}.\n`;
         } else {
           addToDesc = `${added} ${changes[i].desc}.\n`;
         }
         embed.setDescription(embed.description + addToDesc)
+        addCounter++;
         break;
 
       case "updated":
-        updateCounter++;
         if(updateCounter == 0){
           addToDesc = `\n\n**• Actualizado**\n${added} ${changes[i].desc}.\n`;
         } else {
@@ -43,16 +42,17 @@ module.exports.run = async (bot, message, args) => {
         }
         addToDesc = `${updated} ${changes[i].desc}.\n\n`;
         embed.setDescription(embed.description + addToDesc)
+        updateCounter++;
         break;
 
       case "removed":
-        removeCounter++;
         if(removeCounter == 0){
           addToDesc = `\n\n**• Eliminado**\n${removed} ${changes[i].desc}.\n`;
         } else {
           addToDesc = `${removed} ${changes[i].desc}.\n`;
         }
         embed.setDescription(embed.description + addToDesc)
+        removeCounter++;
         break;
     }
   }
