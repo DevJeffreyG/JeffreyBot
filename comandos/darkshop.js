@@ -1344,9 +1344,13 @@ module.exports.run = async (bot, message, args) => {
                                                                         GlobalData.findOneAndDelete({
                                                                             "info.type": "roleDuration",
                                                                             roleID: roleID,
-                                                                            userID: victimMember.id,
-                                                                            since: hoy,
-                                                                            duration: roleDuration
+                                                                            userID: victimMember.id
+                                                                        }, (err, func) => {
+                                                                            if(err){
+                                                                                console.log(err);
+                                                                            } else {
+                                                                                console.log("Role eliminado automaticamente")
+                                                                            }
                                                                         });
                                                                     }, roleDuration);
 
