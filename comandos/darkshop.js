@@ -1436,6 +1436,17 @@ module.exports.run = async (bot, message, args) => {
                                                         case "item":
                                                             let action4 = use.info.action;
                                                             let index4 = stats.items.indexOf(item);
+                                                            if(item.id === 4){ // es stackoverflow
+                                                                stats.items.splice(index4, 1); // borrarlo
+                                                                stats.save();
+
+                                                                let randomPercentage = Number(Number(Math.random() * 5).toFixed(1));
+                                                                stats.accuracy += randomPercentage;
+
+                                                                if(stats.accuracy + randomPercentage > 90) stats.accuracy = 90;
+                                                                stats.save();
+                                                            } else
+                                                            
                                                             if(item.active === false && action4 === "add"){ // entonces activarlo.
                                                                 // buscarlo
 
