@@ -36,11 +36,10 @@ module.exports.run = async (bot, message, args) => {
 
       case "updated":
         if(updateCounter == 0){
-          addToDesc = `\n\n**• Actualizado**\n${added} ${changes[i].desc}.\n`;
+          addToDesc = `\n\n**• Actualizado**\n${updated} ${changes[i].desc}.\n`;
         } else {
-          addToDesc = `${added} ${changes[i].desc}.\n`;
+          addToDesc = `${updated} ${changes[i].desc}.\n`;
         }
-        addToDesc = `${updated} ${changes[i].desc}.\n\n`;
         embed.setDescription(embed.description + addToDesc)
         updateCounter++;
         break;
