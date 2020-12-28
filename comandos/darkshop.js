@@ -215,7 +215,7 @@ module.exports.run = async (bot, message, args) => {
                                                                         );
                             
                                                                         if (i + 1 === fin + 1){
-                                                                            return return msg.edit(embed);
+                                                                            return msg.edit(embed);
                                                                         }
                                                                     })
                                                                 }
