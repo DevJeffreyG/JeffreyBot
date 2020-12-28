@@ -656,8 +656,7 @@ module.exports.run = async (bot, message, args) => {
                                     let errorEmbed = new Discord.MessageEmbed()
                                     .setAuthor(`| Error`, Config.errorPng)
                                     .setDescription(
-                                        `▸ El uso correcto es: /darkshop add <nombre> <precio>
-            **—** Para los roles, si no se necesita, rellenar con "\`na\`".`
+                                        `▸ El uso correcto es: /darkshop add <nombre> <precio> (ignoreInterest).`
                                     )
                                     .setColor(Colores.nocolor);
 
@@ -667,6 +666,8 @@ module.exports.run = async (bot, message, args) => {
                                     let nameItem = args[1];
                                     let priceItem = args[2];
 
+                                    let ignoreBool = !args[3] ? true : false;
+
                                     let lastID = c + plus;
 
                                     const newItem = new Items({
@@ -674,6 +675,7 @@ module.exports.run = async (bot, message, args) => {
                                     itemPrice: priceItem,
                                     itemDescription: "na",
                                     replyMessage: "¡Item usado con éxito!",
+                                    ignoreInterest: ignoreBool,
                                     id: lastID
                                     });
 
