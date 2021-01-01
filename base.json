@@ -6,6 +6,10 @@
     [
         {
             "type": "added",
+            "desc": "Los nuevos usuarios no obtendrán el role de miembros hasta que acepten las reglas."
+        },
+        {
+            "type": "added",
             "desc": "Se ha habilitado la `{ PREFIX }darkshop` para los usuarios **nivel 5**"
         },
         {
@@ -78,6 +82,8 @@
     "muteRole": "475490272676151296",
     "bdRole": "528441046405742595",
     "vipRole": "529275759521431553",
+    "memberRole": "460966148704436235",
+    "botRole": "447821238631530498",
     "__comment": "Mensajes",
     "mRainbow": "572617072711041026",
     "sMRainbow": "572964150674849802",

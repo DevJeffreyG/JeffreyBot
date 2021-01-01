@@ -133,6 +133,42 @@ fs.readdir("./comandos/", (err, files) => {
   });
 });
 
+
+// #### PENDING WELCOME SCREEN
+
+Structures.extend('GuildMember', GuildMember => {
+  class GuildMemberWithPending extends GuildMember {
+      pending = false;
+  
+      constructor(client: any, data: any, guild: any) {
+          super(client, data, guild);
+          this.pending = data.pending ?? false;
+      }
+  
+      _patch(data: any) {
+          super._patch(data);
+          this.pending = data.pending ?? false;
+      }
+  }
+  return GuildMemberWithPending;
+});
+
+client.on('guildMemberUpdate', async (oldMember, newMember) => {
+    let guild = newMember.guild;
+    let memberRole = guild.roles.cache.find(x => x.id === Config.memberRole);
+
+    if(bot.user.id === Config.testingJBID){
+      memberRole = guild.roles.cache.find(x => x.id === "575094139100594186");
+    }
+
+    // Member passed membership screening
+    if (oldMember.pending && !newMember.pending) {
+        if (memberRole) {
+            await newMember.roles.add(memberRole);
+        }
+    }
+});
+
 /* ############################ LOGGER ################################ */
 
 const lEvents = {
@@ -265,8 +301,8 @@ bot.on("raw", async event => {
           embed.setDescription(`**— ${
             entry.target.type === "text" ? "Texto" : "Voz"
           }**
-**—** Nombre: **${entry.target.name}**.
-**—** ID: **${entry.target.id}**.`);
+          **—** Nombre: **${entry.target.name}**.
+          **—** ID: **${entry.target.id}**.`);
           embed.setFooter(
             `Creado por ${executor.tag}`,
             executor.displayAvatarURL()
@@ -284,8 +320,8 @@ bot.on("raw", async event => {
           embed.setDescription(`**— ${
             entry.changes[1].old === 0 ? "Texto" : "Voz"
           }**
-**—** Nombre: **${entry.changes[0].old}**.
-**—** ID: **${entry.target.id}**.`);
+          **—** Nombre: **${entry.changes[0].old}**.
+          **—** ID: **${entry.target.id}**.`);
           embed.setFooter(
             `Eliminado por ${executor.tag}`,
             executor.displayAvatarURL()
@@ -356,8 +392,8 @@ bot.on("raw", async event => {
           embed.setDescription(`**— ${
             entry.target.type === "text" ? "Texto" : "Voz"
           }**
-**—** Nombre: **${entry.target.name}**.
-**—** ID: **${entry.target.id}**.`);
+          **—** Nombre: **${entry.target.name}**.
+          **—** ID: **${entry.target.id}**.`);
           embed.setFooter(
             `Creado por ${executor.tag}`,
             executor.displayAvatarURL()
@@ -529,28 +565,28 @@ bot.on("guildMemberRemove", member => {
 });
 
 bot.on("guildMemberAdd", member => {
-  if(bot.user.id === Config.testingJBID){
-    return;
-  }
   
-  let channel = member.guild.channels.cache.find(x => x.id === mainChannel);
   let tag = member.user.tag;
-  let reglasC = member.guild.channels.cache.find(
-    x => x.id === Config.rulesChannel
-  );
-  let infoC = member.guild.channels.cache.find(
-    x => x.id === Config.infoChannel
-  );
+  let guild = member.guild;
+  let channel = guild.channels.cache.find(x => x.id === Config.mainChannel);
+  let reglasC = guild.channels.cache.find(x => x.id === Config.rulesChannel);
+  let infoC = guild.channels.cache.find(x => x.id === Config.infoChannel);
+  let botRole = guild.roles.cache.find(x => x.id === Config.botRole);
+
+  if(bot.user.id === Config.testingJBID){
+    channel = guild.channels.cache.find(x => x.id === "535500338015502357");
+    reglasC = guild.channels.cache.find(x => x.id === "482993020472393741");
+    infoC = guild.channels.cache.find(x => x.id === "483007894942515202");
+    botRole = guild.roles.cache.find(x => x.id === "794646554690322432");
+  }
 
   if (member.user.bot) {
-    return member.roles.add("447821238631530498");
-  } else {
-    member.roles.add("460966148704436235");
+    return member.roles.add(botRole);
   }
 
   let bienvenidas = [
-    `Bienvenid@ a \`${member.guild.name}\`, **${tag}**. Pásate por ${reglasC} y ${infoC} para aclarar las dudas frecuentes! ¡Disfruta!`,
-    `¡Hola, **${tag}**! Muchas gracias por unirte a \`${member.guild.name}\`, ve a los canales: ${reglasC} y ${infoC} para evitar inconvenientes, y ¡pásala bien!`
+    `Bienvenid@ a \`${guild.name}\`, **${tag}**. Pásate por ${reglasC} y ${infoC} para aclarar las dudas frecuentes! ¡Disfruta!`,
+    `¡Hola, **${tag}**! Muchas gracias por unirte a \`${guild.name}\`, ve a los canales: ${reglasC} y ${infoC} para evitar inconvenientes, y ¡pásala bien!`
   ];
 
   let fBienv = bienvenidas[Math.floor(Math.random() * bienvenidas.length)];
