@@ -36,9 +36,12 @@ module.exports.run = async (bot, message, args) => {
   }
   
   if(!args[1]){ // Para siempre
-    if(mUser.roles.find(x => x.id === staffRole)){
+    if(mUser.roles.cache.find(x => x.id === staffRole.id)){
       return console.log(`Staff, no....`);
     }
+
+    // llamar la funcion
+    Duration("permanent", muteRole.id, mUser);
 
     let mEmbed = new Discord.MessageEmbed()
     .setAuthor(`| Mute`, author.displayAvatarURL())
@@ -51,9 +54,12 @@ module.exports.run = async (bot, message, args) => {
 
   } else { // Temp Mute
     let mTime = args[1]
-    if(mUser.roles.cache.find(x => x.id === staffRole)){
+    if(mUser.roles.cache.find(x => x.id === staffRole.id)){
       return console.log(`Staff`);
     }
+
+    // llamar la funcion
+    Duration(ms(mTime), muteRole.id, mUser);
 
     let mEmbed = new Discord.MessageEmbed()
     .setAuthor(`| Temp mute`, author.displayAvatarURL())
@@ -64,18 +70,55 @@ module.exports.run = async (bot, message, args) => {
 
     mUser.roles.add(muteRole).then(x => message.react("✅"));
     logC.send(mEmbed);
-
-    setTimeout(function(){
-      mUser.roles.remove(muteRole);
-      let umEmbed = new Discord.MessageEmbed()
-      .setAuthor(`| Unmute`, author.displayAvatarURL())
-      .setDescription(`**—** Usuario desmuteado: ${mUser}
-**—** Tiempo de mute: ${mTime}`)
-      .setColor(Colores.verde);
-      
-      logC.send(umEmbed);
-    }, ms(`${mTime}`));
   }
+
+  function Duration(roleDuration, roleID, victimMember){
+    let role = guild.roles.cache.find(x => x.id === roleID);
+    if(roleDuration != "permanent"){
+        // agregar una global data con la fecha
+
+        let hoy = new Date();
+        const newData = new GlobalData({
+            info: {
+                type: "roleDuration",
+                roleID: roleID,
+                userID: victimMember.id,
+                since: hoy,
+                duration: roleDuration
+            }
+        })
+
+        newData.save();
+
+        // timeout, por si pasa el tiempo antes de que el bot pueda reiniciarse
+        setTimeout(function(){
+            victimMember.roles.remove(role);
+            let umEmbed = new Discord.MessageEmbed()
+            .setAuthor(`| Unmute`, author.displayAvatarURL())
+            .setDescription(`**—** Usuario desmuteado: ${mUser}
+      **—** Tiempo de mute: ${mTime}`)
+            .setColor(Colores.verde);
+            
+            logC.send(umEmbed);
+
+            GlobalData.findOneAndDelete({
+                "info.type": "roleDuration",
+                roleID: roleID,
+                userID: victimMember.id
+            }, (err, func) => {
+                if(err){
+                    console.log(err);
+                } else {
+                    console.log("Role eliminado automaticamente")
+                }
+            });
+        }, roleDuration);
+
+    } else {
+        // es permanente, no hacer nada
+        return;
+    }
+}
 }
 
 module.exports.help = {
