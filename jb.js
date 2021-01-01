@@ -648,9 +648,8 @@ bot.on("ready", async () => {
 
   channel.send("Reviví.");
 
-  globaldatas();
   /* ############ GLOBAL DATAS ############ */
-  setInterval(function globaldatas(){
+  setInterval(function(){
 
     // buscar muteados
     GlobalData.find({
