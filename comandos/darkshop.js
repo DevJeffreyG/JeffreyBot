@@ -46,6 +46,12 @@ module.exports.run = async (bot, message, args) => {
   const itemPerPage = 3;
 
   // ¿es nivel 5?
+Stats.findOne({
+    userID: author.id
+}, (err, actual) => {
+
+    let saldo = actual ? actual.djeffros : 0;
+
   Jeffros.findOne({
       serverID: guild.id,
       userID: author.id
@@ -72,7 +78,9 @@ module.exports.run = async (bot, message, args) => {
                         .setDescription(`**—** Bienvenido a la DarkShop. \`${prefix}darkshop help\` para ver todos los comandos disponibles.
             **—** Para comprar items usa \`${prefix}darkshop <ID del item>\`.
             **—** Para tener más información del item usa \`${prefix}darkshop info <id>\`.
-            **—** Esta tienda __**NO**__ usa los Jeffros convencionales, usa \`${prefix}darkshop bal\` para saber tu saldo.`);
+            **—** Esta tienda __**NO**__ usa los Jeffros convencionales.
+            
+            **—** Tienes ${Emojis.Dark}**${saldo}**`);
                         
 
                         // BUSCAR DARKITEMS
@@ -172,7 +180,9 @@ module.exports.run = async (bot, message, args) => {
                                                             .setColor(Colores.negro)
                                                             .setDescription(`**—** Bienvenido a la DarkShop. \`${prefix}darkshop <ID del item>\`.
             **—** Para tener más información del item usa \`${prefix}darkshop info <id>\`.
-            **—** Esta tienda __**NO**__ usa los Jeffros convencionales, usa \`${prefix}darkshop bal\` para saber tu saldo.`);
+            **—** Esta tienda __**NO**__ usa los Jeffros convencionales.
+            
+            **—** Tienes ${Emojis.Dark}**${saldo}**`);
 
                                                             Items.countDocuments({}, (err, c) => {
                                                                 if (err) throw err;
@@ -232,7 +242,9 @@ module.exports.run = async (bot, message, args) => {
                                                             .setColor(Colores.negro)
                                                             .setDescription(`**—** Bienvenido a la DarkShop. \`${prefix}darkshop <ID del item>\`.
             **—** Para tener más información del item usa \`${prefix}darkshop info <id>\`.
-            **—** Esta tienda __**NO**__ usa los Jeffros convencionales, usa \`${prefix}darkshop bal\` para saber tu saldo.`);
+            **—** Esta tienda __**NO**__ usa los Jeffros convencionales.
+            
+            **—** Tienes ${Emojis.Dark}**${saldo}**`);
 
                                                             Items.countDocuments({}, (err, c) => {
                                                                 if (err) throw err;
@@ -1684,6 +1696,7 @@ module.exports.run = async (bot, message, args) => {
     })
 
   })
+})
 
   function Interest (idUse) {
     Items.findOne({
