@@ -154,7 +154,7 @@ Structures.extend('GuildMember', GuildMember => {
   return GuildMemberWithPending;
 });
 
-client.on('guildMemberUpdate', async (oldMember, newMember) => {
+bot.on('guildMemberUpdate', async (oldMember, newMember) => {
     let guild = newMember.guild;
     let memberRole = guild.roles.cache.find(x => x.id === Config.memberRole);
 
