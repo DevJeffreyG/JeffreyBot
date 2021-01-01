@@ -141,12 +141,12 @@ Structures.extend('GuildMember', GuildMember => {
   class GuildMemberWithPending extends GuildMember {
       pending = false;
   
-      constructor(client: any, data: any, guild: any) {
+      constructor(client, data, guild) {
           super(client, data, guild);
           this.pending = data.pending ?? false;
       }
   
-      _patch(data: any) {
+      _patch(data) {
           super._patch(data);
           this.pending = data.pending ?? false;
       }
