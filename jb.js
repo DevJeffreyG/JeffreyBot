@@ -813,6 +813,7 @@ bot.on("ready", async () => {
       duration = Math.floor(Math.random() * 30); // duración máxima 30 días.
 
       if(event === "s"){ // si el precio DEBE subir
+        console.log("sube");
         GlobalData.findOne({
           "info.type": "dsInflation"
         }, (err, inflations) => {
@@ -836,6 +837,7 @@ bot.on("ready", async () => {
           }
         })
       } else if(event === "b"){ // si el precio DEBE bajar
+        console.log("baja");
         GlobalData.findOne({
           "info.type": "dsInflation"
         }, (err, inflations) => {
@@ -863,6 +865,7 @@ bot.on("ready", async () => {
           }
         })
       } else { // el precio no cambia
+        console.log("igual");
         GlobalData.findOne({
           "info.type": "dsInflation"
         }, (err, inflations) => {

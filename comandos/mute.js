@@ -4,6 +4,12 @@ const Discord = require("discord.js");
 const ms = require("ms");
 const prefix = Config.prefix;
 
+/* ##### MONGOOSE ######## */
+
+const GlobalData = require("../modelos/globalData.js");
+
+/* ##### MONGOOSE ######## */
+
 module.exports.run = async (bot, message, args) => {
 
   if(!message.content.startsWith(prefix))return;
