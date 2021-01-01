@@ -896,6 +896,7 @@ bot.on("ready", async () => {
         if(dark.info.inflation === "NaN"){ // error por alguna razón, elimina el evento
           return dark.remove();
         }
+        
         let oldDate = new Date(dark.info.since);
         let newDate = new Date()
 
