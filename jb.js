@@ -22,6 +22,7 @@ const Rainbow = require("./rainbow.json");
 const Colores = require("./colores.json");
 const Emojis = require("./emojis.json");
 const Discord = require("discord.js");
+const { Structures } = require('discord.js');
 const anyBase = require("any-base");
 const prettyms = require("pretty-ms");
 const dec2hex = anyBase(anyBase.DEC, anyBase.HEX);
