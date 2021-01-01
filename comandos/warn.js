@@ -134,7 +134,7 @@ module.exports.run = async (bot, message, args) => {
                   .setAuthor(`| Warn`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
                   .setDescription(`
         **—** Has sido __warneado__ por el STAFF.
-        **—** Warns actuales: **${numWarns}**.
+        **—** Warns actuales: **1**.
         **—** Por infringir la regla: **${rule}**.
         **—** Notas / observaciones: **${notes}**.`)
                   .setColor(Colores.rojo)
@@ -177,7 +177,43 @@ module.exports.run = async (bot, message, args) => {
                   .catch(e => console.log(e));
                   
                   // acciones de automod
-                  if(warns.warns === 2){
+                  if(warns.warns >= 4){
+                    let autoMod = new Discord.MessageEmbed()
+                    .setAuthor(`| Ban PERMANENTE.`, "https://cdn.discordapp.com/emojis/537804262600867860.png")
+                    .setDescription(`**—** Baneado: **${wUser}**.
+          **—** Warns actuales: **${warns.warns}**.
+          **—** Razón de ban (AutoMod): Muchos warns.
+          **—** Último warn por infringir la regla: **${rule}**.`)
+                    .setColor(Colores.rojo);
+
+                    logC.send(autoMod);
+                    wUser.send(autoMod)
+                    wUser.ban(`AutoMod. (Infringir "${rule}")`);
+                  } else
+
+                  if(warns.warns >= 3){
+                    let autoMod = new Discord.MessageEmbed()
+                    .setAuthor(`| TempBan`, "https://cdn.discordapp.com/emojis/537792425129672704.png")
+                    .setDescription(`**—** Ban (24h): **${wUser}**.
+          **—** Warns actuales: **${warns.warns}**.
+          **—** Razón de ban (AutoMod): 3 warns acumulados.
+          **—** Último warn por infringir la regla: **${rule}**.`)
+                    .setColor(Colores.rojo);
+                    
+
+                    wUser.send(autoMod);
+                    wUser.ban(`AutoMod. (Infringir "${rule}")`);
+                    
+
+                    /// USAR UN GLOBAL DATA::::
+                    setTimeout(function() {
+                      guild.unban(wUser.id)
+                    }, ms("1d"));
+                    
+                    logC.send(autoMod);
+                  } else
+
+                  if(warns.warns >= 2){
                     let infoEmbed = new Discord.MessageEmbed()
                     .setAuthor(`| Warn`, "https://cdn.discordapp.com/emojis/494267320097570837.png?v=1")
                   .setDescription(`**—** ${wUser.user.tag}, este es tu **warn número ❛ \`2\` ❜**
@@ -187,44 +223,8 @@ module.exports.run = async (bot, message, args) => {
                   .setColor(Colores.rojo);
                     
                     wUser.send(infoEmbed);
-                  } else
-
-                  if(warns.warns == 3){
-                    let autoMod = new Discord.MessageEmbed()
-                    .setAuthor(`| TempBan`, "https://cdn.discordapp.com/emojis/537792425129672704.png")
-                    .setDescription(`**—** Ban (24h): **${wUser}**.
-          **—** Warns actuales: **${warns.warns}**.
-          **—** Warn por última vez: **${numWarns}**.
-          **—** Razón de ban (AutoMod): 3 warns acumulados.
-          **—** Último warn por infringir la regla: **${rule}**.`)
-                    .setColor(Colores.rojo);
-                    
-
-                    wUser.send(autoMod);
-                    wUser.ban(`AutoMod. (Infringir "${rule}")`);
-                    
-                    setTimeout(function() {
-                      guild.unban(wUser.id)
-                    }, ms("1d"));
-                    
-                    logC.send(autoMod);
-                  } else
-
-                  if(warns.warns == 4){
-                    let autoMod = new Discord.MessageEmbed()
-                    .setAuthor(`| Ban PERMANENTE.`, "https://cdn.discordapp.com/emojis/537804262600867860.png")
-                    .setDescription(`**—** Baneado: **${wUser}**.
-          **—** Warns actuales: **${warns.warns}**.
-          **—** Warn por última vez: **${numWarns}**.
-          **—** Razón de ban (AutoMod): Muchos warns.
-          **—** Último warn por infringir la regla: **${rule}**.`)
-                    .setColor(Colores.rojo);
-
-                    logC.send(autoMod);
-                    wUser.send(autoMod)
-                    wUser.ban(`AutoMod. (Infringir "${rule}")`);
                   }
-                  
+
                 message.react("✅");
                   
                   // embed que se le envía al usuario por el warn
