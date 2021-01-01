@@ -5,6 +5,7 @@ const Discord = require("discord.js");
 var Chance = require("chance");
 var chance = new Chance();
 const ms = require("ms");
+const prettyms = require("pretty-ms");
 const prefix = Config.prefix;
 
 /* ##### MONGOOSE ######## */
@@ -765,7 +766,7 @@ Stats.findOne({
                                         let givenduration = use.info.extra.duration != "na" ? use.info.extra.duration : "Ninguna";
                                         let giveneffect = use.info.extra.effect != "na" ? use.info.extra.effect : "Ninguno";
 
-                                        givenrole = givenrol ? givenrol : "Ninguno";
+                                        givenrole = givenrole ? givenrole : "Ninguno";
 
                                         let embed = new Discord.MessageEmbed()
                                         .setAuthor(`| Item ${data.id}`, Config.darkLogoPng)
@@ -776,7 +777,7 @@ Stats.findOne({
             **—** Se da: \`${giventhing}\`.
             **—** Role dado: ${givenrol}.
             **—** Cantidad: \`${givencantidad}\`.
-            **—** Duración: \`${givenduration}\`.
+            **—** Duración: \`${prettyms(givenduration, {secondsDecimalDigits: 0 })}\`.
             **—** Efecto: \`${giveneffect}\`.
             **—** ID: \`${data.id}\`.`
                                         )
