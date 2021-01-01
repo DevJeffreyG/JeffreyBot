@@ -648,351 +648,354 @@ bot.on("ready", async () => {
 
   channel.send("Reviví.");
 
-  // buscar muteados
-  GlobalData.find({
-    "info.type": "roleDuration"
-  }, (err, roled) => {
-    if(err) throw err;
+  /* ############ GLOBAL DATAS ############ */
+  setInterval(function(){
 
-    if(!roled) return;
+    // buscar muteados
+    GlobalData.find({
+      "info.type": "roleDuration"
+    }, (err, roled) => {
+      if(err) throw err;
 
-    for (let i = 0; i < roled.length; i++){
-      let role = guild.roles.cache.find(x => x.id === roled[i].info.roleID);
-      let member = guild.members.cache.find(x => x.id === roled[i].info.userID);
-      let since = roled[i].info.since;
-      let realDuration = roled[i].info.duration;
-      let today = new Date();
+      if(!roled) return;
 
-      if(today - since >= realDuration){
-        // sacarle el role
-        member.roles.remove(role);
+      for (let i = 0; i < roled.length; i++){
+        let role = guild.roles.cache.find(x => x.id === roled[i].info.roleID);
+        let member = guild.members.cache.find(x => x.id === roled[i].info.userID);
+        let since = roled[i].info.since;
+        let realDuration = roled[i].info.duration;
+        let today = new Date();
 
-        // eliminar global data
-        return roled[i].remove();
-      } else {
-        // nada XD
-      }
-    }
-  })
+        if(today - since >= realDuration){
+          // sacarle el role
+          member.roles.remove(role);
 
-  // inflacion DARKSHOP
-
-  GlobalData.findOne({
-    "info.type": "dsInflation"
-  }, (err, dark) => {
-    if(err) throw err;
-
-    inflation = Number(Math.random() * 10).toFixed(2);
-    if(Number(inflation) < 1) inflation = Number(inflation) + 1;
-    date = new Date() // hoy
-    duration = Math.floor(Math.random() * 30); // duración máxima 30 días.
-
-    if(!dark){
-      console.log(inflation, date, duration);
-
-      const newInflation = new GlobalData({
-        info: {
-          type: "dsInflation",
-          oldinflation: 1,
-          inflation: inflation,
-          since: date,
-          duration: duration
+          // eliminar global data
+          return roled[i].remove();
+        } else {
+          // nada XD
         }
-      });
-
-      newInflation.save();
-    } else {
-      // leer y cambiar si es necesario
-      let oldDate = new Date(dark.info.since);
-      let newDate = new Date()
-
-      let diference1 = newDate.getTime() - oldDate.getTime();
-      let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
-
-      if(pastDays >= dark.info.duration){
-
-
-        dark.info.oldinflation = dark.info.inflation;
-        dark.info.since = date;
-        dark.info.duration = duration;
-        dark.info.inflation = inflation;
-
-        dark.markModified("info");
-        dark.save();
       }
-    }
-  })
+    })
 
-  // ELIMINAR DARKJEFFROS CADUCADOS
-  GlobalData.find({
-    "info.type": "dsDJDuration"
-  }, (err, dark) => {
-    if(err) throw err;
+    // inflacion DARKSHOP
 
-    if(!dark) return;
+    GlobalData.findOne({
+      "info.type": "dsInflation"
+    }, (err, dark) => {
+      if(err) throw err;
 
-    for(let i = 0; i < dark.length; i++){
-      // variables
-      let id = dark[i].info.userID;
-      let member = guild.members.cache.find(x => x.id === id);
-
-      let oldDate = new Date(dark[i].info.since);
-      let newDate = new Date()
-
-      let diference1 = newDate.getTime() - oldDate.getTime();
-      let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
-
-      // revisar si tiene darkjeffros el usuario
-      Stats.findOne({
-        userID: id
-      }, (err, user) => {
-        if(err) throw err;
-
-        if(user.djeffros === 0) return;
-
-        // si tiene darkjeffros, ¿caducaron?
-        if(pastDays >= dark[i].info.duration){
-          let staffCID = "514124198205980713";
-          if(bot.user.id === Config.testingJBID){
-            staffCID = "537095712102416384";
-          }
-
-          let staffC = guild.channels.cache.find(x => x.id === staffCID);
-          let memberD = guild.members.cache.find(x => x.id === user.userID);
-
-          let staffEmbed = new Discord.MessageEmbed()
-          .setColor(Colores.verde)
-          .setDescription(`**—** Se han elimando los Dark Jeffros de ${memberD.tag}.`)
-          .addField(`— Desde`, `${dark[i].info.since}`, true)
-          .addField(`— Duración`, `${dark[i].info.duration}`, true)
-          .setFooter("Mensaje enviado a la vez que al usuario")
-          .setTimestamp();
-
-          let embed = new Discord.MessageEmbed()
-          .setAuthor(`| ...`, Config.darkLogoPng)
-          .setColor(Colores.negro)
-          .setDescription(`**—** Parece que no has vendido todos tus DarkJeffros. Han sido eliminados de tu cuenta tras haber concluido los días estipulados. (\`${dark[i].info.duration} días.\`)`)
-          .setFooter("▸ Si crees que se trata de un error, contacta al Staff.");
-
-          // eliminarlos de la cuenta (0)
-          user.djeffros = 0;
-          user.save();
-          // intentar enviar un mensaje al MD.
-          member.send(embed)
-          .catch(err => {
-            staffC.send(`**${member.tag} no recibió MD de DarkJeffros eliminados.**\n\`\`\`javascript\n${err}\`\`\``)
-          });
-
-          staffCID.send(staffEmbed);
-        }
-      })
-
-    }
-  })
-
-  // CREAR EVENTO EN UN DIA RANDOM EN UN PLAZO DE 30 DIAS
-  GlobalData.findOne({
-    "info.type": "dsEventRandomInflation"
-  }, (err, dark) => {
-    if (err) throw err;
-
-    if(!dark){ // si no existe un evento random, crearlo
-      let event = "b";
-      let ecuation = Math.random()*100;
-
-      if(ecuation >= 80){ // SUBE EL PRECIO (INFLACION) EN EL EVENTO.
-        event = "s";
-      } else  if(ecuation >= 20){ // BAJA EL PRECIO (INFLACION) EN EL EVENTO. -> EL MÁS PROBABLE A PASAR
-        event = "b";
-      } else { // SI ES MENOR QUE 20 EL PRECIO NO CAMBIA
-        event = "i";
-      }
-
-      let eventinflation;
+      inflation = Number(Math.random() * 10).toFixed(2);
+      if(Number(inflation) < 1) inflation = Number(inflation) + 1;
       date = new Date() // hoy
       duration = Math.floor(Math.random() * 30); // duración máxima 30 días.
 
-      if(event === "s"){ // si el precio DEBE subir
-        console.log("sube");
-        GlobalData.findOne({
-          "info.type": "dsInflation"
-        }, (err, inflations) => {
-          if(err) throw err;
+      if(!dark){
+        console.log(inflation, date, duration);
 
-          if(!inflations){
-            return console.log("No hay inflaciones");
-          } else {
-            let oldInflation = Number(inflations.info.inflation);
-            eventinflation = Number((Math.random() * 10) + oldInflation).toFixed(2);
-
-            const newData = new GlobalData({
-              info: {
-                type: "dsEventRandomInflation",
-                inflation: eventinflation,
-                since: date,
-                duration: duration
-              }
-            });
-            newData.save();
+        const newInflation = new GlobalData({
+          info: {
+            type: "dsInflation",
+            oldinflation: 1,
+            inflation: inflation,
+            since: date,
+            duration: duration
           }
-        })
-      } else if(event === "b"){ // si el precio DEBE bajar
-        console.log("baja");
-        GlobalData.findOne({
-          "info.type": "dsInflation"
-        }, (err, inflations) => {
-          if(err) throw err;
+        });
 
-          if(!inflations){
-            return console.log("No hay inflaciones");
-          } else {
-            let oldInflation = Number(inflations.info.inflation);
+        newInflation.save();
+      } else {
+        // leer y cambiar si es necesario
+        let oldDate = new Date(dark.info.since);
+        let newDate = new Date()
 
-            // si es menor a 1
+        let diference1 = newDate.getTime() - oldDate.getTime();
+        let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
 
-            if(oldInflation < 1) return;
-            eventinflation = Number(Math.random() * oldInflation).toFixed(2);
+        if(pastDays >= dark.info.duration){
 
-            const newData = new GlobalData({
-              info: {
-                type: "dsEventRandomInflation",
-                inflation: eventinflation,
-                since: date,
-                duration: duration
-              }
-            });
-            newData.save();
-          }
-        })
-      } else { // el precio no cambia
-        console.log("igual");
-        GlobalData.findOne({
-          "info.type": "dsInflation"
-        }, (err, inflations) => {
-          if(err) throw err;
 
-          if(!inflations){
-            return console.log("No hay inflaciones");
-          } else {
-            let oldInflation = Number(inflations.info.inflation);
-            eventinflation = Number(oldInflation);
+          dark.info.oldinflation = dark.info.inflation;
+          dark.info.since = date;
+          dark.info.duration = duration;
+          dark.info.inflation = inflation;
 
-            const newData = new GlobalData({
-              info: {
-                type: "dsEventRandomInflation",
-                inflation: eventinflation,
-                since: date,
-                duration: duration
-              }
-            });
-            newData.save();
-          }
-        })
+          dark.markModified("info");
+          dark.save();
+        }
       }
-    } else { // si ya existe, leerlo y revisar si ya es momento de cambiarlo
-      if(dark.info.inflation === "NaN"){ // error por alguna razón, elimina el evento
-        return dark.remove();
-      }
-      let oldDate = new Date(dark.info.since);
-      let newDate = new Date()
+    })
 
-      let diference1 = newDate.getTime() - oldDate.getTime();
-      let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
+    // ELIMINAR DARKJEFFROS CADUCADOS
+    GlobalData.find({
+      "info.type": "dsDJDuration"
+    }, (err, dark) => {
+      if(err) throw err;
 
-      if(pastDays >= dark.info.duration){
-        // enviar mensaje random de evento
-        let newInflation = `**${dark.info.inflation}%**`;
-        let rndmEventSUBE = [
-          `Estamos de suerte, se han devaluado los Jeffros, la inflación ha subido al ${newInflation}`
-        ];
+      if(!dark) return;
 
-        let rndmEventBAJA = [
-          `Parece que algo en las oficinas ha hecho que la inflación baje al ${newInflation}`
-        ];
+      for(let i = 0; i < dark.length; i++){
+        // variables
+        let id = dark[i].info.userID;
+        let member = guild.members.cache.find(x => x.id === id);
 
-        let rndmEventIGUAL = [
-          `Por poco... nos han intentado robar en una de nuestras sucursales, la inflación se queda en ${newInflation}`
-        ];
+        let oldDate = new Date(dark[i].info.since);
+        let newDate = new Date()
 
-        let rSube = rndmEventSUBE[Math.floor(Math.random() * rndmEventSUBE.length)];
-        let rBaja = rndmEventBAJA[Math.floor(Math.random() * rndmEventBAJA.length)];
-        let rIgual = rndmEventIGUAL[Math.floor(Math.random() * rndmEventIGUAL.length)];
+        let diference1 = newDate.getTime() - oldDate.getTime();
+        let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
 
-        // revisar si baja, sube o se queda igual de acuerdo a la inflación actual
-
-        GlobalData.findOne({
-          "info.type": "dsInflation"
-        }, (err, inflation) => {
+        // revisar si tiene darkjeffros el usuario
+        Stats.findOne({
+          userID: id
+        }, (err, user) => {
           if(err) throw err;
-          
-          let oldInflation = inflation.info.inflation;
-          let eventInflation = dark.info.inflation;
-          let event;
 
-          if(eventInflation > oldInflation){
-            event = "s";
-          } else if(eventInflation < oldInflation){
-            event = "b";
-          } else {
-            event = "i";
-          }
+          if(user.djeffros === 0) return;
 
-        switch(event){
-          case "s":
+          // si tiene darkjeffros, ¿caducaron?
+          if(pastDays >= dark[i].info.duration){
+            let staffCID = "514124198205980713";
+            if(bot.user.id === Config.testingJBID){
+              staffCID = "537095712102416384";
+            }
+
+            let staffC = guild.channels.cache.find(x => x.id === staffCID);
+            let memberD = guild.members.cache.find(x => x.id === user.userID);
+
+            let staffEmbed = new Discord.MessageEmbed()
+            .setColor(Colores.verde)
+            .setDescription(`**—** Se han elimando los Dark Jeffros de ${memberD.tag}.`)
+            .addField(`— Desde`, `${dark[i].info.since}`, true)
+            .addField(`— Duración`, `${dark[i].info.duration}`, true)
+            .setFooter("Mensaje enviado a la vez que al usuario")
+            .setTimestamp();
+
             let embed = new Discord.MessageEmbed()
-            .setAuthor(`| Evento`, Config.darkLogoPng)
-            .setDescription(rSube)
+            .setAuthor(`| ...`, Config.darkLogoPng)
             .setColor(Colores.negro)
-            .setFooter(`La inflación SUBE.`)
-            .setTimestamp();
+            .setDescription(`**—** Parece que no has vendido todos tus DarkJeffros. Han sido eliminados de tu cuenta tras haber concluido los días estipulados. (\`${dark[i].info.duration} días.\`)`)
+            .setFooter("▸ Si crees que se trata de un error, contacta al Staff.");
 
-            dsChannel.send(`${dsNews}`).then(() => {
-              dsChannel.send(embed)
-            })
-            break;
+            // eliminarlos de la cuenta (0)
+            user.djeffros = 0;
+            user.save();
+            // intentar enviar un mensaje al MD.
+            member.send(embed)
+            .catch(err => {
+              staffC.send(`**${member.tag} no recibió MD de DarkJeffros eliminados.**\n\`\`\`javascript\n${err}\`\`\``)
+            });
 
-          case "b":
-            let embed2 = new Discord.MessageEmbed()
-            .setAuthor(`| Evento`, Config.darkLogoPng)
-            .setDescription(rBaja)
-            .setColor(Colores.negro)
-            .setFooter(`La inflación BAJA.`)
-            .setTimestamp();
+            staffCID.send(staffEmbed);
+          }
+        })
 
-            dsChannel.send(`${dsNews}`).then(() => {
-              dsChannel.send(embed2)
-            })
-            break;
+      }
+    })
 
-          case "i":
-            let embed3 = new Discord.MessageEmbed()
-            .setAuthor(`| Evento`, Config.darkLogoPng)
-            .setDescription(rIgual)
-            .setColor(Colores.negro)
-            .setFooter(`La inflación se MANTIENE.`)
-            .setTimestamp();
+    // CREAR EVENTO EN UN DIA RANDOM EN UN PLAZO DE 30 DIAS
+    GlobalData.findOne({
+      "info.type": "dsEventRandomInflation"
+    }, (err, dark) => {
+      if (err) throw err;
 
-            dsChannel.send(`${dsNews}`).then(() => {
-              dsChannel.send(embed3)
-            })
-            break;
+      if(!dark){ // si no existe un evento random, crearlo
+        let event = "b";
+        let ecuation = Math.random()*100;
+
+        if(ecuation >= 80){ // SUBE EL PRECIO (INFLACION) EN EL EVENTO.
+          event = "s";
+        } else  if(ecuation >= 20){ // BAJA EL PRECIO (INFLACION) EN EL EVENTO. -> EL MÁS PROBABLE A PASAR
+          event = "b";
+        } else { // SI ES MENOR QUE 20 EL PRECIO NO CAMBIA
+          event = "i";
         }
 
-        // aplicar el evento a la inflacion actual
-          
-          inflation.info.oldinflation = inflation.info.inflation;
-          inflation.info.inflation = dark.info.inflation;
+        let eventinflation;
+        date = new Date() // hoy
+        duration = Math.floor(Math.random() * 30); // duración máxima 30 días.
 
-          inflation.markModified("info");
-          inflation.save();
-        })
+        if(event === "s"){ // si el precio DEBE subir
+          console.log("sube");
+          GlobalData.findOne({
+            "info.type": "dsInflation"
+          }, (err, inflations) => {
+            if(err) throw err;
 
-        // eliminar el evento
-        dark.remove();
+            if(!inflations){
+              return console.log("No hay inflaciones");
+            } else {
+              let oldInflation = Number(inflations.info.inflation);
+              eventinflation = Number((Math.random() * 10) + oldInflation).toFixed(2);
+
+              const newData = new GlobalData({
+                info: {
+                  type: "dsEventRandomInflation",
+                  inflation: eventinflation,
+                  since: date,
+                  duration: duration
+                }
+              });
+              newData.save();
+            }
+          })
+        } else if(event === "b"){ // si el precio DEBE bajar
+          console.log("baja");
+          GlobalData.findOne({
+            "info.type": "dsInflation"
+          }, (err, inflations) => {
+            if(err) throw err;
+
+            if(!inflations){
+              return console.log("No hay inflaciones");
+            } else {
+              let oldInflation = Number(inflations.info.inflation);
+
+              // si es menor a 1
+
+              if(oldInflation < 1) return;
+              eventinflation = Number(Math.random() * oldInflation).toFixed(2);
+
+              const newData = new GlobalData({
+                info: {
+                  type: "dsEventRandomInflation",
+                  inflation: eventinflation,
+                  since: date,
+                  duration: duration
+                }
+              });
+              newData.save();
+            }
+          })
+        } else { // el precio no cambia
+          console.log("igual");
+          GlobalData.findOne({
+            "info.type": "dsInflation"
+          }, (err, inflations) => {
+            if(err) throw err;
+
+            if(!inflations){
+              return console.log("No hay inflaciones");
+            } else {
+              let oldInflation = Number(inflations.info.inflation);
+              eventinflation = Number(oldInflation);
+
+              const newData = new GlobalData({
+                info: {
+                  type: "dsEventRandomInflation",
+                  inflation: eventinflation,
+                  since: date,
+                  duration: duration
+                }
+              });
+              newData.save();
+            }
+          })
+        }
+      } else { // si ya existe, leerlo y revisar si ya es momento de cambiarlo
+        if(dark.info.inflation === "NaN"){ // error por alguna razón, elimina el evento
+          return dark.remove();
+        }
+        let oldDate = new Date(dark.info.since);
+        let newDate = new Date()
+
+        let diference1 = newDate.getTime() - oldDate.getTime();
+        let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
+
+        if(pastDays >= dark.info.duration){
+          // enviar mensaje random de evento
+          let newInflation = `**${dark.info.inflation}%**`;
+          let rndmEventSUBE = [
+            `Estamos de suerte, se han devaluado los Jeffros, la inflación ha subido al ${newInflation}`
+          ];
+
+          let rndmEventBAJA = [
+            `Parece que algo en las oficinas ha hecho que la inflación baje al ${newInflation}`
+          ];
+
+          let rndmEventIGUAL = [
+            `Por poco... nos han intentado robar en una de nuestras sucursales, la inflación se queda en ${newInflation}`
+          ];
+
+          let rSube = rndmEventSUBE[Math.floor(Math.random() * rndmEventSUBE.length)];
+          let rBaja = rndmEventBAJA[Math.floor(Math.random() * rndmEventBAJA.length)];
+          let rIgual = rndmEventIGUAL[Math.floor(Math.random() * rndmEventIGUAL.length)];
+
+          // revisar si baja, sube o se queda igual de acuerdo a la inflación actual
+
+          GlobalData.findOne({
+            "info.type": "dsInflation"
+          }, (err, inflation) => {
+            if(err) throw err;
+            
+            let oldInflation = inflation.info.inflation;
+            let eventInflation = dark.info.inflation;
+            let event;
+
+            if(eventInflation > oldInflation){
+              event = "s";
+            } else if(eventInflation < oldInflation){
+              event = "b";
+            } else {
+              event = "i";
+            }
+
+          switch(event){
+            case "s":
+              let embed = new Discord.MessageEmbed()
+              .setAuthor(`| Evento`, Config.darkLogoPng)
+              .setDescription(rSube)
+              .setColor(Colores.negro)
+              .setFooter(`La inflación SUBE.`)
+              .setTimestamp();
+
+              dsChannel.send(`${dsNews}`).then(() => {
+                dsChannel.send(embed)
+              })
+              break;
+
+            case "b":
+              let embed2 = new Discord.MessageEmbed()
+              .setAuthor(`| Evento`, Config.darkLogoPng)
+              .setDescription(rBaja)
+              .setColor(Colores.negro)
+              .setFooter(`La inflación BAJA.`)
+              .setTimestamp();
+
+              dsChannel.send(`${dsNews}`).then(() => {
+                dsChannel.send(embed2)
+              })
+              break;
+
+            case "i":
+              let embed3 = new Discord.MessageEmbed()
+              .setAuthor(`| Evento`, Config.darkLogoPng)
+              .setDescription(rIgual)
+              .setColor(Colores.negro)
+              .setFooter(`La inflación se MANTIENE.`)
+              .setTimestamp();
+
+              dsChannel.send(`${dsNews}`).then(() => {
+                dsChannel.send(embed3)
+              })
+              break;
+          }
+
+          // aplicar el evento a la inflacion actual
+            
+            inflation.info.oldinflation = inflation.info.inflation;
+            inflation.info.inflation = dark.info.inflation;
+
+            inflation.markModified("info");
+            inflation.save();
+          })
+
+          // eliminar el evento
+          dark.remove();
+        }
       }
-    }
-  })
-
+    })
+  }, ms("5m"))
 });
 
 //main
