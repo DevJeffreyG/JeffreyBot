@@ -763,7 +763,7 @@ Stats.findOne({
                                         let giventhing = use.info.thing;
                                         let givenrole = guild.roles.cache.find(x => x.id === use.info.thingID);
                                         let givencantidad = use.info.extra.quantity;
-                                        let givenduration = use.info.extra.duration != "na" ? use.info.extra.duration : "Ninguna";
+                                        let givenduration = use.info.extra.duration != "na" ? prettyms(use.info.extra.duration, {secondsDecimalDigits: 0 }) : "Ninguna";
                                         let giveneffect = use.info.extra.effect != "na" ? use.info.extra.effect : "Ninguno";
 
                                         givenrole = givenrole ? givenrole : "Ninguno";
@@ -777,7 +777,7 @@ Stats.findOne({
             **—** Se da: \`${giventhing}\`.
             **—** Role dado: ${givenrole}.
             **—** Cantidad: \`${givencantidad}\`.
-            **—** Duración: \`${prettyms(givenduration, {secondsDecimalDigits: 0 })}\`.
+            **—** Duración: \`${givenduration}\`.
             **—** Efecto: \`${giveneffect}\`.
             **—** ID: \`${data.id}\`.`
                                         )
