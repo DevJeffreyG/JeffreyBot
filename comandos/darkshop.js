@@ -747,32 +747,37 @@ Stats.findOne({
 
                             if (!args[1]) return message.channel.send(errorEmbed2);
 
-                            Items.findOne(
-                                {
-                                id: args[1]
-                                },
-                                (err, data) => {
+                            DarkUse.findOne({
+                                itemID: args[1]
+                            }, (err, use) => {
+
+                                Items.findOne({
+                                    id: args[1]
+                                }, (err, data) => {
                                     if (err) throw err;
 
-                                    if (!data) {
+                                    if (!data || !use) {
                                         return message.reply(`no he encontrado ese item, revisa la id.`);
                                     } else {
-                                        let reqrole = guild.roles.cache.find(
-                                        x => x.id === data.roleRequired
-                                        );
+                                        let giventhing = use.info.thing;
+                                        let givenrole = guild.roles.cache.find(x => x.id === use.info.thingID);
+                                        let givencantidad = use.info.extra.quantity;
+                                        let givenduration = use.info.extra.duration != "na" ? use.info.extra.duration : "Ninguna";
+                                        let giveneffect = use.info.extra.effect != "na" ? use.info.extra.effect : "Ninguno";
 
-                                        if (!reqrole) {
-                                        reqrole = "Ninguno";
-                                        }
+                                        givenrole = givenrol ? givenrol : "Ninguno";
 
                                         let embed = new Discord.MessageEmbed()
                                         .setAuthor(`| Item ${data.id}`, Config.darkLogoPng)
-                                        .setDescription(`**—** Si quieres cambiar algo usa el comando \`${prefix}shop edit <id> <nombre, precio, etc> <nuevo>\`.
-
-            **—** Nombre: \`${data.itemName}\`.
-            **—** Precio: ${Emojis.Dark}${data.itemPrice}.
+                                        .setDescription(`**—** Nombre: \`${data.itemName}\`.
+            **—** Precio base: ${Emojis.Dark}${data.itemPrice}.
             **—** Descripción: \`${data.itemDescription}\`.
             **—** Mensaje respuesta (lo que se envía después de comprar): \`${data.replyMessage}\`.
+            **—** Se da: \`${giventhing}\`.
+            **—** Role dado: ${givenrol}.
+            **—** Cantidad: \`${givencantidad}\`.
+            **—** Duración: \`${givenduration}\`.
+            **—** Efecto: \`${giveneffect}\`.
             **—** ID: \`${data.id}\`.`
                                         )
                                         .setColor(Colores.negro);
@@ -780,7 +785,8 @@ Stats.findOne({
                                         return message.channel.send(embed);
                                     }
                                 });
-                                break;
+                            });
+                            break;
 
                         case "edit":
                             // editar un darkitem
@@ -909,65 +915,70 @@ Stats.findOne({
                             let cantidad = 0;
                             let efecto = "na";
 
-                            // SI ES UN ITEM
-                            if (args[3].toLowerCase() === "item" && !args[4]) {
-                            useEmbedError.setAuthor(`| Error: negative / positive`, Config.errorPng);
-                            return message.channel.send(useEmbedError)
-                            } else if (args[3].toLowerCase() === "item") {
-                            efecto = args[4].toLowerCase();
-                            }
+                            switch(args[3].toLowerCase()){
+                                case "item":
+                                    if(!args[4]){
+                                        useEmbedError.setAuthor(`| Error: negative / positive`, Config.errorPng);
+                                        return message.channel.send(useEmbedError)
+                                    } else {
+                                        efecto = args[4].toLowerCase();
+                                    }
+                                    break;
 
-                            // SI ES UN ROLE
-                            if (args[3].toLowerCase() === "role" && !args[4]) {
-                            useEmbedError.setAuthor(`| Error: roleID`, Config.errorPng);
-                            return message.channel.send(useEmbedError)
-                            } else if (args[3].toLowerCase() === "role") {
-                            cosaID = args[4];
-                            }
+                                case "role":
+                                    if(!args[4]){
+                                        useEmbedError.setAuthor(`| Error: roleID`, Config.errorPng);
+                                        return message.channel.send(useEmbedError)
+                                    } else {
+                                        cosaID = args[4];
+                                    }
 
-                            if(args[3].toLowerCase() === "role" && !args[5]){
-                            useEmbedError.setAuthor(`| Error: duración`, Config.errorPng);
-                            return message.channel.send(useEmbedError)
-                            } else if (args[3].toLowerCase() === "role"){
-                                duracion = Number(ms(args[5].toLowerCase()));
-                            }
-                            
-                            if(args[3].toLowerCase() === "role" && !args[6]){
-                                useEmbedError.setAuthor(`| Error: negative / positive`, Config.errorPng);
-                                return message.channel.send(useEmbedError)
-                            } else if (args[3].toLowerCase() === "role"){
-                                efecto = args[6].toLowerCase();
-                            }
+                                    if(!args[5]){
+                                        useEmbedError.setAuthor(`| Error: duración`, Config.errorPng);
+                                        return message.channel.send(useEmbedError)
+                                    } else {
+                                        duracion = Number(ms(args[5].toLowerCase()));
+                                    }
 
-                            // SI SON WARNS
+                                    if(!args[6]){
+                                        useEmbedError.setAuthor(`| Error: negative / positive`, Config.errorPng);
+                                        return message.channel.send(useEmbedError)
+                                    } else {
+                                        efecto = args[6].toLowerCase();
+                                    }
+                                    break;
 
-                            if (args[3].toLowerCase() === "warns" && !args[4] || args[3].toLowerCase() === "warns" && isNaN(args[4])){
-                            useEmbedError.setAuthor(`| Error: # Warns`, Config.errorPng);
-                            return message.channel.send(useEmbedError)
-                            } else if(args[3].toLowerCase() === "warns"){
-                                cantidad = Number(args[4]);
-                            }
+                                case "warns":
+                                    if(!args[4] || isNaN(args[4])){
+                                        useEmbedError.setAuthor(`| Error: # Warns`, Config.errorPng);
+                                        return message.channel.send(useEmbedError)
+                                    } else {
+                                        cantidad = Number(args[4]);
+                                    }
 
-                            if (args[3].toLowerCase() === "warns" && !args[5]){
-                            useEmbedError.setAuthor(`| Error: negative / positive`, Config.errorPng);
-                            return message.channel.send(useEmbedError)
-                            } else if(args[3].toLowerCase() === "warns"){
-                                efecto = args[5].toLowerCase();
-                            }
+                                    if(!args[5]){
+                                        useEmbedError.setAuthor(`| Error: negative / positive`, Config.errorPng);
+                                        return message.channel.send(useEmbedError)
+                                    } else {
+                                        efecto = args[5].toLowerCase();
+                                    }
+                                    break;
+                                    
+                                case "jeffros":
+                                    if(!args[4] || isNaN(args[4])){
+                                        useEmbedError.setAuthor(`| Error: # Jeffros`, Config.errorPng);
+                                        return message.channel.send(useEmbedError)
+                                    } else {
+                                        cantidad = Number(args[4]);
+                                    }
 
-                            // SI SON JEFFROS
-                            if (args[3].toLowerCase() === "jeffros" && !args[4] || args[3].toLowerCase() === "jeffros" && isNaN(args[4])){
-                            useEmbedError.setAuthor(`| Error: # Jeffros`, Config.errorPng);
-                            return message.channel.send(useEmbedError)
-                            } else if(args[3].toLowerCase() === "jeffros"){
-                                cantidad = Number(args[4]);
-                            }
-
-                            if (args[3].toLowerCase() === "jeffros" && !args[5]){
-                            useEmbedError.setAuthor(`| Error: negative / positive`, Config.errorPng);
-                            return message.channel.send(useEmbedError)
-                            } else if(args[3].toLowerCase() === "jeffros"){
-                                efecto = args[5].toLowerCase();
+                                    if(!args[5]){
+                                        useEmbedError.setAuthor(`| Error: negative / positive`, Config.errorPng);
+                                        return message.channel.send(useEmbedError)
+                                    } else {
+                                        efecto = args[5].toLowerCase();
+                                    }
+                                    break;
                             }
 
                             /*
