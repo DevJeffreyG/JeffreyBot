@@ -24,12 +24,19 @@ module.exports.run = async (bot, message, args) => {
   for(let i = 0; i < changes.length; i++){
     let addToDesc;
 
+    // regex
+    let str = changes[i].desc;
+    let desc = str.replace(
+      new RegExp("{ PREFIX }", "g"),
+      `${prefix}`
+    );
+
     switch(changes[i].type){
       case "added":
         if(addCounter == 0){
-          addToDesc = `\n**• Agregado**\n${added} ${changes[i].desc}.\n`;
+          addToDesc = `\n**• Agregado**\n${added} ${desc}.\n`;
         } else {
-          addToDesc = `${added} ${changes[i].desc}.\n`;
+          addToDesc = `${added} ${desc}.\n`;
         }
         embed.setDescription(embed.description + addToDesc)
         addCounter++;
@@ -37,9 +44,9 @@ module.exports.run = async (bot, message, args) => {
 
       case "updated":
         if(updateCounter == 0){
-          addToDesc = `\n**• Actualizado**\n${updated} ${changes[i].desc}.\n`;
+          addToDesc = `\n**• Actualizado**\n${updated} ${desc}.\n`;
         } else {
-          addToDesc = `${updated} ${changes[i].desc}.\n`;
+          addToDesc = `${updated} ${desc}.\n`;
         }
         embed.setDescription(embed.description + addToDesc)
         updateCounter++;
@@ -47,9 +54,9 @@ module.exports.run = async (bot, message, args) => {
 
       case "removed":
         if(removeCounter == 0){
-          addToDesc = `\n**• Eliminado**\n${removed} ${changes[i].desc}.\n`;
+          addToDesc = `\n**• Eliminado**\n${removed} ${desc}.\n`;
         } else {
-          addToDesc = `${removed} ${changes[i].desc}.\n`;
+          addToDesc = `${removed} ${desc}.\n`;
         }
         embed.setDescription(embed.description + addToDesc)
         removeCounter++;

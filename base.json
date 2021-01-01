@@ -6,27 +6,27 @@
     [
         {
             "type": "added",
-            "desc": "Se ha habilitado la darkshop para los usuarios nivel 5"
+            "desc": "Se ha habilitado la `{ PREFIX }darkshop` para los usuarios **nivel 5**"
         },
         {
             "type": "updated",
-            "desc": "Se ha actualizado el comando `/botinfo`"
+            "desc": "Se ha actualizado el comando `{ PREFIX }botinfo`"
         },
         {
             "type": "updated",
-            "desc": "Se ha actualizado el comando `/serverinfo`"
+            "desc": "Se ha actualizado el comando `{ PREFIX }serverinfo`"
         },
         {
             "type": "removed",
-            "desc": "Se ha eliminado el comando `/traducir`"
+            "desc": "Se ha eliminado el comando `{ PREFIX }traducir`"
         },
         {
             "type": "removed",
-            "desc": "Se ha eliminado el comando `/perfil`"
+            "desc": "Se ha eliminado el comando `{ PREFIX }perfil`"
         },
         {
             "type": "removed",
-            "desc": "Se ha eliminado el comando `/soporte`"
+            "desc": "Se ha eliminado el comando `{ PREFIX }soporte`"
         }
     ],
     "bienPng": "http://i.imgur.com/M6hqbcc.png",
