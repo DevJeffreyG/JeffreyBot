@@ -6,7 +6,7 @@
     [
         {
             "type": "added",
-            "desc": "Los nuevos usuarios no obtendrán el role de miembros hasta que acepten las reglas."
+            "desc": "Los nuevos usuarios no obtendrán el role de miembros hasta que acepten las reglas"
         },
         {
             "type": "added",

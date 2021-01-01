@@ -586,8 +586,9 @@ bot.on("guildMemberAdd", member => {
   }
 
   let bienvenidas = [
-    `Bienvenid@ a \`${guild.name}\`, **${tag}**. Pásate por ${reglasC} y ${infoC} para aclarar las dudas frecuentes! ¡Disfruta!`,
-    `¡Hola, **${tag}**! Muchas gracias por unirte a \`${guild.name}\`, ve a los canales: ${reglasC} y ${infoC} para evitar inconvenientes, y ¡pásala bien!`
+    `Bienvenid@ a \`${guild.name}\`, **${tag}**. Pásate por ${reglasC} e ${infoC} para aclarar las dudas frecuentes! ¡Disfruta!`,
+    `¡Hola, **${tag}**! Muchas gracias por unirte a \`${guild.name}\`, ve a los canales: ${reglasC} e ${infoC} para evitar inconvenientes, y ¡pásala bien!`,
+    `¡Eyyy, **${tag}**! Bienvenido a \`${guild.name}\` 🎉 ¡Echa un vistazo a ${reglasC} e ${infoC} para que te guíes dentro del server! :D`
   ];
 
   let fBienv = bienvenidas[Math.floor(Math.random() * bienvenidas.length)];
@@ -599,6 +600,7 @@ bot.on("guildMemberAdd", member => {
 
   let embed = new Discord.MessageEmbed()
     .setDescription(fBienv)
+    .setFooter(`* Para poder hablar en el chat debes aceptar las reglas`, guild.iconURL())
     .setColor(Colores.verde);
 
   member.send(embed).catch(e => {
