@@ -775,7 +775,7 @@ Stats.findOne({
             **—** Descripción: \`${data.itemDescription}\`.
             **—** Mensaje respuesta (lo que se envía después de comprar): \`${data.replyMessage}\`.
             **—** Se da: \`${giventhing}\`.
-            **—** Role dado: ${givenrol}.
+            **—** Role dado: ${givenrole}.
             **—** Cantidad: \`${givencantidad}\`.
             **—** Duración: \`${prettyms(givenduration, {secondsDecimalDigits: 0 })}\`.
             **—** Efecto: \`${giveneffect}\`.
