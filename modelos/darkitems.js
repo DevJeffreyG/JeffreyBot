@@ -5,7 +5,6 @@ const ditemsSchema = mongoose.Schema({
   itemName: String,
   itemPrice: String,
   itemDescription: String,
-  replyMessage: String,
   ignoreInterest: Boolean,
   id: Number
 

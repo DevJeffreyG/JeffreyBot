@@ -688,7 +688,6 @@ Stats.findOne({
                                     itemName: nameItem,
                                     itemPrice: priceItem,
                                     itemDescription: "na",
-                                    replyMessage: "¡Item usado con éxito!",
                                     ignoreInterest: ignoreBool,
                                     id: lastID
                                     });
@@ -701,7 +700,6 @@ Stats.findOne({
             **—** Nombre: \`${nameItem}\`.
             **—** Precio: ${Emojis.Dark}${priceItem}.
             **—** Descripción: \`na\`.
-            **—** Mensaje después de comprar: \`¡Item usado con éxito!\`.
             **—** ID: \`${lastID}\`.`
                                     )
                                     .setColor(Colores.verde);
