@@ -771,7 +771,6 @@ Stats.findOne({
                                         .setDescription(`**—** Nombre: \`${data.itemName}\`.
             **—** Precio base: ${Emojis.Dark}${data.itemPrice}.
             **—** Descripción: \`${data.itemDescription}\`.
-            **—** Mensaje respuesta (lo que se envía después de comprar): \`${data.replyMessage}\`.
             **—** Se da: \`${giventhing}\`.
             **—** Role dado: ${givenrole}.
             **—** Cantidad: \`${givencantidad}\`.
