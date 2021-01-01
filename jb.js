@@ -821,7 +821,7 @@ bot.on("ready", async () => {
           if(!inflations){
             return console.log("No hay inflaciones");
           } else {
-            let oldInflation = inflations.info.inflation;
+            let oldInflation = Number(inflations.info.inflation);
             eventinflation = Number((Math.random() * 10) + oldInflation).toFixed(2);
 
             const newData = new GlobalData({
@@ -844,7 +844,7 @@ bot.on("ready", async () => {
           if(!inflations){
             return console.log("No hay inflaciones");
           } else {
-            let oldInflation = inflations.info.inflation;
+            let oldInflation = Number(inflations.info.inflation);
 
             // si es menor a 1
 
@@ -871,7 +871,7 @@ bot.on("ready", async () => {
           if(!inflations){
             return console.log("No hay inflaciones");
           } else {
-            let oldInflation = inflations.info.inflation;
+            let oldInflation = Number(inflations.info.inflation);
             eventinflation = Number(oldInflation);
 
             const newData = new GlobalData({
@@ -887,6 +887,9 @@ bot.on("ready", async () => {
         })
       }
     } else { // si ya existe, leerlo y revisar si ya es momento de cambiarlo
+      if(dark.info.inflation === "NaN"){ // error por alguna razón, elimina el evento
+        return dark.remove();
+      }
       let oldDate = new Date(dark.info.since);
       let newDate = new Date()
 
