@@ -74,7 +74,7 @@ module.exports.run = async (bot, message, args) => {
         
         if (n != 0){
           for (let i = 0; i < n; i++){
-            badguy.addField(`${i + 1} — ${soft.warns[i].rule}`, `**— Nota: ${soft.warns[i].note}**\n*El número que sale NO es el número de la regla, es la id del softwarn.*`)
+            badguy.addField(`${i+1} — ${soft.warns[i].rule} : Regla N°${reglas[i+1]}`, `**— Nota: ${soft.warns[i].note}**`)
           }
         }
 
