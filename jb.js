@@ -50,7 +50,10 @@ const workCooldown = new Set();
 
 const coolded = new Map();
 const active = new Map();
-const disableEXPs = 0;
+
+// mantenimiento
+const disableEXPs = false; // deshabilitar ganar exp o jeffros
+const disableAwards = true; // deshabilitar awards.
 
 // WEAS PARA EVENTOS:
 
@@ -1341,7 +1344,7 @@ bot.on("message", async message => {
 
     // ################################# JEFFROS ################################
     
-    if(author.id == jeffreygID || disableEXPs != 1){
+    if(author.id == jeffreygID || disableEXPs === false){
     let jeffrosToAdd = Math.ceil(Math.random() * 5);
 
     // VIP 200%
@@ -1722,6 +1725,18 @@ bot.on("messageReactionAdd", (reaction, user) => {
       return;
   }
 
+  if(disableAwards === true && user.id != jeffreygID) {
+    message.channel.messages.fetch(message.id).then(m => {
+      let react = m.reactions.get(
+        reaction.emoji.name + ":" + reaction.emoji.id
+      );
+
+      react.remove(user.id);
+    });
+
+    return bots.send("los awards actualmente están en mantenimiento, por favor intenta más tarde. :D");
+  }
+
   let confirmation = new Discord.MessageEmbed()
     .setAuthor(`| Confirmación`, Config.jeffreyguildIcon)
     .setDescription(
@@ -1743,17 +1758,15 @@ bot.on("messageReactionAdd", (reaction, user) => {
         .setDescription(`Cancelado.`)
         .setColor(Colores.nocolor);
 
-      const yesFilter = (reaction, userr) =>
-        reaction.emoji.id === "558084462232076312" && userr.id === user.id;
-      const noFilter = (reaction, userr) =>
-        reaction.emoji.id === "558084461686947891" && userr.id === user.id;
+      const yesFilter = (reaction, userr) => reaction.emoji.id === "558084462232076312" && userr.id === user.id;
+      const noFilter = (reaction, userr) => reaction.emoji.id === "558084461686947891" && userr.id === user.id;
+      const collectorFilter = (reaction, userr) => reaction.emoji.id === "558084461686947891" || reaction.emoji.id === "558084462232076312" && userr.id === user.id;
 
       const yes = msg.createReactionCollector(yesFilter, { time: 60000 });
-      const no = msg.createReactionCollector(noFilter, {
-        time: 60000
-      });
+      const no = msg.createReactionCollector(noFilter, { time: 60000 });
+      const collectorAwards = msg.createReactionCollector(collectorFilter, { time: 60000 });
 
-      yes.on("end", r => {
+      collectorAwards.on("end", r => {
         if (msg.reactions.length > 0) {
           message.channel.messages.fetch(message.id).then(m => {
             let react = m.reactions.get(

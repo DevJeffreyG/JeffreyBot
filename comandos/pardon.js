@@ -25,6 +25,8 @@ module.exports.run = async (bot, message, args) => {
     staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
     logC = guild.channels.cache.find(x => x.id === "483108734604804107");
   }
+
+  if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
     
   let embed = new Discord.MessageEmbed()
   .setTitle(`Ayuda: ${prefix}pardon`)
@@ -55,86 +57,179 @@ module.exports.run = async (bot, message, args) => {
     numW = args[1];
   }
   
-  if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
   let rule = reglas[softW] || "na";
   if(rule === "na" && args[2]) return message.channel.send(rulesEmbed);
 
   if(softW){
-    // quitar el softwarn
-    SoftWarn.findOne({
-      userID: wUser.id
-    }, (err, swarns) => {
-      if (err) throw err;
+    //confirmacion madre mia
+    let confirmationSoft = new Discord.MessageEmbed()
+    .setAuthor(`| SoftWarn Pardon?`, guild.iconURL())
+    .setDescription(`\`▸\` ¿Estás seguro de restar un **softwarn** a **${wUser.user.tag}**?
+    \`▸\` Regla: Regla N°${args[2]} (${rule}).`)
+    .setColor(Colores.verde);
 
-      for (let i = 0; i < swarns.warns.length; i++){
-        if(swarns.warns[i].rule === rule){
-
-          swarns.warns.splice(i, 1);
-          swarns.save().then(() =>
-            message.react("✅")
-          )
-
-          let sEmbed = new Discord.MessageEmbed()
-        .setAuthor(`| ¿Me perd0nas?`, "https://cdn.discordapp.com/emojis/537004318667177996.png")
-        .setDescription(`**—** Miembro: ${wUser}
-  **—** SOFTWarn actuales: **${swarns.warns.length}**.
-  **—** Mod: ${author}`)
-        .setColor(Colores.verde);
-
-        logC.send(sEmbed);
-        
-        let sunwarnedEmbed = new Discord.MessageEmbed()
-            .setAuthor(`| Pardon`, "https://cdn.discordapp.com/emojis/537004318667177996.png")
-            .setDescription(`
-  **—** Has sido perdonado. =)
-  **—** SOFTWarns actuales: **${swarns.warns.length}**.`)
-            .setColor(Colores.verde)
-            .setFooter(`Tienes suerte.`, 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png');
-            
-            wUser.send(sunwarnedEmbed)
-            .catch(e => {
-              console.log('Tiene los MDs desactivados.')
+    message.channel.send(confirmationSoft).then(msg => {
+            msg.react(":allow:558084462232076312")
+            .then(r => {
+              msg.react(":denegar:558084461686947891");
             });
-        }
-      }
+ 
+            let cancelEmbed = new Discord.MessageEmbed()
+            .setDescription(`Cancelado.`)
+            .setColor(Colores.nocolor);
+ 
+            const yesFilter = (reaction, user) => reaction.emoji.id === "558084462232076312" && user.id === message.author.id;
+            const noFilter = (reaction, user) => reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
+            const collectorFilter = (reaction, user) => reaction.emoji.id === "558084461686947891" || reaction.emoji.id === "558084462232076312" && user.id === message.author.id;
+
+            const yes = msg.createReactionCollector(yesFilter, { time: 60000 });
+            const no = msg.createReactionCollector(noFilter, { time: 60000 });
+            const collector = msg.createReactionCollector(collectorFilter, { time: 60000 });
+
+            yes.on("collect", r => {
+
+              // quitar el softwarn
+              SoftWarn.findOne({
+                userID: wUser.id
+              }, (err, swarns) => {
+                if (err) throw err;
+
+                for (let i = 0; i < swarns.warns.length; i++){
+                  if(swarns.warns[i].rule === rule){
+
+                    swarns.warns.splice(i, 1);
+                    swarns.save().then(() =>
+                      message.react("✅")
+                    )
+
+                    let sEmbed = new Discord.MessageEmbed()
+                  .setAuthor(`| ¿Me perd0nas?`, "https://cdn.discordapp.com/emojis/537004318667177996.png")
+                  .setDescription(`**—** Miembro: ${wUser}
+            **—** SOFTWarn actuales: **${swarns.warns.length}**.
+            **—** Mod: ${author}`)
+                  .setColor(Colores.verde);
+
+                  logC.send(sEmbed);
+                  
+                  let sunwarnedEmbed = new Discord.MessageEmbed()
+                      .setAuthor(`| Pardon`, "https://cdn.discordapp.com/emojis/537004318667177996.png")
+                      .setDescription(`
+            **—** Has sido perdonado. =)
+            **—** SOFTWarns actuales: **${swarns.warns.length}**.`)
+                      .setColor(Colores.verde)
+                      .setFooter(`Tienes suerte.`, 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png');
+                      
+                      wUser.send(sunwarnedEmbed)
+                      .catch(e => {
+                        console.log('Tiene los MDs desactivados.')
+                      });
+                  }
+                }
+              })
+            })
+
+            no.on("collect", r => {
+              return msg.edit(cancelEmbed).then(a => {
+                msg.reactions.removeAll();
+                message.delete();
+                a.delete({timeout: ms("20s")});
+              });
+            })
+
+            collector.on('end', collected => {
+	            if(!collected.size > 0){
+                return msg.edit(cancelEmbed).then(a => {
+                  msg.reactions.removeAll();
+                  message.delete();
+                  a.delete({timeout: ms("20s")});
+                });
+              }
+            });
     })
-  } else {
-    Warn.findOne({
-      userID: wUser.id
-    }, (err, warns) => {
-      if(err) throw err;
-      
-      if(!warns || warns.warns === 0 || warns.warns-numW <= -1){
-        return;
-      } else {
-        warns.warns = warns.warns - numW;
-        warns.save().then(() =>
-          message.react("✅")
-        )
-        .catch(e => console.log(e));
-        
-        let wEmbed = new Discord.MessageEmbed()
-        .setAuthor(`| ¿Me perd0nas?`, "https://cdn.discordapp.com/emojis/537004318667177996.png")
-        .setDescription(`**—** Miembro: ${wUser}
-  **—** Warns actuales: **${warns.warns}**.
-  **—** Mod: ${author}`)
-        .setColor(Colores.verde);
 
-        logC.send(wEmbed);
-        
-        let unwarnedEmbed = new Discord.MessageEmbed()
-            .setAuthor(`| Pardon`, "https://cdn.discordapp.com/emojis/537004318667177996.png")
-            .setDescription(`
-  **—** Has sido perdonado. =)
-  **—** Warns actuales: **${warns.warns}**.`)
-            .setColor(Colores.verde)
-            .setFooter(`Tienes suerte.`, 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png');
+  } else {
+    //confirmacion madre mia
+    let confirmation = new Discord.MessageEmbed()
+    .setAuthor(`| Pardon?`, guild.iconURL())
+    .setDescription(`\`▸\` ¿Estás seguro de restar \`${numW}\` **warn(s)** a **${wUser.user.tag}**?`)
+    .setColor(Colores.verde);
+
+    message.channel.send(confirmationSoft).then(msg => {
+
+      msg.react(":allow:558084462232076312")
+      .then(r => {
+          msg.react(":denegar:558084461686947891");
+      });
+
+      let cancelEmbed = new Discord.MessageEmbed()
+      .setDescription(`Cancelado.`)
+      .setColor(Colores.nocolor);
+
+      const yesFilter = (reaction, user) => reaction.emoji.id === "558084462232076312" && user.id === message.author.id;
+      const noFilter = (reaction, user) => reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
+      const collectorFilter = (reaction, user) => reaction.emoji.id === "558084461686947891" || reaction.emoji.id === "558084462232076312" && user.id === message.author.id;
+
+      const yes = msg.createReactionCollector(yesFilter, { time: 60000 });
+      const no = msg.createReactionCollector(noFilter, { time: 60000 });
+      const collector = msg.createReactionCollector(collectorFilter, { time: 60000 });
+
+      yes.on("collect", r => {
+        Warn.findOne({
+          userID: wUser.id
+        }, (err, warns) => {
+          if(err) throw err;
+          
+          if(!warns || warns.warns === 0 || warns.warns-numW <= -1){
+            return;
+          } else {
+            warns.warns = warns.warns - numW;
+            warns.save().then(() =>
+              message.react("✅")
+            )
+            .catch(e => console.log(e));
             
-            wUser.send(unwarnedEmbed)
-            .catch(e => {
-              console.log('Tiene los MDs desactivados.')
-            });
-      }
+            let wEmbed = new Discord.MessageEmbed()
+            .setAuthor(`| ¿Me perd0nas?`, "https://cdn.discordapp.com/emojis/537004318667177996.png")
+            .setDescription(`**—** Miembro: ${wUser}
+      **—** Warns actuales: **${warns.warns}**.
+      **—** Mod: ${author}`)
+            .setColor(Colores.verde);
+
+            logC.send(wEmbed);
+            
+            let unwarnedEmbed = new Discord.MessageEmbed()
+                .setAuthor(`| Pardon`, "https://cdn.discordapp.com/emojis/537004318667177996.png")
+                .setDescription(`
+      **—** Has sido perdonado. =)
+      **—** Warns actuales: **${warns.warns}**.`)
+                .setColor(Colores.verde)
+                .setFooter(`Tienes suerte.`, 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png');
+                
+                wUser.send(unwarnedEmbed)
+                .catch(e => {
+                  console.log('Tiene los MDs desactivados.')
+                });
+          }
+        })
+      })
+
+      no.on("collect", r => {
+        return msg.edit(cancelEmbed).then(a => {
+          msg.reactions.removeAll();
+          message.delete();
+          a.delete({timeout: ms("20s")});
+        });
+      })
+
+      collector.on('end', collected => {
+        if(!collected.size > 0){
+          return msg.edit(cancelEmbed).then(a => {
+            msg.reactions.removeAll();
+            message.delete();
+            a.delete({timeout: ms("20s")});
+          });
+        }
+      });
     })
   }
 }
