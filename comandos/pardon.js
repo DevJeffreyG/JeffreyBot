@@ -154,7 +154,7 @@ module.exports.run = async (bot, message, args) => {
     .setDescription(`\`▸\` ¿Estás seguro de restar \`${numW}\` **warn(s)** a **${wUser.user.tag}**?`)
     .setColor(Colores.verde);
 
-    message.channel.send(confirmationSoft).then(msg => {
+    message.channel.send(confirmation).then(msg => {
 
       msg.react(":allow:558084462232076312")
       .then(r => {
