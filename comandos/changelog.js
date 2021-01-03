@@ -21,6 +21,8 @@ module.exports.run = async (bot, message, args) => {
   let removeCounter = 0;
   let updateCounter = 0;
 
+  let hasExtended = true;
+
   for(let i = 0; i < changes.length; i++){
     let addToDesc;
 
@@ -33,10 +35,11 @@ module.exports.run = async (bot, message, args) => {
 
     switch(changes[i].type){
       case "added":
+        if(!changes[i].extended) hasExtended = false;
         if(addCounter == 0){
-          addToDesc = `\n**• Agregado**\n${added} ${desc}.\n`;
+          addToDesc = hasExtended ? `\n**• Agregado**\n${added} ${desc} [?](${message.url} '${changes[i].extended}').\n` : `\n**• Agregado**\n${added} ${desc}.\n`;
         } else {
-          addToDesc = `${added} ${desc}.\n`;
+          addToDesc = hasExtended ? `${added} ${desc} [?](${message.url} '${changes[i].extended}').\n` : `${added} ${desc}.\n`;
         }
         embed.setDescription(embed.description + addToDesc)
         addCounter++;

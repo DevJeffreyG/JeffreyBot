@@ -6,7 +6,8 @@
     [
         {
             "type": "added",
-            "desc": "Los nuevos usuarios no obtendrán el role de miembros hasta que acepten las reglas"
+            "desc": "Los nuevos usuarios no obtendrán el role de miembros hasta que acepten las reglas",
+            "extended": "Una nueva opción de discord permite que los miembros nuevos deban aceptar las reglas antes de poder hablar en el server.\niwastesting."
         },
         {
             "type": "added",
