@@ -74,8 +74,10 @@ module.exports.run = async (bot, message, args) => {
         .setColor(Colores.verde);
         
         if (n != 0){
+          let reglasArray = Object.values(reglas);
           for (let i = 0; i < n; i++){
-            badguy.addField(`${i+1} — ${soft.warns[i].rule} : Regla N°${reglas[i+1]}`, `**— Nota: ${soft.warns[i].note}**`)
+          let index = reglasArray.indexOf(soft.warns[i].rule) + 1;
+            badguy.addField(`${i+1} — ${soft.warns[i].rule} : Regla N°${index}`, `**— Nota: ${soft.warns[i].note}**`)
           }
         }
 
