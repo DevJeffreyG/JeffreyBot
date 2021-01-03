@@ -29,7 +29,12 @@ module.exports.run = async (bot, message, args) => {
 
     // regex
     let str = changes[i].desc;
+    let str2 = changes[i].extended;
     let desc = str.replace(
+      new RegExp("{ PREFIX }", "g"),
+      `${prefix}`
+    );
+    let extendedDetails = str2.replace(
       new RegExp("{ PREFIX }", "g"),
       `${prefix}`
     );
@@ -38,9 +43,9 @@ module.exports.run = async (bot, message, args) => {
       case "added":
         if(!changes[i].extended) hasExtended = false;
         if(addCounter == 0){
-          addToDesc = hasExtended ? `\n**• Agregado**\n${added} ${desc}. [${viewExtension}](${message.url} '${changes[i].extended}')\n` : `\n**• Agregado**\n${added} ${desc}.\n`;
+          addToDesc = hasExtended ? `\n**• Agregado**\n${added} ${desc}. [${viewExtension}](${message.url} '${extendedDetails}')\n` : `\n**• Agregado**\n${added} ${desc}.\n`;
         } else {
-          addToDesc = hasExtended ? `${added} ${desc}. [${viewExtension}](${message.url} '${changes[i].extended}')\n` : `${added} ${desc}.\n`;
+          addToDesc = hasExtended ? `${added} ${desc}. [${viewExtension}](${message.url} '${extendedDetails}')\n` : `${added} ${desc}.\n`;
         }
         embed.setDescription(embed.description + addToDesc)
         addCounter++;
@@ -49,9 +54,9 @@ module.exports.run = async (bot, message, args) => {
       case "updated":
         if(!changes[i].extended) hasExtended = false;
         if(updateCounter == 0){
-          addToDesc = hasExtended ? `\n**• Actualizado**\n${updated} ${desc}. [${viewExtension}](${message.url} '${changes[i].extended}')\n` : `\n**• Actualizado**\n${updated} ${desc}.\n`;
+          addToDesc = hasExtended ? `\n**• Actualizado**\n${updated} ${desc}. [${viewExtension}](${message.url} '${extendedDetails}')\n` : `\n**• Actualizado**\n${updated} ${desc}.\n`;
         } else {
-          addToDesc = hasExtended ? `${updated} ${desc}. [${viewExtension}](${message.url} '${changes[i].extended}')\n` : `${updated} ${desc}.\n`;
+          addToDesc = hasExtended ? `${updated} ${desc}. [${viewExtension}](${message.url} '${extendedDetails}')\n` : `${updated} ${desc}.\n`;
         }
         embed.setDescription(embed.description + addToDesc)
         updateCounter++;
@@ -60,9 +65,9 @@ module.exports.run = async (bot, message, args) => {
       case "removed":
         if(!changes[i].extended) hasExtended = false;
         if(removeCounter == 0){
-          addToDesc = hasExtended ? `\n**• Eliminado**\n${removed} ${desc}. [${viewExtension}](${message.url} '${changes[i].extended}')\n` : `\n**• Eliminado**\n${removed} ${desc}.\n`;
+          addToDesc = hasExtended ? `\n**• Eliminado**\n${removed} ${desc}. [${viewExtension}](${message.url} '${extendedDetails}')\n` : `\n**• Eliminado**\n${removed} ${desc}.\n`;
         } else {
-          addToDesc = hasExtended ? `${removed} ${desc}. [${viewExtension}](${message.url} '${changes[i].extended}')\n`: `${removed} ${desc}.\n`;
+          addToDesc = hasExtended ? `${removed} ${desc}. [${viewExtension}](${message.url} '${extendedDetails}')\n`: `${removed} ${desc}.\n`;
         }
         embed.setDescription(embed.description + addToDesc)
         removeCounter++;
