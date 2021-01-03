@@ -174,7 +174,7 @@ Stats.findOne({
                                                         collectorMainPage.on("end", r => {
                                                             return msg.reactions.removeAll()
                                                             .then(() => {
-                                                                msg.react("⏰");
+                                                                msg.react("<a:timer:795090708478033950>");
                                                             });
                                                         })
                                                         

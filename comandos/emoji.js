@@ -4,7 +4,6 @@ const Discord = require("discord.js");
 const prefix = Config.prefix;
 
 module.exports.run = async (bot, message, args) => {
-    // <a:timer:795090708478033950>
   if(!message.content.startsWith(prefix))return;
 
   // Variables
