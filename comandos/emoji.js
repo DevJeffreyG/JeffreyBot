@@ -25,7 +25,7 @@ module.exports.run = async (bot, message, args) => {
     if(!guild) return message.reply(`No encontré ese server, verifica que hayas escrito bien la id y que me encuentre en ese server.`);
 
     const emoji = guild.emojis.cache.find(x => x.name === emojiName);
-    if(!role) return message.reply(`No encontré ese emoji, verifica que hayas escrito bien el nombre.`);
+    if(!emoji) return message.reply(`No encontré ese emoji, verifica que hayas escrito bien el nombre.`);
 
     let finalEmbed = new Discord.MessageEmbed()
     .setAuthor(`Role: ${emojiName}`, guild.avatarURL)
