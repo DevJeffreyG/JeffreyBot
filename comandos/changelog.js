@@ -16,7 +16,7 @@ module.exports.run = async (bot, message, args) => {
   
   let embed = new Discord.MessageEmbed()
   .setDescription(`**Jeffrey Bot v\`${Package.version}\` — Últimos cambios hechos al bot.**\n`)
-  .setFooter(`* Si estás en PC, poniendo el mouse sobre '${viewExtension}', podrás ver detalles extendidos de los cambios. — En móvil usa '${prefix}changelog extended'.`)
+  .setFooter(`* Si estás en PC, poniendo el mouse sobre '${viewExtension}', podrás ver detalles extendidos de los cambios.\n— En móvil usa '${prefix}changelog extended'.`)
   .setColor(Colores.verde);
   
   let addCounter = 0;
@@ -79,7 +79,7 @@ module.exports.run = async (bot, message, args) => {
       }
     }
 
-    return author.send(embed)
+    return message.author.send(embed)
     .catch(err => {
       message.reply("lo siento, no pude enviar este mensaje a tus MDs porque los tienes desactivados.");
     });
