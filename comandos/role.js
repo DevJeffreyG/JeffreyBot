@@ -17,9 +17,7 @@ module.exports.run = async (bot, message, args) => {
   .setDescription(`▸ El uso correcto es: ${prefix}role <Nombre del Rol> (guildID)\n▸ Sacas el ID de un rol por su nombre.`)
   .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}id`);
     
-  let roleName = !isNaN(args[args.length-1]) ? args.join(" ").slice(0) : args.join(" ").slice(0, args[0].length);
-
-  console.log(args, roleName);
+  let roleName = isNaN(args[args.length-1]) ? args.join(" ").slice(0) : args.join(" ").slice(0, args[0].length);
 
   if (!args[0]) return message.channel.send(embed);
   if(!isNaN(args[args.length-1])){
