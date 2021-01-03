@@ -14,27 +14,27 @@
         },
         {
             "type": "updated",
-            "desc": "Se ha actualizado el comando `{ PREFIX }botinfo`: Ahora es `{ PREFIX }changelog` o `{ PREFIX }changes` **—** Cambios más detallados"
+            "desc": "Se ha actualizado el comando `{ PREFIX }botinfo`:\n**—** Ahora es `{ PREFIX }changelog` o `{ PREFIX }changes`\n**—** Ahora los cambios serán más detallados"
         },
         {
             "type": "updated",
-            "desc": "Se han arreglado algunos bugs en el sistema de Awards"
+            "desc": "Se han arreglado algunos bugs en el sistema de Awards\n**—** Si no se reaccionaba, a veces no se eliminaba la reacción del usuario"
         },
         {
             "type": "updated",
-            "desc": "Se ha actualizado el comando `{ PREFIX }serverinfo`"
+            "desc": "Se ha actualizado el comando `{ PREFIX }serverinfo`\n**—** Ahora se muestran los miembros del Staff actual"
         },
         {
             "type": "removed",
-            "desc": "Se ha eliminado el comando `{ PREFIX }traducir`"
+            "desc": "Se ha eliminado el comando `{ PREFIX }traducir`\n**—** Problemas de compatibilidad con las políticas de Google"
         },
         {
             "type": "removed",
-            "desc": "Se ha eliminado el comando `{ PREFIX }perfil`"
+            "desc": "Se ha eliminado el comando `{ PREFIX }perfil`\n**—** No se usaba. El sistema de cumpleaños será re-integrado próximamente"
         },
         {
             "type": "removed",
-            "desc": "Se ha eliminado el comando `{ PREFIX }soporte`"
+            "desc": "Se ha eliminado el comando `{ PREFIX }soporte`\n**—** No se usaba, y la información que se daba era la que se encuentra en el canal de <#485191307346837507>"
         }
     ],
     "bienPng": "http://i.imgur.com/M6hqbcc.png",
