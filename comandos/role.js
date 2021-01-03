@@ -20,6 +20,8 @@ module.exports.run = async (bot, message, args) => {
   let posibleGuild = args[args.length-1];
   let roleName = isNaN(args[args.length-1]) ? args.join(" ").slice(0) : args.join(" ").replace(posibleGuild, "");
 
+    console.log(roleName + "# " + args)
+
   if (!args[0]) return message.channel.send(embed);
   if(!isNaN(args[args.length-1])){
       notInThisGuild = true;
