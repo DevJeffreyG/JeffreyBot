@@ -15,7 +15,7 @@ module.exports.run = async (bot, message, args) => {
   .setDescription(`▸ El uso correcto es: ${prefix}emoji <Nombre del emoji> (guildID) \n▸ Sacas el ID de un rol por su nombre.`)
   .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}emote`);
     
-  let emojiName = args.join(" ").slice(0);
+  let emojiName = args[0];
   
   if (!args[0]) return message.channel.send(embed);
   if(args[1]){
@@ -25,7 +25,7 @@ module.exports.run = async (bot, message, args) => {
     if(!guild) return message.reply(`No encontré ese server, verifica que hayas escrito bien la id y que me encuentre en ese server.`);
 
     const role = guild.emojis.cache.find(x => x.name === emojiName);
-    if(!role) return message.reply(`No encontré ese rol, verifica que hayas escrito bien el nombre.`);
+    if(!role) return message.reply(`No encontré ese emoji, verifica que hayas escrito bien el nombre.`);
 
     let finalEmbed = new Discord.MessageEmbed()
     .setAuthor(`Role: ${emojiName}`, guild.avatarURL)

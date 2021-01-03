@@ -16,11 +16,11 @@ module.exports.run = async (bot, message, args) => {
   .setDescription(`▸ El uso correcto es: ${prefix}role <Nombre del Rol> (guildID)\n▸ Sacas el ID de un rol por su nombre.`)
   .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}id`);
     
-  let roleName = args.join(" ").slice(0);
+  let roleName = isNaN(args[0]) ? args.join(" ").slice(0) : args.join(" ").slice(0, args[0].length);
   
   if (!args[0]) return message.channel.send(embed);
   if(args[1]){
-      guild = bot.guilds.cache.find(x => x.id === args[1]);
+      guild = bot.guilds.cache.find(x => x.id === args[0]);
   }
     if(!guild) return message.reply(`No encontré ese server, verifica que hayas escrito bien la id y que me encuentre en ese server.`);
 
