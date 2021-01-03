@@ -14,7 +14,7 @@
         },
         {
             "type": "updated",
-            "desc": "Se ha actualizado el comando `{ PREFIX }botinfo`"
+            "desc": "Se ha actualizado el comando `{ PREFIX }botinfo`: Ahora es `{ PREFIX }changelog` o `{ PREFIX }changes` **—** Cambios más detallados"
         },
         {
             "type": "updated",

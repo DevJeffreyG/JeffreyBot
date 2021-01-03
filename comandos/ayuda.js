@@ -25,7 +25,7 @@ module.exports.run = async (bot, message, args) => {
   .setAuthor(`| Comandos generales`, "https://cdn.discordapp.com/emojis/494282181296914432.png")
   .setDescription(`▸ \`${prefix}ayuda\`: Te muestra este mensaje.
 ▸ \`${prefix}bugreport\`: Puedes reportar un bug, para que Jeffrey lo revise.
-▸ \`${prefix}botinfo\`: Información del bot: versión y sus últimos cambios.
+▸ \`${prefix}changelog\`: Información del bot: versión y sus últimos cambios.
 ▸ \`${prefix}serverinfo\`: Información del servidor.
 ▸ \`${prefix}rep\`: Dale un punto de reputación a un usuario. ^^
 ▸ \`${prefix}warns\`: Con este comando puedes revisar un resumen de tus warns (MD).
