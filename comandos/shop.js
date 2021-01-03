@@ -588,7 +588,7 @@ module.exports.run = async (bot, message, args) => {
                                   collector.on("end", r => {
                                     return msg.edit(cancelEmbed).then(a => {
                                       msg.reactions.removeAll().then(() => {
-                                        msg.react("<a:timer:795090708478033950>");
+                                        msg.react("795090708478033950");
                                       });
                                       message.delete();
                                       a.delete({timeout: ms("20s")});

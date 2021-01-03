@@ -35,7 +35,7 @@ module.exports.run = async (bot, message, args) => {
     .setDescription(`
 **—** Nombre del Role: \`${roleName}\`.
 **—** ID: \`${role.id}\`.
-**—** Role del servidor: ${guild.name}.
+**—** Role del servidor: \`${guild.name}\`.
     `)
     .setColor(Colores.verde);
 
