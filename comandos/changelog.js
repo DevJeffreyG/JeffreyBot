@@ -20,7 +20,7 @@ module.exports.run = async (bot, message, args) => {
 
   if(args[0] && args[0] === "extended"){
     let embed = new Discord.MessageEmbed()
-    .setDescription(`**Jeffrey Bot v\`${Package.version}\` — Últimos cambios hechos al bot.**\n`)
+    .setDescription(`**Jeffrey Bot v\`${Package.version}\` — Últimos cambios hechos al bot. (ESTO ES DEMASIADO TEXTO, CREO, SUERTE)**\n`)
     .setColor(Colores.verde);
     for(let i = 0; i < changes.length; i++){
       let addToDesc;
