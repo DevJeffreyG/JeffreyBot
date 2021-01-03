@@ -8,7 +8,7 @@ const changes = Config.changes;
 module.exports.run = async (bot, message, args) => {
 
   if(!message.content.startsWith(prefix))return;
-  let viewExtension = "<?>";
+  let viewExtension = "ꜝ";
 
   let added = "<:Plus:792966881350123540>";
   let removed = "<:Minus:792966881530609736>";
