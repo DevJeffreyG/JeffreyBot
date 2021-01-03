@@ -25,6 +25,7 @@ module.exports.run = async (bot, message, args) => {
 
   for(let i = 0; i < changes.length; i++){
     let addToDesc;
+    let hasExtended = true;
 
     // regex
     let str = changes[i].desc;
@@ -34,7 +35,6 @@ module.exports.run = async (bot, message, args) => {
     );
 
     switch(changes[i].type){
-    let hasExtended = true;
       case "added":
         if(!changes[i].extended) hasExtended = false;
         if(addCounter == 0){
