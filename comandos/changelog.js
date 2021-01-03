@@ -49,9 +49,9 @@ module.exports.run = async (bot, message, args) => {
       switch(changes[i].type){
         case "added":
           if(addCounter == 0){
-            addToDesc = hasExtended ? `\n**• Agregado**\n${added} ${desc}.\n➟ Detalles:\n${extendedDetails}\n` : `\n**• Agregado**\n${added} ${desc}.\n`;
+            addToDesc = hasExtended ? `\n**• Agregado**\n${added} ${desc}.\n**⇢ Detalles⇠**\n${extendedDetails}\n` : `\n**• Agregado**\n${added} ${desc}.\n`;
           } else {
-            addToDesc = hasExtended ? `${added} ${desc}.\n➟ Detalles:\n${extendedDetails}\n` : `${added} ${desc}.\n`;
+            addToDesc = hasExtended ? `${added} ${desc}.\n**⇢ Detalles⇠**\n${extendedDetails}\n` : `${added} ${desc}.\n`;
           }
           embed.setDescription(embed.description + addToDesc)
           addCounter++;
@@ -59,9 +59,9 @@ module.exports.run = async (bot, message, args) => {
 
         case "updated":
           if(updateCounter == 0){
-            addToDesc = hasExtended ? `\n**• Actualizado**\n${updated} ${desc}.\n➟ Detalles:\n${extendedDetails}\n` : `\n**• Actualizado**\n${updated} ${desc}.\n`;
+            addToDesc = hasExtended ? `\n**• Actualizado**\n${updated} ${desc}.\n**⇢ Detalles⇠**\n${extendedDetails}\n` : `\n**• Actualizado**\n${updated} ${desc}.\n`;
           } else {
-            addToDesc = hasExtended ? `${updated} ${desc}.\n➟ Detalles:\n${extendedDetails}\n` : `${updated} ${desc}.\n`;
+            addToDesc = hasExtended ? `${updated} ${desc}.\n**⇢ Detalles⇠**\n${extendedDetails}\n` : `${updated} ${desc}.\n`;
           }
           embed.setDescription(embed.description + addToDesc)
           updateCounter++;
@@ -69,9 +69,9 @@ module.exports.run = async (bot, message, args) => {
 
         case "removed":
           if(removeCounter == 0){
-            addToDesc = hasExtended ? `\n**• Eliminado**\n${removed} ${desc}.\n➟ Detalles:\n${extendedDetails}\n` : `\n**• Eliminado**\n${removed} ${desc}.\n`;
+            addToDesc = hasExtended ? `\n**• Eliminado**\n${removed} ${desc}.\n**⇢ Detalles⇠**\n${extendedDetails}\n` : `\n**• Eliminado**\n${removed} ${desc}.\n`;
           } else {
-            addToDesc = hasExtended ? `${removed} ${desc}.\n➟ Detalles:\n${extendedDetails}\n`: `${removed} ${desc}.\n`;
+            addToDesc = hasExtended ? `${removed} ${desc}.\n**⇢ Detalles⇠**\n${extendedDetails}\n`: `${removed} ${desc}.\n`;
           }
           embed.setDescription(embed.description + addToDesc)
           removeCounter++;
