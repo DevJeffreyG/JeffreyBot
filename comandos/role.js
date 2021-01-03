@@ -17,7 +17,9 @@ module.exports.run = async (bot, message, args) => {
   .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}id`);
     
   let roleName = isNaN(args[1]) ? args.join(" ").slice(0) : args.join(" ").slice(0, args[0].length);
-  
+
+  console.log(args, roleName);
+
   if (!args[0]) return message.channel.send(embed);
   if(args[1]){
       guild = bot.guilds.cache.find(x => x.id === args[0]);
