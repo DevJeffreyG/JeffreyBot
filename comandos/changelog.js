@@ -29,19 +29,24 @@ module.exports.run = async (bot, message, args) => {
 
     // regex
     let str = changes[i].desc;
-    let str2 = changes[i].extended;
+    let str2 = changes[i].extended ? changes[i].extended : false;
+    let extendedDetails;
     let desc = str.replace(
       new RegExp("{ PREFIX }", "g"),
       `${prefix}`
     );
-    let extendedDetails = str2.replace(
-      new RegExp("{ PREFIX }", "g"),
-      `${prefix}`
-    );
+
+    if(str2){
+      extendedDetails = str2.replace(
+        new RegExp("{ PREFIX }", "g"),
+        `${prefix}`
+      );
+    } else {
+      hasExtended = false;
+    }
 
     switch(changes[i].type){
       case "added":
-        if(!changes[i].extended) hasExtended = false;
         if(addCounter == 0){
           addToDesc = hasExtended ? `\n**• Agregado**\n${added} ${desc}. [${viewExtension}](${message.url} '${extendedDetails}')\n` : `\n**• Agregado**\n${added} ${desc}.\n`;
         } else {
@@ -52,7 +57,6 @@ module.exports.run = async (bot, message, args) => {
         break;
 
       case "updated":
-        if(!changes[i].extended) hasExtended = false;
         if(updateCounter == 0){
           addToDesc = hasExtended ? `\n**• Actualizado**\n${updated} ${desc}. [${viewExtension}](${message.url} '${extendedDetails}')\n` : `\n**• Actualizado**\n${updated} ${desc}.\n`;
         } else {
@@ -63,7 +67,6 @@ module.exports.run = async (bot, message, args) => {
         break;
 
       case "removed":
-        if(!changes[i].extended) hasExtended = false;
         if(removeCounter == 0){
           addToDesc = hasExtended ? `\n**• Eliminado**\n${removed} ${desc}. [${viewExtension}](${message.url} '${extendedDetails}')\n` : `\n**• Eliminado**\n${removed} ${desc}.\n`;
         } else {

@@ -25,19 +25,23 @@
         },
         {
             "type": "updated",
-            "desc": "Se ha actualizado el comando `{ PREFIX }serverinfo`\n**—** Ahora se muestran los miembros del Staff actual"
+            "desc": "Se ha actualizado el comando `{ PREFIX }serverinfo`",
+            "extended": "— Ahora se muestran los miembros del Staff actual."
         },
         {
             "type": "removed",
-            "desc": "Se ha eliminado el comando `{ PREFIX }traducir`\n**—** Problemas de compatibilidad con las políticas de Google"
+            "desc": "Se ha eliminado el comando `{ PREFIX }traducir`",
+            "extended": "— Problemas de compatibilidad con las políticas de Google."
         },
         {
             "type": "removed",
-            "desc": "Se ha eliminado el comando `{ PREFIX }perfil`\n**—** No se usaba. El sistema de cumpleaños será re-integrado próximamente"
+            "desc": "Se ha eliminado el comando `{ PREFIX }perfil`",
+            "extended": "— No se usaba. El sistema de cumpleaños será re-integrado próximamente."
         },
         {
             "type": "removed",
-            "desc": "Se ha eliminado el comando `{ PREFIX }soporte`\n**—** No se usaba, y la información que se daba era la que se encuentra en el canal de <#485191307346837507>"
+            "desc": "Se ha eliminado el comando `{ PREFIX }soporte`",
+            "extended": "— No se usaba, y la información que se daba era la que se encuentra en el canal de #informacion."
         }
     ],
     "bienPng": "http://i.imgur.com/M6hqbcc.png",
