@@ -7,7 +7,7 @@
         {
             "type": "added",
             "desc": "Los nuevos usuarios no obtendrán el role de miembros hasta que acepten las reglas",
-            "extended": "Una nueva opción de discord permite que los miembros nuevos deban aceptar las reglas antes de poder hablar en el server.\niwastesting."
+            "extended": "— Una nueva opción de discord permite que los miembros nuevos deban aceptar las reglas antes de poder hablar en el server."
         },
         {
             "type": "added",
@@ -15,11 +15,13 @@
         },
         {
             "type": "updated",
-            "desc": "Se ha actualizado el comando `{ PREFIX }botinfo`:\n**—** Ahora es `{ PREFIX }changelog` o `{ PREFIX }changes`\n**—** Ahora los cambios serán más detallados"
+            "desc": "Se ha actualizado el comando `{ PREFIX }botinfo`",
+            "extended": "— Ahora es '{ PREFIX }changelog' o '{ PREFIX }changes'.\n— Ahora los cambios serán más detallados con este comando."
         },
         {
             "type": "updated",
-            "desc": "Se han arreglado algunos bugs en el sistema de Awards\n**—** Si no se reaccionaba, a veces no se eliminaba la reacción del usuario"
+            "desc": "Se han arreglado algunos bugs en el sistema de Awards",
+            "extended": "— Si no se reaccionaba, a veces no se eliminaba la reacción del usuario."
         },
         {
             "type": "updated",
