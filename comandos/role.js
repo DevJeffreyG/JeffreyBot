@@ -20,7 +20,6 @@ module.exports.run = async (bot, message, args) => {
   let posibleGuild = args[args.length-1];
   let roleName = isNaN(args[args.length-1]) ? args.join(" ").slice(0) : args.join(" ").replace(posibleGuild, "");
 
-    console.log(roleName, args)
   if (!args[0]) return message.channel.send(embed);
   if(!isNaN(args[args.length-1])){
       notInThisGuild = true;
@@ -28,7 +27,7 @@ module.exports.run = async (bot, message, args) => {
   }
     if(!guild) return message.reply(`No encontré ese server "${notInThisGuild ? args[args.length-1] : message.guild.id}", verifica que hayas escrito bien la id y que me encuentre en ese server.`);
 
-    const role = message.guild.roles.cache.find(x => x.name === roleName);
+    const role = guild.roles.cache.find(x => x.name === roleName);
     if(!role) return message.reply(`No encontré ese rol, verifica que hayas escrito bien el nombre.`);
 
     let finalEmbed = new Discord.MessageEmbed()
