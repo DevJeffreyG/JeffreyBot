@@ -18,9 +18,7 @@ module.exports.run = async (bot, message, args) => {
   .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}id`);
     
   let posibleGuild = args[args.length-1];
-  let roleName = isNaN(args[args.length-1]) ? args.join(" ").slice(0) : args.join(" ").replace(posibleGuild, "");
-
-    console.log(roleName + "# " + args)
+  let roleName = isNaN(args[args.length-1]) ? args.join(" ").slice(0) : args.join(" ").replace(posibleGuild, "").trimEnd();
 
   if (!args[0]) return message.channel.send(embed);
   if(!isNaN(args[args.length-1])){
