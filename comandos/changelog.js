@@ -23,6 +23,68 @@ module.exports.run = async (bot, message, args) => {
   let removeCounter = 0;
   let updateCounter = 0;
 
+  if(args[0] && args[0] === "extended"){
+    for(let i = 0; i < changes.length; i++){
+      let addToDesc;
+      let hasExtended = true;
+
+      // regex
+      let str = changes[i].desc;
+      let str2 = changes[i].extended ? changes[i].extended : false;
+      let extendedDetails;
+      let desc = str.replace(
+        new RegExp("{ PREFIX }", "g"),
+        `${prefix}`
+      );
+
+      if(str2){
+        extendedDetails = str2.replace(
+          new RegExp("{ PREFIX }", "g"),
+          `${prefix}`
+        );
+      } else {
+        hasExtended = false;
+      }
+
+      switch(changes[i].type){
+        case "added":
+          if(addCounter == 0){
+            addToDesc = hasExtended ? `\n**• Agregado**\n${added} ${desc}.\n➟${extendedDetails}\n` : `\n**• Agregado**\n${added} ${desc}.\n`;
+          } else {
+            addToDesc = hasExtended ? `${added} ${desc}.\n➟${extendedDetails}\n` : `${added} ${desc}.\n`;
+          }
+          embed.setDescription(embed.description + addToDesc)
+          addCounter++;
+          break;
+
+        case "updated":
+          if(updateCounter == 0){
+            addToDesc = hasExtended ? `\n**• Actualizado**\n${updated} ${desc}.\n➟${extendedDetails}\n` : `\n**• Actualizado**\n${updated} ${desc}.\n`;
+          } else {
+            addToDesc = hasExtended ? `${updated} ${desc}.\n➟${extendedDetails}\n` : `${updated} ${desc}.\n`;
+          }
+          embed.setDescription(embed.description + addToDesc)
+          updateCounter++;
+          break;
+
+        case "removed":
+          if(removeCounter == 0){
+            addToDesc = hasExtended ? `\n**• Eliminado**\n${removed} ${desc}.\n➟${extendedDetails}\n` : `\n**• Eliminado**\n${removed} ${desc}.\n`;
+          } else {
+            addToDesc = hasExtended ? `${removed} ${desc}.\n➟${extendedDetails}\n`: `${removed} ${desc}.\n`;
+          }
+          embed.setDescription(embed.description + addToDesc)
+          removeCounter++;
+          break;
+      }
+    }
+
+    return author.send(embed)
+    .catch(err => {
+      message.reply("lo siento, no pude enviar este mensaje a tus MDs porque los tienes desactivados.");
+    });
+  }
+
   for(let i = 0; i < changes.length; i++){
     let addToDesc;
     let hasExtended = true;
@@ -78,7 +140,7 @@ module.exports.run = async (bot, message, args) => {
     }
   }
   
-  message.channel.send(embed);
+  return message.channel.send(embed);
 
 }
 
