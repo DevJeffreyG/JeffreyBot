@@ -95,7 +95,7 @@ module.exports.run = async (bot, message, args) => {
             const no = msg.createReactionCollector(noFilter, { time: 60000 });
             const collector = msg.createReactionCollector(collectorFilter, { time: 60000 });
  
-            collector.on("end", => {
+            collector.on("end", r => {
               return msg.edit(cancelEmbed).then(a => {
                 msg.reactions.removeAll().then(() => {
                   msg.react("⏰");
