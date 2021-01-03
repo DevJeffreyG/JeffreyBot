@@ -7,6 +7,7 @@ module.exports.run = async (bot, message, args) => {
   if(!message.content.startsWith(prefix))return;
 
   // Variables
+  let notInThisGuild = false;
   let guild = message.guild;
 
   let embed = new Discord.MessageEmbed()
@@ -18,11 +19,12 @@ module.exports.run = async (bot, message, args) => {
   let emojiName = args[0];
   
   if (!args[0]) return message.channel.send(embed);
-  if(args[1]){
-      guild = bot.guilds.cache.find(x => x.id === args[1]);
+  if(!isNaN(args[args.length-1])){
+      notInThisGuild = true;
+      guild = bot.guilds.cache.find(x => x.id === args[args.length-1]);
   }
 
-    if(!guild) return message.reply(`No encontré ese server, verifica que hayas escrito bien la id y que me encuentre en ese server.`);
+    if(!guild) return message.reply(`No encontré ese server "${notInThisGuild ? args[args.length-1] : message.guild.id}", verifica que hayas escrito bien la id y que me encuentre en ese server.`);
 
     const emoji = guild.emojis.cache.find(x => x.name === emojiName);
     if(!emoji) return message.reply(`No encontré ese emoji, verifica que hayas escrito bien el nombre.`);
