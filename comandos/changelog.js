@@ -14,16 +14,14 @@ module.exports.run = async (bot, message, args) => {
   let removed = "<:Minus:792966881530609736>";
   let updated = "<:Update:792966881690648576>";
   
-  let embed = new Discord.MessageEmbed()
-  .setDescription(`**Jeffrey Bot v\`${Package.version}\` — Últimos cambios hechos al bot.**\n`)
-  .setFooter(`* Si estás en PC, poniendo el mouse sobre '${viewExtension}', podrás ver detalles extendidos de los cambios.\n— En móvil usa '${prefix}changelog extended'.`)
-  .setColor(Colores.verde);
-  
   let addCounter = 0;
   let removeCounter = 0;
   let updateCounter = 0;
 
   if(args[0] && args[0] === "extended"){
+    let embed = new Discord.MessageEmbed()
+    .setDescription(`**Jeffrey Bot v\`${Package.version}\` — Últimos cambios hechos al bot.**\n`)
+    .setColor(Colores.verde);
     for(let i = 0; i < changes.length; i++){
       let addToDesc;
       let hasExtended = true;
@@ -84,6 +82,11 @@ module.exports.run = async (bot, message, args) => {
       message.reply("lo siento, no pude enviar este mensaje a tus MDs porque los tienes desactivados.");
     });
   }
+
+  let embed = new Discord.MessageEmbed()
+  .setDescription(`**Jeffrey Bot v\`${Package.version}\` — Últimos cambios hechos al bot.**\n`)
+  .setFooter(`* Si estás en PC, poniendo el mouse sobre '${viewExtension}', podrás ver detalles extendidos de los cambios.\n— En móvil usa '${prefix}changelog extended'.`)
+  .setColor(Colores.verde);
 
   for(let i = 0; i < changes.length; i++){
     let addToDesc;
