@@ -568,8 +568,7 @@ module.exports.run = async (bot, message, args) => {
                                   );
 
                                 message.channel.send(buyEmbed).then(msg => {
-                                  msg
-                                    .react(":allow:558084462232076312")
+                                  msg.react(":allow:558084462232076312")
                                     .then(r => {
                                       msg.react(":denegar:558084461686947891");
                                     });
@@ -578,26 +577,23 @@ module.exports.run = async (bot, message, args) => {
                                     .setDescription(`Cancelado.`)
                                     .setColor(Colores.nocolor);
 
-                                  const yesFilter = (reaction, user) =>
-                                    reaction.emoji.id ===
-                                      "558084462232076312" &&
-                                    user.id === message.author.id;
-                                  const noFilter = (reaction, user) =>
-                                    reaction.emoji.id ===
-                                      "558084461686947891" &&
-                                    user.id === message.author.id;
+                                  const yesFilter = (reaction, user) => reaction.emoji.id === "558084462232076312" && user.id === message.author.id;
+                                  const noFilter = (reaction, user) =>  reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
+                                  const collectorFilter = (reaction, user) => reaction.emoji.id === "558084462232076312" || reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
 
-                                  const yes = msg.createReactionCollector(
-                                    yesFilter,
-                                    { time: 60000 }
-                                  );
-                                  const no = msg.createReactionCollector(
-                                    noFilter,
-                                    {
-                                      time: 60000
-                                    }
-                                  );
+                                  const yes = msg.createReactionCollector(yesFilter, { time: 60000 });
+                                  const no = msg.createReactionCollector(noFilter, { time: 60000 });
+                                  const collector = msg.createReactionCollector(collectorFilter, { time: 60000 });
 
+                                  collector.on("end", r => {
+                                    return msg.edit(cancelEmbed).then(a => {
+                                      msg.reactions.removeAll().then(() => {
+                                        msg.react("⏰");
+                                      });
+                                      message.delete();
+                                      a.delete({timeout: ms("20s")});
+                                    });
+                                  })
                                   yes.on("collect", r => {
                                     currency.jeffros -= precio;
 

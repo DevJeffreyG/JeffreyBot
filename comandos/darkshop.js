@@ -172,7 +172,10 @@ Stats.findOne({
 
 
                                                         collectorMainPage.on("end", r => {
-                                                            return msg.reactions.removeAll();
+                                                            return msg.reactions.removeAll()
+                                                            .then(() => {
+                                                                msg.react("⏰");
+                                                            });
                                                         })
                                                         
                                                         // si se reacciona atrás

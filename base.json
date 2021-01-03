@@ -18,6 +18,10 @@
         },
         {
             "type": "updated",
+            "desc": "Se han arreglado algunos bugs en el sistema de Awards."
+        },
+        {
+            "type": "updated",
             "desc": "Se ha actualizado el comando `{ PREFIX }serverinfo`"
         },
         {

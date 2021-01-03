@@ -398,21 +398,20 @@ module.exports.run = async (bot, message, args) => {
                             msg.react("⏪").then(r => {
                               msg.react("⏩");
 
-                              const backwardsFilter = (reaction, user) =>
-                                reaction.emoji.name === "⏪" &&
-                                user.id === message.author.id;
-                              const forwardsFilter = (reaction, user) =>
-                                reaction.emoji.name === "⏩" &&
-                                user.id === message.author.id;
+                              const backwardsFilter = (reaction, user) => reaction.emoji.name === "⏪" && user.id === message.author.id;
+                              const forwardsFilter = (reaction, user) => reaction.emoji.name === "⏩" && user.id === message.author.id;
+                              const collectorFilter = (reaction, user) => reaction.emoji.name === "⏪" || reaction.emoji.name === "⏩" && user.id === message.author.id;
 
-                              const backwards = msg.createReactionCollector(
-                                backwardsFilter,
-                                { time: 60000 }
-                              );
-                              const forwards = msg.createReactionCollector(
-                                forwardsFilter,
-                                { time: 60000 }
-                              );
+                              const backwards = msg.createReactionCollector(backwardsFilter, { time: 60000 });
+                              const forwards = msg.createReactionCollector(forwardsFilter, { time: 60000 });
+                              const collector = msg.createReactionCollector(collectorFilter, { time: 60000 });
+
+                              collector.on("end", r => {
+                                return msg.reactions.removeAll()
+                                .then(() => {
+                                  msg.react("⏰");
+                                });
+                              });
 
                               backwards.on("collect", r => {
                                 if (pistan === 1) return;
