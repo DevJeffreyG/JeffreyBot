@@ -92,6 +92,7 @@ module.exports.run = async (bot, message, args) => {
 ▸ \`${prefix}syncMute\`: Sincronizas el rol de Mute en todos los canales.
 ▸ \`${prefix}add-jeffros\`: Añades Jeffros o Dark Jeffros a un usuario.
 ▸ \`${prefix}dbBan\`: Prohíbe a alguien enviar un reporte de bug.
+▸ \`${prefix}emoji\`: Conoce la ID de un emote por su nombre en el server actual.
 ▸ \`${prefix}role\`: Conoce el ID de un rol por su nombre.
 ▸ \`${prefix}embeds\`: Diferentes embeds preestablecidos para usarlos en los canales de información.
 ▸ \`${prefix}toggle\`: Deshabilita cualquier comando para uso público sin necesidad de cambiar el código.`)
