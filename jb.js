@@ -1331,6 +1331,8 @@ bot.on("message", async message => {
         tmoney = `**${Emojis.Jeffros}${money}**`;
       }
 
+
+      console.log(boostedJeffros.has(author.id));
       if(boostedJeffros.has(author.id) || boostedGeneral.has(author.id)){
         // buscar la globaldata
         let query = GlobalData.find({
@@ -1355,6 +1357,7 @@ bot.on("message", async message => {
             }
           }
 
+          console.log({"money": money, "tmoney": tmoney});
           return {"money": money, "tmoney": tmoney};
         });
 
