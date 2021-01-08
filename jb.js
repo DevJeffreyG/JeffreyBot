@@ -659,7 +659,8 @@ bot.on("ready", async () => {
   intervalGlobalDatas();
   setInterval(intervalGlobalDatas, ms("5m"))
 
-  function intervalGlobalDatas(){
+  function intervalGlobalDatas(justBoost = false){
+
     console.log("Ciclo de Global Datas iniciado")
     // buscar un tipo de boost
     GlobalData.find({
@@ -722,6 +723,7 @@ bot.on("ready", async () => {
 
       }
     })
+    if(justBoost) return console.log("Cancelado bucle de global datas por ser solo boosts");
     // buscar sub
     GlobalData.find({
       "info.type": "jeffrosSubscription"
@@ -1331,7 +1333,7 @@ bot.on("message", async message => {
         tmoney = `**${Emojis.Jeffros}${money}**`;
       }
 
-
+      intervalGlobalDatas(true);
       console.log(boostedJeffros.has(author.id));
       if(boostedJeffros.has(author.id) || boostedGeneral.has(author.id)){
         // buscar la globaldata
