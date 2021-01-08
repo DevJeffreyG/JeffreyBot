@@ -321,9 +321,9 @@ module.exports.run = async (bot, message, args) => {
 
   function LimitedTime(roleID, victimMember, duration, specialType, specialObjective, specialValue){
     let role = guild.roles.cache.find(x => x.id === roleID);
-    let specialType = specialType || false;
-    let specialObjective = specialObjective || false;
-    let specialValue = specialValue || false;
+    specialType = specialType || false;
+    specialObjective = specialObjective || false;
+    specialValue = specialValue || false;
     let hoy = new Date();
 
     const newData = new GlobalData({
