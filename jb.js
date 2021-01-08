@@ -659,7 +659,8 @@ bot.on("ready", async () => {
   intervalGlobalDatas();
   setInterval(intervalGlobalDatas, ms("5m"))
 
-  function intervalGlobalDatas(justBoost = false){
+  function intervalGlobalDatas(justBoost){
+    justBoost = justBoost || false;
 
     console.log("Ciclo de Global Datas iniciado")
     // buscar un tipo de boost
@@ -696,7 +697,7 @@ bot.on("ready", async () => {
 
         if(today - since >= realDuration){
           // sacarle el role
-          console.log("ha pasado el tiempo 0001", member)
+          console.log("ha pasado el tiempo 0001")
           member.roles.remove(role);
 
           // buscar el set y eliminarlo
@@ -712,7 +713,7 @@ bot.on("ready", async () => {
           return boosts[i].remove();
         } else {
           // es un usuario con un boost comprado, entonces...
-          console.log(member.id);
+          console.log("member", member.id);
           if(specialData.specialObjective === "exp"){ // si el boost es de exp
             boostedExp.add(member.id);
           } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
@@ -2329,7 +2330,9 @@ function getChanges(entryChanges) {
   return { old: oldKey, new: newKey };
 }
 
-function intervalGlobalDatas(justBoost = false){
+function intervalGlobalDatas(justBoost){
+
+  justBoost = justBoost || false;
 
   let guild;
   if(bot.user.id === Config.testingJBID){
@@ -2373,7 +2376,7 @@ function intervalGlobalDatas(justBoost = false){
 
       if(today - since >= realDuration){
         // sacarle el role
-        console.log("ha pasado el tiempo 0001", member)
+        console.log("ha pasado el tiempo 0001")
         member.roles.remove(role);
 
         // buscar el set y eliminarlo
@@ -2389,7 +2392,7 @@ function intervalGlobalDatas(justBoost = false){
         return boosts[i].remove();
       } else {
         // es un usuario con un boost comprado, entonces...
-        console.log(member.id);
+        console.log("memeber", member.id);
         if(specialData.specialObjective === "exp"){ // si el boost es de exp
           boostedExp.add(member.id);
         } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
