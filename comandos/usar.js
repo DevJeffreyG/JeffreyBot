@@ -288,7 +288,15 @@ module.exports.run = async (bot, message, args) => {
                           });
                         } else {
                           if(!isSub){ // no es una sub pero tiene tiempo limitado
-                            return LimitedTime(r.id, message.member, duration, use.special.type, use.special.specialObjective, use.special.specialValue);
+                            return LimitedTime(r.id, message.member, duration, use.special.type, use.special.specialObjective, use.special.specialValue).then(() => {
+                              purchase.remove();
+                              let embed = new Discord.MessageEmbed()
+                                .setAuthor(`| Listo`, guild.iconURL())
+                                .setColor(Colores.verde)
+                                .setDescription(`\`▸\` ${item.replyMessage}.`);
+
+                              message.channel.send(embed);
+                            });
                           } else {
                             return Subscription(r.id, message.member, duration, true, jeffrosPrice, subscriptionName).then(() => {
                               purchase.remove();
@@ -341,6 +349,7 @@ module.exports.run = async (bot, message, args) => {
       }
     })
 
+    victimMember.roles.add(role);
     newData.save();
   }
   function Subscription(roleID, victimMember, intervalTime, isInfinite, jeffrosPerInterval, subscriptionName){
@@ -365,6 +374,7 @@ module.exports.run = async (bot, message, args) => {
         }
       })
 
+      victimMember.roles.add(role);
       newData.save();
     }
   }

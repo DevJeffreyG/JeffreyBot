@@ -693,6 +693,7 @@ bot.on("ready", async () => {
 
         if(today - since >= realDuration){
           // sacarle el role
+          console.log("ha pasado el tiempo 0001")
           member.roles.remove(role);
 
           // buscar el set y eliminarlo
