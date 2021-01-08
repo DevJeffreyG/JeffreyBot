@@ -111,7 +111,7 @@ module.exports.run = async (bot, message, args) => {
             thingID: cosaID,
             duration: optDuration,
             isSub: suscription,
-            special: special
+            special: special,
             id: c + plus
           });
 
