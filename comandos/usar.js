@@ -328,7 +328,7 @@ module.exports.run = async (bot, message, args) => {
 
     const newData = new GlobalData({
       info: {
-        type: "limitedTimeRole":
+        type: "limitedTimeRole",
         roleID: roleID,
         userID: victimMember,
         since: hoy,
