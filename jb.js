@@ -656,9 +656,11 @@ bot.on("ready", async () => {
   channel.send("Reviví.");
 
   /* ############ GLOBAL DATAS ############ */
-  setInterval(function(){
+  intervalGlobalDatas();
+  setInterval(intervalGlobalDatas, ms("5m"))
 
-
+  function intervalGlobalDatas(){
+    console.log("Ciclo de Global Datas iniciado")
     // buscar un tipo de boost
     GlobalData.find({
       "info.type": "limitedTimeRole",
@@ -666,7 +668,7 @@ bot.on("ready", async () => {
     }, (err, boosts) => {
       if(err) throw err;
 
-      if(!boosts) return;
+      if(!boosts) return console.log(boosts);
 
       for (let i = 0; i < boosts.length; i++){
         let boost = boosts[i];
@@ -1128,7 +1130,7 @@ bot.on("ready", async () => {
         }
       }
     })
-  }, ms("5m"))
+  }
 });
 
 //main
