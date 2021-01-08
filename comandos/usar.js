@@ -95,7 +95,7 @@ module.exports.run = async (bot, message, args) => {
 
           if(args[3].toLowerCase() === "role"){
             optDuration = args[5] ? ms(args[5]) : false;
-            suscription = args[6] ? true : false;
+            suscription = args[6] == "true" ? true : false;
             special = {
               "type": args[7] ? args[7] : false,
               "specialObjective": args[8] ? args[8] : false, // exp, jeffros
@@ -341,7 +341,7 @@ module.exports.run = async (bot, message, args) => {
       }
     })
 
-    newDate.save();
+    newData.save();
   }
   function Subscription(roleID, victimMember, intervalTime, isInfinite, jeffrosPerInterval, subscriptionName){
     let role = guild.roles.cache.find(x => x.id === roleID);
@@ -365,7 +365,7 @@ module.exports.run = async (bot, message, args) => {
         }
       })
 
-      newDate.save();
+      newData.save();
     }
   }
 
