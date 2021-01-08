@@ -1168,6 +1168,8 @@ bot.on("message", async message => {
       modRole = guild.roles.cache.find(x => x.id === "483105108607893533");
       staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
     }
+    
+    intervalGlobalDatas(true);
 
     // COOLDOWN COMANDOS
 
@@ -1337,19 +1339,12 @@ bot.on("message", async message => {
         tmoney = `**${Emojis.Jeffros}${money}**`;
       }
 
-      intervalGlobalDatas(true);
-      console.log("XXXXXXXX")
-      console.log(boostedJeffros);
-      console.log(author.id);
-      console.log(boostedJeffros.has(author.id));
       if(boostedJeffros.has(author.id) || boostedGeneral.has(author.id)){
         // buscar la globaldata
         let query = GlobalData.find({
           "info.type": "limitedTimeRole",
           "info.special.type": "boostMultiplier"
-        });
-
-        let boosted = query.exec(function(err, boosts){
+        }, (err, boosts) => {
           if(err) throw err;
 
           for(let i = 0; i < boosts.length; i++){
@@ -1367,12 +1362,10 @@ bot.on("message", async message => {
           }
 
           console.log({"money": money, "tmoney": tmoney});
-          return {"money": money, "tmoney": tmoney};
+          return money, tmoney;
         });
 
-        console.log(boosted);
-        money = boosted.money;
-        tmoney = boosted.tmoney;
+        console.log(money, tmoney);
       }
 
       let responses = [
