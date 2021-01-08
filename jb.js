@@ -1360,12 +1360,11 @@ bot.on("message", async message => {
               tmoney = `**B${Emojis.Jeffros}${money}**`;
             }
           }
-
-          console.log({"money": money, "tmoney": tmoney});
-          return money, tmoney;
+        })
+        .then(a => {
+          console.log("AAAAAAAAAAAAAA")
+          console.log(a);
         });
-
-        console.log(money, tmoney);
       }
 
       let responses = [
