@@ -1338,7 +1338,7 @@ bot.on("message", async message => {
           "info.special.type": "boostMultiplier"
         });
 
-        query.exec(function(err, boosts){
+        let boosted = query.exec(function(err, boosts){
           if(err) throw err;
 
           for(let i = 0; i < boosts.length; i++){
@@ -1354,7 +1354,13 @@ bot.on("message", async message => {
               tmoney = `**B${Emojis.Jeffros}${money}**`;
             }
           }
-        })
+
+          return {"money": money, "tmoney": tmoney};
+        });
+
+        console.log(boosted);
+        money = boosted.money;
+        tmoney = boosted.tmoney;
       }
 
       let responses = [
