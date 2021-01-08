@@ -51,6 +51,10 @@ const workCooldown = new Set();
 const coolded = new Map();
 const active = new Map();
 
+const boostedExp = new Set();
+const boostedJeffros = new Set();
+const boostedGeneral = new Set(); // exp + jeffros boosteados
+
 // mantenimiento
 const disableEXPs = false; // deshabilitar ganar exp o jeffros
 const disableAwards = true; // deshabilitar awards.
@@ -654,6 +658,128 @@ bot.on("ready", async () => {
   /* ############ GLOBAL DATAS ############ */
   setInterval(function(){
 
+
+    // buscar un tipo de boost
+    GlobalData.find({
+      "info.type": "limitedTimeRole",
+      "info.special.type": "boostMultiplier"
+    }, (err, boosts) => {
+      if(err) throw err;
+
+      if(!boosts) return;
+
+      for (let i = 0; i < boosts.length; i++){
+        let boost = boosts[i];
+        let role = guild.roles.cache.find(x => x.id === boost.info.roleID);
+        let member = guild.members.cache.find(x => x.id === boost.info.userID);
+        let since = boost.info.since;
+        let realDuration = boost.info.duration;
+        let specialData = boost.info.special;
+        let today = new Date();
+        /*
+        info: {
+          type: "limitedTimeRole":
+          roleID: roleID,
+          userID: victimMember,
+          since: hoy,
+          duration: ms(duration),
+          special: {
+            "type": specialType, // boostMultiplier
+            "specialObjective": specialObjective, // exp, jeffros, all
+            "specialValue": specialValue // (2) = exp || jeffros normales x 2
+          }
+        }
+      */
+
+        if(today - since >= realDuration){
+          // sacarle el role
+          member.roles.remove(role);
+
+          // buscar el set y eliminarlo
+          if(specialData.specialObjective === "exp"){ // si el boost es de exp
+            boostedExp.delete(member.id);
+          } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
+            boostedJeffros.delete(member.id);
+          } else if(specialData.specialObjective === "all"){ // si el boost es de todo
+            boostedGeneral.delete(member.id);
+          }
+
+          // eliminar global data
+          return boosts[i].remove();
+        } else {
+          // es un usuario con un boost comprado, entonces...
+          if(specialData.specialObjective === "exp"){ // si el boost es de exp
+            boostedExp.add(member.id);
+          } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
+            boostedJeffros.add(member.id);
+          } else if(specialData.specialObjective === "all"){ // si el boost es de todo
+            boostedGeneral.add(member.id);
+          }
+        }
+
+      }
+    })
+    // buscar sub
+    GlobalData.find({
+      "info.type": "jeffrosSubscription"
+    }, (err, subs) => {
+      if(err) throw err;
+
+      if (!subs) return;
+
+      for(let i = 0; i < subs.length; i++){
+        let sub = subs[i]
+        let role = guild.roles.cache.find(x => x.id === sub.info.roleID);
+        let member = guild.members.cache.find(x => x.id === sub.info.userID);
+        let since = sub.info.since;
+        let interval = sub.info.interval;
+        let price = Number(sub.info.price);
+        let subName = sub.info.subName;
+        let today = new Date();
+
+        let notEnough = new Discord.MessageEmbed()
+        .setAuthor(`| Error`, Config.errorPng)
+        .setDescription(`**—** No tienes suficientes Jeffros **(${Emojis.Jeffros}${price})** para pagar la suscripción a \`${subName}\`.
+        **—** Tu saldo ha quedado en **alerta roja**.`)
+        .setColor(Colores.rojo);
+
+        let paidEmbed = new Discord.MessageEmbed()
+        .setAuthor(`| Pagado`, Config.bienPng)
+        .setDescription(`**—** Has pagado **${Emojis.Jeffros}${price}** para pagar la suscripción a \`${subName}\`.
+        **—** Tu saldo ha quedado en **${Emojis.Jeffros}${jeffros.jeffros - price}**.`)
+        .setColor(Colores.verde);
+
+        if(today - since >= interval){
+          // cobrar jeffros
+          Jeffros.findOne({
+            serverID: guild.id,
+            userID: sub.info.userID
+          }, (err, jeffros) => {
+            if(err) throw err;
+
+            // si no es una sub
+            if(!sub.isInfinite){
+              /// quitar el role
+              member.roles.remove(role);
+
+              // eliminar globaldata
+              return subs[i].remove();
+            } else if(!jeffros || jeffros.jeffros < price){
+              // quitarle los jeffros, y dejarlo en negativo
+              jeffros.jeffros -= price;
+              member.send(notEnough);
+              subs[i].remove();
+              member.roles.remove(role);
+            } else {
+              jeffros.jeffros -= price;
+              member.send(paidEmbed);
+            }
+          })
+        } else {
+          return;
+        }
+      }
+    })
     // buscar muteados
     GlobalData.find({
       "info.type": "roleDuration"
@@ -1200,6 +1326,32 @@ bot.on("message", async message => {
       if (multiplier != 1) {
         money = money * multiplier;
         tmoney = `**${Emojis.Jeffros}${money}**`;
+      }
+
+      if(boostedJeffros.has(author.id) || boostedGeneral(author.id)){
+        // buscar la globaldata
+        let query = GlobalData.find({
+          "info.type": "limitedTimeRole",
+          "info.special.type": "boostMultiplier"
+        });
+
+        query.exec(function(err, boosts){
+          if(err) throw err;
+
+          for(let i = 0; i < boosts.length; i++){
+            let specialData = boosts[i].info.special;
+
+            if(specialData.specialObjective === "exp"){ // si el boost es de exp
+              
+            } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
+              money = money * Number(boosts[i].info.special.specialValue);
+              tmoney = `**B${Emojis.Jeffros}${money}**`;
+            } else if(specialData.specialObjective === "all"){ // si el boost es de todo
+              money = money * Number(boosts[i].info.special.specialValue);
+              tmoney = `**B${Emojis.Jeffros}${money}**`;
+            }
+          }
+        })
       }
 
       let responses = [

@@ -2,6 +2,7 @@ const Config = require("./../base.json");
 const Colores = require("./../colores.json");
 const Discord = require("discord.js");
 const prefix = Config.prefix;
+const ms = require("ms");
 
 /* ##### MONGOOSE ######## */
 
@@ -12,6 +13,7 @@ const Purchased = require("../modelos/purchased.js");
 const All = require("../modelos/allpurchases.js");
 const Use = require("../modelos/use.js");
 const Ignore = require("../modelos/ignore.js")
+const GlobalData = require("../modelos/globalData.js");
 
 /* ##### MONGOOSE ######## */
 
@@ -40,7 +42,8 @@ module.exports.run = async (bot, message, args) => {
   if (args[0].toLowerCase() === "add") {
     if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
 
-    // /usar add <id> <action> <cosa> (id de cosa)
+    // /usar add <id> <action> <cosa> (id de cosa) (duration) (isSub "true, false") (specialtype) (specialobjective) (specialvalue)
+    // /usar   0  1      2        3       4            5               6                  7               8               9
     /*
     
       serverID: String,
@@ -76,10 +79,28 @@ module.exports.run = async (bot, message, args) => {
             );
 
           let cosaID = "na";
-          if (args[3].toLowerCase() === "role" && !args[4]) {
+          if (args[3].toLowerCase() === "role" && !args[4] || args[3].toLowerCase() === "role" && isNaN(args[4])) {
             return message.reply(`falta la id del role.`);
           } else if (args[3].toLowerCase() === "role") {
             cosaID = args[4];
+          }
+
+          let optDuration = false;
+          let suscription = false;
+          let special = {
+            "type": false,
+            "specialObjective": false,
+            "specialValue": false
+          }
+
+          if(args[3].toLowerCase() === "role"){
+            optDuration = args[5] ? ms(args[5]) : false;
+            suscription = args[6] ? true : false;
+            special = {
+              "type": args[7] ? args[7] : false,
+              "specialObjective": args[8] ? args[8] : false, // exp, jeffros
+              "specialValue": args[9] ? args[9] : false // (2) = exp || jeffros normales x 2
+            }
           }
 
           const newUse = new Use({
@@ -88,6 +109,9 @@ module.exports.run = async (bot, message, args) => {
             action: args[2].toLowerCase(),
             thing: args[3].toLowerCase(),
             thingID: cosaID,
+            duration: optDuration,
+            isSub: suscription,
+            special: special
             id: c + plus
           });
 
@@ -106,7 +130,11 @@ module.exports.run = async (bot, message, args) => {
     });
   } else if (args[0].toLowerCase() === "edit") {
     if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
-  } else {
+
+    return message.reply("coming soon.")
+  } else if(args[0].toLowerCase() === "cancel") {
+    // CANCELAR SUSCRIPCION QUE TENGA EL USUARIO
+  } else { // usar normalmente
     Purchased.findOne(
       {
         userID: author.id,
@@ -146,11 +174,8 @@ module.exports.run = async (bot, message, args) => {
           id: Number
           
         */
-            Ignore.findOne({
-              itemID: args[0]
-            }, (err, ignored) => {
-              let isIgnored = true;
-              if(!ignored) isIgnored = false;
+            let isIgnored = true;
+            if(item.ignoreInterest == false) isIgnored = false;
               
             Use.findOne(
               {
@@ -162,6 +187,7 @@ module.exports.run = async (bot, message, args) => {
 
                 let action = use.action;
                 let thing = use.thing;
+                let duration = use.duration || "na";
 
                 All.findOne(
                   {
@@ -178,7 +204,7 @@ module.exports.run = async (bot, message, args) => {
                       })
                       
                       newAll.save();
-                    } else if(!ignored){
+                    } else if(!isIgnored){
                       all.quantity += 1;
                       all.save()
                     }
@@ -224,22 +250,12 @@ module.exports.run = async (bot, message, args) => {
                         }
                       );
                     } else if (thing === "role") {
-                      if (use.thingID === "na")
-                        return message.channel.send(
-                          `Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas __usar__ tu item :)`
-                        );
+                      if (use.thingID === "na") return message.channel.send(`Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas __usar__ tu item :)`);
 
                       if (action === "delete") {
-                        let r = guild.roles.cache.find(
-                          x => x.id === use.thingID
-                        );
+                        let r = guild.roles.cache.find(x => x.id === use.thingID);
 
-                        if (
-                          !message.member.roles.cache.find(x => x.id === r.id)
-                        )
-                          return message.reply(
-                            `no tienes el rol que se quita al usar \`${item.itemName}\`.`
-                          );
+                        if (!message.member.roles.cache.find(x => x.id === r.id)) return message.reply(`no tienes el rol que se quita al usar \`${item.itemName}\`.`);
 
                         message.member.roles.remove(r).then(() => {
                           purchase.remove();
@@ -251,24 +267,41 @@ module.exports.run = async (bot, message, args) => {
                           return message.channel.send(embed);
                         });
                       } else {
-                        let r = guild.roles.cache.find(
-                          x => x.id === use.thingID
-                        );
+                        let r = guild.roles.cache.find(x => x.id === use.thingID);
+                        let jeffrosPrice = item.itemPrice;
+                        let subscriptionName = item.itemName;
 
-                        if (message.member.roles.cache.find(x => x.id === r.id))
-                          return message.reply(
-                            `ya tienes el rol que se da al usar \`${item.itemName}\`.`
-                          );
+                        let isSub = use.isSub ? true : false;
 
-                        message.member.roles.add(r).then(() => {
-                          purchase.remove();
-                          let embed = new Discord.MessageEmbed()
-                            .setAuthor(`| Listo`, guild.iconURL())
-                            .setColor(Colores.verde).setDescription(`
-\`▸\` ${item.replyMessage}.`);
+                        if (message.member.roles.cache.find(x => x.id === r.id)) return message.reply(`ya tienes el rol que se da al usar \`${item.itemName}\`.`);
 
-                          return message.channel.send(embed);
-                        });
+                        if(duration === "na" || duration === "permanent"){
+
+                          message.member.roles.add(r).then(() => {
+                            purchase.remove();
+                            let embed = new Discord.MessageEmbed()
+                              .setAuthor(`| Listo`, guild.iconURL())
+                              .setColor(Colores.verde)
+                              .setDescription(`\`▸\` ${item.replyMessage}.`);
+
+                            return message.channel.send(embed);
+                          });
+                        } else {
+                          if(!isSub){ // no es una sub pero tiene tiempo limitado
+                            return LimitedTime(r.id, message.member, duration, use.special.type, use.special.specialObjective, use.special.specialValue);
+                          } else {
+                            return Subscription(r.id, message.member, duration, true, jeffrosPrice, subscriptionName).then(() => {
+                              purchase.remove();
+                              let embed = new Discord.MessageEmbed()
+                                .setAuthor(`| Listo`, guild.iconURL())
+                                .setColor(Colores.verde)
+                                .setDescription(`\`▸\` ${item.replyMessage}.`)
+                                .setFooter(`Para cancelar la suscripción usa ${prefix}usar cancel <${args[0]}>`);
+
+                              message.channel.send(embed);
+                            });
+                          }
+                        }
                       }
                     } else {
                       return message.channel.send(
@@ -281,12 +314,100 @@ module.exports.run = async (bot, message, args) => {
               }
               
             );
-          }
-        );
-      }
-    );
-                    })
+      });
+    })
 
+  }
+
+  function LimitedTime(roleID, victimMember, duration, specialType, specialObjective, specialValue){
+    let role = guild.roles.cache.find(x => x.id === roleID);
+    let specialType = specialType || false;
+    let specialObjective = specialObjective || false;
+    let specialValue = specialValue || false;
+    let hoy = new Date();
+
+    const newData = new GlobalData({
+      info: {
+        type: "limitedTimeRole":
+        roleID: roleID,
+        userID: victimMember,
+        since: hoy,
+        duration: ms(duration),
+        special: {
+          "type": specialType, // boostMultiplier
+          "specialObjective": specialObjective, // exp, jeffros, all
+          "specialValue": specialValue // (2) = exp || jeffros normales x 2
+        }
+      }
+    })
+
+    newDate.save();
+  }
+  function Subscription(roleID, victimMember, intervalTime, isInfinite, jeffrosPerInterval, subscriptionName){
+    let role = guild.roles.cache.find(x => x.id === roleID);
+
+    if(intervalTime != "permanent" || intervalTime === "na"){
+      // no es una sub
+      return;
+    } else {
+      let hoy = new Date();
+
+      const newData = new GlobalData({
+        info: {
+          type: "jeffrosSubscription",
+          roleID: roleID,
+          userID: victimMember.id,
+          since: hoy,
+          interval: ms(intervalTime),
+          isInfinite: isInfinite,
+          price: jeffrosPerInterval,
+          subName: subscriptionName
+        }
+      })
+
+      newDate.save();
+    }
+  }
+
+  function Duration(roleDuration, roleID, victimMember){
+    let role = guild.roles.cache.find(x => x.id === roleID);
+    if(roleDuration != "permanent"){
+        // agregar una global data con la fecha
+
+        let hoy = new Date();
+        const newData = new GlobalData({
+            info: {
+                type: "roleDuration",
+                roleID: roleID,
+                userID: victimMember.id,
+                since: hoy,
+                duration: roleDuration
+            }
+        })
+
+        newData.save();
+
+        // timeout, por si pasa el tiempo antes de que el bot pueda reiniciarse
+        setTimeout(function(){
+            victimMember.roles.remove(role);
+
+            GlobalData.findOneAndDelete({
+                "info.type": "roleDuration",
+                roleID: roleID,
+                userID: victimMember.id
+            }, (err, func) => {
+                if(err){
+                    console.log(err);
+                } else {
+                    console.log("Role eliminado automaticamente")
+                }
+            });
+        }, roleDuration);
+
+    } else {
+        // es permanente, no hacer nada
+        return;
+    }
   }
 };
 

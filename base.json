@@ -11,6 +11,11 @@
         },
         {
             "type": "added",
+            "desc": "Se han agregado nuevos items a la `{ PREFIX }shop`.",
+            "extended": "— Suscripción mensual a VIP.\n— Boost de EXP + Jeffros por 7d."
+        },
+        {
+            "type": "added",
             "desc": "Se ha habilitado la `{ PREFIX }darkshop` para los usuarios **nivel 5**"
         },
         {
