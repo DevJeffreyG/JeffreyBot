@@ -1329,7 +1329,7 @@ bot.on("message", async message => {
         tmoney = `**${Emojis.Jeffros}${money}**`;
       }
 
-      if(boostedJeffros.has(author.id) || boostedGeneral(author.id)){
+      if(boostedJeffros.has(author.id) || boostedGeneral.has(author.id)){
         // buscar la globaldata
         let query = GlobalData.find({
           "info.type": "limitedTimeRole",
