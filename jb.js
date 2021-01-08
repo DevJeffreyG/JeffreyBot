@@ -1169,7 +1169,7 @@ bot.on("message", async message => {
       staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
     }
     
-    intervalGlobalDatas(true);
+    await intervalGlobalDatas(true);
 
     // COOLDOWN COMANDOS
 
