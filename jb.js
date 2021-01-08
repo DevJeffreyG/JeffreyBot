@@ -1151,6 +1151,8 @@ bot.on("message", async message => {
   let jexpCooldown = 60;
   const repCooldown = 86400;
 
+  await intervalGlobalDatas(true);
+
   // Captcha.
   if (message.author.bot) return;
   if (message.channel.type == "dm") return;
@@ -1169,8 +1171,6 @@ bot.on("message", async message => {
       staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
     }
     
-    await intervalGlobalDatas(true);
-
     // COOLDOWN COMANDOS
 
     if (!message.content.startsWith(prefix)) return;
@@ -2323,7 +2323,7 @@ function getChanges(entryChanges) {
   return { old: oldKey, new: newKey };
 }
 
-function intervalGlobalDatas(justBoost){
+async function intervalGlobalDatas(justBoost){
 
   justBoost = justBoost || false;
 

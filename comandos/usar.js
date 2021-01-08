@@ -351,6 +351,23 @@ module.exports.run = async (bot, message, args) => {
 
     victimMember.roles.add(role);
     newData.save();
+
+    // timeout, por si pasa el tiempo antes de que el bot pueda reiniciarse
+      setTimeout(function(){
+        victimMember.roles.remove(role);
+
+        GlobalData.findOneAndDelete({
+            "info.type": "limitedTimeRole",
+            roleID: roleID,
+            userID: victimMember.id
+        }, (err, func) => {
+            if(err){
+                console.log(err);
+            } else {
+                console.log("Role eliminado automaticamente")
+            }
+        });
+      }, ms(duration));
   }
   function Subscription(roleID, victimMember, intervalTime, isInfinite, jeffrosPerInterval, subscriptionName){
     let role = guild.roles.cache.find(x => x.id === roleID);
