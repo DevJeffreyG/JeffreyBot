@@ -1310,7 +1310,7 @@ bot.on("message", async message => {
           if(!aliasDisabled && commandFile){ // si no encuentra tampoco el alias entonces correr comando
             if (commandFile) commandFile.run(bot, message, args, active);
           } else if(!commandFile){ // si no existe el comando, return
-            return console.log("no existe el comando");
+            return;
           } else if(author.id === jeffreygID) { // si es jeffrey
             if (commandFile) commandFile.run(bot, message, args, active);
           } else { // si encuentra el comando toggleado return nomas
@@ -1318,7 +1318,7 @@ bot.on("message", async message => {
           }
         })
       } else if(!commandFile){ // si no existe el comando, return
-        return console.log("no existe el comando");
+        return;
       } else if(author.id === jeffreygID) { // si es jeffrey
         if (commandFile) commandFile.run(bot, message, args, active);
       } else { // si encuentra el comando toggleado return nomas
@@ -1364,9 +1364,6 @@ bot.on("message", async message => {
             }
           }
         });
-
-        money = query.money;
-        tmoney = query.tmoney;
 
         console.log(money, tmoney);
       }
