@@ -288,26 +288,26 @@ module.exports.run = async (bot, message, args) => {
                           });
                         } else {
                           if(!isSub){ // no es una sub pero tiene tiempo limitado
-                            return LimitedTime(r.id, message.member, duration, use.special.type, use.special.specialObjective, use.special.specialValue).then(() => {
-                              purchase.remove();
-                              let embed = new Discord.MessageEmbed()
-                                .setAuthor(`| Listo`, guild.iconURL())
-                                .setColor(Colores.verde)
-                                .setDescription(`\`▸\` ${item.replyMessage}.`);
+                            LimitedTime(r.id, message.member, duration, use.special.type, use.special.specialObjective, use.special.specialValue);
+                            
+                            purchase.remove();
+                            let embed = new Discord.MessageEmbed()
+                              .setAuthor(`| Listo`, guild.iconURL())
+                              .setColor(Colores.verde)
+                              .setDescription(`\`▸\` ${item.replyMessage}.`);
 
-                              message.channel.send(embed);
-                            });
+                            return message.channel.send(embed);
                           } else {
-                            return Subscription(r.id, message.member, duration, true, jeffrosPrice, subscriptionName).then(() => {
-                              purchase.remove();
-                              let embed = new Discord.MessageEmbed()
-                                .setAuthor(`| Listo`, guild.iconURL())
-                                .setColor(Colores.verde)
-                                .setDescription(`\`▸\` ${item.replyMessage}.`)
-                                .setFooter(`Para cancelar la suscripción usa ${prefix}usar cancel <${args[0]}>`);
+                            Subscription(r.id, message.member, duration, true, jeffrosPrice, subscriptionName);
 
-                              message.channel.send(embed);
-                            });
+                            purchase.remove();
+                            let embed = new Discord.MessageEmbed()
+                              .setAuthor(`| Listo`, guild.iconURL())
+                              .setColor(Colores.verde)
+                              .setDescription(`\`▸\` ${item.replyMessage}.`)
+                              .setFooter(`Para cancelar la suscripción usa ${prefix}usar cancel <${args[0]}>`);
+
+                            return message.channel.send(embed);
                           }
                         }
                       }
