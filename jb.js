@@ -1359,6 +1359,9 @@ bot.on("message", async message => {
               tmoney = `**B${Emojis.Jeffros}${money}**`;
             }
           }
+
+          console.log(money, tmoney);
+
         });
 
         console.log(money, tmoney);
