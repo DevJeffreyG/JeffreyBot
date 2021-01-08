@@ -659,7 +659,7 @@ bot.on("ready", async () => {
   intervalGlobalDatas();
   setInterval(intervalGlobalDatas, ms("5m"))
 
-  function intervalGlobalDatas(justBoost){
+  /*function intervalGlobalDatas(justBoost){
     justBoost = justBoost || false;
 
     console.log("Ciclo de Global Datas iniciado")
@@ -693,7 +693,6 @@ bot.on("ready", async () => {
             "specialValue": specialValue // (2) = exp || jeffros normales x 2
           }
         }
-      */
 
         if(today - since >= realDuration){
           // sacarle el role
@@ -1135,7 +1134,7 @@ bot.on("ready", async () => {
         }
       }
     })
-  }
+  }*/
 });
 
 //main
@@ -1155,6 +1154,7 @@ bot.on("message", async message => {
   if (message.channel.type == "dm") return;
   if (message.content.startsWith(prefix)) {
     // Si el mensaje empieza por el prefijo, entonces...
+    await intervalGlobalDatas(true);
 
     let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
     let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
@@ -1324,7 +1324,6 @@ bot.on("message", async message => {
     })
 
     if (message.content === `${prefix}coins`) {
-      await intervalGlobalDatas(true);
       
       //if(message.author.id != jeffreygID) return message.reply("Comando en mantenimiento, vuelve más tarde!");
       let money = Math.ceil(Math.random() * 20);
