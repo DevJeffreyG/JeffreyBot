@@ -2325,6 +2325,13 @@ function getChanges(entryChanges) {
 
 function intervalGlobalDatas(justBoost = false){
 
+  let guild;
+  if(bot.user.id === Config.testingJBID){
+    guild = bot.guilds.cache.find(x => x.id === "482989052136652800")
+  } else {
+    guild = bot.guild.cache.find(x => x.id === Config.jgServer);
+  }
+
   console.log("Ciclo de Global Datas iniciado")
   // buscar un tipo de boost
   GlobalData.find({
