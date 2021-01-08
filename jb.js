@@ -1365,7 +1365,8 @@ bot.on("message", async message => {
           }
         });
 
-        { money, tmoney } = query;
+        money = query.money;
+        tmoney = query.tmoney;
 
         console.log(money, tmoney);
       }
