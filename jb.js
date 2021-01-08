@@ -1341,12 +1341,11 @@ bot.on("message", async message => {
 
       if(boostedJeffros.has(author.id) || boostedGeneral.has(author.id)){
         // buscar la globaldata
-        let query = GlobalData.find({
+        GlobalData.find({
           "info.type": "limitedTimeRole",
           "info.special.type": "boostMultiplier"
-        }, (err, boosts) => {
-          if(err) throw err;
-
+        })
+        .then(boosts => {
           for(let i = 0; i < boosts.length; i++){
             let specialData = boosts[i].info.special;
 
@@ -1360,11 +1359,9 @@ bot.on("message", async message => {
               tmoney = `**B${Emojis.Jeffros}${money}**`;
             }
           }
-        })
-        .then(a => {
-          console.log("AAAAAAAAAAAAAA")
-          console.log(a);
         });
+
+        console.log(money, tmoney);
       }
 
       let responses = [
