@@ -713,7 +713,6 @@ bot.on("ready", async () => {
           return boosts[i].remove();
         } else {
           // es un usuario con un boost comprado, entonces...
-          console.log("member", member.id);
           if(specialData.specialObjective === "exp"){ // si el boost es de exp
             boostedExp.add(member.id);
           } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
@@ -1151,8 +1150,6 @@ bot.on("message", async message => {
   let jexpCooldown = 60;
   const repCooldown = 86400;
 
-  await intervalGlobalDatas(true);
-
   // Captcha.
   if (message.author.bot) return;
   if (message.channel.type == "dm") return;
@@ -1327,6 +1324,8 @@ bot.on("message", async message => {
     })
 
     if (message.content === `${prefix}coins`) {
+      await intervalGlobalDatas(true);
+      
       //if(message.author.id != jeffreygID) return message.reply("Comando en mantenimiento, vuelve más tarde!");
       let money = Math.ceil(Math.random() * 20);
       let tmoney = `**${Emojis.Jeffros}${money}**`;
@@ -2324,7 +2323,6 @@ function getChanges(entryChanges) {
 }
 
 async function intervalGlobalDatas(justBoost){
-
   justBoost = justBoost || false;
 
   let guild;
@@ -2385,7 +2383,7 @@ async function intervalGlobalDatas(justBoost){
         return boosts[i].remove();
       } else {
         // es un usuario con un boost comprado, entonces...
-        console.log("memeber", member.id);
+        
         if(specialData.specialObjective === "exp"){ // si el boost es de exp
           boostedExp.add(member.id);
         } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
@@ -2393,7 +2391,7 @@ async function intervalGlobalDatas(justBoost){
         } else if(specialData.specialObjective === "all"){ // si el boost es de todo
           boostedGeneral.add(member.id);
         } else {
-            console.log("wtf");
+          console.log("wtf");
         }
       }
 
