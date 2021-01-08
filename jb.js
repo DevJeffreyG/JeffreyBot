@@ -712,12 +712,15 @@ bot.on("ready", async () => {
           return boosts[i].remove();
         } else {
           // es un usuario con un boost comprado, entonces...
+          console.log(member.id);
           if(specialData.specialObjective === "exp"){ // si el boost es de exp
             boostedExp.add(member.id);
           } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
             boostedJeffros.add(member.id);
           } else if(specialData.specialObjective === "all"){ // si el boost es de todo
             boostedGeneral.add(member.id);
+          } else {
+            console.log("wtf");
           }
         }
 
@@ -1334,6 +1337,9 @@ bot.on("message", async message => {
       }
 
       intervalGlobalDatas(true);
+      console.log("XXXXXXXX")
+      console.log(boostedJeffros);
+      console.log(author.id);
       console.log(boostedJeffros.has(author.id));
       if(boostedJeffros.has(author.id) || boostedGeneral.has(author.id)){
         // buscar la globaldata
@@ -2383,12 +2389,15 @@ function intervalGlobalDatas(justBoost = false){
         return boosts[i].remove();
       } else {
         // es un usuario con un boost comprado, entonces...
+        console.log(member.id);
         if(specialData.specialObjective === "exp"){ // si el boost es de exp
           boostedExp.add(member.id);
         } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
           boostedJeffros.add(member.id);
         } else if(specialData.specialObjective === "all"){ // si el boost es de todo
           boostedGeneral.add(member.id);
+        } else {
+            console.log("wtf");
         }
       }
 
