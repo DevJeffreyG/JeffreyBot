@@ -122,7 +122,7 @@ module.exports.run = async (bot, message, args) => {
                   } else if(!userIsOnMobible && items[i].ignoreInterest == true){
                     embed.addField(
                       `— { ${items[i].id} } ${items[i].itemName}`,
-                      `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio})`
+                      `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
                     );
                   }
 
@@ -218,7 +218,7 @@ module.exports.run = async (bot, message, args) => {
                     } else if(!userIsOnMobible && items[i].ignoreInterest == true){
                       embed.addField(
                         `— { ${items[i].id} } ${items[i].itemName}`,
-                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio})`
+                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
                       );
                     }
 
@@ -341,7 +341,7 @@ module.exports.run = async (bot, message, args) => {
                                     } else if(!userIsOnMobible && items[i].ignoreInterest == true){
                                       embed.addField(
                                         `— { ${items[i].id} } ${items[i].itemName}`,
-                                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio})`
+                                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
                                       );
                                     }
 
@@ -444,7 +444,7 @@ module.exports.run = async (bot, message, args) => {
                                     } else if(!userIsOnMobible && items[i].ignoreInterest == true){
                                       embed.addField(
                                         `— { ${items[i].id} } ${items[i].itemName}`,
-                                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio})`
+                                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
                                       );
                                     }
 
@@ -732,7 +732,7 @@ module.exports.run = async (bot, message, args) => {
                 let errorEmbed = new Discord.MessageEmbed()
                   .setAuthor(`| Error`, Config.errorPng)
                   .setDescription(
-                    `▸ El uso correcto es: /shop add <nombre> <precio> (@role requerido o ID)
+                    `▸ El uso correcto es: /shop add <nombre> <precio> <ignora la subida de precio "true || false"> (@role requerido o ID)
 **—** Para los roles, si no se necesita, rellenar con "\`na\`".`
                   )
                   .setColor(Colores.nocolor);
@@ -740,10 +740,12 @@ module.exports.run = async (bot, message, args) => {
                 if (!args[1]) return message.channel.send(errorEmbed);
                 if (!args[2]) return message.channel.send(errorEmbed);
                 if (!args[3]) return message.channel.send(errorEmbed);
+                if (!args[4]) return message.channel.send(errorEmbed);
 
                 let nameItem = args[1];
                 let priceItem = args[2];
-                let reqRole = args[3];
+                let ignoreInterest = args[3] == "true" ? true : false;
+                let reqRole = args[4] ? args[4] : "na";
 
                 let lastID = c + plus;
 
@@ -754,6 +756,7 @@ module.exports.run = async (bot, message, args) => {
                   itemDescription: "na",
                   replyMessage: "¡Item usado con éxito!",
                   roleRequired: reqRole,
+                  ignoreInterest: ignoreInterest,
                   id: lastID
                 });
 
@@ -768,6 +771,7 @@ module.exports.run = async (bot, message, args) => {
 **—** Descripción: \`na\`.
 **—** Mensaje después de comprar: \`¡Item usado con éxito!\`.
 **—** Role requerido: \`${reqRole}\`.
+**—** Ignora el interés por compra: \`${ignoreInterest ? "Sí" : "No"}\`.
 **—** ID: \`${lastID}\`.`
                   )
                   .setColor(Colores.verde);
