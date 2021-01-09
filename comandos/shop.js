@@ -581,9 +581,9 @@ module.exports.run = async (bot, message, args) => {
                                   const noFilter = (reaction, user) =>  reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
                                   const collectorFilter = (reaction, user) => reaction.emoji.id === "558084462232076312" || reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
 
-                                  const yes = msg.createReactionCollector(yesFilter, { time: 60000 });
-                                  const no = msg.createReactionCollector(noFilter, { time: 60000 });
-                                  const collector = msg.createReactionCollector(collectorFilter, { time: 60000 });
+                                  const yes = msg.createReactionCollector(yesFilter, { time: ms("30s") });
+                                  const no = msg.createReactionCollector(noFilter, { time: ms("30s") });
+                                  const collector = msg.createReactionCollector(collectorFilter, { time: ms("30s") });
 
                                   collector.on("end", r => {
                                     return msg.edit(cancelEmbed).then(a => {
