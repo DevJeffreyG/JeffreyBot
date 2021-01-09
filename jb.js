@@ -1890,7 +1890,7 @@ async function intervalGlobalDatas(justBoost){
       if(today - since >= realDuration){
         // sacarle el role
         console.log("ha pasado el tiempo 0001")
-        await member.roles.remove(role);
+        member.roles.remove(role);
 
         // buscar el set y eliminarlo
         if(specialData.specialObjective === "exp"){ // si el boost es de exp
