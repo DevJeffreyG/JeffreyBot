@@ -32,10 +32,10 @@ module.exports.run = async (bot, message, args) => {
   if(!delMgs) return message.channel.send(embed);
 
   message.channel.bulkDelete(delMgs).then(deleMsg => {
-  message.channel.send(`Limpiados ${deleMsg.size} mensajes.`).then(msg => msg.delete(7000));
+  message.channel.send(`Limpiados ${deleMsg.size} mensajes.`).then(msg => msg.delete({timeout: 7000}));
 }).catch(err => {
     console.log(err);
-  message.reply(`Sólo puedo eliminar mensajes que sean menores de 14 días. <:jgSad:492115297533165569>`).then(msg => msg.delete(7000));
+  message.reply(`Sólo puedo eliminar mensajes que sean menores de 14 días. <:jgSad:492115297533165569>`).then(msg => msg.delete({timeout: 7000}));
 });
 
 }
