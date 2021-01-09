@@ -1901,15 +1901,15 @@ async function intervalGlobalDatas(justBoost){
         // buscar el set y eliminarlo
         if(specialData.specialObjective === "exp"){ // si el boost es de exp
           return new Promise((resolved, rejected) => {
-            resolve(boostedExp.delete(member.id));
+            resolved(boostedExp.delete(member.id));
           });
         } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
           return new Promise((resolved, rejected) => {
-            resolve(boostedJeffros.delete(member.id));
+            resolved(boostedJeffros.delete(member.id));
           })
         } else if(specialData.specialObjective === "all"){ // si el boost es de todo
           new Promise((resolved, rejected) => {
-            resolve(boostedGeneral.delete(member.id));
+            resolved(boostedGeneral.delete(member.id));
           })
         }
       } else {
