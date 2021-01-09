@@ -2017,15 +2017,9 @@ async function intervalGlobalDatas(justBoost){
           **—** Tu saldo ha quedado en **${Emojis.Jeffros}${jeffros.jeffros - price}**.`)
           .setColor(Colores.verde);
 
-          // si no es una sub
-          if(!sub.isInfinite){
-            /// quitar el role
-            member.roles.remove(role);
-
-            // eliminar globaldata
-            return subs[i].remove();
-          } else if(!jeffros || jeffros.jeffros < price){
+          if(!jeffros || jeffros.jeffros < price){
             // quitarle los jeffros, y dejarlo en negativo
+            console.log("no tiene suficientes jeffros")
             jeffros.jeffros -= price;
             member.send(notEnough);
             subs[i].remove();
