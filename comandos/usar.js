@@ -300,7 +300,7 @@ module.exports.run = async (bot, message, args) => {
 
                             return message.channel.send(embed);
                           } else {
-                            Subscription(r.id, message.member, duration, true, jeffrosPrice, subscriptionName);
+                            Subscription(r.id, message.member, duration, jeffrosPrice, subscriptionName);
 
                             purchase.remove();
                             let embed = new Discord.MessageEmbed()
@@ -388,7 +388,6 @@ module.exports.run = async (bot, message, args) => {
           userID: victimMember.id,
           since: hoy,
           interval: ms(intervalTime),
-          isInfinite: isInfinite,
           price: jeffrosPerInterval,
           subName: subscriptionName
         }
