@@ -84,7 +84,7 @@ module.exports.run = async (bot, message, args) => {
               let isSub = false;
               let time = null;
               let usesQuery = await Use.findOne({
-                serverID: guild.id
+                serverID: guild.id,
                 itemID: items[i].id
               }, (err, actualItemUse) => {
                 isSub = actualItemUse.isSub;
