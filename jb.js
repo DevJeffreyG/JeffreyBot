@@ -846,7 +846,7 @@ bot.on("message", async message => {
 
     if (message.content === `${prefix}coins`) {
       
-      await intervalGlobalDatas(true)
+      await intervalGlobalDatas()
 
       //if(message.author.id != jeffreygID) return message.reply("Comando en mantenimiento, vuelve más tarde!");
       let money = Math.ceil(Math.random() * 20);
@@ -1844,9 +1844,7 @@ function getChanges(entryChanges) {
   return { old: oldKey, new: newKey };
 }
 
-async function intervalGlobalDatas(justBoost){
-  justBoost = justBoost || false;
-
+async function intervalGlobalDatas(){
   let guild;
   if(bot.user.id === Config.testingJBID){
     guild = bot.guilds.cache.find(x => x.id === "482989052136652800")
@@ -1894,11 +1892,11 @@ async function intervalGlobalDatas(justBoost){
 
         // buscar el set y eliminarlo
         if(specialData.specialObjective === "exp"){ // si el boost es de exp
-          await boostedExp.delete(member.id);
+          boostedExp.delete(member.id);
         } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
-          await boostedJeffros.delete(member.id);
+          boostedJeffros.delete(member.id);
         } else if(specialData.specialObjective === "all"){ // si el boost es de todo
-          await boostedGeneral.delete(member.id);
+          boostedGeneral.delete(member.id);
         }
 
         // eliminar global data
@@ -1922,7 +1920,6 @@ async function intervalGlobalDatas(justBoost){
 
     }
   })
-  if(justBoost) return console.log("Cancelado bucle de global datas por ser solo boosts");
   // buscar sub
   GlobalData.find({
     "info.type": "jeffrosSubscription"
