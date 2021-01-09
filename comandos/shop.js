@@ -27,7 +27,8 @@ module.exports.run = async (bot, message, args) => {
   let item;
   let interest = 2000; // CUANTO SUBE EL PRECIO POR COMPRA
 
-  let member = guild.members.cache.find(x => x.id === author.id)
+  let member = guild.members.cache.find(x => x.id === author.id);
+  member = member.user.fetch();
 
   console.log(member.presence.clientStatus);
 
