@@ -677,8 +677,6 @@ bot.on("message", async message => {
   if (message.channel.type == "dm") return;
   if (message.content.startsWith(prefix)) {
     // Si el mensaje empieza por el prefijo, entonces...
-    await intervalGlobalDatas(true)
-
     let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
     let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
     let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
@@ -848,6 +846,8 @@ bot.on("message", async message => {
 
     if (message.content === `${prefix}coins`) {
       
+      await intervalGlobalDatas(true)
+
       //if(message.author.id != jeffreygID) return message.reply("Comando en mantenimiento, vuelve más tarde!");
       let money = Math.ceil(Math.random() * 20);
       let tmoney = `**${Emojis.Jeffros}${money}**`;
@@ -1890,15 +1890,15 @@ async function intervalGlobalDatas(justBoost){
       if(today - since >= realDuration){
         // sacarle el role
         console.log("ha pasado el tiempo 0001")
-        member.roles.remove(role);
+        await member.roles.remove(role);
 
         // buscar el set y eliminarlo
         if(specialData.specialObjective === "exp"){ // si el boost es de exp
-          boostedExp.delete(member.id);
+          await boostedExp.delete(member.id);
         } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
-          boostedJeffros.delete(member.id);
+          await boostedJeffros.delete(member.id);
         } else if(specialData.specialObjective === "all"){ // si el boost es de todo
-          boostedGeneral.delete(member.id);
+          await boostedGeneral.delete(member.id);
         }
 
         // eliminar global data
@@ -1907,13 +1907,13 @@ async function intervalGlobalDatas(justBoost){
         // es un usuario con un boost comprado, entonces...
         
         if(specialData.specialObjective === "exp"){ // si el boost es de exp
-          boostedExp.add(member.id);
+          await boostedExp.add(member.id);
           console.log(boostedExp)
         } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
-          boostedJeffros.add(member.id);
+          await boostedJeffros.add(member.id);
           console.log(boostedJeffros)
         } else if(specialData.specialObjective === "all"){ // si el boost es de todo
-          boostedGeneral.add(member.id);
+          await boostedGeneral.add(member.id);
           console.log(boostedGeneral)
         } else {
           return null;
