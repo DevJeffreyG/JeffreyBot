@@ -656,7 +656,7 @@ bot.on("ready", async () => {
   channel.send("Reviví.");
 
   /* ############ GLOBAL DATAS ############ */
-  await intervalGlobalDatas();
+  intervalGlobalDatas();
   setInterval(intervalGlobalDatas, ms("2m"))
 });
 
@@ -846,7 +846,7 @@ bot.on("message", async message => {
 
     if (message.content === `${prefix}coins`) {
       
-      await intervalGlobalDatas(true)
+      loadBoosts()
 
       //if(message.author.id != jeffreygID) return message.reply("Comando en mantenimiento, vuelve más tarde!");
       let money = Math.ceil(Math.random() * 20);
@@ -1841,7 +1841,15 @@ function getChanges(entryChanges) {
   return { old: oldKey, new: newKey };
 }
 
-async function intervalGlobalDatas(justBoost){
+async function loadBoosts () {
+  try {
+    await intervalGlobalDatas(true)
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+function intervalGlobalDatas(justBoost){
   justBoost = justBoost || false;
 
   let guild;
@@ -1891,13 +1899,32 @@ async function intervalGlobalDatas(justBoost){
 
         // buscar el set y eliminarlo
         if(specialData.specialObjective === "exp"){ // si el boost es de exp
-          return new Promise((resolved, rejected) => {
-            boostedExp.delete(member.id);
+          return new Promise((resolve, reject) => {
+            boostedExp.delete(member.id).then(() => {
+              resolve(`${member.user.username} eliminado de boostedExp`);
+            })
+            .catch(err => {
+              reject(err)
+            })
           })
         } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
-          boostedJeffros.delete(member.id);
+          return new Promise((resolve, reject) => {
+            boostedJeffros.delete(member.id).then(() => {
+              resolve(`${member.user.username} eliminado de boostedJeffros`);
+            })
+            .catch(err => {
+              reject(err)
+            })
+          })
         } else if(specialData.specialObjective === "all"){ // si el boost es de todo
-          boostedGeneral.delete(member.id);
+          return new Promise((resolve, reject) => {
+            boostedGeneral.delete(member.id).then(() => {
+              resolve(`${member.user.username} eliminado de boostedGeneral`);
+            })
+            .catch(err => {
+              reject(err)
+            })
+          })
         }
 
         // eliminar global data
@@ -1906,19 +1933,43 @@ async function intervalGlobalDatas(justBoost){
         // es un usuario con un boost comprado, entonces...
         
         if(specialData.specialObjective === "exp"){ // si el boost es de exp
-          boostedExp.add(member.id);
+          return new Promise((resolve, reject) => {
+            boostedExp.add(member.id).then(() => {
+              resolve(`${member.user.username} agregado a boostedExp`);
+            })
+            .catch(err => {
+              reject(err)
+            })
+          })
         } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
-          boostedJeffros.add(member.id);
+          return new Promise((resolve, reject) => {
+            boostedJeffros.add(member.id).then(() => {
+              resolve(`${member.user.username} agregado a boostedJeffros`);
+            })
+            .catch(err => {
+              reject(err)
+            })
+          })
         } else if(specialData.specialObjective === "all"){ // si el boost es de todo
-          boostedGeneral.add(member.id);
+          return new Promise((resolve, reject) => {
+            boostedGeneral.add(member.id).then(() => {
+              resolve(`${member.user.username} agregado a boostedGeneral`);
+            })
+            .catch(err => {
+              reject(err)
+            })
+          })
         } else {
-          console.log("no es ninguno de estos boost, what?")
+          return new Promise((resolve, reject) => {
+            reject("No es ninguno de los boosts predeterminados.")
+          })
         }
       }
     }
-    return;
   })
+
   if(justBoost === true) return console.log("Cancelando proceso de Globaldatas por ser sólo tipo BOOST.");
+  
   // buscar sub
   GlobalData.find({
     "info.type": "jeffrosSubscription"
