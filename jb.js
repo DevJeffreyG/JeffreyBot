@@ -1900,30 +1900,18 @@ function intervalGlobalDatas(justBoost){
         // buscar el set y eliminarlo
         if(specialData.specialObjective === "exp"){ // si el boost es de exp
           return new Promise((resolve, reject) => {
-            boostedExp.delete(member.id).then(() => {
-              resolve(`${member.user.username} eliminado de boostedExp`);
-            })
-            .catch(err => {
-              reject(err)
-            })
+            boostedExp.delete(member.id)
+            resolve(`${member.user.username} eliminado de boostedExp`);
           })
         } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
           return new Promise((resolve, reject) => {
-            boostedJeffros.delete(member.id).then(() => {
-              resolve(`${member.user.username} eliminado de boostedJeffros`);
-            })
-            .catch(err => {
-              reject(err)
-            })
+            boostedJeffros.delete(member.id)
+            resolve(`${member.user.username} eliminado de boostedJeffros`);
           })
         } else if(specialData.specialObjective === "all"){ // si el boost es de todo
           return new Promise((resolve, reject) => {
-            boostedGeneral.delete(member.id).then(() => {
-              resolve(`${member.user.username} eliminado de boostedGeneral`);
-            })
-            .catch(err => {
-              reject(err)
-            })
+            boostedGeneral.delete(member.id)
+            resolve(`${member.user.username} eliminado de boostedGeneral`);
           })
         }
 
@@ -1934,30 +1922,18 @@ function intervalGlobalDatas(justBoost){
         
         if(specialData.specialObjective === "exp"){ // si el boost es de exp
           return new Promise((resolve, reject) => {
-            boostedExp.add(member.id).then(() => {
-              resolve(`${member.user.username} agregado a boostedExp`);
-            })
-            .catch(err => {
-              reject(err)
-            })
+            boostedExp.add(member.id)
+            resolve(`${member.user.username} agregado a boostedExp`);
           })
         } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
           return new Promise((resolve, reject) => {
-            boostedJeffros.add(member.id).then(() => {
-              resolve(`${member.user.username} agregado a boostedJeffros`);
-            })
-            .catch(err => {
-              reject(err)
-            })
+            boostedJeffros.add(member.id)
+            resolve(`${member.user.username} agregado a boostedJeffros`);
           })
         } else if(specialData.specialObjective === "all"){ // si el boost es de todo
           return new Promise((resolve, reject) => {
-            boostedGeneral.add(member.id).then(() => {
-              resolve(`${member.user.username} agregado a boostedGeneral`);
-            })
-            .catch(err => {
-              reject(err)
-            })
+            boostedGeneral.add(member.id)
+            resolve(`${member.user.username} agregado a boostedGeneral`);
           })
         } else {
           return new Promise((resolve, reject) => {
@@ -1969,7 +1945,7 @@ function intervalGlobalDatas(justBoost){
   })
 
   if(justBoost === true) return console.log("Cancelando proceso de Globaldatas por ser sólo tipo BOOST.");
-  
+
   // buscar sub
   GlobalData.find({
     "info.type": "jeffrosSubscription"
