@@ -846,7 +846,8 @@ bot.on("message", async message => {
 
     if (message.content === `${prefix}coins`) {
       
-      await intervalGlobalDatas()
+      await intervalGlobalDatas().then(() => {
+
 
       //if(message.author.id != jeffreygID) return message.reply("Comando en mantenimiento, vuelve más tarde!");
       let money = Math.ceil(Math.random() * 20);
@@ -888,6 +889,7 @@ bot.on("message", async message => {
 
         console.log(money, tmoney);
       }
+      })
 
       let responses = [
         `Te ofreces para dar clases particulares a domicilio, terminas con intenciones suicidas pero ganas ${tmoney}`, //1
@@ -1906,13 +1908,10 @@ async function intervalGlobalDatas(){
         
         if(specialData.specialObjective === "exp"){ // si el boost es de exp
           boostedExp.add(member.id);
-          console.log(boostedExp)
         } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
           boostedJeffros.add(member.id);
-          console.log(boostedJeffros)
         } else if(specialData.specialObjective === "all"){ // si el boost es de todo
           boostedGeneral.add(member.id);
-          console.log(boostedGeneral)
         } else {
           return null;
         }
