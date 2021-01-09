@@ -1062,7 +1062,7 @@ bot.on("message", async message => {
         userID: author.id,
         serverID: message.guild.id
       },
-      (err, jeffros) => {
+      async (err, jeffros) => {
         if (err) console.log(err);
 
         if (jeffrosExpCooldown.has(author.id)) {
