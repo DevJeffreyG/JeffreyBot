@@ -1901,15 +1901,18 @@ async function intervalGlobalDatas(justBoost){
         // buscar el set y eliminarlo
         if(specialData.specialObjective === "exp"){ // si el boost es de exp
           return new Promise((resolved, rejected) => {
-            resolved(boostedExp.delete(member.id));
+            boostedExp.delete(member.id);
+            resolved(boostedExp);
           });
         } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
           return new Promise((resolved, rejected) => {
-            resolved(boostedJeffros.delete(member.id));
+            boostedJeffros.delete(member.id);
+            resolved(boostedJeffros);
           })
         } else if(specialData.specialObjective === "all"){ // si el boost es de todo
           new Promise((resolved, rejected) => {
-            resolved(boostedGeneral.delete(member.id));
+            boostedGeneral.delete(member.id);
+            resolved(boostedGeneral);
           })
         }
       } else {
@@ -1917,15 +1920,18 @@ async function intervalGlobalDatas(justBoost){
         
         if(specialData.specialObjective === "exp"){ // si el boost es de exp
           return new Promise((res, rej) => {
-            res(boostedExp.add(member.id));
+            boostedExp.add(member.id);
+            res(boostedExp);
           })
         } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
           return new Promise((res, rej) => {
-            res(boostedJeffros.add(member.id));
+            boostedJeffros.add(member.id);
+            res(boostedJeffros);
           })
         } else if(specialData.specialObjective === "all"){ // si el boost es de todo
           return new Promise((res, rej) => {
-            res(boostedGeneral.add(member.id));
+            boostedGeneral.add(member.id);
+            res(boostedGeneral);
           })
         } else {
           return null;
