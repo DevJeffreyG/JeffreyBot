@@ -662,6 +662,7 @@ bot.on("ready", async () => {
 
 //main
 bot.on("message", async message => {
+  loadBoosts();
   let messageArray = message.content.split(" ");
   let cmd = messageArray[0];
   let args = messageArray.slice(1);
@@ -846,10 +847,7 @@ bot.on("message", async message => {
 
     if (message.content === `${prefix}coins`) {
       
-      await loadBoosts()
-      .then(e => {
-        console.log(e)
-      })
+      loadBoosts();
       
 
       //if(message.author.id != jeffreygID) return message.reply("Comando en mantenimiento, vuelve más tarde!");
@@ -865,7 +863,7 @@ bot.on("message", async message => {
 
       console.log("XXXXXXXXXXXXXXXXXXXXXXXXX")
       console.log(boostedJeffros, boostedGeneral);
-      console.log(loadBoosts());
+      console.log("load", loadBoosts());
       if(boostedJeffros.has(author.id) || boostedGeneral.has(author.id)){
         // buscar la globaldata
         let query = await GlobalData.find({
