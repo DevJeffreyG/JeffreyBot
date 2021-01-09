@@ -846,10 +846,6 @@ bot.on("message", async message => {
     })
 
     if (message.content === `${prefix}coins`) {
-      
-      loadBoosts();
-      
-
       //if(message.author.id != jeffreygID) return message.reply("Comando en mantenimiento, vuelve más tarde!");
       let money = Math.ceil(Math.random() * 20);
       let tmoney = `**${Emojis.Jeffros}${money}**`;
@@ -1850,8 +1846,6 @@ async function loadBoosts () {
     await intervalGlobalDatas(true)
   } catch (err) {
     console.log(err);
-  } finally {
-    console.log("Done.");
   }
 }
 
@@ -1932,10 +1926,8 @@ function intervalGlobalDatas(justBoost){
             resolve(`${member.user.username} agregado a boostedExp`);
           })
         } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
-          console.log("es de jeffros");
           return new Promise((resolve, reject) => {
             boostedJeffros.add(member.id)
-            console.log("XDXDXD", boostedJeffros)
             resolve(`${member.user.username} agregado a boostedJeffros`);
           })
         } else if(specialData.specialObjective === "all"){ // si el boost es de todo
