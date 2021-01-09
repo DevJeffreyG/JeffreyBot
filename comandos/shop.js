@@ -43,6 +43,7 @@ module.exports.run = async (bot, message, args) => {
         if (err) throw err;
 
         Jeffros.findOne({
+          serverID: guild.id,
           userID: author.id
         }, (err, j) => {
 
