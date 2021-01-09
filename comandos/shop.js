@@ -157,7 +157,7 @@ module.exports.run = async (bot, message, args) => {
             let pagn = "1";
             let totalpags;
 
-            Items.countDocuments({}, (err, c) => {
+            Items.countDocuments({}, async (err, c) => {
               if (err) throw err;
 
               totalpags = Math.floor(c / itemPerPage);
