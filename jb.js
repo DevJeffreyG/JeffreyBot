@@ -1897,6 +1897,9 @@ function intervalGlobalDatas(justBoost){
         console.log("ha pasado el tiempo 0001")
         member.roles.remove(role);
 
+        // eliminar global data
+        boosts[i].remove();
+
         // buscar el set y eliminarlo
         if(specialData.specialObjective === "exp"){ // si el boost es de exp
           return new Promise((resolve, reject) => {
@@ -1914,9 +1917,6 @@ function intervalGlobalDatas(justBoost){
             resolve(`${member.user.username} eliminado de boostedGeneral`);
           })
         }
-
-        // eliminar global data
-        return boosts[i].remove();
       } else {
         // es un usuario con un boost comprado, entonces...
         
