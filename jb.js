@@ -846,7 +846,8 @@ bot.on("message", async message => {
 
     if (message.content === `${prefix}coins`) {
       
-      loadBoosts()
+      let e = loadBoosts()
+      console.log(e)
 
       //if(message.author.id != jeffreygID) return message.reply("Comando en mantenimiento, vuelve más tarde!");
       let money = Math.ceil(Math.random() * 20);
@@ -1846,6 +1847,8 @@ async function loadBoosts () {
     await intervalGlobalDatas(true)
   } catch (err) {
     console.log(err);
+  } finally {
+    console.log("Done.");
   }
 }
 
