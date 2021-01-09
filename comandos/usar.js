@@ -371,7 +371,7 @@ module.exports.run = async (bot, message, args) => {
         });
       }, ms(duration));
   }
-  function Subscription(roleID, victimMember, intervalTime, isInfinite, jeffrosPerInterval, subscriptionName){
+  function Subscription(roleID, victimMember, intervalTime, jeffrosPerInterval, subscriptionName){
     let role = guild.roles.cache.find(x => x.id === roleID);
 
     if(intervalTime === "permanent" || intervalTime === "na"){
