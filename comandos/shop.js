@@ -27,7 +27,7 @@ module.exports.run = async (bot, message, args) => {
   let item;
   let interest = 2000; // CUANTO SUBE EL PRECIO POR COMPRA
 
-  console.log(message.author.presence.clientStatus)
+  console.log(message.author.presence)
   let userIsOnMobible = message.author.presence.clientStatus == "mobile" ? true : false;
   let viewExtension = "ꜝ";
   let extendedDetails = "▸ Al comprar este item, su precio subirá."
