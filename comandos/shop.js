@@ -29,7 +29,7 @@ module.exports.run = async (bot, message, args) => {
 
 
   guild.members.fetch({ author, withPresences: true }); // fetchear de nuevo el usuario para actualizar las prenseces.
-  let presences = guild.prenseces.cache.find(x => x.userID === author.id);
+  let presences = guild.presences.cache.find(x => x.userID === author.id);
 
   console.log(presences);
 
