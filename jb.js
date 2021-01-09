@@ -846,7 +846,7 @@ bot.on("message", async message => {
 
     if (message.content === `${prefix}coins`) {
       
-      await intervalGlobalDatas().then(() => {
+      await intervalGlobalDatas().then(async () => {
 
 
       //if(message.author.id != jeffreygID) return message.reply("Comando en mantenimiento, vuelve más tarde!");
