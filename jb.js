@@ -846,8 +846,11 @@ bot.on("message", async message => {
 
     if (message.content === `${prefix}coins`) {
       
-      let e = loadBoosts()
-      console.log(e)
+      loadBoosts()
+      .then(e => {
+        console.log(e)
+      })
+      
 
       //if(message.author.id != jeffreygID) return message.reply("Comando en mantenimiento, vuelve más tarde!");
       let money = Math.ceil(Math.random() * 20);
