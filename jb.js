@@ -846,7 +846,13 @@ bot.on("message", async message => {
 
     if (message.content === `${prefix}coins`) {
       
-      await intervalGlobalDatas()
+      await intervalGlobalDatas(true)
+      .then(function(val){
+        console.log(val);
+      })
+      .catch(function(err){
+        console.log(err);
+      })
 
       //if(message.author.id != jeffreygID) return message.reply("Comando en mantenimiento, vuelve más tarde!");
       let money = Math.ceil(Math.random() * 20);
