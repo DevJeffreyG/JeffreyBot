@@ -717,9 +717,7 @@ module.exports.run = async (bot, message, args) => {
                                   const collector = msg.createReactionCollector(collectorFilter, { time: ms("30s") });
 
                                   collector.on("end", (r) => {
-                                    console.log(r);
-                                    console.log(r.array().length);
-                                    if(r.length === 0) return;
+                                    if(r.first()) return;
                                     return msg.edit(cancelEmbed).then(a => {
                                       msg.reactions.removeAll().then(() => {
                                         msg.react("795090708478033950");
