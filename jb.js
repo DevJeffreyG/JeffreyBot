@@ -656,8 +656,13 @@ bot.on("ready", async () => {
   channel.send("Reviví.");
 
   /* ############ GLOBAL DATAS ############ */
+  console.log("Ciclo de Global Datas iniciado")
   intervalGlobalDatas();
-  setInterval(intervalGlobalDatas, ms("2m"))
+
+  setInterval(function(){
+    console.log("Ciclo de Global Datas iniciado")
+    intervalGlobalDatas();
+  }, ms("2m"));
 });
 
 //main
@@ -857,9 +862,6 @@ bot.on("message", async message => {
         tmoney = `**${Emojis.Jeffros}${money}**`;
       }
 
-      console.log("XXXXXXXXXXXXXXXXXXXXXXXXX")
-      console.log(boostedJeffros, boostedGeneral);
-      console.log("load", loadBoosts());
       if(boostedJeffros.has(author.id) || boostedGeneral.has(author.id)){
         // buscar la globaldata
         let query = await GlobalData.find({
@@ -882,8 +884,6 @@ bot.on("message", async message => {
             }
           }
         });
-
-        console.log(money, tmoney);
       }
 
       let responses = [
@@ -1046,6 +1046,28 @@ bot.on("message", async message => {
       jeffrosToAdd = jeffrosToAdd * multiplier;
     }
 
+    if(boostedJeffros.has(author.id) || boostedGeneral.has(author.id)){
+        // buscar la globaldata
+        let query = await GlobalData.find({
+          "info.type": "limitedTimeRole",
+          "info.special.type": "boostMultiplier"
+        }, (err, boosts) => {
+          if(err) throw err;
+
+          for(let i = 0; i < boosts.length; i++){
+            let specialData = boosts[i].info.special;
+
+            if(specialData.specialObjective === "exp"){ // si el boost es de exp
+              
+            } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
+              jeffrosToAdd = jeffrosToAdd * Number(boosts[i].info.special.specialValue);
+            } else if(specialData.specialObjective === "all"){ // si el boost es de todo
+              jeffrosToAdd = jeffrosToAdd * Number(boosts[i].info.special.specialValue);
+            }
+          }
+        });
+      }
+
     Jeffros.findOne(
       {
         userID: author.id,
@@ -1096,6 +1118,28 @@ bot.on("message", async message => {
         if (multiplier != 1) {
           expToAdd = expToAdd * multiplier;
         }
+
+        if(boostedExp.has(author.id) || boostedGeneral.has(author.id)){
+        // buscar la globaldata
+        let query = await GlobalData.find({
+          "info.type": "limitedTimeRole",
+          "info.special.type": "boostMultiplier"
+        }, (err, boosts) => {
+          if(err) throw err;
+
+          for(let i = 0; i < boosts.length; i++){
+            let specialData = boosts[i].info.special;
+
+            if(specialData.specialObjective === "exp"){ // si el boost es de exp  
+              expToAdd = expToAdd * Number(boosts[i].info.special.specialValue);
+            } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
+
+            } else if(specialData.specialObjective === "all"){ // si el boost es de todo
+              expToAdd = expToAdd * Number(boosts[i].info.special.specialValue);
+            }
+          }
+        });
+      }
 
         Exp.findOne(
           {
@@ -1859,7 +1903,6 @@ function intervalGlobalDatas(justBoost){
     guild = bot.guild.cache.find(x => x.id === Config.jgServer);
   }
 
-  console.log("Ciclo de Global Datas iniciado")
   // buscar un tipo de boost
   GlobalData.find({
     "info.type": "limitedTimeRole",
@@ -1944,7 +1987,7 @@ function intervalGlobalDatas(justBoost){
     }
   })
 
-  if(justBoost === true) return console.log("Cancelando proceso de Globaldatas por ser sólo tipo BOOST.");
+  if(justBoost === true) return;
 
   // buscar sub
   GlobalData.find({
