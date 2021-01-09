@@ -71,16 +71,18 @@ module.exports.run = async (bot, message, args) => {
             }
           }
 
-          if (!args[1]) return message.reply(`falta la id.`);
-          if (!args[2]) return message.reply(`falta la acción (add o delete).`);
-          if (!args[3])
-            return message.reply(
-              `que se va a agregar o eliminar? (jeffros, warns, role)`
-            );
+          let correctUseAdd = new Discord.MessageEmbed()
+          .setAuthor(`| Error`, Config.errorPng)
+          .setDescription(`▸ El uso correcto es: /use add <id> <add || delete> <jeffros | warns | role> (id de role) ($duracion) (es un pago cada cierta $duracion "true" ; "false") (specialType "boostMultiplier") (specialObjetive "exp, jeffros, all") (specialValue [MULTIPLICADOR] "2" = Jeffros ganados normalmente * 2)`)
+          .setColor(Colores.rojo);
+
+          if (!args[1]) return message.channel.send(correctUseAdd);
+          if (!args[2]) return message.channel.send(correctUseAdd);
+          if (!args[3]) return message.channel.send(correctUseAdd);
 
           let cosaID = "na";
           if (args[3].toLowerCase() === "role" && !args[4] || args[3].toLowerCase() === "role" && isNaN(args[4])) {
-            return message.reply(`falta la id del role.`);
+            return message.channel.send(correctUseAdd)
           } else if (args[3].toLowerCase() === "role") {
             cosaID = args[4];
           }
