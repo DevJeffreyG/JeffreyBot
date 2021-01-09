@@ -848,7 +848,7 @@ bot.on("message", async message => {
       
       await intervalGlobalDatas(true)
       .then(function(val){
-        console.log(val);
+        console.log("XD",val);
       })
       .catch(function(err){
         console.log(err);
