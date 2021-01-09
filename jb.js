@@ -971,17 +971,6 @@ bot.on("message", async message => {
       );
     }
   } else {
-    // JEFFREY ASSISTANT
-
-    if (
-      message.content
-        .toLowerCase()
-        .startsWith("hey,", "ey,", "eu, ", "bot,", "hey bot,")
-    ) {
-      // entrenamiento
-
-      return;
-    }
 
     if (message.member.roles.cache.find(x => x.id === Config.lvl40)){
       jexpCooldown = jexpCooldown / 2;
@@ -1120,26 +1109,26 @@ bot.on("message", async message => {
         }
 
         if(boostedExp.has(author.id) || boostedGeneral.has(author.id)){
-        // buscar la globaldata
-        let query = await GlobalData.find({
-          "info.type": "limitedTimeRole",
-          "info.special.type": "boostMultiplier"
-        }, (err, boosts) => {
-          if(err) throw err;
+          // buscar la globaldata
+          let query2 = await GlobalData.find({
+            "info.type": "limitedTimeRole",
+            "info.special.type": "boostMultiplier"
+          }, (err, boosts) => {
+            if(err) throw err;
 
-          for(let i = 0; i < boosts.length; i++){
-            let specialData = boosts[i].info.special;
+            for(let i = 0; i < boosts.length; i++){
+              let specialData = boosts[i].info.special;
 
-            if(specialData.specialObjective === "exp"){ // si el boost es de exp  
-              expToAdd = expToAdd * Number(boosts[i].info.special.specialValue);
-            } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
+              if(specialData.specialObjective === "exp"){ // si el boost es de exp  
+                expToAdd = expToAdd * Number(boosts[i].info.special.specialValue);
+              } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
 
-            } else if(specialData.specialObjective === "all"){ // si el boost es de todo
-              expToAdd = expToAdd * Number(boosts[i].info.special.specialValue);
+              } else if(specialData.specialObjective === "all"){ // si el boost es de todo
+                expToAdd = expToAdd * Number(boosts[i].info.special.specialValue);
+              }
             }
-          }
-        });
-      }
+          });
+        }
 
         Exp.findOne(
           {
@@ -1893,7 +1882,7 @@ async function loadBoosts () {
   }
 }
 
-function intervalGlobalDatas(justBoost){
+async function intervalGlobalDatas(justBoost){
   justBoost = justBoost || false;
 
   let guild;
