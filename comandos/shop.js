@@ -27,11 +27,7 @@ module.exports.run = async (bot, message, args) => {
   let item;
   let interest = 2000; // CUANTO SUBE EL PRECIO POR COMPRA
 
-
-  //guild.members.fetch({ author, withPresences: true }); // fetchear de nuevo el usuario para actualizar las prenseces.
   let presences = guild.presences.cache.find(x => x.userID === author.id);
-
-  console.log(presences);
 
   let userIsOnMobible = presences.clientStatus.mobile === "online" && !presences.clientStatus.desktop ? true : false;
   let viewExtension = "ꜝ";
