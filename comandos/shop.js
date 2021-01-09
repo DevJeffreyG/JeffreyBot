@@ -28,11 +28,11 @@ module.exports.run = async (bot, message, args) => {
   let interest = 2000; // CUANTO SUBE EL PRECIO POR COMPRA
 
   let member = guild.members.cache.find(x => x.id === author.id);
-  let user = member.user.fetch();
+  member = member.fetch();
 
-  console.log(user);
+  console.log(member);
 
-  let userIsOnMobible = user.presence.clientStatus.mobile === "online" ? true : false;
+  let userIsOnMobible = member.presence.clientStatus.mobile === "online" ? true : false;
   let viewExtension = "ꜝ";
   let extendedDetails = "▸ Al comprar este item, su precio subirá."
 
