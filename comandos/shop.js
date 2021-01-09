@@ -92,7 +92,7 @@ module.exports.run = async (bot, message, args) => {
                 time = isSub ? prettyms(actualItemUse.duration, {secondsDecimalDigits: 0 }) : null;
               });
 
-              console.log(usesQuery, actualItemUse, isSub, time);
+              console.log(usesQuery, isSub, time);
 
               All.findOne(
                 {
