@@ -846,7 +846,7 @@ bot.on("message", async message => {
 
     if (message.content === `${prefix}coins`) {
       
-      loadBoosts()
+      await loadBoosts()
       .then(e => {
         console.log(e)
       })
@@ -858,12 +858,14 @@ bot.on("message", async message => {
       let randommember = guild.members.cache.random();
       randommember = `**${randommember.user.tag}**`;
 
-      console.log(randommember);
       if (multiplier != 1) {
         money = money * multiplier;
         tmoney = `**${Emojis.Jeffros}${money}**`;
       }
 
+      console.log("XXXXXXXXXXXXXXXXXXXXXXXXX")
+      console.log(boostedJeffros, boostedGeneral);
+      console.log(loadBoosts());
       if(boostedJeffros.has(author.id) || boostedGeneral.has(author.id)){
         // buscar la globaldata
         let query = await GlobalData.find({
@@ -1932,8 +1934,10 @@ function intervalGlobalDatas(justBoost){
             resolve(`${member.user.username} agregado a boostedExp`);
           })
         } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
+          console.log("es de jeffros");
           return new Promise((resolve, reject) => {
             boostedJeffros.add(member.id)
+            console.log("XDXDXD", boostedJeffros)
             resolve(`${member.user.username} agregado a boostedJeffros`);
           })
         } else if(specialData.specialObjective === "all"){ // si el boost es de todo
