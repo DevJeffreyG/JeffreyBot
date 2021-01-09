@@ -17,8 +17,8 @@ module.exports.run = async (bot, message, args) => {
   let addCounter = 0;
   let removeCounter = 0;
   let updateCounter = 0;
-
-  if(args[0] && args[0] === "extended"){
+  let userIsOnMobible = message.author.presence.clientStatus == "mobile" ? true : false;
+  if(args[0] && args[0] === "extended" || userIsOnMobible){
     let embed = new Discord.MessageEmbed()
     .setDescription(`**Jeffrey Bot v\`${Package.version}\` — Últimos cambios hechos al bot.\n(ESTO ES DEMASIADO TEXTO, CREO, SUERTE)**\n`)
     .setColor(Colores.verde);
@@ -79,7 +79,11 @@ module.exports.run = async (bot, message, args) => {
 
     return message.author.send(embed)
     .catch(err => {
-      message.reply("lo siento, no pude enviar este mensaje a tus MDs porque los tienes desactivados.");
+      if(userIsOnMobible){
+        message.reply("lo siento, detecté que estás en u dispositivo móvil, pero no pude enviar este mensaje a tus MDs porque los tienes desactivados.");
+      } else {
+        message.reply("lo siento, no pude enviar este mensaje a tus MDs porque los tienes desactivados.");
+      }
     });
   }
 

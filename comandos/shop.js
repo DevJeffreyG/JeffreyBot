@@ -27,6 +27,10 @@ module.exports.run = async (bot, message, args) => {
   let item;
   let interest = 2000; // CUANTO SUBE EL PRECIO POR COMPRA
 
+  let userIsOnMobible = message.author.presence.clientStatus == "mobile" ? true : false;
+  let viewExtension = "ꜝ";
+  let extendedDetails = "▸ Al comprar este item, su precio subirá."
+
   if(bot.user.id === Config.testingJBID){
     staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
   }
@@ -105,10 +109,22 @@ module.exports.run = async (bot, message, args) => {
                     }
                   }
 
-                  embed.addField(
-                    `— { ${items[i].id} } ${items[i].itemName}`,
-                    `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
-                  );
+                  if(userIsOnMobible && !items[i].ignoreInterest){
+                    embed.addField(
+                      `— { ${items[i].id} } ${items[i].itemName}`,
+                      `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
+                    );
+                  } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
+                    embed.addField(
+                      `— { ${items[i].id} } ${items[i].itemName}`,
+                      `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
+                    );
+                  } else if(!userIsOnMobible && items[i].ignoreInterest == true){
+                    embed.addField(
+                      `— { ${items[i].id} } ${items[i].itemName}`,
+                      `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio})`
+                    );
+                  }
 
                   if (i + 1 === items.length) {
                     return message.channel.send(embed);
@@ -188,10 +204,23 @@ module.exports.run = async (bot, message, args) => {
                           (Math.floor(items[i].itemPrice) / 100) * 15}`;
                       }
                     }
-                    embed.addField(
-                      `— { ${items[i].id} } ${items[i].itemName}`,
-                      `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
-                    );
+
+                    if(userIsOnMobible && !items[i].ignoreInterest){
+                      embed.addField(
+                        `— { ${items[i].id} } ${items[i].itemName}`,
+                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
+                      );
+                    } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
+                      embed.addField(
+                        `— { ${items[i].id} } ${items[i].itemName}`,
+                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
+                      );
+                    } else if(!userIsOnMobible && items[i].ignoreInterest == true){
+                      embed.addField(
+                        `— { ${items[i].id} } ${items[i].itemName}`,
+                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio})`
+                      );
+                    }
 
                     if (i + 1 === itemPerPage) {
                       message.channel.send(embed).then(msg => {
@@ -298,10 +327,23 @@ module.exports.run = async (bot, message, args) => {
                                             15}`;
                                       }
                                     }
-                                    embed.addField(
-                                      `— { ${items[i].id} } ${items[i].itemName}`,
-                                      `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
-                                    );
+                                    
+                                    if(userIsOnMobible && !items[i].ignoreInterest){
+                                      embed.addField(
+                                        `— { ${items[i].id} } ${items[i].itemName}`,
+                                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
+                                      );
+                                    } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
+                                      embed.addField(
+                                        `— { ${items[i].id} } ${items[i].itemName}`,
+                                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
+                                      );
+                                    } else if(!userIsOnMobible && items[i].ignoreInterest == true){
+                                      embed.addField(
+                                        `— { ${items[i].id} } ${items[i].itemName}`,
+                                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio})`
+                                      );
+                                    }
 
                                     if (i + 1 === fin + 1) {
                                       return msg.edit(embed);
@@ -388,10 +430,23 @@ module.exports.run = async (bot, message, args) => {
                                             15}`;
                                       }
                                     }
-                                    embed.addField(
-                                      `— { ${items[i].id} } ${items[i].itemName}`,
-                                      `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
-                                    );
+                                    
+                                    if(userIsOnMobible && !items[i].ignoreInterest){
+                                      embed.addField(
+                                        `— { ${items[i].id} } ${items[i].itemName}`,
+                                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
+                                      );
+                                    } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
+                                      embed.addField(
+                                        `— { ${items[i].id} } ${items[i].itemName}`,
+                                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
+                                      );
+                                    } else if(!userIsOnMobible && items[i].ignoreInterest == true){
+                                      embed.addField(
+                                        `— { ${items[i].id} } ${items[i].itemName}`,
+                                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio})`
+                                      );
+                                    }
 
                                     if (i + 1 === fin) {
                                       return msg.edit(embed);
