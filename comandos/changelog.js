@@ -17,11 +17,12 @@ module.exports.run = async (bot, message, args) => {
   let addCounter = 0;
   let removeCounter = 0;
   let updateCounter = 0;
-  let member = message.guild.members.cache.find(x => x.id === author.id)
-  member = member.user.fetch();
+  let member = guild.members.cache.find(x => x.id === author.id);
+  let user = member.user.fetch();
 
-  console.log(member.presence.clientStatus);
-  let userIsOnMobible = member.presence.clientStatus.mobile === "online" ? true : false;
+  console.log(user);
+
+  let userIsOnMobible = user.presence.clientStatus.mobile === "online" ? true : false;
 
   if(args[0] && args[0] === "extended" || userIsOnMobible){
     let embed = new Discord.MessageEmbed()
