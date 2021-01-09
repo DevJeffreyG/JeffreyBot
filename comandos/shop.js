@@ -4,6 +4,7 @@ const Emojis = require("./../emojis.json");
 const Discord = require("discord.js");
 const ms = require("ms");
 const prefix = Config.prefix;
+const prettyms = require("pretty-ms");
 
 /* ##### MONGOOSE ######## */
 
@@ -51,7 +52,7 @@ module.exports.run = async (bot, message, args) => {
         Jeffros.findOne({
           serverID: guild.id,
           userID: author.id
-        }, (err, j) => {
+        }, async (err, j) => {
 
 
         let embed = new Discord.MessageEmbed()
@@ -80,6 +81,19 @@ module.exports.run = async (bot, message, args) => {
             );
 
             for (let i = 0; i < items.length; i++) {
+              let isSub = false;
+              let time = null;
+              let usesQuery = await Use.findOne({
+                serverID: guild.id
+                itemID: items[i].id
+              }, (err, actualItemUse) => {
+                isSub = actualItemUse.isSub;
+
+                time = isSub ? prettyms(actualItemUse.duration, {secondsDecimalDigits: 0 }) : 
+              });
+
+              console.log(usesQuery, actualItemUse, isSub, time);
+
               All.findOne(
                 {
                   userID: author.id,
@@ -111,20 +125,27 @@ module.exports.run = async (bot, message, args) => {
                     }
                   }
 
-                  if(userIsOnMobible && !items[i].ignoreInterest){
+                  if(!isSub){
+                    if(userIsOnMobible && !items[i].ignoreInterest){
+                      embed.addField(
+                        `— { ${items[i].id} } ${items[i].itemName}`,
+                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
+                      );
+                    } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
+                      embed.addField(
+                        `— { ${items[i].id} } ${items[i].itemName}`,
+                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
+                      );
+                    } else if(!userIsOnMobible && items[i].ignoreInterest == true){
+                      embed.addField(
+                        `— { ${items[i].id} } ${items[i].itemName}`,
+                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
+                      );
+                    }
+                  } else { // es una suscripción
                     embed.addField(
-                      `— { ${items[i].id} } ${items[i].itemName}`,
-                      `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
-                    );
-                  } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
-                    embed.addField(
-                      `— { ${items[i].id} } ${items[i].itemName}`,
-                      `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
-                    );
-                  } else if(!userIsOnMobible && items[i].ignoreInterest == true){
-                    embed.addField(
-                      `— { ${items[i].id} } ${items[i].itemName}`,
-                      `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
+                        `— { ${items[i].id} } ${items[i].itemName}`,
+                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}/${time}')`
                     );
                   }
 
