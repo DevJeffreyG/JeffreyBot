@@ -2002,12 +2002,6 @@ async function intervalGlobalDatas(justBoost){
       **—** Tu saldo ha quedado en **alerta roja**.`)
       .setColor(Colores.rojo);
 
-      let paidEmbed = new Discord.MessageEmbed()
-      .setAuthor(`| Pagado`, Config.bienPng)
-      .setDescription(`**—** Has pagado **${Emojis.Jeffros}${price}** para pagar la suscripción a \`${subName}\`.
-      **—** Tu saldo ha quedado en **${Emojis.Jeffros}${jeffros.jeffros - price}**.`)
-      .setColor(Colores.verde);
-
       if(today - since >= interval){
         // cobrar jeffros
         Jeffros.findOne({
@@ -2015,6 +2009,12 @@ async function intervalGlobalDatas(justBoost){
           userID: sub.info.userID
         }, (err, jeffros) => {
           if(err) throw err;
+
+          let paidEmbed = new Discord.MessageEmbed()
+          .setAuthor(`| Pagado`, Config.bienPng)
+          .setDescription(`**—** Has pagado **${Emojis.Jeffros}${price}** para pagar la suscripción a \`${subName}\`.
+          **—** Tu saldo ha quedado en **${Emojis.Jeffros}${jeffros.jeffros - price}**.`)
+          .setColor(Colores.verde);
 
           // si no es una sub
           if(!sub.isInfinite){
