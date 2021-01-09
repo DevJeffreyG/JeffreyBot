@@ -1905,13 +1905,13 @@ async function intervalGlobalDatas(){
         // es un usuario con un boost comprado, entonces...
         
         if(specialData.specialObjective === "exp"){ // si el boost es de exp
-          await boostedExp.add(member.id);
+          boostedExp.add(member.id);
           console.log(boostedExp)
         } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
-          await boostedJeffros.add(member.id);
+          boostedJeffros.add(member.id);
           console.log(boostedJeffros)
         } else if(specialData.specialObjective === "all"){ // si el boost es de todo
-          await boostedGeneral.add(member.id);
+          boostedGeneral.add(member.id);
           console.log(boostedGeneral)
         } else {
           return null;
