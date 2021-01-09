@@ -678,8 +678,8 @@ bot.on("message", async message => {
   if (message.content.startsWith(prefix)) {
     // Si el mensaje empieza por el prefijo, entonces...
     await intervalGlobalDatas(true)
-    .then(() =>{
-      console.log("Se ha terminado el interval de global datas.")
+    .then(a =>{
+      console.log("Se ha terminado el interval de global datas.", a)
     });
 
     let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
@@ -1910,13 +1910,13 @@ async function intervalGlobalDatas(justBoost){
         // es un usuario con un boost comprado, entonces...
         
         if(specialData.specialObjective === "exp"){ // si el boost es de exp
-          boostedExp.add(member.id);
+          return boostedExp.add(member.id);
         } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
-          boostedJeffros.add(member.id);
+          return boostedJeffros.add(member.id);
         } else if(specialData.specialObjective === "all"){ // si el boost es de todo
-          boostedGeneral.add(member.id);
+          return boostedGeneral.add(member.id);
         } else {
-          console.log("wtf");
+          return null;
         }
       }
 
