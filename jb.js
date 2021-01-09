@@ -859,7 +859,7 @@ bot.on("message", async message => {
         money = money * multiplier;
         tmoney = `**${Emojis.Jeffros}${money}**`;
       }
-      
+
       if(boostedJeffros.has(author.id) || boostedGeneral.has(author.id)){
         // buscar la globaldata
         let query = await GlobalData.find({
@@ -1841,7 +1841,9 @@ function getChanges(entryChanges) {
   return { old: oldKey, new: newKey };
 }
 
-async function intervalGlobalDatas(){
+async function intervalGlobalDatas(justBoost){
+  justBoost = justBoost || false;
+
   let guild;
   if(bot.user.id === Config.testingJBID){
     guild = bot.guilds.cache.find(x => x.id === "482989052136652800")
@@ -1887,26 +1889,38 @@ async function intervalGlobalDatas(){
         console.log("ha pasado el tiempo 0001")
         member.roles.remove(role);
 
+        // eliminar global data
+        boosts[i].remove();
+
         // buscar el set y eliminarlo
         if(specialData.specialObjective === "exp"){ // si el boost es de exp
-          boostedExp.delete(member.id);
+          return new Promise((resolved, rejected) => {
+            resolve(boostedExp.delete(member.id));
+          });
         } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
-          boostedJeffros.delete(member.id);
+          return new Promise((resolved, rejected) => {
+            resolve(boostedJeffros.delete(member.id));
+          })
         } else if(specialData.specialObjective === "all"){ // si el boost es de todo
-          boostedGeneral.delete(member.id);
+          new Promise((resolved, rejected) => {
+            resolve(boostedGeneral.delete(member.id));
+          })
         }
-
-        // eliminar global data
-        return boosts[i].remove();
       } else {
         // es un usuario con un boost comprado, entonces...
         
         if(specialData.specialObjective === "exp"){ // si el boost es de exp
-          boostedExp.add(member.id);
+          return new Promise((res, rej) => {
+            res(boostedExp.add(member.id));
+          })
         } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
-          boostedJeffros.add(member.id);
+          return new Promise((res, rej) => {
+            res(boostedJeffros.add(member.id));
+          })
         } else if(specialData.specialObjective === "all"){ // si el boost es de todo
-          boostedGeneral.add(member.id);
+          return new Promise((res, rej) => {
+            res(boostedGeneral.add(member.id));
+          })
         } else {
           return null;
         }
@@ -1914,6 +1928,7 @@ async function intervalGlobalDatas(){
 
     }
   })
+  if(justBoost === true) return;
   // buscar sub
   GlobalData.find({
     "info.type": "jeffrosSubscription"
