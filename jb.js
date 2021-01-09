@@ -2029,8 +2029,16 @@ async function intervalGlobalDatas(justBoost){
             member.send(notEnough);
             subs[i].remove();
             member.roles.remove(role);
-          } else {
+            jeffros.save();
+          } else { // cobrar
             jeffros.jeffros -= price;
+            jeffros.save();
+
+            // actualizar el globaldata
+            subs[i].info.since = today;
+            subs[i].markModified("info");
+            subs[i].save();
+
             member.send(paidEmbed);
           }
         })
