@@ -407,6 +407,7 @@ module.exports.run = async (bot, message, args) => {
                               const collector = msg.createReactionCollector(collectorFilter, { time: 60000 });
 
                               collector.on("end", r => {
+                                if(r.size === 0) return;
                                 return msg.reactions.removeAll()
                                 .then(() => {
                                   msg.react("795090708478033950");
