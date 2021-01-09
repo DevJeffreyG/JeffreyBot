@@ -710,7 +710,7 @@ module.exports.run = async (bot, message, args) => {
 
                                   const yesFilter = (reaction, user) => reaction.emoji.id === "558084462232076312" && user.id === message.author.id;
                                   const noFilter = (reaction, user) =>  reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
-                                  const collectorFilter = (reaction, user) => reaction.emoji.id === "558084462232076312" || reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
+                                  const collectorFilter = (reaction, user) => (reaction.emoji.id === "558084462232076312" || reaction.emoji.id === "558084461686947891") && user.id === message.author.id;
 
                                   const yes = msg.createReactionCollector(yesFilter, { time: ms("30s") });
                                   const no = msg.createReactionCollector(noFilter, { time: ms("30s") });
@@ -719,7 +719,7 @@ module.exports.run = async (bot, message, args) => {
                                   collector.on("collect", r => {
                                     console.log(r);
                                   })
-                                  
+
                                   collector.on("end", r => {
                                     return msg.edit(cancelEmbed).then(a => {
                                       msg.reactions.removeAll().then(() => {
