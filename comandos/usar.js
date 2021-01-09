@@ -374,8 +374,9 @@ module.exports.run = async (bot, message, args) => {
   function Subscription(roleID, victimMember, intervalTime, isInfinite, jeffrosPerInterval, subscriptionName){
     let role = guild.roles.cache.find(x => x.id === roleID);
 
-    if(intervalTime != "permanent" || intervalTime === "na"){
+    if(intervalTime === "permanent" || intervalTime === "na"){
       // no es una sub
+      console.log("no es una sub al parecer")
       return;
     } else {
       let hoy = new Date();
