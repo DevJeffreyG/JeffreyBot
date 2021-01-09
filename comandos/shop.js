@@ -297,7 +297,7 @@ module.exports.run = async (bot, message, args) => {
 **—** Para tener más información del item usa \`${prefix}shop info <id>\`.
 **—** Tienes ${Emojis.Jeffros}**${j.jeffros}**`);
 
-                            Items.countDocuments({}, (err, c) => {
+                            Items.countDocuments({}, async (err, c) => {
                               if (err) throw err;
 
                               totalpags = Math.floor(c / itemPerPage);
@@ -422,7 +422,7 @@ module.exports.run = async (bot, message, args) => {
 **—** Para tener más información del item usa \`${prefix}shop info <id>\`.
 **—** Tienes ${Emojis.Jeffros}**${j.jeffros}**`);
 
-                            Items.countDocuments({}, (err, c) => {
+                            Items.countDocuments({}, async (err, c) => {
                               if (err) throw err;
 
                               totalpags = Math.floor(c / itemPerPage);
