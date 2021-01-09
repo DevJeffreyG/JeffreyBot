@@ -89,7 +89,7 @@ module.exports.run = async (bot, message, args) => {
               }, (err, actualItemUse) => {
                 isSub = actualItemUse.isSub;
 
-                time = isSub ? prettyms(actualItemUse.duration, {secondsDecimalDigits: 0 }) : null;
+                time = isSub ? prettyms(Number(actualItemUse.duration), {secondsDecimalDigits: 0 }) : null;
               });
 
               console.log(usesQuery, isSub, time);
