@@ -677,7 +677,10 @@ bot.on("message", async message => {
   if (message.channel.type == "dm") return;
   if (message.content.startsWith(prefix)) {
     // Si el mensaje empieza por el prefijo, entonces...
-    await intervalGlobalDatas(true);
+    await intervalGlobalDatas(true)
+    .then(() =>{
+      console.log("Se ha terminado el interval de global datas.")
+    });
 
     let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
     let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
