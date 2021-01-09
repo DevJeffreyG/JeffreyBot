@@ -847,12 +847,6 @@ bot.on("message", async message => {
     if (message.content === `${prefix}coins`) {
       
       await intervalGlobalDatas(true)
-      .then(function(val){
-        console.log("XD",val);
-      })
-      .catch(function(err){
-        console.log(err);
-      })
 
       //if(message.author.id != jeffreygID) return message.reply("Comando en mantenimiento, vuelve más tarde!");
       let money = Math.ceil(Math.random() * 20);
@@ -1895,52 +1889,36 @@ async function intervalGlobalDatas(justBoost){
         console.log("ha pasado el tiempo 0001")
         member.roles.remove(role);
 
-        // eliminar global data
-        boosts[i].remove();
-
         // buscar el set y eliminarlo
         if(specialData.specialObjective === "exp"){ // si el boost es de exp
-          return new Promise(function(resolved, rejected){
+          return new Promise((resolved, rejected) => {
             boostedExp.delete(member.id);
-            resolved(boostedExp);
-          });
+          })
         } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
-          return new Promise(function(resolved, rejected){
-            boostedJeffros.delete(member.id);
-            resolved(boostedJeffros);
-          })
+          boostedJeffros.delete(member.id);
         } else if(specialData.specialObjective === "all"){ // si el boost es de todo
-          new Promise(function(resolved, rejected){
-            boostedGeneral.delete(member.id);
-            resolved(boostedGeneral);
-          })
+          boostedGeneral.delete(member.id);
         }
+
+        // eliminar global data
+        return boosts[i].remove();
       } else {
         // es un usuario con un boost comprado, entonces...
         
         if(specialData.specialObjective === "exp"){ // si el boost es de exp
-          return new Promise(function(res, rej){
-            boostedExp.add(member.id);
-            res(boostedExp);
-          })
+          boostedExp.add(member.id);
         } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
-          return new Promise(function(res, rej){
-            boostedJeffros.add(member.id);
-            res("lul");
-          })
+          boostedJeffros.add(member.id);
         } else if(specialData.specialObjective === "all"){ // si el boost es de todo
-          return new Promise(function(res, rej){
-            boostedGeneral.add(member.id);
-            res(boostedGeneral);
-          })
+          boostedGeneral.add(member.id);
         } else {
-          return null;
+          console.log("no es ninguno de estos boost, what?")
         }
       }
-
     }
+    return;
   })
-  if(justBoost === true) return;
+  if(justBoost === true) return console.log("Cancelando proceso de Globaldatas por ser sólo tipo BOOST.");
   // buscar sub
   GlobalData.find({
     "info.type": "jeffrosSubscription"
@@ -2349,6 +2327,7 @@ async function intervalGlobalDatas(justBoost){
       }
     }
   })
+  return;
 }
 
 if (process.env.mantenimiento != 1) {
