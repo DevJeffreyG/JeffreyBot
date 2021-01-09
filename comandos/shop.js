@@ -29,11 +29,11 @@ module.exports.run = async (bot, message, args) => {
 
 
   guild.members.fetch({ author, withPresences: true }); // fetchear de nuevo el usuario para actualizar las prenseces.
-  let member = guild.members.cache.find(x => x.id === author.id);
+  let presences = guild.prenseces.cache.find(x => x.userID === author.id);
 
-  console.log(member);
+  console.log(presences);
 
-  let userIsOnMobible = member.presence.clientStatus.mobile === "online" ? true : false;
+  let userIsOnMobible = presences.clientStatus.mobile === "online" ? true : false;
   let viewExtension = "ꜝ";
   let extendedDetails = "▸ Al comprar este item, su precio subirá."
 
