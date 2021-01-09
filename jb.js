@@ -657,7 +657,7 @@ bot.on("ready", async () => {
 
   /* ############ GLOBAL DATAS ############ */
   await intervalGlobalDatas();
-  setInterval(intervalGlobalDatas, ms("5m"))
+  setInterval(intervalGlobalDatas, ms("2m"))
 });
 
 //main
@@ -846,8 +846,7 @@ bot.on("message", async message => {
 
     if (message.content === `${prefix}coins`) {
       
-      await intervalGlobalDatas().then(async () => {
-
+      await intervalGlobalDatas()
 
       //if(message.author.id != jeffreygID) return message.reply("Comando en mantenimiento, vuelve más tarde!");
       let money = Math.ceil(Math.random() * 20);
@@ -861,9 +860,6 @@ bot.on("message", async message => {
         tmoney = `**${Emojis.Jeffros}${money}**`;
       }
       
-      console.log("XXXXXXXXXXXXXX");
-      console.log(boostedJeffros);
-      console.log(boostedJeffros.has(author.id) || boostedGeneral.has(author.id));
       if(boostedJeffros.has(author.id) || boostedGeneral.has(author.id)){
         // buscar la globaldata
         let query = await GlobalData.find({
@@ -889,7 +885,6 @@ bot.on("message", async message => {
 
         console.log(money, tmoney);
       }
-      })
 
       let responses = [
         `Te ofreces para dar clases particulares a domicilio, terminas con intenciones suicidas pero ganas ${tmoney}`, //1
