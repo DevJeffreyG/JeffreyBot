@@ -92,8 +92,6 @@ module.exports.run = async (bot, message, args) => {
                 time = isSub ? prettyms(Number(actualItemUse.duration), {secondsDecimalDigits: 0 }) : null;
               });
 
-              console.log(usesQuery, isSub, time);
-
               All.findOne(
                 {
                   userID: author.id,
@@ -145,7 +143,7 @@ module.exports.run = async (bot, message, args) => {
                   } else { // es una suscripción
                     embed.addField(
                         `— { ${items[i].id} } ${items[i].itemName}`,
-                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}/${time}')`
+                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} **/${time}**`
                     );
                   }
 
@@ -188,6 +186,17 @@ module.exports.run = async (bot, message, args) => {
 
               // hacer la primera página
               for (let i = 0; i < itemPerPage; i++) {
+                let isSub = false;
+                let time = null;
+                let usesQuery = await Use.findOne({
+                  serverID: guild.id,
+                  itemID: items[i].id
+                }, (err, actualItemUse) => {
+                  isSub = actualItemUse.isSub;
+
+                  time = isSub ? prettyms(Number(actualItemUse.duration), {secondsDecimalDigits: 0 }) : null;
+                });
+
                 All.findOne(
                   {
                     userID: author.id,
@@ -228,20 +237,27 @@ module.exports.run = async (bot, message, args) => {
                       }
                     }
 
-                    if(userIsOnMobible && !items[i].ignoreInterest){
+                    if(!isSub){
+                      if(userIsOnMobible && !items[i].ignoreInterest){
+                        embed.addField(
+                          `— { ${items[i].id} } ${items[i].itemName}`,
+                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
+                        );
+                      } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
+                        embed.addField(
+                          `— { ${items[i].id} } ${items[i].itemName}`,
+                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
+                        );
+                      } else if(!userIsOnMobible && items[i].ignoreInterest == true){
+                        embed.addField(
+                          `— { ${items[i].id} } ${items[i].itemName}`,
+                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
+                        );
+                      }
+                    } else { // es una suscripción
                       embed.addField(
-                        `— { ${items[i].id} } ${items[i].itemName}`,
-                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
-                      );
-                    } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
-                      embed.addField(
-                        `— { ${items[i].id} } ${items[i].itemName}`,
-                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
-                      );
-                    } else if(!userIsOnMobible && items[i].ignoreInterest == true){
-                      embed.addField(
-                        `— { ${items[i].id} } ${items[i].itemName}`,
-                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
+                          `— { ${items[i].id} } ${items[i].itemName}`,
+                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} **/${time}**`
                       );
                     }
 
@@ -308,6 +324,17 @@ module.exports.run = async (bot, message, args) => {
                                 guild.iconURL()
                               );
                               for (let i = inicio; i < fin + 1; i++) {
+                                let isSub = false;
+                                let time = null;
+                                let usesQuery = await Use.findOne({
+                                  serverID: guild.id,
+                                  itemID: items[i].id
+                                }, (err, actualItemUse) => {
+                                  isSub = actualItemUse.isSub;
+
+                                  time = isSub ? prettyms(Number(actualItemUse.duration), {secondsDecimalDigits: 0 }) : null;
+                                });
+
                                 All.findOne(
                                   {
                                     userID: author.id,
@@ -351,20 +378,27 @@ module.exports.run = async (bot, message, args) => {
                                       }
                                     }
                                     
-                                    if(userIsOnMobible && !items[i].ignoreInterest){
+                                    if(!isSub){
+                                      if(userIsOnMobible && !items[i].ignoreInterest){
+                                        embed.addField(
+                                          `— { ${items[i].id} } ${items[i].itemName}`,
+                                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
+                                        );
+                                      } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
+                                        embed.addField(
+                                          `— { ${items[i].id} } ${items[i].itemName}`,
+                                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
+                                        );
+                                      } else if(!userIsOnMobible && items[i].ignoreInterest == true){
+                                        embed.addField(
+                                          `— { ${items[i].id} } ${items[i].itemName}`,
+                                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
+                                        );
+                                      }
+                                    } else { // es una suscripción
                                       embed.addField(
-                                        `— { ${items[i].id} } ${items[i].itemName}`,
-                                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
-                                      );
-                                    } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
-                                      embed.addField(
-                                        `— { ${items[i].id} } ${items[i].itemName}`,
-                                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
-                                      );
-                                    } else if(!userIsOnMobible && items[i].ignoreInterest == true){
-                                      embed.addField(
-                                        `— { ${items[i].id} } ${items[i].itemName}`,
-                                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
+                                          `— { ${items[i].id} } ${items[i].itemName}`,
+                                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} **/${time}**`
                                       );
                                     }
 
@@ -411,6 +445,17 @@ module.exports.run = async (bot, message, args) => {
                               );
 
                               for (let i = inicio; i < fin + 1; i++) {
+                                let isSub = false;
+                                let time = null;
+                                let usesQuery = await Use.findOne({
+                                  serverID: guild.id,
+                                  itemID: items[i].id
+                                }, (err, actualItemUse) => {
+                                  isSub = actualItemUse.isSub;
+
+                                  time = isSub ? prettyms(Number(actualItemUse.duration), {secondsDecimalDigits: 0 }) : null;
+                                });
+
                                 All.findOne(
                                   {
                                     userID: author.id,
@@ -454,20 +499,27 @@ module.exports.run = async (bot, message, args) => {
                                       }
                                     }
                                     
-                                    if(userIsOnMobible && !items[i].ignoreInterest){
+                                    if(!isSub){
+                                      if(userIsOnMobible && !items[i].ignoreInterest){
+                                        embed.addField(
+                                          `— { ${items[i].id} } ${items[i].itemName}`,
+                                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
+                                        );
+                                      } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
+                                        embed.addField(
+                                          `— { ${items[i].id} } ${items[i].itemName}`,
+                                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
+                                        );
+                                      } else if(!userIsOnMobible && items[i].ignoreInterest == true){
+                                        embed.addField(
+                                          `— { ${items[i].id} } ${items[i].itemName}`,
+                                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
+                                        );
+                                      }
+                                    } else { // es una suscripción
                                       embed.addField(
-                                        `— { ${items[i].id} } ${items[i].itemName}`,
-                                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
-                                      );
-                                    } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
-                                      embed.addField(
-                                        `— { ${items[i].id} } ${items[i].itemName}`,
-                                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
-                                      );
-                                    } else if(!userIsOnMobible && items[i].ignoreInterest == true){
-                                      embed.addField(
-                                        `— { ${items[i].id} } ${items[i].itemName}`,
-                                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
+                                          `— { ${items[i].id} } ${items[i].itemName}`,
+                                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} **/${time}**`
                                       );
                                     }
 
