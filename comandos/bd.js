@@ -32,6 +32,8 @@ module.exports.run = async (bot, message, args) => {
   `)
   .setFooter(`<> Obligatorio () Opcional — Para ver tu fecha registrada actual revisa ${prefix}stats`);
 
+  if(!args[0] || !args[1]) return message.channel.send(embed);
+
   let day;
   let month;
   let dateString;
