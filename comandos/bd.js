@@ -38,68 +38,71 @@ module.exports.run = async (bot, message, args) => {
   let month;
   let dateString;
 
-  let query = await GlobalData.findOne({
-    "info.type": "birthdayData",
-    "info.userID": author.id
-  });
-
-  if(!query){
-    const query2 = await new GlobalData({
-      info: {
-        type: "birthdayData",
-        userID: author.id,
-        birthd: null,
-        birthm: null
-      }
-    });
-
-    query2.save();
-  }
-
   GlobalData.findOne({
     "info.type": "birthdayData",
     "info.userID": author.id
   }, async (err, userBD) => {
     if(err) throw err;
 
-      switch(args[0].toLowerCase()){
-        case "all":
-          // bd all DD MM
-          day = !isNaN(args[1]) && (Number(args[1]) <= 31) && (Number(args[1]) > 0) ? args[1] : null;
-          month = !isNaN(args[2]) && (Number(args[2]) <= 12) && (Number(args[2]) > 0) ? args[2] : null;
+    let query = false;
+    if(!userBD){
+      newBD = new GlobalData({
+        info: {
+          type: "birthdayData",
+          userID: author.id,
+          birthd: null,
+          birthm: null
+        }
+      });
 
-          if(!day || !month) return message.channel.send(embed);
+      await newBD.save();
 
-          userBD.info.birthd = day;
-          userBD.info.birthm = month;
+      query = await GlobalData.findOne({
+        "info.type": "birthdayData",
+        "info.userID": author.id
+      });
+    }
 
-          userBD.markModified("info");
-          return userBD.save();
+    userBD = query ? query : userBD;
 
-        case "dia":
-          // bd dia DD
-          day = !isNaN(args[1]) && (Number(args[1]) <= 31) && (Number(args[1]) > 0) ? args[1] : null;
+    switch(args[0].toLowerCase()){
+      case "all":
+        // bd all DD MM
+        day = !isNaN(args[1]) && (Number(args[1]) <= 31) && (Number(args[1]) > 0) ? args[1] : null;
+        month = !isNaN(args[2]) && (Number(args[2]) <= 12) && (Number(args[2]) > 0) ? args[2] : null;
 
-          if(!day) return message.channel.send(embed);
+        if(!day || !month) return message.channel.send(embed);
 
-          userBD.info.birthd = day;
+        userBD.info.birthd = day;
+        userBD.info.birthm = month;
 
-          userBD.markModified("info");
-          return userBD.save();
-        case "mes":
-          // bd mes MM
-          month = !isNaN(args[1]) && (Number(args[1]) <= 12) && (Number(args[1]) > 0) ? args[1] : null;
+        userBD.markModified("info");
+        return userBD.save();
 
-          if(!month) return message.channel.send(embed);
+      case "dia":
+        // bd dia DD
+        day = !isNaN(args[1]) && (Number(args[1]) <= 31) && (Number(args[1]) > 0) ? args[1] : null;
 
-          userBD.info.birthm = month;
+        if(!day) return message.channel.send(embed);
 
-          userBD.markModified("info");
-          return userBD.save();
-          
-        default:
-          return message.channel.send(embed);
-      }
+        userBD.info.birthd = day;
+
+        userBD.markModified("info");
+        return userBD.save();
+      case "mes":
+        // bd mes MM
+        month = !isNaN(args[1]) && (Number(args[1]) <= 12) && (Number(args[1]) > 0) ? args[1] : null;
+
+        if(!month) return message.channel.send(embed);
+
+        userBD.info.birthm = month;
+
+        userBD.markModified("info");
+        return userBD.save();
+        
+      default:
+        return message.channel.send(embed);
+    }
   })
 }
 
