@@ -114,7 +114,6 @@ mongoose.connect(`${process.env.MONGOCONNECT}`, {
 
 const Jeffros = require("./modelos/jeffros.js");
 const Exp = require("./modelos/exp.js");
-const Cuenta = require("./modelos/cuenta.js");
 const AutoRole = require("./modelos/autorole.js");
 const Toggle = require("./modelos/toggle.js");
 
@@ -975,45 +974,6 @@ bot.on("message", async message => {
     if (message.member.roles.cache.find(x => x.id === Config.lvl40)){
       jexpCooldown = jexpCooldown / 2;
     }
-    
-
-    // ############################ CREACION DEL PERFIL ###################################
-    Cuenta.findOne(
-      {
-        userID: author.id
-      },
-      (err, cuenta) => {
-        if (err) throw err;
-
-        if (!cuenta) {
-          const newCuenta = new Cuenta({
-            userID: author.id,
-            discordname: author.username,
-            username: "N/A",
-            realname: author.username,
-            bio: "N/A",
-            age: "N/A",
-            sex: "N/A",
-            hex: "N/A",
-            birthd: "N/A",
-            birthy: "N/A",
-            bdString: "N/A",
-            bdMonthString: "N/A",
-            bdDayString: "N/A",
-            seenBy: 0
-          });
-
-          if (message.channel.id != mainChannel) return;
-          newCuenta
-            .save()
-            .then(() => {
-              console.log(`Cuenta creada para ${author.username}`);
-            })
-            .catch(err => console.log(err));
-        } else {
-        }
-      }
-    );
 
     // ################################# JEFFROS ################################
     
@@ -1640,76 +1600,6 @@ bot.on("message", async msg => {
   }
 });
 
-bot.on("message", async message => {
-  // Cumpleaños
-  if (message.author.bot) return;
-  let messageArray = message.content.split(" ");
-  let cmd = messageArray[0];
-  let args = messageArray.slice(1);
-  let guild = message.guild;
-  let author = message.author;
-
-  if (message.channel.id != mainChannel) return;
-
-  Cuenta.findOne(
-    {
-      userID: author.id
-    },
-    (err, account) => {
-      if (err) throw err;
-
-      if (!account) return;
-
-      if (account.bdString === "N/A") return;
-
-      let dateString = account.bdString;
-      let bdDay = account.bdDayString;
-      let bdMonth = account.bdMonthString;
-      let bdYear = account.birthy;
-
-      var hoy = new Date();
-      var userBD = new Date(dateString);
-
-      if (hoy.getDate() === userBD.getDate()) {
-        console.log(`DÍA EN COMÚN`);
-
-        if (hoy.getMonth() === userBD.getMonth()) {
-          console.log(`feliz cumpleaños, ${account.realname}.`);
-          // give role
-
-          if (message.member.roles.cache.find(x => x.id === Config.bdRole))
-            return;
-          let birthRole = guild.roles.cache.find(x => x.id === Config.bdRole);
-          message.member.roles.add(birthRole);
-
-          setTimeout(function() {
-            message.member.roles.remove(birthRole);
-          }, ms("1d"));
-
-          // actualizar edad
-          var edad = hoy.getFullYear() - userBD.getFullYear();
-          console.log(`############### CUMPLEAÑOS: "${userBD}" ##############`);
-
-          console.log(`############### EDAD: "${edad + 1}" ##############`);
-
-          account.age = edad + 1;
-          account.save().catch(e => console.log(e));
-
-          message.guild.members.cache
-            .get(message.author.id)
-            .setNickname(`! ${message.author.username} ❮🎂❯`);
-        } else {
-          return console.log(`Pero mes no es común.`);
-        }
-      } else {
-        return console.log(
-          `${hoy.getDate()} no es igual a ${userBD.getDate()}...`
-        );
-      }
-    }
-  );
-});
-
 bot.on("message", message => {
   let channel = message.channel;
   let author = message.author;
@@ -1889,10 +1779,13 @@ async function intervalGlobalDatas(justBoost){
   justBoost = justBoost || false;
 
   let guild;
+  let bdRole;
   if(bot.user.id === Config.testingJBID){
-    guild = bot.guilds.cache.find(x => x.id === "482989052136652800")
+    guild = bot.guilds.cache.find(x => x.id === "482989052136652800");
+    bdRole = guild.roles.cache.find(x => x.id === "544687105977090061");
   } else {
     guild = bot.guild.cache.find(x => x.id === Config.jgServer);
+    bdRole = guild.roles.cache.find(x => x.id === Config.bdRole);
   }
 
   // buscar un tipo de boost
@@ -2395,6 +2288,33 @@ async function intervalGlobalDatas(justBoost){
 
         // eliminar el evento
         dark.remove();
+      }
+    }
+  });
+
+  // buscar usuarios de cumpleaños
+  GlobalData.find({
+    "info.type": "birthdayData"
+  }, (err, birthdays) => {
+    if(!birthdays) return;
+
+    for (let i = 0; i < birthdays.length; i++){
+      let bd = birthdays[i];
+      let member = guild.members.cache.find(x => x.id === bd.info.userID);
+      let bdDay = bd.info.birthd;
+      let bdMonth = bd.info.birthm;
+
+      if(!bdDay || !bdMonth) return;
+      let now = new Date();
+      let actualDay = now.getDate();
+      let actualMonth = now.getMonth();
+
+      if((actualDay == bdDay) && (actualMonth == bdMonth)){
+        // ES EL CUMPLEAÑOS
+        if(!member.roles.cache.find(x => x.id === bdRole.id)) return member.roles.add(bdRole);
+      } else {
+        // revisar si tiene el rol de cumpleaños, entonces quitarselo
+        if(member.roles.cache.find(x => x.id === bdRole.id)) return member.roles.remove(bdRole);
       }
     }
   })
