@@ -136,6 +136,107 @@ module.exports.run = async (bot, message, args) => {
     return message.reply("coming soon.")
   } else if(args[0].toLowerCase() === "cancel") {
     // CANCELAR SUSCRIPCION QUE TENGA EL USUARIO
+    let subToCancel = !isNaN(args[1]) ? args[1] : false;
+
+    if(!subToCancel) return message.reply("lo siento, no encontré esa ID...");
+
+    let queryItem = await Use.findOne({
+      itemID: subToCancel,
+      isSub: true
+    });
+
+    if(!queryItem) return message.reply("lo siento, no encontré que ese item en la tienda sea de tipo suscripción...");
+
+    GlobalData.findOne({
+      "info.type": "jeffrosSubscription",
+      "info.userID": author.id,
+      "info.roleID": queryItem.thingID,
+      "info.isCancelled": false
+    }, (err, subbed) => {
+
+      if(!subbed) return message.reply("lo siento, no encontré una suscripción activa en tu cuenta.");
+
+
+      // INICIAR PROCESO DE CONFIRMACION
+
+      let cancelConfirmation = new Discord.MessageEmbed()
+      .setAuthor(`| Cancelar?`, guild.iconURL())
+      .setColor(Colores.rojo)
+      .setDescription(
+        `
+\`▸\` ¿Estás seguro de cancelar tu suscripción a \`${subbed.info.subName}\`?
+\`▸\` Mantendrás tus beneficios por haber pagado este mes.
+\`▸\` Reacciona de acuerdo a tu preferencia.`
+      )
+      .setFooter(
+        `▸ No podrás comprar ${subbed.info.subName} hasta que se acabe el mes de suscripción actual.`,
+        "https://cdn.discordapp.com/emojis/494267320097570837.png"
+      );
+
+      message.channel.send(cancelConfirmation).then(msg => {
+        msg.react(":allow:558084462232076312")
+        .then(r => {
+          msg.react(":denegar:558084461686947891");
+        });
+
+        let cancelEmbed = new Discord.MessageEmbed()
+        .setDescription(`Cancelado.`)
+        .setColor(Colores.nocolor);
+
+        const yesFilter = (reaction, user) => reaction.emoji.id === "558084462232076312" && user.id === message.author.id;
+        const noFilter = (reaction, user) =>  reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
+        const collectorFilter = (reaction, user) => ['558084462232076312', '558084461686947891'].includes(reaction.emoji.id) && user.id === message.author.id;
+
+        const yes = msg.createReactionCollector(yesFilter, { time: ms("30s") });
+        const no = msg.createReactionCollector(noFilter, { time: ms("30s") });
+        const collector = msg.createReactionCollector(collectorFilter, { time: ms("30s") });
+
+        collector.on("end", (r) => {
+          if(r.size > 0) return;
+          return msg.edit(cancelEmbed).then(a => {
+            msg.reactions.removeAll().then(() => {
+              msg.react("795090708478033950");
+            });
+            message.delete();
+            a.delete({timeout: ms("20s")});
+          });
+        });
+
+        yes.on("collect", r => {
+          subbed.info.isCancelled = true;
+          subbed.markModified("info");
+          subbed.save();
+
+          let cancelledEmbed = new Discord.MessageEmbed()
+          .setAuthor(`| Listo`, Config.bienPng)
+          .setDescription(`**—** Se ha cancelado tu suscripción a \`${subbed.info.subName}\`.
+          **—** Podrás volver a comprar \`${subbed.info.subName}\` cuando se acabe tu suscripción actual.`)
+          .setColor(Colores.verde);
+
+          return msg.edit(cancelledEmbed).then(() => {
+            msg.reactions.removeAll();
+            collector.stop();
+          });
+        });
+
+        no.on("collect", r => {
+          return msg.edit(cancelEmbed).then(a => {
+            collector.stop();
+            msg.reactions.removeAll();
+            message.delete();
+            a.delete({timeout: ms("20s")});
+          });
+        })
+
+      })
+      
+
+    });
+
+
+
+
+
   } else { // usar normalmente
     Purchased.findOne(
       {
@@ -389,7 +490,8 @@ module.exports.run = async (bot, message, args) => {
           since: hoy,
           interval: ms(intervalTime),
           price: jeffrosPerInterval,
-          subName: subscriptionName
+          subName: subscriptionName,
+          isCancelled: false
         }
       })
 

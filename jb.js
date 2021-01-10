@@ -1997,6 +1997,7 @@ async function intervalGlobalDatas(justBoost){
       let interval = sub.info.interval;
       let price = Number(sub.info.price);
       let subName = sub.info.subName;
+      let isCancelled = sub.info.isCancelled;
       let today = new Date();
 
       let notEnough = new Discord.MessageEmbed()
@@ -2006,6 +2007,12 @@ async function intervalGlobalDatas(justBoost){
       .setColor(Colores.rojo);
 
       if(today - since >= interval){
+        // si fue cancelada ya
+        if(isCancelled){
+            member.roles.remove(role);
+            return subs[i].remove();
+        }
+
         // cobrar jeffros
         Jeffros.findOne({
           serverID: guild.id,
