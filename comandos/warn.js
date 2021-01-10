@@ -96,7 +96,7 @@ module.exports.run = async (bot, message, args) => {
             const collector = msg.createReactionCollector(collectorFilter, { time: 60000 });
  
             collector.on("end", r => {
-              if(r.first()) return;
+              if(r.size > 0) return;
               return msg.edit(cancelEmbed).then(a => {
                 msg.reactions.removeAll().then(() => {
                   msg.react("795090708478033950");
@@ -107,6 +107,7 @@ module.exports.run = async (bot, message, args) => {
             });
 
             yes.on("collect", r => {
+              collector.stop();
               if(!warns){
                 
                 // revisar si tiene el softwarn
@@ -289,6 +290,7 @@ module.exports.run = async (bot, message, args) => {
 
              no.on("collect", r => {
               return msg.edit(cancelEmbed).then(a => {
+                collector.stop();
                 msg.reactions.removeAll();
                 message.delete();
                 a.delete({timeout: ms("20s")});

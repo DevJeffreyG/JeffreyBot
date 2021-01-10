@@ -1484,7 +1484,7 @@ bot.on("messageReactionAdd", (reaction, user) => {
       const collectorAwards = msg.createReactionCollector(collectorFilter, { time: 60000 });
 
       collectorAwards.on("end", r => {
-        if(r.first()) return;
+        if(r.size > 0) return;
         if (msg.reactions.length > 0) {
           message.channel.messages.fetch(message.id).then(m => {
             let react = m.reactions.get(
@@ -1502,6 +1502,7 @@ bot.on("messageReactionAdd", (reaction, user) => {
       });
 
       yes.on("collect", r => {
+        collectorAwards.stop();
         msg.reactions.removeAll();
         Jeffros.findOne(
           {
@@ -1582,6 +1583,7 @@ bot.on("messageReactionAdd", (reaction, user) => {
       });
 
       no.on("collect", r => {
+        collectorAwards.stop();
         message.channel.messages.fetch(message.id).then(m => {
           let react = m.reactions.cache.get(reaction.emoji.id);
 
