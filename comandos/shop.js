@@ -716,6 +716,11 @@ module.exports.run = async (bot, message, args) => {
                                   const no = msg.createReactionCollector(noFilter, { time: ms("30s") });
                                   const collector = msg.createReactionCollector(collectorFilter, { time: ms("30s") });
 
+                                  collector.on("collect", r => {
+                                    console.log("collector triggered");
+                                    console.log(r);
+                                  })
+
                                   collector.on("end", (r) => {
                                     console.log(r.size);
                                     if(r.size > 0) return;
