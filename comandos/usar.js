@@ -166,7 +166,7 @@ module.exports.run = async (bot, message, args) => {
 \`▸\` Mantendrás tus beneficios hasta que se acabe el tiempo de suscripción.
 \`▸\` Reacciona de acuerdo a tu preferencia.`)
       .setFooter(
-        `▸ No podrás comprar ${subbed.info.subName} hasta que se acabe el mes de suscripción actual.`,
+        `▸ No podrás usar ${subbed.info.subName} hasta que se acabe el mes de suscripción actual.`,
         "https://cdn.discordapp.com/emojis/494267320097570837.png"
       );
 
@@ -207,7 +207,7 @@ module.exports.run = async (bot, message, args) => {
           let cancelledEmbed = new Discord.MessageEmbed()
           .setAuthor(`| Listo`, Config.bienPng)
           .setDescription(`**—** Se ha cancelado tu suscripción a \`${subbed.info.subName}\`.
-          **—** Podrás volver a comprar \`${subbed.info.subName}\` cuando se acabe tu suscripción actual.`)
+          **—** Puedes comprar \`${subbed.info.subName}\`, pero sólo lo podrás usar hasta que se acabe tu suscripción actual.`)
           .setColor(Colores.verde);
 
           return msg.edit(cancelledEmbed).then(() => {
