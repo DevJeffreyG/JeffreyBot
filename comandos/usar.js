@@ -294,7 +294,7 @@ module.exports.run = async (bot, message, args) => {
                     userID: author.id,
                     itemID: args[0]
                   },
-                  (err, all) => {
+                  async (err, all) => {
                     
                     if(!all && !isIgnored) {
                       const newAll = new All({
