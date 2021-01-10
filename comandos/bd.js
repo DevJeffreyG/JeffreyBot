@@ -21,7 +21,7 @@ module.exports.run = async (bot, message, args) => {
 
   let member;
 
-  let embed = new Discord.MessageEmbed();
+  let embed = new Discord.MessageEmbed()
   .setTitle(`Ayuda: ${prefix}bd`)
   .setColor(Colores.nocolor)
   .setDescription(`▸ El uso correcto es: ${prefix}bd <config> <nueva config> \n▸ Cambias uno de tus ajustes de cumpleaños.
