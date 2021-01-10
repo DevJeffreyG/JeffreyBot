@@ -387,11 +387,6 @@ module.exports.run = async (bot, message, args) => {
                             return message.channel.send(embed);
                           });
                         } else {
-                          let errorNotDone = new Discord.MessageEmbed()
-                          .setAuthor(`| Error`, Config.errorPng)
-                          .setDescription(`**—** Ya hay una suscripción por terminarse, espera a que esta se acabe para poder usar este item.`)
-                          .setColor(Colores.rojo);
-
                           if(!isSub){ // no es una sub pero tiene tiempo limitado
                             LimitedTime(r.id, message.member, duration, use.special.type, use.special.specialObjective, use.special.specialValue);
                             
@@ -403,12 +398,6 @@ module.exports.run = async (bot, message, args) => {
 
                             return message.channel.send(embed);
                           } else {
-                            let cancelledQuery = await GlobalData.findOne({
-                              "info.type": "jeffrosSubscription",
-                              "info.userID": author.id,
-                              "info.roleID": r.id,
-                            })
-                            if(cancelledQuery.info.isCancelled === true) return message.channel.send(errorNotDone); // nunca debería llegar aqui si esto se cumple, pero por siacaXD.
                             Subscription(r.id, message.member, duration, jeffrosPrice, subscriptionName);
 
                             purchase.remove();
