@@ -77,7 +77,8 @@ module.exports.run = async (bot, message, args) => {
         userBD.info.birthm = month;
 
         userBD.markModified("info");
-        return userBD.save();
+        userBD.save();
+        return message.react("✅")
 
       case "dia":
         // bd dia DD
@@ -88,7 +89,8 @@ module.exports.run = async (bot, message, args) => {
         userBD.info.birthd = day;
 
         userBD.markModified("info");
-        return userBD.save();
+        userBD.save();
+        return message.react("✅")
       case "mes":
         // bd mes MM
         month = !isNaN(args[1]) && (Number(args[1]) <= 12) && (Number(args[1]) > 0) ? args[1] : null;
@@ -98,7 +100,8 @@ module.exports.run = async (bot, message, args) => {
         userBD.info.birthm = month;
 
         userBD.markModified("info");
-        return userBD.save();
+        userBD.save();
+        return message.react("✅")
         
       default:
         return message.channel.send(embed);
