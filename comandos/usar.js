@@ -162,12 +162,9 @@ module.exports.run = async (bot, message, args) => {
       let cancelConfirmation = new Discord.MessageEmbed()
       .setAuthor(`| Cancelar?`, guild.iconURL())
       .setColor(Colores.rojo)
-      .setDescription(
-        `
-\`▸\` ¿Estás seguro de cancelar tu suscripción a \`${subbed.info.subName}\`?
-\`▸\` Mantendrás tus beneficios por haber pagado este mes.
-\`▸\` Reacciona de acuerdo a tu preferencia.`
-      )
+      .setDescription(`\`▸\` ¿Estás seguro de cancelar tu suscripción a \`${subbed.info.subName}\`?
+\`▸\` Mantendrás tus beneficios hasta que se acabe el tiempo de suscripción.
+\`▸\` Reacciona de acuerdo a tu preferencia.`)
       .setFooter(
         `▸ No podrás comprar ${subbed.info.subName} hasta que se acabe el mes de suscripción actual.`,
         "https://cdn.discordapp.com/emojis/494267320097570837.png"
@@ -390,6 +387,11 @@ module.exports.run = async (bot, message, args) => {
                             return message.channel.send(embed);
                           });
                         } else {
+                          let errorNotDone = new Discord.MessageEmbed()
+                          .setAuthor(`| Error`, Config.errorPng)
+                          .setDescription(`**—** Ya hay una suscripción por terminarse, espera a que esta se acabe para poder usar este item.`)
+                          .setColor(Colores.rojo);
+
                           if(!isSub){ // no es una sub pero tiene tiempo limitado
                             LimitedTime(r.id, message.member, duration, use.special.type, use.special.specialObjective, use.special.specialValue);
                             
@@ -401,6 +403,12 @@ module.exports.run = async (bot, message, args) => {
 
                             return message.channel.send(embed);
                           } else {
+                            let cancelledQuery = await GlobalData.findOne({
+                              "info.type": "jeffrosSubscription",
+                              "info.userID": author.id,
+                              "info.roleID": r.id,
+                            })
+                            if(cancelledQuery.info.isCancelled === true) return message.channel.send(errorNotDone); // nunca debería llegar aqui si esto se cumple, pero por siacaXD.
                             Subscription(r.id, message.member, duration, jeffrosPrice, subscriptionName);
 
                             purchase.remove();
