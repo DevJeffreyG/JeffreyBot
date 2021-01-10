@@ -2303,7 +2303,9 @@ async function intervalGlobalDatas(justBoost){
       let member = guild.members.cache.find(x => x.id === bd.info.userID);
       let bdDay = bd.info.birthd;
       let bdMonth = bd.info.birthm;
+      let isLocked = bd.info.isLocked ? bd.info.isLocked : false;
 
+      if(!isLocked) return;
       if(!bdDay || !bdMonth) return;
       let now = new Date();
       let actualDay = now.getDate();

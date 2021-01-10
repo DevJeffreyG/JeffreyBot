@@ -26,6 +26,7 @@ module.exports.run = async (bot, message, args) => {
   .setColor(Colores.nocolor)
   .setDescription(`▸ El uso correcto es: ${prefix}bd <config> <nueva config> \n▸ Cambias uno de tus ajustes de cumpleaños.
 **———— Configs ————**
+**—** \`lock\`: (coming soon) Bloqueas el poder seguir cambiando la configuracion de tu fecha de nacimiento por un año. Cuando hagas esto, ya podrás recibir los beneficios el role el día de tu cumpleaños.
 **—** \`all\`: Determina tu fecha de cumpleaños con el formato DD MM.
 **—** \`dia\`: Se cambia el día de tu fecha de cumpleaños.
 **—** \`mes\`: Se cambia el mes de tu fecha de cumpleaños.
@@ -51,7 +52,8 @@ module.exports.run = async (bot, message, args) => {
           type: "birthdayData",
           userID: author.id,
           birthd: null,
-          birthm: null
+          birthm: null,
+          isLocked: false
         }
       });
 
