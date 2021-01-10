@@ -717,6 +717,7 @@ module.exports.run = async (bot, message, args) => {
                                   const collector = msg.createReactionCollector(collectorFilter, { time: ms("30s") });
 
                                   collector.on("end", (r) => {
+                                    console.log(r.first());
                                     if(r.first()) return;
                                     return msg.edit(cancelEmbed).then(a => {
                                       msg.reactions.removeAll().then(() => {
