@@ -726,7 +726,8 @@ module.exports.run = async (bot, message, args) => {
                                       message.delete();
                                       a.delete({timeout: ms("20s")});
                                     });
-                                  })
+                                  });
+
                                   yes.on("collect", r => {
                                     currency.jeffros -= precio;
 
@@ -749,12 +750,14 @@ module.exports.run = async (bot, message, args) => {
                                       .setColor(Colores.verde);
 
                                     return msg.edit(useEmbed).then(() => {
+                                      collector.stop();
                                       msg.reactions.removeAll();
                                     });
                                   });
 
                                   no.on("collect", r => {
                                     return msg.edit(cancelEmbed).then(a => {
+                                      collector.stop();
                                       msg.reactions.removeAll();
                                       message.delete();
                                       a.delete({timeout: ms("20s")});
