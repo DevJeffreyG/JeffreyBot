@@ -85,5 +85,5 @@ module.exports.run = async (bot, message, args) => {
 
 module.exports.help = {
     name: "stats",
-    alias: "estadisticas"
+    alias: "perfil"
 }

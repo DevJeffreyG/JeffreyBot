@@ -15,6 +15,11 @@
         },
         {
             "type": "updated",
+            "desc": "Se ha actualizado el comando `{ PREFIX }stats`",
+            "extended": "— Ahora podrá usarse también como '{ PREFIX }perfil'.\n— Ahora se podrá ver la fecha de cumpleaños del usuario."
+        },
+        {
+            "type": "updated",
             "desc": "Se ha actualizado el comando `{ PREFIX }botinfo`",
             "extended": "— Ahora es '{ PREFIX }changelog' o '{ PREFIX }changes'.\n— Ahora los cambios serán más detallados con este comando."
         },
@@ -36,12 +41,7 @@
         {
             "type": "removed",
             "desc": "Se ha eliminado el comando `{ PREFIX }perfil`",
-            "extended": "— No se usaba. El sistema de cumpleaños será re-integrado próximamente."
-        },
-        {
-            "type": "removed",
-            "desc": "Se ha eliminado el comando `{ PREFIX }soporte`",
-            "extended": "— No se usaba, y la información que se daba era la que se encuentra en el canal de #informacion."
+            "extended": "— No se usaba. El sistema de cumpleaños será re-integrado con el comando `{ PREFIX }bd`."
         }
     ],
     "bienPng": "http://i.imgur.com/M6hqbcc.png",
