@@ -3,6 +3,7 @@ const Colores = require("./../colores.json");
 const reglas = require("./../reglas.json");
 const Discord = require("discord.js");
 const prefix = Config.prefix;
+const ms = require("ms");
 
 /* ##### MONGOOSE ######## */
 
@@ -176,6 +177,7 @@ module.exports.run = async (bot, message, args) => {
       const collector = msg.createReactionCollector(collectorFilter, { time: 60000 });
 
       yes.on("collect", r => {
+        collector.stop();
         Warn.findOne({
           userID: wUser.id
         }, (err, warns) => {
@@ -217,6 +219,7 @@ module.exports.run = async (bot, message, args) => {
 
       no.on("collect", r => {
         return msg.edit(cancelEmbed).then(a => {
+          collector.stop();
           msg.reactions.removeAll();
           message.delete();
           a.delete({timeout: ms("20s")});
