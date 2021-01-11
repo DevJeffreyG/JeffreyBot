@@ -1,28 +1,14 @@
 const Config = require("./../base.json");
 const Colores = require("./../colores.json");
 const reglas = require("./../reglas.json");
-const Emojis = require("./../emojis.json");
 const Discord = require("discord.js");
-const bot = new Discord.Client();
-const fs = require("fs");
 const ms = require("ms");
 const prefix = Config.prefix;
-const jeffreygID = Config.jeffreygID;
-const jgServer = Config.jgServer;
-const offtopicChannel = Config.offtopicChannel;
-const mainChannel = Config.mainChannel;
-const botsChannel = Config.botsChannel;
-const logChannel = Config.logChannel;
-const version = Config.version;
 
 /* ##### MONGOOSE ######## */
 
-const Jeffros = require("../modelos/jeffros.js");
-const Reporte = require("../modelos/reporte.js");
-const Exp = require("../modelos/exp.js");
 const Warn = require("../modelos/warn.js");
 const SoftWarn = require("../modelos/softwarn.js");
-const Banned = require("../modelos/banned.js");
 
 /* ##### MONGOOSE ######## */
 
@@ -31,17 +17,17 @@ module.exports.run = async (bot, message, args) => {
   if(!message.content.startsWith(prefix))return;
 
   // Variables
-  let author = message.author;
   const guild = message.guild;
-  let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
-  let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
-  let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
-  let muteRole = guild.roles.cache.find(x => x.id === Config.muteRole);
-  let logC = guild.channels.cache.find(x => x.id === Config.logChannel);  
+  let logC = guild.channels.cache.find(x => x.id === Config.logChannel);
+
+  if(bot.user.id === Config.testingJBID){
+    staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
+    logC = guild.channels.cache.find(x => x.id === "483108734604804107");
+  }
   
-  if(message.member.roles.cache.find(x => x.id === jeffreyRole.id)){} else if(message.member.roles.cache.find(x => x.id === adminRole.id)){} else if(message.member.roles.cache.find(x => x.id === modRole.id)){} else {return;}
-  
+  if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
+
   let embed = new Discord.MessageEmbed()
   .setTitle(`Ayuda: ${prefix}warn`)
   .setColor(Colores.nocolor)
@@ -92,22 +78,36 @@ module.exports.run = async (bot, message, args) => {
          .setColor(Colores.rojo);
  
          message.channel.send(confirmation).then(msg => {
-             msg.react(":allow:558084462232076312")
-             .then(r => {
-                 msg.react(":denegar:558084461686947891");
-             });
+            msg.react(":allow:558084462232076312")
+            .then(r => {
+                msg.react(":denegar:558084461686947891");
+            });
+
+            let cancelEmbed = new Discord.MessageEmbed()
+              .setDescription(`Cancelado.`)
+              .setColor(Colores.nocolor);
+
+            const yesFilter = (reaction, user) => reaction.emoji.id === "558084462232076312" && user.id === message.author.id;
+            const noFilter = (reaction, user) => reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
+            const collectorFilter = (reaction, user) => reaction.emoji.id === "558084462232076312" || reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
+
+            const yes = msg.createReactionCollector(yesFilter, { time: 60000 });
+            const no = msg.createReactionCollector(noFilter, { time: 60000 });
+            const collector = msg.createReactionCollector(collectorFilter, { time: 60000 });
  
-             let cancelEmbed = new Discord.MessageEmbed()
-               .setDescription(`Cancelado.`)
-               .setColor(Colores.nocolor);
- 
-             const yesFilter = (reaction, user) => reaction.emoji.id === "558084462232076312" && user.id === message.author.id;
-             const noFilter = (reaction, user) => reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
- 
-             const yes = msg.createReactionCollector(yesFilter, { time: 60000 });
-             const no = msg.createReactionCollector(noFilter, { time: 60000 });
- 
-             yes.on("collect", r => {
+            collector.on("end", r => {
+              if(r.size > 0) return;
+              return msg.edit(cancelEmbed).then(a => {
+                msg.reactions.removeAll().then(() => {
+                  msg.react("795090708478033950");
+                });
+                message.delete();
+                a.delete({timeout: ms("20s")});
+              });
+            });
+
+            yes.on("collect", r => {
+              collector.stop();
               if(!warns){
                 
                 // revisar si tiene el softwarn
@@ -148,7 +148,7 @@ module.exports.run = async (bot, message, args) => {
                   .setAuthor(`| Warn`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
                   .setDescription(`
         **—** Has sido __warneado__ por el STAFF.
-        **—** Warns actuales: **${numWarns}**.
+        **—** Warns actuales: **1**.
         **—** Por infringir la regla: **${rule}**.
         **—** Notas / observaciones: **${notes}**.`)
                   .setColor(Colores.rojo)
@@ -191,7 +191,43 @@ module.exports.run = async (bot, message, args) => {
                   .catch(e => console.log(e));
                   
                   // acciones de automod
-                  if(warns.warns === 2){
+                  if(warns.warns >= 4){
+                    let autoMod = new Discord.MessageEmbed()
+                    .setAuthor(`| Ban PERMANENTE.`, "https://cdn.discordapp.com/emojis/537804262600867860.png")
+                    .setDescription(`**—** Baneado: **${wUser}**.
+          **—** Warns actuales: **${warns.warns}**.
+          **—** Razón de ban (AutoMod): Muchos warns.
+          **—** Último warn por infringir la regla: **${rule}**.`)
+                    .setColor(Colores.rojo);
+
+                    logC.send(autoMod);
+                    wUser.send(autoMod)
+                    wUser.ban(`AutoMod. (Infringir "${rule}")`);
+                  } else
+
+                  if(warns.warns >= 3){
+                    let autoMod = new Discord.MessageEmbed()
+                    .setAuthor(`| TempBan`, "https://cdn.discordapp.com/emojis/537792425129672704.png")
+                    .setDescription(`**—** Ban (24h): **${wUser}**.
+          **—** Warns actuales: **${warns.warns}**.
+          **—** Razón de ban (AutoMod): 3 warns acumulados.
+          **—** Último warn por infringir la regla: **${rule}**.`)
+                    .setColor(Colores.rojo);
+                    
+
+                    wUser.send(autoMod);
+                    wUser.ban(`AutoMod. (Infringir "${rule}")`);
+                    
+
+                    /// USAR UN GLOBAL DATA::::
+                    setTimeout(function() {
+                      guild.unban(wUser.id)
+                    }, ms("1d"));
+                    
+                    logC.send(autoMod);
+                  } else
+
+                  if(warns.warns >= 2){
                     let infoEmbed = new Discord.MessageEmbed()
                     .setAuthor(`| Warn`, "https://cdn.discordapp.com/emojis/494267320097570837.png?v=1")
                   .setDescription(`**—** ${wUser.user.tag}, este es tu **warn número ❛ \`2\` ❜**
@@ -201,44 +237,8 @@ module.exports.run = async (bot, message, args) => {
                   .setColor(Colores.rojo);
                     
                     wUser.send(infoEmbed);
-                  } else
-
-                  if(warns.warns == 3){
-                    let autoMod = new Discord.MessageEmbed()
-                    .setAuthor(`| TempBan`, "https://cdn.discordapp.com/emojis/537792425129672704.png")
-                    .setDescription(`**—** Ban (24h): **${wUser}**.
-          **—** Warns actuales: **${warns.warns}**.
-          **—** Warn por última vez: **${numWarns}**.
-          **—** Razón de ban (AutoMod): 3 warns acumulados.
-          **—** Último warn por infringir la regla: **${rule}**.`)
-                    .setColor(Colores.rojo);
-                    
-
-                    wUser.send(autoMod);
-                    wUser.ban(`AutoMod. (Infringir "${rule}")`);
-                    
-                    setTimeout(function() {
-                      guild.unban(wUser.id)
-                    }, ms("1d"));
-                    
-                    logC.send(autoMod);
-                  } else
-
-                  if(warns.warns == 4){
-                    let autoMod = new Discord.MessageEmbed()
-                    .setAuthor(`| Ban PERMANENTE.`, "https://cdn.discordapp.com/emojis/537804262600867860.png")
-                    .setDescription(`**—** Baneado: **${wUser}**.
-          **—** Warns actuales: **${warns.warns}**.
-          **—** Warn por última vez: **${numWarns}**.
-          **—** Razón de ban (AutoMod): Muchos warns.
-          **—** Último warn por infringir la regla: **${rule}**.`)
-                    .setColor(Colores.rojo);
-
-                    logC.send(autoMod);
-                    wUser.send(autoMod)
-                    wUser.ban(`AutoMod. (Infringir "${rule}")`);
                   }
-                  
+
                 message.react("✅");
                   
                   // embed que se le envía al usuario por el warn
@@ -290,6 +290,7 @@ module.exports.run = async (bot, message, args) => {
 
              no.on("collect", r => {
               return msg.edit(cancelEmbed).then(a => {
+                collector.stop();
                 msg.reactions.removeAll();
                 message.delete();
                 a.delete({timeout: ms("20s")});
