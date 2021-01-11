@@ -106,7 +106,7 @@ module.exports.run = async (bot, message, args) => {
               });
             });
 
-            yes.on("collect", r => {
+            yes.on("collect", async r => {
               collector.stop();
               if(!warns){
                 
@@ -277,11 +277,17 @@ module.exports.run = async (bot, message, args) => {
               })
 
               // embed a editar el mensaje de confirmación
+              // await para saber los warns actuales porque esta mamada no sirve por alguna razón
+              let query = await Warn.findOne({
+                userID: wUser.id
+              });
+
+              let numWarns = query ? query.warns : 0;
               let wEmbed = new Discord.MessageEmbed()
               .setAuthor(`| Warn`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
               .setDescription(`**—** Warneado: **${wUser}**.
     **—** Canal: **${message.channel}**.
-    **—** Warns actuales: **${warns.warns || 1}**.
+    **—** Warns actuales: **${numWarns}**.
     **—** Por infringir la regla: **${rule}**.`)
               .setColor(Colores.rojo);
 
