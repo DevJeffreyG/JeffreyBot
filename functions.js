@@ -8,6 +8,7 @@ const anyBase = require("any-base");
 const prettyms = require("pretty-ms");
 const dec2hex = anyBase(anyBase.DEC, anyBase.HEX);
 let { bot } = require("./jb.js");
+console.log(bot);
 
 const fs = require("fs");
 const ms = require("ms");
