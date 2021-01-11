@@ -655,7 +655,7 @@ bot.on("ready", async () => {
     dsNews = guild.roles.cache.find(x => x.id === Config.dsnews);
   }
 
-  global.bot = bot;
+  module.exports = { bot: bot };
 
   functions = await require("./functions.js");
 
