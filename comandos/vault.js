@@ -4,6 +4,7 @@ const Emojis = require("./../emojis.json");
 const Discord = require("discord.js");
 const ms = require("ms");
 const prefix = Config.prefix;
+const functions = require("./../functions.js");
 
 /* ##### MONGOOSE ######## */
 
@@ -337,137 +338,21 @@ module.exports.run = async (bot, message, args) => {
                 },
                 (err, won) => {
                   if (!won) {
-                    vaultMode(i);
+                    functions.vaultMode(i);
                   } else if (i === vaults) {
-                    vaultMode(randomHint);
+                    functions.vaultMode(randomHint);
                   }
                 }
               );
             }
           } else if(wins.length === vaults){ // si los tiene todos
-            vaultMode(1);
+            functions.vaultMode(1);
           } else {
-            vaultMode(randomHint);
+            functions.vaultMode(randomHint);
           }
         });
       }
     );
-
-    function vaultMode(hint) {
-      Vault.find({}, function(err, pistas) {
-        if (pistas.length === 0) {
-          return message.reply(`No deberías estar aquí.`);
-        }
-
-        Vault.findOne(
-          {
-            id: hint
-          },
-          (err, pista1) => {
-            if (err) throw err;
-            Hint.countDocuments(
-              {
-                codeID: pista1.id
-              },
-              (err, totalhints) => {
-                Hint.find({
-                  codeID: pista1.id
-                })
-                  .sort([["num", "ascending"]])
-                  .exec((err, pista) => {
-                    // captcha si el código ya se descifró.
-
-                    WinVault.findOne(
-                      {
-                        codeID: pista[0].codeID,
-                        userID: author.id
-                      },
-                      (err, won) => {
-                        //console.log(`${pista1.code}: ${pista1.id} || ${pista[0].hint}`);
-                        if (!won) {
-                          let pistan = 1;
-
-                          const embed = new Discord.MessageEmbed()
-                            .setColor(Colores.verde)
-                            .setFooter(
-                              `Pista ${pistan} de ${totalhints} | /vault [codigo] para decifrar.`
-                            )
-                            .setDescription(pista[pistan - 1].hint);
-
-                          message.channel.send(embed).then(msg => {
-                            msg.react("⏪").then(r => {
-                              msg.react("⏩");
-
-                              const backwardsFilter = (reaction, user) => reaction.emoji.name === "⏪" && user.id === message.author.id;
-                              const forwardsFilter = (reaction, user) => reaction.emoji.name === "⏩" && user.id === message.author.id;
-                              const collectorFilter = (reaction, user) => reaction.emoji.name === "⏪" || reaction.emoji.name === "⏩" && user.id === message.author.id;
-
-                              const backwards = msg.createReactionCollector(backwardsFilter, { time: 60000 });
-                              const forwards = msg.createReactionCollector(forwardsFilter, { time: 60000 });
-                              const collector = msg.createReactionCollector(collectorFilter, { time: 60000 });
-
-                              collector.on("end", r => {
-                                return msg.reactions.removeAll()
-                                .then(() => {
-                                  msg.react("795090708478033950");
-                                });
-                              });
-
-                              backwards.on("collect", r => {
-                                if (pistan === 1) return;
-                                pistan--;
-                                embed.setFooter(
-                                  `Pista ${pistan} de ${totalhints} | /vault [codigo] para decifrar.`
-                                );
-                                embed.setDescription(pista[pistan - 1].hint);
-                                msg.edit(embed);
-                              });
-
-                              forwards.on("collect", r => {
-                                if (pistan === pista.length) return;
-                                pistan++;
-                                embed.setFooter(
-                                  `Pista ${pistan} de ${totalhints} | /vault [codigo] para decifrar.`
-                                );
-                                embed.setDescription(pista[pistan - 1].hint);
-
-                                msg.edit(embed);
-                              });
-                            });
-                          });
-                        } else {
-                          let respRelleno = [
-                            "Jeffrey sube vídeo",
-                            "No seas malo",
-                            "Las rosas son rojas",
-                            "Los caballos comen manzanas",
-                            "siganme en twitter xfa @pewdiepie",
-                            "No tengo plata. ¿me donan?",
-                            "Mindblowing"
-                          ];
-
-                          let relleno =
-                            respRelleno[
-                              Math.floor(Math.random() * respRelleno.length)
-                            ];
-
-                          let r = new Discord.MessageEmbed()
-                            .setDescription(relleno)
-                            .setColor(Colores.blanco);
-
-                          return message.channel
-                            .send(r)
-                            .then(m => m.delete({ timeout: ms("5s") }));
-                        }
-                      }
-                    );
-                  });
-              }
-            );
-          }
-        );
-      });
-    }
   }
 };
 

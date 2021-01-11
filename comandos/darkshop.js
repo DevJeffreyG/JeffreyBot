@@ -7,6 +7,7 @@ var chance = new Chance();
 const ms = require("ms");
 const prettyms = require("pretty-ms");
 const prefix = Config.prefix;
+const functions = require("./../functions.js");
 
 /* ##### MONGOOSE ######## */
 
@@ -1135,7 +1136,7 @@ Stats.findOne({
                                                                             if(!victim.roles.cache.find(x => x.id === dsRole.id)){
                                                                                 return dsChannel.send(fail2);
                                                                             } else {
-                                                                                Warns(victim, cantidad);
+                                                                                functions.Warns(victim, cantidad);
 
                                                                                 dsChannel.send(success2);
         
@@ -1143,20 +1144,20 @@ Stats.findOne({
                                                                                 stats.items.splice(index, 1);
 
                                                                                 // revisar si se ignora el interes o no
-                                                                                Interest(idUse);
+                                                                                functions.Interest(idUse);
 
                                                                                 return stats.save();
                                                                             }
                                                                         } else {
                                                                             if(victimStats.items.length === 0){ // tiene cuenta pero no items, proseguir
-                                                                                Warns(victim, cantidad);                                                                                
+                                                                                functions.Warns(victim, cantidad);                                                                                
                                                                                 dsChannel.send(success2);
 
                                                                                 //eliminar item del autor
                                                                                 stats.items.splice(index, 1);
                                                                                 
                                                                                 // revisar si se ignora el interes o no
-                                                                                Interest(idUse);
+                                                                                functions.Interest(idUse);
                                                                                 
                                                                                 return stats.save();
                                                                             }
@@ -1170,14 +1171,14 @@ Stats.findOne({
                                                                                     let skip2 = chance.bool({likelihood: accu2});
 
                                                                                     if(skip2 === true){ // skip firewall
-                                                                                        Warns(victim, cantidad);                                                                                
+                                                                                        functions.Warns(victim, cantidad);                                                                                
                                                                                         dsChannel.send(skipped2);
 
                                                                                         //eliminar item del autor
                                                                                         stats.items.splice(index, 1);
 
                                                                                         // revisar si se ignora el interes o no
-                                                                                        Interest(idUse);
+                                                                                        functions.Interest(idUse);
                                                                                         
                                                                                         return stats.save();
                                                                                     } else {
@@ -1191,31 +1192,31 @@ Stats.findOne({
                                                                                         stats.items.splice(index, 1);
 
                                                                                         // revisar si se ignora el interes o no
-                                                                                        Interest(idUse);
+                                                                                        functions.Interest(idUse);
                                                                                         
                                                                                         return stats.save();
                                                                                     }
                                                                                 } else {
-                                                                                    Warns(victim, cantidad);                                                                                
+                                                                                    functions.Warns(victim, cantidad);                                                                                
                                                                                     dsChannel.send(success2);
 
                                                                                     //eliminar item del autor
                                                                                     stats.items.splice(index, 1);
 
                                                                                     // revisar si se ignora el interes o no
-                                                                                    Interest(idUse);
+                                                                                    functions.Interest(idUse);
                                                                                     
                                                                                     return stats.save();
                                                                                 }
                                                                             } else { // no tienen ningun item con nombre firewall
-                                                                                Warns(victim, cantidad);                                                                                
+                                                                                functions.Warns(victim, cantidad);                                                                                
                                                                                 dsChannel.send(success2);
 
                                                                                 //eliminar item del autor
                                                                                 stats.items.splice(index, 1);
 
                                                                                 // revisar si se ignora el interes o no
-                                                                                Interest(idUse);
+                                                                                functions.Interest(idUse);
                                                                                 
                                                                                 return stats.save();
                                                                             }
@@ -1223,36 +1224,17 @@ Stats.findOne({
                                                                     })
                                                                 } else {
                                                                     // no es negativo agregar warns
-                                                                    Warns();
+                                                                    functions.Warns();
                                                                     dsChannel.send(success2);
 
                                                                     //eliminar item del autor
                                                                     stats.items.splice(index, 1);
                                                                     
                                                                     // revisar si se ignora el interes o no
-                                                                    Interest(idUse);
+                                                                    functions.Interest(idUse);
                                                                     
                                                                     return stats.save();
                                                                 }
-                                                            }
-
-                                                            function Warns(v, c){
-                                                                Warn.findOne({
-                                                                    userID: v.id
-                                                                }, (err, victimWarns) => {
-                                                                    if(err) throw err;
-
-                                                                    if(!victimWarns) {
-                                                                        const newWarn = new Warn({
-                                                                            userID: v.id,
-                                                                            warns: c
-                                                                        });
-                                                                        newWarn.save();
-                                                                    } else {
-                                                                        victimWarns.warns += cantidad;
-                                                                        victimWarns.save();
-                                                                    }
-                                                                })
                                                             }
                                                             break;
 
@@ -1308,11 +1290,11 @@ Stats.findOne({
                                                                                 stats.save();
 
                                                                                 // revisar si se ignora el interes o no
-                                                                                Interest(idUse);
+                                                                                functions.Interest(idUse);
                                                                                 
 
                                                                                 // tiene una duración?
-                                                                                return Duration(duracion, role.id, victim);
+                                                                                return functions.Duration(duracion, role.id, victim);
                                                                             }
                                                                         } else {
                                                                             if(victimStats.items.length === 0){ // tiene cuenta pero no items, proseguir
@@ -1324,10 +1306,10 @@ Stats.findOne({
                                                                                 stats.save();
 
                                                                                 // revisar si se ignora el interes o no
-                                                                                Interest(idUse);
+                                                                                functions.Interest(idUse);
                                                                                 
                                                                                 // tiene una duración?
-                                                                                return Duration(duracion, role.id, victim);
+                                                                                return functions.Duration(duracion, role.id, victim);
                                                                             }
 
                                                                             if(victimStats.items.find(x => x.name === "Firewall")){ // si encuentra un item con nombre "Firewall", revisar si está activo
@@ -1347,11 +1329,11 @@ Stats.findOne({
                                                                                         stats.save();
 
                                                                                         // revisar si se ignora el interes o no
-                                                                                        Interest(idUse);
+                                                                                        functions.Interest(idUse);
                                                                                         
 
                                                                                         // tiene una duración?
-                                                                                        return Duration(duracion, role.id, victim);
+                                                                                        return functions.Duration(duracion, role.id, victim);
                                                                                     } else {
                                                                                         dsChannel.send(fail3);
 
@@ -1363,7 +1345,7 @@ Stats.findOne({
                                                                                         stats.items.splice(index, 1);
 
                                                                                         // revisar si se ignora el interes o no
-                                                                                        Interest(idUse);
+                                                                                        functions.Interest(idUse);
                                                                                         
                                                                                         return stats.save();
                                                                                     }
@@ -1376,11 +1358,11 @@ Stats.findOne({
                                                                                     stats.save();
 
                                                                                     // revisar si se ignora el interes o no
-                                                                                    Interest(idUse);
+                                                                                    functions.Interest(idUse);
                                                                                     
 
                                                                                     // tiene una duración?
-                                                                                    return Duration(duracion, role.id, victim);
+                                                                                    return functions.Duration(duracion, role.id, victim);
                                                                                 }
                                                                             } else { // no tienen ningun item con nombre firewall
                                                                                 dsChannel.send(success3);
@@ -1391,11 +1373,11 @@ Stats.findOne({
                                                                                 stats.save();
 
                                                                                 // revisar si se ignora el interes o no
-                                                                                Interest(idUse);
+                                                                                functions.Interest(idUse);
                                                                                 
 
                                                                                 // tiene una duración?
-                                                                                return Duration(duracion, role.id, victim);
+                                                                                return functions.Duration(duracion, role.id, victim);
                                                                             }
                                                                         }
                                                                     })
@@ -1409,57 +1391,14 @@ Stats.findOne({
                                                                     stats.save();
 
                                                                     // revisar si se ignora el interes o no
-                                                                    Interest(idUse);
+                                                                    functions.Interest(idUse);
                                                                     
 
                                                                     // tiene una duración?
-                                                                    return Duration(duracion, role.id, victim);
+                                                                    return functions.Duration(duracion, role.id, victim);
                                                                     
                                                                 }
                                                             }
-
-                                                            function Duration(roleDuration, roleID, victimMember){
-                                                                let role = guild.roles.cache.find(x => x.id === roleID);
-                                                                if(roleDuration != "permanent"){
-                                                                    // agregar una global data con la fecha
-
-                                                                    let hoy = new Date();
-                                                                    const newData = new GlobalData({
-                                                                        info: {
-                                                                            type: "roleDuration",
-                                                                            roleID: roleID,
-                                                                            userID: victimMember.id,
-                                                                            since: hoy,
-                                                                            duration: roleDuration
-                                                                        }
-                                                                    })
-
-                                                                    newData.save();
-
-                                                                    // timeout, por si pasa el tiempo antes de que el bot pueda reiniciarse
-                                                                    setTimeout(function(){
-                                                                        victimMember.roles.remove(role);
-
-                                                                        GlobalData.findOneAndDelete({
-                                                                            "info.type": "roleDuration",
-                                                                            roleID: roleID,
-                                                                            userID: victimMember.id
-                                                                        }, (err, func) => {
-                                                                            if(err){
-                                                                                console.log(err);
-                                                                            } else {
-                                                                                console.log("Role eliminado automaticamente")
-                                                                            }
-                                                                        });
-                                                                    }, roleDuration);
-
-                                                                } else {
-                                                                    // es permanente, no hacer nada
-                                                                    return;
-                                                                }
-                                                            }
-
-
                                                             break;
 
                                                         case "item":
@@ -1472,7 +1411,7 @@ Stats.findOne({
                                                                 stats.accuracy += randomPercentage;
 
                                                                 // revisar si se ignora el interes o no
-                                                                Interest(idUse);
+                                                                functions.Interest(idUse);
 
                                                                 if(stats.accuracy + randomPercentage > 90) stats.accuracy = 90;
                                                                 stats.save();
@@ -1494,7 +1433,7 @@ Stats.findOne({
                                                                 .catch(err => console.log(err));
 
                                                                 // revisar si se ignora el interes o no
-                                                                Interest(idUse);
+                                                                functions.Interest(idUse);
                                                                 
 
                                                                 let activated = new Discord.MessageEmbed()
@@ -1504,7 +1443,7 @@ Stats.findOne({
                                                                 return message.channel.send(activated)
                                                             } else {
                                                                 // revisar si se ignora el interes o no
-                                                                Interest(idUse);
+                                                                functions.Interest(idUse);
                                                                 
                                                                 return message.reply("este item ya está activo en tu cuenta.")
                                                             }
@@ -1714,35 +1653,6 @@ Stats.findOne({
 
   })
 })
-
-  function Interest (idUse) {
-    Items.findOne({
-        id: idUse
-    }, (err, item) => {
-        All.findOne({
-            userID: author.id,
-            itemID: idUse
-        }, (err, alli) => {
-
-            if(item.ignoreInterest == false && !alli){
-                const newAll = new All({
-                    userID: author.id,
-                    itemID: idUse,
-                    quantity: 1,
-                    isDarkShop: true
-                });
-
-                return newAll.save();
-            } else if (item.ignoreInterest == false && alli){
-                alli.quantity += 1;
-                return alli.save();
-            } else {
-                // no hacer nada, se ignora el interés
-                return;
-            }
-        })
-    })
-  }
 }
 
 module.exports.help = {

@@ -40,7 +40,11 @@ const Jeffros = require("./modelos/jeffros.js");
 const Exp = require("./modelos/exp.js");
 const AutoRole = require("./modelos/autorole.js");
 const Toggle = require("./modelos/toggle.js");
-
+const Warn = require("./modelos/warn.js");
+const DarkItems = require("./modelos/darkitems.js");
+const Vault = require("./modelos/vault.js");
+const WinVault = require("./modelos/winVault.js");
+const Hint = require("./modelos/hint.js");
 const GlobalData = require("./modelos/globalData.js");
 const Stats = require("./modelos/darkstats.js");
 
@@ -724,9 +728,330 @@ const intervalGlobalDatas = async function(justBoost){
   return;
 }
 
+const Warns = function (v, c){
+    Warn.findOne({
+        userID: v.id
+    }, (err, victimWarns) => {
+        if(err) throw err;
+
+        if(!victimWarns) {
+            const newWarn = new Warn({
+                userID: v.id,
+                warns: c
+            });
+            newWarn.save();
+        } else {
+            victimWarns.warns += cantidad;
+            victimWarns.save();
+        }
+    })
+}
+
+const Interest = function (idUse) {
+    DarkItems.findOne({
+        id: idUse
+    }, (err, item) => {
+        All.findOne({
+            userID: author.id,
+            itemID: idUse
+        }, (err, alli) => {
+
+            if(item.ignoreInterest == false && !alli){
+                const newAll = new All({
+                    userID: author.id,
+                    itemID: idUse,
+                    quantity: 1,
+                    isDarkShop: true
+                });
+
+                return newAll.save();
+            } else if (item.ignoreInterest == false && alli){
+                alli.quantity += 1;
+                return alli.save();
+            } else {
+                // no hacer nada, se ignora el interés
+                return;
+            }
+        })
+    })
+}
+
+const Duration = function(roleDuration, roleID, victimMember){
+    let role = guild.roles.cache.find(x => x.id === roleID);
+    if(roleDuration != "permanent"){
+        // agregar una global data con la fecha
+
+        let hoy = new Date();
+        const newData = new GlobalData({
+            info: {
+                type: "roleDuration",
+                roleID: roleID,
+                userID: victimMember.id,
+                since: hoy,
+                duration: roleDuration
+            }
+        })
+
+        newData.save();
+
+        // timeout, por si pasa el tiempo antes de que el bot pueda reiniciarse
+        setTimeout(function(){
+            victimMember.roles.remove(role);
+
+            GlobalData.findOneAndDelete({
+                "info.type": "roleDuration",
+                roleID: roleID,
+                userID: victimMember.id
+            }, (err, func) => {
+                if(err){
+                    console.log(err);
+                } else {
+                    return true;
+                }
+            });
+        }, roleDuration);
+
+    } else {
+        // es permanente, no hacer nada
+        return;
+    }
+}
+
+const LimitedTime = function(roleID, victimMember, duration, specialType, specialObjective, specialValue){
+    let role = guild.roles.cache.find(x => x.id === roleID);
+    specialType = specialType || false;
+    specialObjective = specialObjective || false;
+    specialValue = specialValue || false;
+    let hoy = new Date();
+
+    const newData = new GlobalData({
+      info: {
+        type: "limitedTimeRole",
+        roleID: roleID,
+        userID: victimMember,
+        since: hoy,
+        duration: ms(duration),
+        special: {
+          "type": specialType, // boostMultiplier
+          "specialObjective": specialObjective, // exp, jeffros, all
+          "specialValue": specialValue // (2) = exp || jeffros normales x 2
+        }
+      }
+    })
+
+    victimMember.roles.add(role);
+    newData.save();
+
+    // timeout, por si pasa el tiempo antes de que el bot pueda reiniciarse
+      setTimeout(function(){
+        victimMember.roles.remove(role);
+
+        GlobalData.findOneAndDelete({
+            "info.type": "limitedTimeRole",
+            roleID: roleID,
+            userID: victimMember.id
+        }, (err, func) => {
+            if(err){
+                console.log(err);
+            } else {
+                console.log("Role eliminado automaticamente")
+            }
+        });
+      }, ms(duration));
+}
+
+const Subscription = function(roleID, victimMember, intervalTime, jeffrosPerInterval, subscriptionName){
+    let role = guild.roles.cache.find(x => x.id === roleID);
+
+    if(intervalTime === "permanent" || intervalTime === "na"){
+      // no es una sub
+      console.log("no es una sub al parecer")
+      return;
+    } else {
+      let hoy = new Date();
+
+      const newData = new GlobalData({
+        info: {
+          type: "jeffrosSubscription",
+          roleID: roleID,
+          userID: victimMember.id,
+          since: hoy,
+          interval: ms(intervalTime),
+          price: jeffrosPerInterval,
+          subName: subscriptionName,
+          isCancelled: false
+        }
+      })
+
+      victimMember.roles.add(role);
+      newData.save();
+    }
+}
+
+const Duration = function(roleDuration, roleID, victimMember){
+    let role = guild.roles.cache.find(x => x.id === roleID);
+    if(roleDuration != "permanent"){
+        // agregar una global data con la fecha
+
+        let hoy = new Date();
+        const newData = new GlobalData({
+            info: {
+                type: "roleDuration",
+                roleID: roleID,
+                userID: victimMember.id,
+                since: hoy,
+                duration: roleDuration
+            }
+        })
+
+        newData.save();
+
+        // timeout, por si pasa el tiempo antes de que el bot pueda reiniciarse
+        setTimeout(function(){
+            victimMember.roles.remove(role);
+
+            GlobalData.findOneAndDelete({
+                "info.type": "roleDuration",
+                roleID: roleID,
+                userID: victimMember.id
+            }, (err, func) => {
+                if(err){
+                    console.log(err);
+                } else {
+                    console.log("Role eliminado automaticamente")
+                }
+            });
+        }, roleDuration);
+
+    } else {
+        // es permanente, no hacer nada
+        return;
+    }
+}
+
+const vaultMode = function(hint) {
+      Vault.find({}, function(err, pistas) {
+        if (pistas.length === 0) {
+          return message.reply(`No deberías estar aquí.`);
+        }
+
+        Vault.findOne(
+          {
+            id: hint
+          },
+          (err, pista1) => {
+            if (err) throw err;
+            Hint.countDocuments(
+              {
+                codeID: pista1.id
+              },
+              (err, totalhints) => {
+                Hint.find({
+                  codeID: pista1.id
+                })
+                  .sort([["num", "ascending"]])
+                  .exec((err, pista) => {
+                    // captcha si el código ya se descifró.
+
+                    WinVault.findOne(
+                      {
+                        codeID: pista[0].codeID,
+                        userID: author.id
+                      },
+                      (err, won) => {
+                        //console.log(`${pista1.code}: ${pista1.id} || ${pista[0].hint}`);
+                        if (!won) {
+                          let pistan = 1;
+
+                          const embed = new Discord.MessageEmbed()
+                            .setColor(Colores.verde)
+                            .setFooter(
+                              `Pista ${pistan} de ${totalhints} | /vault [codigo] para decifrar.`
+                            )
+                            .setDescription(pista[pistan - 1].hint);
+
+                          message.channel.send(embed).then(msg => {
+                            msg.react("⏪").then(r => {
+                              msg.react("⏩");
+
+                              const backwardsFilter = (reaction, user) => reaction.emoji.name === "⏪" && user.id === message.author.id;
+                              const forwardsFilter = (reaction, user) => reaction.emoji.name === "⏩" && user.id === message.author.id;
+                              const collectorFilter = (reaction, user) => reaction.emoji.name === "⏪" || reaction.emoji.name === "⏩" && user.id === message.author.id;
+
+                              const backwards = msg.createReactionCollector(backwardsFilter, { time: 60000 });
+                              const forwards = msg.createReactionCollector(forwardsFilter, { time: 60000 });
+                              const collector = msg.createReactionCollector(collectorFilter, { time: 60000 });
+
+                              collector.on("end", r => {
+                                return msg.reactions.removeAll()
+                                .then(() => {
+                                  msg.react("795090708478033950");
+                                });
+                              });
+
+                              backwards.on("collect", r => {
+                                if (pistan === 1) return;
+                                pistan--;
+                                embed.setFooter(
+                                  `Pista ${pistan} de ${totalhints} | /vault [codigo] para decifrar.`
+                                );
+                                embed.setDescription(pista[pistan - 1].hint);
+                                msg.edit(embed);
+                              });
+
+                              forwards.on("collect", r => {
+                                if (pistan === pista.length) return;
+                                pistan++;
+                                embed.setFooter(
+                                  `Pista ${pistan} de ${totalhints} | /vault [codigo] para decifrar.`
+                                );
+                                embed.setDescription(pista[pistan - 1].hint);
+
+                                msg.edit(embed);
+                              });
+                            });
+                          });
+                        } else {
+                          let respRelleno = [
+                            "Jeffrey sube vídeo",
+                            "No seas malo",
+                            "Las rosas son rojas",
+                            "Los caballos comen manzanas",
+                            "siganme en twitter xfa @pewdiepie",
+                            "No tengo plata. ¿me donan?",
+                            "Mindblowing"
+                          ];
+
+                          let relleno =
+                            respRelleno[
+                              Math.floor(Math.random() * respRelleno.length)
+                            ];
+
+                          let r = new Discord.MessageEmbed()
+                            .setDescription(relleno)
+                            .setColor(Colores.blanco);
+
+                          return message.channel
+                            .send(r)
+                            .then(m => m.delete({ timeout: ms("5s") }));
+                        }
+                      }
+                    );
+                  });
+              }
+            );
+          }
+        );
+      });
+}
+
 module.exports = {
     resetBot,
     getChanges,
     loadBoosts,
-    intervalGlobalDatas
+    intervalGlobalDatas,
+    Warns,
+    Interest,
+    Duration,
+    vaultMode
 }

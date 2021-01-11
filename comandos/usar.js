@@ -3,6 +3,7 @@ const Colores = require("./../colores.json");
 const Discord = require("discord.js");
 const prefix = Config.prefix;
 const ms = require("ms");
+const functions = require("./../functions.js");
 
 /* ##### MONGOOSE ######## */
 
@@ -388,7 +389,7 @@ module.exports.run = async (bot, message, args) => {
                           });
                         } else {
                           if(!isSub){ // no es una sub pero tiene tiempo limitado
-                            LimitedTime(r.id, message.member, duration, use.special.type, use.special.specialObjective, use.special.specialValue);
+                            functions.LimitedTime(r.id, message.member, duration, use.special.type, use.special.specialObjective, use.special.specialValue);
                             
                             purchase.remove();
                             let embed = new Discord.MessageEmbed()
@@ -398,7 +399,7 @@ module.exports.run = async (bot, message, args) => {
 
                             return message.channel.send(embed);
                           } else {
-                            Subscription(r.id, message.member, duration, jeffrosPrice, subscriptionName);
+                            functions.Subscription(r.id, message.member, duration, jeffrosPrice, subscriptionName);
 
                             purchase.remove();
                             let embed = new Discord.MessageEmbed()
@@ -424,118 +425,6 @@ module.exports.run = async (bot, message, args) => {
             );
       });
     })
-
-  }
-
-  function LimitedTime(roleID, victimMember, duration, specialType, specialObjective, specialValue){
-    let role = guild.roles.cache.find(x => x.id === roleID);
-    specialType = specialType || false;
-    specialObjective = specialObjective || false;
-    specialValue = specialValue || false;
-    let hoy = new Date();
-
-    const newData = new GlobalData({
-      info: {
-        type: "limitedTimeRole",
-        roleID: roleID,
-        userID: victimMember,
-        since: hoy,
-        duration: ms(duration),
-        special: {
-          "type": specialType, // boostMultiplier
-          "specialObjective": specialObjective, // exp, jeffros, all
-          "specialValue": specialValue // (2) = exp || jeffros normales x 2
-        }
-      }
-    })
-
-    victimMember.roles.add(role);
-    newData.save();
-
-    // timeout, por si pasa el tiempo antes de que el bot pueda reiniciarse
-      setTimeout(function(){
-        victimMember.roles.remove(role);
-
-        GlobalData.findOneAndDelete({
-            "info.type": "limitedTimeRole",
-            roleID: roleID,
-            userID: victimMember.id
-        }, (err, func) => {
-            if(err){
-                console.log(err);
-            } else {
-                console.log("Role eliminado automaticamente")
-            }
-        });
-      }, ms(duration));
-  }
-  function Subscription(roleID, victimMember, intervalTime, jeffrosPerInterval, subscriptionName){
-    let role = guild.roles.cache.find(x => x.id === roleID);
-
-    if(intervalTime === "permanent" || intervalTime === "na"){
-      // no es una sub
-      console.log("no es una sub al parecer")
-      return;
-    } else {
-      let hoy = new Date();
-
-      const newData = new GlobalData({
-        info: {
-          type: "jeffrosSubscription",
-          roleID: roleID,
-          userID: victimMember.id,
-          since: hoy,
-          interval: ms(intervalTime),
-          price: jeffrosPerInterval,
-          subName: subscriptionName,
-          isCancelled: false
-        }
-      })
-
-      victimMember.roles.add(role);
-      newData.save();
-    }
-  }
-
-  function Duration(roleDuration, roleID, victimMember){
-    let role = guild.roles.cache.find(x => x.id === roleID);
-    if(roleDuration != "permanent"){
-        // agregar una global data con la fecha
-
-        let hoy = new Date();
-        const newData = new GlobalData({
-            info: {
-                type: "roleDuration",
-                roleID: roleID,
-                userID: victimMember.id,
-                since: hoy,
-                duration: roleDuration
-            }
-        })
-
-        newData.save();
-
-        // timeout, por si pasa el tiempo antes de que el bot pueda reiniciarse
-        setTimeout(function(){
-            victimMember.roles.remove(role);
-
-            GlobalData.findOneAndDelete({
-                "info.type": "roleDuration",
-                roleID: roleID,
-                userID: victimMember.id
-            }, (err, func) => {
-                if(err){
-                    console.log(err);
-                } else {
-                    console.log("Role eliminado automaticamente")
-                }
-            });
-        }, roleDuration);
-
-    } else {
-        // es permanente, no hacer nada
-        return;
-    }
   }
 };
 
