@@ -8,7 +8,15 @@ const { Structures } = require('discord.js');
 const anyBase = require("any-base");
 const prettyms = require("pretty-ms");
 const dec2hex = anyBase(anyBase.DEC, anyBase.HEX);
-const bot = index.bot;
+const bot = new Discord.Client({ disableMentions: "everyone" });
+const hmm = index.bot;
+
+console.log("bot")
+console.log(bot)
+
+console.log("hmm")
+console.log(hmm)
+
 const fs = require("fs");
 const ms = require("ms");
 var Chance = require("chance");
