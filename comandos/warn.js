@@ -197,7 +197,7 @@ module.exports.run = async (bot, message, args) => {
 
                     logC.send(autoMod);
                     wUser.send(autoMod)
-                    wUser.ban(`AutoMod. (Infringir "${rule}")`);
+                    wUser.ban({reason: `AutoMod. (Infringir "${rule}")`});
                   } else
 
                   if(warns.warns >= 3){
@@ -211,7 +211,7 @@ module.exports.run = async (bot, message, args) => {
                     
 
                     wUser.send(autoMod);
-                    wUser.ban(`AutoMod. (Infringir "${rule}")`);
+                    wUser.ban({reason: `AutoMod. (Infringir "${rule}")`});
                     
 
                     GlobalData.findOne({
