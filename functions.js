@@ -888,47 +888,6 @@ const Subscription = function(roleID, victimMember, intervalTime, jeffrosPerInte
     }
 }
 
-const Duration = function(roleDuration, roleID, victimMember){
-    let role = guild.roles.cache.find(x => x.id === roleID);
-    if(roleDuration != "permanent"){
-        // agregar una global data con la fecha
-
-        let hoy = new Date();
-        const newData = new GlobalData({
-            info: {
-                type: "roleDuration",
-                roleID: roleID,
-                userID: victimMember.id,
-                since: hoy,
-                duration: roleDuration
-            }
-        })
-
-        newData.save();
-
-        // timeout, por si pasa el tiempo antes de que el bot pueda reiniciarse
-        setTimeout(function(){
-            victimMember.roles.remove(role);
-
-            GlobalData.findOneAndDelete({
-                "info.type": "roleDuration",
-                roleID: roleID,
-                userID: victimMember.id
-            }, (err, func) => {
-                if(err){
-                    console.log(err);
-                } else {
-                    console.log("Role eliminado automaticamente")
-                }
-            });
-        }, roleDuration);
-
-    } else {
-        // es permanente, no hacer nada
-        return;
-    }
-}
-
 const vaultMode = function(hint) {
       Vault.find({}, function(err, pistas) {
         if (pistas.length === 0) {
