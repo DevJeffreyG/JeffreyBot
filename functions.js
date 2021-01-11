@@ -7,9 +7,9 @@ const { Structures } = require('discord.js');
 const anyBase = require("any-base");
 const prettyms = require("pretty-ms");
 const dec2hex = anyBase(anyBase.DEC, anyBase.HEX);
-let { client } = require("./jb.js");
+let { bot } = require("./jb.js");
 console.log("#############################");
-console.log(client);
+console.log(bot);
 console.log("#############################");
 
 const fs = require("fs");
@@ -53,13 +53,13 @@ const Stats = require("./modelos/darkstats.js");
 
 /* ##### MONGOOSE ######## */
 
-// Turn client off (destroy), then turn it back on
+// Turn bot off (destroy), then turn it back on
 const resetBot = function (channel) {
-  // send channel a message that you're resetting client [optional]
+  // send channel a message that you're resetting bot [optional]
   channel
     .send("Reseteando...")
-    .then(msg => client.destroy())
-    .then(() => client.login(process.env.TOKEN))
+    .then(msg => bot.destroy())
+    .then(() => bot.login(process.env.TOKEN))
     .then(() => channel.send("Reviví sin problemas."));
 }
 
@@ -150,12 +150,12 @@ const intervalGlobalDatas = async function(justBoost){
   let guild;
   let bdRole;
   let logs;
-  if(client.user.id === Config.testingJBID){
-    guild = client.guilds.cache.find(x => x.id === "482989052136652800");
+  if(bot.user.id === Config.testingJBID){
+    guild = bot.guilds.cache.find(x => x.id === "482989052136652800");
     bdRole = guild.roles.cache.find(x => x.id === "544687105977090061");
     logs = guild.channels.cache.find(x => x.id === "483108734604804107");
   } else {
-    guild = client.guild.cache.find(x => x.id === Config.jgServer);
+    guild = bot.guild.cache.find(x => x.id === Config.jgServer);
     bdRole = guild.roles.cache.find(x => x.id === Config.bdRole);
     logs = guild.channels.cache.find(x => x.id === Config.logChannel);
   }
@@ -423,7 +423,7 @@ const intervalGlobalDatas = async function(justBoost){
         // si tiene darkjeffros, ¿caducaron?
         if(pastDays >= dark[i].info.duration){
           let staffCID = "514124198205980713";
-          if(client.user.id === Config.testingJBID){
+          if(bot.user.id === Config.testingJBID){
             staffCID = "537095712102416384";
           }
 
@@ -797,7 +797,7 @@ const Duration = function(roleDuration, roleID, victimMember){
 
         newData.save();
 
-        // timeout, por si pasa el tiempo antes de que el client pueda reiniciarse
+        // timeout, por si pasa el tiempo antes de que el bot pueda reiniciarse
         setTimeout(function(){
             victimMember.roles.remove(role);
 
@@ -845,7 +845,7 @@ const LimitedTime = function(roleID, victimMember, duration, specialType, specia
     victimMember.roles.add(role);
     newData.save();
 
-    // timeout, por si pasa el tiempo antes de que el client pueda reiniciarse
+    // timeout, por si pasa el tiempo antes de que el bot pueda reiniciarse
       setTimeout(function(){
         victimMember.roles.remove(role);
 
