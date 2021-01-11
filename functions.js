@@ -1,4 +1,4 @@
-const index = require("./jb.js");
+let {hmm} = require("./jb.js");
 const Config = require("./base.json");
 const Rainbow = require("./rainbow.json");
 const Colores = require("./colores.json");
