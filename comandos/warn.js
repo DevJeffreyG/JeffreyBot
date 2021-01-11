@@ -243,7 +243,7 @@ module.exports.run = async (bot, message, args) => {
                         // si ya existe (how) cambiar el since
                         guildBan.info.since = now;
                         guildBan.save();
-                        
+
                       }
 
                       setTimeout(function() {
@@ -309,6 +309,7 @@ module.exports.run = async (bot, message, args) => {
                 userID: wUser.id
               });
 
+              console.log(query);
               let numWarns = query ? query.warns : 0;
               let wEmbed = new Discord.MessageEmbed()
               .setAuthor(`| Warn`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
