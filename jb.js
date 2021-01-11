@@ -56,7 +56,7 @@ const boostedExp = new Set();
 const boostedJeffros = new Set();
 const boostedGeneral = new Set(); // exp + jeffros boosteados
 
-const functions = require("./functions.js");
+let functions;
 
 // mantenimiento
 const disableEXPs = false; // deshabilitar ganar exp o jeffros
@@ -656,6 +656,8 @@ bot.on("ready", async () => {
   }
 
   module.exports.hmm = "bot";
+
+  functions = require("./functions.js");
 
   channel.send("Reviví.");
 
