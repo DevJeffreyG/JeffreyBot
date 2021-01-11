@@ -9,7 +9,6 @@ const anyBase = require("any-base");
 const prettyms = require("pretty-ms");
 const dec2hex = anyBase(anyBase.DEC, anyBase.HEX);
 const bot = new Discord.Client({ disableMentions: "everyone" });
-const hmm = index.bot;
 
 console.log("bot")
 console.log(bot)
