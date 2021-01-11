@@ -655,6 +655,8 @@ bot.on("ready", async () => {
     dsNews = guild.roles.cache.find(x => x.id === Config.dsnews);
   }
 
+  module.exports.bot = bot;
+
   channel.send("Reviví.");
 
   /* ############ GLOBAL DATAS ############ */
@@ -1689,8 +1691,6 @@ bot.on("message", message => {
 
 if (process.env.mantenimiento != 1) {
   bot.login(process.env.TOKEN);
-
-  module.exports.bot = bot;
 } else {
   console.log("########## BOT EN MANTENIMIENTO, NO LOGEADO #############");
 }
