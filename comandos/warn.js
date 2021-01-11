@@ -166,13 +166,10 @@ module.exports.run = async (bot, message, args) => {
                   if (err) throw err;
                   let existsSoft = false;
 
-                  console.log("SOFT:");
-                  console.log(soft);
                   if(!soft) return msg.edit(errorEmbed).then(() => msg.reactions.removeAll());
 
                   for (let i = 0; i < soft.warns.length; i++){ // revisar cada soft
                     if(soft.warns[i].rule === rule){ // si existe
-                      console.log("FOUND");
                       existsSoft = true;
                     }
 
@@ -310,7 +307,7 @@ module.exports.run = async (bot, message, args) => {
               });
 
               console.log(query);
-              let numWarns = query ? query.warns : 0;
+              let numWarns = query ? query.warns + 1 : 1;
               let wEmbed = new Discord.MessageEmbed()
               .setAuthor(`| Warn`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
               .setDescription(`**—** Warneado: **${wUser}**.
