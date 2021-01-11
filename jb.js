@@ -57,7 +57,7 @@ const boostedJeffros = new Set();
 const boostedGeneral = new Set(); // exp + jeffros boosteados
 
 const functions = require("./functions.js");
-functions.test
+functions.s()
 
 // mantenimiento
 const disableEXPs = false; // deshabilitar ganar exp o jeffros
