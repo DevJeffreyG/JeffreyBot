@@ -2320,7 +2320,7 @@ async function intervalGlobalDatas(justBoost){
         .setAuthor(`| Unban`, guild.iconURL())
         .setDescription(`
       **—** Usuario desbaneado: **${userID}**.
-      **—** Razón: ${ban.info.reason}**.
+      **—** Razón: **${ban.info.reason}**.
           `)
         .setColor(Colores.verde);
 
