@@ -2317,7 +2317,7 @@ async function intervalGlobalDatas(justBoost){
         tempBans[i].remove();
 
         let unBEmbed = new Discord.MessageEmbed()
-        .setAuthor(`| Unban`, author.displayAvatarURL())
+        .setAuthor(`| Unban`, guild.iconURL())
         .setDescription(`
       **—** Usuario desbaneado: **${userID}**.
       **—** Razón: ${ban.info.reason}**.
