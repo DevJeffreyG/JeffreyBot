@@ -31,6 +31,7 @@ const fs = require("fs");
 const ms = require("ms");
 var Chance = require("chance");
 var chance = new Chance();
+
 const prefix = Config.prefix;
 const jeffreygID = Config.jeffreygID;
 const jgServer = Config.jgServer;
@@ -54,6 +55,9 @@ const active = new Map();
 const boostedExp = new Set();
 const boostedJeffros = new Set();
 const boostedGeneral = new Set(); // exp + jeffros boosteados
+
+const functions = require("./functions.js");
+functions.test
 
 // mantenimiento
 const disableEXPs = false; // deshabilitar ganar exp o jeffros
