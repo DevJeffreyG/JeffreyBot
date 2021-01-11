@@ -1,3 +1,4 @@
+const index = require("./jb.js");
 const Config = require("./base.json");
 const Rainbow = require("./rainbow.json");
 const Colores = require("./colores.json");
@@ -7,7 +8,7 @@ const { Structures } = require('discord.js');
 const anyBase = require("any-base");
 const prettyms = require("pretty-ms");
 const dec2hex = anyBase(anyBase.DEC, anyBase.HEX);
-const bot = new Discord.Client({ disableMentions: "everyone" });
+const bot = index.bot;
 const fs = require("fs");
 const ms = require("ms");
 var Chance = require("chance");

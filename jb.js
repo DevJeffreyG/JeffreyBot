@@ -1689,6 +1689,8 @@ bot.on("message", message => {
 
 if (process.env.mantenimiento != 1) {
   bot.login(process.env.TOKEN);
+
+  module.exports.bot = bot;
 } else {
   console.log("########## BOT EN MANTENIMIENTO, NO LOGEADO #############");
 }
