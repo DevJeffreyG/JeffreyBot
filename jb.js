@@ -655,9 +655,10 @@ bot.on("ready", async () => {
     dsNews = guild.roles.cache.find(x => x.id === Config.dsnews);
   }
 
-  module.exports = { bot: bot };
+  console.log(bot);
+  module.exports.bot = bot;
 
-  functions = await require("./functions.js");
+  functions = require("./functions.js");
 
   channel.send("Reviví.");
 
