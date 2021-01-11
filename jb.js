@@ -1780,12 +1780,15 @@ async function intervalGlobalDatas(justBoost){
 
   let guild;
   let bdRole;
+  let logs;
   if(bot.user.id === Config.testingJBID){
     guild = bot.guilds.cache.find(x => x.id === "482989052136652800");
     bdRole = guild.roles.cache.find(x => x.id === "544687105977090061");
+    logs = guild.channels.cache.find(x => x.id === "483108734604804107");
   } else {
     guild = bot.guild.cache.find(x => x.id === Config.jgServer);
     bdRole = guild.roles.cache.find(x => x.id === Config.bdRole);
+    logs = guild.channels.cache.find(x => x.id === Config.logChannel);
   }
 
   // buscar un tipo de boost
@@ -2291,6 +2294,42 @@ async function intervalGlobalDatas(justBoost){
       }
     }
   });
+
+  // buscar temp bans
+  GlobalData.find({
+    "info.type": "temporalGuildBan",
+    "info.serverID": guild.id
+  }, (err, tempBans) => {
+    if(err) throw err;
+
+    if(!tempBans) return;
+
+    for (let i = 0; i < tempBans.length; i++){
+      let ban = tempBans[i];
+      let userID = ban.info.userID;
+      let since = ban.info.since;
+      let realDuration = ban.info.duration;
+      let today = new Date();
+
+      if(today - since >= realDuration){
+        // ya pasó el tiempo, unban
+        guild.members.unban(userID);
+        tempBans[i].remove();
+
+        let unBEmbed = new Discord.MessageEmbed()
+        .setAuthor(`| Unban`, author.displayAvatarURL())
+        .setDescription(`
+      **—** Usuario desbaneado: **${userID}**.
+      **—** Razón: ${ban.info.reason}**.
+          `)
+        .setColor(Colores.verde);
+
+        logs.send(unBEmbed)
+      } else {
+        // nada XD
+      }
+    }
+  })
 
   // buscar usuarios de cumpleaños
   GlobalData.find({

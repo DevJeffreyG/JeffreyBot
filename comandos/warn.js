@@ -9,6 +9,7 @@ const prefix = Config.prefix;
 
 const Warn = require("../modelos/warn.js");
 const SoftWarn = require("../modelos/softwarn.js");
+const GlobalData = require("../modelos/globalData.js");
 
 /* ##### MONGOOSE ######## */
 
@@ -216,10 +217,39 @@ module.exports.run = async (bot, message, args) => {
                     wUser.ban(`AutoMod. (Infringir "${rule}")`);
                     
 
-                    /// USAR UN GLOBAL DATA::::
-                    setTimeout(function() {
-                      guild.unban(wUser.id)
-                    }, ms("1d"));
+                    GlobalData.findOne({
+                      "info.type": "temporalGuildBan",
+                      "info.userID": wUser.id,
+                      "info.serverID": guild.id
+                    }, (err, guildBan) => {
+                      if(err) throw err;
+
+                      let now = new Date();
+
+                      if(!guildBan){
+                        const newBan = new GlobalData({
+                          info: {
+                            type: "temporalGuildBan",
+                            userID: wUser.id,
+                            serverID: guild.id,
+                            reason: `AutoMod. (Infringir "${rule}")`,
+                            since: now,
+                            duration: ms("1d")
+                          }
+                        });
+
+                        newBan.save();
+                      } else {
+                        // si ya existe (how) cambiar el since
+                        guildBan.info.since = now;
+                        guildBan.save();
+                        
+                      }
+
+                      setTimeout(function() {
+                        guild.unban(wUser.id)
+                      }, ms("1d"));
+                    })
                     
                     logC.send(autoMod);
                   } else
@@ -230,7 +260,7 @@ module.exports.run = async (bot, message, args) => {
                   .setDescription(`**—** ${wUser.user.tag}, este es tu **warn número ❛ \`2\` ❜**
         *— ¿Qué impacto tendrá este warn?*
         **—** Tranquilo. Este warn no afectará en nada tu estadía en el servidor, sin embargo; el siguiente warn será un **ban de un día**.
-        **—** Te sugiero comprar un **-1 Warn** en la tienda del servidor. *( \`${prefix}shop items\` para más info de precios, etc. )*`)
+        **—** Te sugiero comprar un **-1 Warn** en la tienda del servidor. *( \`${prefix}shop\` para más info de precios, etc. )*`)
                   .setColor(Colores.rojo);
                     
                     wUser.send(infoEmbed);

@@ -44,12 +44,11 @@ module.exports.run = async (bot, message, args) => {
   .setAuthor(`| Ban`, author.displayAvatarURL())
     .setDescription(`
 **—** Usuario baneado: **${bUser}**.\n\n
-**—** Ban en: **${message.channel}**.\n\n
-**—** Moderador: **${message.author.username}**.\n\n
-**—** Tiempo: **${message.createdAt}**.\n\n
-**—** Razón de ban: **${bRazon}**.
+**—** Mod: **${message.author.username}**.
       `)
-    .setColor(Colores.rojo);
+    .setColor(Colores.rojo)
+    .setFooter(bRazon)
+    .setTimestamp();
 
     message.guild.members.ban(bUser, {reason: bRazon}).then(x => message.react("✅")); // Baneado
     logC.send(bEmbed);
