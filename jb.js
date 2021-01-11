@@ -57,7 +57,6 @@ const boostedJeffros = new Set();
 const boostedGeneral = new Set(); // exp + jeffros boosteados
 
 const functions = require("./functions.js");
-functions.s()
 
 // mantenimiento
 const disableEXPs = false; // deshabilitar ganar exp o jeffros
@@ -1684,19 +1683,9 @@ bot.on("message", message => {
     message.content.startsWith(`${prefix}reset`) &&
     message.member.hasPermission("BAN_MEMBERS")
   ) {
-    resetBot(message.channel);
+    functions.resetBot(message.channel);
   }
 });
-
-// Turn bot off (destroy), then turn it back on
-function resetBot(channel) {
-  // send channel a message that you're resetting bot [optional]
-  channel
-    .send("Reseteando...")
-    .then(msg => bot.destroy())
-    .then(() => bot.login(process.env.TOKEN))
-    .then(() => channel.send("Reviví sin problemas."));
-}
 
 function getChanges(entryChanges) {
   switch (entryChanges.key) {
