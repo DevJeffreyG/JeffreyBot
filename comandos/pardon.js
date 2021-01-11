@@ -199,20 +199,21 @@ module.exports.run = async (bot, message, args) => {
       **—** Mod: ${author}`)
             .setColor(Colores.verde);
 
-            logC.send(wEmbed);
+            msg.edit(wEmbed);
+            msg.reactions.removeAll();
             
             let unwarnedEmbed = new Discord.MessageEmbed()
-                .setAuthor(`| Pardon`, "https://cdn.discordapp.com/emojis/537004318667177996.png")
-                .setDescription(`
-      **—** Has sido perdonado. =)
-      **—** Warns actuales: **${warns.warns}**.`)
-                .setColor(Colores.verde)
-                .setFooter(`Tienes suerte.`, 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png');
-                
-                wUser.send(unwarnedEmbed)
-                .catch(e => {
-                  console.log('Tiene los MDs desactivados.')
-                });
+            .setAuthor(`| Pardon`, "https://cdn.discordapp.com/emojis/537004318667177996.png")
+            .setDescription(`
+  **—** Has sido perdonado. =)
+  **—** Warns actuales: **${warns.warns}**.`)
+            .setColor(Colores.verde)
+            .setFooter(`Tienes suerte.`, 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png');
+            
+            wUser.send(unwarnedEmbed)
+            .catch(e => {
+              console.log('Tiene los MDs desactivados.')
+            });
           }
         })
       })
