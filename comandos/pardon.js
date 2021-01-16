@@ -111,6 +111,7 @@ module.exports.run = async (bot, message, args) => {
                   .setColor(Colores.verde);
 
                   logC.send(sEmbed);
+                  collector.stop();
                   
                   let sunwarnedEmbed = new Discord.MessageEmbed()
                       .setAuthor(`| Pardon`, "https://cdn.discordapp.com/emojis/537004318667177996.png")
@@ -133,6 +134,7 @@ module.exports.run = async (bot, message, args) => {
               return msg.edit(cancelEmbed).then(a => {
                 msg.reactions.removeAll();
                 message.delete();
+                collector.stop();
                 a.delete({timeout: ms("20s")});
               });
             })

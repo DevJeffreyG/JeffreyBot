@@ -138,6 +138,60 @@ module.exports.run = async (bot, message, args) => {
         **—** Tendrás acceso a los beneficios del role de cumpleaños el día estipulado.
         **—** ${bdString}.`)
         .setColor(Colores.verde);
+
+        message.channel.send(confirmation).then(msg => {
+            msg.react(":allow:558084462232076312")
+            .then(r => {
+              msg.react(":denegar:558084461686947891");
+            });
+ 
+            let cancelEmbed = new Discord.MessageEmbed()
+            .setDescription(`Cancelado.`)
+            .setColor(Colores.nocolor);
+ 
+            const yesFilter = (reaction, user) => reaction.emoji.id === "558084462232076312" && user.id === message.author.id;
+            const noFilter = (reaction, user) => reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
+            const collectorFilter = (reaction, user) => reaction.emoji.id === "558084461686947891" || reaction.emoji.id === "558084462232076312" && user.id === message.author.id;
+
+            const yes = msg.createReactionCollector(yesFilter, { time: 60000 });
+            const no = msg.createReactionCollector(noFilter, { time: 60000 });
+            const collector = msg.createReactionCollector(collectorFilter, { time: 60000 });
+
+            yes.on("collect", r => {
+              let hoy = new Date();
+              userBD.info.isLocked = true;
+              userBD.info.lockedSince = hoy;
+              userBD.markModified("info");
+              userBD.save();
+              msg.delete();
+
+              message.react("✅")
+              .then(m => {
+                m.delete({timeout: 7000})
+              });
+            })
+
+            no.on("collect", r => {
+              return msg.edit(cancelEmbed).then(a => {
+                msg.reactions.removeAll();
+                collector.stop();
+                message.delete();
+                a.delete({timeout: ms("20s")});
+              });
+            })
+
+            collector.on('end', collected => {
+	            if(!collected.size > 0){
+                return msg.edit(cancelEmbed).then(a => {
+                  msg.reactions.removeAll().then(() => {
+                    msg.react("795090708478033950");
+                  });
+                  message.delete();
+                  a.delete({timeout: ms("20s")});
+                });
+              }
+            });
+    })
         
       case "all":
         // bd all DD MM
