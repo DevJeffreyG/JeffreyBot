@@ -33,7 +33,7 @@ module.exports.run = async (bot, message, args) => {
   `)
   .setFooter(`<> Obligatorio () Opcional — Para ver tu fecha registrada actual revisa ${prefix}stats`);
 
-  if(!args[0] || !args[1]) return message.channel.send(embed);
+  if((!args[0] || !args[1]) && args[0] != "lock") return message.channel.send(embed);
 
   let day;
   let month;
