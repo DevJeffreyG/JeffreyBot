@@ -71,9 +71,8 @@ module.exports.run = async (bot, message, args) => {
 
     // revisar si ya pasó el año desde el lock
     let now = new Date();
-    let lockedSince = userBD.lockedSince ? userBD.lockedSince : now;
+    let lockedSince = userBD.info.lockedSince ? userBD.info.lockedSince : now;
     let lockedDuration = 365;
-    console.log(now - lockedSince)
     if(now - lockedSince >= lockedDuration){
       message.reply("hmmm, si estás usando este comando, ¿será para cambiar algo? he quitado el bloqueo de tu fecha de cumpleaños, reactívala cuando gustes.");
 
