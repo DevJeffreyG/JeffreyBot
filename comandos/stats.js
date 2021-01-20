@@ -53,19 +53,8 @@ module.exports.run = async (bot, message, args) => {
         
         
         let curLvl = exp.level;
-        let nxtLvl = exp.level * 300 + (exp.level * 5);
         let curExp = exp.exp;
-        let nxtLvlExp = curLvl * 300 + (exp.level * 5);
-        let expDiff = nxtLvlExp - curExp;
-        
-        if(exp.level === 0){ // Si el nivel del usuario a penas es 0, para subir de nivel deberá tener 100 de exp.
-          nxtLvlExp = 100;
-        }
-        
-        if(exp.level === 1){
-            nxtLvl = 200;
-            nxtLvlExp = 200;
-        }
+        let nxtLvlExp = 10 * (exp.level ** 2) + 50 * exp.level + 100; // fórmula de MEE6. 5 * (level ^ 2) + 50 * level + 100
         
         let bdData = await GlobalData.findOne({
           "info.type": "birthdayData",

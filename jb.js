@@ -1038,7 +1038,7 @@ bot.on("message", async message => {
 
         // ################################# E X P ################################
 
-        let expToAdd = Math.ceil(Math.random() * 5);
+        let expToAdd = Math.ceil(Math.random() * 30);
 
         // VIP 200%
         if (message.member.roles.cache.find(x => x.id === "529275759521431553")) {
@@ -1111,13 +1111,8 @@ bot.on("message", async message => {
               // Si el usuario ya tiene Experiencia
 
               let curLvl = uExp.level;
-              let nxtLvl = uExp.level * 300 + (uExp.level * 5);
+              let nxtLvl = 10 * (uExp.level ** 2) + 50 * uExp.level + 100; // fórmula de MEE6.
               let curExp = uExp.exp;
-
-              if (uExp.level === 0) {
-                // Si el nivel del usuario a penas es 0, para subir de nivel deberá tener 100 de exp.
-                nxtLvl = 100;
-              }
 
               uExp.exp = uExp.exp + expToAdd;
 
@@ -1176,6 +1171,8 @@ bot.on("message", async message => {
                 } else if (uExp.level === 100) {
                   message.channel.send(`**${author} está determinado.\n— ¡SUBE A NIVEL 100!**`)
                   message.member.roles.add(Config.lvl100);
+                } else if (uExp.level === 200) {
+                  message.channel.send(`**${author} literal mente vive AQUÍ.\n— ¡SUBE A NIVEL 200!**`)
                 }
               }
 
