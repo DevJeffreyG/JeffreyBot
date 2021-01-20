@@ -896,6 +896,11 @@ bot.on("message", async message => {
         `${tmoney}`
       );
 
+      text = text.replace(
+        new RegExp("{ MEMBER }", "g"),
+        `${randommember}`
+      );
+
       let embed = new Discord.MessageEmbed()
         .setColor(Colores.rojo)
         .setDescription(text);
@@ -904,6 +909,7 @@ bot.on("message", async message => {
         
       } else {
         let rAuthor = guild.members.cache.find(x => x.id === index.author);
+        console.log(rAuthor)
         embed.setFooter(`Respuesta sugerida por ${rAuthor.user.tag}`, guild.iconURL())
       }
 

@@ -15,7 +15,7 @@
         },
         {
             "author": "None",
-            "text": "Le haces un dibujo a ${randommember} y te paga { MONEY }"
+            "text": "Le haces un dibujo a { MEMBER } y te paga { MONEY }"
         },
         {
             "author": "None",
@@ -27,7 +27,7 @@
         },
         {
             "author": "None",
-            "text": "${randommember} te da { MONEY } por cambiar de puesto en el McDonalds"
+            "text": "{ MEMBER } te da { MONEY } por cambiar de puesto en el McDonalds"
         },
         {
             "author": "366361149027123200",
@@ -39,7 +39,7 @@
         },
         {
             "author": "454452293954437120",
-            "text": "${randommember} te regaló un bono de diez mil dólares y al recibir el pago viste que tenías { MONEY }"
+            "text": "{ MEMBER } te regaló un bono de diez mil dólares y al recibir el pago viste que tenías { MONEY }"
         },
         {
             "author": "366361149027123200",
@@ -127,7 +127,7 @@
         },
         {
             "author": "None",
-            "text": "Te cuelgas de la fama de ${randommember} y logras sacar { MONEY } con el clickbait"
+            "text": "Te cuelgas de la fama de { MEMBER } y logras sacar { MONEY } con el clickbait"
         }
     ]
 }
