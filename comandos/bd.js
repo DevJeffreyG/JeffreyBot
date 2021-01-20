@@ -66,7 +66,7 @@ module.exports.run = async (bot, message, args) => {
 
     userBD = query ? query : userBD;
 
-    if((!args[0] || !args[1]) && args[0] != "lock") return message.channel.send(embed);
+    if((args[0] != "lock" && !args[1]) || (!args[0] || !args[1])) return message.channel.send(embed);
 
     switch(args[0].toLowerCase()){
       case "lock":
