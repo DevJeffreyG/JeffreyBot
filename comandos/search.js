@@ -1,5 +1,5 @@
 const Config = require("./../base.json");
-const Colores = require("./../colores.json");
+const Colores = require("./../resources/colores.json");
 const Discord = require("discord.js");
 const prefix = Config.prefix;
 const search = require("yt-search");

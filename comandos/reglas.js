@@ -1,6 +1,6 @@
 const Config = require("./../base.json");
-const Colores = require("./../colores.json");
-const reglas = require("./../reglas.json");
+const Colores = require("./../resources/colores.json");
+const reglas = require("./../resources/reglas.json");
 const Discord = require("discord.js");
 const prefix = Config.prefix;
 

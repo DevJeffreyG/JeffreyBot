@@ -1,9 +1,9 @@
 const Config = require("./../base.json");
-const Colores = require("./../colores.json");
+const Colores = require("./../resources/colores.json");
 const Discord = require("discord.js");
 const ms = require("ms");
 const prefix = Config.prefix;
-const functions = require("./../functions.js");
+const functions = require("./../resources/functions.js");
 
 /* ##### MONGOOSE ######## */
 

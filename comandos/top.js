@@ -1,7 +1,7 @@
 const Config = require("./../base.json");
-const Colores = require("./../colores.json");
+const Colores = require("./../resources/colores.json");
 const Discord = require("discord.js");
-const Emojis = require("./../emojis.json");
+const Emojis = require("./../resources/emojis.json");
 const prefix = Config.prefix;
 const mainChannel = Config.mainChannel;
 

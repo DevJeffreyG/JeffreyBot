@@ -18,9 +18,10 @@ http.get(“http://<your app name>.herokuapp.com”);
 */
 
 const Config = require("./base.json");
-const Rainbow = require("./rainbow.json");
-const Colores = require("./colores.json");
-const Emojis = require("./emojis.json");
+const Rainbow = require("./resources/rainbow.json");
+const Colores = require("./resources/colores.json");
+const Emojis = require("./resources/emojis.json");
+const Responses = require("./resources/coinsresponses.json");
 const Discord = require("discord.js");
 const { Structures } = require('discord.js');
 const anyBase = require("any-base");
@@ -60,7 +61,7 @@ let functions;
 
 // mantenimiento
 const disableEXPs = false; // deshabilitar ganar exp o jeffros
-const disableAwards = true; // deshabilitar awards.
+const disableAwards = false; // deshabilitar awards.
 
 // WEAS PARA EVENTOS:
 
@@ -888,46 +889,23 @@ bot.on("message", async message => {
         });
       }
 
-      let responses = [
-        `Te ofreces para dar clases particulares a domicilio, terminas con intenciones suicidas pero ganas ${tmoney}`, //1
-        `Hoy te flipas en la oficina y te dan ${tmoney}`, //2
-        `Repartes el periódico por tu barrio, ganas ${tmoney}`,
-        `Le haces un dibujo a ${randommember} y te paga ${tmoney}`,
-        `Te patrocina una marca reconocida y te dan ${tmoney}`,
-        `Te vuelves youtuber y te dan ${tmoney}`,
-        `${randommember} te da ${tmoney} por cambiar de puesto en el McDonalds`,
-        `Vas a buscar trabajo en el estadero de la esquina, la señora que atiende te escupe en la cara pero aun así te dan ${tmoney}`, // AlagX#5391 - No 1 ---- 8
-        `Buscas trabajo en McDonalds pero acabas en Burger King, no sabes como paso pero te dan ${tmoney}`, // BokaShoTeAmo#5512 - No 1
-        `${randommember} te regaló un bono de diez mil dólares y al recibir el pago viste que tenías ${tmoney}.`, // FraZ#4046 - No 1
-        `Te vuelves streamer y eres muy popular, luego tu canal muere, aún así recibes ${tmoney}`, // AlagX#5391 - No 2
-        `En tu celular cargas 10$ de Saldo pero al ver tu Saldo actual, miras que no recargo nada y tenés ${tmoney}`, // FraZ#4046 - No 2
-        `Compraste una mansion por 1 millon de dolares, pero al final se quedaron con tu dinero, les reclamas pero no te lo devuelven todo, te dan ${tmoney}`, //BokaShoTeAmo#5512 - No 2
-        `Te compras un mueble pero viene todo roto, reclamas y te dan ${tmoney}`, // jųæņđłø#7339 - No 1
-        `Pasas de hacer streams en Twitch a Mixer, la gente te odia pero aún así te dan ${tmoney} por esto`, // AlagX#5391 - No 3
-        `Atracas un banco, corres lo más rápido que puedes y logras escapar de la policía, luego te das cuenta que se te cayó parte del dinero y te quedas con ${tmoney}`, // AlagX#5391 - No 4
-        `Vendes un juego en G2A para tu saldo de PayPal, pero al revisarlo, solo te llega ${tmoney}`, // 4K#1583 - No 1
-        `Trabajas en un puesto de comida rápida, un cliente se queja de su comida por su desagradable textura, pero aún así te dio ${tmoney}`, // 4K#1583 - No 2
-        `Intentas piratear una pelicula y terminas hackeado, ves tu PayPal y tienes ${tmoney}`, // juandlo#7339 - No 2
-        `Trabajas en una empresa de PCs en el primer dia te corren pero te dan ${tmoney}`, // Shya#5512 - No 3
-        `Gastas medio millón de dólares en cierto juego que empieza por F, pero pierdes todo tu dinero, aún así logras trabajar de conserje en cierta compañía que empieza por E y te dan ${tmoney}`, // Hat Kid#5391 - No 5
-        `Participas en un torneo de GH3, llegas sin dedos a tu hogar pero aún sientes que valió la pena, recibes ${tmoney}`, // 4KK#1583 - No 2
-        `Haces varias plegarias hacia al cielo y de él te caen ${tmoney} y algún que otro rayo`, // Hat Kid#5391 - No 6
-        `Trabajas de conserje en una compañía multimillonaria y te dan ${tmoney}`, // Hat Kid#5391 - No 7
-        `Trabajas en una pizzería con animatrónicos supuestamente embrujada, logras sobrevivir y los dueños te pagan ${tmoney}`, // Hat Kid#5391 - No 8
-        `Trabajas de cirujano y aunque te de algo de asco te dan ${tmoney}`, // juandlo#7339 - No 3
-        `Trabajas como programador y haces un gran juego, ganas ${tmoney}`, // El Faw que ahora es Blixer#9125 - No 1
-        `Creas tu propio estudio indie y creas un videojuego pero la gente piratea tu juego y solo consigues ${tmoney}`, // Hat Kid#5391 - No 9
-        `MrBeast te regala ${tmoney} mientras te comes una pizza`,
-        `Participas en un sorteo. No ganas nada pero te encuentras ${tmoney} cuando sales de casa`,
-        `Le copias una canción a un artista, logras sacar ${tmoney} antes de que te detecte el copyright`,
-        `Te cuelgas de la fama de ${randommember} y logras sacar ${tmoney} con el clickbait`
-      ];
-
-      let text = responses[Math.floor(Math.random() * responses.length)];
+      let index = Responses.r[Math.floor(Math.random() * responses.length)];
+      let textString = index.text;
+      let text = textString.replace(
+        new RegExp("{ MONEY }", "g"),
+        `${tmoney}`
+      );
 
       let embed = new Discord.MessageEmbed()
         .setColor(Colores.rojo)
         .setDescription(text);
+
+      if(index.author.toUpperCase() === "NONE"){
+        
+      } else {
+        let rAuthor = guild.members.cache.find(x => x.id === index.author);
+        embed.setFooter(`Respuesta sugerida por ${rAuthor.user.tag}`, guild.iconURL())
+      }
 
       Jeffros.findOne(
         {
@@ -1692,7 +1670,7 @@ if (process.env.mantenimiento != 1) {
 
   module.exports.bot = bot;
 
-  functions = require("./functions.js");
+  functions = require("./resources/functions.js");
   
 } else {
   console.log("########## BOT EN MANTENIMIENTO, NO LOGEADO #############");
