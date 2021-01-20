@@ -1150,7 +1150,7 @@ bot.on("message", async message => {
                   message.channel.send(`**${author} casi logra llegar al punto medio.\n— ¡SUBE A NIVEL 40!**`)
                   message.member.roles.add(Config.lvl40);
                 } else if (uExp.level === 50) {
-                  message.channel.send(`**${author} está a mitad de camino.\n— ¡SUBE A NIVEL 50!**`)
+                  message.channel.send(`**${author} literalmente está... ¿determinadx?...\n— ¡SUBE A NIVEL 50!**`)
                   message.member.roles.add(Config.lvl50);
                 } else if (uExp.level === 60) {
                   message.channel.send(`**${author} no se rinde.\n— ¡SUBE A NIVEL 60!**`)
@@ -1169,7 +1169,7 @@ bot.on("message", async message => {
                   message.member.roles.add(Config.lvl99);
                   message.member.roles.add(Config.vipRole);
                 } else if (uExp.level === 100) {
-                  message.channel.send(`**${author} está determinado.\n— ¡SUBE A NIVEL 100!**`)
+                  message.channel.send(`**${author} está determinadx.\n— ¡SUBE A NIVEL 100!**`)
                   message.member.roles.add(Config.lvl100);
                 } else if (uExp.level === 200) {
                   message.channel.send(`**${author} literal mente vive AQUÍ.\n— ¡SUBE A NIVEL 200!**`)
