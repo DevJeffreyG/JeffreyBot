@@ -73,7 +73,7 @@ module.exports.run = async (bot, message, args) => {
         });
 
         let dataExists = bdData ? true : false;
-        let bdString;
+        let bdString = "";
 
         if(dataExists){
           day = bdData.info.birthd;
