@@ -67,13 +67,13 @@ module.exports.run = async (bot, message, args) => {
 
     userBD = query ? query : userBD;
 
-    if((args[0] && args[0] != "lock") || (!args[0])) return message.channel.send(embed);
+    if(!args[0]) return message.channel.send(embed);
 
     // revisar si ya pasó el año desde el lock
     let now = new Date();
     let lockedSince = userBD.lockedSince ? userBD.lockedSince : now;
     let lockedDuration = 365;
-    
+
     if(now - lockedSince >= lockedDuration){
       message.reply("hmmm, si estás usando este comando, ¿será para cambiar algo? he quitado el bloqueo de tu fecha de cumpleaños, reactívala cuando gustes.");
 
@@ -82,6 +82,8 @@ module.exports.run = async (bot, message, args) => {
       userBD.markModified("info");
       await userBD.save();
     }
+
+    if(userBD.info.isLocked) return message.react("537804262600867860");
 
     switch(args[0].toLowerCase()){
       case "lock":
