@@ -67,8 +67,6 @@ module.exports.run = async (bot, message, args) => {
 
     userBD = query ? query : userBD;
 
-    if(!args[0]) return message.channel.send(embed);
-
     // revisar si ya pasó el año desde el lock
     let now = new Date();
     let lockedSince = userBD.info.lockedSince ? userBD.info.lockedSince : now;
@@ -81,6 +79,8 @@ module.exports.run = async (bot, message, args) => {
       userBD.markModified("info");
       await userBD.save();
     }
+
+    if(!args[0]) return message.channel.send(embed);
 
     if(userBD.info.isLocked) return message.react("537804262600867860");
 
