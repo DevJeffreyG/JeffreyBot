@@ -889,7 +889,7 @@ bot.on("message", async message => {
         });
       }
 
-      let index = Responses.r[Math.floor(Math.random() * responses.length)];
+      let index = Responses.r[Math.floor(Math.random() * Responses.r.length)];
       let textString = index.text;
       let text = textString.replace(
         new RegExp("{ MONEY }", "g"),
