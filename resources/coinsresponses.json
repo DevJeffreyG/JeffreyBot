@@ -47,7 +47,7 @@
         },
         {
             "author": "600555878327910430",
-            "text": "En tu celular cargas 10$ de Saldo pero al ver tu Saldo actual, miras que no recargo nada y tenés { MONEY }"
+            "text": "Recargas tu cuenta, te das cuenta que no recarga nada y terminas con { MONEY }"
         },
         {
             "author": "464866374133612545",
@@ -78,12 +78,12 @@
             "text": "Trabajas en una empresa de PCs en el primer dia te corren pero te dan { MONEY }"
         },
         {
-            "author": "366361149027123200",
-            "text": "Gastas medio millón de dólares en cierto juego que empieza por F, pero pierdes todo tu dinero, aún así logras trabajar de conserje en cierta compañía que empieza por E y te dan { MONEY }"
+            "author": "None",
+            "text": "Acabas de gastar { MONEY } en un juego muerto, espero que estés orgullos@"
         },
         {
             "author": "589570477496860710",
-            "text": "Participas en un torneo de GH3, llegas sin dedos a tu hogar pero aún sientes que valió la pena, recibes { MONEY }"
+            "text": "Participas en un torneo de GH, llegas sin dedos a tu hogar pero aún sientes que valió la pena, recibes { MONEY }"
         },
         {
             "author": "366361149027123200",
@@ -92,10 +92,6 @@
         {
             "author": "366361149027123200",
             "text": "Trabajas de conserje en una compañía multimillonaria y te dan { MONEY }"
-        },
-        {
-            "author": "366361149027123200",
-            "text": "Trabajas en una pizzería con animatrónicos supuestamente embrujada, logras sobrevivir y los dueños te pagan { MONEY }"
         },
         {
             "author": "366361149027123200",
@@ -128,6 +124,38 @@
         {
             "author": "None",
             "text": "Te cuelgas de la fama de { MEMBER } y logras sacar { MONEY } con el clickbait"
+        },
+        {
+            "author": "None",
+            "text": "El vídeo de { MEMBER } se hace viral, intentas copiar la idea y te quedas con { MONEY }"
+        },
+        {
+            "author": "None",
+            "text": "Crackeas un juego para una compañía fraudulenta por { MONEY }"
+        },
+        {
+            "author": "None",
+            "text": "Mientras caminabas por tu barrio encuentras { MONEY } tirados en la carretera"
+        },
+        {
+            "author": "None",
+            "text": "Las rosas son rojas, las violetas azules, toma, { MONEY } que estás pobre"
+        },
+        {
+            "author": "None",
+            "text": "{ MEMBER } te ha confundido por mendig@, te regala { MONEY }"
+        },
+        {
+            "author": "None",
+            "text": "Creas tu empresa de ensueño de licuadoras y consigues { MONEY }"
+        },
+        {
+            "author": "None",
+            "text": "Intentas llamar la atención del público con clickbait, ganas { MONEY }"
+        },
+        {
+            "author": "None",
+            "text": "Haces alto cover de la canción de { MEMBER } y te da { MONEY } por el intento"
         }
     ]
 }
