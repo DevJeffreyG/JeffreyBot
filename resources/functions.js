@@ -36,17 +36,17 @@ mongoose.connect(`${process.env.MONGOCONNECT}`, {
   useUnifiedTopology: true
 });
 
-const Jeffros = require("./modelos/jeffros.js");
-const Exp = require("./modelos/exp.js");
-const AutoRole = require("./modelos/autorole.js");
-const Toggle = require("./modelos/toggle.js");
-const Warn = require("./modelos/warn.js");
-const DarkItems = require("./modelos/darkitems.js");
-const Vault = require("./modelos/vault.js");
-const WinVault = require("./modelos/winVault.js");
-const Hint = require("./modelos/hint.js");
-const GlobalData = require("./modelos/globalData.js");
-const Stats = require("./modelos/darkstats.js");
+const Jeffros = require("../modelos/jeffros.js");
+const Exp = require("../modelos/exp.js");
+const AutoRole = require("../modelos/autorole.js");
+const Toggle = require("../modelos/toggle.js");
+const Warn = require("../modelos/warn.js");
+const DarkItems = require("../modelos/darkitems.js");
+const Vault = require("../modelos/vault.js");
+const WinVault = require("../modelos/winVault.js");
+const Hint = require("../modelos/hint.js");
+const GlobalData = require("../modelos/globalData.js");
+const Stats = require("../modelos/darkstats.js");
 
 /* ##### MONGOOSE ######## */
 
