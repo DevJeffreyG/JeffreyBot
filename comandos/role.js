@@ -31,7 +31,7 @@ module.exports.run = async (bot, message, args) => {
     if(!role) return message.reply(`No encontré ese rol, verifica que hayas escrito bien el nombre.`);
 
     let finalEmbed = new Discord.MessageEmbed()
-    .setAuthor(`Role: ${roleName}`, guild.avatarURL)
+    .setAuthor(`Role: ${roleName}`, guild.iconURL())
     .setDescription(`
 **—** Nombre del Role: \`${roleName}\`.
 **—** ID: \`${role.id}\`.

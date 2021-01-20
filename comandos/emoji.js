@@ -30,7 +30,7 @@ module.exports.run = async (bot, message, args) => {
     if(!emoji) return message.reply(`No encontré ese emoji, verifica que hayas escrito bien el nombre.`);
 
     let finalEmbed = new Discord.MessageEmbed()
-    .setAuthor(`Role: ${emojiName}`, guild.avatarURL)
+    .setAuthor(`| Emote: ${emojiName}`, emoji.url)
     .setDescription(`
 **—** Nombre del Role: \`${emojiName}\`.
 **—** ID: \`${emoji.id}\`.
