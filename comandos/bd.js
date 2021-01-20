@@ -191,7 +191,8 @@ module.exports.run = async (bot, message, args) => {
                 });
               }
             });
-    })
+        })
+        break;
         
       case "all":
         // bd all DD MM
