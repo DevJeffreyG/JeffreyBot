@@ -909,8 +909,8 @@ bot.on("message", async message => {
         
       } else {
         let rAuthor = guild.members.cache.find(x => x.id === index.author);
-        console.log(rAuthor)
-        embed.setFooter(`Respuesta sugerida por ${rAuthor.user.tag}`, guild.iconURL())
+        let suggestor = rAuthor ? rAuthor.user.tag : "un usario del server";
+        embed.setFooter(`Respuesta sugerida por ${suggestor}`, guild.iconURL())
       }
 
       Jeffros.findOne(
