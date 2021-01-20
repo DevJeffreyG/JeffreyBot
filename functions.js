@@ -710,7 +710,7 @@ const intervalGlobalDatas = async function(justBoost){
       let bdMonth = bd.info.birthm;
       let isLocked = bd.info.isLocked ? bd.info.isLocked : false;
 
-      if(!isLocked) return;
+      if(!isLocked || bd.info.lockedSince) return;
       if(!bdDay || !bdMonth) return;
       let now = new Date();
       let actualDay = now.getDate();
