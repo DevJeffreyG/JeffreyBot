@@ -7,7 +7,7 @@ const { Structures } = require('discord.js');
 const anyBase = require("any-base");
 const prettyms = require("pretty-ms");
 const dec2hex = anyBase(anyBase.DEC, anyBase.HEX);
-let { bot } = require("./jb.js");
+let { bot } = require("../jb.js");
 
 const fs = require("fs");
 const ms = require("ms");
