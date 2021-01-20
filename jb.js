@@ -924,11 +924,11 @@ bot.on("message", async message => {
           setTimeout(() => {
             coolded.delete(author.id)
             workCooldown.delete(message.author.id);
-          }, ms("30s"));
+          }, ms("10m"));
 
           if (workCooldown.has(message.author.id)){
             let timer = coolded.get(author.id)
-            let left = prettyms((ms("30s")) - (new Date().getTime() - timer), {secondsDecimalDigits: 0 });
+            let left = prettyms((ms("10m")) - (new Date().getTime() - timer), {secondsDecimalDigits: 0 });
             return message.reply(
               `Usa este comando en ${left}, ${randomCumplidos}`
             );
