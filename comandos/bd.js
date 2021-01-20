@@ -182,9 +182,6 @@ module.exports.run = async (bot, message, args) => {
               msg.delete();
 
               message.react("✅")
-              .then(m => {
-                m.delete({timeout: 7000})
-              });
             })
 
             no.on("collect", r => {
