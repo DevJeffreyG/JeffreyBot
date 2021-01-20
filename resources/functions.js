@@ -1,4 +1,4 @@
-const Config = require("./base.json");
+const Config = require("../base.json");
 const Rainbow = require("./rainbow.json");
 const Colores = require("./colores.json");
 const Emojis = require("./emojis.json");
