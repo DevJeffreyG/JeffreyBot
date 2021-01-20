@@ -17,7 +17,7 @@ module.exports.run = async (bot, message, args) => {
   let addCounter = 0;
   let removeCounter = 0;
   let updateCounter = 0;
-  let presences = guild.presences.cache.find(x => x.userID === author.id);
+  let presences = message.guild.presences.cache.find(x => x.userID === author.id);
 
   let userIsOnMobible = presences.clientStatus.mobile === "online" && !presences.clientStatus.desktop ? true : false;
 
