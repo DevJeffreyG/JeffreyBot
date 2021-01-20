@@ -75,7 +75,7 @@ module.exports.run = async (bot, message, args) => {
         let dataExists = bdData ? true : false;
         let bdString = "";
 
-        if(dataExists){
+        if(dataExists && bdData.info.isLocked === true){
           day = bdData.info.birthd;
           month = bdData.info.birthm;
 
