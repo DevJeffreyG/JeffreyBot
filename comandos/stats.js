@@ -8,6 +8,7 @@ const prefix = Config.prefix;
 
 const Jeffros = require("../modelos/jeffros.js");
 const Exp = require("../modelos/exp.js");
+const GlobalData = require("../modelos/globalData.js");
 
 /* ##### MONGOOSE ######## */
 
@@ -43,7 +44,7 @@ module.exports.run = async (bot, message, args) => {
     Jeffros.findOne({
       serverID: guild.id,
       userID: member.user.id
-    }, (err2, jeffros) => {
+    }, async (err2, jeffros) => {
       if(err2) throw err2;
       
       if(!jeffros || !exp){
@@ -66,13 +67,82 @@ module.exports.run = async (bot, message, args) => {
             nxtLvlExp = 200;
         }
         
-        
+        let bdData = await GlobalData.findOne({
+          "info.type": "birthdayData",
+          "info.userID": author.id
+        });
+
+        let dataExists = bdData ? true : false;
+        let bdString;
+
+        if(dataExists){
+          day = bdData.info.birthd;
+          month = bdData.info.birthm;
+
+          switch(month){
+            case "1":
+              month = "Enero"
+              break;
+
+            case "2":
+              month = "Febrero"
+              break;
+
+            case "3":
+              month = "Marzo"
+              break;
+
+            case "4":
+              month = "Abril"
+              break;
+
+            case "5":
+              month = "Mayo"
+              break;
+
+            case "6":
+              month = "Junio"
+              break;
+
+            case "7":
+              month = "Julio"
+              break;
+
+            case "8":
+              month = "Agosto"
+              break;
+
+            case "9":
+              month = "Septiembre"
+              break;
+
+            case "10":
+              month = "Octubre"
+              break;
+
+            case "11":
+              month = "Noviembre"
+              break;
+
+            case "12":
+              month = "Diciembre"
+              break;
+
+            default:
+              month = null;
+              break;
+          }
+
+          bdString = day != null && month != null ? `**— Cumpleaños**: ${day} de ${month}.` : "";
+        }
+
         let meEmbed = new Discord.MessageEmbed()
         .setAuthor(`| Estadísticas de ${member.user.tag}`, member.user.displayAvatarURL())
         .setDescription(`**— Nivel**: ${exp.level}
 **— EXP**: ${exp.exp} / ${nxtLvlExp}.
 **— Jeffros**: ${Emojis.Jeffros}${jeffros.jeffros}.  
-**— Reputación**: ${exp.reputacion}.`)
+**— Reputación**: ${exp.reputacion}.
+${bdString}`)
         .setThumbnail(Config.jeffreyguildIcon)
         .setColor(Colores.verde);
 
