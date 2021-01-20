@@ -716,9 +716,7 @@ const intervalGlobalDatas = async function(justBoost){
       let actualDay = now.getDate();
       let actualMonth = now.getMonth();
 
-      console.log(actualDay, bdDay, "$" , actualMonth - 1, bdMonth);
-
-      if((actualDay == bdDay) && (actualMonth - 1 == bdMonth)){ // actualMonth - 1 ( 0 = ENERO && 11 = DICIEMBRE )
+      if((actualDay == bdDay) && (actualMonth + 1 == bdMonth)){ // actualMonth + 1 ( 0 = ENERO && 11 = DICIEMBRE )
         // ES EL CUMPLEAÑOS
         if(!member.roles.cache.find(x => x.id === bdRole.id)) return member.roles.add(bdRole);
       } else {
