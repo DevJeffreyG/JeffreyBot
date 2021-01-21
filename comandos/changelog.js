@@ -107,6 +107,8 @@ module.exports.run = async (bot, message, args) => {
   .setFooter(`* Si estás en PC, poniendo el mouse sobre '${viewExtension}', podrás ver detalles extendidos de los cambios.\n— En móvil usa '${prefix}changelog extended'.`)
   .setColor(Colores.verde);
 
+  let quepasa;
+
   for(let i = 0; i < changes.length; i++){
     let addToDesc;
     let hasExtended = true;
@@ -136,7 +138,7 @@ module.exports.run = async (bot, message, args) => {
         } else {
           addToDesc = hasExtended ? `${added} ${desc}. [${viewExtension}](${message.url} '${extendedDetails}')\n` : `${added} ${desc}.\n`;
         }
-        embed.setDescription(embed.description + addToDesc)
+        quepasa = embed.description + addToDesc
         addCounter++;
         break;
 
@@ -146,7 +148,7 @@ module.exports.run = async (bot, message, args) => {
         } else {
           addToDesc = hasExtended ? `${updated} ${desc}. [${viewExtension}](${message.url} '${extendedDetails}')\n` : `${updated} ${desc}.\n`;
         }
-        embed.setDescription(embed.description + addToDesc)
+        quepasa = embed.description + addToDesc
         updateCounter++;
         break;
 
@@ -156,13 +158,14 @@ module.exports.run = async (bot, message, args) => {
         } else {
           addToDesc = hasExtended ? `${removed} ${desc}. [${viewExtension}](${message.url} '${extendedDetails}')\n`: `${removed} ${desc}.\n`;
         }
-        embed.setDescription(embed.description + addToDesc)
+        quepasa = embed.description + addToDesc
         removeCounter++;
         break;
     }
   }
 
-  const arr2 = embed.description.match(/.{1,2048}/g); // Build the array
+  console.log(quepasa)
+  const arr2 = quepasa.match(/.{1,2048}/g); // Build the array
 
   console.log(arr2)
 
@@ -173,6 +176,8 @@ module.exports.run = async (bot, message, args) => {
 
     await console.log(chunk) // Wait for the embed to be sent
   }
+
+  message.channel.send(embed)
 
 }
 
