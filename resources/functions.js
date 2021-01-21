@@ -50,7 +50,7 @@ const Stats = require("../modelos/darkstats.js");
 
 /* ##### MONGOOSE ######## */
 
-const findLvls5 = function(guild){
+const findLvls5 = async function(guild){
   let role = bot.user.id === Config.testingJBID ? guild.roles.cache.find(x => x.id === "791006500973576262") : guild.roles.cache.find(x => x.id === Config.dsRole);
   Exp.find({
     serverID: guild.id
@@ -63,7 +63,7 @@ const findLvls5 = function(guild){
       let exp = exps[i];
       let member = guild.members.cache.find(x => x.id === exp.userID);
 
-      if(!member.roles.cache.find(x => x.id === role.id)) member.roles.add(role);
+      if(!member.roles.cache.find(x => x.id === role.id)) await member.roles.add(role);
     }
   })
 }
