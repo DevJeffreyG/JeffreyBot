@@ -4,39 +4,39 @@
 	"description": "El bot del servidor oficial de JeffreyG, remasterizado.",
 	"main": "jb.js",
 	"scripts": {
-	  "start": "node jb.js"
+		"start": "node jb.js"
 	},
 	"engines": {
-	  "node": "12.16.1"
+		"node": "12.16.1"
 	},
 	"author": "JeffreyG",
 	"license": "ISC",
 	"dependencies": {
-	  "any-base": "^1.1.0",
-	  "chance": "^1.1.6",
-	  "discord.js": "^12.2.0",
-	  "express": "^4.17.1",
-	  "fs": "0.0.2",
-	  "google": "^2.1.0",
-	  "is-hexcolor": "^1.0.0",
-	  "mongoose": "^5.9.18",
-	  "ms": "^2.1.2",
-	  "node-opus": "^0.3.3",
-	  "on-finished": "^2.3.0",
-	  "pretty-ms": "^7.0.0",
-	  "request": "^2.88.2",
-	  "seconds-to-human": "^0.0.1",
-	  "tmi.js": "^1.5.0",
-	  "translate-google": "^1.3.5",
-	  "yt-search": "^2.1.8",
-	  "ytdl-core": "^3.2.0"
+		"any-base": "^1.1.0",
+		"chance": "^1.1.6",
+		"discord.js": "^12.5.1",
+		"express": "^4.17.1",
+		"fs": "0.0.2",
+		"google": "^2.1.0",
+		"is-hexcolor": "^1.0.0",
+		"mongoose": "^5.11.13",
+		"ms": "^2.1.3",
+		"node-opus": "^0.3.3",
+		"on-finished": "^2.3.0",
+		"pretty-ms": "^7.0.1",
+		"request": "^2.88.2",
+		"seconds-to-human": "^0.0.1",
+		"tmi.js": "^1.7.1",
+		"translate-google": "^1.4.3",
+		"yt-search": "^2.5.2",
+		"ytdl-core": "^3.4.2"
 	},
 	"repository": {
-	  "type": "git",
-	  "url": "git+https://github.com/JeffreyRandom/JeffreyBot.git"
+		"type": "git",
+		"url": "git+https://github.com/JeffreyRandom/JeffreyBot.git"
 	},
 	"bugs": {
-	  "url": "https://github.com/JeffreyRandom/JeffreyBot/issues"
+		"url": "https://github.com/JeffreyRandom/JeffreyBot/issues"
 	},
 	"homepage": "https://github.com/JeffreyRandom/JeffreyBot#readme"
-  }
+}
