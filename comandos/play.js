@@ -64,7 +64,7 @@ module.exports.run = async (bot, message, args, active) => {
   }
 
   //definir info
-  let info = await ytdl.getInfo(args[0], {});
+  let info = await ytdl.getInfo(args[0]);
   // fetch al active
   let data = active.get(message.guild.id) || {};
 
