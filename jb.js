@@ -658,6 +658,9 @@ bot.on("ready", async () => {
 
   channel.send("Reviví.");
 
+  /* Buscar usuarios nivel 5 sin role nivel 5 */
+  functions.findLvls5(guild)
+
   /* ############ GLOBAL DATAS ############ */
   console.log("Ciclo de Global Datas iniciado")
   functions.intervalGlobalDatas();

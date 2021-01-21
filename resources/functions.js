@@ -50,6 +50,24 @@ const Stats = require("../modelos/darkstats.js");
 
 /* ##### MONGOOSE ######## */
 
+const findLvls5 = function(guild){
+  let role = bot.user.id === Config.testingJBID ? guild.roles.cache.find(x => x.id === "791006500973576262") : guild.roles.cache.find(x => x.id === Config.dsRole);
+  Exp.find({
+    serverID: guild.id
+  }, async (err, exps) => {
+    if(err) throw err;
+
+    if(!exps) return;
+
+    for(let i = 0; i < exps.length; i++){
+      let exp = exps[i];
+      let member = guild.members.cache.find(x => x.id === exp.userID);
+
+      if(!member.roles.cache.find(x => x.id === role.id)) member.roles.add(role);
+    }
+  })
+}
+
 // Turn bot off (destroy), then turn it back on
 const resetBot = function (channel) {
   // send channel a message that you're resetting bot [optional]
@@ -1012,5 +1030,6 @@ module.exports = {
     Warns,
     Interest,
     Duration,
-    vaultMode
+    vaultMode,
+    findLvls5
 }
