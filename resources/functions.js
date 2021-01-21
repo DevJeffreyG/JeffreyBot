@@ -165,14 +165,20 @@ const intervalGlobalDatas = async function(justBoost){
   let guild;
   let bdRole;
   let logs;
+  let dsChannel = bot.channels.cache.find(x => x.id === Config.dsChannel);
+  let dsNews;
+
   if(bot.user.id === Config.testingJBID){
     guild = bot.guilds.cache.find(x => x.id === "482989052136652800");
     bdRole = guild.roles.cache.find(x => x.id === "544687105977090061");
     logs = guild.channels.cache.find(x => x.id === "483108734604804107");
+    dsNews = guild.roles.cache.find(x => x.id === "790431614378704906");
+    dsChannel = bot.channels.cache.find(x => x.id === "790431676970041356");
   } else {
     guild = bot.guild.cache.find(x => x.id === Config.jgServer);
     bdRole = guild.roles.cache.find(x => x.id === Config.bdRole);
     logs = guild.channels.cache.find(x => x.id === Config.logChannel);
+    dsNews = guild.roles.cache.find(x => x.id === Config.dsnews);
   }
 
   // buscar un tipo de boost
