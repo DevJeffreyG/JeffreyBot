@@ -166,7 +166,7 @@ module.exports.run = async (bot, message, args) => {
     .setDescription(chunk)
     .setColor(Colores.verde);
 
-    await message.channel.send({ chunkEmbeds2 }); // Wait for the embed to be sent
+    await message.channel.send(chunkEmbeds2); // Wait for the embed to be sent
   }
 
 }
