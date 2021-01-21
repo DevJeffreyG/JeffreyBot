@@ -58,7 +58,7 @@ module.exports.run = async (bot, message, args, active) => {
   // validar info
   let validate = await ytdl.validateURL(args[0]);
 
-  if (!validate) {
+  if (!validate || !args[0]) {
     let commandFile = require("./search.js");
     return commandFile.run(bot, message, args, active);
   }
