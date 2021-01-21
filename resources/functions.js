@@ -385,7 +385,7 @@ const intervalGlobalDatas = async function(justBoost){
         dark.markModified("info");
         dark.save();
       } else {
-        console.log("Aún no ha pasado el tiempo para cambiar la inflacion", pastDays, dark.info.duration);
+        
       }
     }
   })
