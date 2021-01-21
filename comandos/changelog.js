@@ -162,9 +162,11 @@ module.exports.run = async (bot, message, args) => {
         removeCounter++;
         break;
     }
-  }
 
   console.log(quepasa)
+
+  }
+
   const arr2 = quepasa.match(/.{1,2048}/g); // Build the array
 
   console.log(arr2)
