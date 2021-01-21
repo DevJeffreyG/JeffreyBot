@@ -40,13 +40,7 @@
         },
         {
             "type": "removed",
-            "desc": "Se ha eliminado el comando `{ PREFIX }traducir`",
-            "extended": "— Problemas de compatibilidad con las políticas de Google."
-        },
-        {
-            "type": "removed",
-            "desc": "Se ha eliminado el comando `{ PREFIX }perfil`",
-            "extended": "— No se usaba. El sistema de cumpleaños será re-integrado con el comando `{ PREFIX }bd`."
+            "desc": "Se ha eliminado los comandos `{ PREFIX }traducir`, `{ PREFIX }perfil`"
         }
     ],
     "bienPng": "http://i.imgur.com/M6hqbcc.png",
