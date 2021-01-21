@@ -20,23 +20,13 @@
         },
         {
             "type": "updated",
-            "desc": "Se ha actualizado el comando `{ PREFIX }stats`",
-            "extended": "— Ahora podrá usarse también como '{ PREFIX }perfil'.\n— Ahora se podrá ver la fecha de cumpleaños del usuario."
-        },
-        {
-            "type": "updated",
-            "desc": "Se ha actualizado el comando `{ PREFIX }botinfo`",
-            "extended": "— Ahora es '{ PREFIX }changelog' o '{ PREFIX }changes'.\n— Ahora los cambios serán más detallados con este comando."
+            "desc": "Se ha actualizado los comandos `{ PREFIX }stats`, `{ PREFIX }botinfo`, `{ PREFIX }serverinfo`",
+            "extended": "— '{ PREFIX }stats' o '{ PREFIX }perfil'.\n— '{ PREFIX }botinfo' a '{ PREFIX }changelog' o '{ PREFIX }changes'."
         },
         {
             "type": "updated",
             "desc": "Se han arreglado algunos bugs en el sistema de Awards",
             "extended": "— Si no se reaccionaba, a veces no se eliminaba la reacción del usuario."
-        },
-        {
-            "type": "updated",
-            "desc": "Se ha actualizado el comando `{ PREFIX }serverinfo`",
-            "extended": "— Ahora se muestran los miembros del Staff actual."
         },
         {
             "type": "removed",
