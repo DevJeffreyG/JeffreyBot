@@ -21,7 +21,12 @@ module.exports.run = async (bot, message, args) => {
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
 
   if(bot.user.id === Config.testingJBID){
-    return message.channel.send("Este comando es de uso exclusivo del server por las diferentes variables que se encuentran en código.")
+    jeffreyRole = guild.roles.cache.find(x => x.id === "482992290550382592");
+    adminRole = guild.roles.cache.find(x => x.id === "483105079285776384");
+    modRole = guild.roles.cache.find(x => x.id === "483105108607893533");
+    staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
+
+    mainChannel = "797258710997139537";
   }
 
   /* ################## EMBEDS DE INFORMACION ######################### */
