@@ -283,19 +283,19 @@ Y la más importante:
       embed1.setColor(Colores.verde);
       embed2.setDescription(`**—** Escribe en el chat como si estuvieses hablando con alguien que te importa mucho, con sentido común y sin incoherencias.
 
-**—** Trata a las personas con las que no tienes tanta confianza con respeto y amabilidad. No gore ni contenido que pueda herir la sensibilidad de los demás.
+**—** Trata a las personas con las que no tienes tanta confianza con respeto y amabilidad. No gore ni contenido que pueda herir la sensibilidad de los demás. No menciones innecesariamente.
 
 **—** Cada canal tiene un fin, escribe dónde debas hacerlo. Siempre lee las descripciones de los canales.
 
 **—** No hables de problemas personales en los chats, eso es privado y debería mantenerse así.
-
-**—** No menciones innecesariamente.
 
 **—** No flood ni spam en los canales generales.
 
 **—** No nicknames inapropiados ni con símbolos que no te dejen mencionarlos ni que cambien drásticamente tu posición en la lista de miembros.
 
 **—** No se permiten cadenas de mensajes en el chat.
+
+**—** Las reglas de este servidor se basan en las [Condiciones del servicio de Discord "TOS"](https://discord.com/terms) por lo cual debes cumplirlas, cualquier rotura a estas será tomada como una falta en contra de las nuestras y dependiendo la gravedad se tomarán acciones contra estas.
 
 \`—\` Un consejo amistoso: no desactives los MDs, nunca sabes cuando te pueden dar un warn y no enterarte de ello.`);
       embed2.setColor(Colores.nocolor);
