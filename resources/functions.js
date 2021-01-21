@@ -543,6 +543,10 @@ const intervalGlobalDatas = async function(justBoost){
 
             if(oldInflation < 1) return;
             eventinflation = Number(Math.random() * oldInflation).toFixed(2);
+            
+            while (eventinflation < 1) {
+              eventinflation = Number(Math.random() * oldInflation).toFixed(2);
+            }
 
             const newData = new GlobalData({
               info: {
