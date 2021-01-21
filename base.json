@@ -16,12 +16,12 @@
         {
             "type": "updated",
             "desc": "Se ha cambiado la fórmula para subir de nivel",
-            "extended": "— ❛ nivel * 300 + (nivel * 5) ❜ ➟ ❛ 10 * (nivel^2) + 50 * nivel + 100 ❜ (fórmula de MEE6)\n— Se ha hecho este cambio porque era igual de fácil llegar al nivel 2 como llegar al nivel 200.\n— Los usuarios actuales no perderán nivel, sin embargo tendrán que conseguir la nueva cantidad de EXP para poder subir de nivel.\n— La EXP ganada por mensaje por minuto se ha subido de 5 a 30."
+            "extended": "— De ❛ nivel * 300 + (nivel * 5) ❜ ➟ a ➟ ❛ 10 * (nivel^2) + 50 * nivel + 100 ❜ (fórmula de MEE6)\n— Se ha hecho este cambio porque era igual de fácil llegar al nivel 2 como llegar al nivel 200.\n— Los usuarios actuales no perderán nivel, sin embargo tendrán que conseguir la nueva cantidad de EXP para poder subir de nivel.\n— La EXP máxima ganada por mensaje por minuto se ha subido de 5 a 30."
         },
         {
             "type": "updated",
             "desc": "Se ha actualizado los comandos `{ PREFIX }stats`, `{ PREFIX }botinfo`, `{ PREFIX }serverinfo`",
-            "extended": "— '{ PREFIX }stats' o '{ PREFIX }perfil'.\n— '{ PREFIX }botinfo' ➟ '{ PREFIX }changelog' o '{ PREFIX }changes'."
+            "extended": "— '{ PREFIX }stats' o '{ PREFIX }perfil'.\n— '{ PREFIX }botinfo' ➟ a ➟ '{ PREFIX }changelog' o '{ PREFIX }changes'."
         },
         {
             "type": "updated",
