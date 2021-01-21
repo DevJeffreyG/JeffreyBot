@@ -22,7 +22,6 @@ module.exports.run = async (bot, message, args) => {
   let userIsOnMobible = presences.clientStatus.mobile === "online" && !presences.clientStatus.desktop ? true : false;
 
   if(args[0] && args[0] === "extended" || userIsOnMobible){
-    return;
     let embed = new Discord.MessageEmbed()
     .setDescription(`**Jeffrey Bot v\`${Package.version}\` — Últimos cambios hechos al bot.\n(ESTO ES DEMASIADO TEXTO, CREO, SUERTE)**\n`)
     .setColor(Colores.verde);
@@ -81,33 +80,20 @@ module.exports.run = async (bot, message, args) => {
       }
     }
 
-    const arr = embed.description.match(/.{1,2048}/g); // Build the array
-
-    for (let chunk of arr) { // Loop through every element
-      let chunkEmbeds = new Discord.MessageEmbed()
-      .setDescription(chunk)
-      .setColor(Colores.verde);
-
-      await message.author.send(chunkEmbeds) // Wait for the embed to be sent
-      .catch(err => {
-        if(userIsOnMobible){
-          message.reply("lo siento, detecté que estás en u dispositivo móvil, pero no pude enviar este mensaje a tus MDs porque los tienes desactivados.");
-        } else {
-          message.reply("lo siento, no pude enviar este mensaje a tus MDs porque los tienes desactivados.");
-        }
-      }); 
-    }
-
-    return;
-    
+    return message.author.send(embed)
+    .catch(err => {
+      if(userIsOnMobible){
+        message.reply("lo siento, detecté que estás en u dispositivo móvil, pero no pude enviar este mensaje a tus MDs porque los tienes desactivados.");
+      } else {
+        message.reply("lo siento, no pude enviar este mensaje a tus MDs porque los tienes desactivados.");
+      }
+    });
   }
 
   let embed = new Discord.MessageEmbed()
   .setDescription(`**Jeffrey Bot v\`${Package.version}\` — Últimos cambios hechos al bot.**\n`)
   .setFooter(`* Si estás en PC, poniendo el mouse sobre '${viewExtension}', podrás ver detalles extendidos de los cambios.\n— En móvil usa '${prefix}changelog extended'.`)
   .setColor(Colores.verde);
-
-  let quepasa;
 
   for(let i = 0; i < changes.length; i++){
     let addToDesc;
@@ -138,7 +124,7 @@ module.exports.run = async (bot, message, args) => {
         } else {
           addToDesc = hasExtended ? `${added} ${desc}. [${viewExtension}](${message.url} '${extendedDetails}')\n` : `${added} ${desc}.\n`;
         }
-        quepasa = embed.description + addToDesc
+        embed.setDescription(embed.description + addToDesc)
         addCounter++;
         break;
 
@@ -148,7 +134,7 @@ module.exports.run = async (bot, message, args) => {
         } else {
           addToDesc = hasExtended ? `${updated} ${desc}. [${viewExtension}](${message.url} '${extendedDetails}')\n` : `${updated} ${desc}.\n`;
         }
-        quepasa = embed.description + addToDesc
+        embed.setDescription(embed.description + addToDesc)
         updateCounter++;
         break;
 
@@ -158,28 +144,13 @@ module.exports.run = async (bot, message, args) => {
         } else {
           addToDesc = hasExtended ? `${removed} ${desc}. [${viewExtension}](${message.url} '${extendedDetails}')\n`: `${removed} ${desc}.\n`;
         }
-        quepasa = embed.description + addToDesc
+        embed.setDescription(embed.description + addToDesc)
         removeCounter++;
         break;
     }
-
-  console.log(quepasa)
-
   }
-
-  const arr2 = quepasa.match(/.{1,2048}/g); // Build the array
-
-  console.log(arr2)
-
-  for (let chunk of arr2) { // Loop through every element
-    let chunkEmbeds2 = new Discord.MessageEmbed()
-    .setDescription(chunk)
-    .setColor(Colores.verde);
-
-    await console.log(chunk) // Wait for the embed to be sent
-  }
-
-  message.channel.send(embed)
+  
+  return message.channel.send(embed);
 
 }
 
