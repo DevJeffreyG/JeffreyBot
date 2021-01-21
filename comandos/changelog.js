@@ -22,6 +22,7 @@ module.exports.run = async (bot, message, args) => {
   let userIsOnMobible = presences.clientStatus.mobile === "online" && !presences.clientStatus.desktop ? true : false;
 
   if(args[0] && args[0] === "extended" || userIsOnMobible){
+    return;
     let embed = new Discord.MessageEmbed()
     .setDescription(`**Jeffrey Bot v\`${Package.version}\` — Últimos cambios hechos al bot.\n(ESTO ES DEMASIADO TEXTO, CREO, SUERTE)**\n`)
     .setColor(Colores.verde);
@@ -87,7 +88,7 @@ module.exports.run = async (bot, message, args) => {
       .setDescription(chunk)
       .setColor(Colores.verde);
 
-      await message.author.send({ chunkEmbeds }) // Wait for the embed to be sent
+      await message.author.send(chunkEmbeds) // Wait for the embed to be sent
       .catch(err => {
         if(userIsOnMobible){
           message.reply("lo siento, detecté que estás en u dispositivo móvil, pero no pude enviar este mensaje a tus MDs porque los tienes desactivados.");
@@ -96,6 +97,8 @@ module.exports.run = async (bot, message, args) => {
         }
       }); 
     }
+
+    return;
     
   }
 
@@ -166,7 +169,7 @@ module.exports.run = async (bot, message, args) => {
     .setDescription(chunk)
     .setColor(Colores.verde);
 
-    await message.channel.send(chunkEmbeds2); // Wait for the embed to be sent
+    await console.log(chunk) // Wait for the embed to be sent
   }
 
 }
