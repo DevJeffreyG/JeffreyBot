@@ -80,14 +80,23 @@ module.exports.run = async (bot, message, args) => {
       }
     }
 
-    return message.author.send(embed)
-    .catch(err => {
-      if(userIsOnMobible){
-        message.reply("lo siento, detecté que estás en u dispositivo móvil, pero no pude enviar este mensaje a tus MDs porque los tienes desactivados.");
-      } else {
-        message.reply("lo siento, no pude enviar este mensaje a tus MDs porque los tienes desactivados.");
-      }
-    });
+    const arr = embed.description.match(/.{1,2048}/g); // Build the array
+
+    for (let chunk of arr) { // Loop through every element
+      let chunkEmbeds = new Discord.MessageEmbed()
+      .setDescription(chunk)
+      .setColor(Colores.verde);
+
+      await message.author.send({ chunkEmbeds }) // Wait for the embed to be sent
+      .catch(err => {
+        if(userIsOnMobible){
+          message.reply("lo siento, detecté que estás en u dispositivo móvil, pero no pude enviar este mensaje a tus MDs porque los tienes desactivados.");
+        } else {
+          message.reply("lo siento, no pude enviar este mensaje a tus MDs porque los tienes desactivados.");
+        }
+      }); 
+    }
+    
   }
 
   let embed = new Discord.MessageEmbed()
@@ -149,8 +158,16 @@ module.exports.run = async (bot, message, args) => {
         break;
     }
   }
-  
-  return message.channel.send(embed);
+
+  const arr2 = embed.description.match(/.{1,2048}/g); // Build the array
+
+  for (let chunk of arr2) { // Loop through every element
+    let chunkEmbeds2 = new Discord.MessageEmbed()
+    .setDescription(chunk)
+    .setColor(Colores.verde);
+
+    await message.channel.send({ chunkEmbeds2 }); // Wait for the embed to be sent
+  }
 
 }
 
