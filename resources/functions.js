@@ -541,7 +541,7 @@ const intervalGlobalDatas = async function(justBoost){
 
             // si es menor a 1
 
-            if(oldInflation < 1) return dark.remove();
+            if(oldInflation < 1) return;
             eventinflation = Number(Math.random() * oldInflation).toFixed(2);
 
             const newData = new GlobalData({
