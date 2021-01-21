@@ -5,7 +5,7 @@ const embedImages = require("./../resources/embeds.json");
 const Discord = require("discord.js");
 const prefix = Config.prefix;
 const jeffreygID = Config.jeffreygID;
-const mainChannel = Config.mainChannel;
+let mainChannel = Config.mainChannel;
 
 module.exports.run = async (bot, message, args) => {
   if (!message.content.startsWith(prefix)) return;
