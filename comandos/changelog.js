@@ -164,6 +164,8 @@ module.exports.run = async (bot, message, args) => {
 
   const arr2 = embed.description.match(/.{1,2048}/g); // Build the array
 
+  console.log(arr2)
+
   for (let chunk of arr2) { // Loop through every element
     let chunkEmbeds2 = new Discord.MessageEmbed()
     .setDescription(chunk)
