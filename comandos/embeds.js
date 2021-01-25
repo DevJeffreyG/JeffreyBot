@@ -90,23 +90,26 @@ module.exports.run = async (bot, message, args) => {
     .setColor(Colores.nocolor);
 
   let rolesEmbed3 = new Discord.MessageEmbed()
-    .setDescription(
-      `<@&460966148704436235> • Todos tendrán este rol.
+    .setDescription(`<@&460966148704436235> • Todos tendrán este rol.
+
+<@&447821238631530498> • Todos los Bots del server tendrán este rol.
 
 <@&460242238555815946> • ¡Verdaderos suscriptores que tienen un canal para recibir notificaciones de Videos, Directos y Tweets de Jeffrey!
-  ➟ Consíguelo en <#473627930396852226>.
+➟ Consíguelo en <#473627930396852226>.
 
-<@&461259197368107020> • Alguien cercano a Jeffrey.  
+<@&461259197368107020> • Alguien cercano a Jeffrey / Amigos IRL.
+
+<@&529275759521431553> • Usuario que ha pagado por tener colores exclusivos y acceso anticipado a las notificaciones de Jeffrey, etc. \`( Más info en '${prefix}shop' )\`.
 
 <@&461302293464219658> • Personas que se la pasan bien en el servidor y es bueno con los demás~
-
-<@&529275759521431553> • Usuario que ha pagado por tener colores exclusivos y acceso anticipado a las notificaciones de Jeffrey, etc. \`( Más info en '${prefix}shop items' )\`.
 
 <@&461553370277347328> • Persona de confianza para Jeffrey.
 
 <@&460586399981109278> • Gente activa con más de 5,000 mensajes en <#${mainChannel}>.
 
-<@&460517579941740544> • Personas que lleva mucho tiempo dentro del servidor.`
+<@&460517579941740544> • Personas que lleva mucho tiempo dentro del servidor, o está desde tiempos inmemorables, o simplemente estaba en el servidor viejo (...) este rol es muy extraño.
+
+<@&790995699759448094> • Shhh... los usuarios con nivel 5 tendrán este rol, y consigo acceso a la DarkShop.`
     )
     .setColor(Colores.nocolor);
 
@@ -117,14 +120,19 @@ module.exports.run = async (bot, message, args) => {
     .setColor(Colores.verde);
 
   let jeffrosEmbed2 = new Discord.MessageEmbed()
-    .setDescription(
-      `
-    **—** ¿Qué son los ${Emojis.Jeffros}effros?
-    ➟ Los Jeffros, son la moneda virtual que se usará para comprar items en la tienda del servidor y usar los **Awards**.
+    .setDescription(`**—** ¿Qué son los ${Emojis.Jeffros}effros y como conseguirlos?
+    ➟ Los Jeffros son la moneda virtual del servidor. Puedes conseguirlos al hablar en <#${mainChannel}>.
 
     **—** ¿Cómo gasto mis Jeffros?
-    ➟ Con el comando \`${prefix}shop\` tendrás más información de los items.
-  `
+    ➟ Los Jeffros se usarán para comprar items en la tienda del servidor (\`${prefix}shop\`) y usar los **Awards**.
+
+    **—** No confundir con los __Dark${Emojis.Dark}effros__:
+    ➟ Los DarkJeffros se desbloquearán cuando un usuario consiga el nivel 5. Podrán ser usados en la DarkShop.
+    
+    **—** ¿Como consigo DarkJeffros?
+    ➟ Piensa en los DarkJeffros como si fuesen bitcoins. ¿Por qué bitcoins? Porque es divertido.
+    ➟ Los DarkJeffros solo se podrán conseguir cambiando Jeffros. Estos pueden ser más costosos dependiendo de la **inflación actual**.
+    ➟ Usando el comando \`${prefix}darkshop ayuda\` podrás tener más información.`
     )
     .setColor(Colores.nocolor);
 
@@ -150,7 +158,7 @@ module.exports.run = async (bot, message, args) => {
 
   ➟ ${jeffreyRole} • Es el rol de JeffreyG. Ten por seguro que si alguien tiene este rol es porque es el verdadero Jeffrey.
 
-  `
+  ➟ Usando el comando \`${prefix}serverinfo\` podrás ver quiénes hacen parte del equipo del Staff más cómodamente.`
     )
     .setColor(Colores.verde);
   

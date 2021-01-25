@@ -317,7 +317,8 @@ Stats.findOne({
                         case "ayuda":
                             let embedAyuda = new Discord.MessageEmbed()
                             .setAuthor(`| Comandos`, Config.darkLogoPng)
-                            .setDescription(`**—** \`${prefix}ds bal\`: Mira tus estadísticas.
+                            .setDescription(`**—** \`${prefix}ds\`: Comando principal, donde puedes ver todos los items de la DarkShop.
+            **—** \`${prefix}ds bal\`: Mira tus estadísticas.
             **—** \`${prefix}ds status\`: Mira el estado de la moneda.
             **—** \`${prefix}ds duration\`: Miras la fecha/duración que tienen tus DarkJeffros actuales.
             **—** \`${prefix}ds change\`: Cambia tus Jeffros por DarkJeffros.
