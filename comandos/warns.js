@@ -37,7 +37,7 @@ module.exports.run = async (bot, message, args) => {
   
   let error = new Discord.MessageEmbed()
   .setColor(Colores.rojo)
-  .setDescription(`Este usuario no tiene warns :D`);
+  .setDescription(`Este usuario no tiene warns ningún tipo de warn.`);
   
   Warn.findOne({
     userID: member.id
@@ -70,7 +70,7 @@ module.exports.run = async (bot, message, args) => {
         let badguy = new Discord.MessageEmbed()
         .setAuthor(`| ${member.user.tag}'s warns`, member.user.displayAvatarURL())
         .setDescription(`**Número de warns ** ❛ \`${w}\` ❜
-        **Número de Softwarns —** ❛ \`${n}\` ❜ ¬¬`)
+        **Número de Softwarns —** ❛ \`${n}\` ❜`)
         .setColor(Colores.verde);
         
         if (n != 0){
@@ -81,7 +81,11 @@ module.exports.run = async (bot, message, args) => {
           }
         }
 
-        return message.channel.send(badguy);
+        return message.channel.send(badguy).then(msg => {
+          if(member == message.member){
+            msg.delete({timeout: ms("10s")});
+          }
+        });
       })
       
   })
