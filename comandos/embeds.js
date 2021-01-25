@@ -6,6 +6,9 @@ const Discord = require("discord.js");
 const prefix = Config.prefix;
 const jeffreygID = Config.jeffreygID;
 let mainChannel = Config.mainChannel;
+let supportChannel = Config.supportChannel;
+let gdps = Config.gdpsSupportChannel;
+let rulesChannel = Config.rulesChannel;
 
 module.exports.run = async (bot, message, args) => {
   if (!message.content.startsWith(prefix)) return;
@@ -27,6 +30,9 @@ module.exports.run = async (bot, message, args) => {
     staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
 
     mainChannel = "797258710997139537";
+    supportChannel = "803309710883160065";
+    gdps = "803309815576789003";
+    rulesChannel = "482993020472393741";
   }
 
   /* ################## EMBEDS DE INFORMACION ######################### */
@@ -204,11 +210,17 @@ Para mantener tu posición como staff, debes cumplir lo siguiente:
 > ➟ Si tienes alguna duda, no lo pienses dos veces y pregunta en <#485191724369444865>.
 
 Y la más importante:
-> ➟ No te tomes esto como lo más serio de mundo. Todos estamos aquí para divertirnos, ¿verdad? relájate un poco.`)
+> ➟ No te tomes esto como lo más serio de mundo. Todos estamos aquí para divertirnos, ¿verdad? relájate un poco.`);
 
-  let noEmbed = new Discord.MessageEmbed()
-    .setAuthor(`| ¿Qué necesitas?`, author.displayAvatarURL())
-    .setColor(Colores.nocolor).setDescription(`**—** ${prefix}embed <embed>
+let finalInfoEmbed = new Discord.MessageEmbed()
+.setColor(Colores.verde)
+.setDescription(`**— Y... ¡eso es todo!**
+• Esperamos te la pases bien en el server, si tienes dudas del server no dudes preguntar en <#${supportChannel}> y no olvides leer las <#${rulesChannel}>.`)
+
+let noEmbed = new Discord.MessageEmbed()
+.setAuthor(`| ¿Qué necesitas?`, author.displayAvatarURL())
+.setColor(Colores.nocolor)
+.setDescription(`**—** ${prefix}embed <embed>
 \`▸\` Muted
 \`▸\` Reglas
 \`▸\` Niveles
@@ -220,9 +232,10 @@ Y la más importante:
 \`▸\` Colores_especiales
 \`▸\` Auto_Roles
 \`▸\` Roles_especiales
-\`▸\` Staff_manual`);
+\`▸\` Staff_manual
+\`▸\` Final_info`);
 
-  if (!args[0]) return message.channel.send(noEmbed); //.then(m => m.delete(ms("10s")));
+  if (!args[0]) return message.channel.send(noEmbed).then(m => m.delete({ timeout: ms("10s") }));
   let embed1 = new Discord.MessageEmbed();
   let embed2 = new Discord.MessageEmbed();
   let embed3 = new Discord.MessageEmbed();
@@ -446,6 +459,10 @@ Y la más importante:
           });
         });
       })
+      break;
+
+    case (caso = "final_info"):
+      message.channel.send(finalInfoEmbed);
       break;
 
     case (caso = "edit"):
