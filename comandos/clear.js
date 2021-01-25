@@ -6,7 +6,7 @@ const prefix = Config.prefix;
 module.exports.run = async (bot, message, args) => {
 
   if(!message.content.startsWith(prefix))return;
-  message.delete();
+  await message.delete();
 
   // Variables
   const guild = message.guild;

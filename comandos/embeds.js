@@ -367,9 +367,13 @@ Y la más importante:
       break;
 
     case (caso = "awards"):
-      let silver = guild.emojis.get(Config.silverAward);
-      let gold = guild.emojis.get(Config.goldAward);
-      let platinium = guild.emojis.get(Config.platiniumAward);
+      let silver = guild.emojis.cache.find(x => x.id === Config.silverAward);
+      let gold = guild.emojis.cache.find(x => x.id === Config.goldAward);
+      let platinium = guild.emojis.cache.find(x => x.id === Config.platiniumAward);
+
+      silver = silver ? silver : "SILVER EMOTE";
+      gold = gold ? gold : "GOLD EMOTE";
+      platinium = platinium ? platinium : "PLAT EMOTE";
 
       embed1.setImage(embedImages.awards);
       embed1.setColor(Colores.verde);
