@@ -105,7 +105,8 @@ module.exports.run = async (bot, message, args) => {
 
 <@&461259197368107020> • Alguien cercano a Jeffrey / Amigos IRL.
 
-<@&529275759521431553> • Usuario que ha pagado por tener colores exclusivos y acceso anticipado a las notificaciones de Jeffrey, etc. \`( Más info en '${prefix}shop' )\`.
+<@&529275759521431553> • Usuario que ha ascendido en el servidor, tendrá colores exclusivos y acceso anticipado a las notificaciones de Jeffrey, etc.
+➟ Si quieres conseguirlo antes de <@&${Config.lvl99}> ve a \`${prefix}shop\`.
 
 <@&461302293464219658> • Personas que se la pasan bien en el servidor y es bueno con los demás~
 
