@@ -3,7 +3,7 @@ const Colores = require("./../resources/colores.json");
 const Discord = require("discord.js");
 const prefix = Config.prefix;
 
-module.exports.run = async (bot, message, args, active) => {
+module.exports.run = async (client, message, args, active) => {
   if (!message.content.startsWith(prefix)) return;
 
   let sadface = new Discord.MessageEmbed()
@@ -16,7 +16,7 @@ module.exports.run = async (bot, message, args, active) => {
   const guild = message.guild;
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
 
-  if(bot.user.id === Config.testingJBID){
+  if(client.user.id === Config.testingJBID){
     staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
   }
 

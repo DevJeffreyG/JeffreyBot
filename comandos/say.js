@@ -5,7 +5,7 @@ const jeffreygID = Config.jeffreygID;
 const botsChannel = Config.botsChannel;
 const botsVip = Config.botsVip;
 
-module.exports.run = async (bot, message, args) => {
+module.exports.run = async (client, message, args) => {
 
   if(!message.content.startsWith(prefix))return;
 
@@ -15,7 +15,7 @@ module.exports.run = async (bot, message, args) => {
     
   if(!message.content.startsWith(prefix))return;
 
-  if(bot.user.id === Config.testingJBID){
+  if(client.user.id === Config.testingJBID){
     return message.channel.send("Este comando es de uso exclusivo del server por las diferentes variables que se encuentran en código.")
   }
 

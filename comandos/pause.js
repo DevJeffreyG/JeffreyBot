@@ -5,7 +5,7 @@ const prefix = Config.prefix;
 
 const ytdl = require("ytdl-core");
 
-module.exports.run = async (bot, message, args, active) => {
+module.exports.run = async (client, message, args, active) => {
 
   if(!message.content.startsWith(prefix))return;
 
@@ -38,7 +38,7 @@ module.exports.run = async (bot, message, args, active) => {
   // author está en el canal?
   if(!message.member.voice) return message.channel.send(errorE1);
   
-  // bot está en el canal?
+  // client está en el canal?
   if(!guild.me.voice) return message.channel.send(errorE2);
   
   // están en el mismo canal?

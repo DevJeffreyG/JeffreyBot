@@ -12,7 +12,7 @@ const GlobalData = require("../modelos/globalData.js");
 
 /* ##### MONGOOSE ######## */
 
-module.exports.run = async (bot, message, args) => {
+module.exports.run = async (client, message, args) => {
 
   if(!message.content.startsWith(prefix))return;
 
@@ -22,7 +22,7 @@ module.exports.run = async (bot, message, args) => {
   let mainChannel = guild.channels.cache.find(x => x.id === Config.mainChannel);
   let member;
 
-  if(bot.user.id === Config.testingJBID){
+  if(client.user.id === Config.testingJBID){
     mainChannel = guild.channels.cache.find(x => x.id === "535500338015502357");
   }
   

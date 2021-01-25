@@ -18,7 +18,7 @@ const Ignore = require("../modelos/ignore.js")
 
 /* ##### MONGOOSE ######## */
 
-module.exports.run = async (bot, message, args) => {
+module.exports.run = async (client, message, args) => {
   if (!message.content.startsWith(prefix)) return;
   
   // Variables
@@ -34,7 +34,7 @@ module.exports.run = async (bot, message, args) => {
   let viewExtension = "ꜝ";
   let extendedDetails = "▸ Al comprar este item, su precio subirá."
 
-  if(bot.user.id === Config.testingJBID){
+  if(client.user.id === Config.testingJBID){
     staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
   }
 

@@ -12,7 +12,7 @@ const Exp = require("../modelos/exp.js");
 
 /* ##### MONGOOSE ######## */
 
-module.exports.run = async (bot, message, args) => {
+module.exports.run = async (client, message, args) => {
   if (!message.content.startsWith(prefix)) return;
 
   // Variables

@@ -27,7 +27,7 @@ const { Structures } = require('discord.js');
 const anyBase = require("any-base");
 const prettyms = require("pretty-ms");
 const dec2hex = anyBase(anyBase.DEC, anyBase.HEX);
-const bot = new Discord.Client({ disableMentions: "everyone" });
+const client = new Discord.Client({ disableMentions: "everyone" });
 const fs = require("fs");
 const ms = require("ms");
 var Chance = require("chance");
@@ -126,7 +126,7 @@ const Stats = require("./modelos/darkstats.js");
 
 /* ##### MONGOOSE ######## */
 
-bot.comandos = new Discord.Collection();
+client.comandos = new Discord.Collection();
 
 fs.readdir("./comandos/", (err, files) => {
   if (err) console.log(err);
@@ -139,8 +139,8 @@ fs.readdir("./comandos/", (err, files) => {
 
   jsfile.forEach((f, i) => {
     let props = require(`./comandos/${f}`);
-    bot.comandos.set(props.help.name, props);
-    bot.comandos.set(props.help.alias, props);
+    client.comandos.set(props.help.name, props);
+    client.comandos.set(props.help.alias, props);
   });
 });
 
@@ -164,11 +164,11 @@ Structures.extend('GuildMember', GuildMember => {
   return GuildMemberWithPending;
 });
 
-bot.on('guildMemberUpdate', async (oldMember, newMember) => {
+client.on('guildMemberUpdate', async (oldMember, newMember) => {
     let guild = newMember.guild;
     let memberRole = guild.roles.cache.find(x => x.id === Config.memberRole);
 
-    if(bot.user.id === Config.testingJBID){
+    if(client.user.id === Config.testingJBID){
       memberRole = guild.roles.cache.find(x => x.id === "575094139100594186");
     }
 
@@ -243,16 +243,16 @@ const lKeys = {
   type: "Tipo"
 };
 
-bot.on("raw", async event => {
+client.on("raw", async event => {
   if (lEvents.hasOwnProperty(event.t)) return;
 
-  if(bot.user.id === Config.testingJBID){
+  if(client.user.id === Config.testingJBID){
     return;
   }
   
   console.log("EVENTO:");
   console.log(event);
-  const guild = bot.guilds.cache.get(Config.jgServer);
+  const guild = client.guilds.cache.get(Config.jgServer);
   const log = guild.channels.cache.get(Config.logChannel);
   
   let e = guild.fetchAuditLogs().then(audit => {
@@ -417,14 +417,14 @@ bot.on("raw", async event => {
   });
 });
 
-bot.on("channelUpdate", (oldChannel, newChannel) => {
+client.on("channelUpdate", (oldChannel, newChannel) => {
  // if (!lKeys.hasOwnProperty(newChannel.changes[0].key)) return;
   
-  if(bot.user.id === Config.testingJBID){
+  if(client.user.id === Config.testingJBID){
     return;
   }
 
-  const guild = bot.guilds.cache.get("447797737216278528");
+  const guild = client.guilds.cache.get("447797737216278528");
   const log = guild.channels.cache.get(Config.logChannel);
 
   let embed = new Discord.MessageEmbed();
@@ -479,13 +479,13 @@ bot.on("channelUpdate", (oldChannel, newChannel) => {
 
 })
 
-/*bot.on("messageUpdate", async (oldMessage, newMessage) => {
+/*client.on("messageUpdate", async (oldMessage, newMessage) => {
   if (newMessage.author.bot) return;
   if(oldMessage.content === newMessage.content) return;
   if (!oldMessage.content) oldMessage.content = "_ _";
   if (!newMessage.content) newMessage.content = "_ _";
 
-  let l = bot.guilds.cache
+  let l = client.guilds.cache
     .get(jgServer)
     .channels.find(x => x.id === Config.logChannel);
   let embed = new Discord.MessageEmbed()
@@ -506,7 +506,7 @@ bot.on("channelUpdate", (oldChannel, newChannel) => {
   l.send(embed);
 });
 
-bot.on("messageDelete", async message => {
+client.on("messageDelete", async message => {
   if (message.author.bot) return;
   if (!message.content) message.content = "_ _";
   let user;
@@ -522,7 +522,7 @@ bot.on("messageDelete", async message => {
   } else {
     user = message.author;
   }
-  let l = bot.guilds.cache
+  let l = client.guilds.cache
     .get(jgServer)
     .channels.find(x => x.id === Config.logChannel);
   console.log(message);
@@ -541,8 +541,8 @@ bot.on("messageDelete", async message => {
 
 /* ############################ LOGGER ################################ */
 
-bot.on("guildMemberRemove", member => {
-  if(bot.user.id === Config.testingJBID){
+client.on("guildMemberRemove", member => {
+  if(client.user.id === Config.testingJBID){
     return;
   }
 
@@ -569,13 +569,13 @@ bot.on("guildMemberRemove", member => {
     .setDescription(fBye)
     .setColor("#66a0ff");
 
-  bot.user.setActivity(`${prefix}ayuda - ${member.guild.memberCount} usuarios🔎`);
+  client.user.setActivity(`${prefix}ayuda - ${member.guild.memberCount} usuarios🔎`);
   return channel.send(embed).then(msg => {
     msg.react(member.guild.emojis.cache.get("524673704655847427"));
   });
 });
 
-bot.on("guildMemberAdd", member => {
+client.on("guildMemberAdd", member => {
   
   let tag = member.user.tag;
   let guild = member.guild;
@@ -584,7 +584,7 @@ bot.on("guildMemberAdd", member => {
   let infoC = guild.channels.cache.find(x => x.id === Config.infoChannel);
   let botRole = guild.roles.cache.find(x => x.id === Config.botRole);
 
-  if(bot.user.id === Config.testingJBID){
+  if(client.user.id === Config.testingJBID){
     channel = guild.channels.cache.find(x => x.id === "535500338015502357");
     reglasC = guild.channels.cache.find(x => x.id === "482993020472393741");
     infoC = guild.channels.cache.find(x => x.id === "483007894942515202");
@@ -617,41 +617,41 @@ bot.on("guildMemberAdd", member => {
     channel.send(embed);
   });
 
-  bot.user.setActivity(`${prefix}ayuda - ${member.guild.memberCount} usuarios🔎`);
+  client.user.setActivity(`${prefix}ayuda - ${member.guild.memberCount} usuarios🔎`);
 });
 
-bot.on("ready", async () => {
+client.on("ready", async () => {
   // para cada guild fetchear(?
-  let guilds = bot.guilds.cache.array();
-  let guild = bot.guilds.cache.find(x => x.id === Config.jgServer);
+  let guilds = client.guilds.cache.array();
+  let guild = client.guilds.cache.find(x => x.id === Config.jgServer);
   //console.log(guilds);
 
   let totalMembers = 0;
 
   for (let i = 0; i < guilds.length; i++){
-    let actualGuild = bot.guilds.cache.find(x => x.id === guilds[i].id);
+    let actualGuild = client.guilds.cache.find(x => x.id === guilds[i].id);
     actualGuild.members.fetch();
 
     totalMembers += actualGuild.memberCount;
 
     if(i+1 === guilds.length){ // final
 
-      bot.user.setActivity(`${prefix}ayuda - ${totalMembers} usuarios🔎`);
+      client.user.setActivity(`${prefix}ayuda - ${totalMembers} usuarios🔎`);
     }
   }
 
   
-  console.log(`${bot.user.username} ONLINE`);
+  console.log(`${client.user.username} ONLINE`);
 
-  let channel = bot.channels.cache.get(logChannel);
-  let dsChannel = bot.channels.cache.find(x => x.id === Config.dsChannel);
+  let channel = client.channels.cache.get(logChannel);
+  let dsChannel = client.channels.cache.find(x => x.id === Config.dsChannel);
   let dsNews;
 
-  if(bot.user.id === Config.testingJBID){
-    channel = bot.channels.cache.get("483108734604804107");
-    guild = bot.guilds.cache.find(x => x.id === "482989052136652800");
+  if(client.user.id === Config.testingJBID){
+    channel = client.channels.cache.get("483108734604804107");
+    guild = client.guilds.cache.find(x => x.id === "482989052136652800");
     dsNews = guild.roles.cache.find(x => x.id === "790431614378704906");
-    dsChannel = bot.channels.cache.find(x => x.id === "790431676970041356");
+    dsChannel = client.channels.cache.find(x => x.id === "790431676970041356");
   } else {
     dsNews = guild.roles.cache.find(x => x.id === Config.dsnews);
   }
@@ -672,7 +672,7 @@ bot.on("ready", async () => {
 });
 
 //main
-bot.on("message", async message => {
+client.on("message", async message => {
   functions.loadBoosts();
   let messageArray = message.content.split(" ");
   let cmd = messageArray[0];
@@ -694,7 +694,7 @@ bot.on("message", async message => {
     let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
     let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
 
-    if(bot.user.id === Config.testingJBID){
+    if(client.user.id === Config.testingJBID){
       jeffreyRole = guild.roles.cache.find(x => x.id === "482992290550382592");
       adminRole = guild.roles.cache.find(x => x.id === "483105079285776384");
       modRole = guild.roles.cache.find(x => x.id === "483105108607893533");
@@ -825,7 +825,7 @@ bot.on("message", async message => {
     }, cmdCooldown * 1000);
 
     // handler
-    let commandFile = bot.comandos.get(cmd.slice(prefix.length));
+    let commandFile = client.comandos.get(cmd.slice(prefix.length));
 
     Toggle.findOne({
       command: cmd.slice(prefix.length)
@@ -838,11 +838,11 @@ bot.on("message", async message => {
           if(err) throw err;
 
           if(!aliasDisabled && commandFile){ // si no encuentra tampoco el alias entonces correr comando
-            if (commandFile) commandFile.run(bot, message, args, active);
+            if (commandFile) commandFile.run(client, message, args, active);
           } else if(!commandFile){ // si no existe el comando, return
             return;
           } else if(author.id === jeffreygID) { // si es jeffrey
-            if (commandFile) commandFile.run(bot, message, args, active);
+            if (commandFile) commandFile.run(client, message, args, active);
           } else { // si encuentra el comando toggleado return nomas
             return message.reply("este comando está deshabilitado.");
           }
@@ -850,7 +850,7 @@ bot.on("message", async message => {
       } else if(!commandFile){ // si no existe el comando, return
         return;
       } else if(author.id === jeffreygID) { // si es jeffrey
-        if (commandFile) commandFile.run(bot, message, args, active);
+        if (commandFile) commandFile.run(client, message, args, active);
       } else { // si encuentra el comando toggleado return nomas
         return message.reply("este comando está deshabilitado.");
       }
@@ -1206,13 +1206,13 @@ const events = {
   MESSAGE_REACTION_REMOVE: "messageReactionRemove"
 };
 
-bot.on("raw", async event => {
+client.on("raw", async event => {
   if (!events.hasOwnProperty(event.t)) return;
 
   const { d: data } = event;
-  const user = bot.users.cache.get(data.user_id);
+  const user = client.users.cache.get(data.user_id);
   const channel =
-    bot.channels.cache.get(data.channel_id) || (await user.createDM());
+    client.channels.cache.get(data.channel_id) || (await user.createDM());
 
   if (channel.messages.cache.has(data.message_id)) return;
 
@@ -1226,10 +1226,10 @@ bot.on("raw", async event => {
     reaction = message.reactions.cache.get(data.emoji.id);
   }
 
-  bot.emit(events[event.t], reaction, user);
+  client.emit(events[event.t], reaction, user);
 });
 
-bot.on("messageReactionAdd", (reaction, user) => {
+client.on("messageReactionAdd", (reaction, user) => {
   if (user.bot) return; // Si es un bot
 
   let guild = reaction.message.guild;
@@ -1271,7 +1271,7 @@ bot.on("messageReactionAdd", (reaction, user) => {
   );
 });
 
-bot.on("messageReactionRemove", (reaction, user) => {
+client.on("messageReactionRemove", (reaction, user) => {
   if (user.bot) return; // Si es un bot
 
   let guild = reaction.message.guild;
@@ -1315,7 +1315,7 @@ bot.on("messageReactionRemove", (reaction, user) => {
 
 // ####################### AWARDS
 
-bot.on("messageReactionAdd", (reaction, user) => {
+client.on("messageReactionAdd", (reaction, user) => {
   if (user.bot) return; // Si es un bot
 
   let guild = reaction.message.guild;
@@ -1546,7 +1546,7 @@ bot.on("messageReactionAdd", (reaction, user) => {
   });
 });
 
-bot.on("message", async msg => {
+client.on("message", async msg => {
   // Si mencionan a Jeffrey, mención en #log
   if (msg.author.bot) return;
   if (msg.channel.type == "dm") return;
@@ -1587,7 +1587,7 @@ bot.on("message", async msg => {
   }
 });
 
-bot.on("message", message => {
+client.on("message", message => {
   let channel = message.channel;
   let author = message.author;
 
@@ -1624,7 +1624,7 @@ bot.on("message", message => {
   }
 });
 
-bot.on("messageUpdate", message => {
+client.on("messageUpdate", message => {
   let channel = message.channel;
   let author = message.author;
 
@@ -1662,7 +1662,7 @@ bot.on("messageUpdate", message => {
 });
 
 // set message listener
-bot.on("message", message => {
+client.on("message", message => {
   if (
     message.content.startsWith(`${prefix}reset`) &&
     message.member.hasPermission("BAN_MEMBERS")
@@ -1672,9 +1672,9 @@ bot.on("message", message => {
 });
 
 if (process.env.mantenimiento != 1) {
-  bot.login(process.env.TOKEN);
+  client.login(process.env.TOKEN);
 
-  module.exports.bot = bot;
+  module.exports.client = client;
 
   functions = require("./resources/functions.js");
   

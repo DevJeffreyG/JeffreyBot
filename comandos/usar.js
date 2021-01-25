@@ -18,7 +18,7 @@ const GlobalData = require("../modelos/globalData.js");
 
 /* ##### MONGOOSE ######## */
 
-module.exports.run = async (bot, message, args) => {
+module.exports.run = async (client, message, args) => {
   if (!message.content.startsWith(prefix)) return;
   // Variables
   let author = message.author;
@@ -26,7 +26,7 @@ module.exports.run = async (bot, message, args) => {
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
   let item;
 
-  if(bot.user.id === Config.testingJBID){
+  if(client.user.id === Config.testingJBID){
     staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
   }
 

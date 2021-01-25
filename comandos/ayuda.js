@@ -4,7 +4,7 @@ const Emojis = require("./../resources/emojis.json");
 const Discord = require("discord.js");
 const prefix = Config.prefix;
 
-module.exports.run = async (bot, message, args) => {
+module.exports.run = async (client, message, args) => {
 
   if(!message.content.startsWith(prefix))return;
 
@@ -16,7 +16,7 @@ module.exports.run = async (bot, message, args) => {
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
   let via = args[0];
 
-  if(bot.user.id === Config.testingJBID){
+  if(client.user.id === Config.testingJBID){
     jeffreyRole = guild.roles.cache.find(x => x.id === "482992290550382592");
     staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
   }

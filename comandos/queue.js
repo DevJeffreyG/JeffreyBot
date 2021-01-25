@@ -5,7 +5,7 @@ const prefix = Config.prefix;
 
 const ytdl = require("ytdl-core");
 
-module.exports.run = async (bot, message, args, active) => {
+module.exports.run = async (client, message, args, active) => {
   if (!message.content.startsWith(prefix)) return;
 
   let sadface = new Discord.MessageEmbed()

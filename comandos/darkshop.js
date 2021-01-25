@@ -24,7 +24,7 @@ const Ignore = require("../modelos/ignore.js")
 
 /* ##### MONGOOSE ######## */
 
-module.exports.run = async (bot, message, args) => {
+module.exports.run = async (client, message, args) => {
 
   if(!message.content.startsWith(prefix))return;
 
@@ -37,7 +37,7 @@ module.exports.run = async (bot, message, args) => {
 
   const interest = 5;
 
-  if(bot.user.id === Config.testingJBID){
+  if(client.user.id === Config.testingJBID){
     staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
     dsRole = guild.roles.cache.find(x => x.id === "791006500973576262");
     dsChannel = guild.channels.cache.find(x => x.id === "790431676970041356");

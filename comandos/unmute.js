@@ -4,7 +4,7 @@ const Discord = require("discord.js");
 const prefix = Config.prefix;
 
 
-module.exports.run = async (bot, message, args) => {
+module.exports.run = async (client, message, args) => {
 
   if(!message.content.startsWith(prefix))return;
 
@@ -15,7 +15,7 @@ module.exports.run = async (bot, message, args) => {
   let muteRole = guild.roles.cache.find(x => x.id === Config.muteRole);
   let logC = guild.channels.cache.find(x => x.id === Config.logChannel);
   
-  if(bot.user.id === Config.testingJBID){
+  if(client.user.id === Config.testingJBID){
     staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
     muteRole = guild.roles.cache.find(x => x.id === "544691532104728597");
     logC = guild.channels.cache.find(x => x.id === "483108734604804107");

@@ -12,7 +12,7 @@ const SoftWarn = require("../modelos/softwarn.js");
 
 /* ##### MONGOOSE ######## */
 
-module.exports.run = async (bot, message, args) => {
+module.exports.run = async (client, message, args) => {
 
   if(!message.content.startsWith(prefix))return;
 
@@ -22,7 +22,7 @@ module.exports.run = async (bot, message, args) => {
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
   let logC = guild.channels.cache.find(x => x.id === Config.logChannel);
 
-  if(bot.user.id === Config.testingJBID){
+  if(client.user.id === Config.testingJBID){
     staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
     logC = guild.channels.cache.find(x => x.id === "483108734604804107");
   }

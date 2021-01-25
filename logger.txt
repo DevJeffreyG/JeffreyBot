@@ -1,4 +1,4 @@
-bot.on("channelCreate", async channel => {
+client.on("channelCreate", async channel => {
   // Canal creado
   let type;
   let tShow;
@@ -37,7 +37,7 @@ bot.on("channelCreate", async channel => {
   return logC.send(embed);
 });
 
-bot.on("channelDelete", async channel => {
+client.on("channelDelete", async channel => {
   // Canal eliminado
   let type;
   let tShow;
@@ -75,7 +75,7 @@ bot.on("channelDelete", async channel => {
   return logC.send(embed);
 });
 
-bot.on("channelUpdate", async (oldChannel, newChannel) => {
+client.on("channelUpdate", async (oldChannel, newChannel) => {
   // Canal actualizado
 
   const { Permissions } = require("discord.js");
@@ -257,7 +257,7 @@ bot.on("channelUpdate", async (oldChannel, newChannel) => {
   }
 });
 
-bot.on("messageUpdate", async (oldMessage, newMessage) => {
+client.on("messageUpdate", async (oldMessage, newMessage) => {
   if (oldMessage.channel.type == "dm") return;
   let logC = newMessage.guild.channels.cache.find(x => x.id === logChannel);
   let member = newMessage.member;
@@ -285,7 +285,7 @@ bot.on("messageUpdate", async (oldMessage, newMessage) => {
   return logC.send(embed);
 });
 
-bot.on("messageDelete", async message => {
+client.on("messageDelete", async message => {
   if (message.channel.type === "dm") return;
   if (message.author.bot) return;
   let logC = message.guild.channels.cache.find(x => x.id === logChannel);

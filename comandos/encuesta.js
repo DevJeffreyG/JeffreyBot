@@ -1,7 +1,7 @@
 const Config = require("./../base.json");
 const prefix = Config.prefix;
 
-module.exports.run = async (bot, message, args) => {
+module.exports.run = async (client, message, args) => {
 
       if(!message.content.startsWith(prefix))return;
 

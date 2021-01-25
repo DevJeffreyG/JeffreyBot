@@ -15,7 +15,7 @@ const Jeffros = require("../modelos/jeffros.js");
 
 /* ##### MONGOOSE ######## */
 
-module.exports.run = async (bot, message, args) => {
+module.exports.run = async (client, message, args) => {
   if (!message.content.startsWith(prefix)) return;
   message.delete({ timeout: ms("5s") });
 
@@ -24,7 +24,7 @@ module.exports.run = async (bot, message, args) => {
   const guild = message.guild;
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
 
-  if(bot.user.id === Config.testingJBID){
+  if(client.user.id === Config.testingJBID){
     return message.channel.send("Este comando es de uso exclusivo del server por las diferentes variables que se encuentran en código.")
   }
 

@@ -5,7 +5,7 @@ const Discord = require("discord.js");
 const prefix = Config.prefix;
 const changes = Config.changes;
 
-module.exports.run = async (bot, message, args) => {
+module.exports.run = async (client, message, args) => {
 
   if(!message.content.startsWith(prefix))return;
   let viewExtension = "ꜝ";

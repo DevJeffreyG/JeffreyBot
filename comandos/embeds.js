@@ -10,7 +10,7 @@ let supportChannel = Config.supportChannel;
 let gdps = Config.gdpsSupportChannel;
 let rulesChannel = Config.rulesChannel;
 
-module.exports.run = async (bot, message, args) => {
+module.exports.run = async (client, message, args) => {
   if (!message.content.startsWith(prefix)) return;
   if (message.author.id != jeffreygID) return;
   message.delete();
@@ -23,7 +23,7 @@ module.exports.run = async (bot, message, args) => {
   let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
 
-  if(bot.user.id === Config.testingJBID){
+  if(client.user.id === Config.testingJBID){
     jeffreyRole = guild.roles.cache.find(x => x.id === "482992290550382592");
     adminRole = guild.roles.cache.find(x => x.id === "483105079285776384");
     modRole = guild.roles.cache.find(x => x.id === "483105108607893533");
@@ -184,7 +184,7 @@ En este manual se mostrarán las instrucciones a la hora de hacer ciertas accion
   let manualEmbed3 = new Discord.MessageEmbed()
   .setColor(Colores.nocolor)
   .setDescription(`Lo más importante del staff diría yo.
-Aunque creo que es obvio tengo que aclarar que usará a ${bot.user} para la moderación del servidor. Puedes ver tus comandos con \`/ayuda\`.
+Aunque creo que es obvio tengo que aclarar que usará a ${client.user} para la moderación del servidor. Puedes ver tus comandos con \`/ayuda\`.
 
 <:Faq:494282181296914432> **— ¿Cuando dar un warn y cuando no?**
 Es sencillo. Cuando un usario incumpla una regla hay que tener en cuenta una sóla cosa:
@@ -319,7 +319,7 @@ let noEmbed = new Discord.MessageEmbed()
 
 **—** Debes cumplir las [Condiciones del servicio de Discord "TOS"](https://discord.com/terms), cualquier rotura a estas será tomada como una falta en contra de las nuestras **y dependiendo la gravedad se tomarán acciones contra estas**.
 
-\`—\` Un dato curioso: ${bot.user} te enviará un mensaje al recibir cualquier tipo de warn, siempre y cuando tengas los MDs activados.
+\`—\` Un dato curioso: ${client.user} te enviará un mensaje al recibir cualquier tipo de warn, siempre y cuando tengas los MDs activados.
 Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para conocer __tus__ warns.`);
       embed2.setColor(Colores.nocolor);
 

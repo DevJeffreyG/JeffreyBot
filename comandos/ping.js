@@ -2,13 +2,13 @@ const Config = require("./../base.json");
 const Discord = require("discord.js");
 let prefix = Config.prefix;
 
-module.exports.run = async (bot, message, args) => {
+module.exports.run = async (client, message, args) => {
 
       if(!message.content.startsWith(prefix))return;
 
       let start = Date.now(); message.reply('Pong! ').then(message => {
       let diff = (Date.now() - start);
-      let API = (bot.ws.ping).toFixed(2)
+      let API = (client.ws.ping).toFixed(2)
 
           let embed = new Discord.MessageEmbed()
           .setTitle(`🔔 Pong!`)

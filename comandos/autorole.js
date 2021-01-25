@@ -9,7 +9,7 @@ const AutoRole = require("../modelos/autorole.js");
 
 /* ##### MONGOOSE ######## */
 
-module.exports.run = async (bot, message, args) => {
+module.exports.run = async (client, message, args) => {
   if (!message.content.startsWith(prefix)) return;
 
   // Variables
@@ -43,7 +43,7 @@ module.exports.run = async (bot, message, args) => {
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
   
   // testing jeffrey bot verifier
-  if(bot.user.id === Config.testingJBID){
+  if(client.user.id === Config.testingJBID){
     staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
   }
 
@@ -121,7 +121,7 @@ module.exports.run = async (bot, message, args) => {
                     // reaccionando a ese mensaje
                     if (custom === 1) {
                       arChannel.messages.fetch(`${arMessage}`).then(msg => {
-                        msg.react(bot.emojis.get(arEmoji));
+                        msg.react(client.emojis.cache.find(x => x.id === arEmoji));
                       });
                     } else {
                       arChannel.messages.fetch(`${arMessage}`).then(msg => {
@@ -155,13 +155,13 @@ module.exports.run = async (bot, message, args) => {
               if (autorole.custom === 1) {
                 ch.messages.fetch(`${autorole.messageID}`).then(msg => {
                   msg.reactions.forEach(reaction =>
-                    reaction.remove(bot.user.id)
+                    reaction.remove(client.user.id)
                   );
                 });
               } else {
                 ch.messages.fetch(`${autorole.messageID}`).then(msg => {
                   msg.reactions.forEach(reaction =>
-                    reaction.remove(bot.user.id)
+                    reaction.remove(client.user.id)
                   );
                 });
               }

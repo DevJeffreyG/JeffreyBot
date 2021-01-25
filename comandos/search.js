@@ -4,7 +4,7 @@ const Discord = require("discord.js");
 const prefix = Config.prefix;
 const search = require("yt-search");
 
-module.exports.run = async (bot, message, args, active) => {
+module.exports.run = async (client, message, args, active) => {
   if (!message.content.startsWith(prefix)) return;
 
   let sadface = new Discord.MessageEmbed()
@@ -71,7 +71,7 @@ module.exports.run = async (bot, message, args, active) => {
 
         let commandFile = require("./play.js");
         commandFile.run(
-          bot,
+          client,
           message,
           [this.videos[parseInt(m.content) - 1].url],
           active

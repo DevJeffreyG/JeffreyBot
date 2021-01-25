@@ -2,7 +2,7 @@ const Config = require("./../base.json");
 const Colores = require("./../resources/colores.json");
 const Emojis = require("./../resources/emojis.json");
 const Discord = require("discord.js");
-const bot = new Discord.Client();
+const client = new Discord.Client();
 const fs = require("fs");
 const ms = require("ms");
 const prefix = Config.prefix;
@@ -24,7 +24,7 @@ const Banned = require("../modelos/banned.js");
 
 /* ##### MONGOOSE ######## */
 
-module.exports.run = async (bot, message, args) => {
+module.exports.run = async (client, message, args) => {
 
   if(!message.content.startsWith(prefix))return;
 
@@ -36,7 +36,7 @@ module.exports.run = async (bot, message, args) => {
   let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
 
-  if(bot.user.id === Config.testingJBID){
+  if(client.user.id === Config.testingJBID){
       jeffreyRole = guild.roles.cache.find(x => x.id === "482992290550382592");
       adminRole = guild.roles.cache.find(x => x.id === "483105079285776384");
       modRole = guild.roles.cache.find(x => x.id === "483105108607893533");

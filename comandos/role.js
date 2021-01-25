@@ -3,7 +3,7 @@ const Colores = require("./../resources/colores.json");
 const Discord = require("discord.js");
 const prefix = Config.prefix;
 
-module.exports.run = async (bot, message, args) => {
+module.exports.run = async (client, message, args) => {
 
   if(!message.content.startsWith(prefix))return;
 
@@ -23,7 +23,7 @@ module.exports.run = async (bot, message, args) => {
   if (!args[0]) return message.channel.send(embed);
   if(!isNaN(args[args.length-1])){
       notInThisGuild = true;
-      guild = bot.guilds.cache.find(x => x.id === args[args.length-1]);
+      guild = client.guilds.cache.find(x => x.id === args[args.length-1]);
   }
     if(!guild) return message.reply(`No encontré ese server "${notInThisGuild ? args[args.length-1] : message.guild.id}", verifica que hayas escrito bien la id y que me encuentre en ese server.`);
 

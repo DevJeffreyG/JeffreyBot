@@ -3,7 +3,7 @@ const Colores = require("./../resources/colores.json");
 const Discord = require("discord.js");
 const prefix = Config.prefix;
 
-module.exports.run = async (bot, message, args) => {
+module.exports.run = async (client, message, args) => {
 
   if(!message.content.startsWith(prefix))return;
 
@@ -14,7 +14,7 @@ module.exports.run = async (bot, message, args) => {
   let jbNRole = guild.roles.cache.find(x => x.id === Config.jbnews);
   let jbChannel = guild.channels.cache.find(x => x.id === Config.announceChannel);
 
-  if(bot.user.id === Config.testingJBID){
+  if(client.user.id === Config.testingJBID){
     staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
     jbNRole = guild.roles.cache.find(x => x.id === '790393911519870986');
     jbChannel = guild.channels.cache.find(x => x.id === "483007967239602196");
@@ -35,9 +35,9 @@ module.exports.run = async (bot, message, args) => {
     .setColor(Colores.verde)
     .setTitle(`¡Novedades de Jeffrey Bot!`)
     .setDescription(anuncio)
-    .setFooter(`Noticia por ${author.tag}`, bot.user.displayAvatarURL())
+    .setFooter(`Noticia por ${author.tag}`, client.user.displayAvatarURL())
 	  .setTimestamp()
-    .setThumbnail(bot.user.displayAvatarURL());
+    .setThumbnail(client.user.displayAvatarURL());
     
     jbChannel.send(`${jbNRole}~`).then(r => {
       jbChannel.send(nEmbed);

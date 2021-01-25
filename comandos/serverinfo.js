@@ -3,7 +3,7 @@ const Colores = require("./../resources/colores.json");
 const Discord = require("discord.js");
 const prefix = Config.prefix;
 
-module.exports.run = async (bot, message, args) => {
+module.exports.run = async (client, message, args) => {
 
   if(!message.content.startsWith(prefix))return;
 
@@ -12,7 +12,7 @@ module.exports.run = async (bot, message, args) => {
   let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
   let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
   
-  if(bot.user.id === Config.testingJBID){
+  if(client.user.id === Config.testingJBID){
     adminRole = guild.roles.cache.find(x => x.id === "483105079285776384");
     modRole = guild.roles.cache.find(x => x.id === "483105108607893533");
   }
