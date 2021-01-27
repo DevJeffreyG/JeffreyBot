@@ -194,7 +194,10 @@ module.exports.run = async (client, message, args) => {
 
             listEmbed.addField(`— @${role.name}`, `**—** Canal: ${rCh}.\n**—** [Mensaje](${msg.url}).\n**—** Emoji: ${aroles[i].emoji}.\n**—** ID: \`${aroles[i].id}\`.`);
 
+            console.log("agregado field");
+
             if (i + 1 === aroles.length) {
+              console.log("hmm");
               return message.channel.send(listEmbed);
             }
           }
