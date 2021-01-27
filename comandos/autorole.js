@@ -180,7 +180,7 @@ module.exports.run = async (client, message, args) => {
         }, async (err, aroles) => {
           if(err) throw err;
 
-          if(!aroles || aroles.length) return message.reply("Aún no hay autoroles en este servidor.");
+          if(!aroles || aroles.length === 0) return message.reply("Aún no hay autoroles en este servidor.");
           
           let listEmbed = new Discord.MessageEmbed()
           .setDescription(`*** Lista de todos los AutoRoles en este servidor.**`)
