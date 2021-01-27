@@ -181,7 +181,7 @@ module.exports.run = async (client, message, args) => {
         }, (err, aroles) => {
           if(err) throw err;
 
-          (!aroles) return message.reply("Aún no hay autoroles en este servidor.");
+          if(!aroles) return message.reply("Aún no hay autoroles en este servidor.");
           
           let listEmbed = new Discord.MessageEmbed()
           .setColor(Colores.verde);
