@@ -56,7 +56,7 @@ module.exports.run = async (client, message, args) => {
     },
     (err, roles) => {
       if (err) throw err;
-
+      console.log(action);
       if (action === "add") {
         let newID;
 
