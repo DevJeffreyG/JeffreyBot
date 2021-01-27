@@ -178,7 +178,7 @@ module.exports.run = async (client, message, args) => {
       } else if (action === "list"){
         AutoRole.find({
           serverID: guild.id
-        }, async (err, aroles) => {
+        }, (err, aroles) => {
           if(err) throw err;
 
           if(!aroles) return message.reply("Aún no hay autoroles en este servidor.");
@@ -193,10 +193,11 @@ module.exports.run = async (client, message, args) => {
             let msg = rCh.messages.fetch(`${aroles[i].messageID}`);
 
             listEmbed.addField(`— @${role.name}`, `**—** Canal: ${rCh}.\n**—** [Mensaje](${msg.url}).\n**—** Emoji: ${aroles[i].emoji}.\n**—** ID: \`${aroles[i].id}\`.`);
+
+            if (i + 1 === aroles.length) {
+              return message.channel.send(listEmbed);
+            }
           }
-
-          return message.channel.send(listEmbed);
-
         })
       }
     }
