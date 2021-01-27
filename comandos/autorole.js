@@ -27,7 +27,7 @@ module.exports.run = async (client, message, args) => {
     .setTitle(`${prefix}role`)
     .setColor(Colores.nocolor)
     .setDescription(
-      `▸ El uso correcto es: ${prefix}autorole <add | remove> <@role o ID> <:emoji:> <#canal o ID> <[ID mensaje](https://support.discordapp.com/hc/es/articles/206346498--D%C3%B3nde-puedo-encontrar-mi-ID-de-usuario-servidor-mensaje)>`
+      `▸ El uso correcto es: ${prefix}autorole <add | remove | list> <@role o ID> <:emoji:> <#canal o ID> <[ID mensaje](https://support.discordapp.com/hc/es/articles/206346498--D%C3%B3nde-puedo-encontrar-mi-ID-de-usuario-servidor-mensaje)>`
     )
     .setFooter(`<> Obligatorio, () Opcional┊Alias: ${prefix}arole`);
   
@@ -66,7 +66,7 @@ module.exports.run = async (client, message, args) => {
         if (!arMessage) return message.channel.send(embed);
 
         AutoRole.countDocuments({}, function(err, c) {
-          let lastid = c + 6969;
+          let lastid = c + 1;
 
           AutoRole.findOne(
             {
@@ -78,7 +78,7 @@ module.exports.run = async (client, message, args) => {
               if (!found) {
               } else {
                 while (lastid === found.id) {
-                  lastid = c + 6969 + 1;
+                  lastid = c + 1 + 1;
                   console.log("equal id");
                 }
               }
@@ -150,7 +150,7 @@ module.exports.run = async (client, message, args) => {
             if (!autorole) {
               message.reply(`no encontré ningún role automático con ese ID.`);
             } else {
-              let ch = guild.channels.get(autorole.channelID);
+              let ch = guild.channels.cache.get(autorole.channelID);
 
               if (autorole.custom === 1) {
                 ch.messages.fetch(`${autorole.messageID}`).then(msg => {
@@ -165,14 +165,37 @@ module.exports.run = async (client, message, args) => {
                   );
                 });
               }
-              AutoRole.deleteOne({ serverID: guild.id, id: args[1] }).catch(
+              AutoRole.deleteOne({ serverID: guild.id, id: args[1] })
+              .then(() => {
+                message.react("✅");
+              })
+              .catch(
                 err => console.log(err)
               );
-
-              return message.reply(`listo.`);
             }
           }
         );
+      } else if (action === "list"){
+        AutoRole.find({
+          serverID: guild.id
+        }, (err, aroles) => {
+          if(err) throw err;
+
+          (!aroles) return message.reply("Aún no hay autoroles en este servidor.");
+          
+          let listEmbed = new Discord.MessageEmbed()
+          .setColor(Colores.verde);
+
+          for(let i = 0; i < aroles.length; i++){
+            let role = guild.roles.cache.find(x => x.id === aroles[i].roleID);
+            let rCh = guild.channels.cache.find(x => x.id === aroles[i].channelID);
+            let msg = rCh.messages.cache.find(x => x.id === aroles[i].messageID);
+
+            listEmbed.addField(`— ${role.name}`, `**—** Canal: ${rCh}.\n**—** [Mensaje](${msg.url}).\n**—** Emoji: ${aroles[i].emoji}.\n**—** ID: \`${aroles[i].id}\`.`);
+          }
+
+          message.channel.send(listEmbed);
+        })
       }
     }
   );
