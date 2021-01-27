@@ -195,6 +195,8 @@ module.exports.run = async (client, message, args) => {
             let rCh = guild.channels.cache.find(x => x.id === aroles[i].channelID);
             let msg = rCh.messages.fetch(`${aroles[i].messageID}`);
 
+            console.log("hora de agregar el field");
+
             listEmbed.addField(`— @${role.name}`, `**—** Canal: ${rCh}.\n**—** [Mensaje](${msg.url}).\n**—** Emoji: ${aroles[i].emoji}.\n**—** ID: \`${aroles[i].id}\`.`);
 
             console.log("agregado field");
