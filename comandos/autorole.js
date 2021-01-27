@@ -193,9 +193,11 @@ module.exports.run = async (client, message, args) => {
             let msg = await rCh.messages.fetch(aroles[i].messageID);
 
             listEmbed.addField(`— @${role.name}`, `**—** Canal: ${rCh}.\n**—** [Mensaje](${msg.url}).\n**—** Emoji: ${aroles[i].emoji}.\n**—** ID: \`${aroles[i].id}\`.`);
-          }
 
-          message.channel.send(listEmbed);
+            if(i + 1 === aroles.length){
+              return message.channel.send(listEmbed);
+            }
+          }
         })
       }
     }
