@@ -182,12 +182,14 @@ module.exports.run = async (client, message, args) => {
         }, (err, aroles) => {
           if(err) throw err;
 
+          console.log("pole")
           if(!aroles) return message.reply("Aún no hay autoroles en este servidor.");
           
           let listEmbed = new Discord.MessageEmbed()
           .setDescription(`*** Lista de todos los AutoRoles en este servidor.**`)
           .setColor(Colores.verde);
-
+          
+          console.log("se viene el drop")
           for(let i = 0; i < aroles.length; i++){
             let role = guild.roles.cache.find(x => x.id === aroles[i].roleID);
             let rCh = guild.channels.cache.find(x => x.id === aroles[i].channelID);
