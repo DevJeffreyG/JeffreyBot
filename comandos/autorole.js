@@ -36,7 +36,7 @@ module.exports.run = async (client, message, args) => {
   action = args[0].toLowerCase();
   arRole = message.mentions.roles.first() || guild.roles.cache.get(args[1]);
   arEmoji = args[2];
-  arChannel = message.mentions.channels.first() || guild.channels.get(args[3]);
+  arChannel = message.mentions.channels.first() || guild.channels.cache.get(args[3]);
   arMessage = args[4];
 
   // Roles
