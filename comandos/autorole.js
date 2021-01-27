@@ -176,6 +176,7 @@ module.exports.run = async (client, message, args) => {
           }
         );
       } else if (action === "list"){
+        console.log("list :o");
         AutoRole.find({
           serverID: guild.id
         }, (err, aroles) => {
