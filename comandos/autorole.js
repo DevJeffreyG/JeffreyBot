@@ -191,6 +191,7 @@ module.exports.run = async (client, message, args) => {
           
           console.log("se viene el drop")
           for(let i = 0; i < aroles.length; i++){
+            console.log(i);
             let role = guild.roles.cache.find(x => x.id === aroles[i].roleID);
             let rCh = guild.channels.cache.find(x => x.id === aroles[i].channelID);
             let msg = rCh.messages.fetch(`${aroles[i].messageID}`);
