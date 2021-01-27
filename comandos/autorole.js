@@ -184,6 +184,7 @@ module.exports.run = async (client, message, args) => {
           if(!aroles) return message.reply("Aún no hay autoroles en este servidor.");
           
           let listEmbed = new Discord.MessageEmbed()
+          .setDescription(`*** Lista de todos los AutoRoles en este servidor.**`)
           .setColor(Colores.verde);
 
           for(let i = 0; i < aroles.length; i++){
@@ -191,7 +192,7 @@ module.exports.run = async (client, message, args) => {
             let rCh = guild.channels.cache.find(x => x.id === aroles[i].channelID);
             let msg = rCh.messages.fetch(aroles[i].messageID);
 
-            listEmbed.addField(`— ${role.name}`, `**—** Canal: ${rCh}.\n**—** [Mensaje](${msg.url}).\n**—** Emoji: ${aroles[i].emoji}.\n**—** ID: \`${aroles[i].id}\`.`);
+            listEmbed.addField(`— @${role.name}`, `**—** Canal: ${rCh}.\n**—** [Mensaje](${msg.url}).\n**—** Emoji: ${aroles[i].emoji}.\n**—** ID: \`${aroles[i].id}\`.`);
           }
 
           message.channel.send(listEmbed);
