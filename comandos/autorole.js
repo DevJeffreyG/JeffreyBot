@@ -160,7 +160,7 @@ module.exports.run = async (client, message, args) => {
                 });
               } else {
                 ch.messages.fetch(`${autorole.messageID}`).then(msg => {
-                  msg.reactions.forEach(reaction =>
+                  msg.reactions.cache.each(reaction =>
                     reaction.remove(client.user.id)
                   );
                 });
