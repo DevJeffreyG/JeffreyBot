@@ -56,7 +56,6 @@ module.exports.run = async (client, message, args) => {
     },
     (err, roles) => {
       if (err) throw err;
-      console.log(action);
       if (action === "add") {
         let newID;
 
@@ -176,34 +175,25 @@ module.exports.run = async (client, message, args) => {
           }
         );
       } else if (action === "list"){
-        console.log("list :o");
         AutoRole.find({
           serverID: guild.id
-        }, (err, aroles) => {
+        }, async (err, aroles) => {
           if(err) throw err;
 
-          console.log("pole")
-          if(!aroles) return message.reply("Aún no hay autoroles en este servidor.");
+          if(!aroles || aroles.length) return message.reply("Aún no hay autoroles en este servidor.");
           
           let listEmbed = new Discord.MessageEmbed()
           .setDescription(`*** Lista de todos los AutoRoles en este servidor.**`)
           .setColor(Colores.verde);
           
-          console.log("se viene el drop")
           for(let i = 0; i < aroles.length; i++){
-            console.log(i);
             let role = guild.roles.cache.find(x => x.id === aroles[i].roleID);
             let rCh = guild.channels.cache.find(x => x.id === aroles[i].channelID);
-            let msg = rCh.messages.fetch(`${aroles[i].messageID}`);
-
-            console.log("hora de agregar el field");
+            let msg = await rCh.messages.fetch(`${aroles[i].messageID}`);
 
             listEmbed.addField(`— @${role.name}`, `**—** Canal: ${rCh}.\n**—** [Mensaje](${msg.url}).\n**—** Emoji: ${aroles[i].emoji}.\n**—** ID: \`${aroles[i].id}\`.`);
 
-            console.log("agregado field");
-
             if (i + 1 === aroles.length) {
-              console.log("hmm");
               return message.channel.send(listEmbed);
             }
           }
