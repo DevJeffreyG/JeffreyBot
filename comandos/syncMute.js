@@ -24,7 +24,7 @@ module.exports.run = async (client, message, args) => {
   .setDescription(`▸ El uso correcto es: ${prefix}comando <> \n▸ Explicación.`)
   .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}alias`);
 
-  message.guild.channels.forEach(async (channel, id) => {
+  message.guild.channels.cache.each(async (channel, id) => {
     await channel.overwritePermissions(muteRole, {
       VIEW_CHANNEL: false,
       SEND_MESSAGES: false,
