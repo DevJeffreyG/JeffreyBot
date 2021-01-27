@@ -190,13 +190,9 @@ module.exports.run = async (client, message, args) => {
           for(let i = 0; i < aroles.length; i++){
             let role = guild.roles.cache.find(x => x.id === aroles[i].roleID);
             let rCh = guild.channels.cache.find(x => x.id === aroles[i].channelID);
-            let msgUrl;
-            let msg = rCh.messages.fetch(aroles[i].messageID)
-            .then(async m => {
-             msgUrl = await m.url;
-            });
+            let msg = await rCh.messages.fetch(aroles[i].messageID);
 
-            await listEmbed.addField(`— @${role.name}`, `**—** Canal: ${rCh}.\n**—** [Mensaje](${msgUrl}).\n**—** Emoji: ${aroles[i].emoji}.\n**—** ID: \`${aroles[i].id}\`.`);
+            listEmbed.addField(`— @${role.name}`, `**—** Canal: ${rCh}.\n**—** [Mensaje](${msg.url}).\n**—** Emoji: ${aroles[i].emoji}.\n**—** ID: \`${aroles[i].id}\`.`);
           }
 
           message.channel.send(listEmbed);
