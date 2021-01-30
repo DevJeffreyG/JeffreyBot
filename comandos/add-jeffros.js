@@ -27,7 +27,7 @@ module.exports.run = async (client, message, args) => {
   .setDescription(`▸ El uso correcto es: ${prefix}addjeffros <@usuario> <N° ${Emojis.Jeffros}/${Emojis.Dark}> (darkjeffros)\n▸ Añades Jeffros o DarkJeffros a un usuario.`)
   .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}add-jeffros`);
   
-  if(author.id === jeffreygID){}else {return;}
+  if(author.id != jeffreygID) return;
   
   let member = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[0]));
   let nJeffros = Math.floor(args[1]);
@@ -39,6 +39,7 @@ module.exports.run = async (client, message, args) => {
   
     /* #### ADDING JEFFROS */
     Jeffros.findOne({
+      serverID: guild.id,
       userID: member.id
     }, (err, jeffros) => {
       if(err) throw err;
