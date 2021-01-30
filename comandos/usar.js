@@ -463,8 +463,6 @@ module.exports.run = async (client, message, args) => {
           console.log("nope")
         }
       })
-    } else {
-      return false;
     }
   }
 }
