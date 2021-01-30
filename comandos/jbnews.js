@@ -26,7 +26,7 @@ module.exports.run = async (client, message, args) => {
   .setDescription(`▸ El uso correcto es: ${prefix}jbnews <anuncio>`)
   .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}announcenews`);
   
-  if(!args[0]) return message.channel.send(embed);
+  if(!args[0] && message.attachments.size === 0) return message.channel.send(embed);
   let anuncio = args.join(" ");
   
   if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
