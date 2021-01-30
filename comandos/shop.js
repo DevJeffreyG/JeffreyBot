@@ -438,7 +438,7 @@ module.exports.run = async (client, message, args) => {
                               if (items.length < fin - 1) {
                                 fin = items.length;
                               } else if (items.length === fin - 1) {
-                                fin = items.length - 1;
+                                fin = items.length + 1;
                               } else {
                                 fin = fin - 1;
                               }
