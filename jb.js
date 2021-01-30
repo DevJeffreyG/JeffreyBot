@@ -959,6 +959,17 @@ client.on("message", async message => {
         }
       );
     }
+
+    if(message.content === `${prefix}updatedata`){
+      if(author.id != jeffreygID) return;
+
+      await functions.intervalGlobalDatas();
+
+      return message.reply("Interval de global datas ejecutado.")
+      .then(m => {
+        m.delete({timeout: ms("10s")});
+      })
+    }
   } else {
 
     if (message.member.roles.cache.find(x => x.id === Config.lvl40)){
