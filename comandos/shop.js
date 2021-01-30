@@ -439,8 +439,6 @@ module.exports.run = async (client, message, args) => {
                                 fin = items.length;
                               } else if (items.length === fin - 1) {
                                 fin = items.length;
-                              } else {
-                                fin = fin - 1;
                               }
 
                               embed.setFooter(
