@@ -448,7 +448,7 @@ module.exports.run = async (client, message, args) => {
                                 guild.iconURL()
                               );
 
-                              for (let i = inicio; i < fin + 1; i++) {
+                              for (let i = inicio; i < fin; i++) {
                                 console.log(i)
                                 let isSub = false;
                                 let time = null;
