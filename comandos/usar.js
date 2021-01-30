@@ -389,7 +389,7 @@ module.exports.run = async (client, message, args) => {
                           });
                         } else {
                           if(!isSub){ // no es una sub pero tiene tiempo limitado
-                            functions.LimitedTime(r.id, message.member, duration, use.special.type, use.special.specialObjective, use.special.specialValue);
+                            functions.LimitedTime(guild, r.id, message.member, duration, use.special.type, use.special.specialObjective, use.special.specialValue);
                             
                             purchase.remove();
                             let embed = new Discord.MessageEmbed()
@@ -399,7 +399,7 @@ module.exports.run = async (client, message, args) => {
 
                             return message.channel.send(embed);
                           } else {
-                            functions.Subscription(r.id, message.member, duration, jeffrosPrice, subscriptionName);
+                            functions.Subscription(guild, r.id, message.member, duration, jeffrosPrice, subscriptionName);
 
                             purchase.remove();
                             let embed = new Discord.MessageEmbed()

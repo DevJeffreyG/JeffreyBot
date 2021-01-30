@@ -846,8 +846,7 @@ const Duration = function(roleDuration, roleID, victimMember){
     }
 }
 
-const LimitedTime = async function(roleID, victimMember, duration, specialType, specialObjective, specialValue){
-    let guild = client.id != Config.testingJBID ? await client.guilds.cache.find(x => x.id === Config.jgServer) : await client.guilds.cache.find(x => x.id === testingGuild);
+const LimitedTime = function(guild, roleID, victimMember, duration, specialType, specialObjective, specialValue){
     let role = guild.roles.cache.find(x => x.id === roleID);
     specialType = specialType || false;
     specialObjective = specialObjective || false;
@@ -890,8 +889,7 @@ const LimitedTime = async function(roleID, victimMember, duration, specialType, 
       }, ms(duration));
 }
 
-const Subscription = async function(roleID, victimMember, intervalTime, jeffrosPerInterval, subscriptionName){
-    let guild = client.id != Config.testingJBID ? await client.guilds.cache.find(x => x.id === Config.jgServer) : await client.guilds.cache.find(x => x.id === testingGuild);
+const Subscription = function(guild, roleID, victimMember, intervalTime, jeffrosPerInterval, subscriptionName){
     let role = guild.roles.cache.find(x => x.id === roleID);
 
     if(intervalTime === "permanent" || intervalTime === "na"){
