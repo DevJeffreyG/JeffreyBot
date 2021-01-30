@@ -450,30 +450,24 @@ module.exports.run = async (client, message, args) => {
     let response;
 
     for (let ignoredID in obj){
-    if(act.itemID === ignoredID){
-      // buscar si el usuario tiene algun rol de los items dentro de este ignoredID
-      for(let i = 0; i < obj[ignoredID].length; i++){
-        console.log(obj[ignoredID][i]);
-        Use.findOne({
-          itemID: obj[ignoredID][i]
-        }, (err, u) => {
-          if(message.member.roles.cache.find(x => x.id === u.thingID)) {
-            console.log("si");
-            response = true;
-            return;
-          } else {
-            return;
-          }
-        });
+      if(act.itemID === ignoredID){
+        // buscar si el usuario tiene algun rol de los items dentro de este ignoredID
+        for(let i = 0; i < obj[ignoredID].length; i++){
+          console.log(obj[ignoredID][i]);
+          Use.findOne({
+            itemID: obj[ignoredID][i]
+          }, (err, u) => {
+            if(message.member.roles.cache.find(x => x.id === u.thingID)) {
+              response = true;
+            }
+          });
+        }
       }
-    } else {
-      return;
     }
-  }
 
-  console.log("#######",response)
-  return response;
-}
+    console.log("#######",response)
+    return response;
+  }
 };
 
 module.exports.help = {
