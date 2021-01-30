@@ -451,12 +451,14 @@ module.exports.run = async (client, message, args) => {
                                   serverID: guild.id,
                                   itemID: items[i].id
                                 }, (err, actualItemUse) => {
-                                  if(!actualItemUse) return message.channel.send(`[001] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas seguir usando correctamente el comando :)`)
+                                  if(!actualItemUse) return null;
                                   
                                   isSub = actualItemUse.isSub;
 
                                   time = isSub ? prettyms(Number(actualItemUse.duration), {secondsDecimalDigits: 0 }) : null;
                                 });
+
+                                if(!usesQuery) return message.channel.send(`[001] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas seguir usando correctamente el comando :)`)
 
                                 All.findOne(
                                   {
