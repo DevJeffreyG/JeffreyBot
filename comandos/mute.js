@@ -48,7 +48,7 @@ module.exports.run = async (client, message, args) => {
     }
 
     // llamar la funcion
-    functions.LimitedTime(guild, "permanent", muteRole.id, mUser);
+    functions.LimitedTime(guild, muteRole.id, mUser, "permanent");
 
     let mEmbed = new Discord.MessageEmbed()
     .setAuthor(`| Mute`, author.displayAvatarURL())
@@ -66,7 +66,7 @@ module.exports.run = async (client, message, args) => {
     }
 
     // llamar la funcion
-    functions.LimitedTime(guild, ms(mTime), muteRole.id, mUser);
+    functions.LimitedTime(guild, muteRole.id, mUser, ms(mTime));
 
     let mEmbed = new Discord.MessageEmbed()
     .setAuthor(`| Temp mute`, author.displayAvatarURL())
