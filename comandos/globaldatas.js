@@ -38,6 +38,7 @@ module.exports.run = async (client, message, args) => {
 
         return message.reply("Interval de global datas ejecutado.")
         .then(m => {
+            message.delete();
             m.delete({timeout: ms("10s")});
         });
     } else {
