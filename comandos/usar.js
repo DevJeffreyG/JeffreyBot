@@ -374,7 +374,6 @@ module.exports.run = async (client, message, args) => {
 
                         let isSub = use.isSub ? true : false;
 
-                        let willBenefit;
                         let ignoreIf = { // ignorar los itmes con id X si la id del item Y
                           "3": [
                             "6"
@@ -388,7 +387,7 @@ module.exports.run = async (client, message, args) => {
                           ]
                         }
 
-                        await forWait(ignoreIf, use);
+                        let willBenefit = await forWait(ignoreIf, use);
 
                         console.log("AFTER FOR")
                         console.log(willBenefit);
@@ -470,7 +469,7 @@ module.exports.run = async (client, message, args) => {
     } else {
       console.log("##### NOPE")
       console.log(ignoredID);
-      console.log(ignoreIf[ignoredID]);
+      console.log(obj[ignoredID]);
     }
   }
 }
