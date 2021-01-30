@@ -455,7 +455,8 @@ module.exports.run = async (client, message, args) => {
         // buscar si el usuario tiene algun rol de los items dentro de este ignoredID
         for(let i = 0; i < obj[ignoredID].length; i++){
           console.log(obj[ignoredID][i]);
-          Use.findOne({
+          await Use.findOne({
+            serverID: guild.id,
             itemID: obj[ignoredID][i]
           }, (err, u) => {
             if(message.member.roles.cache.find(x => x.id === u.thingID)) {
