@@ -47,6 +47,7 @@ const WinVault = require("../modelos/winVault.js");
 const Hint = require("../modelos/hint.js");
 const GlobalData = require("../modelos/globalData.js");
 const Stats = require("../modelos/darkstats.js");
+const testingGuild = "482989052136652800";
 
 /* ##### MONGOOSE ######## */
 
@@ -846,6 +847,7 @@ const Duration = function(roleDuration, roleID, victimMember){
 }
 
 const LimitedTime = function(roleID, victimMember, duration, specialType, specialObjective, specialValue){
+    let guild = client.id != Config.testingJBID ? client.guilds.cache.find(x => x.id === Config.jgServer) : client.guilds.cache.find(x => x.id === testingGuild);
     let role = guild.roles.cache.find(x => x.id === roleID);
     specialType = specialType || false;
     specialObjective = specialObjective || false;
@@ -889,6 +891,7 @@ const LimitedTime = function(roleID, victimMember, duration, specialType, specia
 }
 
 const Subscription = function(roleID, victimMember, intervalTime, jeffrosPerInterval, subscriptionName){
+    let guild = client.id != Config.testingJBID ? client.guilds.cache.find(x => x.id === Config.jgServer) : client.guilds.cache.find(x => x.id === testingGuild);
     let role = guild.roles.cache.find(x => x.id === roleID);
 
     if(intervalTime === "permanent" || intervalTime === "na"){
