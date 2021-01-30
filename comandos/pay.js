@@ -48,6 +48,7 @@ module.exports.run = async (client, message, args) => {
 
   Jeffros.findOne(
     {
+      serverID: guild.id,
       userID: user.id
     },
     (err, uPay) => {
@@ -70,6 +71,7 @@ module.exports.run = async (client, message, args) => {
 
       Jeffros.findOne(
         {
+          serverID: guild.id,
           userID: author.id
         },
         (err2, uBy) => {
