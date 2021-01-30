@@ -390,34 +390,6 @@ module.exports.run = async (client, message, args) => {
 
                         await forWait(ignoreIf);
 
-                        async function forWait(ignoreIf) {
-                            for (let ignoredID in ignoreIf){
-                            if(use.itemID === ignoredID){
-                              console.log("##### YES")
-                              // buscar si el usuario tiene algun rol de los items dentro de este ignoredID
-                              let array = ignoreIf[ignoredID];
-                              console.log(array);
-                              array.forEach(async element => {
-                                let queryForIgnore = await Use.findOne({
-                                  itemID: element
-                                });
-
-                                console.log(queryForIgnore);
-
-                                if(message.member.roles.cache.find(x => x.id === queryForIgnore.thingID)) {
-                                  return true;
-                                } else {
-                                  console.log("no")
-                                }
-                              })
-                            } else {
-                              console.log("##### NOPE")
-                              console.log(ignoredID);
-                              console.log(ignoreIf[ignoredID]);
-                            }
-                          }
-                        }
-
                         console.log("AFTER FOR")
                         console.log(willBenefit);
 
@@ -474,6 +446,34 @@ module.exports.run = async (client, message, args) => {
       });
     })
   }
+
+  async function forWait(obj) {
+    for (let ignoredID in obj){
+    if(use.itemID === ignoredID){
+      console.log("##### YES")
+      // buscar si el usuario tiene algun rol de los items dentro de este ignoredID
+      let array = obj[ignoredID];
+      console.log(array);
+      array.forEach(async element => {
+        let queryForIgnore = await Use.findOne({
+          itemID: element
+        });
+
+        console.log(queryForIgnore);
+
+        if(message.member.roles.cache.find(x => x.id === queryForIgnore.thingID)) {
+          return true;
+        } else {
+          console.log("no")
+        }
+      })
+    } else {
+      console.log("##### NOPE")
+      console.log(ignoredID);
+      console.log(ignoreIf[ignoredID]);
+    }
+  }
+}
 };
 
 module.exports.help = {
