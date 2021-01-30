@@ -387,7 +387,7 @@ module.exports.run = async (client, message, args) => {
                           ]
                         }
 
-                        let willBenefit = await forWait(ignoreIf, use) ? true: false;
+                        let willBenefit = await forWait(ignoreIf, use);
 
                         console.log("AFTER FOR")
                         console.log(willBenefit);
@@ -459,11 +459,12 @@ module.exports.run = async (client, message, args) => {
             console.log("si");
             return true;
           } else {
-            console.log("nope")
+            break;
           }
         });
       }
-      
+    } else {
+      break;
     }
   }
 }
