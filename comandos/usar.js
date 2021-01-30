@@ -387,7 +387,7 @@ module.exports.run = async (client, message, args) => {
                           ]
                         }
 
-                        let willBenefit = await forWait(ignoreIf, use);
+                        let willBenefit = await forWait(ignoreIf, use) ? true: false;
 
                         console.log("AFTER FOR")
                         console.log(willBenefit);
@@ -450,10 +450,10 @@ module.exports.run = async (client, message, args) => {
     for (let ignoredID in obj){
     if(act.itemID === ignoredID){
       // buscar si el usuario tiene algun rol de los items dentro de este ignoredID
-      let array = obj[ignoredID];
-      array.forEach(element => {
+      for(let i = 0; i < obj[ignoredID].length; i++){
+        console.log(obj[ignoredID][i]);
         Use.findOne({
-          itemID: element
+          itemID: obj[ignoredID][i]
         }, (err, u) => {
           if(message.member.roles.cache.find(x => x.id === u.thingID)) {
             console.log("si");
@@ -462,7 +462,8 @@ module.exports.run = async (client, message, args) => {
             console.log("nope")
           }
         });
-      })
+      }
+      
     }
   }
 }
