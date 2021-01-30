@@ -351,7 +351,7 @@ module.exports.run = async (client, message, args) => {
                         }
                       );
                     } else if (thing === "role") {
-                      if (use.thingID === "na") return message.channel.send(`Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas __usar__ tu item :)`);
+                      if (use.thingID === "na") return message.channel.send(`[001] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas __usar__ tu item :)`);
 
                       if (action === "delete") {
                         let r = guild.roles.cache.find(x => x.id === use.thingID);
@@ -374,7 +374,36 @@ module.exports.run = async (client, message, args) => {
 
                         let isSub = use.isSub ? true : false;
 
+                        let willBenefit;
+                        let ignoreIf = { // ignorar los itmes con id X si la id del item Y
+                          "3": [
+                            "6"
+                          ],
+                          "4": [
+                            "6"
+                          ],
+                          "6": [
+                            "3",
+                            "4"
+                          ]
+                        }
+
+                        for (let ignoredID in ignoreIf){
+                          if(item.id === ignoredID){
+                            // buscar si el usuario tiene algun rol de los items dentro de este ignoredID
+                            let array = ignoreIf[ignoredID];
+                            array.forEach(async element => {
+                              let queryForIgnore = await Use.findOne({
+                                itemID: element
+                              });
+
+                              if(message.member.roles.cache.find(x => x.id === queryForIgnore.thingID)) return willBenefit = true;
+                            })
+                          }
+                        }
+
                         if (message.member.roles.cache.find(x => x.id === r.id)) return message.reply(`ya tienes el rol que se da al usar \`${item.itemName}\`.`);
+                        if (willBenefit) return message.reply(`lo siento, pero si usas este item, te estarías beneficiandote aún más, espera a que tu Boost actual termine para poder usar \`${item.itemName}\`.`)
 
                         if(duration === "na" || duration === "permanent"){
 
@@ -414,7 +443,7 @@ module.exports.run = async (client, message, args) => {
                       }
                     } else {
                       return message.channel.send(
-                        `Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas __usar__ tu item :)`
+                        `[002] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas __usar__ tu item :)`
                       );
                     }
                     

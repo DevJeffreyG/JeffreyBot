@@ -1046,7 +1046,7 @@ Stats.findOne({
                                 if(err) throw err;
 
                                 if(!uses){
-                                    return message.channel.send(`[01] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas ver tus items... :)`);
+                                    return message.channel.send(`[001] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas ver tus items... :)`);
                                 } else {
                                     Stats.findOne({
                                         userID: author.id
@@ -1082,7 +1082,7 @@ Stats.findOne({
                                                     // verificar que tenga ese item
                                                     if(!stats.items.find(x => x.id === Number(idUse))) return message.channel.send(noItem);
 
-                                                    if(!use) return message.channel.send(`[02] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas usar tu item... :)`)
+                                                    if(!use) return message.channel.send(`[002] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas usar tu item... :)`)
 
                                                     let item = stats.items.find(x => x.id === Number(idUse));
 
@@ -1492,7 +1492,7 @@ Stats.findOne({
                                             return message.reply("ese item no existe.")
                                         } else {
                                             if(!use){ // si no está listo para usar
-                                                return message.channel.send(`Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas comprar tu item :)`);
+                                                return message.channel.send(`[003] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas comprar tu item :)`);
                                             }
 
                                             All.findOne({

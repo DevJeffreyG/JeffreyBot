@@ -451,6 +451,8 @@ module.exports.run = async (client, message, args) => {
                                   serverID: guild.id,
                                   itemID: items[i].id
                                 }, (err, actualItemUse) => {
+                                  if(!actualItemUse) return message.channel.send(`[001] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas seguir usando correctamente el comando :)`)
+                                  
                                   isSub = actualItemUse.isSub;
 
                                   time = isSub ? prettyms(Number(actualItemUse.duration), {secondsDecimalDigits: 0 }) : null;
@@ -657,7 +659,7 @@ module.exports.run = async (client, message, args) => {
 
                           if (!use) {
                             return message.channel.send(
-                              `Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas comprar tu item :)`
+                              `[002] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas comprar tu item :)`
                             );
                           }
 
