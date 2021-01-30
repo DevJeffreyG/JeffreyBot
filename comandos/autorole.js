@@ -109,14 +109,14 @@ module.exports.run = async (client, message, args) => {
                         msg.react(client.emojis.cache.find(x => x.id === arEmoji));
                       })
                       .catch(err => {
-                        message.reply("no encontré ese mensaje en ese canal, revísa tus datos.")
+                        return message.reply("no encontré ese mensaje en ese canal, revísa tus datos.")
                       });
                     } else {
                       arChannel.messages.fetch(`${arMessage}`).then(msg => {
                         msg.react(`${arEmoji}`);
                       })
                       .catch(err => {
-                        message.reply("no encontré ese mensaje en ese canal, revísa tus datos.")
+                        return message.reply("no encontré ese mensaje en ese canal, revísa tus datos.")
                       });
                     }
 

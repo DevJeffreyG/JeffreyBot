@@ -279,7 +279,7 @@ module.exports.run = async (client, message, args) => {
                   wUser.send(warnedEmbed)
                   .catch(e => {
                     message.react("494267320097570837");
-                    message.channel.send("¡Usuario con MDs desactivados! **¡No sabe cuántos WARNS tiene!**");
+                    message.channel.send("¡Usuario con MDs desactivados // Usuario no encontrado! **¡No sabe cuántos WARNS tiene!**");
                   });
                 })
               }
