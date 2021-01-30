@@ -846,7 +846,7 @@ const LimitedTime = function(guild, roleID, victimMember, duration, specialType,
             GlobalData.findOneAndDelete({
                 "info.type": "roleDuration",
                 "info.roleID": roleID,
-                "info.userID": victimMember.id
+                "info.userID": victimMember.id,
                 "info.special.type": false
             }, (err, func) => {
                 if(err){
