@@ -449,6 +449,7 @@ module.exports.run = async (client, message, args) => {
                               );
 
                               for (let i = inicio; i < fin + 1; i++) {
+                                console.log(i)
                                 let isSub = false;
                                 let time = null;
                                 let usesQuery = await Use.findOne({
