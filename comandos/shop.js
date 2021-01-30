@@ -436,7 +436,7 @@ module.exports.run = async (client, message, args) => {
                               inicio = inicio - 1;
 
                               if (items.length <= fin - 1) {
-                                fin = items.length;
+                                fin = items.length - 1;
                                 }
 
                               embed.setFooter(
@@ -451,6 +451,7 @@ module.exports.run = async (client, message, args) => {
                                   serverID: guild.id,
                                   itemID: items[i].id
                                 }, (err, actualItemUse) => {
+                                  if(err) throw err;
                                   if(!actualItemUse) return null;
                                   
                                   isSub = actualItemUse.isSub;

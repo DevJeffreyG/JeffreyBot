@@ -450,7 +450,6 @@ module.exports.run = async (client, message, args) => {
       if(act.itemID === ignoredID){
         // buscar si el usuario tiene algun rol de los items dentro de este ignoredID
         for(let i = 0; i < obj[ignoredID].length; i++){
-          console.log(obj[ignoredID][i]);
           await Use.findOne({
             serverID: guild.id,
             itemID: obj[ignoredID][i]
