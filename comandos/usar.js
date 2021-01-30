@@ -388,7 +388,7 @@ module.exports.run = async (client, message, args) => {
                           ]
                         }
 
-                        await forWait(ignoreIf);
+                        await forWait(ignoreIf, use);
 
                         console.log("AFTER FOR")
                         console.log(willBenefit);
@@ -447,9 +447,9 @@ module.exports.run = async (client, message, args) => {
     })
   }
 
-  async function forWait(obj) {
+  async function forWait(obj, act) {
     for (let ignoredID in obj){
-    if(use.itemID === ignoredID){
+    if(act.itemID === ignoredID){
       console.log("##### YES")
       // buscar si el usuario tiene algun rol de los items dentro de este ignoredID
       let array = obj[ignoredID];
