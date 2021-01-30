@@ -435,9 +435,13 @@ module.exports.run = async (client, message, args) => {
 
                               inicio = inicio - 1;
 
-                              if (items.length <= fin - 1) {
+                              if (items.length < fin - 1) {
+                                fin = items.length;
+                              } else if (items.length === fin - 1) {
                                 fin = items.length - 1;
-                                }
+                              } else {
+                                fin = fin - 1;
+                              }
 
                               embed.setFooter(
                                 `| Tienda oficial - Página ${pagn} de ${totalpags}`,
