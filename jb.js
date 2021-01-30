@@ -673,7 +673,7 @@ client.on("ready", async () => {
 
 //main
 client.on("message", async message => {
-  functions.loadBoosts();
+  await functions.loadBoosts();
   let messageArray = message.content.split(" ");
   let cmd = messageArray[0];
   let args = messageArray.slice(1);
