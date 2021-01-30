@@ -1295,7 +1295,7 @@ Stats.findOne({
                                                                                 
 
                                                                                 // tiene una duración?
-                                                                                return functions.Duration(duracion, role.id, victim);
+                                                                                return functions.LimitedTime(guild, duracion, role.id, victim);
                                                                             }
                                                                         } else {
                                                                             if(victimStats.items.length === 0){ // tiene cuenta pero no items, proseguir
@@ -1310,7 +1310,7 @@ Stats.findOne({
                                                                                 functions.Interest(idUse);
                                                                                 
                                                                                 // tiene una duración?
-                                                                                return functions.Duration(duracion, role.id, victim);
+                                                                                return functions.LimitedTime(guild, duracion, role.id, victim);
                                                                             }
 
                                                                             if(victimStats.items.find(x => x.name === "Firewall")){ // si encuentra un item con nombre "Firewall", revisar si está activo
@@ -1334,7 +1334,7 @@ Stats.findOne({
                                                                                         
 
                                                                                         // tiene una duración?
-                                                                                        return functions.Duration(duracion, role.id, victim);
+                                                                                        return functions.LimitedTime(guild, duracion, role.id, victim);
                                                                                     } else {
                                                                                         dsChannel.send(fail3);
 
@@ -1363,7 +1363,7 @@ Stats.findOne({
                                                                                     
 
                                                                                     // tiene una duración?
-                                                                                    return functions.Duration(duracion, role.id, victim);
+                                                                                    return functions.LimitedTime(guild, duracion, role.id, victim);
                                                                                 }
                                                                             } else { // no tienen ningun item con nombre firewall
                                                                                 dsChannel.send(success3);
@@ -1378,7 +1378,7 @@ Stats.findOne({
                                                                                 
 
                                                                                 // tiene una duración?
-                                                                                return functions.Duration(duracion, role.id, victim);
+                                                                                return functions.LimitedTime(guild, duracion, role.id, victim);
                                                                             }
                                                                         }
                                                                     })
@@ -1396,7 +1396,7 @@ Stats.findOne({
                                                                     
 
                                                                     // tiene una duración?
-                                                                    return functions.Duration(duracion, role.id, victim);
+                                                                    return functions.LimitedTime(guild, duracion, role.id, victim);
                                                                     
                                                                 }
                                                             }

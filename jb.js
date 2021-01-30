@@ -871,7 +871,7 @@ client.on("message", async message => {
       if(boostedJeffros.has(author.id) || boostedGeneral.has(author.id)){
         // buscar la globaldata
         let query = await GlobalData.find({
-          "info.type": "limitedTimeRole",
+          "info.type": "roleDuration",
           "info.special.type": "boostMultiplier"
         }, (err, boosts) => {
           if(err) throw err;
@@ -959,17 +959,6 @@ client.on("message", async message => {
         }
       );
     }
-
-    if(message.content === `${prefix}updatedata`){
-      if(author.id != jeffreygID) return;
-
-      await functions.intervalGlobalDatas();
-
-      return message.reply("Interval de global datas ejecutado.")
-      .then(m => {
-        m.delete({timeout: ms("10s")});
-      })
-    }
   } else {
 
     if (message.member.roles.cache.find(x => x.id === Config.lvl40)){
@@ -999,7 +988,7 @@ client.on("message", async message => {
     if(boostedJeffros.has(author.id) || boostedGeneral.has(author.id)){
         // buscar la globaldata
         let query = await GlobalData.find({
-          "info.type": "limitedTimeRole",
+          "info.type": "roleDuration",
           "info.special.type": "boostMultiplier"
         }, (err, boosts) => {
           if(err) throw err;
@@ -1072,7 +1061,7 @@ client.on("message", async message => {
         if(boostedExp.has(author.id) || boostedGeneral.has(author.id)){
           // buscar la globaldata
           let query2 = await GlobalData.find({
-            "info.type": "limitedTimeRole",
+            "info.type": "roleDuration",
             "info.special.type": "boostMultiplier"
           }, (err, boosts) => {
             if(err) throw err;

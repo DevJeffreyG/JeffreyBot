@@ -184,7 +184,7 @@ const intervalGlobalDatas = async function(justBoost){
 
   // buscar un tipo de boost
   GlobalData.find({
-    "info.type": "limitedTimeRole",
+    "info.type": "roleDuration",
     "info.special.type": "boostMultiplier"
   }, (err, boosts) => {
     if(err) throw err;
@@ -201,7 +201,7 @@ const intervalGlobalDatas = async function(justBoost){
       let today = new Date();
       /*
       info: {
-        type: "limitedTimeRole":
+        type: "roleDuration":
         roleID: roleID,
         userID: victimMember,
         since: hoy,
@@ -340,7 +340,8 @@ const intervalGlobalDatas = async function(justBoost){
   })
   // buscar muteados
   GlobalData.find({
-    "info.type": "roleDuration"
+    "info.type": "roleDuration",
+    "info.special.type": false
   }, (err, roled) => {
     if(err) throw err;
 
@@ -805,9 +806,19 @@ const Interest = function (idUse) {
     })
 }
 
-const Duration = function(roleDuration, roleID, victimMember){
+const LimitedTime = function(guild, roleID, victimMember, duration, specialType, specialObjective, specialValue){
+    specialType = specialType || false;
+    specialObjective = specialObjective || false;
+    specialValue = specialValue || false;
+
     let role = guild.roles.cache.find(x => x.id === roleID);
-    if(roleDuration != "permanent"){
+
+    // si no es un boost (por ahora)
+    if(!specialType){
+      console.log("Nuevo roleDuration que NO es un BOOST.")
+
+      /* "duration" DEBE SER ms ( no se usa ms() ) */
+      if(duration != "permanent"){
         // agregar una global data con la fecha
 
         let hoy = new Date();
@@ -817,7 +828,12 @@ const Duration = function(roleDuration, roleID, victimMember){
                 roleID: roleID,
                 userID: victimMember.id,
                 since: hoy,
-                duration: roleDuration
+                duration: duration,
+                special: {
+                  "type": false,
+                  "specialObjective": false, 
+                  "specialValue": false
+                }
             }
         })
 
@@ -838,55 +854,51 @@ const Duration = function(roleDuration, roleID, victimMember){
                     return true;
                 }
             });
-        }, roleDuration);
+        }, duration);
 
-    } else {
-        // es permanente, no hacer nada
-        return;
-    }
-}
-
-const LimitedTime = function(guild, roleID, victimMember, duration, specialType, specialObjective, specialValue){
-    let role = guild.roles.cache.find(x => x.id === roleID);
-    specialType = specialType || false;
-    specialObjective = specialObjective || false;
-    specialValue = specialValue || false;
-    let hoy = new Date();
-
-    const newData = new GlobalData({
-      info: {
-        type: "limitedTimeRole",
-        roleID: roleID,
-        userID: victimMember,
-        since: hoy,
-        duration: ms(duration),
-        special: {
-          "type": specialType, // boostMultiplier
-          "specialObjective": specialObjective, // exp, jeffros, all
-          "specialValue": specialValue // (2) = exp || jeffros normales x 2
-        }
+      } else {
+          // es permanente, no hacer nada
+          return;
       }
-    })
+    } else {
 
-    victimMember.roles.add(role);
-    newData.save();
+      let hoy = new Date();
 
-    // timeout, por si pasa el tiempo antes de que el bot pueda reiniciarse
-      setTimeout(function(){
-        victimMember.roles.remove(role);
+      const newData = new GlobalData({
+        info: {
+          type: "roleDuration",
+          roleID: roleID,
+          userID: victimMember,
+          since: hoy,
+          duration: ms(duration),
+          special: {
+            "type": specialType, // boostMultiplier
+            "specialObjective": specialObjective, // exp, jeffros, all
+            "specialValue": specialValue // (2) = exp || jeffros normales x 2
+          }
+        }
+      })
 
-        GlobalData.findOneAndDelete({
-            "info.type": "limitedTimeRole",
-            roleID: roleID,
-            userID: victimMember.id
-        }, (err, func) => {
-            if(err){
-                console.log(err);
-            } else {
-                console.log("Role eliminado automaticamente")
-            }
-        });
-      }, ms(duration));
+      victimMember.roles.add(role);
+      newData.save();
+
+      // timeout, por si pasa el tiempo antes de que el bot pueda reiniciarse
+        setTimeout(function(){
+          victimMember.roles.remove(role);
+
+          GlobalData.findOneAndDelete({
+              "info.type": "roleDuration",
+              roleID: roleID,
+              userID: victimMember.id
+          }, (err, func) => {
+              if(err){
+                  console.log(err);
+              } else {
+                  console.log("Role eliminado automaticamente")
+              }
+          });
+        }, ms(duration));
+    }
 }
 
 const Subscription = function(guild, roleID, victimMember, intervalTime, jeffrosPerInterval, subscriptionName){
@@ -1040,7 +1052,6 @@ module.exports = {
     intervalGlobalDatas,
     Warns,
     Interest,
-    Duration,
     vaultMode,
     findLvls5,
     LimitedTime,

@@ -90,6 +90,7 @@ module.exports.run = async (client, message, args) => {
   .setAuthor(`| Comandos de Desarrollador`, "https://cdn.discordapp.com/emojis/494282181296914432.png")
   .setDescription(`▸ \`${prefix}actividad\`: Cambias lo que estoy jugando ahora.
 ▸ \`${prefix}syncMute\`: Sincronizas el rol de Mute en todos los canales.
+▸ \`${prefix}globaldatas\`: Todos los tipos de GlobalDatas actuales. / Forzar ciclo de GlobalDatas.
 ▸ \`${prefix}add-jeffros\`: Añades Jeffros o Dark Jeffros a un usuario.
 ▸ \`${prefix}dbBan\`: Prohíbe a alguien enviar un reporte de bug.
 ▸ \`${prefix}emoji\`: Conoce la ID de un emote por su nombre en el server actual.
