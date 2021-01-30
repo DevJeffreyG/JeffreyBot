@@ -388,7 +388,7 @@ module.exports.run = async (client, message, args) => {
                           ]
                         }
 
-                        for await (let ignoredID in ignoreIf){
+                        await for (let ignoredID in ignoreIf){
                           if(use.itemID === ignoredID){
                             console.log("##### YES")
                             // buscar si el usuario tiene algun rol de los items dentro de este ignoredID
