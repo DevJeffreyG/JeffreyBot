@@ -390,6 +390,7 @@ module.exports.run = async (client, message, args) => {
 
                         for (let ignoredID in ignoreIf){
                           if(use.itemID === ignoredID){
+                            console.log("##### YES")
                             // buscar si el usuario tiene algun rol de los items dentro de este ignoredID
                             let array = ignoreIf[ignoredID];
                             console.log(array);
@@ -400,16 +401,25 @@ module.exports.run = async (client, message, args) => {
 
                               console.log(queryForIgnore);
 
-                              if(message.member.roles.cache.find(x => x.id === queryForIgnore.thingID)) return willBenefit = true;
+                              if(message.member.roles.cache.find(x => x.id === queryForIgnore.thingID)) {
+                                console.log("si")
+                                willBenefit = true;
+                              } else {
+                                console.log("no")
+                              }
                             })
                           } else {
+                            console.log("##### NOPE")
                             console.log(ignoredID);
                             console.log(ignoreIf[ignoredID]);
                           }
                         }
 
+                        console.log("AFTER FOR")
+                        console.log(willBenefit);
+
                         if (message.member.roles.cache.find(x => x.id === r.id)) return message.reply(`ya tienes el rol que se da al usar \`${item.itemName}\`.`);
-                        if (willBenefit == true) return message.reply(`lo siento, pero si usas este item, te estarías beneficiandote aún más, espera a que tu Boost actual termine para poder usar \`${item.itemName}\`.`)
+                        if (willBenefit === true) return message.reply(`lo siento, pero si usas este item, te estarías beneficiandote aún más, espera a que tu Boost actual termine para poder usar \`${item.itemName}\`.`)
 
                         if(duration === "na" || duration === "permanent"){
 
