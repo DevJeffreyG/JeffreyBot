@@ -38,6 +38,11 @@ module.exports.run = async (client, message, args) => {
     .setFooter(`Noticia por ${author.tag}`, client.user.displayAvatarURL())
 	  .setTimestamp()
     .setThumbnail(client.user.displayAvatarURL());
+
+    if(message.attachments.size != 0) { // si hay attachements, agregarlos al embed.
+      let firstAttachment = message.attachments.first();
+      nEmbed.setImage(firstAttachment.url);
+    }
     
     jbChannel.send(`${jbNRole}~`).then(r => {
       jbChannel.send(nEmbed);
