@@ -1041,5 +1041,7 @@ module.exports = {
     Interest,
     Duration,
     vaultMode,
-    findLvls5
+    findLvls5,
+    LimitedTime,
+    Subscription
 }
