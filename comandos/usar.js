@@ -389,9 +389,10 @@ module.exports.run = async (client, message, args) => {
                         }
 
                         for (let ignoredID in ignoreIf){
-                          if(item.id === ignoredID){
+                          if(use.itemID === ignoredID){
                             // buscar si el usuario tiene algun rol de los items dentro de este ignoredID
                             let array = ignoreIf[ignoredID];
+                            console.log(array);
                             array.forEach(async element => {
                               let queryForIgnore = await Use.findOne({
                                 itemID: element
@@ -401,6 +402,9 @@ module.exports.run = async (client, message, args) => {
 
                               if(message.member.roles.cache.find(x => x.id === queryForIgnore.thingID)) return willBenefit = true;
                             })
+                          } else {
+                            console.log(ignoredID);
+                            console.log(ignoreIf[ignoredID]);
                           }
                         }
 
