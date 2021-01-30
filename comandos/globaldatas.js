@@ -15,7 +15,7 @@ module.exports.run = async (client, message, args) => {
   // Variables
   let author = message.author;
   const guild = message.guild;
-  
+
   if(author.id != jeffreygID) return;
     
   let embed = new Discord.MessageEmbed()
@@ -30,7 +30,10 @@ module.exports.run = async (client, message, args) => {
   .addField(`▸ roleDuration`, `**—** Información de Roles temporales (o no) que se les da a un usuario.`)
   .addField(`▸ jeffrosSubscription`, `**—** Información de una suscripción de un usuario.`)
 
-    if(args[0].toLowerCase() === "update") {
+
+    if(!args[0]){
+        return message.channel.send(embed);
+    } else if(args[0].toLowerCase() === "update"){
         await functions.intervalGlobalDatas();
 
         return message.reply("Interval de global datas ejecutado.")
@@ -40,8 +43,6 @@ module.exports.run = async (client, message, args) => {
     } else {
         return message.channel.send(embed);
     }
-
-
 }
 
 module.exports.help = {
