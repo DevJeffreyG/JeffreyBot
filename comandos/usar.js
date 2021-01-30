@@ -390,7 +390,7 @@ module.exports.run = async (client, message, args) => {
 
                         await forWait(ignoreIf);
 
-                        let forWait = async function (ignoreIf) {
+                        async function forWait(ignoreIf) {
                             for (let ignoredID in ignoreIf){
                             if(use.itemID === ignoredID){
                               console.log("##### YES")
