@@ -11,11 +11,12 @@ const functions = require("./../resources/functions.js");
 module.exports.run = async (client, message, args) => {
 
   if(!message.content.startsWith(prefix))return;
-  if(author.id != jeffreygID) return;
 
   // Variables
   let author = message.author;
   const guild = message.guild;
+  
+  if(author.id != jeffreygID) return;
     
   let embed = new Discord.MessageEmbed()
   .setTitle(`Ayuda: ${prefix}globaldatas`)
