@@ -461,6 +461,7 @@ module.exports.run = async (client, message, args) => {
             if(message.member.roles.cache.find(x => x.id === u.thingID)) {
               console.log("el miembro tiene el rol", u.thingID)
               response = true;
+              return response;
             } else {
               console.log("el miembro NO tiene el rol", u.thingID)
             }
