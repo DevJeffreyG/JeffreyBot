@@ -397,13 +397,15 @@ module.exports.run = async (client, message, args) => {
                                 itemID: element
                               });
 
+                              console.log(queryForIgnore);
+
                               if(message.member.roles.cache.find(x => x.id === queryForIgnore.thingID)) return willBenefit = true;
                             })
                           }
                         }
 
                         if (message.member.roles.cache.find(x => x.id === r.id)) return message.reply(`ya tienes el rol que se da al usar \`${item.itemName}\`.`);
-                        if (willBenefit) return message.reply(`lo siento, pero si usas este item, te estarías beneficiandote aún más, espera a que tu Boost actual termine para poder usar \`${item.itemName}\`.`)
+                        if (willBenefit == true) return message.reply(`lo siento, pero si usas este item, te estarías beneficiandote aún más, espera a que tu Boost actual termine para poder usar \`${item.itemName}\`.`)
 
                         if(duration === "na" || duration === "permanent"){
 
