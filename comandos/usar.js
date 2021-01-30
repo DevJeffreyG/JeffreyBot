@@ -448,6 +448,7 @@ module.exports.run = async (client, message, args) => {
 
   async function forWait(obj, act) {
     let response;
+
     for (let ignoredID in obj){
     if(act.itemID === ignoredID){
       // buscar si el usuario tiene algun rol de los items dentro de este ignoredID
@@ -470,6 +471,7 @@ module.exports.run = async (client, message, args) => {
     }
   }
 
+  console.log("#######",response)
   return response;
 }
 };
