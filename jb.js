@@ -1674,7 +1674,12 @@ client.on("message", message => {
 if (process.env.mantenimiento != 1) {
   client.login(process.env.TOKEN);
 
-  module.exports.client = client;
+  module.exports = {
+    client: client,
+    boostedExp: boostedExp,
+    boostedJeffros: boostedJeffros,
+    boostedGeneral: boostedGeneral
+  }
 
   functions = require("./resources/functions.js");
   
