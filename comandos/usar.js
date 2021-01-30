@@ -394,6 +394,7 @@ module.exports.run = async (client, message, args) => {
 
                         if (message.member.roles.cache.find(x => x.id === r.id)) return message.reply(`ya tienes el rol que se da al usar \`${item.itemName}\`.`);
                         if (willBenefit === true) return message.reply(`lo siento, pero si usas este item, te estarías beneficiandote aún más, espera a que tu Boost actual termine para poder usar \`${item.itemName}\`.`)
+                        return message.channel.send("se beneficiaría? ("+willBenefit+")");
 
                         if(duration === "na" || duration === "permanent"){
 
@@ -447,7 +448,7 @@ module.exports.run = async (client, message, args) => {
   }
 
   async function forWait(obj, act) {
-    let response;
+    let response = false;
 
     for (let ignoredID in obj){
       if(act.itemID === ignoredID){
@@ -458,7 +459,10 @@ module.exports.run = async (client, message, args) => {
             itemID: obj[ignoredID][i]
           }, (err, u) => {
             if(message.member.roles.cache.find(x => x.id === u.thingID)) {
+              console.log("el miembro tiene el rol", u.thingID)
               response = true;
+            } else {
+              console.log("el miembro NO tiene el rol", u.thingID)
             }
           });
         }
