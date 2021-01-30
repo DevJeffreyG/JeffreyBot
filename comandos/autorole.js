@@ -102,6 +102,24 @@ module.exports.run = async (client, message, args) => {
                   }
 
                   if (!newautorole) {
+
+                    // reaccionando a ese mensaje
+                    if (custom === 1) {
+                      arChannel.messages.fetch(`${arMessage}`).then(msg => {
+                        msg.react(client.emojis.cache.find(x => x.id === arEmoji));
+                      })
+                      .catch(err => {
+                        message.reply("no encontré ese mensaje en ese canal, revísa tus datos.")
+                      });
+                    } else {
+                      arChannel.messages.fetch(`${arMessage}`).then(msg => {
+                        msg.react(`${arEmoji}`);
+                      })
+                      .catch(err => {
+                        message.reply("no encontré ese mensaje en ese canal, revísa tus datos.")
+                      });
+                    }
+
                     const newARole = new AutoRole({
                       serverID: guild.id,
                       roleID: arRole.id,
@@ -117,16 +135,6 @@ module.exports.run = async (client, message, args) => {
                       .then(z => message.reply(`listo. **ID:** \`${lastid}\`.`))
                       .catch(e => console.log(e));
 
-                    // reaccionando a ese mensaje
-                    if (custom === 1) {
-                      arChannel.messages.fetch(`${arMessage}`).then(msg => {
-                        msg.react(client.emojis.cache.find(x => x.id === arEmoji));
-                      });
-                    } else {
-                      arChannel.messages.fetch(`${arMessage}`).then(msg => {
-                        msg.react(`${arEmoji}`);
-                      });
-                    }
                   } else {
                     return message.reply(
                       `ya existe un autorole con las mismas características.`
