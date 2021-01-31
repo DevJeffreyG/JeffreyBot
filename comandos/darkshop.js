@@ -1135,7 +1135,7 @@ Stats.findOne({
                                                                                 stats.items.splice(index, 1);
 
                                                                                 // revisar si se ignora el interes o no
-                                                                                functions.Interest(idUse);
+                                                                                functions.Interest(author, idUse);
 
                                                                                 return stats.save();
                                                                             }
@@ -1148,7 +1148,7 @@ Stats.findOne({
                                                                                 stats.items.splice(index, 1);
                                                                                 
                                                                                 // revisar si se ignora el interes o no
-                                                                                functions.Interest(idUse);
+                                                                                functions.Interest(author, idUse);
                                                                                 
                                                                                 return stats.save();
                                                                             }
@@ -1169,7 +1169,7 @@ Stats.findOne({
                                                                                         stats.items.splice(index, 1);
 
                                                                                         // revisar si se ignora el interes o no
-                                                                                        functions.Interest(idUse);
+                                                                                        functions.Interest(author, idUse);
                                                                                         
                                                                                         return stats.save();
                                                                                     } else {
@@ -1183,7 +1183,7 @@ Stats.findOne({
                                                                                         stats.items.splice(index, 1);
 
                                                                                         // revisar si se ignora el interes o no
-                                                                                        functions.Interest(idUse);
+                                                                                        functions.Interest(author, idUse);
                                                                                         
                                                                                         return stats.save();
                                                                                     }
@@ -1195,7 +1195,7 @@ Stats.findOne({
                                                                                     stats.items.splice(index, 1);
 
                                                                                     // revisar si se ignora el interes o no
-                                                                                    functions.Interest(idUse);
+                                                                                    functions.Interest(author, idUse);
                                                                                     
                                                                                     return stats.save();
                                                                                 }
@@ -1207,7 +1207,7 @@ Stats.findOne({
                                                                                 stats.items.splice(index, 1);
 
                                                                                 // revisar si se ignora el interes o no
-                                                                                functions.Interest(idUse);
+                                                                                functions.Interest(author, idUse);
                                                                                 
                                                                                 return stats.save();
                                                                             }
@@ -1222,7 +1222,7 @@ Stats.findOne({
                                                                     stats.items.splice(index, 1);
                                                                     
                                                                     // revisar si se ignora el interes o no
-                                                                    functions.Interest(idUse);
+                                                                    functions.Interest(author, idUse);
                                                                     
                                                                     return stats.save();
                                                                 }
@@ -1281,7 +1281,7 @@ Stats.findOne({
                                                                                 stats.save();
 
                                                                                 // revisar si se ignora el interes o no
-                                                                                functions.Interest(idUse);
+                                                                                functions.Interest(author, idUse);
                                                                                 
 
                                                                                 // tiene una duración?
@@ -1297,7 +1297,7 @@ Stats.findOne({
                                                                                 stats.save();
 
                                                                                 // revisar si se ignora el interes o no
-                                                                                functions.Interest(idUse);
+                                                                                functions.Interest(author, idUse);
                                                                                 
                                                                                 // tiene una duración?
                                                                                 return functions.LimitedTime(guild, duracion, role.id, victim);
@@ -1320,7 +1320,7 @@ Stats.findOne({
                                                                                         stats.save();
 
                                                                                         // revisar si se ignora el interes o no
-                                                                                        functions.Interest(idUse);
+                                                                                        functions.Interest(author, idUse);
                                                                                         
 
                                                                                         // tiene una duración?
@@ -1336,7 +1336,7 @@ Stats.findOne({
                                                                                         stats.items.splice(index, 1);
 
                                                                                         // revisar si se ignora el interes o no
-                                                                                        functions.Interest(idUse);
+                                                                                        functions.Interest(author, idUse);
                                                                                         
                                                                                         return stats.save();
                                                                                     }
@@ -1349,7 +1349,7 @@ Stats.findOne({
                                                                                     stats.save();
 
                                                                                     // revisar si se ignora el interes o no
-                                                                                    functions.Interest(idUse);
+                                                                                    functions.Interest(author, idUse);
                                                                                     
 
                                                                                     // tiene una duración?
@@ -1364,7 +1364,7 @@ Stats.findOne({
                                                                                 stats.save();
 
                                                                                 // revisar si se ignora el interes o no
-                                                                                functions.Interest(idUse);
+                                                                                functions.Interest(author, idUse);
                                                                                 
 
                                                                                 // tiene una duración?
@@ -1382,7 +1382,7 @@ Stats.findOne({
                                                                     stats.save();
 
                                                                     // revisar si se ignora el interes o no
-                                                                    functions.Interest(idUse);
+                                                                    functions.Interest(author, idUse);
                                                                     
 
                                                                     // tiene una duración?
@@ -1402,7 +1402,7 @@ Stats.findOne({
                                                                 stats.accuracy += randomPercentage;
 
                                                                 // revisar si se ignora el interes o no
-                                                                functions.Interest(idUse);
+                                                                functions.Interest(author, idUse);
 
                                                                 if(stats.accuracy + randomPercentage > 90) stats.accuracy = 90;
                                                                 stats.save();
@@ -1424,7 +1424,7 @@ Stats.findOne({
                                                                 .catch(err => console.log(err));
 
                                                                 // revisar si se ignora el interes o no
-                                                                functions.Interest(idUse);
+                                                                functions.Interest(author, idUse);
                                                                 
 
                                                                 let activated = new Discord.MessageEmbed()
@@ -1434,7 +1434,7 @@ Stats.findOne({
                                                                 return message.channel.send(activated)
                                                             } else {
                                                                 // revisar si se ignora el interes o no
-                                                                functions.Interest(idUse);
+                                                                functions.Interest(author, idUse);
                                                                 
                                                                 return message.reply("este item ya está activo en tu cuenta.")
                                                             }

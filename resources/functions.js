@@ -778,7 +778,7 @@ const Warns = function (v, c){
     })
 }
 
-const Interest = function (idUse) {
+const Interest = function (author, idUse) {
     DarkItems.findOne({
         id: idUse
     }, (err, item) => {

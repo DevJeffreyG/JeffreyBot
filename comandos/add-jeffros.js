@@ -87,7 +87,7 @@ module.exports.run = async (client, message, args) => {
             userID: member.id,
             djeffros: nJeffros,
             accuracy: Number(Number(Math.random() * 15).toFixed(1)),
-            items: {}
+            items: []
         });
         newStats.save();
 
