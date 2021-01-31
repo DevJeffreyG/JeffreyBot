@@ -37,7 +37,7 @@ module.exports.run = async (client, message, args) => {
 
   const interest = 5;
 
-  let presences = guild.presences.cache.find(x => x.userID === author.id);
+  let presences = guild.presences.cache.find(x => x.user.id === author.id);
 
   let userIsOnMobible = presences.status != "offline" && presences.clientStatus.mobile === "online" && !presences.clientStatus.desktop ? true : false;
   let viewExtension = "ꜝ";
