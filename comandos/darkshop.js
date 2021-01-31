@@ -1314,6 +1314,12 @@ Stats.findOne({
                                                                 .setFooter(`${stats.items[index].name} para ${victim.user.tag}`)
                                                                 .setTimestamp();
 
+                                                                let failhasRole = new Discord.MessageEmbed()
+                                                                .setAuthor(`| Amenaza`, Config.darkLogoPng)
+                                                                .setDescription(`**—** ¡**${author.tag}** ha querido usar el item \`${stats.items[index].name}\` en **${victim.user.tag}** pero YA ESTÁ AFECTADO POR EL ITEM!`)
+                                                                .setColor(Colores.negro)
+                                                                .setFooter(`${stats.items[index].name} para ${victim.user.tag}`)
+                                                                .setTimestamp();
 
                                                                 // revisar si el efecto es negativo.
                                                                 if(efecto === "negative"){
@@ -1329,7 +1335,7 @@ Stats.findOne({
                                                                                 return dsChannel.send(fail3);
                                                                             } else {
                                                                                 // revisar si ya tiene el role a dar.
-                                                                                if(victim.roles.cache.find(x => x.id === role.id)) return dsChannel.send(fail3);
+                                                                                if(victim.roles.cache.find(x => x.id === role.id)) return dsChannel.send(failhasRole);
                                                                                 
                                                                                 dsChannel.send(success3);
                                                                                 victim.roles.add(role);
@@ -1348,7 +1354,7 @@ Stats.findOne({
                                                                         } else {
                                                                             if(victimStats.items.length === 0){ // tiene cuenta pero no items, proseguir
                                                                                 // revisar si ya tiene el role a dar.
-                                                                                if(victim.roles.cache.find(x => x.id === role.id)) return dsChannel.send(fail3);
+                                                                                if(victim.roles.cache.find(x => x.id === role.id)) return dsChannel.send(failhasRole);
 
                                                                                 dsChannel.send(success3);
                                                                                 victim.roles.add(role);
@@ -1403,7 +1409,7 @@ Stats.findOne({
                                                                                     }
                                                                                 } else {
                                                                                     // revisar si ya tiene el role a dar.
-                                                                                    if(victim.roles.cache.find(x => x.id === role.id)) return dsChannel.send(fail3);
+                                                                                    if(victim.roles.cache.find(x => x.id === role.id)) return dsChannel.send(failhasRole);
 
                                                                                     dsChannel.send(success3);
                                                                                     victim.roles.add(role);
@@ -1422,7 +1428,7 @@ Stats.findOne({
                                                                             } else { // no tienen ningun item con nombre firewall
 
                                                                                 // revisar si ya tiene el role a dar.
-                                                                                if(victim.roles.cache.find(x => x.id === role.id)) return dsChannel.send(fail3);
+                                                                                if(victim.roles.cache.find(x => x.id === role.id)) return dsChannel.send(failhasRole);
 
                                                                                 dsChannel.send(success3);
                                                                                 victim.roles.add(role);
