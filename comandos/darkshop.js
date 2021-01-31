@@ -39,6 +39,7 @@ module.exports.run = async (client, message, args) => {
 
   let presences = guild.presences.cache.find(x => x.user.id === author.id);
 
+    console.log(presences);
   let userIsOnMobible = presences.status != "offline" && presences.clientStatus.mobile === "online" && !presences.clientStatus.desktop ? true : false;
   let viewExtension = "ꜝ";
   let extendedDetails = "▸ Al comprar este item, su precio subirá."
