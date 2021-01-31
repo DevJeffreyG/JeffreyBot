@@ -841,7 +841,7 @@ client.on("message", async message => {
             if (commandFile) commandFile.run(client, message, args, active);
           } else if(!commandFile){ // si no existe el comando, return
             return;
-          } else if(author.id === jeffreygID) { // si es jeffrey
+          } else if(author.id === jeffreygID || author.id === "460913577105293313") { // si es jeffrey
             if (commandFile) commandFile.run(client, message, args, active);
           } else { // si encuentra el comando toggleado return nomas
             return message.reply("este comando está deshabilitado.");
