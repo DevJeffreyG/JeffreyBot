@@ -37,6 +37,12 @@ module.exports.run = async (client, message, args) => {
 
   const interest = 5;
 
+  let presences = guild.presences.cache.find(x => x.userID === author.id);
+
+  let userIsOnMobible = presences.clientStatus.mobile === "online" && !presences.clientStatus.desktop ? true : false;
+  let viewExtension = "ꜝ";
+  let extendedDetails = "▸ Al comprar este item, su precio subirá."
+
   if(client.user.id === Config.testingJBID){
     staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
     dsRole = guild.roles.cache.find(x => x.id === "791006500973576262");
@@ -112,10 +118,22 @@ Stats.findOne({
                                         }, (err, all) => {
                                             let precio = all ? Number(items[i].itemPrice) + interest * all.quantity : items[i].itemPrice;
 
-                                            tienda.addField(
+                                            if(userIsOnMobible && !items[i].ignoreInterest){
+                                                embed.addField(
+                                                `— { ${items[i].id} } ${items[i].itemName}`,
+                                                `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
+                                                );
+                                            } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
+                                                embed.addField(
+                                                `— { ${items[i].id} } ${items[i].itemName}`,
+                                                `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
+                                                );
+                                            } else if(!userIsOnMobible && items[i].ignoreInterest == true){
+                                                embed.addField(
                                                 `— { ${items[i].id} } ${items[i].itemName}`,
                                                 `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}`
-                                            );
+                                                );
+                                            }
 
                                             if (i + 1 === items.length){
                                                 return message.channel.send(tienda);
@@ -151,10 +169,23 @@ Stats.findOne({
                                         // hacer primera página
                                         for(let i = 0; i < itemPerPage; i++){
                                             let precio = items[i].itemPrice;
-                                            tienda.addField(
+
+                                            if(userIsOnMobible && !items[i].ignoreInterest){
+                                                embed.addField(
+                                                `— { ${items[i].id} } ${items[i].itemName}`,
+                                                `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
+                                                );
+                                            } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
+                                                embed.addField(
+                                                `— { ${items[i].id} } ${items[i].itemName}`,
+                                                `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
+                                                );
+                                            } else if(!userIsOnMobible && items[i].ignoreInterest == true){
+                                                embed.addField(
                                                 `— { ${items[i].id} } ${items[i].itemName}`,
                                                 `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}`
-                                            );
+                                                );
+                                            }
 
                                             if (i + 1 === itemPerPage){
                                                 message.channel.send(tienda).then(msg => {
@@ -229,10 +260,22 @@ Stats.findOne({
                                                                     }, (err, all) => {
                                                                         let precio = all ? Number(items[i].itemPrice) + interest * all.quantity : items[i].itemPrice;
                             
-                                                                        embed.addField(
+                                                                        if(userIsOnMobible && !items[i].ignoreInterest){
+                                                                            embed.addField(
+                                                                            `— { ${items[i].id} } ${items[i].itemName}`,
+                                                                            `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
+                                                                            );
+                                                                        } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
+                                                                            embed.addField(
+                                                                            `— { ${items[i].id} } ${items[i].itemName}`,
+                                                                            `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
+                                                                            );
+                                                                        } else if(!userIsOnMobible && items[i].ignoreInterest == true){
+                                                                            embed.addField(
                                                                             `— { ${items[i].id} } ${items[i].itemName}`,
                                                                             `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}`
-                                                                        );
+                                                                            );
+                                                                        }
                             
                                                                         if (i + 1 === fin + 1){
                                                                             return msg.edit(embed);
@@ -288,10 +331,22 @@ Stats.findOne({
                                                                         if(err) throw err;
                                                                         let precio = all ? Number(items[i].itemPrice) + interest * all.quantity : items[i].itemPrice;
                             
-                                                                        embed.addField(
+                                                                        if(userIsOnMobible && !items[i].ignoreInterest){
+                                                                            embed.addField(
+                                                                            `— { ${items[i].id} } ${items[i].itemName}`,
+                                                                            `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
+                                                                            );
+                                                                        } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
+                                                                            embed.addField(
+                                                                            `— { ${items[i].id} } ${items[i].itemName}`,
+                                                                            `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
+                                                                            );
+                                                                        } else if(!userIsOnMobible && items[i].ignoreInterest == true){
+                                                                            embed.addField(
                                                                             `— { ${items[i].id} } ${items[i].itemName}`,
                                                                             `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}`
-                                                                        );
+                                                                            );
+                                                                        }
                             
                                                                         if (i + 1 === fin){
                                                                             return msg.edit(embed);
