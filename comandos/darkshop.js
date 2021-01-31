@@ -68,7 +68,7 @@ Stats.findOne({
             }, (err, exp) => {
                 if(err) throw err;
 
-                if(exp.level >= 5){ // si cumple los requisitos
+                if(exp && exp.level >= 5){ // si cumple los requisitos
 
                     // si no hay args, muestra la página principal
                     if(!args[0]){
