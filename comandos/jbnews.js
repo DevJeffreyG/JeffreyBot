@@ -33,15 +33,23 @@ module.exports.run = async (client, message, args) => {
 
     let nEmbed = new Discord.MessageEmbed()
     .setColor(Colores.verde)
-    .setTitle(`¡Novedades de Jeffrey Bot!`)
     .setDescription(anuncio)
     .setFooter(`Noticia por ${author.tag}`, client.user.displayAvatarURL())
-	  .setTimestamp()
-    .setThumbnail(client.user.displayAvatarURL());
+	  .setTimestamp();
 
     if(message.attachments.size != 0) { // si hay attachements, agregarlos al embed.
       let firstAttachment = message.attachments.first();
       nEmbed.setImage(firstAttachment.url);
+    }
+
+    if(!args[0] && message.attachments.size != 0) {
+      nEmbed.setAuthor(`¡Novedades de Jeffrey Bot!`, guild.iconURL())
+    } else if(args[0] && message.attachments.size != 0) {
+      nEmbed.setTitle(`¡Novedades de Jeffrey Bot!`);
+      nEmbed.setThumbnail(client.user.displayAvatarURL());
+    } else {
+      nEmbed.setTitle(`¡Novedades de Jeffrey Bot!`);
+      nEmbed.setThumbnail(client.user.displayAvatarURL());
     }
     
     jbChannel.send(`${jbNRole}~`).then(r => {
