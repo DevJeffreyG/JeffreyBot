@@ -47,6 +47,7 @@ const WinVault = require("../modelos/winVault.js");
 const Hint = require("../modelos/hint.js");
 const GlobalData = require("../modelos/globalData.js");
 const Stats = require("../modelos/darkstats.js");
+const All = require("../modelos/allpurchases.js");
 const testingGuild = "482989052136652800";
 
 /* ##### MONGOOSE ######## */
