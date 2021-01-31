@@ -171,17 +171,17 @@ Stats.findOne({
                                             let precio = items[i].itemPrice;
 
                                             if(userIsOnMobible && !items[i].ignoreInterest){
-                                                embed.addField(
+                                                tienda.addField(
                                                 `— { ${items[i].id} } ${items[i].itemName}`,
                                                 `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
                                                 );
                                             } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
-                                                embed.addField(
+                                                tienda.addField(
                                                 `— { ${items[i].id} } ${items[i].itemName}`,
                                                 `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
                                                 );
                                             } else if(!userIsOnMobible && items[i].ignoreInterest == true){
-                                                embed.addField(
+                                                tienda.addField(
                                                 `— { ${items[i].id} } ${items[i].itemName}`,
                                                 `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}`
                                                 );
