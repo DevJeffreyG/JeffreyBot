@@ -17,9 +17,8 @@ module.exports.run = async (client, message, args) => {
   let addCounter = 0;
   let removeCounter = 0;
   let updateCounter = 0;
-  let presences = message.guild.presences.cache.find(x => x.userID === message.author.id);
 
-  let userIsOnMobible = presences.status != "offline" && presences.clientStatus.mobile === "online" && !presences.clientStatus.desktop ? true : false;
+  let userIsOnMobible = author.presence.clientStatus && author.presence.clientStatus.mobile === "online" && !author.presence.clientStatus.desktop ? true : false;
 
   if(args[0] && args[0] === "extended" || userIsOnMobible){
     let embed = new Discord.MessageEmbed()
