@@ -1328,6 +1328,9 @@ Stats.findOne({
                                                                             if(!victim.roles.cache.find(x => x.id === dsRole.id)){
                                                                                 return dsChannel.send(fail3);
                                                                             } else {
+                                                                                // revisar si ya tiene el role a dar.
+                                                                                if(victim.roles.cache.find(x => x.id === role.id)) return message.channel.send(fail3);
+                                                                                
                                                                                 dsChannel.send(success3);
                                                                                 victim.roles.add(role);
     
@@ -1344,6 +1347,9 @@ Stats.findOne({
                                                                             }
                                                                         } else {
                                                                             if(victimStats.items.length === 0){ // tiene cuenta pero no items, proseguir
+                                                                                // revisar si ya tiene el role a dar.
+                                                                                if(victim.roles.cache.find(x => x.id === role.id)) return message.channel.send(fail3);
+
                                                                                 dsChannel.send(success3);
                                                                                 victim.roles.add(role);
 
@@ -1396,6 +1402,9 @@ Stats.findOne({
                                                                                         return stats.save();
                                                                                     }
                                                                                 } else {
+                                                                                    // revisar si ya tiene el role a dar.
+                                                                                    if(victim.roles.cache.find(x => x.id === role.id)) return message.channel.send(fail3);
+
                                                                                     dsChannel.send(success3);
                                                                                     victim.roles.add(role);
 
@@ -1411,6 +1420,10 @@ Stats.findOne({
                                                                                     return functions.LimitedTime(guild, role.id, victim, duracion);
                                                                                 }
                                                                             } else { // no tienen ningun item con nombre firewall
+
+                                                                                // revisar si ya tiene el role a dar.
+                                                                                if(victim.roles.cache.find(x => x.id === role.id)) return message.channel.send(fail3);
+
                                                                                 dsChannel.send(success3);
                                                                                 victim.roles.add(role);
 
