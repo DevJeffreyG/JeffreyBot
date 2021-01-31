@@ -772,7 +772,7 @@ const Warns = function (v, c){
             });
             newWarn.save();
         } else {
-            victimWarns.warns += cantidad;
+            victimWarns.warns += c;
             victimWarns.save();
         }
     })
