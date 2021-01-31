@@ -1399,12 +1399,13 @@ Stats.findOne({
                                                                 stats.items.splice(index4, 1); // borrarlo
 
                                                                 let randomPercentage = Number(Number(Math.random() * 5).toFixed(1));
-                                                                stats.accuracy += randomPercentage;
+                                                                let finalAc = Number(stats.accuracy += randomPercentage).toFixed(1);
 
                                                                 // revisar si se ignora el interes o no
                                                                 functions.Interest(author, idUse);
 
-                                                                if(stats.accuracy + randomPercentage > 90) stats.accuracy = 90;
+                                                                stats.accuracy = finalAc;
+                                                                if(finalAc > 90) stats.accuracy = 90;
                                                                 stats.save();
 
                                                                 let activated2 = new Discord.MessageEmbed()
