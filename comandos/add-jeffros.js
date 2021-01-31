@@ -84,7 +84,7 @@ module.exports.run = async (client, message, args) => {
 
       if(!stats){
         const newStats = new Stats({
-            userID: author.id,
+            userID: member.id,
             djeffros: nJeffros,
             accuracy: Number(Number(Math.random() * 15).toFixed(1)),
             items: {}
