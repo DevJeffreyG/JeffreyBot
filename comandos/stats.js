@@ -47,19 +47,17 @@ module.exports.run = async (client, message, args) => {
     }, async (err2, jeffros) => {
       if(err2) throw err2;
       
-      if(!jeffros || !exp){
-        message.reply(`No tienen Jeffros, EXP, habla en ${mainChannel} para ganarlos.`)
-      } else {
+      let actualJeffros = jeffros ? jeffros.jeffros : 0;
+      let curExp = exp ? exp.exp : 0;
+      let curLvl = exp ? exp.level : 0;
+      let rep = exp ? exp.reputacion : 0;
         
+      let nxtLvlExp = 10 * (curLvl ** 2) + 50 * curLvl + 100; // fórmula de MEE6. 5 * (level ^ 2) + 50 * level + 100
         
-        let curLvl = exp.level;
-        let curExp = exp.exp;
-        let nxtLvlExp = 10 * (exp.level ** 2) + 50 * exp.level + 100; // fórmula de MEE6. 5 * (level ^ 2) + 50 * level + 100
-        
-        let bdData = await GlobalData.findOne({
-          "info.type": "birthdayData",
-          "info.userID": author.id
-        });
+      let bdData = await GlobalData.findOne({
+        "info.type": "birthdayData",
+        "info.userID": author.id
+      });
 
         let dataExists = bdData ? true : false;
         let bdString = "";
@@ -127,16 +125,15 @@ module.exports.run = async (client, message, args) => {
 
         let meEmbed = new Discord.MessageEmbed()
         .setAuthor(`| Estadísticas de ${member.user.tag}`, member.user.displayAvatarURL())
-        .setDescription(`**— Nivel**: ${exp.level}
-**— EXP**: ${exp.exp} / ${nxtLvlExp}.
-**— Jeffros**: ${Emojis.Jeffros}${jeffros.jeffros}.  
-**— Reputación**: ${exp.reputacion}.
+        .setDescription(`**— Nivel**: ${curLvl}
+**— EXP**: ${curExp} / ${nxtLvlExp}.
+**— Jeffros**: ${Emojis.Jeffros}${actualJeffros}.  
+**— Reputación**: ${rep}.
 ${bdString}`)
         .setThumbnail(Config.jeffreyguildIcon)
         .setColor(Colores.verde);
 
         return message.channel.send(meEmbed);
-      }
     })
   })
 
