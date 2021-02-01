@@ -415,18 +415,21 @@ const intervalGlobalDatas = async function(justBoost){
     }
   })
 
+  console.log("ahi viene")
   // ELIMINAR DARKJEFFROS CADUCADOS
   GlobalData.find({
     "info.type": "dsDJDuration"
   }, async (err, dark) => {
     if(err) throw err;
 
+    console.log("se viene, otra vez")
     if(dark) {
       let q = await GlobalData.findOne({
         "info.type": "dsInflation"
       });
 
       for(let i = 0; i < dark.length; i++){
+        console.log("omg")
         // variables
         let id = dark[i].info.userID;
         let member = guild.members.cache.find(x => x.id === id);
