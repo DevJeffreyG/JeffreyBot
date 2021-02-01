@@ -24,7 +24,7 @@ module.exports.run = async (client, message, args) => {
   let embed = new Discord.MessageEmbed()
   .setTitle(`Ayuda: ${prefix}addjeffros`)
   .setColor(Colores.nocolor)
-  .setDescription(`▸ El uso correcto es: ${prefix}addjeffros <@usuario> <N° ${Emojis.Jeffros}/${Emojis.Dark}> (darkjeffros)\n▸ Añades Jeffros o DarkJeffros a un usuario.`)
+  .setDescription(`▸ El uso correcto es: ${prefix}addjeffros <@usuario> <N° ${Emojis.Jeffros}/${Emojis.Dark}> (darkjeffros)\n▸ Añades Jeffros o DarkJeffros a un usuario.\n▸ Agregar DarkJeffros a un usuario sin estos, hará que no se genere un \`dsDJDuration\`.`)
   .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}add-jeffros`);
   
   if(author.id != jeffreygID) return;
