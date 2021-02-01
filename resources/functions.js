@@ -314,7 +314,6 @@ const intervalGlobalDatas = async function(justBoost){
 
               if(!jeffros || jeffros.jeffros < price){
                 // quitarle los jeffros, y dejarlo en negativo
-                console.log("no tiene suficientes jeffros")
                 jeffros.jeffros -= price;
                 member.send(notEnough);
                 subs[i].remove();
@@ -378,8 +377,6 @@ const intervalGlobalDatas = async function(justBoost){
     duration = Math.floor(Math.random() * 30); // duración máxima 30 días.
 
     if(!dark){
-      console.log(inflation, date, duration);
-
       const newInflation = new GlobalData({
         info: {
           type: "dsInflation",
@@ -415,21 +412,18 @@ const intervalGlobalDatas = async function(justBoost){
     }
   })
 
-  console.log("ahi viene")
   // ELIMINAR DARKJEFFROS CADUCADOS
   GlobalData.find({
     "info.type": "dsDJDuration"
   }, async (err, dark) => {
     if(err) throw err;
 
-    console.log("se viene, otra vez")
     if(dark) {
       let q = await GlobalData.findOne({
         "info.type": "dsInflation"
       });
 
       for(let i = 0; i < dark.length; i++){
-        console.log("omg")
         // variables
         let id = dark[i].info.userID;
         let member = guild.members.cache.find(x => x.id === id);
@@ -450,7 +444,6 @@ const intervalGlobalDatas = async function(justBoost){
           if(user.djeffros != 0){
             // si tiene darkjeffros, ¿caducaron?
             if(pastDays >= dark[i].info.duration){
-              console.log("a")
               let staffCID = "514124198205980713";
               if(client.user.id === Config.testingJBID){
                 staffCID = "537095712102416384";
@@ -482,10 +475,7 @@ const intervalGlobalDatas = async function(justBoost){
               dark[i].info.duration = newDuration;
 
               dark[i].markModified("info");
-              await dark[i].save()
-              .then(a => {
-                console.log(a)
-              });
+              await dark[i].save();
 
               // intentar enviar un mensaje al MD.
               member.send(embed)
@@ -494,8 +484,6 @@ const intervalGlobalDatas = async function(justBoost){
               });
 
               staffC.send(staffEmbed);
-            } else {
-              console.log(pastDays, dark[i].info.duration, pastDays >= dark[i].info.duration)
             }
           }
         })
