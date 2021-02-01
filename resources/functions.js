@@ -444,7 +444,7 @@ const intervalGlobalDatas = async function(justBoost){
       // revisar si tiene darkjeffros el usuario
       Stats.findOne({
         userID: id
-      }, (err, user) => {
+      }, async (err, user) => {
         if(err) throw err;
 
         if(user.djeffros === 0) return;
@@ -482,7 +482,10 @@ const intervalGlobalDatas = async function(justBoost){
           dark[i].info.duration = newDuration;
 
           dark[i].markModified("info");
-          dark[i].save();
+          await dark[i].save()
+          .then(a => {
+            console.log(a)
+          });
 
           // intentar enviar un mensaje al MD.
           member.send(embed)
