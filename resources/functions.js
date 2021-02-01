@@ -163,6 +163,7 @@ const loadBoosts = async function() {
 
 const intervalGlobalDatas = async function(justBoost){
   justBoost = justBoost || false;
+  console.log(justBoost)
 
   let guild;
   let bdRole;
