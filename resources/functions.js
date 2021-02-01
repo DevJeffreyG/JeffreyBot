@@ -477,7 +477,7 @@ const intervalGlobalDatas = async function(justBoost){
             staffC.send(`**${member.tag} no recibió MD de DarkJeffros eliminados.**\n\`\`\`javascript\n${err}\`\`\``)
           });
 
-          staffCID.send(staffEmbed);
+          staffC.send(staffEmbed);
         }
       })
 

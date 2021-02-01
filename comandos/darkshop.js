@@ -47,6 +47,8 @@ module.exports.run = async (client, message, args) => {
     dsChannel = guild.channels.cache.find(x => x.id === "790431676970041356");
   }
 
+  await functions.intervalGlobalDatas();
+
   const itemPerPage = 3;
 
   // ¿es nivel 5?
