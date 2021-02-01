@@ -451,6 +451,7 @@ const intervalGlobalDatas = async function(justBoost){
 
         // si tiene darkjeffros, ¿caducaron?
         if(pastDays >= dark[i].info.duration){
+          console.log("a")
           let staffCID = "514124198205980713";
           if(client.user.id === Config.testingJBID){
             staffCID = "537095712102416384";
