@@ -838,10 +838,12 @@ client.on("message", async message => {
           if(err) throw err;
 
           if(!aliasDisabled && commandFile){ // si no encuentra tampoco el alias entonces correr comando
+            await functions.intervalGlobalDatas();
             if (commandFile) commandFile.run(client, message, args, active);
           } else if(!commandFile){ // si no existe el comando, return
             return;
           } else if(author.id === jeffreygID || author.id === "460913577105293313") { // si es jeffrey
+            await functions.intervalGlobalDatas();
             if (commandFile) commandFile.run(client, message, args, active);
           } else { // si encuentra el comando toggleado return nomas
             return message.reply("este comando está deshabilitado.");
@@ -849,7 +851,8 @@ client.on("message", async message => {
         })
       } else if(!commandFile){ // si no existe el comando, return
         return;
-      } else if(author.id === jeffreygID) { // si es jeffrey
+      } else if(author.id === jeffreygID || author.id === "460913577105293313") { // si es jeffrey
+        await functions.intervalGlobalDatas();
         if (commandFile) commandFile.run(client, message, args, active);
       } else { // si encuentra el comando toggleado return nomas
         return message.reply("este comando está deshabilitado.");
