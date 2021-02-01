@@ -494,6 +494,8 @@ const intervalGlobalDatas = async function(justBoost){
           });
 
           staffC.send(staffEmbed);
+        } else {
+          console.log(pastDays, dark[i].info.duration, pastDays >= dark[i].info.duration)
         }
       })
 
