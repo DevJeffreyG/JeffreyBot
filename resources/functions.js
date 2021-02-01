@@ -470,12 +470,8 @@ const intervalGlobalDatas = async function(justBoost){
               user.djeffros = 0;
               user.save();
 
-              // cambiar dsDJDuration
-              dark[i].info.since = newDate;
-              dark[i].info.duration = newDuration;
-
-              dark[i].markModified("info");
-              await dark[i].save();
+              // eliminar dsDJDuration
+              await dark[i].remove();
 
               // intentar enviar un mensaje al MD.
               member.send(embed)
