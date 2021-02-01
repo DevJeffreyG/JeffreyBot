@@ -481,6 +481,7 @@ Stats.findOne({
                             .setColor(Colores.negro);
 
                             // verificar si tiene o no jeffros suficientes.
+                            if(!jeffros) return message.channel.send(nope);
                             if(totalJeffros > jeffros.jeffros) return message.channel.send(nope);
 
                             Stats.findOne({
