@@ -432,6 +432,7 @@ const intervalGlobalDatas = async function(justBoost){
 
       let oldDate = new Date(dark[i].info.since);
       let newDate = new Date()
+      let newDuration = Number(dark.info.duration) + Math.floor(Math.random() * 60); // duración máxima 60 días & minima de la duracion de la inflacion actual.
 
       let diference1 = newDate.getTime() - oldDate.getTime();
       let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
@@ -456,9 +457,9 @@ const intervalGlobalDatas = async function(justBoost){
 
           let staffEmbed = new Discord.MessageEmbed()
           .setColor(Colores.verde)
-          .setDescription(`**—** Se han elimando los Dark Jeffros de ${memberD.tag}.`)
-          .addField(`— Desde`, `${dark[i].info.since}`, true)
-          .addField(`— Duración`, `${dark[i].info.duration}`, true)
+          .setDescription(`**—** Se han elimando los Dark Jeffros de ${memberD.user.tag}.
+          **—** Desde: \`${dark[i].info.since}\`.
+          **—** Duración: \`${dark[i].info.duration}\`.`)
           .setFooter("Mensaje enviado a la vez que al usuario")
           .setTimestamp();
 
@@ -471,6 +472,14 @@ const intervalGlobalDatas = async function(justBoost){
           // eliminarlos de la cuenta (0)
           user.djeffros = 0;
           user.save();
+
+          // cambiar dsDJDuration
+          dark.info.since = newDate;
+          dark.info.duration = newDuration;
+
+          dark.markModified("info");
+          dark.save();
+
           // intentar enviar un mensaje al MD.
           member.send(embed)
           .catch(err => {
