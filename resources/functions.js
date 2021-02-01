@@ -420,10 +420,14 @@ const intervalGlobalDatas = async function(justBoost){
   // ELIMINAR DARKJEFFROS CADUCADOS
   GlobalData.find({
     "info.type": "dsDJDuration"
-  }, (err, dark) => {
+  }, async (err, dark) => {
     if(err) throw err;
 
     if(!dark) return;
+
+    let q = await GlobalData.findOne({
+      "info.type": "dsInflation"
+    });
 
     for(let i = 0; i < dark.length; i++){
       // variables
@@ -432,7 +436,7 @@ const intervalGlobalDatas = async function(justBoost){
 
       let oldDate = new Date(dark[i].info.since);
       let newDate = new Date()
-      let newDuration = Number(dark.info.duration) + Math.floor(Math.random() * 60); // duración máxima 60 días & minima de la duracion de la inflacion actual.
+      let newDuration = Number(q.info.duration) + Math.floor(Math.random() * 60); // duración máxima 60 días & minima de la duracion de la inflacion actual.
 
       let diference1 = newDate.getTime() - oldDate.getTime();
       let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
