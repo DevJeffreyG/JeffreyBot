@@ -163,7 +163,6 @@ const loadBoosts = async function() {
 
 const intervalGlobalDatas = async function(justBoost){
   justBoost = justBoost || false;
-  console.log(justBoost)
 
   let guild;
   let bdRole;
@@ -191,78 +190,78 @@ const intervalGlobalDatas = async function(justBoost){
   }, (err, boosts) => {
     if(err) throw err;
 
-    if(!boosts) return console.log(boosts);
-
-    for (let i = 0; i < boosts.length; i++){
-      let boost = boosts[i];
-      let role = guild.roles.cache.find(x => x.id === boost.info.roleID);
-      let member = guild.members.cache.find(x => x.id === boost.info.userID);
-      let since = boost.info.since;
-      let realDuration = boost.info.duration;
-      let specialData = boost.info.special;
-      let today = new Date();
-      /*
-      info: {
-        type: "roleDuration":
-        roleID: roleID,
-        userID: victimMember,
-        since: hoy,
-        duration: ms(duration),
-        special: {
-          "type": specialType, // boostMultiplier
-          "specialObjective": specialObjective, // exp, jeffros, all
-          "specialValue": specialValue // (2) = exp || jeffros normales x 2
+    if(boosts) {
+      for (let i = 0; i < boosts.length; i++){
+        let boost = boosts[i];
+        let role = guild.roles.cache.find(x => x.id === boost.info.roleID);
+        let member = guild.members.cache.find(x => x.id === boost.info.userID);
+        let since = boost.info.since;
+        let realDuration = boost.info.duration;
+        let specialData = boost.info.special;
+        let today = new Date();
+        /*
+        info: {
+          type: "roleDuration":
+          roleID: roleID,
+          userID: victimMember,
+          since: hoy,
+          duration: ms(duration),
+          special: {
+            "type": specialType, // boostMultiplier
+            "specialObjective": specialObjective, // exp, jeffros, all
+            "specialValue": specialValue // (2) = exp || jeffros normales x 2
+          }
         }
-      }
-    */
+      */
 
-      if(today - since >= realDuration){
-        // sacarle el role
-        console.log("ha pasado el tiempo 0001")
-        member.roles.remove(role);
+        if(today - since >= realDuration){
+          // sacarle el role
+          console.log("ha pasado el tiempo 0001")
+          member.roles.remove(role);
 
-        // eliminar global data
-        boosts[i].remove();
+          // eliminar global data
+          boosts[i].remove();
 
-        // buscar el set y eliminarlo
-        if(specialData.specialObjective === "exp"){ // si el boost es de exp
-          return new Promise((resolve, reject) => {
-            boostedExp.delete(member.id)
-            resolve(`${member.user.username} eliminado de boostedExp`);
-          })
-        } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
-          return new Promise((resolve, reject) => {
-            boostedJeffros.delete(member.id)
-            resolve(`${member.user.username} eliminado de boostedJeffros`);
-          })
-        } else if(specialData.specialObjective === "all"){ // si el boost es de todo
-          return new Promise((resolve, reject) => {
-            boostedGeneral.delete(member.id)
-            resolve(`${member.user.username} eliminado de boostedGeneral`);
-          })
-        }
-      } else {
-        // es un usuario con un boost comprado, entonces...
-        
-        if(specialData.specialObjective === "exp"){ // si el boost es de exp
-          return new Promise((resolve, reject) => {
-            boostedExp.add(member.id)
-            resolve(`${member.user.username} agregado a boostedExp`);
-          })
-        } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
-          return new Promise((resolve, reject) => {
-            boostedJeffros.add(member.id)
-            resolve(`${member.user.username} agregado a boostedJeffros`);
-          })
-        } else if(specialData.specialObjective === "all"){ // si el boost es de todo
-          return new Promise((resolve, reject) => {
-            boostedGeneral.add(member.id)
-            resolve(`${member.user.username} agregado a boostedGeneral`);
-          })
+          // buscar el set y eliminarlo
+          if(specialData.specialObjective === "exp"){ // si el boost es de exp
+            new Promise((resolve, reject) => {
+              boostedExp.delete(member.id)
+              resolve(`${member.user.username} eliminado de boostedExp`);
+            })
+          } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
+            new Promise((resolve, reject) => {
+              boostedJeffros.delete(member.id)
+              resolve(`${member.user.username} eliminado de boostedJeffros`);
+            })
+          } else if(specialData.specialObjective === "all"){ // si el boost es de todo
+            new Promise((resolve, reject) => {
+              boostedGeneral.delete(member.id)
+              resolve(`${member.user.username} eliminado de boostedGeneral`);
+            })
+          }
         } else {
-          return new Promise((resolve, reject) => {
-            reject("No es ninguno de los boosts predeterminados.")
-          })
+          // es un usuario con un boost comprado, entonces...
+          
+          if(specialData.specialObjective === "exp"){ // si el boost es de exp
+            new Promise((resolve, reject) => {
+              boostedExp.add(member.id)
+              resolve(`${member.user.username} agregado a boostedExp`);
+            })
+          } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
+            new Promise((resolve, reject) => {
+              boostedJeffros.add(member.id)
+              resolve(`${member.user.username} agregado a boostedJeffros`);
+            })
+          } else if(specialData.specialObjective === "all"){ // si el boost es de todo
+            new Promise((resolve, reject) => {
+              boostedGeneral.add(member.id)
+              resolve(`${member.user.username} agregado a boostedGeneral`);
+            })
+          } else {
+            new Promise((resolve, reject) => {
+              reject("No es ninguno de los boosts predeterminados.")
+            })
+          }
         }
       }
     }
@@ -276,67 +275,65 @@ const intervalGlobalDatas = async function(justBoost){
   }, (err, subs) => {
     if(err) throw err;
 
-    if (!subs) return;
+    if (subs) {
+      for(let i = 0; i < subs.length; i++){
+        let sub = subs[i]
+        let role = guild.roles.cache.find(x => x.id === sub.info.roleID);
+        let member = guild.members.cache.find(x => x.id === sub.info.userID);
+        let since = sub.info.since;
+        let interval = sub.info.interval;
+        let price = Number(sub.info.price);
+        let subName = sub.info.subName;
+        let isCancelled = sub.info.isCancelled;
+        let today = new Date();
 
-    for(let i = 0; i < subs.length; i++){
-      let sub = subs[i]
-      let role = guild.roles.cache.find(x => x.id === sub.info.roleID);
-      let member = guild.members.cache.find(x => x.id === sub.info.userID);
-      let since = sub.info.since;
-      let interval = sub.info.interval;
-      let price = Number(sub.info.price);
-      let subName = sub.info.subName;
-      let isCancelled = sub.info.isCancelled;
-      let today = new Date();
+        let notEnough = new Discord.MessageEmbed()
+        .setAuthor(`| Error`, Config.errorPng)
+        .setDescription(`**—** No tienes suficientes Jeffros **(${Emojis.Jeffros}${price})** para pagar la suscripción a \`${subName}\`.
+        **—** Tu saldo ha quedado en **alerta roja**.`)
+        .setColor(Colores.rojo);
 
-      let notEnough = new Discord.MessageEmbed()
-      .setAuthor(`| Error`, Config.errorPng)
-      .setDescription(`**—** No tienes suficientes Jeffros **(${Emojis.Jeffros}${price})** para pagar la suscripción a \`${subName}\`.
-      **—** Tu saldo ha quedado en **alerta roja**.`)
-      .setColor(Colores.rojo);
+        if(today - since >= interval){
+          // si fue cancelada ya
+          if(isCancelled){
+              member.roles.remove(role);
+              subs[i].remove();
+          } else {
+            // cobrar jeffros
+            Jeffros.findOne({
+              serverID: guild.id,
+              userID: sub.info.userID
+            }, (err, jeffros) => {
+              if(err) throw err;
 
-      if(today - since >= interval){
-        // si fue cancelada ya
-        if(isCancelled){
-            member.roles.remove(role);
-            return subs[i].remove();
-        }
+              let paidEmbed = new Discord.MessageEmbed()
+              .setAuthor(`| Pagado`, Config.bienPng)
+              .setDescription(`**—** Has pagado **${Emojis.Jeffros}${price}** para pagar la suscripción a \`${subName}\`.
+              **—** Tu saldo ha quedado en **${Emojis.Jeffros}${jeffros.jeffros - price}**.`)
+              .setColor(Colores.verde);
 
-        // cobrar jeffros
-        Jeffros.findOne({
-          serverID: guild.id,
-          userID: sub.info.userID
-        }, (err, jeffros) => {
-          if(err) throw err;
+              if(!jeffros || jeffros.jeffros < price){
+                // quitarle los jeffros, y dejarlo en negativo
+                console.log("no tiene suficientes jeffros")
+                jeffros.jeffros -= price;
+                member.send(notEnough);
+                subs[i].remove();
+                member.roles.remove(role);
+                jeffros.save();
+              } else { // cobrar
+                jeffros.jeffros -= price;
+                jeffros.save();
 
-          let paidEmbed = new Discord.MessageEmbed()
-          .setAuthor(`| Pagado`, Config.bienPng)
-          .setDescription(`**—** Has pagado **${Emojis.Jeffros}${price}** para pagar la suscripción a \`${subName}\`.
-          **—** Tu saldo ha quedado en **${Emojis.Jeffros}${jeffros.jeffros - price}**.`)
-          .setColor(Colores.verde);
+                // actualizar el globaldata
+                subs[i].info.since = today;
+                subs[i].markModified("info");
+                subs[i].save();
 
-          if(!jeffros || jeffros.jeffros < price){
-            // quitarle los jeffros, y dejarlo en negativo
-            console.log("no tiene suficientes jeffros")
-            jeffros.jeffros -= price;
-            member.send(notEnough);
-            subs[i].remove();
-            member.roles.remove(role);
-            jeffros.save();
-          } else { // cobrar
-            jeffros.jeffros -= price;
-            jeffros.save();
-
-            // actualizar el globaldata
-            subs[i].info.since = today;
-            subs[i].markModified("info");
-            subs[i].save();
-
-            member.send(paidEmbed);
+                member.send(paidEmbed);
+              }
+            })
           }
-        })
-      } else {
-        return;
+        }
       }
     }
   })
@@ -347,23 +344,23 @@ const intervalGlobalDatas = async function(justBoost){
   }, (err, roled) => {
     if(err) throw err;
 
-    if(!roled) return;
+    if(roled) {
+      for (let i = 0; i < roled.length; i++){
+        let role = guild.roles.cache.find(x => x.id === roled[i].info.roleID);
+        let member = guild.members.cache.find(x => x.id === roled[i].info.userID);
+        let since = roled[i].info.since;
+        let realDuration = roled[i].info.duration;
+        let today = new Date();
 
-    for (let i = 0; i < roled.length; i++){
-      let role = guild.roles.cache.find(x => x.id === roled[i].info.roleID);
-      let member = guild.members.cache.find(x => x.id === roled[i].info.userID);
-      let since = roled[i].info.since;
-      let realDuration = roled[i].info.duration;
-      let today = new Date();
+        if(today - since >= realDuration){
+          // sacarle el role
+          member.roles.remove(role);
 
-      if(today - since >= realDuration){
-        // sacarle el role
-        member.roles.remove(role);
-
-        // eliminar global data
-        return roled[i].remove();
-      } else {
-        // nada XD
+          // eliminar global data
+          roled[i].remove();
+        } else {
+          // nada XD
+        }
       }
     }
   })
@@ -424,83 +421,82 @@ const intervalGlobalDatas = async function(justBoost){
   }, async (err, dark) => {
     if(err) throw err;
 
-    if(!dark) return;
+    if(dark) {
+      let q = await GlobalData.findOne({
+        "info.type": "dsInflation"
+      });
 
-    let q = await GlobalData.findOne({
-      "info.type": "dsInflation"
-    });
+      for(let i = 0; i < dark.length; i++){
+        // variables
+        let id = dark[i].info.userID;
+        let member = guild.members.cache.find(x => x.id === id);
 
-    for(let i = 0; i < dark.length; i++){
-      // variables
-      let id = dark[i].info.userID;
-      let member = guild.members.cache.find(x => x.id === id);
+        let oldDate = new Date(dark[i].info.since);
+        let newDate = new Date()
+        let newDuration = Number(q.info.duration) + Math.floor(Math.random() * 60); // duración máxima 60 días & minima de la duracion de la inflacion actual.
 
-      let oldDate = new Date(dark[i].info.since);
-      let newDate = new Date()
-      let newDuration = Number(q.info.duration) + Math.floor(Math.random() * 60); // duración máxima 60 días & minima de la duracion de la inflacion actual.
+        let diference1 = newDate.getTime() - oldDate.getTime();
+        let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
 
-      let diference1 = newDate.getTime() - oldDate.getTime();
-      let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
+        // revisar si tiene darkjeffros el usuario
+        Stats.findOne({
+          userID: id
+        }, async (err, user) => {
+          if(err) throw err;
 
-      // revisar si tiene darkjeffros el usuario
-      Stats.findOne({
-        userID: id
-      }, async (err, user) => {
-        if(err) throw err;
+          if(user.djeffros != 0){
+            // si tiene darkjeffros, ¿caducaron?
+            if(pastDays >= dark[i].info.duration){
+              console.log("a")
+              let staffCID = "514124198205980713";
+              if(client.user.id === Config.testingJBID){
+                staffCID = "537095712102416384";
+              }
 
-        if(user.djeffros === 0) return;
+              let staffC = guild.channels.cache.find(x => x.id === staffCID);
+              let memberD = guild.members.cache.find(x => x.id === user.userID);
 
-        // si tiene darkjeffros, ¿caducaron?
-        if(pastDays >= dark[i].info.duration){
-          console.log("a")
-          let staffCID = "514124198205980713";
-          if(client.user.id === Config.testingJBID){
-            staffCID = "537095712102416384";
+              let staffEmbed = new Discord.MessageEmbed()
+              .setColor(Colores.verde)
+              .setDescription(`**—** Se han elimando los Dark Jeffros de ${memberD.user.tag}.
+              **—** Desde: \`${dark[i].info.since}\`.
+              **—** Duración: \`${dark[i].info.duration}\`.`)
+              .setFooter("Mensaje enviado a la vez que al usuario")
+              .setTimestamp();
+
+              let embed = new Discord.MessageEmbed()
+              .setAuthor(`| ...`, Config.darkLogoPng)
+              .setColor(Colores.negro)
+              .setDescription(`**—** Parece que no has vendido todos tus DarkJeffros. Han sido eliminados de tu cuenta tras haber concluido los días estipulados. (\`${dark[i].info.duration} días.\`)`)
+              .setFooter("▸ Si crees que se trata de un error, contacta al Staff.");
+
+              // eliminarlos de la cuenta (0)
+              user.djeffros = 0;
+              user.save();
+
+              // cambiar dsDJDuration
+              dark[i].info.since = newDate;
+              dark[i].info.duration = newDuration;
+
+              dark[i].markModified("info");
+              await dark[i].save()
+              .then(a => {
+                console.log(a)
+              });
+
+              // intentar enviar un mensaje al MD.
+              member.send(embed)
+              .catch(err => {
+                staffC.send(`**${member.tag} no recibió MD de DarkJeffros eliminados.**\n\`\`\`javascript\n${err}\`\`\``)
+              });
+
+              staffC.send(staffEmbed);
+            } else {
+              console.log(pastDays, dark[i].info.duration, pastDays >= dark[i].info.duration)
+            }
           }
-
-          let staffC = guild.channels.cache.find(x => x.id === staffCID);
-          let memberD = guild.members.cache.find(x => x.id === user.userID);
-
-          let staffEmbed = new Discord.MessageEmbed()
-          .setColor(Colores.verde)
-          .setDescription(`**—** Se han elimando los Dark Jeffros de ${memberD.user.tag}.
-          **—** Desde: \`${dark[i].info.since}\`.
-          **—** Duración: \`${dark[i].info.duration}\`.`)
-          .setFooter("Mensaje enviado a la vez que al usuario")
-          .setTimestamp();
-
-          let embed = new Discord.MessageEmbed()
-          .setAuthor(`| ...`, Config.darkLogoPng)
-          .setColor(Colores.negro)
-          .setDescription(`**—** Parece que no has vendido todos tus DarkJeffros. Han sido eliminados de tu cuenta tras haber concluido los días estipulados. (\`${dark[i].info.duration} días.\`)`)
-          .setFooter("▸ Si crees que se trata de un error, contacta al Staff.");
-
-          // eliminarlos de la cuenta (0)
-          user.djeffros = 0;
-          user.save();
-
-          // cambiar dsDJDuration
-          dark[i].info.since = newDate;
-          dark[i].info.duration = newDuration;
-
-          dark[i].markModified("info");
-          await dark[i].save()
-          .then(a => {
-            console.log(a)
-          });
-
-          // intentar enviar un mensaje al MD.
-          member.send(embed)
-          .catch(err => {
-            staffC.send(`**${member.tag} no recibió MD de DarkJeffros eliminados.**\n\`\`\`javascript\n${err}\`\`\``)
-          });
-
-          staffC.send(staffEmbed);
-        } else {
-          console.log(pastDays, dark[i].info.duration, pastDays >= dark[i].info.duration)
-        }
-      })
-
+        })
+      }
     }
   })
 
@@ -534,7 +530,7 @@ const intervalGlobalDatas = async function(justBoost){
           if(err) throw err;
 
           if(!inflations){
-            return console.log("No hay inflaciones");
+            console.log("No hay inflaciones");
           } else {
             let oldInflation = Number(inflations.info.inflation);
             eventinflation = Number((Math.random() * 10) + oldInflation).toFixed(2);
@@ -558,28 +554,28 @@ const intervalGlobalDatas = async function(justBoost){
           if(err) throw err;
 
           if(!inflations){
-            return console.log("No hay inflaciones");
+            console.log("No hay inflaciones");
           } else {
             let oldInflation = Number(inflations.info.inflation);
 
             // si es menor a 1
 
-            if(oldInflation < 1) return;
-            eventinflation = Number(Math.random() * oldInflation).toFixed(2);
-            
-            while (eventinflation < 1) {
+            if(oldInflation < 1){
               eventinflation = Number(Math.random() * oldInflation).toFixed(2);
-            }
-
-            const newData = new GlobalData({
-              info: {
-                type: "dsEventRandomInflation",
-                inflation: eventinflation,
-                since: date,
-                duration: duration
+            
+              while (eventinflation < 1) {
+                eventinflation = Number(Math.random() * oldInflation).toFixed(2);
               }
-            });
-            newData.save();
+
+              const newData = new GlobalData({
+                info: {
+                  type: "dsEventRandomInflation",
+                  inflation: eventinflation,
+                  since: date,
+                  duration: duration
+                }
+              });
+              newData.save();}
           }
         })
       } else { // el precio no cambia
@@ -590,7 +586,7 @@ const intervalGlobalDatas = async function(justBoost){
           if(err) throw err;
 
           if(!inflations){
-            return console.log("No hay inflaciones");
+            console.log("No hay inflaciones");
           } else {
             let oldInflation = Number(inflations.info.inflation);
             eventinflation = Number(oldInflation);
@@ -609,7 +605,7 @@ const intervalGlobalDatas = async function(justBoost){
       }
     } else { // si ya existe, leerlo y revisar si ya es momento de cambiarlo
       if(dark.info.inflation === "NaN"){ // error por alguna razón, elimina el evento
-        return dark.remove();
+        dark.remove();
       }
       
       let oldDate = new Date(dark.info.since);
@@ -719,31 +715,31 @@ const intervalGlobalDatas = async function(justBoost){
   }, (err, tempBans) => {
     if(err) throw err;
 
-    if(!tempBans) return;
+    if(tempBans){
+      for (let i = 0; i < tempBans.length; i++){
+        let ban = tempBans[i];
+        let userID = ban.info.userID;
+        let since = ban.info.since;
+        let realDuration = ban.info.duration;
+        let today = new Date();
 
-    for (let i = 0; i < tempBans.length; i++){
-      let ban = tempBans[i];
-      let userID = ban.info.userID;
-      let since = ban.info.since;
-      let realDuration = ban.info.duration;
-      let today = new Date();
+        if(today - since >= realDuration){
+          // ya pasó el tiempo, unban
+          guild.members.unban(userID);
+          tempBans[i].remove();
 
-      if(today - since >= realDuration){
-        // ya pasó el tiempo, unban
-        guild.members.unban(userID);
-        tempBans[i].remove();
+          let unBEmbed = new Discord.MessageEmbed()
+          .setAuthor(`| Unban`, guild.iconURL())
+          .setDescription(`
+        **—** Usuario desbaneado: **${userID}**.
+        **—** Razón: **${ban.info.reason}**.
+            `)
+          .setColor(Colores.verde);
 
-        let unBEmbed = new Discord.MessageEmbed()
-        .setAuthor(`| Unban`, guild.iconURL())
-        .setDescription(`
-      **—** Usuario desbaneado: **${userID}**.
-      **—** Razón: **${ban.info.reason}**.
-          `)
-        .setColor(Colores.verde);
-
-        logs.send(unBEmbed)
-      } else {
-        // nada XD
+          logs.send(unBEmbed)
+        } else {
+          // nada XD
+        }
       }
     }
   })
@@ -752,27 +748,29 @@ const intervalGlobalDatas = async function(justBoost){
   GlobalData.find({
     "info.type": "birthdayData"
   }, (err, birthdays) => {
-    if(!birthdays) return;
+    if(birthdays){
+      for (let i = 0; i < birthdays.length; i++){
+        let bd = birthdays[i];
+        let member = guild.members.cache.find(x => x.id === bd.info.userID);
+        let bdDay = bd.info.birthd;
+        let bdMonth = bd.info.birthm;
+        let isLocked = bd.info.isLocked ? bd.info.isLocked : false;
 
-    for (let i = 0; i < birthdays.length; i++){
-      let bd = birthdays[i];
-      let member = guild.members.cache.find(x => x.id === bd.info.userID);
-      let bdDay = bd.info.birthd;
-      let bdMonth = bd.info.birthm;
-      let isLocked = bd.info.isLocked ? bd.info.isLocked : false;
+        if(isLocked) {
+          if(bdDay && bdMonth){
+              let now = new Date();
+              let actualDay = now.getDate();
+              let actualMonth = now.getMonth();
 
-      if(!isLocked) return console.log("no está bloqueada");
-      if(!bdDay || !bdMonth) return console.log("no está configurado totalmente");
-      let now = new Date();
-      let actualDay = now.getDate();
-      let actualMonth = now.getMonth();
-
-      if((actualDay == bdDay) && (actualMonth + 1 == bdMonth)){ // actualMonth + 1 ( 0 = ENERO && 11 = DICIEMBRE )
-        // ES EL CUMPLEAÑOS
-        if(!member.roles.cache.find(x => x.id === bdRole.id)) return member.roles.add(bdRole);
-      } else {
-        // revisar si tiene el rol de cumpleaños, entonces quitarselo
-        if(member.roles.cache.find(x => x.id === bdRole.id)) return member.roles.remove(bdRole);
+              if((actualDay == bdDay) && (actualMonth + 1 == bdMonth)){ // actualMonth + 1 ( 0 = ENERO && 11 = DICIEMBRE )
+                // ES EL CUMPLEAÑOS
+                if(!member.roles.cache.find(x => x.id === bdRole.id)) member.roles.add(bdRole);
+              } else {
+                // revisar si tiene el rol de cumpleaños, entonces quitarselo
+                if(member.roles.cache.find(x => x.id === bdRole.id)) member.roles.remove(bdRole);
+              }
+            }
+        }
       }
     }
   })
