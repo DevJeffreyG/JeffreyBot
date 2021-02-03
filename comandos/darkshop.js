@@ -1297,7 +1297,7 @@ Stats.findOne({
                                                                 .setAuthor(`| Amenaza`, Config.darkLogoPng)
                                                                 .setDescription(`**—** ¡**${author.tag}** ha querido usar el item \`${stats.items[index].name}\` en **${victim.user.tag}** pero YA ESTÁ AFECTADO POR EL ITEM!`)
                                                                 .setColor(Colores.negro)
-                                                                .setFooter(`${stats.items[index].name} para ${victim.user.tag}`)
+                                                                .setFooter(`${stats.items[index].name} para ${victim.user.tag} | Ya tiene el role '${role.name}'.`)
                                                                 .setTimestamp();
 
                                                                 // revisar si el efecto es negativo.
@@ -1426,6 +1426,16 @@ Stats.findOne({
                                                                         }
                                                                     })
                                                                 } else {
+                                                                    let failhasRole = new Discord.MessageEmbed()
+                                                                    .setAuthor(`| Interacción`, Config.darkLogoPng)
+                                                                    .setDescription(`**—** ¡**${author.tag}** ha querido usar el item \`${stats.items[index].name}\` en **${victim.user.tag}** pero YA ESTÁ AFECTADO POR EL ITEM!`)
+                                                                    .setColor(Colores.negro)
+                                                                    .setFooter(`${stats.items[index].name} para ${victim.user.tag} | Ya tiene el role '${role.name}'.`)
+                                                                    .setTimestamp();
+
+                                                                    // revisar si ya tiene el role a dar.
+                                                                    if(victim.roles.cache.find(x => x.id === role.id)) return dsChannel.send(failhasRole);
+
                                                                     // no es negativo, dar el rol
                                                                     victim.roles.add(role);
                                                                     dsChannel.send(success3);
