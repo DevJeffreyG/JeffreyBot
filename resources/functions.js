@@ -497,11 +497,11 @@ const intervalGlobalDatas = async function(justBoost){
       let event = "b";
       let ecuation = Math.random()*100;
 
-      if(ecuation >= 80){ // SUBE EL PRECIO (INFLACION) EN EL EVENTO.
-        event = "s";
-      } else  if(ecuation >= 20){ // BAJA EL PRECIO (INFLACION) EN EL EVENTO. -> EL MÁS PROBABLE A PASAR
+      if(ecuation >= 52){ // SUBE EL PRECIO (INFLACION) EN EL EVENTO.
         event = "b";
-      } else { // SI ES MENOR QUE 20 EL PRECIO NO CAMBIA
+      } else  if(ecuation >= 14){ // BAJA EL PRECIO (INFLACION) EN EL EVENTO. -> EL MÁS PROBABLE A PASAR
+        event = "s";
+      } else { // SI ES MENOR QUE 14 EL PRECIO NO CAMBIA
         event = "i";
       }
 
@@ -545,7 +545,7 @@ const intervalGlobalDatas = async function(justBoost){
           } else {
             let oldInflation = Number(inflations.info.inflation);
 
-            // si es menor a 1
+            // si es menor a 1 no bajar más
 
             if(oldInflation < 1){
               eventinflation = Number(Math.random() * oldInflation).toFixed(2);
@@ -562,7 +562,24 @@ const intervalGlobalDatas = async function(justBoost){
                   duration: duration
                 }
               });
-              newData.save();}
+              newData.save();
+            } else { // si es mayor a 1 entonces bajar la inflacion, pero que no sea menor a 1 nunca
+              eventinflation = Number(Math.random() * oldInflation).toFixed(2);
+            
+              while (eventinflation < 1) {
+                eventinflation = Number(Math.random() * oldInflation).toFixed(2);
+              }
+
+              const newData = new GlobalData({
+                info: {
+                  type: "dsEventRandomInflation",
+                  inflation: eventinflation,
+                  since: date,
+                  duration: duration
+                }
+              });
+              newData.save();
+            }
           }
         })
       } else { // el precio no cambia
