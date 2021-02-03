@@ -834,7 +834,7 @@ client.on("message", async message => {
       if(!cmdDisabled && commandFile){ // si no encuentra un toggle busca el alias
         Toggle.findOne({
           alias: cmd.slice(prefix.length)
-        }, (err, aliasDisabled) => {
+        }, async (err, aliasDisabled) => {
           if(err) throw err;
 
           if(!aliasDisabled && commandFile){ // si no encuentra tampoco el alias entonces correr comando
