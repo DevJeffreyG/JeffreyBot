@@ -829,7 +829,7 @@ client.on("message", async message => {
 
     Toggle.findOne({
       command: cmd.slice(prefix.length)
-    }, (err, cmdDisabled) => {
+    }, async (err, cmdDisabled) => {
       if(err) throw err;
       if(!cmdDisabled && commandFile){ // si no encuentra un toggle busca el alias
         Toggle.findOne({
