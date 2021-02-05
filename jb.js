@@ -1666,16 +1666,6 @@ client.on("messageUpdate", message => {
   }
 });
 
-// set message listener
-client.on("message", message => {
-  if (
-    message.content.startsWith(`${prefix}reset`) &&
-    message.member.hasPermission("BAN_MEMBERS")
-  ) {
-    functions.resetBot(message.channel);
-  }
-});
-
 if (process.env.mantenimiento != 1) {
   client.login(process.env.TOKEN);
 

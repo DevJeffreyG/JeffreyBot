@@ -70,16 +70,6 @@ const findLvls5 = async function(guild){
   })
 }
 
-// Turn bot off (destroy), then turn it back on
-const resetBot = function (channel) {
-  // send channel a message that you're resetting bot [optional]
-  channel
-    .send("Reseteando...")
-    .then(msg => client.destroy())
-    .then(() => client.login(process.env.TOKEN))
-    .then(() => channel.send("Reviví sin problemas."));
-}
-
 const getChanges = function(entryChanges) {
   switch (entryChanges.key) {
     case "afk_timeout":
@@ -1070,7 +1060,6 @@ const vaultMode = function(hint) {
 }
 
 module.exports = {
-    resetBot,
     getChanges,
     loadBoosts,
     intervalGlobalDatas,
