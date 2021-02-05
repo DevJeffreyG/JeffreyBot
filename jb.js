@@ -673,7 +673,6 @@ client.on("ready", async () => {
 
 //main
 client.on("message", async message => {
-  await functions.loadBoosts();
   let messageArray = message.content.split(" ");
   let cmd = messageArray[0];
   let args = messageArray.slice(1);
@@ -687,6 +686,9 @@ client.on("message", async message => {
   // Captcha.
   if (message.author.bot) return;
   if (message.channel.type == "dm") return;
+
+  await functions.loadBoosts(); // verificar si existen BOOSTS.
+
   if (message.content.startsWith(prefix)) {
     // Si el mensaje empieza por el prefijo, entonces...
     let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
@@ -886,10 +888,10 @@ client.on("message", async message => {
               
             } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
               money = money * Number(boosts[i].info.special.specialValue);
-              tmoney = `**B${Emojis.Jeffros}${money}**`;
+              tmoney = `**${Emojis.Jeffros}${money}📈**`;
             } else if(specialData.specialObjective === "all"){ // si el boost es de todo
               money = money * Number(boosts[i].info.special.specialValue);
-              tmoney = `**B${Emojis.Jeffros}${money}**`;
+              tmoney = `**${Emojis.Jeffros}${money}📈**`;
             }
           }
         });
