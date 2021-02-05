@@ -38,10 +38,9 @@ module.exports.run = async (client, message, args, active) => {
     
     let resp = "";
     for (var i in videos) {
-      console.log(videos[i]);
       resp += `**${parseInt(i) + 1} — [${
         videos[i].title
-      }](https://www.youtube.com${videos[i].url})** \`(${
+      }](${videos[i].url})** \`(${
         videos[i].timestamp
       })\`\n`;
     }
