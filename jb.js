@@ -1436,7 +1436,7 @@ client.on("messageReactionAdd", (reaction, user) => {
       const collectorAwards = msg.createReactionCollector(collectorFilter, { time: 60000 });
 
       collectorAwards.on("end", r => {
-        if(r.size > 0) return;
+        if(r.size > 0 && (r.size === 1 && !r.first().me)) return;
         if (msg.reactions.length > 0) {
           message.channel.messages.fetch(message.id).then(m => {
             let react = m.reactions.get(
