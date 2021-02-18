@@ -140,15 +140,15 @@ module.exports.run = async (client, message, args) => {
             })
 
             collector.on('end', collected => {
-	            if(!collected.size > 0){
-                return msg.edit(cancelEmbed).then(a => {
-                  msg.reactions.removeAll().then(() => {
-                    msg.react("795090708478033950");
-                  });
-                  message.delete();
-                  a.delete({timeout: ms("20s")});
+              if(collected.size > 0 && (collected.size === 1 && !collected.first().me)) return;
+
+              return msg.edit(cancelEmbed).then(a => {
+                msg.reactions.removeAll().then(() => {
+                  msg.react("795090708478033950");
                 });
-              }
+                message.delete();
+                a.delete({timeout: ms("20s")});
+              });
             });
     })
 
@@ -230,13 +230,13 @@ module.exports.run = async (client, message, args) => {
       })
 
       collector.on('end', collected => {
-        if(!collected.size > 0){
-          return msg.edit(cancelEmbed).then(a => {
-            msg.reactions.removeAll();
-            message.delete();
-            a.delete({timeout: ms("20s")});
-          });
-        }
+        if(collected.size > 0 && (collected.size === 1 && !collected.first().me)) return;
+        
+        return msg.edit(cancelEmbed).then(a => {
+          msg.reactions.removeAll();
+          message.delete();
+          a.delete({timeout: ms("20s")});
+        });
       });
     })
   }
