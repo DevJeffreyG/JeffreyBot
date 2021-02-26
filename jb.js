@@ -17,6 +17,7 @@ http.get(“http://<your app name>.herokuapp.com”);
 }, 60000); // every minute
 */
 
+require("dotenv").config();
 const Config = require("./base.json");
 const Rainbow = require("./resources/rainbow.json");
 const Colores = require("./resources/colores.json");
