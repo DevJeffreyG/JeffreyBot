@@ -1,18 +1,10 @@
 const Config = require("./../base.json");
-const Colores = require("./../colores.json");
-const Emojis = require("./../emojis.json");
+const Colores = require("./../resources/colores.json");
+const Emojis = require("./../resources/emojis.json");
 const Discord = require("discord.js");
-const bot = new Discord.Client();
-const fs = require("fs");
 const ms = require("ms");
 const prefix = Config.prefix;
-const jeffreygID = Config.jeffreygID;
-const jgServer = Config.jgServer;
-const offtopicChannel = Config.offtopicChannel;
-const mainChannel = Config.mainChannel;
-const botsChannel = Config.botsChannel;
-const logChannel = Config.logChannel;
-const version = Config.version;
+const prettyms = require("pretty-ms");
 
 /* ##### MONGOOSE ######## */
 
@@ -22,22 +14,26 @@ const Items = require("../modelos/items.js");
 const Purchased = require("../modelos/purchased.js");
 const All = require("../modelos/allpurchases.js");
 const Use = require("../modelos/use.js");
-const Ignore = require("../modelos/ignore.js")
 
 /* ##### MONGOOSE ######## */
 
-module.exports.run = async (bot, message, args) => {
+module.exports.run = async (client, message, args) => {
   if (!message.content.startsWith(prefix)) return;
   
   // Variables
   let author = message.author;
   const guild = message.guild;
-  let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
-  let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
-  let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
   let item;
   let interest = 2000; // CUANTO SUBE EL PRECIO POR COMPRA
+
+  let userIsOnMobible = author.presence.clientStatus && author.presence.clientStatus.mobile === "online" && !author.presence.clientStatus.desktop ? true : false;
+  let viewExtension = "ꜝ";
+  let extendedDetails = "▸ Al comprar este item, su precio subirá."
+
+  if(client.user.id === Config.testingJBID){
+    staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
+  }
 
   let itemPerPage = 3;
 
@@ -51,8 +47,9 @@ module.exports.run = async (bot, message, args) => {
         if (err) throw err;
 
         Jeffros.findOne({
+          serverID: guild.id,
           userID: author.id
-        }, (err, j) => {
+        }, async (err, j) => {
 
 
         let embed = new Discord.MessageEmbed()
@@ -81,10 +78,22 @@ module.exports.run = async (bot, message, args) => {
             );
 
             for (let i = 0; i < items.length; i++) {
+              let isSub = false;
+              let time = null;
+              let usesQuery = await Use.findOne({
+                serverID: guild.id,
+                itemID: items[i].id
+              }, (err, actualItemUse) => {
+                isSub = actualItemUse.isSub;
+
+                time = isSub ? prettyms(Number(actualItemUse.duration), {secondsDecimalDigits: 0 }) : null;
+              });
+
               All.findOne(
                 {
                   userID: author.id,
-                  itemID: items[i].id
+                  itemID: items[i].id,
+                  isDarkShop: false
                 },
                 (err, all) => {
                   let precio = items[i].itemPrice;
@@ -111,10 +120,29 @@ module.exports.run = async (bot, message, args) => {
                     }
                   }
 
-                  embed.addField(
-                    `— { ${items[i].id} } ${items[i].itemName}`,
-                    `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
-                  );
+                  if(!isSub){
+                    if(userIsOnMobible && !items[i].ignoreInterest){
+                      embed.addField(
+                        `— { ${items[i].id} } ${items[i].itemName}`,
+                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
+                      );
+                    } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
+                      embed.addField(
+                        `— { ${items[i].id} } ${items[i].itemName}`,
+                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
+                      );
+                    } else if(!userIsOnMobible && items[i].ignoreInterest == true){
+                      embed.addField(
+                        `— { ${items[i].id} } ${items[i].itemName}`,
+                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
+                      );
+                    }
+                  } else { // es una suscripción
+                    embed.addField(
+                        `— { ${items[i].id} } ${items[i].itemName}`,
+                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} **/${time}**`
+                    );
+                  }
 
                   if (i + 1 === items.length) {
                     return message.channel.send(embed);
@@ -126,7 +154,7 @@ module.exports.run = async (bot, message, args) => {
             let pagn = "1";
             let totalpags;
 
-            Items.countDocuments({}, (err, c) => {
+            Items.countDocuments({}, async (err, c) => {
               if (err) throw err;
 
               totalpags = Math.floor(c / itemPerPage);
@@ -155,10 +183,22 @@ module.exports.run = async (bot, message, args) => {
 
               // hacer la primera página
               for (let i = 0; i < itemPerPage; i++) {
+                let isSub = false;
+                let time = null;
+                let usesQuery = await Use.findOne({
+                  serverID: guild.id,
+                  itemID: items[i].id
+                }, (err, actualItemUse) => {
+                  isSub = actualItemUse.isSub;
+
+                  time = isSub ? prettyms(Number(actualItemUse.duration), {secondsDecimalDigits: 0 }) : null;
+                });
+
                 All.findOne(
                   {
                     userID: author.id,
-                    itemID: items[i].id
+                    itemID: items[i].id,
+                    isDarkShop: false
                   },
                   (err, all) => {
                     let precio = items[i].itemPrice;
@@ -193,10 +233,30 @@ module.exports.run = async (bot, message, args) => {
                           (Math.floor(items[i].itemPrice) / 100) * 15}`;
                       }
                     }
-                    embed.addField(
-                      `— { ${items[i].id} } ${items[i].itemName}`,
-                      `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
-                    );
+
+                    if(!isSub){
+                      if(userIsOnMobible && !items[i].ignoreInterest){
+                        embed.addField(
+                          `— { ${items[i].id} } ${items[i].itemName}`,
+                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
+                        );
+                      } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
+                        embed.addField(
+                          `— { ${items[i].id} } ${items[i].itemName}`,
+                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
+                        );
+                      } else if(!userIsOnMobible && items[i].ignoreInterest == true){
+                        embed.addField(
+                          `— { ${items[i].id} } ${items[i].itemName}`,
+                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
+                        );
+                      }
+                    } else { // es una suscripción
+                      embed.addField(
+                          `— { ${items[i].id} } ${items[i].itemName}`,
+                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} **/${time}**`
+                      );
+                    }
 
                     if (i + 1 === itemPerPage) {
                       message.channel.send(embed).then(msg => {
@@ -234,7 +294,7 @@ module.exports.run = async (bot, message, args) => {
 **—** Para tener más información del item usa \`${prefix}shop info <id>\`.
 **—** Tienes ${Emojis.Jeffros}**${j.jeffros}**`);
 
-                            Items.countDocuments({}, (err, c) => {
+                            Items.countDocuments({}, async (err, c) => {
                               if (err) throw err;
 
                               totalpags = Math.floor(c / itemPerPage);
@@ -261,10 +321,22 @@ module.exports.run = async (bot, message, args) => {
                                 guild.iconURL()
                               );
                               for (let i = inicio; i < fin + 1; i++) {
+                                let isSub = false;
+                                let time = null;
+                                let usesQuery = await Use.findOne({
+                                  serverID: guild.id,
+                                  itemID: items[i].id
+                                }, (err, actualItemUse) => {
+                                  isSub = actualItemUse.isSub;
+
+                                  time = isSub ? prettyms(Number(actualItemUse.duration), {secondsDecimalDigits: 0 }) : null;
+                                });
+
                                 All.findOne(
                                   {
                                     userID: author.id,
-                                    itemID: items[i].id
+                                    itemID: items[i].id,
+                                    isDarkShop: false
                                   },
                                   (err, all) => {
                                     let precio = items[i].itemPrice;
@@ -302,10 +374,30 @@ module.exports.run = async (bot, message, args) => {
                                             15}`;
                                       }
                                     }
-                                    embed.addField(
-                                      `— { ${items[i].id} } ${items[i].itemName}`,
-                                      `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
-                                    );
+                                    
+                                    if(!isSub){
+                                      if(userIsOnMobible && !items[i].ignoreInterest){
+                                        embed.addField(
+                                          `— { ${items[i].id} } ${items[i].itemName}`,
+                                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
+                                        );
+                                      } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
+                                        embed.addField(
+                                          `— { ${items[i].id} } ${items[i].itemName}`,
+                                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
+                                        );
+                                      } else if(!userIsOnMobible && items[i].ignoreInterest == true){
+                                        embed.addField(
+                                          `— { ${items[i].id} } ${items[i].itemName}`,
+                                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
+                                        );
+                                      }
+                                    } else { // es una suscripción
+                                      embed.addField(
+                                          `— { ${items[i].id} } ${items[i].itemName}`,
+                                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} **/${time}**`
+                                      );
+                                    }
 
                                     if (i + 1 === fin + 1) {
                                       return msg.edit(embed);
@@ -327,7 +419,7 @@ module.exports.run = async (bot, message, args) => {
 **—** Para tener más información del item usa \`${prefix}shop info <id>\`.
 **—** Tienes ${Emojis.Jeffros}**${j.jeffros}**`);
 
-                            Items.countDocuments({}, (err, c) => {
+                            Items.countDocuments({}, async (err, c) => {
                               if (err) throw err;
 
                               totalpags = Math.floor(c / itemPerPage);
@@ -340,20 +432,40 @@ module.exports.run = async (bot, message, args) => {
 
                               inicio = inicio - 1;
 
-                              if (items.length <= fin - 1) {
+                              if (items.length < fin - 1) {
                                 fin = items.length;
-                                }
+                              } else if (items.length === fin - 1) {
+                                fin = items.length;
+                              }
 
                               embed.setFooter(
                                 `| Tienda oficial - Página ${pagn} de ${totalpags}`,
                                 guild.iconURL()
                               );
 
-                              for (let i = inicio; i < fin + 1; i++) {
+                              for (let i = inicio; i < fin; i++) {
+                                console.log(i)
+                                let isSub = false;
+                                let time = null;
+                                let usesQuery = await Use.findOne({
+                                  serverID: guild.id,
+                                  itemID: items[i].id
+                                }, (err, actualItemUse) => {
+                                  if(err) throw err;
+                                  if(!actualItemUse) return null;
+                                  
+                                  isSub = actualItemUse.isSub;
+
+                                  time = isSub ? prettyms(Number(actualItemUse.duration), {secondsDecimalDigits: 0 }) : null;
+                                });
+
+                                if(!usesQuery) return message.channel.send(`[001] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas seguir usando correctamente el comando :)`)
+
                                 All.findOne(
                                   {
                                     userID: author.id,
-                                    itemID: items[i].id
+                                    itemID: items[i].id,
+                                    isDarkShop: false
                                   },
                                   (err, all) => {
                                     let precio = items[i].itemPrice;
@@ -391,10 +503,30 @@ module.exports.run = async (bot, message, args) => {
                                             15}`;
                                       }
                                     }
-                                    embed.addField(
-                                      `— { ${items[i].id} } ${items[i].itemName}`,
-                                      `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
-                                    );
+                                    
+                                    if(!isSub){
+                                      if(userIsOnMobible && !items[i].ignoreInterest){
+                                        embed.addField(
+                                          `— { ${items[i].id} } ${items[i].itemName}`,
+                                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
+                                        );
+                                      } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
+                                        embed.addField(
+                                          `— { ${items[i].id} } ${items[i].itemName}`,
+                                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
+                                        );
+                                      } else if(!userIsOnMobible && items[i].ignoreInterest == true){
+                                        embed.addField(
+                                          `— { ${items[i].id} } ${items[i].itemName}`,
+                                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
+                                        );
+                                      }
+                                    } else { // es una suscripción
+                                      embed.addField(
+                                          `— { ${items[i].id} } ${items[i].itemName}`,
+                                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} **/${time}**`
+                                      );
+                                    }
 
                                     if (i + 1 === fin) {
                                       return msg.edit(embed);
@@ -457,7 +589,8 @@ module.exports.run = async (bot, message, args) => {
                   All.findOne(
                     {
                       userID: author.id,
-                      itemID: action
+                      itemID: action,
+                      isDarkShop: false
                     },
                     (err, all) => {
                       if (all) {
@@ -529,7 +662,7 @@ module.exports.run = async (bot, message, args) => {
 
                           if (!use) {
                             return message.channel.send(
-                              `Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas comprar tu item :)`
+                              `[002] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas comprar tu item :)`
                             );
                           }
 
@@ -571,8 +704,7 @@ module.exports.run = async (bot, message, args) => {
                                   );
 
                                 message.channel.send(buyEmbed).then(msg => {
-                                  msg
-                                    .react(":allow:558084462232076312")
+                                  msg.react(":allow:558084462232076312")
                                     .then(r => {
                                       msg.react(":denegar:558084461686947891");
                                     });
@@ -581,25 +713,24 @@ module.exports.run = async (bot, message, args) => {
                                     .setDescription(`Cancelado.`)
                                     .setColor(Colores.nocolor);
 
-                                  const yesFilter = (reaction, user) =>
-                                    reaction.emoji.id ===
-                                      "558084462232076312" &&
-                                    user.id === message.author.id;
-                                  const noFilter = (reaction, user) =>
-                                    reaction.emoji.id ===
-                                      "558084461686947891" &&
-                                    user.id === message.author.id;
+                                  const yesFilter = (reaction, user) => reaction.emoji.id === "558084462232076312" && user.id === message.author.id;
+                                  const noFilter = (reaction, user) =>  reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
+                                  const collectorFilter = (reaction, user) => ['558084462232076312', '558084461686947891'].includes(reaction.emoji.id) && user.id === message.author.id;
 
-                                  const yes = msg.createReactionCollector(
-                                    yesFilter,
-                                    { time: 60000 }
-                                  );
-                                  const no = msg.createReactionCollector(
-                                    noFilter,
-                                    {
-                                      time: 60000
-                                    }
-                                  );
+                                  const yes = msg.createReactionCollector(yesFilter, { time: ms("30s") });
+                                  const no = msg.createReactionCollector(noFilter, { time: ms("30s") });
+                                  const collector = msg.createReactionCollector(collectorFilter, { time: ms("30s") });
+
+                                  collector.on("end", (r) => {
+                                    if(r.size > 0 && (r.size === 1 && !r.first().me)) return;
+                                    return msg.edit(cancelEmbed).then(a => {
+                                      msg.reactions.removeAll().then(() => {
+                                        msg.react("795090708478033950");
+                                      });
+                                      message.delete();
+                                      a.delete({timeout: ms("20s")});
+                                    });
+                                  });
 
                                   yes.on("collect", r => {
                                     currency.jeffros -= precio;
@@ -623,12 +754,14 @@ module.exports.run = async (bot, message, args) => {
                                       .setColor(Colores.verde);
 
                                     return msg.edit(useEmbed).then(() => {
+                                      collector.stop();
                                       msg.reactions.removeAll();
                                     });
                                   });
 
                                   no.on("collect", r => {
                                     return msg.edit(cancelEmbed).then(a => {
+                                      collector.stop();
                                       msg.reactions.removeAll();
                                       message.delete();
                                       a.delete({timeout: ms("20s")});
@@ -683,7 +816,7 @@ module.exports.run = async (bot, message, args) => {
                 let errorEmbed = new Discord.MessageEmbed()
                   .setAuthor(`| Error`, Config.errorPng)
                   .setDescription(
-                    `▸ El uso correcto es: /shop add <nombre> <precio> (@role requerido o ID)
+                    `▸ El uso correcto es: /shop add <nombre> <precio> <ignora la subida de precio "true || false"> (@role requerido o ID)
 **—** Para los roles, si no se necesita, rellenar con "\`na\`".`
                   )
                   .setColor(Colores.nocolor);
@@ -691,10 +824,12 @@ module.exports.run = async (bot, message, args) => {
                 if (!args[1]) return message.channel.send(errorEmbed);
                 if (!args[2]) return message.channel.send(errorEmbed);
                 if (!args[3]) return message.channel.send(errorEmbed);
+                if (!args[4]) return message.channel.send(errorEmbed);
 
                 let nameItem = args[1];
                 let priceItem = args[2];
-                let reqRole = args[3];
+                let ignoreInterest = args[3] == "true" ? true : false;
+                let reqRole = args[4] ? args[4] : "na";
 
                 let lastID = c + plus;
 
@@ -705,6 +840,7 @@ module.exports.run = async (bot, message, args) => {
                   itemDescription: "na",
                   replyMessage: "¡Item usado con éxito!",
                   roleRequired: reqRole,
+                  ignoreInterest: ignoreInterest,
                   id: lastID
                 });
 
@@ -719,6 +855,7 @@ module.exports.run = async (bot, message, args) => {
 **—** Descripción: \`na\`.
 **—** Mensaje después de comprar: \`¡Item usado con éxito!\`.
 **—** Role requerido: \`${reqRole}\`.
+**—** Ignora el interés por compra: \`${ignoreInterest ? "Sí" : "No"}\`.
 **—** ID: \`${lastID}\`.`
                   )
                   .setColor(Colores.verde);
@@ -934,17 +1071,7 @@ module.exports.run = async (bot, message, args) => {
           }
         }
       );
-    } else 
-      if(action === "ignore"){
-        if(!args[1]) return message.reply("¿cuál es la id del item que se va a evitar subir el precio por compra?")
-        const newIgnore = new Ignore({
-          itemID: args[1]
-        });
-        
-        newIgnore.save();
-        
-        message.react("✅")
-      }
+    }
   }
 };
 

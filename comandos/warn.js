@@ -1,6 +1,6 @@
 const Config = require("./../base.json");
-const Colores = require("./../colores.json");
-const reglas = require("./../reglas.json");
+const Colores = require("./../resources/colores.json");
+const reglas = require("./../resources/reglas.json");
 const Discord = require("discord.js");
 const ms = require("ms");
 const prefix = Config.prefix;
@@ -9,10 +9,11 @@ const prefix = Config.prefix;
 
 const Warn = require("../modelos/warn.js");
 const SoftWarn = require("../modelos/softwarn.js");
+const GlobalData = require("../modelos/globalData.js");
 
 /* ##### MONGOOSE ######## */
 
-module.exports.run = async (bot, message, args) => {
+module.exports.run = async (client, message, args) => {
 
   if(!message.content.startsWith(prefix))return;
 
@@ -21,7 +22,7 @@ module.exports.run = async (bot, message, args) => {
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
   let logC = guild.channels.cache.find(x => x.id === Config.logChannel);
 
-  if(bot.user.id === Config.testingJBID){
+  if(client.user.id === Config.testingJBID){
     staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
     logC = guild.channels.cache.find(x => x.id === "483108734604804107");
   }
@@ -96,7 +97,7 @@ module.exports.run = async (bot, message, args) => {
             const collector = msg.createReactionCollector(collectorFilter, { time: 60000 });
  
             collector.on("end", r => {
-              if(r.size > 0) return;
+              if(r.size > 0 && (r.size === 1 && !r.first().me)) return;
               return msg.edit(cancelEmbed).then(a => {
                 msg.reactions.removeAll().then(() => {
                   msg.react("795090708478033950");
@@ -106,7 +107,7 @@ module.exports.run = async (bot, message, args) => {
               });
             });
 
-            yes.on("collect", r => {
+            yes.on("collect", async r => {
               collector.stop();
               if(!warns){
                 
@@ -117,13 +118,10 @@ module.exports.run = async (bot, message, args) => {
                     if (err) throw err;
                     let existsSoft = false;
 
-                    console.log("SOFT:");
-                    console.log(soft);
                     if(!soft) return msg.edit(errorEmbed).then(() => msg.reactions.removeAll());
 
                     for (let i = 0; i < soft.warns.length; i++){ // revisar cada soft
                       if(soft.warns[i].rule === rule){ // si existe
-                        console.log("FOUND");
                         existsSoft = true;
                       }
 
@@ -168,13 +166,10 @@ module.exports.run = async (bot, message, args) => {
                   if (err) throw err;
                   let existsSoft = false;
 
-                  console.log("SOFT:");
-                  console.log(soft);
                   if(!soft) return msg.edit(errorEmbed).then(() => msg.reactions.removeAll());
 
                   for (let i = 0; i < soft.warns.length; i++){ // revisar cada soft
                     if(soft.warns[i].rule === rule){ // si existe
-                      console.log("FOUND");
                       existsSoft = true;
                     }
 
@@ -202,7 +197,7 @@ module.exports.run = async (bot, message, args) => {
 
                     logC.send(autoMod);
                     wUser.send(autoMod)
-                    wUser.ban(`AutoMod. (Infringir "${rule}")`);
+                    wUser.ban({reason: `AutoMod. (Infringir "${rule}")`});
                   } else
 
                   if(warns.warns >= 3){
@@ -216,13 +211,42 @@ module.exports.run = async (bot, message, args) => {
                     
 
                     wUser.send(autoMod);
-                    wUser.ban(`AutoMod. (Infringir "${rule}")`);
+                    wUser.ban({reason: `AutoMod. (Infringir "${rule}")`});
                     
 
-                    /// USAR UN GLOBAL DATA::::
-                    setTimeout(function() {
-                      guild.unban(wUser.id)
-                    }, ms("1d"));
+                    GlobalData.findOne({
+                      "info.type": "temporalGuildBan",
+                      "info.userID": wUser.id,
+                      "info.serverID": guild.id
+                    }, (err, guildBan) => {
+                      if(err) throw err;
+
+                      let now = new Date();
+
+                      if(!guildBan){
+                        const newBan = new GlobalData({
+                          info: {
+                            type: "temporalGuildBan",
+                            userID: wUser.id,
+                            serverID: guild.id,
+                            reason: `AutoMod. (Infringir "${rule}")`,
+                            since: now,
+                            duration: ms("1d")
+                          }
+                        });
+
+                        newBan.save();
+                      } else {
+                        // si ya existe (how) cambiar el since
+                        guildBan.info.since = now;
+                        guildBan.save();
+
+                      }
+
+                      setTimeout(function() {
+                        guild.unban(wUser.id)
+                      }, ms("1d"));
+                    })
                     
                     logC.send(autoMod);
                   } else
@@ -233,7 +257,7 @@ module.exports.run = async (bot, message, args) => {
                   .setDescription(`**—** ${wUser.user.tag}, este es tu **warn número ❛ \`2\` ❜**
         *— ¿Qué impacto tendrá este warn?*
         **—** Tranquilo. Este warn no afectará en nada tu estadía en el servidor, sin embargo; el siguiente warn será un **ban de un día**.
-        **—** Te sugiero comprar un **-1 Warn** en la tienda del servidor. *( \`${prefix}shop items\` para más info de precios, etc. )*`)
+        **—** Te sugiero comprar un **-1 Warn** en la tienda del servidor. *( \`${prefix}shop\` para más info de precios, etc. )*`)
                   .setColor(Colores.rojo);
                     
                     wUser.send(infoEmbed);
@@ -255,7 +279,7 @@ module.exports.run = async (bot, message, args) => {
                   wUser.send(warnedEmbed)
                   .catch(e => {
                     message.react("494267320097570837");
-                    message.channel.send("¡Usuario con MDs desactivados! **¡No sabe cuántos WARNS tiene!**");
+                    message.channel.send("¡Usuario con MDs desactivados // Usuario no encontrado! **¡No sabe cuántos WARNS tiene!**");
                   });
                 })
               }
@@ -277,11 +301,17 @@ module.exports.run = async (bot, message, args) => {
               })
 
               // embed a editar el mensaje de confirmación
+              // await para saber los warns actuales porque esta mamada no sirve por alguna razón
+              let query = await Warn.findOne({
+                userID: wUser.id
+              });
+
+              let numWarns = query ? query.warns + 1 : 1;
               let wEmbed = new Discord.MessageEmbed()
               .setAuthor(`| Warn`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
               .setDescription(`**—** Warneado: **${wUser}**.
     **—** Canal: **${message.channel}**.
-    **—** Warns actuales: **${warns.warns || 1}**.
+    **—** Warns actuales: **${numWarns}**.
     **—** Por infringir la regla: **${rule}**.`)
               .setColor(Colores.rojo);
 

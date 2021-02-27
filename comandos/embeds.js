@@ -1,31 +1,16 @@
 const Config = require("./../base.json");
-const Colores = require("./../colores.json");
-const Emojis = require("./../emojis.json");
-const embedImages = require("./../embeds.json");
+const Colores = require("./../resources/colores.json");
+const Emojis = require("./../resources/emojis.json");
+const embedImages = require("./../resources/embeds.json");
 const Discord = require("discord.js");
-const bot = new Discord.Client();
-const fs = require("fs");
-const ms = require("ms");
 const prefix = Config.prefix;
 const jeffreygID = Config.jeffreygID;
-const jgServer = Config.jgServer;
-const offtopicChannel = Config.offtopicChannel;
-const mainChannel = Config.mainChannel;
-const botsChannel = Config.botsChannel;
-const logChannel = Config.logChannel;
-const version = Config.version;
+let mainChannel = Config.mainChannel;
+let supportChannel = Config.supportChannel;
+let gdps = Config.gdpsSupportChannel;
+let rulesChannel = Config.rulesChannel;
 
-/* ##### MONGOOSE ######## */
-
-const Jeffros = require("../modelos/jeffros.js");
-const Reporte = require("../modelos/reporte.js");
-const Exp = require("../modelos/exp.js");
-const Warn = require("../modelos/warn.js");
-const Banned = require("../modelos/banned.js");
-
-/* ##### MONGOOSE ######## */
-
-module.exports.run = async (bot, message, args) => {
+module.exports.run = async (client, message, args) => {
   if (!message.content.startsWith(prefix)) return;
   if (message.author.id != jeffreygID) return;
   message.delete();
@@ -37,6 +22,18 @@ module.exports.run = async (bot, message, args) => {
   let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
   let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
+
+  if(client.user.id === Config.testingJBID){
+    jeffreyRole = guild.roles.cache.find(x => x.id === "482992290550382592");
+    adminRole = guild.roles.cache.find(x => x.id === "483105079285776384");
+    modRole = guild.roles.cache.find(x => x.id === "483105108607893533");
+    staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
+
+    mainChannel = "797258710997139537";
+    supportChannel = "803309710883160065";
+    gdps = "803309815576789003";
+    rulesChannel = "482993020472393741";
+  }
 
   /* ################## EMBEDS DE INFORMACION ######################### */
 
@@ -99,23 +96,29 @@ module.exports.run = async (bot, message, args) => {
     .setColor(Colores.nocolor);
 
   let rolesEmbed3 = new Discord.MessageEmbed()
-    .setDescription(
-      `<@&460966148704436235> • Todos tendrán este rol.
+    .setDescription(`<@&460966148704436235> • Todos tendrán este rol.
+
+<@&447821238631530498> • Todos los Bots del server tendrán este rol.
 
 <@&460242238555815946> • ¡Verdaderos suscriptores que tienen un canal para recibir notificaciones de Videos, Directos y Tweets de Jeffrey!
-  ➟ Consíguelo en <#473627930396852226>.
+➟ Consíguelo en <#473627930396852226>.
 
-<@&461259197368107020> • Alguien cercano a Jeffrey.  
+<@&595022419123634228> • Alguien que está boosteando el servidor, aparecerá en la lista de miembros por encima de todos menos del Staff.
+
+<@&461259197368107020> • Alguien cercano a Jeffrey / Amigos IRL.
+
+<@&529275759521431553> • Usuario que ha ascendido en el servidor, tendrá colores exclusivos y acceso anticipado a las notificaciones de Jeffrey, etc.
+➟ Si quieres conseguirlo antes de <@&${Config.lvl99}> ve a \`${prefix}shop\`.
 
 <@&461302293464219658> • Personas que se la pasan bien en el servidor y es bueno con los demás~
-
-<@&529275759521431553> • Usuario que ha pagado por tener colores exclusivos y acceso anticipado a las notificaciones de Jeffrey, etc. \`( Más info en '${prefix}shop items' )\`.
 
 <@&461553370277347328> • Persona de confianza para Jeffrey.
 
 <@&460586399981109278> • Gente activa con más de 5,000 mensajes en <#${mainChannel}>.
 
-<@&460517579941740544> • Personas que lleva mucho tiempo dentro del servidor.`
+<@&460517579941740544> • Personas que lleva mucho tiempo dentro del servidor, o está desde tiempos inmemorables, o simplemente estaba en el servidor viejo (...) este rol es muy extraño.
+
+<@&790995699759448094> • Shhh... los usuarios con nivel 5 tendrán este rol, y consigo acceso a la DarkShop.`
     )
     .setColor(Colores.nocolor);
 
@@ -126,14 +129,19 @@ module.exports.run = async (bot, message, args) => {
     .setColor(Colores.verde);
 
   let jeffrosEmbed2 = new Discord.MessageEmbed()
-    .setDescription(
-      `
-    **—** ¿Qué son los ${Emojis.Jeffros}effros?
-    ➟ Los Jeffros, son la moneda virtual que se usará para comprar items en la tienda del servidor y usar los **Awards**.
+    .setDescription(`**—** ¿Qué son los ${Emojis.Jeffros}effros y como conseguirlos?
+    ➟ Los Jeffros son la moneda virtual del servidor. Puedes conseguirlos al hablar en <#${mainChannel}>.
 
     **—** ¿Cómo gasto mis Jeffros?
-    ➟ Con el comando \`${prefix}shop\` tendrás más información de los items.
-  `
+    ➟ Los Jeffros se usarán para comprar items en la tienda del servidor (\`${prefix}shop\`) y usar los **Awards**.
+
+    **—** No confundir con los __Dark${Emojis.Dark}effros__:
+    ➟ Los DarkJeffros se desbloquearán cuando un usuario consiga el nivel 5. Podrán ser usados en la DarkShop.
+    
+    **—** ¿Como consigo DarkJeffros?
+    ➟ Piensa en los DarkJeffros como si fuesen bitcoins. ¿Por qué bitcoins? Porque es divertido.
+    ➟ Los DarkJeffros solo se podrán conseguir cambiando Jeffros. Estos pueden ser más costosos dependiendo de la **inflación actual**.
+    ➟ Usando el comando \`${prefix}darkshop ayuda\` podrás tener más información.`
     )
     .setColor(Colores.nocolor);
 
@@ -159,7 +167,7 @@ module.exports.run = async (bot, message, args) => {
 
   ➟ ${jeffreyRole} • Es el rol de JeffreyG. Ten por seguro que si alguien tiene este rol es porque es el verdadero Jeffrey.
 
-  `
+  ➟ Usando el comando \`${prefix}serverinfo\` podrás ver quiénes hacen parte del equipo del Staff más cómodamente.`
     )
     .setColor(Colores.verde);
   
@@ -178,7 +186,7 @@ En este manual se mostrarán las instrucciones a la hora de hacer ciertas accion
   let manualEmbed3 = new Discord.MessageEmbed()
   .setColor(Colores.nocolor)
   .setDescription(`Lo más importante del staff diría yo.
-Aunque creo que es obvio tengo que aclarar que usará a ${bot.user} para la moderación del servidor. Puedes ver tus comandos con \`/ayuda\`.
+Aunque creo que es obvio tengo que aclarar que usará a ${client.user} para la moderación del servidor. Puedes ver tus comandos con \`/ayuda\`.
 
 <:Faq:494282181296914432> **— ¿Cuando dar un warn y cuando no?**
 Es sencillo. Cuando un usario incumpla una regla hay que tener en cuenta una sóla cosa:
@@ -205,11 +213,17 @@ Para mantener tu posición como staff, debes cumplir lo siguiente:
 > ➟ Si tienes alguna duda, no lo pienses dos veces y pregunta en <#485191724369444865>.
 
 Y la más importante:
-> ➟ No te tomes esto como lo más serio de mundo. Todos estamos aquí para divertirnos, ¿verdad? relájate un poco.`)
+> ➟ No te tomes esto como lo más serio de mundo. Todos estamos aquí para divertirnos, ¿verdad? relájate un poco.`);
 
-  let noEmbed = new Discord.MessageEmbed()
-    .setAuthor(`| ¿Qué necesitas?`, author.displayAvatarURL())
-    .setColor(Colores.nocolor).setDescription(`**—** ${prefix}embed <embed>
+let finalInfoEmbed = new Discord.MessageEmbed()
+.setColor(Colores.verde)
+.setDescription(`**— Y... ¡eso es todo!**
+• Esperamos te la pases bien en el server, si tienes dudas del server no dudes preguntar en <#${supportChannel}> y no olvides leer las <#${rulesChannel}>.`)
+
+let noEmbed = new Discord.MessageEmbed()
+.setAuthor(`| ¿Qué necesitas?`, author.displayAvatarURL())
+.setColor(Colores.nocolor)
+.setDescription(`**—** ${prefix}embed <embed>
 \`▸\` Muted
 \`▸\` Reglas
 \`▸\` Niveles
@@ -221,9 +235,10 @@ Y la más importante:
 \`▸\` Colores_especiales
 \`▸\` Auto_Roles
 \`▸\` Roles_especiales
-\`▸\` Staff_manual`);
+\`▸\` Staff_manual
+\`▸\` Final_info`);
 
-  if (!args[0]) return message.channel.send(noEmbed); //.then(m => m.delete(ms("10s")));
+  if (!args[0]) return message.channel.send(noEmbed).then(m => m.delete({ timeout: ms("10s") }));
   let embed1 = new Discord.MessageEmbed();
   let embed2 = new Discord.MessageEmbed();
   let embed3 = new Discord.MessageEmbed();
@@ -290,23 +305,24 @@ Y la más importante:
     case (caso = "reglas"):
       embed1.setImage(embedImages.reglas);
       embed1.setColor(Colores.verde);
-      embed2.setDescription(`**—** Escribe en el chat como si estuvieses hablando con alguien que te importa mucho, con sentido común y sin incoherencias.
+      embed2.setDescription(`**—** Escribe en el chat como si estuvieses hablando con alguien que te importa mucho, con **sentido común** y **sin incoherencias**.
 
-**—** Trata a las personas con las que no tienes tanta confianza con respeto y amabilidad. No gore ni contenido que pueda herir la sensibilidad de los demás.
+**—** Trata a las personas con las que no tienes tanta confianza con **respeto y amabilidad**. No menciones innecesariamente. No gore ni contenido que pueda herir la sensibilidad de los demás **(NO NSFW)**.
 
-**—** Cada canal tiene un fin, escribe dónde debas hacerlo. Siempre lee las descripciones de los canales.
+**—** Cada canal tiene un fin, **escribe dónde debas hacerlo**. Siempre lee las descripciones de los canales.
 
 **—** No hables de problemas personales en los chats, eso es privado y debería mantenerse así.
 
-**—** No menciones innecesariamente.
-
-**—** No flood ni spam en los canales generales.
+**—** **No flood ni spam** en los canales generales.
 
 **—** No nicknames inapropiados ni con símbolos que no te dejen mencionarlos ni que cambien drásticamente tu posición en la lista de miembros.
 
 **—** No se permiten cadenas de mensajes en el chat.
 
-\`—\` Un consejo amistoso: no desactives los MDs, nunca sabes cuando te pueden dar un warn y no enterarte de ello.`);
+**—** Debes cumplir las [Condiciones del servicio de Discord "TOS"](https://discord.com/terms), cualquier rotura a estas será tomada como una falta en contra de las nuestras **y dependiendo la gravedad se tomarán acciones contra estas**.
+
+\`—\` Un dato curioso: ${client.user} te enviará un mensaje al recibir cualquier tipo de warn, siempre y cuando tengas los MDs activados.
+Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para conocer __tus__ warns.`);
       embed2.setColor(Colores.nocolor);
 
       embed3.setFooter(
@@ -368,9 +384,13 @@ Y la más importante:
       break;
 
     case (caso = "awards"):
-      let silver = guild.emojis.get(Config.silverAward);
-      let gold = guild.emojis.get(Config.goldAward);
-      let platinium = guild.emojis.get(Config.platiniumAward);
+      let silver = guild.emojis.cache.find(x => x.id === Config.silverAward);
+      let gold = guild.emojis.cache.find(x => x.id === Config.goldAward);
+      let platinium = guild.emojis.cache.find(x => x.id === Config.platiniumAward);
+
+      silver = silver ? silver : "SILVER EMOTE";
+      gold = gold ? gold : "GOLD EMOTE";
+      platinium = platinium ? platinium : "PLAT EMOTE";
 
       embed1.setImage(embedImages.awards);
       embed1.setColor(Colores.verde);
@@ -443,6 +463,10 @@ Y la más importante:
           });
         });
       })
+      break;
+
+    case (caso = "final_info"):
+      message.channel.send(finalInfoEmbed);
       break;
 
     case (caso = "edit"):
