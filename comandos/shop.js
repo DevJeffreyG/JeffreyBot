@@ -84,10 +84,13 @@ module.exports.run = async (client, message, args) => {
                 serverID: guild.id,
                 itemID: items[i].id
               }, (err, actualItemUse) => {
+                if(!actualItemUse) return null;
                 isSub = actualItemUse.isSub;
 
                 time = isSub ? prettyms(Number(actualItemUse.duration), {secondsDecimalDigits: 0 }) : null;
               });
+
+              if(!usesQuery) return message.channel.send(`[003] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas seguir usando correctamente el comando :)`)
 
               All.findOne(
                 {
@@ -189,10 +192,13 @@ module.exports.run = async (client, message, args) => {
                   serverID: guild.id,
                   itemID: items[i].id
                 }, (err, actualItemUse) => {
+                  if(!actualItemUse) return null;
                   isSub = actualItemUse.isSub;
 
                   time = isSub ? prettyms(Number(actualItemUse.duration), {secondsDecimalDigits: 0 }) : null;
                 });
+
+                if(!usesQuery) return message.channel.send(`[004] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas seguir usando correctamente el comando :)`)
 
                 All.findOne(
                   {
@@ -327,10 +333,13 @@ module.exports.run = async (client, message, args) => {
                                   serverID: guild.id,
                                   itemID: items[i].id
                                 }, (err, actualItemUse) => {
+                                  if(!actualItemUse) return null;
                                   isSub = actualItemUse.isSub;
 
                                   time = isSub ? prettyms(Number(actualItemUse.duration), {secondsDecimalDigits: 0 }) : null;
                                 });
+
+                                if(!usesQuery) return message.channel.send(`[005] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas seguir usando correctamente el comando :)`)
 
                                 All.findOne(
                                   {
