@@ -199,7 +199,10 @@ module.exports.run = async (client, message, args) => {
             let rCh = guild.channels.cache.find(x => x.id === aroles[i].channelID);
             let msg = await rCh.messages.fetch(`${aroles[i].messageID}`);
 
-            listEmbed.addField(`— @${role.name}`, `**—** Canal: ${rCh}.\n**—** [Mensaje](${msg.url}).\n**—** Emoji: ${aroles[i].emoji}.\n**—** ID: \`${aroles[i].id}\`.`);
+            if(!role || !rCh || !msg){
+            } else {
+              listEmbed.addField(`— @${role.name}`, `**—** Canal: ${rCh}.\n**—** [Mensaje](${msg.url}).\n**—** Emoji: ${aroles[i].emoji}.\n**—** ID: \`${aroles[i].id}\`.`);
+            }
 
             if (i + 1 === aroles.length) {
               return message.channel.send(listEmbed);
