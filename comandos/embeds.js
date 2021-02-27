@@ -319,7 +319,7 @@ let noEmbed = new Discord.MessageEmbed()
 
 **—** No se permiten cadenas de mensajes en el chat.
 
-**—** Debes cumplir las [Condiciones del servicio de Discord "TOS"](https://discord.com/terms), cualquier rotura a estas será tomada como una falta en contra de las nuestras **y dependiendo la gravedad se tomarán acciones contra estas**.
+**—** **Debes** cumplir las [Condiciones del servicio de Discord "TOS"](https://discord.com/terms).
 
 \`—\` Un dato curioso: ${client.user} te enviará un mensaje al recibir cualquier tipo de warn, siempre y cuando tengas los MDs activados.
 Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para conocer __tus__ warns.`);
