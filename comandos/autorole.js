@@ -1,19 +1,7 @@
 const Config = require("./../base.json");
-const Colores = require("./../colores.json");
-const Rainbow = require("./../rainbow.json");
-const Emojis = require("./../emojis.json");
+const Colores = require("./../resources/colores.json");
 const Discord = require("discord.js");
-const bot = new Discord.Client();
-const fs = require("fs");
-const ms = require("ms");
 const prefix = Config.prefix;
-const jeffreygID = Config.jeffreygID;
-const jgServer = Config.jgServer;
-const offtopicChannel = Config.offtopicChannel;
-const mainChannel = Config.mainChannel;
-const botsChannel = Config.botsChannel;
-const logChannel = Config.logChannel;
-const version = Config.version;
 
 /* ##### MONGOOSE ######## */
 
@@ -21,7 +9,7 @@ const AutoRole = require("../modelos/autorole.js");
 
 /* ##### MONGOOSE ######## */
 
-module.exports.run = async (bot, message, args) => {
+module.exports.run = async (client, message, args) => {
   if (!message.content.startsWith(prefix)) return;
 
   // Variables
@@ -39,7 +27,7 @@ module.exports.run = async (bot, message, args) => {
     .setTitle(`${prefix}role`)
     .setColor(Colores.nocolor)
     .setDescription(
-      `▸ El uso correcto es: ${prefix}autorole <add | remove> <@role o ID> <:emoji:> <#canal o ID> <[ID mensaje](https://support.discordapp.com/hc/es/articles/206346498--D%C3%B3nde-puedo-encontrar-mi-ID-de-usuario-servidor-mensaje)>`
+      `▸ El uso correcto es: ${prefix}autorole <add | remove | list> <@role o ID> <:emoji:> <#canal o ID> <[ID mensaje](https://support.discordapp.com/hc/es/articles/206346498--D%C3%B3nde-puedo-encontrar-mi-ID-de-usuario-servidor-mensaje)>`
     )
     .setFooter(`<> Obligatorio, () Opcional┊Alias: ${prefix}arole`);
   
@@ -48,14 +36,16 @@ module.exports.run = async (bot, message, args) => {
   action = args[0].toLowerCase();
   arRole = message.mentions.roles.first() || guild.roles.cache.get(args[1]);
   arEmoji = args[2];
-  arChannel = message.mentions.channels.first() || guild.channels.get(args[3]);
+  arChannel = message.mentions.channels.first() || guild.channels.cache.get(args[3]);
   arMessage = args[4];
 
   // Roles
-  let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
-  let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
-  let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
+  
+  // testing jeffrey bot verifier
+  if(client.user.id === Config.testingJBID){
+    staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
+  }
 
   if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
 
@@ -66,7 +56,6 @@ module.exports.run = async (bot, message, args) => {
     },
     (err, roles) => {
       if (err) throw err;
-
       if (action === "add") {
         let newID;
 
@@ -76,7 +65,7 @@ module.exports.run = async (bot, message, args) => {
         if (!arMessage) return message.channel.send(embed);
 
         AutoRole.countDocuments({}, function(err, c) {
-          let lastid = c + 6969;
+          let lastid = c + 1;
 
           AutoRole.findOne(
             {
@@ -88,7 +77,7 @@ module.exports.run = async (bot, message, args) => {
               if (!found) {
               } else {
                 while (lastid === found.id) {
-                  lastid = c + 6969 + 1;
+                  lastid = c + 1 + 1;
                   console.log("equal id");
                 }
               }
@@ -113,6 +102,24 @@ module.exports.run = async (bot, message, args) => {
                   }
 
                   if (!newautorole) {
+
+                    // reaccionando a ese mensaje
+                    if (custom === 1) {
+                      arChannel.messages.fetch(`${arMessage}`).then(msg => {
+                        msg.react(client.emojis.cache.find(x => x.id === arEmoji));
+                      })
+                      .catch(err => {
+                        return message.reply("no encontré ese mensaje en ese canal, revísa tus datos.")
+                      });
+                    } else {
+                      arChannel.messages.fetch(`${arMessage}`).then(msg => {
+                        msg.react(`${arEmoji}`);
+                      })
+                      .catch(err => {
+                        return message.reply("no encontré ese mensaje en ese canal, revísa tus datos.")
+                      });
+                    }
+
                     const newARole = new AutoRole({
                       serverID: guild.id,
                       roleID: arRole.id,
@@ -128,16 +135,6 @@ module.exports.run = async (bot, message, args) => {
                       .then(z => message.reply(`listo. **ID:** \`${lastid}\`.`))
                       .catch(e => console.log(e));
 
-                    // reaccionando a ese mensaje
-                    if (custom === 1) {
-                      arChannel.messages.fetch(`${arMessage}`).then(msg => {
-                        msg.react(bot.emojis.get(arEmoji));
-                      });
-                    } else {
-                      arChannel.messages.fetch(`${arMessage}`).then(msg => {
-                        msg.react(`${arEmoji}`);
-                      });
-                    }
                   } else {
                     return message.reply(
                       `ya existe un autorole con las mismas características.`
@@ -160,29 +157,55 @@ module.exports.run = async (bot, message, args) => {
             if (!autorole) {
               message.reply(`no encontré ningún role automático con ese ID.`);
             } else {
-              let ch = guild.channels.get(autorole.channelID);
+              let ch = guild.channels.cache.get(autorole.channelID);
 
               if (autorole.custom === 1) {
                 ch.messages.fetch(`${autorole.messageID}`).then(msg => {
-                  msg.reactions.forEach(reaction =>
-                    reaction.remove(bot.user.id)
+                  msg.reactions.cache.each(reaction =>
+                    reaction.remove(client.user.id)
                   );
                 });
               } else {
                 ch.messages.fetch(`${autorole.messageID}`).then(msg => {
-                  msg.reactions.forEach(reaction =>
-                    reaction.remove(bot.user.id)
+                  msg.reactions.cache.each(reaction =>
+                    reaction.remove(client.user.id)
                   );
                 });
               }
-              AutoRole.deleteOne({ serverID: guild.id, id: args[1] }).catch(
+              AutoRole.deleteOne({ serverID: guild.id, id: args[1] })
+              .then(() => {
+                message.react("✅");
+              })
+              .catch(
                 err => console.log(err)
               );
-
-              return message.reply(`listo.`);
             }
           }
         );
+      } else if (action === "list"){
+        AutoRole.find({
+          serverID: guild.id
+        }, async (err, aroles) => {
+          if(err) throw err;
+
+          if(!aroles || aroles.length === 0) return message.reply("Aún no hay autoroles en este servidor.");
+          
+          let listEmbed = new Discord.MessageEmbed()
+          .setDescription(`*** Lista de todos los AutoRoles en este servidor.**`)
+          .setColor(Colores.verde);
+          
+          for(let i = 0; i < aroles.length; i++){
+            let role = guild.roles.cache.find(x => x.id === aroles[i].roleID);
+            let rCh = guild.channels.cache.find(x => x.id === aroles[i].channelID);
+            let msg = await rCh.messages.fetch(`${aroles[i].messageID}`);
+
+            listEmbed.addField(`— @${role.name}`, `**—** Canal: ${rCh}.\n**—** [Mensaje](${msg.url}).\n**—** Emoji: ${aroles[i].emoji}.\n**—** ID: \`${aroles[i].id}\`.`);
+
+            if (i + 1 === aroles.length) {
+              return message.channel.send(listEmbed);
+            }
+          }
+        })
       }
     }
   );

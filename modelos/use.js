@@ -7,6 +7,9 @@ const useSchema = mongoose.Schema({
   action: String, // "delete" para quitar X cosa || "add" para agregar X cosa
   thing: String, // "jeffros" || "warns" || "role"
   thingID: String,
+  duration: String,
+  isSub: Boolean, // true para suscripciones
+  special: Object,
   id: Number
 
 })

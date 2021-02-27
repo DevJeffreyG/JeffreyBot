@@ -1,45 +1,31 @@
 const Config = require("./../base.json");
-const Colores = require("./../colores.json");
-const reglas = require("./../reglas.json");
-const Emojis = require("./../emojis.json");
+const Colores = require("./../resources/colores.json");
+const reglas = require("./../resources/reglas.json");
 const Discord = require("discord.js");
-const bot = new Discord.Client();
-const fs = require("fs");
 const ms = require("ms");
 const prefix = Config.prefix;
-const jeffreygID = Config.jeffreygID;
-const jgServer = Config.jgServer;
-const offtopicChannel = Config.offtopicChannel;
-const mainChannel = Config.mainChannel;
-const botsChannel = Config.botsChannel;
-const logChannel = Config.logChannel;
-const version = Config.version;
 
 /* ##### MONGOOSE ######## */
 
-const Jeffros = require("../modelos/jeffros.js");
-const Reporte = require("../modelos/reporte.js");
-const Exp = require("../modelos/exp.js");
 const SoftWarn = require("../modelos/softwarn.js");
-const Banned = require("../modelos/banned.js");
-const autorole = require("../modelos/autorole");
 
 /* ##### MONGOOSE ######## */
 
-module.exports.run = async (bot, message, args) => {
+module.exports.run = async (client, message, args) => {
 
   if(!message.content.startsWith(prefix))return;
 
   // Variables
   let author = message.author;
   const guild = message.guild;
-  let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
-  let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
-  let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
+
+  if(client.user.id === Config.testingJBID){
+    staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
+  }
   
-  if(message.member.roles.cache.find(x => x.id === jeffreyRole.id)){} else if(message.member.roles.cache.find(x => x.id === adminRole.id)){} else if(message.member.roles.cache.find(x => x.id === modRole.id)){} else {return;}
-    
+  if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
+
   let embed = new Discord.MessageEmbed()
   .setTitle(`Ayuda: ${prefix}softwarn`)
   .setColor(Colores.nocolor)
@@ -100,12 +86,25 @@ module.exports.run = async (bot, message, args) => {
 
             const yesFilter = (reaction, user) => reaction.emoji.id === "558084462232076312" && user.id === message.author.id;
             const noFilter = (reaction, user) => reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
+            const collectorFilter = (reaction, user) => reaction.emoji.id === "558084462232076312" || reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
 
             const yes = msg.createReactionCollector(yesFilter, { time: 60000 });
             const no = msg.createReactionCollector(noFilter, { time: 60000 });
+            const collector = msg.createReactionCollector(collectorFilter, { time: 60000 });
 
+            collector.on("end", r => {
+              if(r.size > 0 && (r.size === 1 && !r.first().me)) return;
+              return msg.edit(cancelEmbed).then(a => {
+                msg.reactions.removeAll().then(() => {
+                  msg.react("795090708478033950");
+                });
+                message.delete();
+                a.delete({timeout: ms("20s")});
+              });
+            });
+            
             yes.on("collect", r => {
-              
+              collector.stop();
                 if(!swarn){
                     const newSoft = new SoftWarn({
                         userID: member.id,
@@ -156,6 +155,7 @@ module.exports.run = async (bot, message, args) => {
 
             no.on("collect", r => {
               return msg.edit(cancelEmbed).then(a => {
+                collector.stop();
                 msg.reactions.removeAll();
                 message.delete();
                 a.delete({timeout: ms("20s")});

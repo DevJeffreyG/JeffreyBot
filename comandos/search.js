@@ -1,19 +1,10 @@
 const Config = require("./../base.json");
-const Colores = require("./../colores.json");
+const Colores = require("./../resources/colores.json");
 const Discord = require("discord.js");
-const bot = new Discord.Client();
-const fs = require("fs");
-const ms = require("ms");
 const prefix = Config.prefix;
-const jeffreygID = Config.jeffreygID;
-const offtopicChannel = Config.offtopicChannel;
-const mainChannel = Config.mainChannel;
-const botsChannel = Config.botsChannel;
-
-const ytdl = require("ytdl-core");
 const search = require("yt-search");
 
-module.exports.run = async (bot, message, args, active) => {
+module.exports.run = async (client, message, args, active) => {
   if (!message.content.startsWith(prefix)) return;
 
   let sadface = new Discord.MessageEmbed()
@@ -25,10 +16,6 @@ module.exports.run = async (bot, message, args, active) => {
   // Variables
   let author = message.author;
   const guild = message.guild;
-  let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
-  let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
-  let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
-  let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
 
   console.log(author.tag);
 
@@ -53,7 +40,7 @@ module.exports.run = async (bot, message, args, active) => {
     for (var i in videos) {
       resp += `**${parseInt(i) + 1} — [${
         videos[i].title
-      }](https://www.youtube.com${videos[i].url})** \`(${
+      }](${videos[i].url})** \`(${
         videos[i].timestamp
       })\`\n`;
     }
@@ -84,7 +71,7 @@ module.exports.run = async (bot, message, args, active) => {
 
         let commandFile = require("./play.js");
         commandFile.run(
-          bot,
+          client,
           message,
           [this.videos[parseInt(m.content) - 1].url],
           active

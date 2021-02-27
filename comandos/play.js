@@ -1,18 +1,11 @@
 const Config = require("./../base.json");
-const Colores = require("./../colores.json");
+const Colores = require("./../resources/colores.json");
 const Discord = require("discord.js");
-const bot = new Discord.Client();
-const fs = require("fs");
-const ms = require("ms");
 const prefix = Config.prefix;
-const jeffreygID = Config.jeffreygID;
-const offtopicChannel = Config.offtopicChannel;
-const mainChannel = Config.mainChannel;
-const botsChannel = Config.botsChannel;
 
 const ytdl = require("ytdl-core");
 
-module.exports.run = async (bot, message, args, active) => {
+module.exports.run = async (client, message, args, active) => {
   if (!message.content.startsWith(prefix)) return;
 
   let sadface = new Discord.MessageEmbed()
@@ -24,10 +17,6 @@ module.exports.run = async (bot, message, args, active) => {
   // Variables
   let author = message.author;
   const guild = message.guild;
-  let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
-  let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
-  let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
-  let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
 
   // embeds
 
@@ -62,20 +51,21 @@ module.exports.run = async (bot, message, args, active) => {
   } else if(pFetched){
     if (pFetched.dispatcher.paused) {
       let commandFile = require("./resume.js");
-      commandFile.run(bot, message, args, active);
+      commandFile.run(client, message, args, active);
     }
   }
 
   // validar info
   let validate = await ytdl.validateURL(args[0]);
 
-  if (!validate) {
+  if (!validate || !args[0]) {
     let commandFile = require("./search.js");
-    return commandFile.run(bot, message, args, active);
+    return commandFile.run(client, message, args, active);
   }
 
   //definir info
-  let info = await ytdl.getInfo(args[0]);
+  let videoID = await ytdl.getURLVideoID(args[0])
+  let info = await ytdl.getInfo(videoID);
   // fetch al active
   let data = active.get(message.guild.id) || {};
 
@@ -94,7 +84,7 @@ module.exports.run = async (bot, message, args, active) => {
   });
 
   // si no hay un dispatcher creado, funcion play()
-  if (!data.dispatcher) play(bot, active, data);
+  if (!data.dispatcher) play(client, active, data);
   else {
     // pero, si ya existe
     let addQueue = new Discord.MessageEmbed()
@@ -109,13 +99,13 @@ module.exports.run = async (bot, message, args, active) => {
 
   active.set(guild.id, data);
 
-  async function play(bot, active, data) {
+  async function play(client, active, data) {
     let reproduciendoEmbed = new Discord.MessageEmbed()
       .setDescription(
         `🎶 | **Reproduciendo: \`${data.queue[0].songTitle}\`, pedido por: ${data.queue[0].requester}**`
       )
       .setColor(Colores.verde);
-    bot.channels.cache.get(data.queue[0].announceChannel).send(reproduciendoEmbed);
+    client.channels.cache.get(data.queue[0].announceChannel).send(reproduciendoEmbed);
     // actualizar la info del dispatcher
     data.dispatcher = await data.connection.play(
       ytdl(data.queue[0].url, {
@@ -128,11 +118,11 @@ module.exports.run = async (bot, message, args, active) => {
     //crear un listener que se active cuando la canción termine
 
     data.dispatcher.once("finish", function() {
-      finish(bot, active, this);
+      finish(client, active, this);
     });
   }
 
-  function finish(bot, active, dispatcher) {
+  function finish(client, active, dispatcher) {
     let fetched = active.get(dispatcher.guildID);
 
     // eliminar primer item en cola
@@ -144,12 +134,12 @@ module.exports.run = async (bot, message, args, active) => {
         //update map con la nueva cola
         active.set(dispatcher.guildID, fetched);
         // play function para que empiece la cancion siguiente
-        play(bot, active, fetched);
+        play(client, active, fetched);
       } else {
         // si la cola está vacia
         //eliminar el objeto guild
         active.delete(dispatcher.guildID);
-        let vc = bot.guilds.cache.get(dispatcher.guildID).me.voice.channel;
+        let vc = client.guilds.cache.get(dispatcher.guildID).me.voice.channel;
 
         let finEmbed = new Discord.MessageEmbed()
           .setDescription(

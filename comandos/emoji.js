@@ -4,7 +4,6 @@ const Discord = require("discord.js");
 const prefix = Config.prefix;
 
 module.exports.run = async (client, message, args) => {
-
   if(!message.content.startsWith(prefix))return;
 
   // Variables
@@ -12,30 +11,31 @@ module.exports.run = async (client, message, args) => {
   let guild = message.guild;
 
   let embed = new Discord.MessageEmbed()
-  .setTitle(`Ayuda: ${prefix}role`)
+  .setTitle(`Ayuda: ${prefix}emoji`)
   .setColor(Colores.nocolor)
-  .setDescription(`▸ El uso correcto es: ${prefix}role <Nombre del Rol> (guildID)\n▸ Sacas el ID de un rol por su nombre.`)
-  .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}id`);
+  .setDescription(`▸ El uso correcto es: ${prefix}emoji <Nombre del emoji> (guildID) \n▸ Sacas el ID de un rol por su nombre.`)
+  .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}emote`);
     
-  let posibleGuild = args[args.length-1];
-  let roleName = isNaN(args[args.length-1]) ? args.join(" ").slice(0) : args.join(" ").replace(posibleGuild, "").trimEnd();
-
+  let emojiName = args[0];
+  
   if (!args[0]) return message.channel.send(embed);
   if(!isNaN(args[args.length-1])){
       notInThisGuild = true;
       guild = client.guilds.cache.find(x => x.id === args[args.length-1]);
   }
+
     if(!guild) return message.reply(`No encontré ese server "${notInThisGuild ? args[args.length-1] : message.guild.id}", verifica que hayas escrito bien la id y que me encuentre en ese server.`);
 
-    const role = guild.roles.cache.find(x => x.name === roleName);
-    if(!role) return message.reply(`No encontré ese rol, verifica que hayas escrito bien el nombre.`);
+    const emoji = guild.emojis.cache.find(x => x.name === emojiName);
+    if(!emoji) return message.reply(`No encontré ese emoji, verifica que hayas escrito bien el nombre.`);
 
     let finalEmbed = new Discord.MessageEmbed()
-    .setAuthor(`Role: ${roleName}`, guild.iconURL())
+    .setAuthor(`| Emote: ${emojiName}`, emoji.url)
     .setDescription(`
-**—** Nombre del Role: \`${roleName}\`.
-**—** ID: \`${role.id}\`.
-**—** Role del servidor: \`${guild.name}\`.
+**—** Nombre del Role: \`${emojiName}\`.
+**—** ID: \`${emoji.id}\`.
+**—** Es animado: \`${emoji.animated ? "Sí" : "No"}\`.
+**—** Emoji del server: \`${guild.name}\`.
     `)
     .setColor(Colores.verde);
 
@@ -44,6 +44,6 @@ module.exports.run = async (client, message, args) => {
 }
 
 module.exports.help = {
-    name: "role",
-    alias: "id"
+    name: "emoji",
+    alias: "emote"
 }

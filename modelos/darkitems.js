@@ -2,11 +2,10 @@ const mongoose = require("mongoose");
 
 const ditemsSchema = mongoose.Schema({
 
-  serverID: String,
   itemName: String,
   itemPrice: String,
   itemDescription: String,
-  replyMessage: String,
+  ignoreInterest: Boolean,
   id: Number
 
 })

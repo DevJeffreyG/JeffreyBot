@@ -1,13 +1,9 @@
 const Discord = require("discord.js");
 const Config = require(".././base.json");
-const bot = new Discord.Client({disableEveryone: true});
 let prefix = Config.prefix;
 const jeffreygID = Config.jeffreygID;
-const jgServer = Config.jgServer;
-const offtopicChannel = Config.offtopicChannel;
-const mainChannel = Config.mainChannel;
 
-module.exports.run = async (bot, message, args) => {
+module.exports.run = async (client, message, args) => {
 
     if(!message.content.startsWith(prefix))return;
 
@@ -26,9 +22,9 @@ module.exports.run = async (bot, message, args) => {
       let setgamembed2 = new Discord.MessageEmbed()
         .setColor(0x07DE47)
         .setAuthor(`| Actividad seleccionada sin problemas.`, Config.bienPng)
-        .setDescription(`${bot.user.username} tiene el juego por DEFAULT.`)
+        .setDescription(`${client.user.username} tiene el juego por DEFAULT.`)
         .setFooter(`Puesto por ${message.author.username}.`, message.author.avatarURL);
-        bot.user.setActivity(`${prefix}ayuda - ${guild.memberCount} usuarios🔎`);
+        client.user.setActivity(`${prefix}ayuda - ${guild.memberCount} usuarios🔎`);
         return message.channel.send(setgamembed2);
   }
 
@@ -40,14 +36,14 @@ module.exports.run = async (bot, message, args) => {
   let setgamembed = new Discord.MessageEmbed()
     .setColor(0x07DE47)
     .setAuthor(`| Actividad seleccionada sin problemas.`, Config.bienPng)
-    .setDescription(`${bot.user.username} ahora juega \`${argcustom}\`.`)
+    .setDescription(`${client.user.username} ahora juega \`${argcustom}\`.`)
     .setFooter(`Puesto por ${message.author.username}.`, message.author.avatarURL);
 
 
   if (!argcustom[0]) return message.channel.send(specifyembed);
 
-  bot.user.setActivity(argcustom);
-  console.log(`${bot.user.username} Ahora juega ${argcustom}.`);
+  client.user.setActivity(argcustom);
+  console.log(`${client.user.username} Ahora juega ${argcustom}.`);
   message.channel.send(setgamembed);
 }
 

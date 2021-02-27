@@ -1,42 +1,32 @@
 const Config = require("./../base.json");
-const Colores = require("./../colores.json");
-const Emojis = require("./../emojis.json");
+const Colores = require("./../resources/colores.json");
 const Discord = require("discord.js");
-const bot = new Discord.Client();
-const fs = require("fs");
 const ms = require("ms");
 const prefix = Config.prefix;
-const jeffreygID = Config.jeffreygID;
-const jgServer = Config.jgServer;
-const offtopicChannel = Config.offtopicChannel;
-const mainChannel = Config.mainChannel;
-const botsChannel = Config.botsChannel;
-const logChannel = Config.logChannel;
-const version = Config.version;
+const functions = require("./../resources/functions.js");
 
 /* ##### MONGOOSE ######## */
 
-const Jeffros = require("../modelos/jeffros.js");
-const Reporte = require("../modelos/reporte.js");
-const Exp = require("../modelos/exp.js");
-const Warn = require("../modelos/warn.js");
-const Banned = require("../modelos/banned.js");
+const GlobalData = require("../modelos/globalData.js");
 
 /* ##### MONGOOSE ######## */
 
-module.exports.run = async (bot, message, args) => {
+module.exports.run = async (client, message, args) => {
 
   if(!message.content.startsWith(prefix))return;
 
   // Variables
   let author = message.author;
   const guild = message.guild;
-  let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
-  let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
-  let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
   let muteRole = guild.roles.cache.find(x => x.id === Config.muteRole);
-  let logC = guild.channels.cache.find(x => x.id === logChannel);
+  let logC = guild.channels.cache.find(x => x.id === Config.logChannel);
+
+  if(client.user.id === Config.testingJBID){
+    staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
+    muteRole = guild.roles.cache.find(x => x.id === "544691532104728597");
+    logC = guild.channels.cache.find(x => x.id === "483108734604804107");
+  }
     
   let embed = new Discord.MessageEmbed()
   .setTitle(`Ayuda: ${prefix}mute`)
@@ -44,8 +34,8 @@ module.exports.run = async (bot, message, args) => {
   .setDescription(`▸ El uso correcto es: ${prefix}mute <@usuario> (tiempo: 1d, 5h, 10m, etc)`)
   .setFooter(`<> Obligatorio () Opcional`);
   
-  if(message.member.roles.cache.find(x => x.id === jeffreyRole.id)){} else if(message.member.roles.cache.find(x => x.id === adminRole.id)){} else if(message.member.roles.cache.find(x => x.id === modRole.id)){} else {return;}
-  
+  if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
+
   let mUser = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[0]));
 
   if(!args[0]) {
@@ -53,9 +43,12 @@ module.exports.run = async (bot, message, args) => {
   }
   
   if(!args[1]){ // Para siempre
-    if(mUser.roles.find(x => x.id === staffRole)){
+    if(mUser.roles.cache.find(x => x.id === staffRole.id)){
       return console.log(`Staff, no....`);
     }
+
+    // llamar la funcion
+    functions.LimitedTime(guild, muteRole.id, mUser, "permanent");
 
     let mEmbed = new Discord.MessageEmbed()
     .setAuthor(`| Mute`, author.displayAvatarURL())
@@ -68,9 +61,12 @@ module.exports.run = async (bot, message, args) => {
 
   } else { // Temp Mute
     let mTime = args[1]
-    if(mUser.roles.cache.find(x => x.id === staffRole)){
+    if(mUser.roles.cache.find(x => x.id === staffRole.id)){
       return console.log(`Staff`);
     }
+
+    // llamar la funcion
+    functions.LimitedTime(guild, muteRole.id, mUser, ms(mTime));
 
     let mEmbed = new Discord.MessageEmbed()
     .setAuthor(`| Temp mute`, author.displayAvatarURL())
@@ -81,17 +77,6 @@ module.exports.run = async (bot, message, args) => {
 
     mUser.roles.add(muteRole).then(x => message.react("✅"));
     logC.send(mEmbed);
-
-    setTimeout(function(){
-      mUser.roles.remove(muteRole);
-      let umEmbed = new Discord.MessageEmbed()
-      .setAuthor(`| Unmute`, author.displayAvatarURL())
-      .setDescription(`**—** Usuario desmuteado: ${mUser}
-**—** Tiempo de mute: ${mTime}`)
-      .setColor(Colores.verde);
-      
-      logC.send(umEmbed);
-    }, ms(`${mTime}`));
   }
 }
 

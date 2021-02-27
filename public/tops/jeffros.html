@@ -28,7 +28,7 @@
             <script type="text/javascript">
           
               const Discord = require("discord.js");
-              const bot = new Discord.Client();
+              const client = new Discord.Client();
               const mongoose = require("mongoose");
               mongoose.connect(`${process.env.MONGOCONNECT}`, {
                 useNewUrlParser: true
@@ -40,7 +40,7 @@
               Jeffros.find({}, (err, docs) => {
                 console.log(docs);
                 docs.forEach((doc) => {
-                  var usuario = bot.users.get(doc.userID);
+                  var usuario = client.users.get(doc.userID);
                   var tabla = document.getElementById("tabla");
                   
                   tabla.innerHTML = `<tr><<td>${usuario.tag}</td></</tr>`
@@ -57,7 +57,7 @@
                   document.write("<table><tr><th>Usuario</th><th>Jeffros</th></tr>");
                   // output data of each row
                   for(var i = 0; i < res.lenght; i++) {
-                    let guildo = bot.guilds.get("447797737216278528");
+                    let guildo = client.guilds.get("447797737216278528");
                     let member = guildo.members.get(res[i].userID) || "User left";
                     if(member === "User left"){
                       document.write("<tr><td>"+member+"</td><td>"+res[i].jeffros+"</td></tr>");
@@ -68,7 +68,7 @@
                   document.write("</table>");
                 });*/
               
-              bot.login(process.env.TOKEN);
+              client.login(process.env.TOKEN);
             </script>
         </div>
 

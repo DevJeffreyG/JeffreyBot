@@ -1,95 +1,116 @@
 const Config = require("./../base.json");
-const Colores = require("./../colores.json");
-const Emojis = require("./../emojis.json");
+const Colores = require("./../resources/colores.json");
+const Emojis = require("./../resources/emojis.json");
 const Discord = require("discord.js");
-const bot = new Discord.Client();
-const fs = require("fs");
-const ms = require("ms");
 const prefix = Config.prefix;
 const jeffreygID = Config.jeffreygID;
-const jgServer = Config.jgServer;
-const offtopicChannel = Config.offtopicChannel;
-const mainChannel = Config.mainChannel;
-const botsChannel = Config.botsChannel;
-const logChannel = Config.logChannel;
-const version = Config.version;
 
 /* ##### MONGOOSE ######## */
 
 const Jeffros = require("../modelos/jeffros.js");
-const Reporte = require("../modelos/reporte.js");
-const Exp = require("../modelos/exp.js");
-const Warn = require("../modelos/warn.js");
-const Banned = require("../modelos/banned.js");
-
+const Stats = require("../modelos/darkstats.js");
+const { stat } = require("fs");
 
 /* ##### MONGOOSE ######## */
 
-module.exports.run = async (bot, message, args) => {
+module.exports.run = async (client, message, args) => {
 
   if(!message.content.startsWith(prefix))return;
 
   // Variables
   let author = message.author;
   const guild = message.guild;
-  let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
-  let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
-  let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
-  let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
     
   let embed = new Discord.MessageEmbed()
   .setTitle(`Ayuda: ${prefix}addjeffros`)
   .setColor(Colores.nocolor)
-  .setDescription(`▸ El uso correcto es: ${prefix}addjeffros <@usuario> <N° ${Emojis.Jeffros}> \n▸ Explicación.`)
+  .setDescription(`▸ El uso correcto es: ${prefix}addjeffros <@usuario> <N° ${Emojis.Jeffros}/${Emojis.Dark}> (darkjeffros)\n▸ Añades Jeffros o DarkJeffros a un usuario.\n▸ Agregar DarkJeffros a un usuario sin estos, hará que no se genere un \`dsDJDuration\`.`)
   .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}add-jeffros`);
   
-  if(message.member.roles.cache.find(x => x.id === jeffreyRole.id)){}else {return;}
+  if(author.id != jeffreygID) return;
   
   let member = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[0]));
   let nJeffros = Math.floor(args[1]);
   
   if(!args[0]) return message.channel.send(embed);
   if(!args[1]) return message.channel.send(embed);
+  if(!args[2] || args[2] != "1") {
   
   
-  /* #### ADDING JEFFROS */
-  Jeffros.findOne({
-    userID: member.id
-  }, (err, jeffros) => {
-    if(err) throw err;
-    
-    if(!jeffros){
-      const newJeffros = new Jeffros({
-        userID: member.id,
-        serverID: guild.id,
-        jeffros: nJeffros
-      })
+    /* #### ADDING JEFFROS */
+    Jeffros.findOne({
+      serverID: guild.id,
+      userID: member.id
+    }, (err, jeffros) => {
+      if(err) throw err;
       
-      newJeffros.save()
-      .catch(e => console.log(e));
-      
-      let cEmbed = new Discord.MessageEmbed()
-      .setAuthor(`| Jeffros para tí!`, 'https://cdn.discordapp.com/emojis/496015995077525571.png')
-      .setDescription(`
-**—** ${member.user.tag}
-**—** ${Emojis.Jeffros}${nJeffros}`)
-      .setColor(Colores.verde);
-      message.channel.send(cEmbed);
+      if(!jeffros){
+        const newJeffros = new Jeffros({
+          userID: member.id,
+          serverID: guild.id,
+          jeffros: nJeffros
+        })
+        
+        newJeffros.save()
+        .catch(e => console.log(e));
+        
+        let cEmbed = new Discord.MessageEmbed()
+        .setAuthor(`| Jeffros para tí!`, 'https://cdn.discordapp.com/emojis/496015995077525571.png')
+        .setDescription(`
+  **—** ${member.user.tag}
+  **—** ${Emojis.Jeffros}${nJeffros}`)
+        .setColor(Colores.verde);
+        message.channel.send(cEmbed);
+      } else {
+        jeffros.jeffros = jeffros.jeffros + nJeffros;
+        
+        jeffros.save()
+        .catch(e => console.log(e));
+        
+        let cEmbed = new Discord.MessageEmbed()
+        .setAuthor(`| Jeffros para tí!`, 'https://cdn.discordapp.com/emojis/496015995077525571.png')
+        .setDescription(`
+  **—** ${member.user.tag}
+  **—** ${Emojis.Jeffros}${jeffros.jeffros}`)
+        .setColor(Colores.verde);
+        message.channel.send(cEmbed);
+      }
+    })
+  } else {
+    Stats.findOne({
+      userID: member.id
+    }, (err, stats) => {
+      if(err) throw err;
+
+      if(!stats){
+        const newStats = new Stats({
+            userID: member.id,
+            djeffros: nJeffros,
+            accuracy: Number(Number(Math.random() * 15).toFixed(1)),
+            items: []
+        });
+        newStats.save();
+
+        let cEmbed = new Discord.MessageEmbed()
+        .setAuthor(`| DarkJeffros para tí!`, 'https://cdn.discordapp.com/emojis/496015995077525571.png')
+        .setDescription(`
+    **—** ${member.user.tag}
+    **—** ${Emojis.Dark}${nJeffros}`)
+        .setColor(Colores.verde);
+        message.channel.send(cEmbed)
     } else {
-      jeffros.jeffros = jeffros.jeffros + nJeffros;
-      
-      jeffros.save()
-      .catch(e => console.log(e));
-      
-      let cEmbed = new Discord.MessageEmbed()
-      .setAuthor(`| Jeffros para tí!`, 'https://cdn.discordapp.com/emojis/496015995077525571.png')
-      .setDescription(`
-**—** ${member.user.tag}
-**—** ${Emojis.Jeffros}${jeffros.jeffros}`)
-      .setColor(Colores.verde);
-      message.channel.send(cEmbed);
+        stats.djeffros += nJeffros;
+        stats.save();
+        let cEmbed = new Discord.MessageEmbed()
+        .setAuthor(`| DarkJeffros para tí!`, 'https://cdn.discordapp.com/emojis/496015995077525571.png')
+        .setDescription(`
+    **—** ${member.user.tag}
+    **—** ${Emojis.Dark}${stats.djeffros}`)
+        .setColor(Colores.verde);
+        message.channel.send(cEmbed)
     }
-  })
+    })
+  }
 
 }
 
