@@ -13,7 +13,6 @@ const Items = require("../modelos/items.js");
 const Purchased = require("../modelos/purchased.js");
 const All = require("../modelos/allpurchases.js");
 const Use = require("../modelos/use.js");
-const Ignore = require("../modelos/ignore.js")
 const GlobalData = require("../modelos/globalData.js");
 
 /* ##### MONGOOSE ######## */

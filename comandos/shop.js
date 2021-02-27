@@ -14,7 +14,6 @@ const Items = require("../modelos/items.js");
 const Purchased = require("../modelos/purchased.js");
 const All = require("../modelos/allpurchases.js");
 const Use = require("../modelos/use.js");
-const Ignore = require("../modelos/ignore.js")
 
 /* ##### MONGOOSE ######## */
 
@@ -1072,24 +1071,7 @@ module.exports.run = async (client, message, args) => {
           }
         }
       );
-    } else 
-      if(action === "ignore"){
-        if(!args[1]) return message.reply("¿cuál es la id del item que se va a evitar subir el precio por compra?");
-        let darkshopBool = true;
-        if(!args[2]) darkshopBool = false;
-        const newIgnore = new Ignore({
-          itemID: args[1],
-          isDarkShop: darkshopBool
-        });
-        
-        newIgnore.save();
-        
-        message.react("✅").then(() => {
-          if(darkshopBool){
-            message.react("739625446961840129")
-          }
-        })
-      }
+    }
   }
 };
 

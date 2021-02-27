@@ -20,7 +20,6 @@ const Items = require("../modelos/darkitems.js");
 const DarkUse = require("../modelos/darkUse.js");
 const GlobalData = require("../modelos/globalData.js");
 const All = require("../modelos/allpurchases.js");
-const Ignore = require("../modelos/ignore.js")
 
 /* ##### MONGOOSE ######## */
 
