@@ -103,6 +103,8 @@ module.exports.run = async (client, message, args) => {
 <@&460242238555815946> • ¡Verdaderos suscriptores que tienen un canal para recibir notificaciones de Videos, Directos y Tweets de Jeffrey!
 ➟ Consíguelo en <#473627930396852226>.
 
+<@&595022419123634228> • Alguien que está boosteando el servidor, aparecerá en la lista de miembros por encima de todos menos del Staff.
+
 <@&461259197368107020> • Alguien cercano a Jeffrey / Amigos IRL.
 
 <@&529275759521431553> • Usuario que ha ascendido en el servidor, tendrá colores exclusivos y acceso anticipado a las notificaciones de Jeffrey, etc.
