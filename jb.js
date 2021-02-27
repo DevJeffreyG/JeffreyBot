@@ -1248,7 +1248,7 @@ client.on("message", message => {
   }
 });
 
-client.on("messageUpdate", message => {
+client.on("messageUpdate", (oldmessage, message) => {
   let channel = message.channel;
   let author = message.author;
 
