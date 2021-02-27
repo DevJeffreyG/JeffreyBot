@@ -66,7 +66,6 @@ const findLvls5 = async function(guild){
       let member = guild.members.cache.find(x => x.id === exp.userID);
 
       if(exp.level >= 5){
-        console.log(member, exp)
         if(member && !member.roles.cache.find(x => x.id === role.id)) await member.roles.add(role);
       }
     }
