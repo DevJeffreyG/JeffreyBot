@@ -8,6 +8,7 @@ const changes = Config.changes;
 module.exports.run = async (client, message, args) => {
 
   if(!message.content.startsWith(prefix))return;
+  let author = message.author;
   let viewExtension = "ꜝ";
 
   let added = "<:Plus:792966881350123540>";
