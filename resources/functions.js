@@ -614,15 +614,30 @@ const intervalGlobalDatas = async function(justBoost){
         // enviar mensaje random de evento
         let newInflation = `**${dark.info.inflation}%**`;
         let rndmEventSUBE = [
-          `Estamos de suerte, se han devaluado los Jeffros, la inflación ha subido al ${newInflation}`
+          `Estamos de suerte, se han devaluado los Jeffros, la inflación ha subido al ${newInflation}`,
+          `Los Jeffros se levantaron con pie izquierdo, la inflación sube a ${newInflation}`,
+          `Nuestro momento ha llegado, los Jeffros se han devaluado y la inflación sube a ${newInflation}`,
+          `Hora de sacar nuestra artillería, han hecho que los Jeffros se devalúen, la inflacion sube a ${newInflation}`,
+          `Esto no pasa muy seguido ¿verdad? hoy estamos de suerte, la inflación sube a ${newInflation}`,
+          `Bastante espectacular, ¿no? la inflación ha subido a ${newInflation}`
         ];
 
         let rndmEventBAJA = [
-          `Parece que algo en las oficinas ha hecho que la inflación baje al ${newInflation}`
+          `Parece que algo en las oficinas ha hecho que la inflación baje al ${newInflation}`,
+          `Mira que hay que tener mala suerte, se han regalado miles de Jeffros por todo el planeta y ha hecho que la inflación baje a ${newInflation}`,
+          `Al otro lado de la moneda se le dio por fortalecerse, la inflación baja a ${newInflation}`,
+          `Han intenado raidearnos, tuvimos que tomar decisiones, la inflación baja a ${newInflation}`,
+          `La inflación baja a ${newInflation}. Hay que ver el lado positivo, con suerte nos va mejor para la próxima`,
+          `Hay días buenos, y otras veces, sólo hay días. La inflación baja a ${newInflation}`
         ];
 
         let rndmEventIGUAL = [
-          `Por poco... nos han intentado robar en una de nuestras sucursales, la inflación se queda en ${newInflation}`
+          `Por poco... nos han intentado robar en una de nuestras sucursales, la inflación se queda en ${newInflation}`,
+          `Parece que casi nos involucran en una mala jugada, la inflación queda en ${newInflation}`,
+          `Casi que no lo logramos, pero la inflación queda en ${newInflation}`,
+          `Menos mal, la cosa se puso difícil pero logramos hacer que la inflación quedase en ${newInflation}`,
+          `¿Qué tal? Casi que nos hacen la jugada, pero somos mejores que ellos. La inflación se queda en ${newInflation}`,
+          `Esto es increíble, logramos quedarnos en ${newInflation}, buen trabajo, equipo.`
         ];
 
         let rSube = rndmEventSUBE[Math.floor(Math.random() * rndmEventSUBE.length)];
