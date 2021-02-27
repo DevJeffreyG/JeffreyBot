@@ -19,7 +19,7 @@ module.exports.run = async (client, message, args) => {
   let author = message.author;
   const guild = message.guild;
   let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
-  let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
+  let adminRole = guild.roles.cache.find(x => x.id === "460583861928329217");
   let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
 
