@@ -81,18 +81,17 @@ module.exports.run = async (client, message, args) => {
  
             const yesFilter = (reaction, user) => reaction.emoji.id === "558084462232076312" && user.id === message.author.id;
             const noFilter = (reaction, user) => reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
-            const collectorFilter = (reaction, user) => reaction.emoji.id === "558084461686947891" || reaction.emoji.id === "558084462232076312" && user.id === message.author.id;
+            const collectorFilter = (reaction, user) => (reaction.emoji.id === "558084461686947891" || reaction.emoji.id === "558084462232076312") && user.id === message.author.id;
 
             const yes = msg.createReactionCollector(yesFilter, { time: 60000 });
             const no = msg.createReactionCollector(noFilter, { time: 60000 });
             const collector = msg.createReactionCollector(collectorFilter, { time: 60000 });
 
             yes.on("collect", r => {
-
               // quitar el softwarn
               SoftWarn.findOne({
                 userID: wUser.id
-              }, (err, swarns) => {
+              }, async (err, swarns) => {
                 if (err) throw err;
 
                 for (let i = 0; i < swarns.warns.length; i++){
@@ -104,39 +103,44 @@ module.exports.run = async (client, message, args) => {
                     )
 
                     let sEmbed = new Discord.MessageEmbed()
-                  .setAuthor(`| ¿Me perd0nas?`, "https://cdn.discordapp.com/emojis/537004318667177996.png")
-                  .setDescription(`**—** Miembro: ${wUser}
-            **—** SOFTWarn actuales: **${swarns.warns.length}**.
-            **—** Mod: ${author}`)
-                  .setColor(Colores.verde);
+                    .setAuthor(`| ¿Me perd0nas?`, "https://cdn.discordapp.com/emojis/537004318667177996.png")
+                    .setDescription(`**—** Miembro: ${wUser}
+              **—** SOFTWarn actuales: **${swarns.warns.length}**.
+              **—** Mod: ${author}`)
+                    .setColor(Colores.verde);
 
-                  logC.send(sEmbed);
-                  collector.stop();
-                  
-                  let sunwarnedEmbed = new Discord.MessageEmbed()
-                      .setAuthor(`| Pardon`, "https://cdn.discordapp.com/emojis/537004318667177996.png")
-                      .setDescription(`
-            **—** Has sido perdonado. =)
-            **—** SOFTWarns actuales: **${swarns.warns.length}**.`)
-                      .setColor(Colores.verde)
-                      .setFooter(`Tienes suerte.`, 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png');
-                      
-                      wUser.send(sunwarnedEmbed)
-                      .catch(e => {
-                        console.log('Tiene los MDs desactivados.')
-                      });
+                    msg.edit(sEmbed);
+                    msg.reactions.removeAll()
+                    
+                    let sunwarnedEmbed = new Discord.MessageEmbed()
+                    .setAuthor(`| Pardon`, "https://cdn.discordapp.com/emojis/537004318667177996.png")
+                    .setDescription(`
+          **—** Has sido perdonado. =)
+          **—** SOFTWarns actuales: **${swarns.warns.length}**.`)
+                    .setColor(Colores.verde)
+                    .setFooter(`Tienes suerte.`, 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png');
+                    
+                    return wUser.send(sunwarnedEmbed)
+                    .catch(e => {
+                      console.log('Tiene los MDs desactivados.')
+                    });
                   }
                 }
+
+                console.log("AHI MUERE LOLXD")
               })
             })
 
             no.on("collect", r => {
-              return msg.edit(cancelEmbed).then(a => {
+              return msg.edit(cancelEmbed).then(async a => {
                 msg.reactions.removeAll();
                 message.delete();
-                collector.stop();
                 a.delete({timeout: ms("20s")});
               });
+            })
+
+            collector.on("collect", r => {
+              collector.stop();
             })
 
             collector.on('end', collected => {
@@ -172,14 +176,13 @@ module.exports.run = async (client, message, args) => {
 
       const yesFilter = (reaction, user) => reaction.emoji.id === "558084462232076312" && user.id === message.author.id;
       const noFilter = (reaction, user) => reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
-      const collectorFilter = (reaction, user) => reaction.emoji.id === "558084461686947891" || reaction.emoji.id === "558084462232076312" && user.id === message.author.id;
+      const collectorFilter = (reaction, user) => reaction.emoji.id === ("558084461686947891" || reaction.emoji.id === "558084462232076312") && user.id === message.author.id;
 
       const yes = msg.createReactionCollector(yesFilter, { time: 60000 });
       const no = msg.createReactionCollector(noFilter, { time: 60000 });
       const collector = msg.createReactionCollector(collectorFilter, { time: 60000 });
 
       yes.on("collect", r => {
-        collector.stop();
         Warn.findOne({
           userID: wUser.id
         }, (err, warns) => {
@@ -222,18 +225,24 @@ module.exports.run = async (client, message, args) => {
 
       no.on("collect", r => {
         return msg.edit(cancelEmbed).then(a => {
-          collector.stop();
           msg.reactions.removeAll();
           message.delete();
           a.delete({timeout: ms("20s")});
         });
       })
 
+      collector.on("collect", r => {
+        collector.stop();
+      })
+
       collector.on('end', collected => {
         if(collected.size > 0 && (collected.size === 1 && !collected.first().me)) return;
         
         return msg.edit(cancelEmbed).then(a => {
-          msg.reactions.removeAll();
+          msg.reactions.removeAll().then(() => {
+            msg.react("795090708478033950");
+          });
+
           message.delete();
           a.delete({timeout: ms("20s")});
         });

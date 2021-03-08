@@ -168,7 +168,7 @@ module.exports.run = async (client, message, args) => {
  
             const yesFilter = (reaction, user) => reaction.emoji.id === "558084462232076312" && user.id === message.author.id;
             const noFilter = (reaction, user) => reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
-            const collectorFilter = (reaction, user) => reaction.emoji.id === "558084461686947891" || reaction.emoji.id === "558084462232076312" && user.id === message.author.id;
+            const collectorFilter = (reaction, user) => (reaction.emoji.id === "558084461686947891" || reaction.emoji.id === "558084462232076312") && user.id === message.author.id;
 
             const yes = msg.createReactionCollector(yesFilter, { time: 60000 });
             const no = msg.createReactionCollector(noFilter, { time: 60000 });
@@ -188,10 +188,13 @@ module.exports.run = async (client, message, args) => {
             no.on("collect", r => {
               return msg.edit(cancelEmbed).then(a => {
                 msg.reactions.removeAll();
-                collector.stop();
                 message.delete();
                 a.delete({timeout: ms("20s")});
               });
+            })
+
+            collector.on("collect", r => {
+              collector.stop();
             })
 
             collector.on('end', collected => {

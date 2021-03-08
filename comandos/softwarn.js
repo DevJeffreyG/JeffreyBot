@@ -86,11 +86,15 @@ module.exports.run = async (client, message, args) => {
 
             const yesFilter = (reaction, user) => reaction.emoji.id === "558084462232076312" && user.id === message.author.id;
             const noFilter = (reaction, user) => reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
-            const collectorFilter = (reaction, user) => reaction.emoji.id === "558084462232076312" || reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
+            const collectorFilter = (reaction, user) => (reaction.emoji.id === "558084462232076312" || reaction.emoji.id === "558084461686947891") && user.id === message.author.id;
 
             const yes = msg.createReactionCollector(yesFilter, { time: 60000 });
             const no = msg.createReactionCollector(noFilter, { time: 60000 });
             const collector = msg.createReactionCollector(collectorFilter, { time: 60000 });
+
+            collector.on("collect", r => {
+              collector.stop();
+            });
 
             collector.on("end", r => {
               if(r.size > 0 && (r.size === 1 && !r.first().me)) return;
@@ -104,7 +108,6 @@ module.exports.run = async (client, message, args) => {
             });
             
             yes.on("collect", r => {
-              collector.stop();
                 if(!swarn){
                     const newSoft = new SoftWarn({
                         userID: member.id,
@@ -147,7 +150,7 @@ module.exports.run = async (client, message, args) => {
 **—** Canal: **${message.channel}**.
 **—** Por infringir la regla: **${rule}**.`)
           .setColor(Colores.rojo);
-
+                
               return msg.edit(warned).then(() => {
                 msg.reactions.removeAll();
               });
@@ -155,7 +158,6 @@ module.exports.run = async (client, message, args) => {
 
             no.on("collect", r => {
               return msg.edit(cancelEmbed).then(a => {
-                collector.stop();
                 msg.reactions.removeAll();
                 message.delete();
                 a.delete({timeout: ms("20s")});

@@ -192,13 +192,12 @@ Stats.findOne({
                                                         // filtros
                                                         const backwardsFilter = (reaction, user) => reaction.emoji.name === "⏪" && user.id === message.author.id;
                                                         const forwardsFilter = (reaction, user) => reaction.emoji.name === "⏩" && user.id === message.author.id;
-                                                        const collectorFilterMainPage = (reaction, user) => reaction.emoji.name === "⏩" || reaction.emoji.name === "⏪" && user.id === message.author.id;
+                                                        const collectorFilterMainPage = (reaction, user) => (reaction.emoji.name === "⏩" || reaction.emoji.name === "⏪") && user.id === message.author.id;
                                 
                                                         // collectors
                                                         const backwards = msg.createReactionCollector(backwardsFilter, {time: 60000});
                                                         const forwards = msg.createReactionCollector(forwardsFilter,{time: 60000});
                                                         const collectorMainPage = msg.createReactionCollector(collectorFilterMainPage,{time: 60000});
-
 
                                                         collectorMainPage.on("end", r => {
                                                             return msg.reactions.removeAll()

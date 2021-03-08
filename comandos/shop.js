@@ -724,11 +724,15 @@ module.exports.run = async (client, message, args) => {
 
                                   const yesFilter = (reaction, user) => reaction.emoji.id === "558084462232076312" && user.id === message.author.id;
                                   const noFilter = (reaction, user) =>  reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
-                                  const collectorFilter = (reaction, user) => ['558084462232076312', '558084461686947891'].includes(reaction.emoji.id) && user.id === message.author.id;
+                                  const collectorFilter = (reaction, user) => (reaction.emoji.id === "558084462232076312" || reaction.emoji.id === "558084461686947891") && user.id === message.author.id;
 
                                   const yes = msg.createReactionCollector(yesFilter, { time: ms("30s") });
                                   const no = msg.createReactionCollector(noFilter, { time: ms("30s") });
                                   const collector = msg.createReactionCollector(collectorFilter, { time: ms("30s") });
+
+                                  collector.on("collect", r => {
+                                    collector.stop();
+                                  })
 
                                   collector.on("end", (r) => {
                                     if(r.size > 0 && (r.size === 1 && !r.first().me)) return;
@@ -763,14 +767,12 @@ module.exports.run = async (client, message, args) => {
                                       .setColor(Colores.verde);
 
                                     return msg.edit(useEmbed).then(() => {
-                                      collector.stop();
                                       msg.reactions.removeAll();
                                     });
                                   });
 
                                   no.on("collect", r => {
                                     return msg.edit(cancelEmbed).then(a => {
-                                      collector.stop();
                                       msg.reactions.removeAll();
                                       message.delete();
                                       a.delete({timeout: ms("20s")});

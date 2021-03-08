@@ -1049,12 +1049,16 @@ client.on("messageReactionAdd", (reaction, user) => {
 
       const yesFilter = (reaction, userr) => reaction.emoji.id === "558084462232076312" && userr.id === user.id;
       const noFilter = (reaction, userr) => reaction.emoji.id === "558084461686947891" && userr.id === user.id;
-      const collectorFilter = (reaction, userr) => reaction.emoji.id === "558084461686947891" || reaction.emoji.id === "558084462232076312" && userr.id === user.id;
+      const collectorFilter = (reaction, userr) => (reaction.emoji.id === "558084461686947891" || reaction.emoji.id === "558084462232076312") && userr.id === user.id;
 
       const yes = msg.createReactionCollector(yesFilter, { time: 60000 });
       const no = msg.createReactionCollector(noFilter, { time: 60000 });
       const collectorAwards = msg.createReactionCollector(collectorFilter, { time: 60000 });
 
+      collectorAwards.on("collect", r => {
+        collectorAwards.stop();
+      });
+      
       collectorAwards.on("end", r => {
         if(r.size > 0 && (r.size === 1 && !r.first().me)) return;
         if (msg.reactions.length > 0) {
@@ -1074,7 +1078,6 @@ client.on("messageReactionAdd", (reaction, user) => {
       });
 
       yes.on("collect", r => {
-        collectorAwards.stop();
         msg.reactions.removeAll();
         Jeffros.findOne(
           {
@@ -1155,7 +1158,6 @@ client.on("messageReactionAdd", (reaction, user) => {
       });
 
       no.on("collect", r => {
-        collectorAwards.stop();
         message.channel.messages.fetch(message.id).then(m => {
           let react = m.reactions.cache.get(reaction.emoji.id);
 

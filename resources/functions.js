@@ -1007,7 +1007,7 @@ const vaultMode = function(hint) {
 
                               const backwardsFilter = (reaction, user) => reaction.emoji.name === "⏪" && user.id === message.author.id;
                               const forwardsFilter = (reaction, user) => reaction.emoji.name === "⏩" && user.id === message.author.id;
-                              const collectorFilter = (reaction, user) => reaction.emoji.name === "⏪" || reaction.emoji.name === "⏩" && user.id === message.author.id;
+                              const collectorFilter = (reaction, user) => (reaction.emoji.name === "⏪" || reaction.emoji.name === "⏩") && user.id === message.author.id;
 
                               const backwards = msg.createReactionCollector(backwardsFilter, { time: 60000 });
                               const forwards = msg.createReactionCollector(forwardsFilter, { time: 60000 });

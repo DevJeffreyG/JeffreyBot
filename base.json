@@ -25,8 +25,7 @@
         },
         {
             "type": "updated",
-            "desc": "Se han arreglado algunos bugs en el sistema de Awards, y música",
-            "extended": "— Si no se reaccionaba, a veces no se eliminaba la reacción del usuario."
+            "desc": "Se han arreglado algunos bugs en el sistema de Awards, música y moderación"
         },
         {
             "type": "removed",
