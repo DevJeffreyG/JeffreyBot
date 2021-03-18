@@ -13,6 +13,10 @@ const ms = require("ms");
 var Chance = require("chance");
 var chance = new Chance();
 
+const moment = require('moment-timezone');
+require('moment/locale/es');
+moment().locale("es").tz("America/Bogota").format();
+
 const prefix = Config.prefix;
 const jeffreygID = Config.jeffreygID;
 const jgServer = Config.jgServer;
@@ -308,6 +312,34 @@ client.on("message", async message => {
   if (message.channel.type == "dm") return;
 
   await functions.loadBoosts(); // verificar si existen BOOSTS.
+
+  // joder
+  let ahora = moment();
+  let hour = ahora.hour();
+
+  if(hour >= 22 || hour < 7){
+    console.log("ESTAMOS EN EL BUCLE");
+
+    if(message.attachments.array().length > 0 || message.content.includes("https://cdn.discordapp.com/attachments/") || message.content.includes("https://media.discordapp.net/attachments/")){
+      let m = message.guild.members.cache.find(x => x.id === author.id);
+
+      if(!m.roles.cache.find(x => x.id === Config.staffRole)){ // no es staff
+        let secretChannelWhatWHAT = guild.id === "447797737216278528" ? guild.channels.cache.find(x => x.id === "821929080709578792") : guild.channels.cache.find(x => x.id === "537095712102416384");
+        let att = message.attachments.array().length > 0 ? message.attachments.array() : message.content;
+        console.log(att);
+
+        let embeddedAtt = message.attachments.array().length > 0 ? false : true;
+
+        if(!embeddedAtt){
+          await secretChannelWhatWHAT.send({content: `Enviado por **${m.user.tag}** a las __${moment(ahora).format('HH[:]mm')}__ en ${message.channel}.`, files: att});
+        } else {
+          await secretChannelWhatWHAT.send({content: `Enviado por **${m.user.tag}** a las __${moment(ahora).format('HH[:]mm')}__ en ${message.channel}.\n\n${message.content}`});
+        }
+        return message.delete();
+
+      }
+    }
+  }
 
   if (message.content.startsWith(prefix)) {
     // Si el mensaje empieza por el prefijo, entonces...

@@ -1,6 +1,6 @@
 {
 	"name": "jeffrey-bot",
-	"version": "1.6.01",
+	"version": "1.6.02",
 	"description": "El bot del servidor oficial de JeffreyG, remasterizado.",
 	"main": "jb.js",
 	"scripts": {
@@ -20,6 +20,7 @@
 		"fs": "0.0.2",
 		"google": "^2.1.0",
 		"is-hexcolor": "^1.0.0",
+		"moment-timezone": "^0.5.33",
 		"mongoose": "^5.11.13",
 		"ms": "^2.1.3",
 		"node-opus": "^0.3.3",
