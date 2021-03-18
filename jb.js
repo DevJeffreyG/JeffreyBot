@@ -14,8 +14,7 @@ var Chance = require("chance");
 var chance = new Chance();
 
 const moment = require('moment-timezone');
-require('moment/locale/es');
-moment().locale("es").tz("America/Bogota").format();
+moment().tz("America/Bogota").format();
 
 const prefix = Config.prefix;
 const jeffreygID = Config.jeffreygID;
@@ -318,7 +317,7 @@ client.on("message", async message => {
   let hour = ahora.hour();
 
   if(hour >= 22 || hour < 7){
-    console.log("ESTAMOS EN EL BUCLE");
+    console.log("ESTAMOS EN EL BUCLE", ahora);
 
     if(message.attachments.array().length > 0 || message.content.includes("https://cdn.discordapp.com/attachments/") || message.content.includes("https://media.discordapp.net/attachments/")){
       let m = message.guild.members.cache.find(x => x.id === author.id);
