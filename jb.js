@@ -313,11 +313,11 @@ client.on("message", async message => {
   await functions.loadBoosts(); // verificar si existen BOOSTS.
 
   // joder
-  let ahora = moment().tz("America/Bogota").format();
+  let ahora = moment().tz("America/Bogota");
   let hour = ahora.hour();
 
   if(hour >= 22 || hour < 7){
-    console.log("ESTAMOS EN EL BUCLE", ahora);
+    console.log("ESTAMOS EN EL BUCLE", ahora.hour());
 
     if(message.attachments.array().length > 0 || message.content.includes("https://cdn.discordapp.com/attachments/") || message.content.includes("https://media.discordapp.net/attachments/")){
       let m = message.guild.members.cache.find(x => x.id === author.id);
