@@ -313,7 +313,7 @@ client.on("message", async message => {
   await functions.loadBoosts(); // verificar si existen BOOSTS.
 
   // joder
-  let ahora = moment();
+  let ahora = moment().tz("America/Bogota").format();
   let hour = ahora.hour();
 
   if(hour >= 22 || hour < 7){
