@@ -6,6 +6,7 @@ const prefix = Config.prefix;
 /* ##### MONGOOSE ######## */
 
 const AutoRole = require("../modelos/autorole.js");
+const ToggleGroup = require("../modelos/toggleGroup.js");
 
 /* ##### MONGOOSE ######## */
 
@@ -27,7 +28,7 @@ module.exports.run = async (client, message, args) => {
     .setTitle(`${prefix}role`)
     .setColor(Colores.nocolor)
     .setDescription(
-      `▸ El uso correcto es: ${prefix}autorole <add | remove | list> <@role o ID> <:emoji:> <#canal o ID> <[ID mensaje](https://support.discordapp.com/hc/es/articles/206346498--D%C3%B3nde-puedo-encontrar-mi-ID-de-usuario-servidor-mensaje)>`
+      `▸ El uso correcto es: ${prefix}autorole <add | remove | toggle | list> <@role o ID> <:emoji:> <#canal o ID> <[ID mensaje](https://support.discordapp.com/hc/es/articles/206346498--D%C3%B3nde-puedo-encontrar-mi-ID-de-usuario-servidor-mensaje)>`
     )
     .setFooter(`<> Obligatorio, () Opcional┊Alias: ${prefix}arole`);
   
@@ -50,11 +51,9 @@ module.exports.run = async (client, message, args) => {
   if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
 
   // AutoRoles
-  AutoRole.findOne(
-    {
+  AutoRole.findOne({
       serverID: guild.id
-    },
-    (err, roles) => {
+  }, async (err, roles) => {
       if (err) throw err;
       if (action === "add") {
         let newID;
@@ -67,11 +66,9 @@ module.exports.run = async (client, message, args) => {
         AutoRole.countDocuments({}, function(err, c) {
           let lastid = c + 1;
 
-          AutoRole.findOne(
-            {
+          AutoRole.findOne({
               id: lastid
-            },
-            (err, found) => {
+          }, (err, found) => {
               if (err) throw err;
               console.log(lastid);
               if (!found) {
@@ -101,7 +98,7 @@ module.exports.run = async (client, message, args) => {
                     custom = 1;
                   }
 
-                  if (!newautorole) {
+                  if (!newautorole) { // si no existe ninguno con esto, hacerlo.
 
                     // reaccionando a ese mensaje
                     if (custom === 1) {
@@ -136,12 +133,9 @@ module.exports.run = async (client, message, args) => {
                       .catch(e => console.log(e));
 
                   } else {
-                    return message.reply(
-                      `ya existe un autorole con las mismas características.`
-                    );
+                    return message.reply(`ya existe un autorole con las mismas características.`);
                   }
-                }
-              );
+                });
             }
           );
         });
@@ -209,6 +203,94 @@ module.exports.run = async (client, message, args) => {
             }
           }
         })
+      } else if(action === "toggle"){
+        // /a toggle idAUTOROLE togglegroup
+        embed.setDescription(`▸ ${prefix}autorole toggle <\`autorole id\`> <\`grupo de toggle\`>`)
+        if(!args[1] || isNaN(args[1])){
+            embed.setAuthor(`| Error: autorole id`, Config.errorPng)
+            return message.channel.send(embed)
+        } else if(!args[2] || isNaN(args[2])) {
+            embed.setAuthor(`| Error: grupo de toggle`, Config.errorPng)
+            return message.channel.send(embed)
+        }
+
+        if(args[1].toLowerCase() === "edit"){
+          embed.setDescription(`▸ ${prefix}autorole edit <\`grupo de toggle\`> <\`nuevo nombre\`>`)
+          if(!args[2] || isNaN(args[2])) {
+              embed.setAuthor(`| Error: grupo de toggle`, Config.errorPng)
+              return message.channel.send(embed)
+          } else if (!args[3]) {
+              embed.setAuthor(`| Error: nuevo nombre`, Config.errorPng)
+              return message.channel.send(embed)
+          }
+
+          let grouptoedit = Number(args[2]);
+          let newname = args.join(" ").slice(args[0].length + args[1].length + args[2].length + 3);
+
+          let groupQuery = await ToggleGroup.findOne({guild_id: message.guild.id, "info.group_id": grouptoedit})
+
+          if(groupQuery){
+              let changedGroup = new Discord.MessageEmbed()
+              .setAuthor(`| Listo`, Config.bienPng)
+              .setColor(Colores.verde)
+              .setDescription(`▸ Se ha cambiado el nombre del grupo \`${grouptoedit}\`.
+              ▸ \`${groupQuery.info.group_name}\` ➜ \`${newname}\`.`);
+
+              groupQuery.info.group_name = newname;
+              groupQuery.markModified("info");
+
+              await groupQuery.save();
+              return message.channel.send(changedGroup);
+          } else {
+              embed.setAuthor(`| Error: grupo de toggle`, Config.errorPng)
+              return message.channel.send(embed)
+          }
+      }
+
+      let autoroleID = args[1];
+      let toggleGroup = args[2];
+
+      let toggleGroupQuery = await ToggleGroup.findOne({guild_id: message.guild.id, "info.group_id": toggleGroup});
+      let autoroleQuery = await AutoRole.findOne({serverID: message.guild.id, id: autoroleID});
+      
+      if(!autoroleQuery) {
+          embed.setAuthor(`| Error: autorole id`, Config.errorPng)
+          return message.channel.send(embed)
+      }
+      
+      if(!toggleGroupQuery && toggleGroup != 0){
+          const newGroup = new ToggleGroup({
+              guild_id: message.guild.id,
+              info: {
+                  group_name: `Grupo ${toggleGroup}`,
+                  group_id: toggleGroup
+              }
+          });
+
+          await newGroup.save();
+          toggleGroupQuery = await ToggleGroup.findOne({guild_id: message.guild.id, "info.group_id": toggleGroup});
+      }
+
+      let changedGroup = new Discord.MessageEmbed();
+
+      if(toggleGroup != 0){
+        changedGroup.setAuthor(`| Listo`, Config.bienPng)
+        changedGroup.setColor(Colores.verde)
+        changedGroup.setDescription(`▸ Se ha agregado el autorole con id \`${autoroleID}\` al grupo ${toggleGroup}, "${toggleGroupQuery.info.group_name}".
+        ▸ Cambia el nombre del grupo con: \`${prefix}autorole toggle edit <grupo id>\`.`);
+      } else {
+        let oldGroup = await ToggleGroup.findOne({guild_id: message.guild.id, "info.group_id": autoroleQuery.toggleGroup});
+        changedGroup.setAuthor(`| Listo`, Config.bienPng)
+        changedGroup.setColor(Colores.rojo)
+        changedGroup.setDescription(`▸ Se ha eliminado el autorole con id \`${autoroleID}\` del grupo ${autoroleQuery.toggleGroup}, "${oldGroup.info.group_name}".
+        ▸ Cambia el nombre del grupo con: \`${prefix}autorole toggle edit <grupo id>\`.`);
+      }
+      
+
+      autoroleQuery.toggleGroup = toggleGroup;
+      await autoroleQuery.save();
+
+      message.channel.send(changedGroup);
       }
     }
   );

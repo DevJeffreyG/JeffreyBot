@@ -102,6 +102,7 @@ mongoose.connect(`${process.env.MONGOCONNECT}`, {
 const Jeffros = require("./modelos/jeffros.js");
 const Exp = require("./modelos/exp.js");
 const AutoRole = require("./modelos/autorole.js");
+const ToggleGroup = require("./modelos/toggleGroup.js");
 const Toggle = require("./modelos/toggle.js");
 
 const GlobalData = require("./modelos/globalData.js");
@@ -885,7 +886,7 @@ client.on("raw", async event => {
   client.emit(events[event.t], reaction, user);
 });
 
-client.on("messageReactionAdd", (reaction, user) => {
+client.on("messageReactionAdd", async (reaction, user) => {
   if (user.bot) return; // Si es un bot
 
   let guild = reaction.message.guild;
@@ -901,13 +902,56 @@ client.on("messageReactionAdd", (reaction, user) => {
       messageID: message.id,
       emoji: reaction.emoji.id || reaction.emoji.name
     },
-    (err, msg) => {
+    async (err, msg) => {
       if (err) throw err;
 
       if (!msg) {
         return;
       } else {
-        if (msg.custom === 1) {
+        let isCorrect = (msg.custom === 1 && reaction.emoji.id === msg.emoji) || (msg.custom === 0 && reaction.emoji.name === msg.emoji) ? true : false;
+
+        if(isCorrect){
+          if(msg.toggleGroup != 0){ // es toggleable D:
+            let sameGroup = await AutoRole.find(
+              {
+                toggleGroup: msg.toggleGroup
+              }
+            );
+            let roleToAdd = guild.roles.cache.find(x => x.id === msg.roleID);
+            
+            if(sameGroup.length > 1){
+                // hay varios toggles.
+                // revisar si ha reaccionado con algún otro autorole con ese toggle.
+  
+                oldReaction:
+                for (let k = 0; k < sameGroup.length; k++) {
+                    const toggledAutorole = sameGroup[k];
+  
+                    let shouldNotHave = guild.roles.cache.find(x => x.id === toggledAutorole.roleID);
+                    let oldReaction = toggledAutorole.emoji;
+  
+                    if(member.roles.cache.find(x => x.id === shouldNotHave.id)) {
+                        await member.roles.remove(shouldNotHave); // eliminar el role
+                        let oldC = guild.channels.cache.find(x => x.id === toggledAutorole.channelID);
+                        let oldM = await oldC.messages.fetch(toggledAutorole.messageID);
+  
+                        let reactions = toggledAutorole.custom === 1 ? await oldM.reactions.cache.find(x => x.emoji.id === oldReaction) : await oldM.reactions.cache.find(x => x.emoji.name === oldReaction);
+                        await reactions.users.remove(user.id);
+  
+                        break oldReaction;
+                    }
+                }
+  
+                await member.roles.add(roleToAdd);
+            } else {
+                await member.roles.add(roleToAdd);
+            }
+          } else {
+              let role = guild.roles.cache.find(x => x.id === msg.roleID);
+              await member.roles.add(role);
+          }
+        }
+        /* if (msg.custom === 1) {
           if (reaction.emoji.id === msg.emoji) {
             role = guild.roles.cache.find(x => x.id === msg.roleID);
             member.roles.add(role);
@@ -921,7 +965,7 @@ client.on("messageReactionAdd", (reaction, user) => {
           } else {
             return;
           }
-        }
+        } */
       }
     }
   );

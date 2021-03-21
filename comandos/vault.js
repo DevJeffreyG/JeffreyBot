@@ -338,17 +338,17 @@ module.exports.run = async (client, message, args) => {
                 },
                 (err, won) => {
                   if (!won) {
-                    functions.vaultMode(i);
+                    functions.vaultMode(i, author);
                   } else if (i === vaults) {
-                    functions.vaultMode(randomHint);
+                    functions.vaultMode(randomHint, author);
                   }
                 }
               );
             }
           } else if(wins.length === vaults){ // si los tiene todos
-            functions.vaultMode(1);
+            functions.vaultMode(1, author);
           } else {
-            functions.vaultMode(randomHint);
+            functions.vaultMode(randomHint, author);
           }
         });
       }

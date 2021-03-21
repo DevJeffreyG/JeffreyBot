@@ -7,6 +7,7 @@ const rolesSchema = mongoose.Schema({
     channelID: String,
     messageID: String,
     custom: Number, // Si es un emoji personalizado,
+    toggleGroup: {type: String, default: "0"},
     id: Number
 })
 

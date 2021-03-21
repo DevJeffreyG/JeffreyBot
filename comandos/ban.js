@@ -34,7 +34,9 @@ module.exports.run = async (client, message, args) => {
     let bUser = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[0]));
     let bRazon = args.join(" ").slice(args[0].length + 1);
   
-    if(!args[1]) {bRazon = "Sin especificar."}
+    if(!args[1]) bRazon = "Sin especificar.";
+
+    if(!bUser) return message.reply(`no encontré a ese usuario.`);
 
     // Si el usuario a banear tiene el permiso de banear también
     if(bUser.roles.cache.has(staffRole)) return console.log("NO.");
