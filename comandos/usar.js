@@ -377,12 +377,12 @@ module.exports.run = async (client, message, args) => {
 
                         let ignoreIf = { // ignorar los itmes con id X si la id del item Y
                           "3": [
-                            "6"
+                            "5"
                           ],
                           "4": [
-                            "6"
+                            "5"
                           ],
-                          "6": [
+                          "5": [
                             "3",
                             "4"
                           ]
