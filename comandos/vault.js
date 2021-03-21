@@ -338,7 +338,7 @@ module.exports.run = async (client, message, args) => {
                 },
                 (err, won) => {
                   if (!won) {
-                    functions.vaultMode(i, author);
+                    functions.vaultMode(i, author, message);
                   } else if (i === vaults) {
                     functions.vaultMode(randomHint, author);
                   }
@@ -346,9 +346,9 @@ module.exports.run = async (client, message, args) => {
               );
             }
           } else if(wins.length === vaults){ // si los tiene todos
-            functions.vaultMode(1, author);
+            functions.vaultMode(1, author, message);
           } else {
-            functions.vaultMode(randomHint, author);
+            functions.vaultMode(randomHint, author, message);
           }
         });
       }

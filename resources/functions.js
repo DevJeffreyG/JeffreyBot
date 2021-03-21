@@ -960,7 +960,7 @@ const Subscription = function(guild, roleID, victimMember, intervalTime, jeffros
     }
 }
 
-const vaultMode = function(hint, author) {
+const vaultMode = function(hint, author, message) {
       Vault.find({}, function(err, pistas) {
         if (pistas.length === 0) {
           return message.reply(`No deberías estar aquí.`);
