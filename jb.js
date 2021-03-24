@@ -581,22 +581,22 @@ client.on("message", async message => {
         (err, jeffros) => {
           if (err) throw err;
 
-          setTimeout(() => {
-            coolded.delete(author.id)
-            workCooldown.delete(message.author.id);
-          }, ms("10m"));
-
           if (workCooldown.has(message.author.id)){
             let timer = coolded.get(author.id)
             let left = prettyms((ms("10m")) - (new Date().getTime() - timer), {secondsDecimalDigits: 0 });
             return message.reply(
               `Usa este comando en ${left}, ${randomCumplidos}`
             );
-          }
+          } else {
+            workCooldown.add(message.author.id);
+            let timeMS = new Date().getTime();
+            coolded.set(author.id, timeMS);
 
-          workCooldown.add(message.author.id);
-          let timeMS = new Date().getTime();
-          coolded.set(author.id, timeMS);
+            setTimeout(() => {
+              coolded.delete(author.id)
+              workCooldown.delete(message.author.id);
+            }, ms("10m"));
+          }
 
           if (!jeffros) {
             const newJeffros = new Jeffros({
