@@ -305,6 +305,7 @@ client.on("messageDelete", async(message) => {
     });
 
     if(!q) return;
+    if(message.channel.id != Config.mainChannel) return;
 
     let j = await Jeffros.findOne({
       serverID: message.guild.id,
