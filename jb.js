@@ -295,6 +295,37 @@ client.on("ready", async () => {
   }, ms("2m"));
 });
 
+client.on("messageDelete", async(message) => {
+  let author = message.author;
+
+  if (jeffrosExpCooldown.has(author.id)) {
+    let q = await GlobalData.findOne({
+      "info.type": "lastExpJeffros",
+      "info.userID": author.id
+    });
+
+    if(!q) return;
+
+    let j = await Jeffros.findOne({
+      serverID: message.guild.id,
+      userID: author.id
+    });
+
+    let e = await Exp.findOne({
+      serverID: message.guild.id,
+      userID: message.author.id
+    });
+
+    j.jeffros -= q.info.jeffros;
+    e.exp -= q.info.exp;
+
+    await j.save();
+    await e.save();
+
+    console.log(j.jeffros, e.exp, author.username);
+  }
+})
+
 //main
 client.on("message", async message => {
   let messageArray = message.content.split(" ");
@@ -742,7 +773,7 @@ client.on("message", async message => {
             userID: author.id,
             serverID: message.guild.id
           },
-          (err, uExp) => {
+          async (err, uExp) => {
             if (err) throw err;
 
             if (jeffrosExpCooldown.has(author.id))
@@ -840,6 +871,29 @@ client.on("message", async message => {
             }
 
             jeffrosExpCooldown.add(author.id);
+
+            let gdQuery = await GlobalData.findOne({
+              "info.type": "lastExpJeffros",
+              "info.userID": author.id
+            });
+
+            if(!gdQuery){
+              const newLEJ = GlobalData({
+                info: {
+                  type: "lastExpJeffros",
+                  userID: author.id,
+                  exp: expToAdd,
+                  jeffros: jeffrosToAdd
+                }
+              });
+
+              await newLEJ.save();
+            } else {
+              gdQuery.info.exp = expToAdd;
+              gdQuery.info.jeffros = jeffrosToAdd;
+
+              await gdQuery.save()
+            }
 
             setTimeout(() => {
               console.log(author.id + " ya puede ganar exp y jeffros")
@@ -1278,6 +1332,7 @@ client.on("message", async msg => {
     if (msg.author.bot) return;
     if (msg.author.id === jeffreygID) return;
     if (msg.content.startsWith(prefix)) return;
+    if (msg.channel.id === Config.offtopicChannel) return;
     if (msg.member.roles.cache.find(x => x.id === staffRole.id)) {
       return logC
         .send(`Un **STAFF** ha mencionado a Jeffrey en ${msg.channel}.`)
