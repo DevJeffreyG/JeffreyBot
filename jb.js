@@ -316,8 +316,16 @@ client.on("messageDelete", async(message) => {
       userID: message.author.id
     });
 
+    let nxtLvl = 10 * ((e.level-1) ** 2) + 50 * (e.level-1) + 100; // fórmula de MEE6.
+
     j.jeffros -= q.info.jeffros;
-    e.exp -= q.info.exp;
+    
+
+    if (e.exp - q.info.exp >= nxtLvl) console.log("Subió de nivel");
+    else {
+      e.exp -= q.info.exp;
+    }
+
 
     await j.save();
     await e.save();
