@@ -6,30 +6,15 @@
     [
         {
             "type": "added",
-            "desc": "Los nuevos usuarios no obtendrán el role de miembros hasta que acepten las reglas",
-            "extended": "— Una nueva opción de discord permite que los miembros nuevos deban aceptar las reglas antes de poder hablar en el server."
-        },
-        {
-            "type": "added",
             "desc": "Se ha habilitado la `{ PREFIX }darkshop` para los usuarios **nivel 5**"
-        },
-        {
-            "type": "updated",
-            "desc": "Se ha cambiado la fórmula para subir de nivel",
-            "extended": "— De ❛ nivel * 300 + (nivel * 5) ❜ ➟ a ➟ ❛ 10 * (nivel^2) + 50 * nivel + 100 ❜ (fórmula de MEE6)\n— Se ha hecho este cambio porque era igual de fácil llegar al nivel 2 como llegar al nivel 200.\n— Los usuarios actuales no perderán nivel, sin embargo tendrán que conseguir la nueva cantidad de EXP para poder subir de nivel.\n— La EXP máxima ganada por mensaje por minuto se ha subido de 5 a 30."
-        },
-        {
-            "type": "updated",
-            "desc": "Se ha actualizado los comandos `{ PREFIX }stats`, `{ PREFIX }botinfo`, `{ PREFIX }serverinfo`",
-            "extended": "— '{ PREFIX }stats' o '{ PREFIX }perfil'.\n— '{ PREFIX }botinfo' ➟ a ➟ '{ PREFIX }changelog' o '{ PREFIX }changes'."
         },
         {
             "type": "updated",
             "desc": "Se han parcheado algunos bugs en el sistema de EXP y Jeffros"
         },
         {
-            "type": "removed",
-            "desc": "Se han eliminado los comandos `{ PREFIX }traducir`, `{ PREFIX }perfil`"
+            "type": "updated",
+            "desc": "Se han arreglado algunos bugs en la Darkshop y en el sistema de Awards"
         }
     ],
     "bienPng": "http://i.imgur.com/M6hqbcc.png",

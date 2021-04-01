@@ -1154,7 +1154,7 @@ client.on("messageReactionAdd", (reaction, user) => {
 
   if(disableAwards === true && user.id != jeffreygID) {
     message.channel.messages.fetch(message.id).then(m => {
-      let react = m.reactions.get(
+      let react = m.reactions.cache.get(
         reaction.emoji.name + ":" + reaction.emoji.id
       );
 
@@ -1201,7 +1201,7 @@ client.on("messageReactionAdd", (reaction, user) => {
         if(r.size > 0 && (r.size === 1 && !r.first().me)) return;
         if (msg.reactions.length > 0) {
           message.channel.messages.fetch(message.id).then(m => {
-            let react = m.reactions.get(
+            let react = m.reactions.cache.get(
               reaction.emoji.name + ":" + reaction.emoji.id
             );
 
