@@ -478,7 +478,8 @@ Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para c
               `**—** Reacciona de acuerdo a los roles que quieras tener.
 
 🔔 ➟ <@&${Config.teamcampanita}>
-🤖 ➟ <@&${Config.jbnews}>`
+🤖 ➟ <@&${Config.jbnews}>
+💀 ➟ <@&${Config.dsnews}>`
             )
             .setColor(Colores.nocolor);
           m.edit(nembed);

@@ -545,7 +545,8 @@ Stats.findOne({
                             .setAuthor(`| Error`, Config.darkLogoPng)
                             .setColor(Colores.negro)
                             .setDescription(`▸ El uso correcto es: /darkshop withdraw <DarkJeffros>
-                            **—** Se cambiarán los DarkJeffros especificados, por Jeffros.`)
+                            **—** Se cambiarán los DarkJeffros especificados, por Jeffros.
+                            **—** Si la suma es mayor o igual a **${Emojis.Jeffros}15000**, tendrás que pagar un interés del **20%**.`)
 
                             if(!args[1]) return message.channel.send(instructions2);
 
@@ -557,6 +558,15 @@ Stats.findOne({
 
                             totalJeffros = Math.floor(darkjeffro * changing);
 
+                            // impuesto
+                            let taxes = "";
+                            let moreThan15000 = false;
+
+                            if(totalJeffros >= 15000){
+                                moreThan15000 = true;
+                                taxes = `**—** Has pagado ${Emojis.Jeffros}${totalJeffros*0.2} en impuestos.`
+                            }
+
                             Stats.findOne({
                                 userID: author.id
                             }, (err, stats) => {
@@ -566,7 +576,8 @@ Stats.findOne({
                                 let embed = new Discord.MessageEmbed()
                                 .setAuthor(`| Éxito`, Config.darkLogoPng)
                                 .setDescription(`**—** Se han restado **${Emojis.Dark}${changing}** de tu cuenta.
-                                **—** Se añadieron **${Emojis.Jeffros}${totalJeffros}**.`)
+                                **—** Se añadieron **${Emojis.Jeffros}${totalJeffros}**.
+                                ${taxes}`)
                                 .setColor(Colores.negro);
 
                                 let nope = new Discord.MessageEmbed()
@@ -583,7 +594,9 @@ Stats.findOne({
                                     // verificar si tiene o no jeffros suficientes.
                                     if(changing > stats.djeffros) return message.channel.send(nope);
 
-                                    jeffros.jeffros += totalJeffros;
+                                    let finalJeffros = moreThan15000 ? totalJeffros-(totalJeffros*0.2) : totalJeffros;
+
+                                    jeffros.jeffros += finalJeffros;
                                     stats.djeffros -= changing;
 
                                     jeffros.save();
@@ -615,6 +628,7 @@ Stats.findOne({
                                         .setAuthor(`| Cálculo`, Config.darkLogoPng)
                                         .setDescription(`${stonks} **— ${dark.info.inflation}%**.
         **— ${Emojis.Dark}? = ${Emojis.Jeffros}?**.`)
+                                        .setFooter(`Esto no tiene en cuenta el interés por si es mayor a 15K.`)
                                         .setColor(Colores.negro);
 
                                         return message.channel.send(stonksEmbed);
@@ -624,6 +638,7 @@ Stats.findOne({
                                         .setAuthor(`| Cálculo`, Config.darkLogoPng)
                                         .setDescription(`${stonks} **— ${dark.info.inflation}%**.
         **— ${Emojis.Dark}${stats.djeffros} = ${Emojis.Jeffros}${Math.floor(stats.djeffros*200*dark.info.inflation)}**.`)
+                                        .setFooter(`Esto no tiene en cuenta el interés por si es mayor a 15K.`)
                                         .setColor(Colores.negro);
 
                                         message.channel.send(stonksEmbed);
@@ -633,6 +648,7 @@ Stats.findOne({
                                         .setAuthor(`| Cálculo`, Config.darkLogoPng)
                                         .setDescription(`${stonks} **— ${dark.info.inflation}%**.
         **— ${Emojis.Dark}${args[1]} = ${Emojis.Jeffros}${Math.floor(args[1]*200*dark.info.inflation)}**.`)
+                                        .setFooter(`Esto no tiene en cuenta el interés por si es mayor a 15K.`)
                                         .setColor(Colores.negro);
 
                                         message.channel.send(stonksEmbed);
@@ -641,6 +657,7 @@ Stats.findOne({
                                     .setAuthor(`| Cálculo`, Config.darkLogoPng)
                                     .setDescription(`${stonks} **— ${dark.info.inflation}%**.
     **— ${Emojis.Dark}${stats.djeffros} = ${Emojis.Jeffros}${Math.floor(stats.djeffros*200*dark.info.inflation)}**.`)
+                                    .setFooter(`Esto no tiene en cuenta el interés por si es mayor a 15K.`)
                                     .setColor(Colores.negro);
 
                                     message.channel.send(stonksEmbed);
