@@ -210,22 +210,10 @@ module.exports.run = async (client, message, args) => {
                     let precio = items[i].itemPrice;
 
                     if (all) {
-                      precio =
-                        Math.floor(items[i].itemPrice) + all.quantity * interest;
+                      precio = Math.floor(items[i].itemPrice) + all.quantity * interest;
 
-                      if (
-                        message.member.roles.cache.find(
-                          x => x.id === Config.lvl20
-                        )
-                      ) {
-                        precio = `~~${precio}~~ ${Math.floor(
-                          items[i].itemPrice
-                        ) +
-                          all.quantity * interest -
-                          ((Math.floor(items[i].itemPrice) +
-                            all.quantity * interest) /
-                            100) *
-                            15}`;
+                      if (message.member.roles.cache.find(x => x.id === Config.lvl20)) {
+                        precio = `~~${precio}~~ ${Math.floor(items[i].itemPrice) + all.quantity * interest - ((Math.floor(items[i].itemPrice) + all.quantity * interest) / 100) * 15}`;
                       }
                     } else {
                       if (

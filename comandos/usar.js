@@ -302,7 +302,8 @@ module.exports.run = async (client, message, args) => {
                       const newAll = new All({
                         userID: author.id,
                         itemID: args[0],
-                        quantity: 1
+                        quantity: 1,
+                        isDarkShop: false
                       })
                       
                       newAll.save();
