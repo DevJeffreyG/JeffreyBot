@@ -214,7 +214,7 @@ const intervalGlobalDatas = async function(justBoost){
           // eliminar global data
           boosts[i].remove();
 
-          // buscar el set y eliminarlo
+          /* // buscar el set y eliminarlo
           if(specialData.specialObjective === "exp"){ // si el boost es de exp
             new Promise((resolve, reject) => {
               boostedExp.delete(member.id)
@@ -230,9 +230,9 @@ const intervalGlobalDatas = async function(justBoost){
               boostedGeneral.delete(member.id)
               resolve(`${member.user.username} eliminado de boostedGeneral`);
             })
-          }
+          } */
         } else {
-          // es un usuario con un boost comprado, entonces...
+          /* // es un usuario con un boost comprado, entonces...
           
           if(specialData.specialObjective === "exp"){ // si el boost es de exp
             new Promise((resolve, reject) => {
@@ -253,7 +253,7 @@ const intervalGlobalDatas = async function(justBoost){
             new Promise((resolve, reject) => {
               reject("No es ninguno de los boosts predeterminados.")
             })
-          }
+          } */
         }
       }
     }
