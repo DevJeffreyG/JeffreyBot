@@ -348,6 +348,7 @@ module.exports.run = async (client, message, args) => {
           } else if(wins.length === vaults){ // si los tiene todos
             functions.vaultMode(1, author, message);
           } else {
+            if(randomHint < 1) randomHint = 1;
             functions.vaultMode(randomHint, author, message);
           }
         });

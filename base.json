@@ -14,11 +14,11 @@
         },
         {
             "type": "updated",
-            "desc": "Se han arreglado algunos bugs en las tiendas y en el sistema de Awards"
+            "desc": "Se han arreglado algunos bugs en las tiendas, el sistema de Awards y el vault"
         },
         {
             "type": "updated",
-            "desc": "Se están trabajando algunos bugs con el sistema de boosts."
+            "desc": "Se están trabajando algunos bugs con el sistema de boosts"
         }
     ],
     "bienPng": "http://i.imgur.com/M6hqbcc.png",
