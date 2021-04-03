@@ -569,10 +569,12 @@ client.on("message", async message => {
         // buscar la globaldata
         let query = await GlobalData.find({
           "info.type": "roleDuration",
+          "info.userID": author.id,
           "info.special.type": "boostMultiplier"
         }, (err, boosts) => {
           if(err) throw err;
 
+          boostLoop:
           for(let i = 0; i < boosts.length; i++){
             let specialData = boosts[i].info.special;
 
@@ -581,9 +583,11 @@ client.on("message", async message => {
             } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
               money = money * Number(boosts[i].info.special.specialValue);
               tmoney = `**${Emojis.Jeffros}${money}📈**`;
+              break boostLoop;
             } else if(specialData.specialObjective === "all"){ // si el boost es de todo
               money = money * Number(boosts[i].info.special.specialValue);
               tmoney = `**${Emojis.Jeffros}${money}📈**`;
+              break boostLoop;
             }
           }
         });

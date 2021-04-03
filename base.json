@@ -15,6 +15,10 @@
         {
             "type": "updated",
             "desc": "Se han arreglado algunos bugs en las tiendas y en el sistema de Awards"
+        },
+        {
+            "type": "updated",
+            "desc": "Se están trabajando algunos bugs con el sistema de boosts."
         }
     ],
     "bienPng": "http://i.imgur.com/M6hqbcc.png",
