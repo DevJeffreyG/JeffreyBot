@@ -690,10 +690,12 @@ client.on("message", async message => {
         // buscar la globaldata
         let query = await GlobalData.find({
           "info.type": "roleDuration",
+          "info.userID": author.id,
           "info.special.type": "boostMultiplier"
         }, (err, boosts) => {
           if(err) throw err;
 
+          boost2:
           for(let i = 0; i < boosts.length; i++){
             let specialData = boosts[i].info.special;
 
@@ -701,8 +703,10 @@ client.on("message", async message => {
               
             } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
               jeffrosToAdd = jeffrosToAdd * Number(boosts[i].info.special.specialValue);
+              break boost2;
             } else if(specialData.specialObjective === "all"){ // si el boost es de todo
               jeffrosToAdd = jeffrosToAdd * Number(boosts[i].info.special.specialValue);
+              break boost2;
             }
           }
         });
@@ -763,19 +767,23 @@ client.on("message", async message => {
           // buscar la globaldata
           let query2 = await GlobalData.find({
             "info.type": "roleDuration",
+            "info.userID": author.id,
             "info.special.type": "boostMultiplier"
           }, (err, boosts) => {
             if(err) throw err;
 
+            boost3:
             for(let i = 0; i < boosts.length; i++){
               let specialData = boosts[i].info.special;
 
               if(specialData.specialObjective === "exp"){ // si el boost es de exp  
                 expToAdd = expToAdd * Number(boosts[i].info.special.specialValue);
+                break boost3;
               } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
 
               } else if(specialData.specialObjective === "all"){ // si el boost es de todo
                 expToAdd = expToAdd * Number(boosts[i].info.special.specialValue);
+                break boost3;
               }
             }
           });
