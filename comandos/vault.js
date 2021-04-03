@@ -329,7 +329,7 @@ module.exports.run = async (client, message, args) => {
       (err, wins) => {
         Vault.countDocuments({}, (err, vaults) => {
           let randomHint = Math.floor(Math.random() * vaults)
-          if (wins.length === vaults - 1) {
+          if (wins.length === vaults - 1) { // le falta un solo codigo para ganar
             for (let i = 1; i <= vaults; i++) {
               WinVault.findOne(
                 {
