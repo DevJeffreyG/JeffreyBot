@@ -566,28 +566,23 @@ client.on("message", async message => {
       }
 
       // buscar la globaldata
-      let query = await GlobalData.find({
+      let query = await GlobalData.findOne({
         "info.type": "roleDuration",
         "info.userID": author.id,
         "info.special.type": "boostMultiplier"
       }, (err, boosts) => {
         if(err) throw err;
 
-        boostLoop:
-        for(let i = 0; i < boosts.length; i++){
-          let specialData = boosts[i].info.special;
+        let specialData = boosts.info.special;
 
-          if(specialData.specialObjective === "exp"){ // si el boost es de exp
-            
-          } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
-            money = money * Number(boosts[i].info.special.specialValue);
-            tmoney = `**${Emojis.Jeffros}${money}📈**`;
-            break boostLoop;
-          } else if(specialData.specialObjective === "all"){ // si el boost es de todo
-            money = money * Number(boosts[i].info.special.specialValue);
-            tmoney = `**${Emojis.Jeffros}${money}📈**`;
-            break boostLoop;
-          }
+        if(specialData.specialObjective === "exp"){ // si el boost es de exp
+          
+        } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
+          money = money * Number(specialData.specialValue);
+          tmoney = `**${Emojis.Jeffros}${money}📈**`;
+        } else if(specialData.specialObjective === "all"){ // si el boost es de todo
+          money = money * Number(specialData.specialValue);
+          tmoney = `**${Emojis.Jeffros}${money}📈**`;
         }
       });
 
@@ -685,26 +680,21 @@ client.on("message", async message => {
     }
 
     // buscar la globaldata
-    let query = await GlobalData.find({
+    let query = await GlobalData.findOne({
       "info.type": "roleDuration",
       "info.userID": author.id,
       "info.special.type": "boostMultiplier"
     }, (err, boosts) => {
       if(err) throw err;
 
-      boost2:
-      for(let i = 0; i < boosts.length; i++){
-        let specialData = boosts[i].info.special;
+      let specialData = boosts.info.special;
 
-        if(specialData.specialObjective === "exp"){ // si el boost es de exp
-          
-        } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
-          jeffrosToAdd = jeffrosToAdd * Number(boosts[i].info.special.specialValue);
-          break boost2;
-        } else if(specialData.specialObjective === "all"){ // si el boost es de todo
-          jeffrosToAdd = jeffrosToAdd * Number(boosts[i].info.special.specialValue);
-          break boost2;
-        }
+      if(specialData.specialObjective === "exp"){ // si el boost es de exp
+        
+      } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
+        jeffrosToAdd = jeffrosToAdd * Number(specialData.specialValue);
+      } else if(specialData.specialObjective === "all"){ // si el boost es de todo
+        jeffrosToAdd = jeffrosToAdd * Number(specialData.specialValue);
       }
     });
 
@@ -760,26 +750,21 @@ client.on("message", async message => {
         }
 
         // buscar la globaldata
-        let query2 = await GlobalData.find({
+        let query2 = await GlobalData.findOne({
           "info.type": "roleDuration",
           "info.userID": author.id,
           "info.special.type": "boostMultiplier"
         }, (err, boosts) => {
           if(err) throw err;
 
-          boost3:
-          for(let i = 0; i < boosts.length; i++){
-            let specialData = boosts[i].info.special;
+          let specialData = boosts.info.special;
 
-            if(specialData.specialObjective === "exp"){ // si el boost es de exp  
-              expToAdd = expToAdd * Number(boosts[i].info.special.specialValue);
-              break boost3;
-            } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
+          if(specialData.specialObjective === "exp"){ // si el boost es de exp  
+            expToAdd = expToAdd * Number(specialData.specialValue);
+          } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
 
-            } else if(specialData.specialObjective === "all"){ // si el boost es de todo
-              expToAdd = expToAdd * Number(boosts[i].info.special.specialValue);
-              break boost3;
-            }
+          } else if(specialData.specialObjective === "all"){ // si el boost es de todo
+            expToAdd = expToAdd * Number(specialData.specialValue);
           }
         });
 
