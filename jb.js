@@ -572,19 +572,18 @@ client.on("message", async message => {
         "info.special.type": "boostMultiplier"
       }, (err, boosts) => {
         if(err) throw err;
-
-        let specialData = boosts.info.special;
-
-        if(specialData.specialObjective === "exp"){ // si el boost es de exp
-          
-        } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
-          money = money * Number(specialData.specialValue);
-          tmoney = `**${Emojis.Jeffros}${money}📈**`;
-        } else if(specialData.specialObjective === "all"){ // si el boost es de todo
-          money = money * Number(specialData.specialValue);
-          tmoney = `**${Emojis.Jeffros}${money}📈**`;
-        }
       });
+
+      if(query){
+        let specialData = query.info.special;
+
+        if(specialData.specialObjective === "jeffros" || specialData.specialObjective === "all"){ // si el boost de de jeffros
+          money = money * Number(specialData.specialValue);
+          tmoney = `**${Emojis.Jeffros}${money}📈**`;
+
+          console.log(author.tag, tmoney);
+        }
+      }
 
       let index = Responses.r[Math.floor(Math.random() * Responses.r.length)];
       let textString = index.text;
@@ -686,17 +685,15 @@ client.on("message", async message => {
       "info.special.type": "boostMultiplier"
     }, (err, boosts) => {
       if(err) throw err;
+    });
 
-      let specialData = boosts.info.special;
+    if(query){
+      let specialData = query.info.special;
 
-      if(specialData.specialObjective === "exp"){ // si el boost es de exp
-        
-      } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
-        jeffrosToAdd = jeffrosToAdd * Number(specialData.specialValue);
-      } else if(specialData.specialObjective === "all"){ // si el boost es de todo
+      if(specialData.specialObjective === "jeffros" || specialData.specialObjective === "all"){ // si el boost de de jeffros
         jeffrosToAdd = jeffrosToAdd * Number(specialData.specialValue);
       }
-    });
+    }
 
     Jeffros.findOne(
       {
@@ -756,17 +753,15 @@ client.on("message", async message => {
           "info.special.type": "boostMultiplier"
         }, (err, boosts) => {
           if(err) throw err;
+        });
 
-          let specialData = boosts.info.special;
+        if(query2){
+          let specialData = query2.info.special;
 
-          if(specialData.specialObjective === "exp"){ // si el boost es de exp  
-            expToAdd = expToAdd * Number(specialData.specialValue);
-          } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
-
-          } else if(specialData.specialObjective === "all"){ // si el boost es de todo
+          if(specialData.specialObjective === "exp" || specialData.specialObjective === "all"){ // si el boost es de exp  
             expToAdd = expToAdd * Number(specialData.specialValue);
           }
-        });
+        }
 
         Exp.findOne(
           {
