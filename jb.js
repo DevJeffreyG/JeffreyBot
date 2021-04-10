@@ -566,7 +566,7 @@ client.on("message", async message => {
       }
 
       // buscar la globaldata
-      let query = await GlobalData.findOne({
+      let query = await GlobalData.find({
         "info.type": "roleDuration",
         "info.userID": author.id,
         "info.special.type": "boostMultiplier"
@@ -574,8 +574,10 @@ client.on("message", async message => {
         if(err) throw err;
       });
 
-      if(query){
-        let specialData = query.info.special;
+      for (let i = 0; i < query.length; i++) {
+        const q = query[i];
+        
+        let specialData = q.info.special;
 
         if(specialData.specialObjective === "jeffros" || specialData.specialObjective === "all"){ // si el boost de de jeffros
           money = money * Number(specialData.specialValue);
@@ -679,7 +681,7 @@ client.on("message", async message => {
     }
 
     // buscar la globaldata
-    let query = await GlobalData.findOne({
+    let query = await GlobalData.find({
       "info.type": "roleDuration",
       "info.userID": author.id,
       "info.special.type": "boostMultiplier"
@@ -687,8 +689,10 @@ client.on("message", async message => {
       if(err) throw err;
     });
 
-    if(query){
-      let specialData = query.info.special;
+    for (let i = 0; i < query.length; i++) {
+      const q = query[i];
+      
+      let specialData = q.info.special;
 
       if(specialData.specialObjective === "jeffros" || specialData.specialObjective === "all"){ // si el boost de de jeffros
         jeffrosToAdd = jeffrosToAdd * Number(specialData.specialValue);
@@ -747,7 +751,7 @@ client.on("message", async message => {
         }
 
         // buscar la globaldata
-        let query2 = await GlobalData.findOne({
+        let query2 = await GlobalData.find({
           "info.type": "roleDuration",
           "info.userID": author.id,
           "info.special.type": "boostMultiplier"
@@ -755,8 +759,10 @@ client.on("message", async message => {
           if(err) throw err;
         });
 
-        if(query2){
-          let specialData = query2.info.special;
+        for (let i = 0; i < query2.length; i++) {
+          const q = query2[i];
+          
+          let specialData = q.info.special;
 
           if(specialData.specialObjective === "exp" || specialData.specialObjective === "all"){ // si el boost es de exp  
             expToAdd = expToAdd * Number(specialData.specialValue);
