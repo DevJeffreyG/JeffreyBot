@@ -6,15 +6,15 @@
     [
         {
             "type": "added",
-            "desc": "Se ha agregado la `{ PREFIX }darkshop` para los usuarios **nivel 5**"
+            "desc": "Se ha creado la `{ PREFIX }darkshop` para los usuarios **nivel 5**"
         },
         {
             "type": "updated",
-            "desc": "Se han parcheado algunos bugs en el sistema de EXP y Jeffros"
+            "desc": "Se han cambiado y arreglado algunas cosas en la DarkShop antes de su lanzamiento público"
         },
         {
             "type": "updated",
-            "desc": "Se están trabajando algunos bugs en el sistema de boosts",
+            "desc": "Se han arreglado algunos bugs en el sistema de boosts",
             "extended": "Si tienes más de un boost comprado no se aplican correctamente."
         }
     ],

@@ -448,7 +448,8 @@ const intervalGlobalDatas = async function(justBoost){
               .setColor(Colores.verde)
               .setDescription(`**—** Se han elimando los Dark Jeffros de ${memberD.user.tag}.
               **—** Desde: \`${dark[i].info.since}\`.
-              **—** Duración: \`${dark[i].info.duration}\`.`)
+              **—** Duración: \`${dark[i].info.duration}\`.
+              **—** Tenía: **${Emojis.Dark}${user.djeffros}**`)
               .setFooter("Mensaje enviado a la vez que al usuario")
               .setTimestamp();
 
@@ -471,6 +472,29 @@ const intervalGlobalDatas = async function(justBoost){
                 staffC.send(`**${member.tag} no recibió MD de DarkJeffros eliminados.**\n\`\`\`javascript\n${err}\`\`\``)
               });
 
+              staffC.send(staffEmbed);
+            }
+          } else {
+            // revisar si caduracion para eliminar el globaldata
+            if(pastDays >= dark[i].info.duration){
+              let staffCID = "514124198205980713";
+              if(client.user.id === Config.testingJBID){
+                staffCID = "537095712102416384";
+              }
+
+              let staffC = guild.channels.cache.find(x => x.id === staffCID);
+              let memberD = guild.members.cache.find(x => x.id === user.userID);
+
+              let staffEmbed = new Discord.MessageEmbed()
+              .setColor(Colores.verde)
+              .setDescription(`**—** Se ha eliminado la dsDJDuration de ${memberD.user.tag}.
+              **—** Desde: \`${dark[i].info.since}\`.
+              **—** Duración: \`${dark[i].info.duration}\`.`)
+              .setFooter("No se ha enviado mensaje al usuario porque sus darkjeffros eran 0.")
+              .setTimestamp();
+
+              // eliminar dsDJDuration
+              await dark[i].remove();
               staffC.send(staffEmbed);
             }
           }
@@ -499,7 +523,7 @@ const intervalGlobalDatas = async function(justBoost){
 
       let eventinflation;
       date = new Date() // hoy
-      duration = Math.floor(Math.random() * 30); // duración máxima 30 días.
+      duration = Math.floor(Math.random() * 30) + 1; // duración máxima 31 días.
 
       if(event === "s"){ // si el precio DEBE subir
         console.log("sube");
@@ -513,6 +537,8 @@ const intervalGlobalDatas = async function(justBoost){
           } else {
             let oldInflation = Number(inflations.info.inflation);
             eventinflation = Number((Math.random() * 10) + oldInflation).toFixed(2);
+
+            if(eventinflation >= 10) eventinflation = 10; // no puede ser mayor a 10
 
             const newData = new GlobalData({
               info: {
@@ -542,8 +568,15 @@ const intervalGlobalDatas = async function(justBoost){
             if(oldInflation < 1){
               eventinflation = Number(Math.random() * oldInflation).toFixed(2);
             
-              while (eventinflation < 1) {
-                eventinflation = Number(Math.random() * oldInflation).toFixed(2);
+              let att = 0; // intentos máximos pa que no se muera si la inflacion es muy baja de por si
+              while (eventinflation < 1 && att < 15) {
+                eventinflation = Number(Math.random() * (inflation*6)).toFixed(2);
+                att++
+              }
+              
+              if(eventinflation < 1) eventinflation = Number(Math.random() * 10).toFixed(2);
+              while (eventinflation < 1) { // si sigue siendo menor a 1 hallar una inflacion normalmente
+                eventinflation = Number(Math.random() * 10).toFixed(2);
               }
 
               const newData = new GlobalData({
@@ -555,12 +588,8 @@ const intervalGlobalDatas = async function(justBoost){
                 }
               });
               newData.save();
-            } else { // si es mayor a 1 entonces bajar la inflacion, pero que no sea menor a 1 nunca
+            } else { // si es mayor a 1 entonces bajar la inflacion, ahora también puede ser menor a 1
               eventinflation = Number(Math.random() * oldInflation).toFixed(2);
-            
-              while (eventinflation < 1) {
-                eventinflation = Number(Math.random() * oldInflation).toFixed(2);
-              }
 
               const newData = new GlobalData({
                 info: {
@@ -602,119 +631,120 @@ const intervalGlobalDatas = async function(justBoost){
     } else { // si ya existe, leerlo y revisar si ya es momento de cambiarlo
       if(dark.info.inflation === "NaN"){ // error por alguna razón, elimina el evento
         dark.remove();
-      }
+      } else { // si no hay error proseguir
       
-      let oldDate = new Date(dark.info.since);
-      let newDate = new Date()
+        let oldDate = new Date(dark.info.since);
+        let newDate = new Date()
 
-      let diference1 = newDate.getTime() - oldDate.getTime();
-      let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
+        let diference1 = newDate.getTime() - oldDate.getTime();
+        let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
 
-      if(pastDays >= dark.info.duration){
-        // enviar mensaje random de evento
-        let newInflation = `**${dark.info.inflation}%**`;
-        let rndmEventSUBE = [
-          `Estamos de suerte, se han devaluado los Jeffros, la inflación ha subido al ${newInflation}`,
-          `Los Jeffros se levantaron con pie izquierdo, la inflación sube a ${newInflation}`,
-          `Nuestro momento ha llegado, los Jeffros se han devaluado y la inflación sube a ${newInflation}`,
-          `Hora de sacar nuestra artillería, han hecho que los Jeffros se devalúen, la inflacion sube a ${newInflation}`,
-          `Esto no pasa muy seguido ¿verdad? hoy estamos de suerte, la inflación sube a ${newInflation}`,
-          `Bastante espectacular, ¿no? la inflación ha subido a ${newInflation}`
-        ];
+        if(pastDays >= dark.info.duration){
+          // enviar mensaje random de evento
+          let newInflation = `**${dark.info.inflation}%**`;
+          let rndmEventSUBE = [
+            `Estamos de suerte, se han devaluado los Jeffros, la inflación ha subido al ${newInflation}`,
+            `Los Jeffros se levantaron con pie izquierdo, la inflación sube a ${newInflation}`,
+            `Nuestro momento ha llegado, los Jeffros se han devaluado y la inflación sube a ${newInflation}`,
+            `Hora de sacar nuestra artillería, han hecho que los Jeffros se devalúen, la inflacion sube a ${newInflation}`,
+            `Esto no pasa muy seguido ¿verdad? hoy estamos de suerte, la inflación sube a ${newInflation}`,
+            `Bastante espectacular, ¿no? la inflación ha subido a ${newInflation}`
+          ];
 
-        let rndmEventBAJA = [
-          `Parece que algo en las oficinas ha hecho que la inflación baje al ${newInflation}`,
-          `Mira que hay que tener mala suerte, se han regalado miles de Jeffros por todo el planeta y ha hecho que la inflación baje a ${newInflation}`,
-          `Al otro lado de la moneda se le dio por fortalecerse, la inflación baja a ${newInflation}`,
-          `Han intenado raidearnos, tuvimos que tomar decisiones, la inflación baja a ${newInflation}`,
-          `La inflación baja a ${newInflation}. Hay que ver el lado positivo, con suerte nos va mejor para la próxima`,
-          `Hay días buenos, y otras veces, sólo hay días. La inflación baja a ${newInflation}`
-        ];
+          let rndmEventBAJA = [
+            `Parece que algo en las oficinas ha hecho que la inflación baje al ${newInflation}`,
+            `Mira que hay que tener mala suerte, se han regalado miles de Jeffros por todo el planeta y ha hecho que la inflación baje a ${newInflation}`,
+            `Al otro lado de la moneda se le dio por fortalecerse, la inflación baja a ${newInflation}`,
+            `Han intenado raidearnos, tuvimos que tomar decisiones, la inflación baja a ${newInflation}`,
+            `La inflación baja a ${newInflation}. Hay que ver el lado positivo, con suerte nos va mejor para la próxima`,
+            `Hay días buenos, y otras veces, sólo hay días. La inflación baja a ${newInflation}`
+          ];
 
-        let rndmEventIGUAL = [
-          `Por poco... nos han intentado robar en una de nuestras sucursales, la inflación se queda en ${newInflation}`,
-          `Parece que casi nos involucran en una mala jugada, la inflación queda en ${newInflation}`,
-          `Casi que no lo logramos, pero la inflación queda en ${newInflation}`,
-          `Menos mal, la cosa se puso difícil pero logramos hacer que la inflación quedase en ${newInflation}`,
-          `¿Qué tal? Casi que nos hacen la jugada, pero somos mejores que ellos. La inflación se queda en ${newInflation}`,
-          `Esto es increíble, logramos quedarnos en ${newInflation}, buen trabajo, equipo.`
-        ];
+          let rndmEventIGUAL = [
+            `Por poco... nos han intentado robar en una de nuestras sucursales, la inflación se queda en ${newInflation}`,
+            `Parece que casi nos involucran en una mala jugada, la inflación queda en ${newInflation}`,
+            `Casi que no lo logramos, pero la inflación queda en ${newInflation}`,
+            `Menos mal, la cosa se puso difícil pero logramos hacer que la inflación quedase en ${newInflation}`,
+            `¿Qué tal? Casi que nos hacen la jugada, pero somos mejores que ellos. La inflación se queda en ${newInflation}`,
+            `Esto es increíble, logramos quedarnos en ${newInflation}, buen trabajo, equipo.`
+          ];
 
-        let rSube = rndmEventSUBE[Math.floor(Math.random() * rndmEventSUBE.length)];
-        let rBaja = rndmEventBAJA[Math.floor(Math.random() * rndmEventBAJA.length)];
-        let rIgual = rndmEventIGUAL[Math.floor(Math.random() * rndmEventIGUAL.length)];
+          let rSube = rndmEventSUBE[Math.floor(Math.random() * rndmEventSUBE.length)];
+          let rBaja = rndmEventBAJA[Math.floor(Math.random() * rndmEventBAJA.length)];
+          let rIgual = rndmEventIGUAL[Math.floor(Math.random() * rndmEventIGUAL.length)];
 
-        // revisar si baja, sube o se queda igual de acuerdo a la inflación actual
+          // revisar si baja, sube o se queda igual de acuerdo a la inflación actual
 
-        GlobalData.findOne({
-          "info.type": "dsInflation"
-        }, (err, inflation) => {
-          if(err) throw err;
-          
-          let oldInflation = inflation.info.inflation;
-          let eventInflation = dark.info.inflation;
-          let event;
+          GlobalData.findOne({
+            "info.type": "dsInflation"
+          }, (err, inflation) => {
+            if(err) throw err;
+            
+            let oldInflation = inflation.info.inflation;
+            let eventInflation = dark.info.inflation;
+            let event;
 
-          if(eventInflation > oldInflation){
-            event = "s";
-          } else if(eventInflation < oldInflation){
-            event = "b";
-          } else {
-            event = "i";
+            if(eventInflation > oldInflation){
+              event = "s";
+            } else if(eventInflation < oldInflation){
+              event = "b";
+            } else {
+              event = "i";
+            }
+
+          switch(event){
+            case "s":
+              let embed = new Discord.MessageEmbed()
+              .setAuthor(`| Evento`, Config.darkLogoPng)
+              .setDescription(rSube)
+              .setColor(Colores.negro)
+              .setFooter(`La inflación SUBE.`)
+              .setTimestamp();
+
+              dsChannel.send(`${dsNews}`).then(() => {
+                dsChannel.send(embed)
+              })
+              break;
+
+            case "b":
+              let embed2 = new Discord.MessageEmbed()
+              .setAuthor(`| Evento`, Config.darkLogoPng)
+              .setDescription(rBaja)
+              .setColor(Colores.negro)
+              .setFooter(`La inflación BAJA.`)
+              .setTimestamp();
+
+              dsChannel.send(`${dsNews}`).then(() => {
+                dsChannel.send(embed2)
+              })
+              break;
+
+            case "i":
+              let embed3 = new Discord.MessageEmbed()
+              .setAuthor(`| Evento`, Config.darkLogoPng)
+              .setDescription(rIgual)
+              .setColor(Colores.negro)
+              .setFooter(`La inflación se MANTIENE.`)
+              .setTimestamp();
+
+              dsChannel.send(`${dsNews}`).then(() => {
+                dsChannel.send(embed3)
+              })
+              break;
           }
 
-        switch(event){
-          case "s":
-            let embed = new Discord.MessageEmbed()
-            .setAuthor(`| Evento`, Config.darkLogoPng)
-            .setDescription(rSube)
-            .setColor(Colores.negro)
-            .setFooter(`La inflación SUBE.`)
-            .setTimestamp();
+          // aplicar el evento a la inflacion actual
+            
+            inflation.info.oldinflation = inflation.info.inflation;
+            inflation.info.inflation = dark.info.inflation;
 
-            dsChannel.send(`${dsNews}`).then(() => {
-              dsChannel.send(embed)
-            })
-            break;
+            inflation.markModified("info");
+            inflation.save();
+          })
 
-          case "b":
-            let embed2 = new Discord.MessageEmbed()
-            .setAuthor(`| Evento`, Config.darkLogoPng)
-            .setDescription(rBaja)
-            .setColor(Colores.negro)
-            .setFooter(`La inflación BAJA.`)
-            .setTimestamp();
-
-            dsChannel.send(`${dsNews}`).then(() => {
-              dsChannel.send(embed2)
-            })
-            break;
-
-          case "i":
-            let embed3 = new Discord.MessageEmbed()
-            .setAuthor(`| Evento`, Config.darkLogoPng)
-            .setDescription(rIgual)
-            .setColor(Colores.negro)
-            .setFooter(`La inflación se MANTIENE.`)
-            .setTimestamp();
-
-            dsChannel.send(`${dsNews}`).then(() => {
-              dsChannel.send(embed3)
-            })
-            break;
+          // eliminar el evento
+          dark.remove();
         }
-
-        // aplicar el evento a la inflacion actual
-          
-          inflation.info.oldinflation = inflation.info.inflation;
-          inflation.info.inflation = dark.info.inflation;
-
-          inflation.markModified("info");
-          inflation.save();
-        })
-
-        // eliminar el evento
-        dark.remove();
       }
     }
   });

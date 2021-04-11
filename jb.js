@@ -696,6 +696,7 @@ client.on("message", async message => {
 
       if(specialData.specialObjective === "jeffros" || specialData.specialObjective === "all"){ // si el boost de de jeffros
         jeffrosToAdd = jeffrosToAdd * Number(specialData.specialValue);
+        console.log(author.tag, "Boost de JEFFROS.")
       }
     }
 
@@ -766,6 +767,7 @@ client.on("message", async message => {
 
           if(specialData.specialObjective === "exp" || specialData.specialObjective === "all"){ // si el boost es de exp  
             expToAdd = expToAdd * Number(specialData.specialValue);
+            console.log(author.tag, "Boost de EXP.")
           }
         }
 
