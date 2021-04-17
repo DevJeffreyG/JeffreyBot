@@ -1115,7 +1115,7 @@ Stats.findOne({
 
                                                 DarkUse.findOne({
                                                     itemID: idUse
-                                                }, (err, use) => {
+                                                }, async (err, use) => {
                                                     if(err) throw err;
 
                                                     // verificar que tenga ese item
@@ -1491,6 +1491,32 @@ Stats.findOne({
                                                                 .setDescription(`**—** Se ha usado el item **${item.name}**.`)
                                                                 .setColor(Colores.negro);
                                                                 return message.channel.send(activated2);
+                                                            } else
+
+                                                            if(item.id === 5){ // es resetimpuesto
+                                                                // /ds items 5 <idDeItemDeShop>
+                                                                if(!args[2] || isNaN(args[2])){
+                                                                    return message.reply(`tienes que indicar la id del item al que deseas volver a precio base __**en la tienda normal**__.`)
+                                                                }
+
+                                                                stats.items.splice(index4, 1); // borrarlo
+
+                                                                let queryInterestItem = await All.findOne({
+                                                                    userID: author.id,
+                                                                    itemID: args[2],
+                                                                    isDarkShop: false
+                                                                });
+
+                                                                if(!queryInterestItem){
+                                                                    return message.reply(`no encontré que el item con id \`${args[2]}\`, tenga su precio afectado para ti.`)
+                                                                }
+
+                                                                // revisar si se ignora el interes o no
+                                                                functions.Interest(author, idUse);
+
+                                                                queryInterestItem.remove();
+
+                                                                stats.save();
                                                             } else
                                                             
                                                             if(item.active === false && action4 === "add"){ // entonces activarlo.
