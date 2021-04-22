@@ -15,7 +15,7 @@ module.exports.run = async (client, message, args) => {
       
     let embed = new Discord.MessageEmbed()
     .setAuthor(`${member.user.tag}`, `${member.user.displayAvatarURL()}`)
-    .setImage(`${member.user.avatarURL({format: 'png', dynamic: true, size: 1024 })}`)
+    .setImage(`${member.user.displayAvatarURL({format: 'png', dynamic: true, size: 1024 })}`)
     .setColor(Colores.verde);
 
     return message.channel.send(embed);
