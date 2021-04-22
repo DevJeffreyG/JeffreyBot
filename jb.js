@@ -655,15 +655,41 @@ client.on("message", async message => {
       );
     }
   } else {
+    let main = guild.channels.cache.find(x => x.id === mainChannel);
+    let vipmain = guild.channels.cache.find(x => x.id === mainVip);
 
     if (message.member.roles.cache.find(x => x.id === Config.lvl40)){
       jexpCooldown = jexpCooldown / 2;
     }
 
+    let lessThan3 = false;
+    let moreThan6 = false;
+
+    if(messageArray.length < 3) lessThan3 = true;
+
+    if(messageArray.length > 6) moreThan6 = true;
+
+    let lastAuthor = false;
+
+    if(message.channel === main || message.channel === vipmain){
+      let c = main || vipmain;
+      let last = await c.messages.fetch({ limit: 2 });
+      last = last.array();
+      if(last[1].author.id === message.author.id) lastAuthor = true;
+    }
+
     // ################################# JEFFROS ################################
     
     if(author.id == jeffreygID || disableEXPs === false){
-    let jeffrosToAdd = Math.ceil(Math.random() * 5);
+    
+    let jeffrosToAdd;
+    if(lessThan3){
+      jeffrosToAdd = Math.ceil(Math.random() * 5);
+    } else if(moreThan6){
+      jeffrosToAdd = Math.ceil(Math.random() * 15);
+    } else {
+      jeffrosToAdd = Math.ceil(Math.random() * 5);
+    }
 
     // VIP 200%
     if (message.member.roles.cache.find(x => x.id === "529275759521431553")) {
@@ -725,16 +751,26 @@ client.on("message", async message => {
           });
 
           newJeffros.save().catch(err => console.log(err));
-        } else {
-          // Si el usuario ya tiene Jeffros
-
-          jeffros.jeffros = jeffros.jeffros + jeffrosToAdd;
-          jeffros.save().catch(err => console.log(err));
+        } else { // Si el usuario ya tiene Jeffros
+          // Si el ultimo mensaje fue del mismo usuario cancelar
+          if(!lastAuthor){
+            jeffros.jeffros = jeffros.jeffros + jeffrosToAdd;
+            jeffros.save().catch(err => console.log(err));
+          } else {
+            console.log(`${author.tag} fue el ultimo en hablar, no se da recompensas de JEFFROS. ${message.url}`)
+          }
         }
 
         // ################################# E X P ################################
 
-        let expToAdd = Math.ceil(Math.random() * 30);
+        let expToAdd;
+        if(lessThan3){
+          expToAdd = Math.ceil(Math.random() * 5);
+        } else if(moreThan6){
+          expToAdd = Math.ceil(Math.random() * 15);
+        } else {
+          expToAdd = Math.ceil(Math.random() * 30);
+        }
 
         // VIP 200%
         if (message.member.roles.cache.find(x => x.id === "529275759521431553")) {
@@ -804,106 +840,111 @@ client.on("message", async message => {
             } else {
               // Si el usuario ya tiene Experiencia
 
-              let curLvl = uExp.level;
-              let nxtLvl = 10 * (uExp.level ** 2) + 50 * uExp.level + 100; // fórmula de MEE6.
-              let curExp = uExp.exp;
+              // Si el ultimo mensaje fue del mismo usuario cancelar
+              if(!lastAuthor){
 
-              uExp.exp = uExp.exp + expToAdd;
+                let curLvl = uExp.level;
+                let nxtLvl = 10 * (uExp.level ** 2) + 50 * uExp.level + 100; // fórmula de MEE6.
+                let curExp = uExp.exp;
 
-              if (uExp.exp >= nxtLvl) {
-                uExp.level = uExp.level + 1;
+                uExp.exp = uExp.exp + expToAdd;
 
-                console.log(`${author.username} sube de nivel! (${curLvl + 1})`);
+                if (uExp.exp >= nxtLvl) {
+                  uExp.level = uExp.level + 1;
 
-                if (uExp.level === 1) {
-                  message.channel.send(`**${author} empieza a mostrarse, ¿será el inicio de algo grande?.\n— ¡SUBE A NIVEL 1!**`)
-                  message.member.roles.add(Config.lvl1);
-                } else if (uExp.level === 10) {
-                  message.channel.send(`**${author} no piensa rendirse.\n— ¡SUBE A NIVEL 10!**`)
-                  message.member.roles.add(Config.lvl10);
-                } else if (uExp.level === 20) {
-                  message.channel.send(`**${author} ¿estás determinado?.\n— ¡SUBE A NIVEL 20!**`)
-                  message.member.roles.add(Config.lvl20);
-                } else if (uExp.level === 30) {
-                  message.channel.send(`**${author} parece no detenerse.\n— ¡SUBE A NIVEL 30!**`)
-                  message.member.roles.add(Config.lvl30);
+                  console.log(`${author.username} sube de nivel! (${curLvl + 1})`);
 
-                  // BONO DE 2000 POR LLEGAR AL LVL 30
-                  Jeffros.findOne(
-                    {
-                      serverID: guild.id,
-                      userID: author.id
-                    },
-                    (err, j) => {
-                      j.jeffros = j.jeffros + 2000;
+                  if (uExp.level === 1) {
+                    message.channel.send(`**${author} empieza a mostrarse, ¿será el inicio de algo grande?.\n— ¡SUBE A NIVEL 1!**`)
+                    message.member.roles.add(Config.lvl1);
+                  } else if (uExp.level === 10) {
+                    message.channel.send(`**${author} no piensa rendirse.\n— ¡SUBE A NIVEL 10!**`)
+                    message.member.roles.add(Config.lvl10);
+                  } else if (uExp.level === 20) {
+                    message.channel.send(`**${author} ¿estás determinado?.\n— ¡SUBE A NIVEL 20!**`)
+                    message.member.roles.add(Config.lvl20);
+                  } else if (uExp.level === 30) {
+                    message.channel.send(`**${author} parece no detenerse.\n— ¡SUBE A NIVEL 30!**`)
+                    message.member.roles.add(Config.lvl30);
 
-                      j.save();
-                    }
-                  );
-                } else if (uExp.level === 40) {
-                  message.channel.send(`**${author} casi logra llegar al punto medio.\n— ¡SUBE A NIVEL 40!**`)
-                  message.member.roles.add(Config.lvl40);
-                } else if (uExp.level === 50) {
-                  message.channel.send(`**${author} literalmente está... ¿determinadx?...\n— ¡SUBE A NIVEL 50!**`)
-                  message.member.roles.add(Config.lvl50);
-                } else if (uExp.level === 60) {
-                  message.channel.send(`**${author} no se rinde.\n— ¡SUBE A NIVEL 60!**`)
-                  message.member.roles.add(Config.lvl60);
-                } else if (uExp.level === 70) {
-                  message.channel.send(`**${author} no va a parar.\n— ¡SUBE A NIVEL 70!**`)
-                  message.member.roles.add(Config.lvl70);
-                } else if (uExp.level === 80) {
-                  message.channel.send(`**${author} no para de sorprendernos.\n— ¡SUBE A NIVEL 80!**`)
-                  message.member.roles.add(Config.lvl80);
-                } else if (uExp.level === 90) {
-                  message.channel.send(`**${author} está en la recta final.\n— ¡SUBE A NIVEL 90!**`)
-                  message.member.roles.add(Config.lvl90);
-                } else if (uExp.level === 99) {
-                  message.channel.send(`**${author} está a punto de logralo.\n— ¡SUBE A NIVEL 99!**`)
-                  message.member.roles.add(Config.lvl99);
-                  message.member.roles.add(Config.vipRole);
-                } else if (uExp.level === 100) {
-                  message.channel.send(`**${author} está determinadx.\n— ¡SUBE A NIVEL 100!**`)
-                  message.member.roles.add(Config.lvl100);
-                } else if (uExp.level === 200) {
-                  message.channel.send(`**${author} literal mente vive AQUÍ.\n— ¡SUBE A NIVEL 200!**`)
+                    // BONO DE 2000 POR LLEGAR AL LVL 30
+                    Jeffros.findOne(
+                      {
+                        serverID: guild.id,
+                        userID: author.id
+                      },
+                      (err, j) => {
+                        j.jeffros = j.jeffros + 2000;
+
+                        j.save();
+                      }
+                    );
+                  } else if (uExp.level === 40) {
+                    message.channel.send(`**${author} casi logra llegar al punto medio.\n— ¡SUBE A NIVEL 40!**`)
+                    message.member.roles.add(Config.lvl40);
+                  } else if (uExp.level === 50) {
+                    message.channel.send(`**${author} literalmente está... ¿determinadx?...\n— ¡SUBE A NIVEL 50!**`)
+                    message.member.roles.add(Config.lvl50);
+                  } else if (uExp.level === 60) {
+                    message.channel.send(`**${author} no se rinde.\n— ¡SUBE A NIVEL 60!**`)
+                    message.member.roles.add(Config.lvl60);
+                  } else if (uExp.level === 70) {
+                    message.channel.send(`**${author} no va a parar.\n— ¡SUBE A NIVEL 70!**`)
+                    message.member.roles.add(Config.lvl70);
+                  } else if (uExp.level === 80) {
+                    message.channel.send(`**${author} no para de sorprendernos.\n— ¡SUBE A NIVEL 80!**`)
+                    message.member.roles.add(Config.lvl80);
+                  } else if (uExp.level === 90) {
+                    message.channel.send(`**${author} está en la recta final.\n— ¡SUBE A NIVEL 90!**`)
+                    message.member.roles.add(Config.lvl90);
+                  } else if (uExp.level === 99) {
+                    message.channel.send(`**${author} está a punto de logralo.\n— ¡SUBE A NIVEL 99!**`)
+                    message.member.roles.add(Config.lvl99);
+                    message.member.roles.add(Config.vipRole);
+                  } else if (uExp.level === 100) {
+                    message.channel.send(`**${author} está determinadx.\n— ¡SUBE A NIVEL 100!**`)
+                    message.member.roles.add(Config.lvl100);
+                  } else if (uExp.level === 200) {
+                    message.channel.send(`**${author} literal mente vive AQUÍ.\n— ¡SUBE A NIVEL 200!**`)
+                  }
                 }
-              }
 
-              uExp.save().catch(err => console.log(err));
-            }
+                uExp.save().catch(err => console.log(err));
 
-            jeffrosExpCooldown.add(author.id);
+              jeffrosExpCooldown.add(author.id);
 
-            let gdQuery = await GlobalData.findOne({
-              "info.type": "lastExpJeffros",
-              "info.userID": author.id
-            });
-
-            if(!gdQuery){
-              const newLEJ = GlobalData({
-                info: {
-                  type: "lastExpJeffros",
-                  userID: author.id,
-                  exp: expToAdd,
-                  jeffros: jeffrosToAdd
-                }
+              let gdQuery = await GlobalData.findOne({
+                "info.type": "lastExpJeffros",
+                "info.userID": author.id
               });
 
-              await newLEJ.save();
+              if(!gdQuery){
+                const newLEJ = GlobalData({
+                  info: {
+                    type: "lastExpJeffros",
+                    userID: author.id,
+                    exp: expToAdd,
+                    jeffros: jeffrosToAdd
+                  }
+                });
+
+                await newLEJ.save();
+              } else {
+                gdQuery.info.exp = expToAdd;
+                gdQuery.info.jeffros = jeffrosToAdd;
+
+                await gdQuery.save()
+              }
+
+              setTimeout(() => {
+                console.log(author.id + " ya puede ganar exp y jeffros")
+                jeffrosExpCooldown.delete(author.id);
+              }, jexpCooldown * 1000);
             } else {
-              gdQuery.info.exp = expToAdd;
-              gdQuery.info.jeffros = jeffrosToAdd;
-
-              await gdQuery.save()
+              console.log(`${author.tag} fue el ultimo en hablar, no se da recompensas de EXP. ${message.url}`)
             }
-
-            setTimeout(() => {
-              console.log(author.id + " ya puede ganar exp y jeffros")
-              jeffrosExpCooldown.delete(author.id);
-            }, jexpCooldown * 1000);
           }
-        );
+          });
       }
     );
   } else {

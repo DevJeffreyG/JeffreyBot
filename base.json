@@ -9,13 +9,12 @@
             "desc": "Se ha creado la `{ PREFIX }darkshop` para los usuarios **nivel 5**"
         },
         {
-            "type": "updated",
-            "desc": "Se han cambiado, arreglado y añadido algunas cosas en la DarkShop antes de su lanzamiento público"
+            "type": "added",
+            "desc": "Se han agregado variables a la hora de ganar EXP o Jeffros"
         },
         {
             "type": "updated",
-            "desc": "Se han arreglado algunos bugs en el sistema de boosts",
-            "extended": "Si tienes más de un boost comprado no se aplican correctamente."
+            "desc": "Se han hecho cambios mínimos en el comando { PREFIX }coins"
         }
     ],
     "bienPng": "http://i.imgur.com/M6hqbcc.png",
