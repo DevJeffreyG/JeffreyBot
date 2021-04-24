@@ -52,7 +52,7 @@ module.exports.run = async (client, message, args) => {
       let rule = reglas[args[1]] || "na";
       let notes = args.join(" ").slice(args[0].length + args[1].length + 2) || "Recuerda leer siempre las reglas";
 
-      if(wUser.roles.cache.find(x => x.id === staffRole.id)){
+      if(wUser.roles.cache.find(x => x.id === staffRole.id) && message.author.id != Config.jeffreygID){
         return message.reply("¿tas bobo o qué?");
       }
 
