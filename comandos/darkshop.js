@@ -1517,6 +1517,12 @@ Stats.findOne({
                                                                 queryInterestItem.remove();
 
                                                                 stats.save();
+
+                                                                let activated3 = new Discord.MessageEmbed()
+                                                                .setAuthor(`| Listo`, Config.darkLogoPng)
+                                                                .setDescription(`**—** Se ha usado el item **${item.name}**.`)
+                                                                .setColor(Colores.negro);
+                                                                return message.channel.send(activated3);
                                                             } else
                                                             
                                                             if(item.active === false && action4 === "add"){ // entonces activarlo.
