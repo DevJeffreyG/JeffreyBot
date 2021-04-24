@@ -96,7 +96,7 @@ module.exports.run = async (client, message, args) => {
 
                 let noSofts = new Discord.MessageEmbed()
                 .setAuthor(`| Error`, Config.errorPng)
-                .setDescription(`**—** ${wUser.tag} no tiene el softwarn "${rule}".`)
+                .setDescription(`**—** ${wUser.user.tag} no tiene el softwarn "${rule}".`)
                 .setColor(Colores.rojo);
 
                 if(swarns.warns.length == 0) {
@@ -206,7 +206,7 @@ module.exports.run = async (client, message, args) => {
 
           let noWarn = new Discord.MessageEmbed()
           .setAuthor(`| Error`, Config.errorPng)
-          .setDescription(`**—** ${wUser.tag} no tiene warns por quitar.`)
+          .setDescription(`**—** ${wUser.user.tag} no tiene warns por quitar.`)
           .setColor(Colores.rojo);
           if(!warns || warns.warns === 0 || warns.warns-numW <= -1){
             msg.edit(noWarn);
