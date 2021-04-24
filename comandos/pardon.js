@@ -94,6 +94,16 @@ module.exports.run = async (client, message, args) => {
               }, async (err, swarns) => {
                 if (err) throw err;
 
+                let noSofts = new Discord.MessageEmbed()
+                .setAuthor(`| Error`, Config.errorPng)
+                .setDescription(`**—** ${wUser.tag} no tiene el softwarn "${rule}".`)
+                .setColor(Colores.rojo);
+
+                if(swarns.warns.length == 0) {
+                  msg.edit(noSofts);
+                  msg.reactions.removeAll();
+                }
+
                 for (let i = 0; i < swarns.warns.length; i++){
                   if(swarns.warns[i].rule === rule){
 
@@ -126,12 +136,9 @@ module.exports.run = async (client, message, args) => {
                     });
                   } else { // si no tiene ese
                     if(swarns.warns.length - 1 === i){ // si es el ultimo
-                      let noSofts = new Discord.MessageEmbed()
-                      .setAuthor(`| Error`, Config.errorPng)
-                      .setDescription(`**—** ${wUser.tag} no tiene el softwarn "${rule}",`)
-                      .setColor(Colores.rojo);
-
-                      return message.channel.send(noSofts);
+                      console.log("Es el ultimo soft que tiene el usuario");
+                      msg.edit(noSofts);
+                      return msg.reactions.removeAll();
                     }
                   }
                 }
@@ -196,9 +203,14 @@ module.exports.run = async (client, message, args) => {
           userID: wUser.id
         }, (err, warns) => {
           if(err) throw err;
-          
+
+          let noWarn = new Discord.MessageEmbed()
+          .setAuthor(`| Error`, Config.errorPng)
+          .setDescription(`**—** ${wUser.tag} no tiene warns por quitar.`)
+          .setColor(Colores.rojo);
           if(!warns || warns.warns === 0 || warns.warns-numW <= -1){
-            return;
+            msg.edit(noWarn);
+            return msg.reactions.removeAll();
           } else {
             warns.warns = warns.warns - numW;
             warns.save().then(() =>
