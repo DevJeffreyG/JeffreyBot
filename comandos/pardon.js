@@ -124,6 +124,15 @@ module.exports.run = async (client, message, args) => {
                     .catch(e => {
                       console.log('Tiene los MDs desactivados.')
                     });
+                  } else { // si no tiene ese
+                    if(swarns.warns.length - 1 === i){ // si es el ultimo
+                      let noSofts = new Discord.MessageEmbed()
+                      .setAuthor(`| Error`, Config.errorPng)
+                      .setDescription(`**—** ${wUser.tag} no tiene el softwarn "${rule}",`)
+                      .setColor(Colores.rojo);
+
+                      return message.channel.send(noSofts);
+                    }
                   }
                 }
 

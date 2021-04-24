@@ -26,6 +26,7 @@ module.exports.run = async (client, message, args) => {
   
   if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
 
+  if(!args[0]) return message.channel.send(embed);
   if(args[0].toLowerCase() === "help"){
     let help = new Discord.MessageEmbed()
     .setTitle(`Ayuda: ${prefix}dmuser`)

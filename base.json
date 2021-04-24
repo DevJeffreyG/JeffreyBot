@@ -14,7 +14,7 @@
         },
         {
             "type": "updated",
-            "desc": "Se han hecho cambios mínimos en el comando { PREFIX }coins"
+            "desc": "Se han arreglado algunos bugs"
         }
     ],
     "bienPng": "http://i.imgur.com/M6hqbcc.png",
