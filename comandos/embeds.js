@@ -319,7 +319,10 @@ let noEmbed = new Discord.MessageEmbed()
 
 **—** No se permiten cadenas de mensajes en el chat.
 
-**—** **Debes** cumplir las [Condiciones del servicio de Discord "TOS"](https://discord.com/terms).
+**—** No reclames/quejes en **canales generales**, acerca de tus warns/softwarns o cualquier acción de moderación que se haya aplicado, ya que puedes incomodar a otros usuarios con tus quejas, para ello, próximamente se **implementará** un sistema de tickets donde podras comunicarte con el STAFF directamente.
+➟ De mientras, mantén estos temas ya sea en <#447797737216278531> o en <#573166749436870687> si tienes VIP.
+
+**—** **Debes** cumplir las [Condiciones del servicio de Discord "TOS"](https://discord.com/terms) y sus [Directivas de la comunidad](https://discord.com/guidelines).
 
 \`—\` Un dato curioso: ${client.user} te enviará un mensaje al recibir cualquier tipo de warn, siempre y cuando tengas los MDs activados.
 Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para conocer __tus__ warns.`);

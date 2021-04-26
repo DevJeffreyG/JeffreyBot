@@ -9,12 +9,8 @@
             "desc": "Se ha creado la `{ PREFIX }darkshop` para los usuarios **nivel 5**"
         },
         {
-            "type": "added",
-            "desc": "Se han agregado variables a la hora de ganar EXP o Jeffros"
-        },
-        {
             "type": "updated",
-            "desc": "Se han arreglado algunos bugs"
+            "desc": "Se han actualizado las reglas"
         }
     ],
     "bienPng": "http://i.imgur.com/M6hqbcc.png",

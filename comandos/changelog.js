@@ -92,7 +92,7 @@ module.exports.run = async (client, message, args) => {
 
   let embed = new Discord.MessageEmbed()
   .setDescription(`**Jeffrey Bot v\`${Package.version}\` — Últimos cambios hechos al bot.**\n`)
-  .setFooter(`* Si estás en PC, poniendo el mouse sobre '${viewExtension}', podrás ver detalles extendidos de los cambios.\n— En móvil usa '${prefix}changelog extended'.`)
+  .setFooter(`* Si estás en PC, poniendo el mouse sobre '!', podrás ver detalles extendidos de los cambios.\n— En móvil usa '${prefix}changelog extended'.`)
   .setColor(Colores.verde);
 
   for(let i = 0; i < changes.length; i++){
