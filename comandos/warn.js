@@ -161,11 +161,11 @@ module.exports.run = async (client, message, args) => {
                     message.channel.send("¡Usuario con MDs desactivados! **¡No sabe cuántos WARNS tiene!**");
                   });
                 })
-              } else {
+              } else { // ya tiene el documento de los warns
                 // revisar si tiene el softwarn
                 SoftWarn.findOne({
                   userID: wUser.id
-                }, (err, soft) => {
+                }, async (err, soft) => {
                   if (err) throw err;
                   let existsSoft = false;
 
@@ -199,7 +199,7 @@ module.exports.run = async (client, message, args) => {
                     .setColor(Colores.rojo);
 
                     logC.send(autoMod);
-                    wUser.send(autoMod)
+                    await wUser.send(autoMod)
                     wUser.ban({reason: `AutoMod. (Infringir "${rule}")`});
                   } else
 
@@ -213,7 +213,7 @@ module.exports.run = async (client, message, args) => {
                     .setColor(Colores.rojo);
                     
 
-                    wUser.send(autoMod);
+                    await wUser.send(autoMod);
                     wUser.ban({reason: `AutoMod. (Infringir "${rule}")`});
                     
 
@@ -263,7 +263,7 @@ module.exports.run = async (client, message, args) => {
         **—** Te sugiero comprar un **-1 Warn** en la tienda del servidor. *( \`${prefix}shop\` para más info de precios, etc. )*`)
                   .setColor(Colores.rojo);
                     
-                    wUser.send(infoEmbed);
+                    await wUser.send(infoEmbed);
                   }
 
                 message.react("✅");
@@ -315,7 +315,8 @@ module.exports.run = async (client, message, args) => {
               .setDescription(`**—** Warneado: **${wUser}**.
     **—** Canal: **${message.channel}**.
     **—** Warns actuales: **${numWarns}**.
-    **—** Por infringir la regla: **${rule}**.`)
+    **—** Por infringir la regla: **${rule}**.
+    **—** Nota adjunta: \`${notes}\`.`)
               .setColor(Colores.rojo);
 
               return msg.edit(wEmbed);

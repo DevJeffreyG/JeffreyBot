@@ -68,7 +68,7 @@ Stats.findOne({
             Exp.findOne({
                 serverID: guild.id,
                 userID: author.id
-            }, (err, exp) => {
+            }, async (err, exp) => {
                 if(err) throw err;
 
                 if(exp && exp.level >= 5){ // si cumple los requisitos
@@ -377,9 +377,92 @@ Stats.findOne({
             **—** \`${prefix}ds calc\`: Determina automáticamente cuantos Jeffros tienes actualmente.
             **—** \`${prefix}ds info\`: Mira la información de un item.
             **—** \`${prefix}ds <id>\`: Compra uno de los items.`)
+                            .setFooter(`/ds es una abreviación de /darkshop, pero cualquiera puede usarse.`, )
                             .setColor(Colores.negro);
 
                             message.channel.send(embedAyuda);
+                            break;
+
+                        case "info":
+                        case "information":
+                        case "información":
+                        case "informacion":
+                            if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
+                            let darkshop = new Discord.MessageEmbed()
+                            .setImage("https://cdn.discordapp.com/attachments/464810032081666048/836365066864558091/DarkShop.png")
+                            .setColor(Colores.negro);
+
+                            let items = new Discord.MessageEmbed()
+                            .setImage("https://cdn.discordapp.com/attachments/464810032081666048/836362815710429224/Items.png")
+                            .setColor(Colores.negro);
+
+                            let inflacion = new Discord.MessageEmbed()
+                            .setImage("https://cdn.discordapp.com/attachments/464810032081666048/836364066578497546/Inflacion.png")
+                            .setColor(Colores.negro);
+
+                            let eventos = new Discord.MessageEmbed()
+                            .setImage("https://cdn.discordapp.com/attachments/464810032081666048/836368266938810398/Eventos.png")
+                            .setColor(Colores.negro);
+
+                            let inversiones = new Discord.MessageEmbed()
+                            .setImage("https://cdn.discordapp.com/attachments/464810032081666048/836369259101028402/Inversiones.png")
+                            .setColor(Colores.negro);
+
+                            let embedInformation1 = new Discord.MessageEmbed()
+                            .setAuthor(`| Lo básico:`, Config.darkLogoPng)
+                            .setDescription(`**—** Bienvenid@ a la DarkShop.
+**—** Con esta guía podrás entender básicamente todo acerca de esta nueva tienda dentro del servidor.
+**—** Lo básico vendría siendo los comandos dentro de la tienda, los cuales puedes ver usando \`${prefix}ds ayuda\`, cuando los hayas visto, vuelve aquí.`)
+                            .setColor(Colores.negro);
+
+                            let embedInformation2 = new Discord.MessageEmbed()
+                            .setAuthor(`| Los items:`, Config.darkLogoPng)
+                            .setDescription(`Esta nueva tienda tiene items principalmente que afectan a otros usuarios, **temporalmente, claro**.
+Y así como tú mismo puedes ser quien lo origine, también puedes ser perjudicado. Esto puede ser evitado, y es comprando el **Item #1, el __Firewall__**.
+Con este item, cualquier otro item que tenga un **efecto negativo** sobre quien se use, __será anulado__. **SIN EMBARGO...**
+Cuando cambias tus primeros ${Emojis.Jeffros}Jeffros por ${Emojis.Dark}DarkJeffros, se creará aleatoriamente un porcentaje (1% - ~15%) llamado **Precisión**.
+                            
+**— ¿Qué significa el porcentaje de la Precisión?**
+El porcentaje que se le da a un usuario al cambiar sus primero Jeffros por DarkJeffros... larga historia corta, es la probabilidad que tiene alguien de saltarse el **Firewall** de un usuario y así afectarlo con un item.`)
+                            .setColor(Colores.negro)
+
+                            let embedInformation3 = new Discord.MessageEmbed()
+                            .setAuthor(`| ¿Cómo funciona la inflación?`, Config.darkLogoPng)
+                            .setDescription(`Lo mágico de la DarkShop es la inflación. Esta es global, la misma para todos los usuarios, y esta va del 0.01% al 10%.
+La forma de determinar el precio actual de **${Emojis.Dark}1** es: **${Emojis.Jeffros}200 x <inflación>**, haciendo así que **${Emojis.Dark}1** pueda costar **${Emojis.Jeffros}2** hasta **${Emojis.Jeffros}2000**.
+La inflación dura un plazo máximo de **30 días** y se genera de forma aleatoria. **SIN EMBARGO...**`)
+                            .setColor(Colores.negro);
+                            
+                            let embedInformation4 = new Discord.MessageEmbed()
+                            .setAuthor(`| Los eventos:`, Config.darkLogoPng)
+                            .setDescription(`A partir de aquí empieza a ponerse interesante la cosa, dentro de un periodo de inflación puede haber, **o no** eventos con la inflación.
+La inflación puede subir, bajar o quedarse igual en un momento indeterminado.
+Pero... ¿cómo que interesante? ... ¿por qué? Ahora se viene el plot twist.`)
+                            .setColor(Colores.negro);
+
+                            let embedInformation5 = new Discord.MessageEmbed()
+                            .setAuthor(`| Inversiones:`, Config.darkLogoPng)
+                            .setDescription(`Ahhh, las inversiones. Debido a la inflación, puedes llegar incluso a comprar ${Emojis.Dark}100 por **${Emojis.Jeffros}200** que esos mismos ${Emojis.Dark}100 cuesten **${Emojis.Jeffros}200.000**.
+Bastante increíble, aunque este es sólo un escenario, que es muy poco probable, puede llegar a pasar. Así como puedes ganar, también puedes perder. Nunca olvides la duración de tus DarkJeffros.
+Sin embargo, por cuestiones preferenciales y como autopago a los servicios que proporcionamos, si al cambiar de DarkJeffros a Jeffros se da un suma mayor o igual a **${Emojis.Jeffros}15.000** deberás pagar un interés del **20%**. No importa si ha cambiado la inflación, siempre debes de pagar esto.
+He escuchado que piensan imponer un nuevo impuesto para los que tengan grandes sumas de ${Emojis.Jeffros}${Emojis.Jeffros}${Emojis.Jeffros}, así que ten eso en cuenta.
+                            
+**— La duración de los ${Emojis.Dark}DarkJeffros:**
+Cuando un usuario cambia sus Jeffros por DarkJeffros, su cuenta en esta tienda se verá comprometida por las autoridades del servidor, por esto, la misma tienda se encargará que a un plazo aleatorio todos los DarkJeffros que tengas en tu cuenta sean borrados para evitar problemas.
+Este plazo será definido por: \`La duración oculta de la inflación actual + 1 a 60 días adicionales\`.
+Puedes ver este plazo con \`${prefix}ds duration\`. Si no cambias tus DarkJeffros a Jeffros antes de este plazo, los perderás.`)
+                            .setColor(Colores.negro);
+
+                            await message.channel.send(darkshop)
+                            await message.channel.send(embedInformation1);
+                            await message.channel.send(items)
+                            await message.channel.send(embedInformation2)
+                            await message.channel.send(inflacion)
+                            await message.channel.send(embedInformation3)
+                            await message.channel.send(eventos)
+                            await message.channel.send(embedInformation4)
+                            await message.channel.send(inversiones)
+                            await message.channel.send(embedInformation5)
                             break;
 
                         case "status":
@@ -1590,7 +1673,7 @@ Stats.findOne({
                                         if(!stats) return message.reply("aún no tienes una cuenta, cambia unos cuantos Jeffros por DarkJeffros antes de venir a comprar.");
                                         
                                         if(!item){
-                                            return message.reply("ese item no existe.")
+                                            return message.channel.send(error);
                                         } else {
                                             if(!use){ // si no está listo para usar
                                                 return message.channel.send(`[003] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas comprar tu item :)`);
@@ -1636,15 +1719,10 @@ Stats.findOne({
                                                     let buyEmbed = new Discord.MessageEmbed()
                                                     .setAuthor(`| Compra`, Config.darkLogoPng)
                                                     .setColor(Colores.blanco)
-                                                    .setDescription(
-                                                        `
-                    \`▸\` ¿Estás seguro de comprar \`${item.itemName}\` por **${Emojis.Dark}${precio}**?
-                    \`▸\` Reacciona de acuerdo a tu preferencia.`
-                                                    )
-                                                    .setFooter(
-                                                        `▸ Esta compra no se puede devolver.`,
-                                                        "https://cdn.discordapp.com/emojis/494267320097570837.png"
-                                                    );
+                                                    .setDescription(`
+\`▸\` ¿Estás seguro de comprar \`${item.itemName}\` por **${Emojis.Dark}${precio}**?
+\`▸\` Reacciona de acuerdo a tu preferencia.`)
+                                                    .setFooter(`▸ Esta compra no se puede devolver.`, "https://cdn.discordapp.com/emojis/494267320097570837.png");
 
                                                     message.channel.send(buyEmbed).then(msg => {
                                                     msg
@@ -1698,13 +1776,10 @@ Stats.findOne({
 
                                                         let useEmbed = new Discord.MessageEmbed()
                                                         .setAuthor(`| Listo!`, Config.darkLogoPng)
-                                                        .setDescription(
-                                                            `
-                    \`▸\` Pago realizado con éxito.
-                    \`▸\` Compraste: \`${item.itemName}\` por **${Emojis.Dark}${precio}**.
-                    \`▸ Úsalo con '${prefix}ds items ${item.id}'\`.
-                    \`▸\` Ahora tienes: **${Emojis.Dark}${stats.djeffros}**.`
-                                                        )
+                                                        .setDescription(`\`▸\` Pago realizado con éxito.
+\`▸\` Compraste: \`${item.itemName}\` por **${Emojis.Dark}${precio}**.
+\`▸ Úsalo con '${prefix}ds items ${item.id}'\`.
+\`▸\` Ahora tienes: **${Emojis.Dark}${stats.djeffros}**.`)
                                                         .setColor(Colores.negro);
 
                                                         return msg.edit(useEmbed).then(() => {
@@ -1730,10 +1805,15 @@ Stats.findOne({
                 }
                     
                 } else { // si no los cumple
+                    console.log("No es nivel 5")
                     r = [
                         "{you}... No estás listo.",
                         "No tienes el valor para hacerlo.",
-                        "Esto no va a terminar bien para ti, {you}."
+                        "Esto no va a terminar bien para ti, {you}.",
+                        "{you}, no estás capacitado para el trabajo.",
+                        "Sigue la luz, {you}.",
+                        "Te encuentras en la oscuridad, {you}.",
+                        "Pronto estaremos compartiendo juntos, {you}."
                     ];
 
                     res = r[Math.floor(Math.random() * r.length)];

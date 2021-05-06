@@ -10,7 +10,15 @@
         },
         {
             "type": "updated",
-            "desc": "Se han actualizado las reglas"
+            "desc": "DarkShop is raising.."
+        },
+        {
+            "type": "updated",
+            "desc": "Se han arreglado algunos bugs en el sistema de EXP y Jeffros"
+        },
+        {
+            "type": "updated",
+            "desc": "Se han arreglado algunos bugs en el sistema de moderación"
         }
     ],
     "bienPng": "http://i.imgur.com/M6hqbcc.png",

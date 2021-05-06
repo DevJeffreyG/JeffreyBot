@@ -684,7 +684,7 @@ client.on("message", async message => {
     
     let jeffrosToAdd;
     if(lessThan3){
-      jeffrosToAdd = Math.ceil(Math.random() * 5);
+      jeffrosToAdd = Math.ceil(Math.random() * 2);
     } else if(moreThan6){
       jeffrosToAdd = Math.ceil(Math.random() * 15);
     } else {
@@ -765,11 +765,11 @@ client.on("message", async message => {
 
         let expToAdd;
         if(lessThan3){
-          expToAdd = Math.ceil(Math.random() * 5);
+          expToAdd = Math.ceil(Math.random() * 3);
         } else if(moreThan6){
-          expToAdd = Math.ceil(Math.random() * 15);
+          expToAdd = Math.ceil(Math.random() * 35);
         } else {
-          expToAdd = Math.ceil(Math.random() * 30);
+          expToAdd = Math.ceil(Math.random() * 15);
         }
 
         // VIP 200%

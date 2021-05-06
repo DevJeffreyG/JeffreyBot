@@ -148,7 +148,8 @@ module.exports.run = async (client, message, args) => {
               .setDescription(`**—** Softwarneado: **${member}**.
 **—** Mod: **${author.tag}**
 **—** Canal: **${message.channel}**.
-**—** Por infringir la regla: **${rule}**.`)
+**—** Por infringir la regla: **${rule}**.
+**—** Nota adjunta: \`${note}\`.`)
           .setColor(Colores.rojo);
                 
               return msg.edit(warned).then(() => {
