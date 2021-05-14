@@ -1377,6 +1377,7 @@ client.on("message", async msg => {
     if (msg.author.id === jeffreygID) return;
     if (msg.content.startsWith(prefix)) return;
     if (msg.channel.id === Config.offtopicChannel) return;
+    if (msg.channel.id === Config.spamChannel) return;
     if (msg.member.roles.cache.find(x => x.id === staffRole.id)) {
       return logC
         .send(`Un **STAFF** ha mencionado a Jeffrey en ${msg.channel}.`)
@@ -1395,7 +1396,7 @@ client.on("message", message => {
   if (author.bot) return;
   if (!message.member) return;
 
-  if (message.member.hasPermission("EMBED_LINKS") || channel.id === Config.offtopicChannel || channel.id === Config.gdpsSupportChannel) {
+  if (message.member.hasPermission("EMBED_LINKS") || channel.id === Config.offtopicChannel || channel.id === Config.spamChannel || channel.id === Config.gdpsSupportChannel) {
     return;
   }
 
@@ -1432,7 +1433,7 @@ client.on("messageUpdate", (oldmessage, message) => {
   if (author.bot) return;
   if (message.channel.type === "dm") return;
 
-  if (message.member.hasPermission("EMBED_LINKS") || channel.id === Config.offtopicChannel || channel.id === Config.gdpsSupportChannel) {
+  if (message.member.hasPermission("EMBED_LINKS") || channel.id === Config.offtopicChannel || channel.id === Config.spamChannel || channel.id === Config.gdpsSupportChannel) {
     return;
   }
 

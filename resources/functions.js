@@ -14,20 +14,6 @@ const ms = require("ms");
 var Chance = require("chance");
 var chance = new Chance();
 
-const prefix = Config.prefix;
-const jeffreygID = Config.jeffreygID;
-const jgServer = Config.jgServer;
-const logChannel = Config.logChannel;
-const offtopicChannel = Config.offtopicChannel;
-const mainChannel = Config.mainChannel;
-const mainVip = Config.mainVip;
-const botsChannel = Config.botsChannel;
-const botsVip = Config.botsVip;
-const staffComandos = Config.staffComandos;
-const staffChat = Config.staffChat;
-
-// ############################
-
 /* ##### MONGOOSE ######## */
 
 const mongoose = require("mongoose");

@@ -1813,7 +1813,9 @@ Puedes ver este plazo con \`${prefix}ds duration\`. Si no cambias tus DarkJeffro
                         "{you}, no estás capacitado para el trabajo.",
                         "Sigue la luz, {you}.",
                         "Te encuentras en la oscuridad, {you}.",
-                        "Pronto estaremos compartiendo juntos, {you}."
+                        "Pronto estaremos compartiendo juntos, {you}.",
+                        "El castillo te aguarda, {you}.",
+                        "Muy pronto todo será felicidad, {you}."
                     ];
 
                     res = r[Math.floor(Math.random() * r.length)];
