@@ -1,6 +1,6 @@
 {
 	"name": "jeffrey-bot",
-	"version": "1.6.131",
+	"version": "1.6.132",
 	"description": "El bot del servidor oficial de JeffreyG, remasterizado.",
 	"main": "jb.js",
 	"scripts": {

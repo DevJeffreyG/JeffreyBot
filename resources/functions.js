@@ -353,7 +353,7 @@ const intervalGlobalDatas = async function(justBoost){
     if(err) throw err;
 
     inflation = Number(Math.random() * 10).toFixed(2);
-    if(Number(inflation) < 1) inflation = Number(inflation) + 1;
+    if(Number(inflation) < 1) inflation = Number(inflation) + 1; // no puede ser menor a 1, sólo con los eventos
     date = new Date() // hoy
     duration = Math.floor(Math.random() * 30); // duración máxima 30 días.
 
@@ -399,18 +399,18 @@ const intervalGlobalDatas = async function(justBoost){
   // ELIMINAR DARKJEFFROS CADUCADOS
   GlobalData.find({
     "info.type": "dsDJDuration"
-  }, async (err, dark) => {
+  }, async (err, dark) => { // buscar todas las duraciones de darkjeffros
     if(err) throw err;
 
-    if(dark) {
+    if(dark) { // si hay
       let q = await GlobalData.findOne({
         "info.type": "dsInflation"
       });
 
       for(let i = 0; i < dark.length; i++){
         // variables
-        let id = dark[i].info.userID;
-        let member = guild.members.cache.find(x => x.id === id);
+        let id = dark[i].info.userID; // id de usuario
+        let member = guild.members.cache.find(x => x.id === id); // miembro actual
 
         let oldDate = new Date(dark[i].info.since);
         let newDate = new Date()
@@ -622,7 +622,7 @@ const intervalGlobalDatas = async function(justBoost){
           }
         })
       }
-    } else { // si ya existe, leerlo y revisar si ya es momento de cambiarlo
+    } else { // si ya existe un evento, leerlo y revisar si ya es momento de cambiarlo
       if(dark.info.inflation === "NaN"){ // error por alguna razón, elimina el evento
         dark.remove();
       } else { // si no hay error proseguir
