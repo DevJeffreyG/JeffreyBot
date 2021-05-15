@@ -292,6 +292,7 @@ const intervalGlobalDatas = async function(justBoost){
 
               if(!jeffros || jeffros.jeffros < price){
                 // quitarle los jeffros, y dejarlo en negativo
+                console.log(jeffros.userID, "ha quedado en negativos por no poder pagar", subName);
                 jeffros.jeffros -= price;
                 member.send(notEnough);
                 subs[i].remove();
@@ -335,6 +336,8 @@ const intervalGlobalDatas = async function(justBoost){
 
           // eliminar global data
           roled[i].remove();
+
+          console.log(member.user.tag, "se le ha eliminado el rol", role.name, "luego de pasar", realDuration);
         } else {
           // nada XD
         }
@@ -366,6 +369,8 @@ const intervalGlobalDatas = async function(justBoost){
       });
 
       newInflation.save();
+
+      console.log("Se ha creado una nueva inflación desde cero.")
     } else {
       // leer y cambiar si es necesario
       let oldDate = new Date(dark.info.since);
@@ -373,6 +378,7 @@ const intervalGlobalDatas = async function(justBoost){
 
       let diference1 = newDate.getTime() - oldDate.getTime();
       let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
+      let oldInflation = dark.info.inflation;
 
       if(pastDays >= dark.info.duration){
 
@@ -384,8 +390,8 @@ const intervalGlobalDatas = async function(justBoost){
 
         dark.markModified("info");
         dark.save();
-      } else {
-        
+
+        console.log("Se ha cambiado la inflación, ahora es", inflation, "|| era:", oldInflation);
       }
     }
   })
@@ -451,6 +457,7 @@ const intervalGlobalDatas = async function(justBoost){
 
               // eliminar dsDJDuration
               await dark[i].remove();
+              console.log("Se han eliminado los DJ de", memberD.tag)
 
               // intentar enviar un mensaje al MD.
               member.send(embed)
@@ -460,7 +467,7 @@ const intervalGlobalDatas = async function(justBoost){
 
               staffC.send(staffEmbed);
             }
-          } else {
+          } else { // sus darkjeffros están en 0
             // revisar si caduracion para eliminar el globaldata
             if(pastDays >= dark[i].info.duration){
               let staffCID = "514124198205980713";
@@ -481,6 +488,7 @@ const intervalGlobalDatas = async function(justBoost){
 
               // eliminar dsDJDuration
               await dark[i].remove();
+              console.log("Se ha eliminado el globaldata de DJ de", memberD.tag)
               staffC.send(staffEmbed);
             }
           }
@@ -512,7 +520,7 @@ const intervalGlobalDatas = async function(justBoost){
       duration = Math.floor(Math.random() * 30) + 1; // duración máxima 31 días.
 
       if(event === "s"){ // si el precio DEBE subir
-        console.log("sube");
+        console.log("Evento próximo va a subir");
         GlobalData.findOne({
           "info.type": "dsInflation"
         }, (err, inflations) => {
@@ -538,7 +546,7 @@ const intervalGlobalDatas = async function(justBoost){
           }
         })
       } else if(event === "b"){ // si el precio DEBE bajar
-        console.log("baja");
+        console.log("Evento próximo va a bajar");
         GlobalData.findOne({
           "info.type": "dsInflation"
         }, (err, inflations) => {
@@ -590,7 +598,7 @@ const intervalGlobalDatas = async function(justBoost){
           }
         })
       } else { // el precio no cambia
-        console.log("igual");
+        console.log("Evento próximo queda igual la inflación");
         GlobalData.findOne({
           "info.type": "dsInflation"
         }, (err, inflations) => {
@@ -626,6 +634,7 @@ const intervalGlobalDatas = async function(justBoost){
         let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
 
         if(pastDays >= dark.info.duration){
+          console.log("Ahora mismo hay un evento.")
           // enviar mensaje random de evento
           let newInflation = `**${dark.info.inflation}%**`;
           let rndmEventSUBE = [
@@ -726,6 +735,8 @@ const intervalGlobalDatas = async function(justBoost){
 
             inflation.markModified("info");
             inflation.save();
+
+            console.log("# Se ha actualizado la inflación debido al evento.")
           })
 
           // eliminar el evento
@@ -764,6 +775,7 @@ const intervalGlobalDatas = async function(justBoost){
           .setColor(Colores.verde);
 
           logs.send(unBEmbed)
+          console.log("Se ha desbaneado a", userID)
         } else {
           // nada XD
         }

@@ -286,11 +286,10 @@ client.on("ready", async () => {
   await functions.findLvls5(guild)
 
   /* ############ GLOBAL DATAS ############ */
-  console.log("Ciclo de Global Datas iniciado")
+  console.log("Ciclo de Global Datas iniciado por primera vez")
   functions.intervalGlobalDatas();
 
   setInterval(function(){
-    console.log("Ciclo de Global Datas iniciado")
     functions.intervalGlobalDatas();
   }, ms("2m"));
 });
