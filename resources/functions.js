@@ -438,7 +438,7 @@ const intervalGlobalDatas = async function(justBoost){
 
               let staffEmbed = new Discord.MessageEmbed()
               .setColor(Colores.verde)
-              .setDescription(`**—** Se han elimando los Dark Jeffros de ${memberD.user.tag}.
+              .setDescription(`**—** Se han elimando los Dark Jeffros de **${memberD.user.tag}**.
               **—** Desde: \`${dark[i].info.since}\`.
               **—** Duración: \`${dark[i].info.duration}\`.
               **—** Tenía: **${Emojis.Dark}${user.djeffros}**`)
@@ -462,7 +462,7 @@ const intervalGlobalDatas = async function(justBoost){
               // intentar enviar un mensaje al MD.
               member.send(embed)
               .catch(err => {
-                staffC.send(`**${member.tag} no recibió MD de DarkJeffros eliminados.**\n\`\`\`javascript\n${err}\`\`\``)
+                staffC.send(`**${member.user.tag} no recibió MD de DarkJeffros eliminados.**\n\`\`\`javascript\n${err}\`\`\``)
               });
 
               staffC.send(staffEmbed);
