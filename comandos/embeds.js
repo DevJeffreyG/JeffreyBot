@@ -5,6 +5,8 @@ const embedImages = require("./../resources/embeds.json");
 const Discord = require("discord.js");
 const prefix = Config.prefix;
 const jeffreygID = Config.jeffreygID;
+const ms = require("ms");
+
 let mainChannel = Config.mainChannel;
 let supportChannel = Config.supportChannel;
 let gdps = Config.gdpsSupportChannel;
@@ -54,7 +56,7 @@ module.exports.run = async (client, message, args) => {
 
 <@&${Config.lvl10}>
 • Cambiarse el apodo.
-• Posibilidad de conseguir un 115% más de EXP y Jeffros.
+• Posibilidad de conseguir un 15% más de EXP y Jeffros.
 
 <@&${Config.lvl20}>
 • 15% de descuento en la Jeffrey Shop.
@@ -64,6 +66,9 @@ module.exports.run = async (client, message, args) => {
 
 <@&${Config.lvl40}>
 • Cooldown para conseguir Jeffros y EXP reducido a la mitad. (30s)
+
+<@&${Config.lvl50}>
+• Posibilidad de conseguir un 50% más de EXP y Jeffros.
 
 ...
 
@@ -79,6 +84,71 @@ module.exports.run = async (client, message, args) => {
     )
     .setColor(Colores.nocolor);
 
+  // CANALES
+let canalesEmbed = new Discord.MessageEmbed()
+.setImage(embedImages.canales)
+.setColor(Colores.verde);
+
+let canalesEmbed2 = new Discord.MessageEmbed()
+.setTitle(`— Información de los canales del servidor`)
+.setDescription(`**—** A continuación se explicarán la mayoría de los canales por categorías del servidor y sus respectivas funciones.
+**—** Para información más específica, algunos canales tienen información en sus respectivas descripciones.
+**—** Algunso de los canales no explicados aquí son canales ocultos que sólo aquellos que los desbloqueen podrán verlos.`)
+.setColor(Colores.nocolor)
+
+let canalesEmbed3 = new Discord.MessageEmbed()
+.setTitle(`📖 — CHAPTER ONE`)
+.setDescription(`<#523159573935423509> • Las reglas del servidor, si hablas en el chat aseguras haberlas leído.
+
+<#485191307346837507> • Información general de todo el servidor, aquí pueden resolverse varias dudas que puedas tener.
+
+<#485191462422577182> • En este canal se harán anuncios a cerca del servidor de discord en su mayoría.
+
+<#834053291532615770> • En este canal se responden algunas de las preguntas que se hacen al staff con mayor frecuencia.
+
+<#668488733804462110> • Aquí se publican los mensajes que han sido destacados por medio de los **Awards**.
+
+<#548968993034338304> • Aquí se envían capturas de eventos memorables que ocurren en el servidor.
+
+<#524647331551772672> • Aquí puedes elegir tu color para tu nombre dentro del server.
+
+<#552580632266407957> • Aquí se encontrarán más colores para aquellos que tengan permisos de verlos.
+
+<#447813323149410304> • Puedes recibir opcionalmente notificaciones de las redes sociales de Jeffrey en este canal
+➟ Consíguelo en <#473627930396852226>.`)
+.setColor(Colores.nocolor);
+
+let canalesEmbed4 = new Discord.MessageEmbed()
+.setTitle(`🌎 — SURFACE`)
+.setDescription(`<#447802627187539968> • Este es canal general, aquí puedes hablar con los demás usuarios del servidor de cualquier tema.
+
+<#447797737216278531> • Si tienes problemas, dudas, quejas, sugerencias del servidor este es lugar para pedir soporte.
+
+<#839861097770123334> • Este canal se usará para comunicarte con el STAFF si crees que algún tipo de moderación fue hecha injustamente mientras un sistema de tickets es implementado.
+
+<#485192397228081162> • Canal en donde debes usar los bots del servidor.
+
+<#502255217379770428> • Si vienes del tutorial del GDPS, y buscas ayuda, puedes preguntar en este canal.
+
+<#485192438701359135> • En este canal puedes hablar fuera de contexto, o hacer spam, **no se permite el flood**.
+
+<#821486638768455700> • Aquí se puede hacer tanto SPAM como FLOOD, siendo este último el principal y el único sitio donde puede hacerse.
+
+<#552580632266407957> • Aquí se encontrarán más colores para aquellos que tengan permisos de verlos.
+
+<#447813323149410304> • Puedes recibir opcionalmente notificaciones de las redes sociales de Jeffrey en este canal
+➟ Consíguelo en <#473627930396852226>.`)
+.setColor(Colores.nocolor);
+
+let canalesEmbed5 = new Discord.MessageEmbed()
+.setTitle(`🎮 — ARCADE`)
+.setDescription(`<#564971690304602113> • <@!467377486141980682> Cuenta con los demás usuarios del sevidor, ¿hasta dónde podrán llegar?
+
+<#723304597191393301> • <@!520282851925688321> ¡Simulador de minería de minecraft en el servidor!
+
+<#820002227958841344> • <@!715906723982082139> Puedes jugar un juego de trivia con todos los miembros del servidor.`)
+.setColor(Colores.nocolor);
+
   // ROLES
 
   let rolesEmbed = new Discord.MessageEmbed()
@@ -87,11 +157,10 @@ module.exports.run = async (client, message, args) => {
 
   let rolesEmbed2 = new Discord.MessageEmbed()
     .setTitle(`<:Users:494281768883716096> — Roles básicos y especiales`)
-    .setDescription(
-      `
-  \`➟\` Los roles básicos se obtienen sin esfuerzo alguno. Y no tienen mucha influencia a la hora de estar en el server.
+    .setDescription(`
+\`➟\` Los roles básicos se obtienen sin esfuerzo alguno. Y no tienen mucha influencia a la hora de estar en el server.
 
-  \`➟\` Y por el contrario, los roles especiales, tienen cierto impacto en el server. Estos también tienen más dificultad para conseguirlos.`
+\`➟\` Y por el contrario, los roles especiales, tienen cierto impacto en el server. Estos también tienen más dificultad para conseguirlos.`
     )
     .setColor(Colores.nocolor);
 
@@ -130,18 +199,18 @@ module.exports.run = async (client, message, args) => {
 
   let jeffrosEmbed2 = new Discord.MessageEmbed()
     .setDescription(`**—** ¿Qué son los ${Emojis.Jeffros}effros y como conseguirlos?
-    ➟ Los Jeffros son la moneda virtual del servidor. Puedes conseguirlos al hablar en <#${mainChannel}>.
+➟ Los Jeffros son la moneda virtual del servidor. Puedes conseguirlos al hablar en <#${mainChannel}>.
 
-    **—** ¿Cómo gasto mis Jeffros?
-    ➟ Los Jeffros se usarán para comprar items en la tienda del servidor (\`${prefix}shop\`) y usar los **Awards**.
+**—** ¿Cómo gasto mis Jeffros?
+➟ Los Jeffros se usarán para comprar items en la tienda del servidor (\`${prefix}shop\`) y usar los **Awards**.
 
-    **—** No confundir con los __Dark${Emojis.Dark}effros__:
-    ➟ Los DarkJeffros se desbloquearán cuando un usuario consiga el nivel 5. Podrán ser usados en la DarkShop.
-    
-    **—** ¿Como consigo DarkJeffros?
-    ➟ Piensa en los DarkJeffros como si fuesen bitcoins. ¿Por qué bitcoins? Porque es divertido.
-    ➟ Los DarkJeffros solo se podrán conseguir cambiando Jeffros. Estos pueden ser más costosos dependiendo de la **inflación actual**.
-    ➟ Usando el comando \`${prefix}darkshop ayuda\` podrás tener más información.`
+**—** No confundir con los __Dark${Emojis.Dark}effros__:
+➟ Los DarkJeffros se desbloquearán cuando un usuario consiga el nivel 5. Podrán ser usados en la DarkShop.
+
+**—** ¿Como consigo DarkJeffros?
+➟ Piensa en los DarkJeffros como si fuesen bitcoins... ¿Por qué bitcoins? Porque es divertido.
+➟ Los DarkJeffros solo se podrán conseguir cambiando Jeffros. Estos pueden ser más costosos dependiendo de la **inflación actual**.
+➟ Usando el comando \`${prefix}darkshop ayuda\` podrás tener más información.`
     )
     .setColor(Colores.nocolor);
 
@@ -160,16 +229,62 @@ module.exports.run = async (client, message, args) => {
     .setColor(Colores.nocolor);
 
   let staffEmbed4 = new Discord.MessageEmbed()
-    .setDescription(
-      `${staffRole} • Todo aquel que tenga este rol, es parte del equipo del STAFF.
+    .setDescription(`${staffRole} • Todo aquel que tenga este rol, es parte del equipo del STAFF.
 
-  ${adminRole} • ${modRole}.
+${adminRole} • ${modRole}.
 
-  ➟ ${jeffreyRole} • Es el rol de JeffreyG. Ten por seguro que si alguien tiene este rol es porque es el verdadero Jeffrey.
+➟ ${jeffreyRole} • Es el rol de JeffreyG. Ten por seguro que si alguien tiene este rol es porque es el verdadero Jeffrey.
 
-  ➟ Usando el comando \`${prefix}serverinfo\` podrás ver quiénes hacen parte del equipo del Staff más cómodamente.`
+➟ Usando el comando \`${prefix}serverinfo\` podrás ver quiénes hacen parte del equipo del Staff más cómodamente.`
     )
     .setColor(Colores.verde);
+
+// INTERESES
+let interestEmbed = new Discord.MessageEmbed()
+.setImage(embedImages.interest)
+.setColor(Colores.verde);
+
+let interestEmbed2 = new Discord.MessageEmbed()
+.setDescription(`**—** Aquellos usuarios con una suma mayor a **${Emojis.Jeffros}25.000**, deberán pagar los siguientes intereses los días 28 de cada mes, a las 12:00 GMT-5:
+
+Más de **${Emojis.Jeffros}90.000** ➟ **20%**
+Más de **${Emojis.Jeffros}40.000** ➟ **10%**
+Más de **${Emojis.Jeffros}25.000** ➟ **5%**
+Más de **${Emojis.Jeffros}20.000** ➟ **1%**`)
+.setColor(Colores.nocolor)
+
+// AWARDS
+let silver = guild.emojis.cache.find(x => x.id === Config.silverAward);
+let gold = guild.emojis.cache.find(x => x.id === Config.goldAward);
+let platinium = guild.emojis.cache.find(x => x.id === Config.platiniumAward);
+
+silver = silver ? silver : "SILVER EMOTE";
+gold = gold ? gold : "GOLD EMOTE";
+platinium = platinium ? platinium : "PLAT EMOTE";
+
+let awardsEmbed = new Discord.MessageEmbed()
+.setImage(embedImages.awards)
+.setColor(Colores.verde);
+
+let awardsEmbed2 = new Discord.MessageEmbed()
+.setDescription(`**—** ¿Qué son los Awards?
+**➟** Los Awards, como su nombre lo dice traducido al español, son una serie de premios que se muestran en un mensaje.
+
+**—** ¿Como le doy un premio a un mensaje?
+**➟** Para dar un Award, es tan fácil como reaccionar al mensaje que quieres darle el premio, con el premio deseado.`)
+.setFooter(
+  `Idea de los Awards tomada de REDDIT.`,
+  "https://www.redditinc.com/assets/images/site/reddit-logo.png"
+)
+.setColor(Colores.nocolor);
+
+let awardsEmbed3 = new Discord.MessageEmbed()
+.setDescription(`**${silver} Plata** • Cuesta **${Emojis.Jeffros}100**, se envía el mensaje a <#${Config.hallChannel}> y ya está.
+
+**${gold} Oro** • Cuesta **${Emojis.Jeffros}500**, se envía el mensaje a <#${Config.hallChannel}>, se le da **${Emojis.Jeffros}100** al autor del mensaje premiado.
+
+**${platinium} Platino** • Cuesta **${Emojis.Jeffros}1800**, se envía el mensaje a <#${Config.hallChannel}>, se le da __**${Emojis.Jeffros}700**__ al autor del mensaje premiado.`)
+.setColor(Colores.nocolor);
   
   // MANUAL
   let manualEmbed = new Discord.MessageEmbed()
@@ -224,11 +339,14 @@ let noEmbed = new Discord.MessageEmbed()
 .setAuthor(`| ¿Qué necesitas?`, author.displayAvatarURL())
 .setColor(Colores.nocolor)
 .setDescription(`**—** ${prefix}embed <embed>
+\`▸\` Informacion
 \`▸\` Muted
 \`▸\` Reglas
 \`▸\` Niveles
 \`▸\` Roles
+\`▸\` Canales
 \`▸\` Jeffros
+\`▸\` Interes
 \`▸\` Awards
 \`▸\` Staff
 \`▸\` Colores
@@ -245,7 +363,40 @@ let noEmbed = new Discord.MessageEmbed()
   let caso = args[0].toLowerCase();
   let shrug = "¯\\_(ツ)_/¯";
   switch (args[0]) {
-    case (caso = "colores"):
+    case (caso = "informacion"):
+      //niveles
+      await message.channel.send(lvlEmbed1);
+      await message.channel.send(lvlEmbed2);
+      //canales
+      await message.channel.send(canalesEmbed);
+      await message.channel.send(canalesEmbed2);
+      await message.channel.send(canalesEmbed3);
+      await message.channel.send(canalesEmbed4);
+      await message.channel.send(canalesEmbed5);
+      //roles
+      await message.channel.send(rolesEmbed);
+      await message.channel.send(rolesEmbed2);
+      await message.channel.send(rolesEmbed3);
+      //jeffros
+      await message.channel.send(jeffrosEmbed);
+      await message.channel.send(jeffrosEmbed2);
+      //interes
+      await message.channel.send(interestEmbed);
+      await message.channel.send(interestEmbed2);
+      //awards
+      await message.channel.send(awardsEmbed);
+      await message.channel.send(awardsEmbed2);
+      await message.channel.send(awardsEmbed3);
+      //staff
+      await message.channel.send(staffEmbed);
+      await message.channel.send(staffEmbed2);
+      await message.channel.send(staffEmbed3);
+      await message.channel.send(staffEmbed4);
+      //final
+      await message.channel.send(finalInfoEmbed);
+      break;
+
+      case (caso = "colores"):
       embed1.setImage(embedImages.colors);
       embed1.setColor(Colores.verde);
       embed2.setDescription(
@@ -305,24 +456,24 @@ let noEmbed = new Discord.MessageEmbed()
     case (caso = "reglas"):
       embed1.setImage(embedImages.reglas);
       embed1.setColor(Colores.verde);
-      embed2.setDescription(`**—** Escribe en el chat como si estuvieses hablando con alguien que te importa mucho, con **sentido común** y **sin incoherencias**.
+      embed2.setDescription(`**Regla N°1**: Escribe en el chat como si estuvieses hablando con alguien que te importa mucho, con **sentido común** y **sin incoherencias**.
 
-**—** Trata a las personas con las que no tienes tanta confianza con **respeto y amabilidad**. No menciones innecesariamente. No gore ni contenido que pueda herir la sensibilidad de los demás **(NO NSFW)**.
+**Regla N°2**: Trata a las personas con las que no tienes tanta confianza con **respeto y amabilidad**. No menciones innecesariamente. No gore ni contenido que pueda herir la sensibilidad de los demás **(NO NSFW)**.
 
-**—** Cada canal tiene un fin, **escribe dónde debas hacerlo**. Siempre lee las descripciones de los canales.
+**Regla N°3**: Cada canal tiene un fin, **escribe dónde debas hacerlo**. Siempre lee las descripciones de los canales.
 
-**—** No hables de problemas personales en los chats, eso es privado y debería mantenerse así.
+**Regla N°4**: No hables de problemas personales en los chats, eso es privado y debería mantenerse así.
 
-**—** **No flood ni spam** en los canales generales.
+**Regla N°5**: **No flood ni spam** en los canales generales.
 
-**—** No nicknames inapropiados ni con símbolos que no te dejen mencionarlos ni que cambien drásticamente tu posición en la lista de miembros.
+**Regla N°6**: No nicknames inapropiados ni con símbolos que no te dejen mencionarlos ni que cambien drásticamente tu posición en la lista de miembros.
 
-**—** No se permiten cadenas de mensajes en el chat.
+**Regla N°7**: No se permiten cadenas de mensajes en el chat.
 
-**—** No reclames/quejes en **canales generales**, acerca de tus warns/softwarns o cualquier acción de moderación que se haya aplicado, ya que puedes incomodar a otros usuarios con tus quejas, para ello, próximamente se **implementará** un sistema de tickets donde podras comunicarte con el STAFF directamente.
-➟ De mientras, mantén estos temas ya sea en <#447797737216278531> o en <#573166749436870687> si tienes VIP.
+**Regla N°8**: No reclames/quejes en **canales generales**, acerca de tus warns/softwarns o cualquier acción de moderación que se haya aplicado, ya que puedes incomodar a otros usuarios con tus quejas, para ello, próximamente se **implementará** un sistema de tickets donde podras comunicarte con el STAFF directamente.
+➟ De mientras, mantén estos temas en <#839861097770123334>.
 
-**—** **Debes** cumplir las [Condiciones del servicio de Discord "TOS"](https://discord.com/terms) y sus [Directivas de la comunidad](https://discord.com/guidelines).
+**Regla N°9**: **Debes** cumplir las [Condiciones del servicio de Discord "TOS"](https://discord.com/terms) y sus [Directivas de la comunidad](https://discord.com/guidelines).
 
 \`—\` Un dato curioso: ${client.user} te enviará un mensaje al recibir cualquier tipo de warn, siempre y cuando tengas los MDs activados.
 Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para conocer __tus__ warns.`);
@@ -387,36 +538,9 @@ Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para c
       break;
 
     case (caso = "awards"):
-      let silver = guild.emojis.cache.find(x => x.id === Config.silverAward);
-      let gold = guild.emojis.cache.find(x => x.id === Config.goldAward);
-      let platinium = guild.emojis.cache.find(x => x.id === Config.platiniumAward);
-
-      silver = silver ? silver : "SILVER EMOTE";
-      gold = gold ? gold : "GOLD EMOTE";
-      platinium = platinium ? platinium : "PLAT EMOTE";
-
-      embed1.setImage(embedImages.awards);
-      embed1.setColor(Colores.verde);
-      embed2.setDescription(`**—** ¿Qué son los Awards?
-**➟** Los Awards, como su nombre lo dice traducido al español, son una serie de premios que se muestran en un mensaje.
-
-**—** ¿Como le doy un premio a un mensaje?
-**➟** Para dar un Award, es tan fácil como reaccionar al mensaje que quieres darle el premio, con el premio deseado.`);
-      embed2.setFooter(
-        `Idea de los Awards tomada de REDDIT.`,
-        "https://www.redditinc.com/assets/images/site/reddit-logo.png"
-      );
-      embed2.setColor(Colores.nocolor);
-      embed3.setDescription(`**${silver} Plata** • Cuesta **${Emojis.Jeffros}100**, se envía el mensaje a <#${Config.hallChannel}> y ya está.
-
-**${gold} Oro** • Cuesta **${Emojis.Jeffros}500**, se envía el mensaje a <#${Config.hallChannel}>, se le da **${Emojis.Jeffros}100** al autor del mensaje premiado.
-
-**${platinium} Platino** • Cuesta **${Emojis.Jeffros}1800**, se envía el mensaje a <#${Config.hallChannel}>, se le da __**${Emojis.Jeffros}700**__ al autor del mensaje premiado.`);
-      embed3.setColor(Colores.nocolor);
-
-      message.channel.send(embed1).then(m => {
-        message.channel.send(embed2).then(s => {
-          message.channel.send(embed3);
+      message.channel.send(awardsEmbed).then(m => {
+        message.channel.send(awardsEmbed2).then(s => {
+          message.channel.send(awardsEmbed3);
         });
       });
 
@@ -438,10 +562,24 @@ Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para c
 
       break;
 
+    case (caso = "canales"):
+      await message.channel.send(canalesEmbed);
+      await message.channel.send(canalesEmbed2);
+      await message.channel.send(canalesEmbed3);
+      await message.channel.send(canalesEmbed4);
+      await message.channel.send(canalesEmbed5);
+
+      break;
+
     case (caso = "jeffros"):
       message.channel.send(jeffrosEmbed).then(() => {
         message.channel.send(jeffrosEmbed2);
       });
+      break;
+
+    case (caso = "interes"):
+      await message.channel.send(interestEmbed);
+      await message.channel.send(interestEmbed2);
       break;
 
     case (caso = "staff"):

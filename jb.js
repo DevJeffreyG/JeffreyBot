@@ -12,6 +12,7 @@ const fs = require("fs");
 const ms = require("ms");
 var Chance = require("chance");
 var chance = new Chance();
+const CronJob = require('cron').CronJob;
 
 const moment = require('moment-timezone');
 moment().tz("America/Bogota").format();
@@ -291,7 +292,78 @@ client.on("ready", async () => {
 
   setInterval(function(){
     functions.intervalGlobalDatas();
-  }, ms("2m"));
+  }, ms("1m"));
+
+  // PAGAR INTERESES LOS FINES DE MES
+  // buscar gente con más de 25k
+  let interestJob = new CronJob('0 12 28 * *', function() { // los 28 de cada mes al medio día
+    console.log('CronJob iniciado.');
+
+    let finalinterest;
+
+    Jeffros.find({
+      serverID: guild.id,
+      jeffros: {$gte: 25000}
+    }, (err, monopoly) => {
+      if(err) throw err;
+
+      for (let i = 0; i < monopoly.length; i++) {
+        const quser = monopoly[i];
+        
+        let member = guild.members.cache.get(quser.userID) || null;
+
+        if(member){ // si el usuario está en el servidor, cobrar interés.
+          let jeffros = quser.jeffros;
+
+          // definir el interés a pagar
+
+          if(jeffros >= 90000){ // que el interés sea del 20%
+            finalinterest = 0.20;
+          } else if(jeffros >= 40000) { // que el interés sea del 10%
+            finalinterest = 0.10;
+          } else if(jeffros >= 25000) { // que el interés sea del 5%
+            finalinterest = 0.05;
+          } else if(jeffros >= 20000) { // que el interés sea del 1%
+            finalinterest = 0.01;
+          }
+
+          let toReduce = Math.floor(jeffros*finalinterest);
+          
+          console.log("(J)"+jeffros, "de", member.user.tag, "pasa a:", jeffros - toReduce, "por el interés seleccionado:", finalinterest*100+"%");
+
+          // eliminar los jeffros
+          // quser.jeffros -= toReduce;
+          //await quser.save(); ################################################ QUITAR EL COMENTARIO CUANDO EMPIECE JUNIO
+
+          let log = new Discord.MessageEmbed()
+          .setAuthor(`| Interés`, member.user.displayAvatarURL())
+          .setDescription(`**—** Tendría: **${Emojis.Jeffros}${jeffros}**.
+**—** Ahora tendría: **${Emojis.Jeffros}${quser.jeffros}**.
+**—** Pagaría: **${Emojis.Jeffros}${toReduce} (${finalinterest*100}%)**.`)
+          .setColor(Colores.verde);
+
+          let userLog = new Discord.MessageEmbed()
+          .setAuthor(`| Interés`, member.user.displayAvatarURL())
+          .setDescription(`**—** Tenías: **${Emojis.Jeffros}${jeffros}**.
+**—** Ahora tienes: **${Emojis.Jeffros}${quser.jeffros}**.
+**—** Pagaste: **${Emojis.Jeffros}${toReduce} (${finalinterest*100}%)**.`)
+          .setColor(Colores.verde);
+
+          channel.send(log); // logchannel predefinido arriba
+
+          // quitar los comentarios de esto tambien #########################################################
+          /* try {
+            member.send(userLog)
+          } catch {
+            // error al enviar mensaje al usuario
+            channel.send("No se pudo enviar el mensaje al usuario.")
+          } */
+        }
+      }
+    })
+  }, null, true, 'America/Bogota');
+
+  interestJob.start(); // iniciar cron job de interés
 });
 
 client.on("messageDelete", async(message) => {
@@ -681,24 +753,31 @@ client.on("message", async message => {
     
     if(author.id == jeffreygID || disableEXPs === false){
     
-    let jeffrosToAdd;
-    if(lessThan3){
-      jeffrosToAdd = Math.ceil(Math.random() * 2);
-    } else if(moreThan6){
-      jeffrosToAdd = Math.ceil(Math.random() * 15);
-    } else {
-      jeffrosToAdd = Math.ceil(Math.random() * 5);
-    }
-
+    let benefitMultiplier = 1; // si es uno no pasaría nada
     // VIP 200%
     if (message.member.roles.cache.find(x => x.id === "529275759521431553")) {
-      jeffrosToAdd = Math.ceil(Math.random() * ((10 / 100) * 200));
+      benefitMultiplier += 1; // 2
     }
 
     // NIVEL 10 115%
 
     if (message.member.roles.cache.find(x => x.id === Config.lvl10)) {
-      jeffrosToAdd = Math.ceil(Math.random() * ((10 / 100) * 115));
+      benefitMultiplier += 0.15; // 2.15
+    }
+
+    // NIVEL 50 150%
+
+    if (message.member.roles.cache.find(x => x.id === Config.lvl50)) {
+      benefitMultiplier += 0.5; // 2.65
+    }
+
+    let jeffrosToAdd;
+    if(lessThan3){
+      jeffrosToAdd = Math.ceil(Math.random() * (2 * benefitMultiplier));
+    } else if(moreThan6){
+      jeffrosToAdd = Math.ceil(Math.random() * (15 * benefitMultiplier));
+    } else {
+      jeffrosToAdd = Math.ceil(Math.random() * (5 * benefitMultiplier));
     }
 
     if (multiplier != 1) {
@@ -764,22 +843,11 @@ client.on("message", async message => {
 
         let expToAdd;
         if(lessThan3){
-          expToAdd = Math.ceil(Math.random() * 3);
+          expToAdd = Math.ceil(Math.random() * (3 * benefitMultiplier));
         } else if(moreThan6){
-          expToAdd = Math.ceil(Math.random() * 35);
+          expToAdd = Math.ceil(Math.random() * (35 * benefitMultiplier));
         } else {
-          expToAdd = Math.ceil(Math.random() * 15);
-        }
-
-        // VIP 200%
-        if (message.member.roles.cache.find(x => x.id === "529275759521431553")) {
-          expToAdd = Math.ceil(Math.random() * ((10 / 100) * 200));
-        }
-
-        // NIVEL 10 115%
-
-        if (message.member.roles.cache.find(x => x.id === Config.lvl10)) {
-          expToAdd = Math.ceil(Math.random() * ((10 / 100) * 115));
+          expToAdd = Math.ceil(Math.random() * (15 * benefitMultiplier));
         }
 
         if (multiplier != 1) {

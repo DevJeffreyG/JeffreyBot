@@ -15,11 +15,16 @@
         },
         {
             "type": "updated",
-            "desc": "Se han arreglado algunos bugs en el sistema de EXP y Jeffros"
+            "desc": "Se han arreglado algunos bugs en el sistema de EXP y Jeffros",
+            "extended": "No se aplicaba correctamente el % de acuerdo al nivel del usuario."
         },
         {
             "type": "updated",
-            "desc": "Se han arreglado algunos bugs en el sistema de moderación"
+            "desc": "Se están trabajando algunos bugs para ver todos los items de las tiendas"
+        },
+        {
+            "type": "updated",
+            "desc": "Se preparan cambios a la información y reglas"
         }
     ],
     "bienPng": "http://i.imgur.com/M6hqbcc.png",
@@ -35,7 +40,7 @@
     "mainVip": "573166733955694593",
     "botsChannel": "485192397228081162",
     "supportChannel": "447797737216278531",
-    "logChannel": "514124198205980713",
+    "logChannel": "447816644765679616",
     "dsChannel": "790440004442521600",
     "dsRole": "790995699759448094",
     "_comment": "447816644765679616",

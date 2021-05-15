@@ -39,29 +39,24 @@ module.exports.run = async (client, message, args) => {
 
   if (!args[0]) {
     // primero se buscan TODOS los items que hayan en la tienda
-    Items.find(
-      {
+    Items.find({
         serverID: guild.id
-      },
-      (err, items) => {
+    },(err, items) => {
         if (err) throw err;
 
         Jeffros.findOne({
           serverID: guild.id,
           userID: author.id
-        }, async (err, j) => {
+        }, async (err, j) => { // buscar las jeffros del quien hace el comando "j"
 
 
         let embed = new Discord.MessageEmbed()
-        .setAuthor(
-          `| Shop`,
-          author.displayAvatarURL()
-        )
-          .setDescription(`**—** ¡Bienvenido a la nueva tienda! para comprar items \`${prefix}shop <ID del item>\`.
+        .setAuthor(`| Shop`,author.displayAvatarURL())
+        .setDescription(`**—** ¡Bienvenid@ a la tienda! para comprar items usa \`${prefix}shop <ID del item>\`.
 **—** Para tener más información del item usa \`${prefix}shop info <id>\`.
 **—** Tienes ${Emojis.Jeffros}**${j.jeffros}**`);
 
-        if (items.length === 0) {
+        if (items.length === 0) { // si no hay items en la db
           embed.setColor(Colores.rojo);
           embed.addField(
             `— No hay nada`,
@@ -69,13 +64,10 @@ module.exports.run = async (client, message, args) => {
           );
           return message.channel.send(embed);
         } else {
-          // si hay menos de o 5 resultados
+          // si hay menos de 3 resultados
           if (items.length <= itemPerPage) {
             embed.setColor(Colores.verde);
-            embed.setFooter(
-              `| Tienda oficial - Página 1 de 1`,
-              guild.iconURL()
-            );
+            embed.setFooter(`| Tienda oficial - Página 1 de 1`, guild.iconURL());
 
             for (let i = 0; i < items.length; i++) {
               let isSub = false;
@@ -92,18 +84,15 @@ module.exports.run = async (client, message, args) => {
 
               if(!usesQuery) return message.channel.send(`[003] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas seguir usando correctamente el comando :)`)
 
-              All.findOne(
-                {
+              All.findOne({
                   userID: author.id,
                   itemID: items[i].id,
                   isDarkShop: false
-                },
-                (err, all) => {
+              }, (err, all) => { //totalpurchases
                   let precio = items[i].itemPrice;
 
-                  if (all) {
-                    precio =
-                      Math.floor(items[i].itemPrice) + all.quantity * interest;
+                  if (all) { // si un usuario tiene totalpurchases del item del loop actual
+                    precio = Math.floor(items[i].itemPrice) + all.quantity * interest;
 
                     if (
                       message.member.roles.cache.find(
@@ -113,18 +102,13 @@ module.exports.run = async (client, message, args) => {
                       precio = `~~${precio}~~ ${Math.floor(items[i].itemPrice) + all.quantity * interest - ((Math.floor(items[i].itemPrice) + all.quantity * interest) / 100) * 15}`;
                     }
                   } else {
-                    if (
-                      message.member.roles.cache.find(
-                        x => x.id === Config.lvl20
-                      )
-                    ) {
-                      precio = `~~${precio}~~ ${Math.floor(items[i].itemPrice) -
-                        (Math.floor(items[i].itemPrice) / 100) * 15}`;
+                    if (message.member.roles.cache.find(x => x.id === Config.lvl20)) { // si tiene descuentos de lvl 20
+                      precio = `~~${precio}~~ ${Math.floor(items[i].itemPrice) - (Math.floor(items[i].itemPrice) / 100) * 15}`;
                     }
                   }
 
                   if(!isSub){
-                    if(userIsOnMobible && !items[i].ignoreInterest){
+                    if(userIsOnMobible && !items[i].ignoreInterest){ // si está en movil y NO ignora el interés
                       embed.addField(
                         `— { ${items[i].id} } ${items[i].itemName}`,
                         `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
@@ -134,7 +118,7 @@ module.exports.run = async (client, message, args) => {
                         `— { ${items[i].id} } ${items[i].itemName}`,
                         `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
                       );
-                    } else if(!userIsOnMobible && items[i].ignoreInterest == true){
+                    } else {
                       embed.addField(
                         `— { ${items[i].id} } ${items[i].itemName}`,
                         `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
@@ -153,7 +137,7 @@ module.exports.run = async (client, message, args) => {
                 }
               );
             }
-          } else {
+          } else { // hay más de 3 resultados
             let pagn = "1";
             let totalpags;
 
@@ -239,7 +223,7 @@ module.exports.run = async (client, message, args) => {
                           `— { ${items[i].id} } ${items[i].itemName}`,
                           `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
                         );
-                      } else if(!userIsOnMobible && items[i].ignoreInterest == true){
+                      } else {
                         embed.addField(
                           `— { ${items[i].id} } ${items[i].itemName}`,
                           `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
@@ -383,7 +367,7 @@ module.exports.run = async (client, message, args) => {
                                           `— { ${items[i].id} } ${items[i].itemName}`,
                                           `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
                                         );
-                                      } else if(!userIsOnMobible && items[i].ignoreInterest == true){
+                                      } else {
                                         embed.addField(
                                           `— { ${items[i].id} } ${items[i].itemName}`,
                                           `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
@@ -512,7 +496,7 @@ module.exports.run = async (client, message, args) => {
                                           `— { ${items[i].id} } ${items[i].itemName}`,
                                           `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
                                         );
-                                      } else if(!userIsOnMobible && items[i].ignoreInterest == true){
+                                      } else {
                                         embed.addField(
                                           `— { ${items[i].id} } ${items[i].itemName}`,
                                           `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`

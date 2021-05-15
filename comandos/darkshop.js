@@ -423,7 +423,7 @@ Con este item, cualquier otro item que tenga un **efecto negativo** sobre quien 
 Cuando cambias tus primeros ${Emojis.Jeffros}Jeffros por ${Emojis.Dark}DarkJeffros, se creará aleatoriamente un porcentaje (1% - ~15%) llamado **Precisión**.
                             
 **— ¿Qué significa el porcentaje de la Precisión?**
-El porcentaje que se le da a un usuario al cambiar sus primero Jeffros por DarkJeffros... larga historia corta, es la probabilidad que tiene alguien de saltarse el **Firewall** de un usuario y así afectarlo con un item.`)
+El porcentaje que se le da a un usuario al cambiar sus primeros Jeffros por DarkJeffros... larga historia corta, es la probabilidad que tiene alguien de saltarse el **Firewall** de un usuario y así afectarlo con un item.`)
                             .setColor(Colores.negro)
 
                             let embedInformation3 = new Discord.MessageEmbed()
@@ -445,7 +445,7 @@ Pero... ¿cómo que interesante? ... ¿por qué? Ahora se viene el plot twist.`)
                             .setDescription(`Ahhh, las inversiones. Debido a la inflación, puedes llegar incluso a comprar ${Emojis.Dark}100 por **${Emojis.Jeffros}200** que esos mismos ${Emojis.Dark}100 cuesten **${Emojis.Jeffros}200.000**.
 Bastante increíble, aunque este es sólo un escenario, que es muy poco probable, puede llegar a pasar. Así como puedes ganar, también puedes perder. Nunca olvides la duración de tus DarkJeffros.
 Sin embargo, por cuestiones preferenciales y como autopago a los servicios que proporcionamos, si al cambiar de DarkJeffros a Jeffros se da un suma mayor o igual a **${Emojis.Jeffros}15.000** deberás pagar un interés del **20%**. No importa si ha cambiado la inflación, siempre debes de pagar esto.
-He escuchado que piensan imponer un nuevo impuesto para los que tengan grandes sumas de ${Emojis.Jeffros}${Emojis.Jeffros}${Emojis.Jeffros}, así que ten eso en cuenta.
+Ten cuidado, aquellos que tengan **${Emojis.Jeffros}25.000** o más; deberán pagar un interés, el cuál es detallado en <#${Config.infoChannel}>, así que ten eso en cuenta.
                             
 **— La duración de los ${Emojis.Dark}DarkJeffros:**
 Cuando un usuario cambia sus Jeffros por DarkJeffros, su cuenta en esta tienda se verá comprometida por las autoridades del servidor, por esto, la misma tienda se encargará que a un plazo aleatorio todos los DarkJeffros que tengas en tu cuenta sean borrados para evitar problemas.
