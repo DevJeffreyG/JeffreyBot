@@ -245,7 +245,7 @@ let interestEmbed = new Discord.MessageEmbed()
 .setColor(Colores.verde);
 
 let interestEmbed2 = new Discord.MessageEmbed()
-.setDescription(`**—** Aquellos usuarios con una suma mayor a **${Emojis.Jeffros}25.000**, deberán pagar los siguientes intereses los días 28 de cada mes, a las 12:00 GMT-5:
+.setDescription(`**—** Aquellos usuarios con una suma mayor a **${Emojis.Jeffros}20.000**, deberán pagar los siguientes intereses los días 28 de cada mes, a las 12:00 GMT-5:
 
 Más de **${Emojis.Jeffros}90.000** ➟ **20%**
 Más de **${Emojis.Jeffros}40.000** ➟ **10%**

@@ -759,13 +759,13 @@ client.on("message", async message => {
       benefitMultiplier += 1; // 2
     }
 
-    // NIVEL 10 115%
+    // NIVEL 10 15% MÁS
 
     if (message.member.roles.cache.find(x => x.id === Config.lvl10)) {
       benefitMultiplier += 0.15; // 2.15
     }
 
-    // NIVEL 50 150%
+    // NIVEL 50 50% MÁS
 
     if (message.member.roles.cache.find(x => x.id === Config.lvl50)) {
       benefitMultiplier += 0.5; // 2.65

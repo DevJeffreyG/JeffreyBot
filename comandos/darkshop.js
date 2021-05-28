@@ -444,8 +444,7 @@ Pero... ¿cómo que interesante? ... ¿por qué? Ahora se viene el plot twist.`)
                             .setAuthor(`| Inversiones:`, Config.darkLogoPng)
                             .setDescription(`Ahhh, las inversiones. Debido a la inflación, puedes llegar incluso a comprar ${Emojis.Dark}100 por **${Emojis.Jeffros}200** que esos mismos ${Emojis.Dark}100 cuesten **${Emojis.Jeffros}200.000**.
 Bastante increíble, aunque este es sólo un escenario, que es muy poco probable, puede llegar a pasar. Así como puedes ganar, también puedes perder. Nunca olvides la duración de tus DarkJeffros.
-Sin embargo, por cuestiones preferenciales y como autopago a los servicios que proporcionamos, si al cambiar de DarkJeffros a Jeffros se da un suma mayor o igual a **${Emojis.Jeffros}15.000** deberás pagar un interés del **20%**. No importa si ha cambiado la inflación, siempre debes de pagar esto.
-Ten cuidado, aquellos que tengan **${Emojis.Jeffros}25.000** o más; deberán pagar un interés, el cuál es detallado en <#${Config.infoChannel}>, así que ten eso en cuenta.
+Ten cuidado, aquellos que tengan **${Emojis.Jeffros}20.000** o más; deberán pagar un interés, el cuál es detallado en <#${Config.infoChannel}>, así que ten eso en cuenta.
                             
 **— La duración de los ${Emojis.Dark}DarkJeffros:**
 Cuando un usuario cambia sus Jeffros por DarkJeffros, su cuenta en esta tienda se verá comprometida por las autoridades del servidor, por esto, la misma tienda se encargará que a un plazo aleatorio todos los DarkJeffros que tengas en tu cuenta sean borrados para evitar problemas.
@@ -628,8 +627,7 @@ Puedes ver este plazo con \`${prefix}ds duration\`. Si no cambias tus DarkJeffro
                             .setAuthor(`| Error`, Config.darkLogoPng)
                             .setColor(Colores.negro)
                             .setDescription(`▸ El uso correcto es: /darkshop withdraw <DarkJeffros>
-                            **—** Se cambiarán los DarkJeffros especificados, por Jeffros.
-                            **—** Si la suma es mayor o igual a **${Emojis.Jeffros}15000**, tendrás que pagar un interés del **20%**.`)
+                            **—** Se cambiarán los DarkJeffros especificados, por Jeffros.`)
 
                             if(!args[1]) return message.channel.send(instructions2);
 
@@ -641,15 +639,6 @@ Puedes ver este plazo con \`${prefix}ds duration\`. Si no cambias tus DarkJeffro
 
                             totalJeffros = Math.floor(darkjeffro * changing);
 
-                            // impuesto
-                            let taxes = "";
-                            let moreThan15000 = false;
-
-                            if(totalJeffros >= 15000){
-                                moreThan15000 = true;
-                                taxes = `**—** Has pagado ${Emojis.Jeffros}${totalJeffros*0.2} en impuestos.`
-                            }
-
                             Stats.findOne({
                                 userID: author.id
                             }, (err, stats) => {
@@ -659,8 +648,7 @@ Puedes ver este plazo con \`${prefix}ds duration\`. Si no cambias tus DarkJeffro
                                 let embed = new Discord.MessageEmbed()
                                 .setAuthor(`| Éxito`, Config.darkLogoPng)
                                 .setDescription(`**—** Se han restado **${Emojis.Dark}${changing}** de tu cuenta.
-                                **—** Se añadieron **${Emojis.Jeffros}${totalJeffros}**.
-                                ${taxes}`)
+                                **—** Se añadieron **${Emojis.Jeffros}${totalJeffros}**.`)
                                 .setColor(Colores.negro);
 
                                 let nope = new Discord.MessageEmbed()
@@ -677,9 +665,7 @@ Puedes ver este plazo con \`${prefix}ds duration\`. Si no cambias tus DarkJeffro
                                     // verificar si tiene o no jeffros suficientes.
                                     if(changing > stats.djeffros) return message.channel.send(nope);
 
-                                    let finalJeffros = moreThan15000 ? totalJeffros-(totalJeffros*0.2) : totalJeffros;
-
-                                    jeffros.jeffros += finalJeffros;
+                                    jeffros.jeffros += totalJeffros;
                                     stats.djeffros -= changing;
 
                                     jeffros.save();
@@ -711,7 +697,6 @@ Puedes ver este plazo con \`${prefix}ds duration\`. Si no cambias tus DarkJeffro
                                         .setAuthor(`| Cálculo`, Config.darkLogoPng)
                                         .setDescription(`${stonks} **— ${dark.info.inflation}%**.
         **— ${Emojis.Dark}? = ${Emojis.Jeffros}?**.`)
-                                        .setFooter(`Esto no tiene en cuenta el interés por si es mayor a 15K.`)
                                         .setColor(Colores.negro);
 
                                         return message.channel.send(stonksEmbed);
@@ -721,7 +706,6 @@ Puedes ver este plazo con \`${prefix}ds duration\`. Si no cambias tus DarkJeffro
                                         .setAuthor(`| Cálculo`, Config.darkLogoPng)
                                         .setDescription(`${stonks} **— ${dark.info.inflation}%**.
         **— ${Emojis.Dark}${stats.djeffros} = ${Emojis.Jeffros}${Math.floor(stats.djeffros*200*dark.info.inflation)}**.`)
-                                        .setFooter(`Esto no tiene en cuenta el interés por si es mayor a 15K.`)
                                         .setColor(Colores.negro);
 
                                         message.channel.send(stonksEmbed);
@@ -731,7 +715,6 @@ Puedes ver este plazo con \`${prefix}ds duration\`. Si no cambias tus DarkJeffro
                                         .setAuthor(`| Cálculo`, Config.darkLogoPng)
                                         .setDescription(`${stonks} **— ${dark.info.inflation}%**.
         **— ${Emojis.Dark}${args[1]} = ${Emojis.Jeffros}${Math.floor(args[1]*200*dark.info.inflation)}**.`)
-                                        .setFooter(`Esto no tiene en cuenta el interés por si es mayor a 15K.`)
                                         .setColor(Colores.negro);
 
                                         message.channel.send(stonksEmbed);
@@ -740,7 +723,6 @@ Puedes ver este plazo con \`${prefix}ds duration\`. Si no cambias tus DarkJeffro
                                     .setAuthor(`| Cálculo`, Config.darkLogoPng)
                                     .setDescription(`${stonks} **— ${dark.info.inflation}%**.
     **— ${Emojis.Dark}${stats.djeffros} = ${Emojis.Jeffros}${Math.floor(stats.djeffros*200*dark.info.inflation)}**.`)
-                                    .setFooter(`Esto no tiene en cuenta el interés por si es mayor a 15K.`)
                                     .setColor(Colores.negro);
 
                                     message.channel.send(stonksEmbed);
