@@ -1121,6 +1121,28 @@ Puedes ver este plazo con \`${prefix}ds duration\`. Si no cambias tus DarkJeffro
                             if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
                             break;
 
+                        case "setinflation":
+                        case "setinflacion":
+                            if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
+                            
+                            GlobalData.findOne({
+                                "info.type": "dsInflation"
+                            }, async (err, inflation) => {
+                                if(err) throw err;
+
+                                if(!inflation) return message.reply("no hay inflaciones aún");
+
+                                if(!args[1] || isNaN(Number(args[1]))) return message.reply("cual es la nueva inflacion?");
+
+                                inflation.info.inflation = args[1];
+
+                                inflation.markModified("info")
+                                await inflation.save();
+
+                                message.react("✅")
+                            })
+                            break;
+
                         case "items":
                             // embeds
                             let noItems = new Discord.MessageEmbed()

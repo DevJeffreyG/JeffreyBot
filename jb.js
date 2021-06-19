@@ -294,8 +294,8 @@ client.on("ready", async () => {
     functions.intervalGlobalDatas();
   }, ms("1m"));
 
-  // PAGAR INTERESES LOS FINES DE MES
-  // buscar gente con más de 25k
+  // ################################################# PAGAR INTERESES LOS FINES DE MES
+  // buscar gente con más de 20k
   let interestJob = new CronJob('0 12 28 * *', function() { // los 28 de cada mes al medio día
     console.log('CronJob iniciado.');
 
@@ -303,7 +303,7 @@ client.on("ready", async () => {
 
     Jeffros.find({
       serverID: guild.id,
-      jeffros: {$gte: 25000}
+      jeffros: {$gte: 20000}
     }, (err, monopoly) => {
       if(err) throw err;
 

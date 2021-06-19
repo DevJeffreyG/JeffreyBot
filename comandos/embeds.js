@@ -165,30 +165,44 @@ let canalesEmbed5 = new Discord.MessageEmbed()
     .setColor(Colores.nocolor);
 
   let rolesEmbed3 = new Discord.MessageEmbed()
-    .setDescription(`<@&460966148704436235> • Todos tendrán este rol.
+    .setTitle(`Roles básicos`)
+    .setDescription(`<@&460966148704436235> • Todos aquellos que hayan aceptado las reglas tendrán este rol.
 
 <@&447821238631530498> • Todos los Bots del server tendrán este rol.
 
 <@&460242238555815946> • ¡Verdaderos suscriptores que tienen un canal para recibir notificaciones de Videos, Directos y Tweets de Jeffrey!
 ➟ Consíguelo en <#473627930396852226>.
 
-<@&595022419123634228> • Alguien que está boosteando el servidor, aparecerá en la lista de miembros por encima de todos menos del Staff.
+<@&573308631018110986> • Personas dentro del server que quieren estar al tanto de las novedades de ${client.user}.
+➟ Consíguelo en <#473627930396852226>.
 
-<@&461259197368107020> • Alguien cercano a Jeffrey / Amigos IRL.
+<@&779783625398812673> • Personas que tienen acceso a la DarkShop y desean recibir menciones de eventos de la inflación e información de la DarkShop en general.
+➟ Consíguelo en <#473627930396852226>.
 
-<@&529275759521431553> • Usuario que ha ascendido en el servidor, tendrá colores exclusivos y acceso anticipado a las notificaciones de Jeffrey, etc.
-➟ Si quieres conseguirlo antes de <@&${Config.lvl99}> ve a \`${prefix}shop\`.
+<@&564144046591705089> • Con este rol, los VIPs pueden recibir notificaciones de vídeos de Jeffrey antes que sean públicos.
+➟ Consíguelo en <#595986219364646923>.
+
+<@&790995699759448094> • Shhh... los usuarios con nivel 5 tendrán este rol, y consigo acceso a la DarkShop.
 
 <@&461302293464219658> • Personas que se la pasan bien en el servidor y es bueno con los demás~
 
 <@&461553370277347328> • Persona de confianza para Jeffrey.
 
+<@&508385695929466881> • Persona que ha ayudado al desarrollo de Jeffrey Bot de alguna forma. 💚`)
+    .setColor(Colores.nocolor);
+
+  let rolesEmbed4 = new Discord.MessageEmbed()
+  .setTitle(`Roles especiales`)
+  .setDescription(`<@&595022419123634228> • Alguien que está boosteando el servidor, aparecerá en la lista de miembros por encima de todos menos del Staff.
+
+<@&529275759521431553> • Usuario que ha ascendido en el servidor, tendrá colores exclusivos y acceso anticipado a las notificaciones de Jeffrey, etc.
+➟ Si quieres conseguirlo antes de <@&${Config.lvl99}> ve a \`${prefix}shop\`.
+
+<@&461259197368107020> • Personas las cuales tienen algún tipo de relación IRL con Jeffrey o/
+
 <@&460586399981109278> • Gente activa con más de 5,000 mensajes en <#${mainChannel}>.
 
-<@&460517579941740544> • Personas que lleva mucho tiempo dentro del servidor, o está desde tiempos inmemorables, o simplemente estaba en el servidor viejo (...) este rol es muy extraño.
-
-<@&790995699759448094> • Shhh... los usuarios con nivel 5 tendrán este rol, y consigo acceso a la DarkShop.`
-    )
+<@&460517579941740544> • Personas que lleva mucho tiempo dentro del servidor, o está desde tiempos inmemorables, o simplemente estaba en el servidor viejo (...) este rol es muy extraño.`)
     .setColor(Colores.nocolor);
 
   // JEFFROS
@@ -305,9 +319,9 @@ Aunque creo que es obvio tengo que aclarar que usará a ${client.user} para la m
 
 <:Faq:494282181296914432> **— ¿Cuando dar un warn y cuando no?**
 Es sencillo. Cuando un usario incumpla una regla hay que tener en cuenta una sóla cosa:
-**¿Se le ha advertido de forma textual en el chat con anterioridad?**
+**¿Se le ha advertido de forma textual en el chat con anterioridad, y a su vez se le ha dado un softwarn?**
 > "Sí": Procede con el warn.
-> "No": Adviertele por medio del chat, **sin warnearlo**. Si continúa pues métele un warn entre pecho y espalda.
+> "No": Adviertele por medio del chat, **y luego softwarneal@**. Si continúa pues métele un warn entre pecho y espalda.
 
 Si la falta es grave (Cosas irreversibles: como publicar información/imágenes que afecten a un usuario sin necesidad de nada más), proceder con un castigo.
 Puedes optar por un warn o de acuerdo a la situación, usar otros comandos de moderación.`);
@@ -377,6 +391,7 @@ let noEmbed = new Discord.MessageEmbed()
       await message.channel.send(rolesEmbed);
       await message.channel.send(rolesEmbed2);
       await message.channel.send(rolesEmbed3);
+      await message.channel.send(rolesEmbed4);
       //jeffros
       await message.channel.send(jeffrosEmbed);
       await message.channel.send(jeffrosEmbed2);
