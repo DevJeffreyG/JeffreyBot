@@ -517,7 +517,7 @@ const intervalGlobalDatas = async function(justBoost){
 
       let eventinflation;
       date = new Date() // hoy
-      duration = Number(Math.random() * 30).toFixed(1) + 1; // duración máxima 31 días.
+      duration = Number((Math.random() * 30) + 1).toFixed(1); // duración máxima 31 días.
 
       if(event === "s"){ // si el precio DEBE subir
         console.log("Evento próximo va a subir");
