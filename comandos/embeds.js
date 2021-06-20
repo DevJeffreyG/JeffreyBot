@@ -93,7 +93,7 @@ let canalesEmbed2 = new Discord.MessageEmbed()
 .setTitle(`— Información de los canales del servidor`)
 .setDescription(`**—** A continuación se explicarán la mayoría de los canales por categorías del servidor y sus respectivas funciones.
 **—** Para información más específica, algunos canales tienen información en sus respectivas descripciones.
-**—** Algunso de los canales no explicados aquí son canales ocultos que sólo aquellos que los desbloqueen podrán verlos.`)
+**—** Algunos de los canales no explicados aquí son canales ocultos que sólo aquellos que los desbloqueen podrán verlos.`)
 .setColor(Colores.nocolor)
 
 let canalesEmbed3 = new Discord.MessageEmbed()
