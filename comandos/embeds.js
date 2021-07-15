@@ -132,12 +132,7 @@ let canalesEmbed4 = new Discord.MessageEmbed()
 
 <#485192438701359135> • En este canal puedes hablar fuera de contexto, o hacer spam, **no se permite el flood**.
 
-<#821486638768455700> • Aquí se puede hacer tanto SPAM como FLOOD, siendo este último el principal y el único sitio donde puede hacerse.
-
-<#552580632266407957> • Aquí se encontrarán más colores para aquellos que tengan permisos de verlos.
-
-<#447813323149410304> • Puedes recibir opcionalmente notificaciones de las redes sociales de Jeffrey en este canal
-➟ Consíguelo en <#473627930396852226>.`)
+<#821486638768455700> • Aquí se puede hacer tanto SPAM como FLOOD, siendo este último el principal y el único sitio donde puede hacerse.`)
 .setColor(Colores.nocolor);
 
 let canalesEmbed5 = new Discord.MessageEmbed()

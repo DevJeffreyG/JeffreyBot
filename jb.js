@@ -1444,6 +1444,7 @@ client.on("message", async msg => {
     if (msg.author.id === jeffreygID) return;
     if (msg.content.startsWith(prefix)) return;
     if (msg.channel.id === Config.offtopicChannel) return;
+    if (msg.channel.id === "829153564353101854") return; // evento de coins 2
     if (msg.channel.id === Config.spamChannel) return;
     if (msg.member.roles.cache.find(x => x.id === staffRole.id)) {
       return logC
