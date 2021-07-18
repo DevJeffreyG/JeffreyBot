@@ -32,6 +32,8 @@ module.exports.run = async (client, message, args) => {
       modRole = guild.roles.cache.find(x => x.id === "483105108607893533");
       staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
   }
+
+  if(!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
     
   let embed = new Discord.MessageEmbed()
   .setTitle(`Ayuda: ${prefix}give`)
