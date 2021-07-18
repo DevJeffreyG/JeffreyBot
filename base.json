@@ -9,22 +9,8 @@
             "desc": "Se ha creado la `{ PREFIX }darkshop` para los usuarios **nivel 5**"
         },
         {
-            "type": "updated",
-            "desc": "DarkShop is raising..",
-            "extended": "Se están trabajando las últimas cosas...!"
-        },
-        {
-            "type": "updated",
-            "desc": "Se han arreglado algunos bugs en el sistema de EXP y Jeffros",
-            "extended": "No se aplicaba correctamente el % de acuerdo al nivel del usuario."
-        },
-        {
-            "type": "updated",
-            "desc": "Se están trabajando algunos bugs para ver todos los items de las tiendas"
-        },
-        {
-            "type": "updated",
-            "desc": "Se preparan cambios a la información y reglas"
+            "type": "added",
+            "desc": "Ahora los STAFF pueden agregar Boosts & Roles temporales a lo usuarios"
         }
     ],
     "bienPng": "http://i.imgur.com/M6hqbcc.png",
