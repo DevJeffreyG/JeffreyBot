@@ -106,7 +106,7 @@ module.exports.run = async (client, message, args) => {
     if(!role) return message.channel.send(embed);
 
     // llamar la funcion para hacer un globaldata y dar el role con boost
-    await functions.LimitedTime(guild, role.id, message.member, tiempo, "boostMultiplier", tipo, multi);
+    await functions.LimitedTime(guild, role.id, member, tiempo, "boostMultiplier", tipo, multi);
     message.react("✅")
   } else {
       return message.channel.send(embed);
