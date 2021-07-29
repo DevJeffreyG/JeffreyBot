@@ -383,10 +383,7 @@ Stats.findOne({
                             message.channel.send(embedAyuda);
                             break;
 
-                        case "info":
-                        case "information":
-                        case "información":
-                        case "informacion":
+                        case "infoe":
                             if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
                             let darkshop = new Discord.MessageEmbed()
                             .setImage("https://cdn.discordapp.com/attachments/464810032081666048/836365066864558091/DarkShop.png")
