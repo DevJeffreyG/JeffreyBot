@@ -6,11 +6,11 @@
     [
         {
             "type": "added",
-            "desc": "Se ha creado la `{ PREFIX }darkshop` para los usuarios **nivel 5**"
+            "desc": "Se ha abierto la `{ PREFIX }darkshop` para los usuarios **nivel 5**"
         },
         {
-            "type": "added",
-            "desc": "Ahora los STAFF pueden agregar Boosts & Roles temporales a lo usuarios"
+            "type": "updated",
+            "desc": "Se han arreglado algunos bugs con la muestra de los items de la DarkShop & tienda normal"
         }
     ],
     "bienPng": "http://i.imgur.com/M6hqbcc.png",

@@ -35,7 +35,7 @@ module.exports.run = async (client, message, args) => {
     staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
   }
 
-  let itemPerPage = 3;
+  const itemPerPage = 3;
 
   if (!args[0]) {
     // primero se buscan TODOS los items que hayan en la tienda
@@ -144,21 +144,13 @@ module.exports.run = async (client, message, args) => {
             Items.countDocuments({}, async (err, c) => {
               if (err) throw err;
 
-              totalpags = Math.floor(c / itemPerPage);
+              totalpags = Math.ceil(c / itemPerPage);
 
-              if (!Number.isInteger(c / itemPerPage)) totalpags++;
+              let inicio = itemPerPage * pagn - itemPerPage;
+              let fin = itemPerPage * pagn - 1;
 
-              let inicio = itemPerPage * pagn - itemPerPage + 1;
-              let fin = itemPerPage * pagn;
-
-              inicio = inicio - 1;
-
-              if (items.length < fin - 1) {
-                fin = items.length;
-              } else if (items.length === fin - 1) {
+              if (items.length <= fin) {
                 fin = items.length - 1;
-              } else {
-                fin = fin - 1;
               }
 
               embed.setFooter(
@@ -169,7 +161,7 @@ module.exports.run = async (client, message, args) => {
               embed.setColor(Colores.verde);
 
               // hacer la primera página
-              for (let i = 0; i < itemPerPage; i++) {
+              for (let i = 0; i <= fin; i++) {
                 let isSub = false;
                 let time = null;
                 let usesQuery = await Use.findOne({
@@ -184,345 +176,251 @@ module.exports.run = async (client, message, args) => {
 
                 if(!usesQuery) return message.channel.send(`[004] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas seguir usando correctamente el comando :)`)
 
-                All.findOne(
-                  {
+                let all = await All.findOne({
                     userID: author.id,
                     itemID: items[i].id,
                     isDarkShop: false
-                  },
-                  (err, all) => {
-                    let precio = items[i].itemPrice;
+                }, (err, all) => {
+                    if(err) throw err;
+                });
 
-                    if (all) {
-                      precio = Math.floor(items[i].itemPrice) + all.quantity * interest;
+                let precio = all ? Math.floor(items[i].itemPrice) + all.quantity * interest : items[i].itemPrice;
 
-                      if (message.member.roles.cache.find(x => x.id === Config.lvl20)) {
-                        precio = `~~${precio}~~ ${Math.floor(items[i].itemPrice) + all.quantity * interest - ((Math.floor(items[i].itemPrice) + all.quantity * interest) / 100) * 15}`;
-                      }
-                    } else {
-                      if (
-                        message.member.roles.cache.find(
-                          x => x.id === Config.lvl20
-                        )
-                      ) {
-                        precio = `~~${precio}~~ ${Math.floor(
-                          items[i].itemPrice
-                        ) -
-                          (Math.floor(items[i].itemPrice) / 100) * 15}`;
-                      }
-                    }
+                if (message.member.roles.cache.find(x => x.id === Config.lvl20) && all) {
+                  precio = `~~${precio}~~ ${precio - ((Math.floor(items[i].itemPrice) + all.quantity * interest) / 100) * 15}`;
+                } else if(message.member.roles.cache.find(x => x.id === Config.lvl20)){
+                  precio = `~~${precio}~~ ${precio - ((Math.floor(items[i].itemPrice)) / 100) * 15}`;
+                }
 
-                    if(!isSub){
-                      if(userIsOnMobible && !items[i].ignoreInterest){
-                        embed.addField(
-                          `— { ${items[i].id} } ${items[i].itemName}`,
-                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
-                        );
-                      } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
-                        embed.addField(
-                          `— { ${items[i].id} } ${items[i].itemName}`,
-                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
-                        );
-                      } else {
-                        embed.addField(
-                          `— { ${items[i].id} } ${items[i].itemName}`,
-                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
-                        );
-                      }
-                    } else { // es una suscripción
-                      embed.addField(
-                          `— { ${items[i].id} } ${items[i].itemName}`,
-                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} **/${time}**`
-                      );
-                    }
-
-                    if (i + 1 === itemPerPage) {
-                      message.channel.send(embed).then(msg => {
-                        msg.react("⏪").then(r => {
-                          msg.react("⏩");
-
-                          const backwardsFilter = (reaction, user) =>
-                            reaction.emoji.name === "⏪" &&
-                            user.id === message.author.id;
-                          const forwardsFilter = (reaction, user) =>
-                            reaction.emoji.name === "⏩" &&
-                            user.id === message.author.id;
-
-                          const backwards = msg.createReactionCollector(
-                            backwardsFilter,
-                            {
-                              time: 60000
-                            }
-                          );
-                          const forwards = msg.createReactionCollector(
-                            forwardsFilter,
-                            {
-                              time: 60000
-                            }
-                          );
-
-                          backwards.on("collect", r => {
-                            if (pagn === 1) return;
-                            pagn--;
-
-                            embed = new Discord.MessageEmbed()
-                              .setAuthor(`| Shop`, author.displayAvatarURL())
-                              .setColor(Colores.verde)
-                              .setDescription(`**—** ¡Bienvenido a la nueva tienda! para comprar items \`${prefix}shop <ID del item>\`.
-**—** Para tener más información del item usa \`${prefix}shop info <id>\`.
-**—** Tienes ${Emojis.Jeffros}**${j.jeffros}**`);
-
-                            Items.countDocuments({}, async (err, c) => {
-                              if (err) throw err;
-
-                              totalpags = Math.floor(c / itemPerPage);
-
-                              if (!Number.isInteger(c / itemPerPage))
-                                totalpags++;
-
-                              let inicio = itemPerPage * pagn - itemPerPage + 1;
-                              let fin = itemPerPage * pagn;
-
-                              inicio = inicio - 1;
-                              console.log(inicio);
-
-                              if (items.length < fin - 1) {
-                                fin = items.length;
-                              } else if (items.length === fin - 1) {
-                                fin = items.length - 1;
-                              } else {
-                                fin = fin - 1;
-                              }
-
-                              embed.setFooter(
-                                `| Tienda oficial - Página ${pagn} de ${totalpags}`,
-                                guild.iconURL()
-                              );
-                              for (let i = inicio; i < fin + 1; i++) {
-                                let isSub = false;
-                                let time = null;
-                                let usesQuery = await Use.findOne({
-                                  serverID: guild.id,
-                                  itemID: items[i].id
-                                }, (err, actualItemUse) => {
-                                  if(!actualItemUse) return null;
-                                  isSub = actualItemUse.isSub;
-
-                                  time = isSub ? prettyms(Number(actualItemUse.duration), {secondsDecimalDigits: 0 }) : null;
-                                });
-
-                                if(!usesQuery) return message.channel.send(`[005] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas seguir usando correctamente el comando :)`)
-
-                                All.findOne(
-                                  {
-                                    userID: author.id,
-                                    itemID: items[i].id,
-                                    isDarkShop: false
-                                  },
-                                  (err, all) => {
-                                    let precio = items[i].itemPrice;
-
-                                    if (all) {
-                                      precio =
-                                        Math.floor(items[i].itemPrice) +
-                                        all.quantity * interest;
-
-                                      if (
-                                        message.member.roles.cache.find(
-                                          x => x.id === Config.lvl20
-                                        )
-                                      ) {
-                                        precio = `~~${precio}~~ ${Math.floor(
-                                          items[i].itemPrice
-                                        ) +
-                                          all.quantity * interest -
-                                          ((Math.floor(items[i].itemPrice) +
-                                            all.quantity * interest) /
-                                            100) *
-                                            15}`;
-                                      }
-                                    } else {
-                                      if (
-                                        message.member.roles.cache.find(
-                                          x => x.id === Config.lvl20
-                                        )
-                                      ) {
-                                        precio = `~~${precio}~~ ${Math.floor(
-                                          items[i].itemPrice
-                                        ) -
-                                          (Math.floor(items[i].itemPrice) /
-                                            100) *
-                                            15}`;
-                                      }
-                                    }
-                                    
-                                    if(!isSub){
-                                      if(userIsOnMobible && !items[i].ignoreInterest){
-                                        embed.addField(
-                                          `— { ${items[i].id} } ${items[i].itemName}`,
-                                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
-                                        );
-                                      } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
-                                        embed.addField(
-                                          `— { ${items[i].id} } ${items[i].itemName}`,
-                                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
-                                        );
-                                      } else {
-                                        embed.addField(
-                                          `— { ${items[i].id} } ${items[i].itemName}`,
-                                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
-                                        );
-                                      }
-                                    } else { // es una suscripción
-                                      embed.addField(
-                                          `— { ${items[i].id} } ${items[i].itemName}`,
-                                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} **/${time}**`
-                                      );
-                                    }
-
-                                    if (i + 1 === fin + 1) {
-                                      return msg.edit(embed);
-                                    }
-                                  }
-                                );
-                              }
-                            });
-                          });
-
-                          forwards.on("collect", r => {
-                            if (pagn === totalpags) return;
-                            pagn++;
-
-                            embed = new Discord.MessageEmbed()
-                              .setAuthor(`| Shop`, author.displayAvatarURL())
-                              .setColor(Colores.verde)
-                              .setDescription(`**—** ¡Bienvenido a la nueva tienda! para comprar items \`${prefix}shop <ID del item>\`.
-**—** Para tener más información del item usa \`${prefix}shop info <id>\`.
-**—** Tienes ${Emojis.Jeffros}**${j.jeffros}**`);
-
-                            Items.countDocuments({}, async (err, c) => {
-                              if (err) throw err;
-
-                              totalpags = Math.floor(c / itemPerPage);
-
-                              if (!Number.isInteger(c / itemPerPage))
-                                totalpags++;
-
-                              let inicio = itemPerPage * pagn - itemPerPage + 1;
-                              let fin = itemPerPage * pagn;
-
-                              inicio = inicio - 1;
-
-                              if (items.length < fin - 1) {
-                                fin = items.length;
-                              } else if (items.length === fin - 1) {
-                                fin = items.length;
-                              }
-
-                              embed.setFooter(
-                                `| Tienda oficial - Página ${pagn} de ${totalpags}`,
-                                guild.iconURL()
-                              );
-
-                              for (let i = inicio; i < fin; i++) {
-                                console.log(i)
-                                let isSub = false;
-                                let time = null;
-                                let usesQuery = await Use.findOne({
-                                  serverID: guild.id,
-                                  itemID: items[i].id
-                                }, (err, actualItemUse) => {
-                                  if(err) throw err;
-                                  if(!actualItemUse) return null;
-                                  
-                                  isSub = actualItemUse.isSub;
-
-                                  time = isSub ? prettyms(Number(actualItemUse.duration), {secondsDecimalDigits: 0 }) : null;
-                                });
-
-                                if(!usesQuery) return message.channel.send(`[001] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas seguir usando correctamente el comando :)`)
-
-                                All.findOne(
-                                  {
-                                    userID: author.id,
-                                    itemID: items[i].id,
-                                    isDarkShop: false
-                                  },
-                                  (err, all) => {
-                                    let precio = items[i].itemPrice;
-
-                                    if (all) {
-                                      precio =
-                                        Math.floor(items[i].itemPrice) +
-                                        all.quantity * interest;
-
-                                      if (
-                                        message.member.roles.cache.find(
-                                          x => x.id === Config.lvl20
-                                        )
-                                      ) {
-                                        precio = `~~${precio}~~ ${Math.floor(
-                                          items[i].itemPrice
-                                        ) +
-                                          all.quantity * interest -
-                                          ((Math.floor(items[i].itemPrice) +
-                                            all.quantity * interest) /
-                                            100) *
-                                            15}`;
-                                      }
-                                    } else {
-                                      if (
-                                        message.member.roles.cache.find(
-                                          x => x.id === Config.lvl20
-                                        )
-                                      ) {
-                                        precio = `~~${precio}~~ ${Math.floor(
-                                          items[i].itemPrice
-                                        ) -
-                                          (Math.floor(items[i].itemPrice) /
-                                            100) *
-                                            15}`;
-                                      }
-                                    }
-                                    
-                                    if(!isSub){
-                                      if(userIsOnMobible && !items[i].ignoreInterest){
-                                        embed.addField(
-                                          `— { ${items[i].id} } ${items[i].itemName}`,
-                                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
-                                        );
-                                      } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
-                                        embed.addField(
-                                          `— { ${items[i].id} } ${items[i].itemName}`,
-                                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
-                                        );
-                                      } else {
-                                        embed.addField(
-                                          `— { ${items[i].id} } ${items[i].itemName}`,
-                                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
-                                        );
-                                      }
-                                    } else { // es una suscripción
-                                      embed.addField(
-                                          `— { ${items[i].id} } ${items[i].itemName}`,
-                                          `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} **/${time}**`
-                                      );
-                                    }
-
-                                    if (i + 1 === fin) {
-                                      return msg.edit(embed);
-                                    }
-                                  }
-                                );
-                              }
-                            });
-                          });
-                        });
-                      });
-                    }
+                if(!isSub){ // si no es una suscripción
+                  if(userIsOnMobible && !items[i].ignoreInterest){
+                    embed.addField(
+                      `— { ${items[i].id} } ${items[i].itemName}`,
+                      `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
+                    );
+                  } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
+                    embed.addField(
+                      `— { ${items[i].id} } ${items[i].itemName}`,
+                      `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
+                    );
+                  } else {
+                    embed.addField(
+                      `— { ${items[i].id} } ${items[i].itemName}`,
+                      `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
+                    );
                   }
-                );
+                } else { // es una suscripción
+                  embed.addField(
+                      `— { ${items[i].id} } ${items[i].itemName}`,
+                      `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} **/${time}**`
+                  );
+                } 
               }
+
+              message.channel.send(embed).then(msg => {
+                  msg.react("⏪").then(r => {
+                    msg.react("⏩");
+
+                    const backwardsFilter = (reaction, user) => reaction.emoji.name === "⏪" && user.id === message.author.id;
+                    const forwardsFilter = (reaction, user) =>reaction.emoji.name === "⏩" && user.id === message.author.id;
+                    const collectorFilterMainPage = (reaction, user) => (reaction.emoji.name === "⏩" || reaction.emoji.name === "⏪") && user.id === message.author.id;
+
+                    const backwards = msg.createReactionCollector(backwardsFilter, {time: 60000});
+                    const forwards = msg.createReactionCollector(forwardsFilter,{ time: 60000});
+                    const collectorMainPage = msg.createReactionCollector(collectorFilterMainPage,{time: 60000});
+
+                    collectorMainPage.on("end", r => {
+                      return msg.reactions.removeAll()
+                      .then(() => {
+                          msg.react("795090708478033950");
+                      });
+                    })
+
+                    backwards.on("collect", async(r, user) => {
+                      let reactions = r.message.reactions.cache.find(x => x.emoji.name === "⏪");
+
+                      if (pagn === 1) return reactions.users.remove(user.id);;
+                      pagn--;
+
+                      embed = new Discord.MessageEmbed()
+                        .setAuthor(`| Shop`, author.displayAvatarURL())
+                        .setColor(Colores.verde)
+                        .setDescription(`**—** ¡Bienvenido a la nueva tienda! para comprar items \`${prefix}shop <ID del item>\`.
+**—** Para tener más información del item usa \`${prefix}shop info <id>\`.
+**—** Tienes ${Emojis.Jeffros}**${j.jeffros}**`);
+
+                      Items.countDocuments({}, async (err, c) => {
+                        if (err) throw err;
+
+                        totalpags = Math.ceil(c / itemPerPage);
+
+                        let inicio = itemPerPage * pagn - itemPerPage;
+                        let fin = itemPerPage * pagn - 1;
+
+                        if (items.length <= fin) {
+                          fin = items.length - 1;
+                        }
+
+                        embed.setFooter(
+                          `| Tienda oficial - Página ${pagn} de ${totalpags}`,
+                          guild.iconURL()
+                        );
+                        
+                        for (let i = inicio; i <= fin + 1; i++) {
+                          let isSub = false;
+                          let time = null;
+                          let usesQuery = await Use.findOne({
+                            serverID: guild.id,
+                            itemID: items[i].id
+                          }, (err, actualItemUse) => {
+                            if (!actualItemUse) return null;
+                            isSub = actualItemUse.isSub;
+
+                            time = isSub ? prettyms(Number(actualItemUse.duration), {secondsDecimalDigits: 0 }) : null;
+                          });
+
+                          if(!usesQuery) return message.channel.send(`[005] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas seguir usando correctamente el comando :)`)
+
+                          all = await All.findOne({
+                              userID: author.id,
+                              itemID: items[i].id,
+                              isDarkShop: false
+                          },(err, all) => {
+                              if(err) throw err;
+                          });
+
+                          let precio = all ? Math.floor(items[i].itemPrice) + all.quantity * interest : items[i].itemPrice;
+
+                          if(message.member.roles.cache.find(x => x.id === Config.lvl20) && all){
+                            precio = `~~${precio}~~ ${precio - ((Math.floor(items[i].itemPrice) + all.quantity * interest) / 100) * 15}`;
+                          } else if(message.member.roles.cache.find(x => x.id === Config.lvl20)){
+                            precio = `~~${precio}~~ ${precio - ((Math.floor(items[i].itemPrice)) / 100) * 15}`;
+                          }
+                              
+                          if(!isSub){ // no es una sub
+                            if(userIsOnMobible && !items[i].ignoreInterest){
+                              embed.addField(
+                                `— { ${items[i].id} } ${items[i].itemName}`,
+                                `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
+                              );
+                            } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
+                              embed.addField(
+                                `— { ${items[i].id} } ${items[i].itemName}`,
+                                `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
+                              );
+                            } else {
+                              embed.addField(
+                                `— { ${items[i].id} } ${items[i].itemName}`,
+                                `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
+                              );
+                            }
+                          } else { // es una suscripción
+                            embed.addField(
+                                `— { ${items[i].id} } ${items[i].itemName}`,
+                                `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} **/${time}**`
+                            );
+                          }
+                        }
+
+                        await msg.edit(embed);
+                        return reactions.users.remove(user.id);
+                      });
+                    });
+
+                    forwards.on("collect", async(r, user) => {
+                      let reactions = r.message.reactions.cache.find(x => x.emoji.name === "⏩");
+
+                      if (pagn === totalpags) return reactions.users.remove(user.id);;
+                      pagn++;
+
+                      embed = new Discord.MessageEmbed()
+                        .setAuthor(`| Shop`, author.displayAvatarURL())
+                        .setColor(Colores.verde)
+                        .setDescription(`**—** ¡Bienvenido a la nueva tienda! para comprar items \`${prefix}shop <ID del item>\`.
+**—** Para tener más información del item usa \`${prefix}shop info <id>\`.
+**—** Tienes ${Emojis.Jeffros}**${j.jeffros}**`);
+
+                      Items.countDocuments({}, async (err, c) => {
+                        if (err) throw err;
+
+                        totalpags = Math.ceil(c / itemPerPage);
+
+                        let inicio = itemPerPage * pagn - itemPerPage;
+                        let fin = itemPerPage * pagn - 1;
+
+                        if (items.length <= fin) {
+                          fin = items.length - 1;
+                        }
+
+                        embed.setFooter(
+                          `| Tienda oficial - Página ${pagn} de ${totalpags}`,
+                          guild.iconURL()
+                        );
+
+                        for (let i = inicio; i <= fin; i++) {
+                          let isSub = false;
+                          let time = null;
+                          let usesQuery = await Use.findOne({
+                            serverID: guild.id,
+                            itemID: items[i].id
+                          }, (err, actualItemUse) => {
+                            if(err) throw err;
+                            if(!actualItemUse) return null;
+                            
+                            isSub = actualItemUse.isSub;
+
+                            time = isSub ? prettyms(Number(actualItemUse.duration), {secondsDecimalDigits: 0 }) : null;
+                          });
+
+                          if(!usesQuery) return message.channel.send(`[001] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas seguir usando correctamente el comando :)`)
+
+                          all = await All.findOne({
+                              userID: author.id,
+                              itemID: items[i].id,
+                              isDarkShop: false
+                          }, (err, all) => {
+                              if (err) throw err;
+                          });
+
+                          let precio = all ? Math.floor(items[i].itemPrice) + all.quantity * interest : items[i].itemPrice;
+
+                          if (message.member.roles.cache.find(x => x.id === Config.lvl20) && all) {
+                            precio = `~~${precio}~~ ${precio - ((Math.floor(items[i].itemPrice) + all.quantity * interest) / 100) * 15}`;
+                          } else if(message.member.roles.cache.find(x => x.id === Config.lvl20)){
+                            precio = `~~${precio}~~ ${precio - ((Math.floor(items[i].itemPrice)) / 100) * 15}`;
+                          }
+                              
+                          if(!isSub){
+                            if(userIsOnMobible && !items[i].ignoreInterest){
+                              embed.addField(
+                                `— { ${items[i].id} } ${items[i].itemName}`,
+                                `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
+                              );
+                            } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
+                              embed.addField(
+                                `— { ${items[i].id} } ${items[i].itemName}`,
+                                `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
+                              );
+                            } else {
+                              embed.addField(
+                                `— { ${items[i].id} } ${items[i].itemName}`,
+                                `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
+                              );
+                            }
+                          } else { // es una suscripción
+                            embed.addField(
+                                `— { ${items[i].id} } ${items[i].itemName}`,
+                                `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} **/${time}**`
+                            );
+                          }
+                        }
+
+                        await msg.edit(embed);
+                        return reactions.users.remove(user.id);
+                      });
+                    });
+                  });
+                });
             });
           }
         }

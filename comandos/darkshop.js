@@ -137,34 +137,27 @@ Stats.findOne({
                                             }
                                         })
                                     }
-                                } else { // hay más de itemPerPage
+                                } else { // hay más de itemPerPage (3)
                                     let pagn = 1;
                                     let totalpags;
 
                                     Items.countDocuments({}, (err, c) => {
                                         if (err) throw err;
 
-                                        totalpags = Math.floor(c / itemPerPage);
+                                        totalpags = Math.ceil(c / itemPerPage);
 
-                                        if(!Number.isInteger(c / itemPerPage)) totalpags++;
+                                        //if(!Number.isInteger(c / itemPerPage)) totalpags++;
 
-                                        let inicio = itemPerPage * pagn - itemPerPage + 1;
-                                        let fin = itemPerPage * pagn;
+                                        let inicio = itemPerPage * pagn - itemPerPage;
+                                        let fin = itemPerPage * pagn - 1;
 
-                                        inicio = inicio - 1;
-
-                                        if(items.length < fin - 1){
-                                            fin = items.length;
-                                        } else if(items.length === fin - 1){
+                                        if(items.length <= fin){
                                             fin = items.length - 1;
-                                        } else {
-                                            fin = fin - 1;
                                         }
 
                                         tienda.setFooter(`| DarkShop - Página 1 de ${totalpags} | Alias: ${prefix}ds`, guild.iconURL());
-
                                         // hacer primera página
-                                        for(let i = 0; i < itemPerPage; i++){
+                                        for(let i = 0; i <= fin; i++){
                                             let precio = items[i].itemPrice;
 
                                             if(userIsOnMobible && !items[i].ignoreInterest){
@@ -184,179 +177,172 @@ Stats.findOne({
                                                 );
                                             }
 
-                                            if (i + 1 === itemPerPage){
-                                                message.channel.send(tienda).then(msg => {
-                                                    msg.react("⏪").then(r => {
-                                                        msg.react("⏩");
-
-                                                        // filtros
-                                                        const backwardsFilter = (reaction, user) => reaction.emoji.name === "⏪" && user.id === message.author.id;
-                                                        const forwardsFilter = (reaction, user) => reaction.emoji.name === "⏩" && user.id === message.author.id;
-                                                        const collectorFilterMainPage = (reaction, user) => (reaction.emoji.name === "⏩" || reaction.emoji.name === "⏪") && user.id === message.author.id;
-                                
-                                                        // collectors
-                                                        const backwards = msg.createReactionCollector(backwardsFilter, {time: 60000});
-                                                        const forwards = msg.createReactionCollector(forwardsFilter,{time: 60000});
-                                                        const collectorMainPage = msg.createReactionCollector(collectorFilterMainPage,{time: 60000});
-
-                                                        collectorMainPage.on("end", r => {
-                                                            return msg.reactions.removeAll()
-                                                            .then(() => {
-                                                                msg.react("795090708478033950");
-                                                            });
-                                                        })
-                                                        
-                                                        // si se reacciona atrás
-                                                        backwards.on("collect", r => {
-                                                            if(pagn === 1) return;
-
-                                                            pagn--;
-
-                                                            let embed = new Discord.MessageEmbed()
-                                                            .setAuthor(`| DarkShop`, Config.darkLogoPng)
-                                                            .setColor(Colores.negro)
-                                                            .setDescription(`**—** Bienvenido a la DarkShop. \`${prefix}darkshop <ID del item>\`.
-            **—** Para tener más información del item usa \`${prefix}darkshop info <id>\`.
-            **—** Esta tienda __**NO**__ usa los Jeffros convencionales.
-            
-            **—** Tienes ${Emojis.Dark}**${saldo}**`);
-
-                                                            Items.countDocuments({}, (err, c) => {
-                                                                if (err) throw err;
-
-                                                                totalpags = Math.floor(c / itemPerPage);
-
-                                                                if (!Number.isInteger(c / itemPerPage))
-                                                                totalpags++;
-
-                                                                let inicio = itemPerPage * pagn - itemPerPage + 1;
-                                                                let fin = itemPerPage * pagn;
-
-                                                                inicio = inicio - 1; // 0
-
-                                                                if (items.length < fin - 1) {
-                                                                fin = items.length;
-                                                                } else if (items.length === fin - 1) {
-                                                                fin = items.length - 1;
-                                                                } else {
-                                                                fin = fin - 1;
-                                                                }
-
-                                                                embed.setFooter(
-                                                                `| DarkShop - Página ${pagn} de ${totalpags} | Alias: ${prefix}ds`,
-                                                                guild.iconURL()
-                                                                );
-
-                                                                for (let i = inicio; i < fin + 1; i++) {
-                                                                    if(!items[i]) return msg.edit(embed);
-                                                                    All.findOne({
-                                                                        userID: author.id,
-                                                                        itemID: items[i].id,
-                                                                        isDarkShop: true
-                                                                    }, (err, all) => {
-                                                                        let precio = all ? Number(items[i].itemPrice) + interest * all.quantity : items[i].itemPrice;
-                            
-                                                                        if(userIsOnMobible && !items[i].ignoreInterest){
-                                                                            embed.addField(
-                                                                            `— { ${items[i].id} } ${items[i].itemName}`,
-                                                                            `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
-                                                                            );
-                                                                        } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
-                                                                            embed.addField(
-                                                                            `— { ${items[i].id} } ${items[i].itemName}`,
-                                                                            `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
-                                                                            );
-                                                                        } else {
-                                                                            embed.addField(
-                                                                            `— { ${items[i].id} } ${items[i].itemName}`,
-                                                                            `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}`
-                                                                            );
-                                                                        }
-                            
-                                                                        if (i + 1 === fin + 1){
-                                                                            return msg.edit(embed);
-                                                                        }
-                                                                    })
-                                                                }
-                                                            });
-                                                        });
-
-                                                        // si se reacciona adelante
-                                                        forwards.on("collect", r => {
-                                                            if(pagn === totalpags) return;;
-                                                            pagn++;
-
-                                                            let embed = new Discord.MessageEmbed()
-                                                            .setAuthor(`| DarkShop`, Config.darkLogoPng)
-                                                            .setColor(Colores.negro)
-                                                            .setDescription(`**—** Bienvenido a la DarkShop. \`${prefix}darkshop <ID del item>\`.
-            **—** Para tener más información del item usa \`${prefix}darkshop info <id>\`.
-            **—** Esta tienda __**NO**__ usa los Jeffros convencionales.
-            
-            **—** Tienes ${Emojis.Dark}**${saldo}**`);
-
-                                                            Items.countDocuments({}, (err, c) => {
-                                                                if (err) throw err;
-
-                                                                totalpags = Math.floor(c / itemPerPage);
-
-                                                                if (!Number.isInteger(c / itemPerPage))
-                                                                totalpags++;
-
-                                                                let inicio = itemPerPage * pagn - itemPerPage + 1;
-                                                                let fin = itemPerPage * pagn;
-
-                                                                inicio = inicio - 1;
-
-                                                                if (items.length <= fin - 1) {
-                                                                fin = items.length;
-                                                                }
-
-                                                                embed.setFooter(
-                                                                `| DarkShop - Página ${pagn} de ${totalpags} | Alias: ${prefix}ds`,
-                                                                guild.iconURL()
-                                                                );
-
-                                                                for (let i = inicio; i < fin + 1; i++) {
-                                                                    if(!items[i]) return msg.edit(embed);
-                                                                    All.findOne({
-                                                                        userID: author.id,
-                                                                        itemID: items[i].id,
-                                                                        isDarkShop: true
-                                                                    }, (err, all) => {
-                                                                        if(err) throw err;
-                                                                        let precio = all ? Number(items[i].itemPrice) + interest * all.quantity : items[i].itemPrice;
-                            
-                                                                        if(userIsOnMobible && !items[i].ignoreInterest){
-                                                                            embed.addField(
-                                                                            `— { ${items[i].id} } ${items[i].itemName}`,
-                                                                            `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
-                                                                            );
-                                                                        } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
-                                                                            embed.addField(
-                                                                            `— { ${items[i].id} } ${items[i].itemName}`,
-                                                                            `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
-                                                                            );
-                                                                        } else {
-                                                                            embed.addField(
-                                                                            `— { ${items[i].id} } ${items[i].itemName}`,
-                                                                            `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}`
-                                                                            );
-                                                                        }
-                            
-                                                                        if (i + 1 === fin){
-                                                                            return msg.edit(embed);
-                                                                        }
-                                                                    })
-                                                                }
-                                                            });
-                                                        });
-
-
-                                                    })
-                                                })
-                                            }
+                                            //if (i === fin) break first;
                                         }
+
+                                        // REACCIONES
+                                        message.channel.send(tienda).then(msg => {
+                                            msg.react("⏪").then(r => {
+                                                msg.react("⏩");
+
+                                                // filtros
+                                                const backwardsFilter = (reaction, user) => reaction.emoji.name === "⏪" && user.id === message.author.id;
+                                                const forwardsFilter = (reaction, user) => reaction.emoji.name === "⏩" && user.id === message.author.id;
+                                                const collectorFilterMainPage = (reaction, user) => (reaction.emoji.name === "⏩" || reaction.emoji.name === "⏪") && user.id === message.author.id;
+                        
+                                                // collectors
+                                                const backwards = msg.createReactionCollector(backwardsFilter, {time: 60000});
+                                                const forwards = msg.createReactionCollector(forwardsFilter,{time: 60000});
+                                                const collectorMainPage = msg.createReactionCollector(collectorFilterMainPage,{time: 60000});
+
+                                                collectorMainPage.on("end", r => {
+                                                    return msg.reactions.removeAll()
+                                                    .then(() => {
+                                                        msg.react("795090708478033950");
+                                                    });
+                                                })
+                                                
+                                                // si se reacciona atrás
+                                                backwards.on("collect", async (r, user) => {
+                                                    let reactions = r.message.reactions.cache.find(x => x.emoji.name === "⏪");
+
+                                                    if(pagn === 1) return reactions.users.remove(user.id);;
+
+                                                    pagn--;
+
+                                                    let embed = new Discord.MessageEmbed()
+                                                    .setAuthor(`| DarkShop`, Config.darkLogoPng)
+                                                    .setColor(Colores.negro)
+                                                    .setDescription(`**—** Bienvenido a la DarkShop. \`${prefix}darkshop <ID del item>\`.
+**—** Para tener más información del item usa \`${prefix}darkshop info <id>\`.
+**—** Esta tienda __**NO**__ usa los Jeffros convencionales.
+
+**—** Tienes ${Emojis.Dark}**${saldo}**`);
+
+                                                    Items.countDocuments({}, async (err, c) => {
+                                                        if (err) throw err;
+
+                                                        totalpags = Math.ceil(c / itemPerPage);
+
+                                                        //if (!Number.isInteger(c / itemPerPage)) totalpags++;
+
+                                                        let inicio = itemPerPage * pagn - itemPerPage;
+                                                        let fin = itemPerPage * pagn - 1;
+
+                                                        if(items.length <= fin){
+                                                            fin = items.length - 1;
+                                                        }
+
+                                                        embed.setFooter(
+                                                        `| DarkShop - Página ${pagn} de ${totalpags} | Alias: ${prefix}ds`,
+                                                        guild.iconURL()
+                                                        );
+
+                                                        for (let i = inicio; i <= fin; i++) {
+                                                            if(!items[i]) return msg.edit(embed);
+                                                            let all = await All.findOne({
+                                                                userID: author.id,
+                                                                itemID: items[i].id,
+                                                                isDarkShop: true
+                                                            }, (err, all) => {
+                                                                if (err) throw err;
+                                                            });
+
+                                                            let precio = all ? Number(items[i].itemPrice) + interest * all.quantity : items[i].itemPrice;
+                    
+                                                            if(userIsOnMobible && !items[i].ignoreInterest){
+                                                                embed.addField(
+                                                                `— { ${items[i].id} } ${items[i].itemName}`,
+                                                                `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
+                                                                );
+                                                            } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
+                                                                embed.addField(
+                                                                `— { ${items[i].id} } ${items[i].itemName}`,
+                                                                `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
+                                                                );
+                                                            } else {
+                                                                embed.addField(
+                                                                `— { ${items[i].id} } ${items[i].itemName}`,
+                                                                `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}`
+                                                                );
+                                                            }
+                                                        }
+
+                                                        await msg.edit(embed);
+                                                        return reactions.users.remove(user.id);
+                                                    });
+                                                });
+
+                                                // si se reacciona adelante
+                                                forwards.on("collect", async (r, user) => {
+                                                    let reactions = r.message.reactions.cache.find(x => x.emoji.name === "⏩");
+
+                                                    if(pagn === totalpags) return reactions.users.remove(user.id);
+                                                    pagn++;
+
+                                                    let embed = new Discord.MessageEmbed()
+                                                    .setAuthor(`| DarkShop`, Config.darkLogoPng)
+                                                    .setColor(Colores.negro)
+                                                    .setDescription(`**—** Bienvenido a la DarkShop. \`${prefix}darkshop <ID del item>\`.
+    **—** Para tener más información del item usa \`${prefix}darkshop info <id>\`.
+    **—** Esta tienda __**NO**__ usa los Jeffros convencionales.
+    
+    **—** Tienes ${Emojis.Dark}**${saldo}**`);
+
+                                                    Items.countDocuments({}, async (err, c) => {
+                                                        if (err) throw err;
+
+                                                        totalpags = Math.ceil(c / itemPerPage);
+
+                                                        let inicio = itemPerPage * pagn - itemPerPage ;
+                                                        let fin = itemPerPage * pagn - 1;
+
+                                                        if (items.length <= fin) {
+                                                            fin = items.length - 1;
+                                                        }
+
+                                                        embed.setFooter(
+                                                        `| DarkShop - Página ${pagn} de ${totalpags} | Alias: ${prefix}ds`,
+                                                        guild.iconURL()
+                                                        );
+
+                                                        for (let i = inicio; i <= fin; i++) {
+                                                            let all = await All.findOne({
+                                                                userID: author.id,
+                                                                itemID: items[i].id,
+                                                                isDarkShop: true
+                                                            }, (err, all) => {
+                                                                if(err) return null;
+                                                            })
+
+                                                            let precio = all ? Number(items[i].itemPrice) + interest * all.quantity : items[i].itemPrice;
+
+                                                            if(userIsOnMobible && !items[i].ignoreInterest){
+                                                                embed.addField(
+                                                                `— { ${items[i].id} } ${items[i].itemName}`,
+                                                                `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
+                                                                );
+                                                            } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
+                                                                embed.addField(
+                                                                `— { ${items[i].id} } ${items[i].itemName}`,
+                                                                `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
+                                                                );
+                                                            } else {
+                                                                embed.addField(
+                                                                `— { ${items[i].id} } ${items[i].itemName}`,
+                                                                `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Dark}${precio}`
+                                                                );
+                                                            }
+                                                        }
+                                                        
+                                                        await msg.edit(embed);
+                                                        return reactions.users.remove(user.id);
+                                                    });
+                                                });
+
+
+                                            })
+                                        })
                                     })
                                 }
                             }
