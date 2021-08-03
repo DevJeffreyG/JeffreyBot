@@ -11,6 +11,10 @@
         {
             "type": "updated",
             "desc": "Se han arreglado algunos bugs con la muestra de los items de la DarkShop & tienda normal"
+        },
+        {
+            "type": "updated",
+            "desc": "Se arregló un bug al cambiar o retirar DarkJeffros"
         }
     ],
     "bienPng": "http://i.imgur.com/M6hqbcc.png",

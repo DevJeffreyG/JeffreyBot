@@ -441,6 +441,8 @@ Stats.findOne({
                             **—** Se calculará cuantos Jeffros necesitas para tener esa cantidad de DarkJeffros y se añadirán a tu cuenta de la DarkShop.`)
 
                             if(!args[1]) return message.channel.send(instructions);
+                            if(isNaN(args[1])) return message.channel.send(instructions);
+                            if(args[1] < 0) return message.channel.send(instructions);
 
                             let wanted = Math.floor(args[1]);
 
@@ -534,7 +536,9 @@ Stats.findOne({
                             **—** Se cambiarán los DarkJeffros especificados, por Jeffros.`)
 
                             if(!args[1]) return message.channel.send(instructions2);
-
+                            if(isNaN(args[1])) return message.channel.send(instructions);
+                            if(args[1] < 0) return message.channel.send(instructions);
+                            
                             let changing = Math.floor(args[1]);
 
                             // analizando inflación ¿a cuanto equivale un darkjeffro?
