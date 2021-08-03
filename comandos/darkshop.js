@@ -442,7 +442,7 @@ Stats.findOne({
 
                             if(!args[1]) return message.channel.send(instructions);
                             if(isNaN(args[1])) return message.channel.send(instructions);
-                            if(args[1] < 0) return message.channel.send(instructions);
+                            if(args[1] < 1) return message.channel.send(instructions);
 
                             let wanted = Math.floor(args[1]);
 
@@ -537,7 +537,7 @@ Stats.findOne({
 
                             if(!args[1]) return message.channel.send(instructions2);
                             if(isNaN(args[1])) return message.channel.send(instructions);
-                            if(args[1] < 0) return message.channel.send(instructions);
+                            if(args[1] < 1) return message.channel.send(instructions);
                             
                             let changing = Math.floor(args[1]);
 
