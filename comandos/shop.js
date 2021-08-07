@@ -25,7 +25,7 @@ module.exports.run = async (client, message, args) => {
   const guild = message.guild;
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
   let item;
-  let interest = 2000; // CUANTO SUBE EL PRECIO POR COMPRA
+  //let interest = 2000; // CUANTO SUBE EL PRECIO POR COMPRA
 
   let userIsOnMobible = author.presence.clientStatus && author.presence.clientStatus.mobile === "online" && !author.presence.clientStatus.desktop ? true : false;
   let viewExtension = "ꜝ";
@@ -66,6 +66,7 @@ module.exports.run = async (client, message, args) => {
         } else {
           // si hay menos de 3 resultados
           if (items.length <= itemPerPage) {
+            let interest = items[i].interest;
             embed.setColor(Colores.verde);
             embed.setFooter(`| Tienda oficial - Página 1 de 1`, guild.iconURL());
 
@@ -92,33 +93,29 @@ module.exports.run = async (client, message, args) => {
                   let precio = items[i].itemPrice;
 
                   if (all) { // si un usuario tiene totalpurchases del item del loop actual
-                    precio = Math.floor(items[i].itemPrice) + all.quantity * interest;
+                    precio = Math.floor(precio) + all.quantity * interest;
 
-                    if (
-                      message.member.roles.cache.find(
-                        x => x.id === Config.lvl20
-                      )
-                    ) {
-                      precio = `~~${precio}~~ ${Math.floor(items[i].itemPrice) + all.quantity * interest - ((Math.floor(items[i].itemPrice) + all.quantity * interest) / 100) * 15}`;
+                    if (message.member.roles.cache.find(x => x.id === Config.lvl20)) {
+                      precio = `~~${precio}~~ ${precio - ((precio) / 100) * 15}`;
                     }
                   } else {
                     if (message.member.roles.cache.find(x => x.id === Config.lvl20)) { // si tiene descuentos de lvl 20
-                      precio = `~~${precio}~~ ${Math.floor(items[i].itemPrice) - (Math.floor(items[i].itemPrice) / 100) * 15}`;
+                      precio = `~~${precio}~~ ${Math.floor(precio) - (Math.floor(precio) / 100) * 15}`;
                     }
                   }
 
                   if(!isSub){
-                    if(userIsOnMobible && !items[i].ignoreInterest){ // si está en movil y NO ignora el interés
+                    if(userIsOnMobible && interest){ // esta movil, y hay interes
                       embed.addField(
                         `— { ${items[i].id} } ${items[i].itemName}`,
-                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
+                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` ${extendedDetails.slice(2, extendedDetails.length)} (+${interest}).`
                       );
-                    } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
+                    } else if(!userIsOnMobible && interest){ // no está en movil, y tambien hay interes
                       embed.addField(
                         `— { ${items[i].id} } ${items[i].itemName}`,
-                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
+                        `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails} (+${interest})')`
                       );
-                    } else {
+                    } else { // puede estar o no en movil, pero no hay interes
                       embed.addField(
                         `— { ${items[i].id} } ${items[i].itemName}`,
                         `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
@@ -162,6 +159,7 @@ module.exports.run = async (client, message, args) => {
 
               // hacer la primera página
               for (let i = 0; i <= fin; i++) {
+                let interest = items[i].interest;
                 let isSub = false;
                 let time = null;
                 let usesQuery = await Use.findOne({
@@ -187,23 +185,23 @@ module.exports.run = async (client, message, args) => {
                 let precio = all ? Math.floor(items[i].itemPrice) + all.quantity * interest : items[i].itemPrice;
 
                 if (message.member.roles.cache.find(x => x.id === Config.lvl20) && all) {
-                  precio = `~~${precio}~~ ${precio - ((Math.floor(items[i].itemPrice) + all.quantity * interest) / 100) * 15}`;
+                  precio = `~~${precio}~~ ${precio - ((precio) / 100) * 15}`;
                 } else if(message.member.roles.cache.find(x => x.id === Config.lvl20)){
-                  precio = `~~${precio}~~ ${precio - ((Math.floor(items[i].itemPrice)) / 100) * 15}`;
+                  precio = `~~${precio}~~ ${precio - ((Math.floor(precio)) / 100) * 15}`;
                 }
 
                 if(!isSub){ // si no es una suscripción
-                  if(userIsOnMobible && !items[i].ignoreInterest){
+                  if(userIsOnMobible && interest){ // esta movil, y hay interes
                     embed.addField(
                       `— { ${items[i].id} } ${items[i].itemName}`,
-                      `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
+                      `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` ${extendedDetails.slice(2, extendedDetails.length)} (+${interest}).`
                     );
-                  } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
+                  } else if(!userIsOnMobible && interest){ // no está en movil, y tambien hay interes
                     embed.addField(
                       `— { ${items[i].id} } ${items[i].itemName}`,
-                      `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
+                      `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails} (+${interest})')`
                     );
-                  } else {
+                  } else { // puede estar o no en movil, pero no hay interes
                     embed.addField(
                       `— { ${items[i].id} } ${items[i].itemName}`,
                       `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
@@ -267,6 +265,7 @@ module.exports.run = async (client, message, args) => {
                         );
                         
                         for (let i = inicio; i <= fin; i++) {
+                          let interest = items[i].interest;
                           let isSub = false;
                           let time = null;
                           let usesQuery = await Use.findOne({
@@ -292,23 +291,23 @@ module.exports.run = async (client, message, args) => {
                           let precio = all ? Math.floor(items[i].itemPrice) + all.quantity * interest : items[i].itemPrice;
 
                           if(message.member.roles.cache.find(x => x.id === Config.lvl20) && all){
-                            precio = `~~${precio}~~ ${precio - ((Math.floor(items[i].itemPrice) + all.quantity * interest) / 100) * 15}`;
+                            precio = `~~${precio}~~ ${precio - ((precio) / 100) * 15}`;
                           } else if(message.member.roles.cache.find(x => x.id === Config.lvl20)){
-                            precio = `~~${precio}~~ ${precio - ((Math.floor(items[i].itemPrice)) / 100) * 15}`;
+                            precio = `~~${precio}~~ ${precio - ((Math.floor(precio)) / 100) * 15}`;
                           }
                               
                           if(!isSub){ // no es una sub
-                            if(userIsOnMobible && !items[i].ignoreInterest){
+                            if(userIsOnMobible && interest){ // esta movil, y hay interes
                               embed.addField(
                                 `— { ${items[i].id} } ${items[i].itemName}`,
-                                `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
+                                `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` ${extendedDetails.slice(2, extendedDetails.length)} (+${interest}).`
                               );
-                            } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
+                            } else if(!userIsOnMobible && interest){ // no está en movil, y tambien hay interes
                               embed.addField(
                                 `— { ${items[i].id} } ${items[i].itemName}`,
-                                `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
+                                `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails} (+${interest})')`
                               );
-                            } else {
+                            } else { // puede estar o no en movil, pero no hay interes
                               embed.addField(
                                 `— { ${items[i].id} } ${items[i].itemName}`,
                                 `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
@@ -358,6 +357,7 @@ module.exports.run = async (client, message, args) => {
                         );
 
                         for (let i = inicio; i <= fin; i++) {
+                          let interest = items[i].interest;
                           let isSub = false;
                           let time = null;
                           let usesQuery = await Use.findOne({
@@ -385,23 +385,23 @@ module.exports.run = async (client, message, args) => {
                           let precio = all ? Math.floor(items[i].itemPrice) + all.quantity * interest : items[i].itemPrice;
 
                           if (message.member.roles.cache.find(x => x.id === Config.lvl20) && all) {
-                            precio = `~~${precio}~~ ${precio - ((Math.floor(items[i].itemPrice) + all.quantity * interest) / 100) * 15}`;
+                            precio = `~~${precio}~~ ${precio - ((precio) / 100) * 15}`;
                           } else if(message.member.roles.cache.find(x => x.id === Config.lvl20)){
-                            precio = `~~${precio}~~ ${precio - ((Math.floor(items[i].itemPrice)) / 100) * 15}`;
+                            precio = `~~${precio}~~ ${precio - ((Math.floor(precio)) / 100) * 15}`;
                           }
                               
                           if(!isSub){
-                            if(userIsOnMobible && !items[i].ignoreInterest){
+                            if(userIsOnMobible && interest){ // esta movil, y hay interes
                               embed.addField(
                                 `— { ${items[i].id} } ${items[i].itemName}`,
-                                `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` Al comprar este item, su precio subirá.`
+                                `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}\n\`▸\` ${extendedDetails.slice(2, extendedDetails.length)} (+${interest}).`
                               );
-                            } else if(!userIsOnMobible && !items[i].ignoreInterest){ // si no está en movil, pero el item no ignora el interés...
+                            } else if(!userIsOnMobible && interest){ // no está en movil, y tambien hay interes
                               embed.addField(
                                 `— { ${items[i].id} } ${items[i].itemName}`,
-                                `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails}')`
+                                `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio} [${viewExtension}](${message.url} '${extendedDetails} (+${interest})')`
                               );
-                            } else {
+                            } else { // puede estar o no en movil, pero no hay interes
                               embed.addField(
                                 `— { ${items[i].id} } ${items[i].itemName}`,
                                 `\`▸\` ${items[i].itemDescription}\n▸ ${Emojis.Jeffros}${precio}`
@@ -432,12 +432,10 @@ module.exports.run = async (client, message, args) => {
 
     if (!isNaN(action)) {
       // ################################################################################## COMPRAR ITEM ########################################################################################
-      Jeffros.findOne(
-        {
-          serverID: guild.id,
-          userID: author.id
-        },
-        (err, currency) => {
+      Jeffros.findOne({
+        serverID: guild.id,
+        userID: author.id
+      }, (err, currency) => {
           if (err) throw err;
 
           if (!currency) {
@@ -447,13 +445,13 @@ module.exports.run = async (client, message, args) => {
                 `**—** No tienes ${Emojis.Jeffros}effros, habla en <#${Config.mainChannel}> para ganarlos.`
               )
               .setColor(Colores.rojo);
+
+              message.channel.send(error1);
           } else {
-            Items.findOne(
-              {
-                serverID: guild.id,
-                id: action
-              },
-              (err, item) => {
+            Items.findOne({
+              serverID: guild.id,
+              id: action
+            }, async (err, item) => {
                 if (err) throw err;
 
                 if (!item) {
@@ -465,196 +463,150 @@ module.exports.run = async (client, message, args) => {
 
                   let precio = item.itemPrice;
 
-                  All.findOne(
-                    {
-                      userID: author.id,
-                      itemID: action,
-                      isDarkShop: false
-                    },
-                    (err, all) => {
-                      if (all) {
-                        precio =
-                          Math.floor(item.itemPrice) + all.quantity * interest;
+                  all = await All.findOne({
+                    userID: author.id,
+                    itemID: action,
+                    isDarkShop: false
+                  }, (err, all) => {
+                    if(err) throw err; 
+                  });
 
-                        if (
-                          message.member.roles.cache.find(
-                            x => x.id === Config.lvl20
-                          )
-                        ) {
-                          precio = Math.floor(item.itemPrice) + all.quantity * interest - ((Math.floor(item.itemPrice) + all.quantity * interest) / 100) * 15;
-                        }
-                      } else {
-                        if (
-                          message.member.roles.cache.find(
-                            x => x.id === Config.lvl20
-                          )
-                        ) {
-                          precio =
-                            Math.floor(item.itemPrice) -
-                            (Math.floor(item.itemPrice) / 100) * 15;
-                        }
+                  let precio = all ? Math.floor(item.itemPrice) + all.quantity * interest : Math.floor(item.priceItem)
+
+                  if (message.member.roles.cache.find(x => x.id === Config.lvl20)) {
+                    precio = (precio) - ((precio) / 100) * 15;
+                  }
+
+                  let doesntHaveRole = new Discord.MessageEmbed()
+                    .setAuthor(`| Error`, Config.errorPng)
+                    .setDescription(`**—** Necesitas el role "<@&${item.roleRequired}>" para comprar \`${item.itemName}\`.`)
+                    .setColor(Colores.rojo);
+
+                  let doesntHaveEnough = new Discord.MessageEmbed()
+                    .setAuthor(`| Error`, Config.errorPng)
+                    .setDescription(`**—** Necesitas **${Emojis.Jeffros}${precio}** para comprar \`${item.itemName}\`. Tienes **${Emojis.Jeffros}${currency.jeffros}**.`)
+                    .setColor(Colores.rojo);
+
+                  let hasRoleToGive = new Discord.MessageEmbed()
+                    .setAuthor(`| Error`, Config.errorPng)
+                    .setDescription(`**—** Ya tienes el role que te da este item, no puedes comprar \`${item.itemName}\` otra vez.`)
+                    .setColor(Colores.rojo);
+
+                  let hasThisItem = new Discord.MessageEmbed()
+                    .setAuthor(`| Error`, Config.errorPng)
+                    .setDescription(`**—** Ya tienes \`${item.itemName}\`, úsalo con \`${prefix}usar ${item.id}\`.`)
+                    .setColor(Colores.rojo);
+
+                  if (item.roleRequired != "na" && !message.member.roles.cache.find(x => x.id === item.roleRequired)) return message.channel.send(doesntHaveRole); // si no tiene el role requerido
+
+                  Use.findOne({
+                    serverID: guild.id,
+                    itemID: item.id
+                  },(err, use) => {
+                      if (err) throw err;
+
+                      if (!use) {
+                        return message.channel.send(
+                          `[002] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas comprar tu item :)`
+                        );
                       }
 
-                      let doesntHaveRole = new Discord.MessageEmbed()
-                        .setAuthor(`| Error`, Config.errorPng)
-                        .setDescription(
-                          `**—** Necesitas el role "<@&${item.roleRequired}>" para comprar \`${item.itemName}\`.`
-                        )
-                        .setColor(Colores.rojo);
+                      if (use.thingID != "na" && use.thing === "role" && message.member.roles.cache.find(x => x.id === use.thingID)) return message.channel.send(hasRoleToGive); // tiene el rol que da el item
 
-                      let doesntHaveEnough = new Discord.MessageEmbed()
-                        .setAuthor(`| Error`, Config.errorPng)
-                        .setDescription(
-                          `**—** Necesitas **${Emojis.Jeffros}${precio}** para comprar \`${item.itemName}\`. Tienes **${Emojis.Jeffros}${currency.jeffros}**.`
-                        )
-                        .setColor(Colores.rojo);
+                      if (currency.jeffros < precio) return message.channel.send(doesntHaveEnough); // revisando que tenga el dinero para pagar
 
-                      let hasRoleToGive = new Discord.MessageEmbed()
-                        .setAuthor(`| Error`, Config.errorPng)
-                        .setDescription(
-                          `**—** Ya tienes el role que te da este item, no puedes comprar \`${item.itemName}\` otra vez.`
-                        )
-                        .setColor(Colores.rojo);
-
-                      let hasThisItem = new Discord.MessageEmbed()
-                        .setAuthor(`| Error`, Config.errorPng)
-                        .setDescription(
-                          `**—** Ya tienes \`${item.itemName}\`, úsalo con \`${prefix}usar ${item.id}\`.`
-                        )
-                        .setColor(Colores.rojo);
-
-                      if (
-                        item.roleRequired != "na" &&
-                        !message.member.roles.cache.find(
-                          x => x.id === item.roleRequired
-                        )
-                      )
-                        return message.channel.send(doesntHaveRole); // si no tiene el role requerido
-
-                      Use.findOne(
-                        {
-                          serverID: guild.id,
-                          itemID: item.id
-                        },
-                        (err, use) => {
+                      Purchased.findOne({
+                        userID: author.id,
+                        itemID: item.id
+                      }, (err, purchase) => {
                           if (err) throw err;
 
-                          if (!use) {
-                            return message.channel.send(
-                              `[002] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas comprar tu item :)`
-                            );
-                          }
-
-                          if (
-                            use.thingID != "na" &&
-                            use.thing === "role" &&
-                            message.member.roles.cache.find(
-                              x => x.id === use.thingID
-                            )
-                          ) {
-                            return message.channel.send(hasRoleToGive);
-                          }
-                          // revisando que tenga el dinero para pagar
-
-                          if (currency.jeffros < precio)
-                            return message.channel.send(doesntHaveEnough);
-
-                          Purchased.findOne(
-                            {
-                              userID: author.id,
-                              itemID: item.id
-                            },
-                            (err, purchase) => {
-                              if (err) throw err;
-
-                              if (!purchase) {
-                                // CONFIRMACION DE COMPRA
-                                let buyEmbed = new Discord.MessageEmbed()
-                                  .setAuthor(`| Compra`, guild.iconURL())
-                                  .setColor(Colores.rojo)
-                                  .setDescription(
-                                    `
+                          if (!purchase) {
+                            // CONFIRMACION DE COMPRA
+                            let buyEmbed = new Discord.MessageEmbed()
+                              .setAuthor(`| Compra`, guild.iconURL())
+                              .setColor(Colores.rojo)
+                              .setDescription(
+                                `
 \`▸\` ¿Estás seguro de comprar \`${item.itemName}\` por **${Emojis.Jeffros}${precio}**?
 \`▸\` Reacciona de acuerdo a tu preferencia.`
-                                  )
-                                  .setFooter(
-                                    `▸ Esta compra no se puede devolver.`,
-                                    "https://cdn.discordapp.com/emojis/494267320097570837.png"
-                                  );
+                              )
+                              .setFooter(
+                                `▸ Esta compra no se puede devolver.`,
+                                "https://cdn.discordapp.com/emojis/494267320097570837.png"
+                              );
 
-                                message.channel.send(buyEmbed).then(msg => {
-                                  msg.react(":allow:558084462232076312")
-                                    .then(r => {
-                                      msg.react(":denegar:558084461686947891");
-                                    });
+                            message.channel.send(buyEmbed).then(msg => {
+                              msg.react(":allow:558084462232076312")
+                                .then(r => {
+                                  msg.react(":denegar:558084461686947891");
+                                });
 
-                                  let cancelEmbed = new Discord.MessageEmbed()
-                                    .setDescription(`Cancelado.`)
-                                    .setColor(Colores.nocolor);
+                              let cancelEmbed = new Discord.MessageEmbed()
+                                .setDescription(`Cancelado.`)
+                                .setColor(Colores.nocolor);
 
-                                  const yesFilter = (reaction, user) => reaction.emoji.id === "558084462232076312" && user.id === message.author.id;
-                                  const noFilter = (reaction, user) =>  reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
-                                  const collectorFilter = (reaction, user) => (reaction.emoji.id === "558084462232076312" || reaction.emoji.id === "558084461686947891") && user.id === message.author.id;
+                              const yesFilter = (reaction, user) => reaction.emoji.id === "558084462232076312" && user.id === message.author.id;
+                              const noFilter = (reaction, user) =>  reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
+                              const collectorFilter = (reaction, user) => (reaction.emoji.id === "558084462232076312" || reaction.emoji.id === "558084461686947891") && user.id === message.author.id;
 
-                                  const yes = msg.createReactionCollector(yesFilter, { time: ms("30s") });
-                                  const no = msg.createReactionCollector(noFilter, { time: ms("30s") });
-                                  const collector = msg.createReactionCollector(collectorFilter, { time: ms("30s") });
+                              const yes = msg.createReactionCollector(yesFilter, { time: ms("30s") });
+                              const no = msg.createReactionCollector(noFilter, { time: ms("30s") });
+                              const collector = msg.createReactionCollector(collectorFilter, { time: ms("30s") });
 
-                                  collector.on("collect", r => {
-                                    collector.stop();
-                                  })
+                              collector.on("collect", r => {
+                                collector.stop();
+                              })
 
-                                  collector.on("end", (r) => {
-                                    if(r.size > 0 && (r.size === 1 && !r.first().me)) return;
-                                    return msg.edit(cancelEmbed).then(a => {
-                                      msg.reactions.removeAll().then(() => {
-                                        msg.react("795090708478033950");
-                                      });
-                                      message.delete();
-                                      a.delete({timeout: ms("20s")});
-                                    });
+                              collector.on("end", (r) => {
+                                if(r.size > 0 && (r.size === 1 && !r.first().me)) return;
+                                return msg.edit(cancelEmbed).then(a => {
+                                  msg.reactions.removeAll().then(() => {
+                                    msg.react("795090708478033950");
                                   });
+                                  message.delete();
+                                  a.delete({timeout: ms("20s")});
+                                });
+                              });
 
-                                  yes.on("collect", r => {
-                                    currency.jeffros -= precio;
+                              yes.on("collect", r => {
+                                currency.jeffros -= precio;
 
-                                    const newPurchase = new Purchased({
-                                      userID: author.id,
-                                      itemID: item.id
-                                    });
+                                const newPurchase = new Purchased({
+                                  userID: author.id,
+                                  itemID: item.id
+                                });
 
-                                    currency.save();
-                                    newPurchase.save();
-                                    let useEmbed = new Discord.MessageEmbed()
-                                      .setAuthor(`| Listo!`, guild.iconURL())
-                                      .setDescription(
-                                        `
+                                currency.save();
+                                newPurchase.save();
+                                let useEmbed = new Discord.MessageEmbed()
+                                  .setAuthor(`| Listo!`, guild.iconURL())
+                                  .setDescription(
+                                    `
 \`▸\` Pago realizado con éxito.
 \`▸\` Compraste: \`${item.itemName}\` por **${Emojis.Jeffros}${precio}**.
 \`▸ Úsalo con '${prefix}usar ${item.id}'\`.
 \`▸\` Ahora tienes: **${Emojis.Jeffros}${currency.jeffros}**.`
-                                      )
-                                      .setColor(Colores.verde);
+                                  )
+                                  .setColor(Colores.verde);
 
-                                    return msg.edit(useEmbed).then(() => {
-                                      msg.reactions.removeAll();
-                                    });
-                                  });
-
-                                  no.on("collect", r => {
-                                    return msg.edit(cancelEmbed).then(a => {
-                                      msg.reactions.removeAll();
-                                      message.delete();
-                                      a.delete({timeout: ms("20s")});
-                                    });
-                                  });
+                                return msg.edit(useEmbed).then(() => {
+                                  msg.reactions.removeAll();
                                 });
-                              } else {
-                                // si ya tiene el item
-                                return message.channel.send(hasThisItem);
-                              }
-                            }
-                          );
+                              });
+
+                              no.on("collect", r => {
+                                return msg.edit(cancelEmbed).then(a => {
+                                  msg.reactions.removeAll();
+                                  message.delete();
+                                  a.delete({timeout: ms("20s")});
+                                });
+                              });
+                            });
+                          } else {
+                            // si ya tiene el item, pero no lo ha activado
+                            return message.channel.send(hasThisItem);
+                          }
                         }
                       );
                     }
@@ -697,19 +649,19 @@ module.exports.run = async (client, message, args) => {
                 let errorEmbed = new Discord.MessageEmbed()
                   .setAuthor(`| Error`, Config.errorPng)
                   .setDescription(
-                    `▸ El uso correcto es: /shop add <nombre> <precio> <ignora la subida de precio "true || false"> (@role requerido o ID)
+                    `▸ El uso correcto es: /shop add <nombre> <precio> <precio de subida por compra (0 para que no suba)> (@role requerido o ID)
 **—** Para los roles, si no se necesita, rellenar con "\`na\`".`
                   )
                   .setColor(Colores.nocolor);
 
                 if (!args[1]) return message.channel.send(errorEmbed);
                 if (!args[2]) return message.channel.send(errorEmbed);
-                if (!args[3]) return message.channel.send(errorEmbed);
+                if (!args[3] ||(args[3] && isNaN(args[3]))) return message.channel.send(errorEmbed);
                 if (!args[4]) return message.channel.send(errorEmbed);
 
                 let nameItem = args[1];
                 let priceItem = args[2];
-                let ignoreInterest = args[3] == "true" ? true : false;
+                let newInterest = Number(args[3]);
                 let reqRole = args[4] ? args[4] : "na";
 
                 let lastID = c + plus;
@@ -721,7 +673,7 @@ module.exports.run = async (client, message, args) => {
                   itemDescription: "na",
                   replyMessage: "¡Item usado con éxito!",
                   roleRequired: reqRole,
-                  ignoreInterest: ignoreInterest,
+                  interest: newInterest,
                   id: lastID
                 });
 
@@ -736,7 +688,7 @@ module.exports.run = async (client, message, args) => {
 **—** Descripción: \`na\`.
 **—** Mensaje después de comprar: \`¡Item usado con éxito!\`.
 **—** Role requerido: \`${reqRole}\`.
-**—** Ignora el interés por compra: \`${ignoreInterest ? "Sí" : "No"}\`.
+**—** Interés por compra: **${Emojis.Jeffros}${newInterest}**.
 **—** ID: \`${lastID}\`.`
                   )
                   .setColor(Colores.verde);

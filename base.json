@@ -9,12 +9,17 @@
             "desc": "Se ha abierto la `{ PREFIX }darkshop` para los usuarios **nivel 5**"
         },
         {
-            "type": "updated",
-            "desc": "Se han arreglado algunos bugs con la muestra de los items de la DarkShop & tienda normal"
+            "type": "added",
+            "desc": "Se han agregado las respuestas aptas del evento & algunas más, y se han cambiado algunas respuestas viejas",
+            "extended": "Algunas respuestas del evento han sido ligeramente modificadas."
+        },
+        {
+            "type": "added",
+            "desc": "Se han implementado las subidas de precio diferentes por item, en la tienda del servidor"
         },
         {
             "type": "updated",
-            "desc": "Se arregló un bug al cambiar o retirar DarkJeffros"
+            "desc": "Se podrán usar los comandos con mayúsculas o minúsculas"
         }
     ],
     "bienPng": "http://i.imgur.com/M6hqbcc.png",
@@ -24,8 +29,8 @@
     "jeffreygID": "437668432604037142",
     "jgServer": "447797737216278528",
     "testingJBID": "514123686530383872",
-    "offtopicChannel": "485192438701359135",
-    "spamChannel": "821486638768455700",
+    "offtopicChannel": "821486638768455700",
+    "spamChannel": "485192438701359135",
     "mainChannel": "447802627187539968",
     "mainVip": "573166733955694593",
     "botsChannel": "485192397228081162",

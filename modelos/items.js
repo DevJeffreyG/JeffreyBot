@@ -8,6 +8,7 @@ const itemsSchema = mongoose.Schema({
   itemDescription: String,
   replyMessage: String,
   roleRequired: String,
+  interest: Number,
   ignoreInterest: Boolean,
   id: Number
 

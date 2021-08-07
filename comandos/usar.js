@@ -277,7 +277,7 @@ module.exports.run = async (client, message, args) => {
           
         */
             let isIgnored = true;
-            if(item.ignoreInterest == false) isIgnored = false;
+            if(item.interest === 0) isIgnored = false;
               
             Use.findOne(
               {

@@ -409,7 +409,7 @@ client.on("messageDelete", async(message) => {
 //main
 client.on("message", async message => {
   let messageArray = message.content.split(" ");
-  let cmd = messageArray[0];
+  let cmd = messageArray[0].toLowerCase();
   let args = messageArray.slice(1);
   let guild = message.guild;
   let author = message.author;
@@ -484,7 +484,7 @@ client.on("message", async message => {
     }
 
     // /rep @usuario
-    if (message.content.startsWith(`${prefix}rep`)) {
+    if (message.content.toLowerCase().startsWith(`${prefix}rep`)) {
       // if(author.id != jeffreygID) return message.reply(`Este comando está en mantenimiento! Pronto estará disponible. Disculpa los inconvenientes.`);
       let jeffreyRole = guild.roles.cache.find(
         x => x.id === Config.jeffreyRole
@@ -624,12 +624,14 @@ client.on("message", async message => {
       }
     })
 
-    if (message.content === `${prefix}coins`) {
+    if (message.content.toLowerCase() === `${prefix}coins`) {
       //if(message.author.id != jeffreygID) return message.reply("Comando en mantenimiento, vuelve más tarde!");
       let money = Math.ceil(Math.random() * 20);
       let tmoney = `**${Emojis.Jeffros}${money}**`;
       let randommember = guild.members.cache.random();
       randommember = `**${randommember.user.tag}**`;
+
+      let fakemoney = `${Math.ceil(Math.random() * 1000) + 999} Jeffros`;
 
       if (multiplier != 1) {
         money = money * multiplier;
@@ -670,9 +672,14 @@ client.on("message", async message => {
         `${randommember}`
       );
 
+      text = text.replace(
+        new RegExp("{ FAKE MONEY }", "g"),
+        `${fakemoney}`
+      );
+
       let embed = new Discord.MessageEmbed()
         .setColor(Colores.rojo)
-        .setDescription(text);
+        .setDescription(`${text}.`);
 
       if(index.author.toUpperCase() === "NONE"){
         
