@@ -460,6 +460,7 @@ module.exports.run = async (client, message, args) => {
                   //embeds
 
                   // descuentos
+                  let interest = item.interest;
 
                   all = await All.findOne({
                     userID: author.id,
