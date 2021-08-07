@@ -470,9 +470,10 @@ module.exports.run = async (client, message, args) => {
                     if(err) throw err; 
                   });
 
+                  console.log("ALL", all)
                   console.log("INTEREST", interest)
 
-                  let precio = all ? Math.floor(item.itemPrice) + all.quantity * interest : Math.floor(item.priceItem)
+                  let precio = all ? Math.floor(item.itemPrice) + all.quantity * interest : Math.floor(item.priceItem);
 
                   console.log("PRECIO 1", precio)
                   if (message.member.roles.cache.find(x => x.id === Config.lvl20)) {
