@@ -278,7 +278,7 @@ module.exports.run = async (client, message, args) => {
 
                           if(!usesQuery) return message.channel.send(`[005] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas seguir usando correctamente el comando :)`)
 
-                          let all1 = await All.findOne({
+                          all = await All.findOne({
                               userID: author.id,
                               itemID: items[i].id,
                               isDarkShop: false
@@ -286,7 +286,7 @@ module.exports.run = async (client, message, args) => {
                               if(err) throw err;
                           });
 
-                          let precio = all1 ? Math.floor(items[i].itemPrice) + all1.quantity * interest : items[i].itemPrice;
+                          let precio = all ? Math.floor(items[i].itemPrice) + all.quantity * interest : items[i].itemPrice;
 
                           if(message.member.roles.cache.find(x => x.id === Config.lvl20)){
                             precio = `~~${precio}~~ ${precio - ((precio) / 100) * 15}`;
@@ -370,7 +370,7 @@ module.exports.run = async (client, message, args) => {
 
                           if(!usesQuery) return message.channel.send(`[001] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas seguir usando correctamente el comando :)`)
 
-                          let all2 = await All.findOne({
+                          all = await All.findOne({
                               userID: author.id,
                               itemID: items[i].id,
                               isDarkShop: false
@@ -378,7 +378,7 @@ module.exports.run = async (client, message, args) => {
                               if (err) throw err;
                           });
 
-                          let precio = all2 ? Math.floor(items[i].itemPrice) + all2.quantity * interest : items[i].itemPrice;
+                          let precio = all ? Math.floor(items[i].itemPrice) + all.quantity * interest : items[i].itemPrice;
 
                           if (message.member.roles.cache.find(x => x.id === Config.lvl20)) {
                             precio = `~~${precio}~~ ${precio - ((precio) / 100) * 15}`;
@@ -456,7 +456,7 @@ module.exports.run = async (client, message, args) => {
                   // descuentos
                   let interest = item.interest;
 
-                  let all3 = await All.findOne({
+                  all = await All.findOne({
                     userID: author.id,
                     itemID: action,
                     isDarkShop: false
@@ -464,17 +464,12 @@ module.exports.run = async (client, message, args) => {
                     if(err) throw err; 
                   });
 
-                  console.log("ALL", all3)
-                  console.log("INTEREST", interest)
+                  let precio = all ? Math.floor(item.itemPrice) + all.quantity * interest : Math.floor(item.itemPrice);
 
-                  let precio = all3 ? Math.floor(item.itemPrice) + all3.quantity * interest : Math.floor(item.priceItem);
-
-                  console.log("PRECIO 1", precio)
                   if (message.member.roles.cache.find(x => x.id === Config.lvl20)) {
                     precio = (precio) - ((precio) / 100) * 15;
                   }
 
-                  console.log("PRECIO 2", precio)
                   let doesntHaveRole = new Discord.MessageEmbed()
                     .setAuthor(`| Error`, Config.errorPng)
                     .setDescription(`**—** Necesitas el role "<@&${item.roleRequired}>" para comprar \`${item.itemName}\`.`)
