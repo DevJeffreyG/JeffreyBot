@@ -470,12 +470,16 @@ module.exports.run = async (client, message, args) => {
                     if(err) throw err; 
                   });
 
+                  console.log("INTEREST", interest)
+
                   let precio = all ? Math.floor(item.itemPrice) + all.quantity * interest : Math.floor(item.priceItem)
 
+                  console.log("PRECIO 1", precio)
                   if (message.member.roles.cache.find(x => x.id === Config.lvl20)) {
                     precio = (precio) - ((precio) / 100) * 15;
                   }
 
+                  console.log("PRECIO 2", precio)
                   let doesntHaveRole = new Discord.MessageEmbed()
                     .setAuthor(`| Error`, Config.errorPng)
                     .setDescription(`**—** Necesitas el role "<@&${item.roleRequired}>" para comprar \`${item.itemName}\`.`)
