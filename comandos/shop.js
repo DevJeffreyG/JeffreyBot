@@ -461,8 +461,6 @@ module.exports.run = async (client, message, args) => {
 
                   // descuentos
 
-                  let precio = item.itemPrice;
-
                   all = await All.findOne({
                     userID: author.id,
                     itemID: action,
