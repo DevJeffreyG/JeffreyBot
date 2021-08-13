@@ -29,7 +29,7 @@ module.exports.run = async (client, message, args) => {
   let delMgs = Number(args[0]);
 
   if(message.member.roles.cache.find(x => x.id === jeffreyRole.id)){} else if(message.member.roles.cache.find(x => x.id === adminRole.id)){} else if(message.member.roles.cache.find(x => x.id === modRole.id)){} else {return;}
-  if(!delMgs) return message.channel.send(embed);
+  if(!delMgs) return message.channel.send({embeds: [embed]});
 
   message.channel.bulkDelete(delMgs).then(deleMsg => {
   message.channel.send(`Limpiados ${deleMsg.size} mensajes.`).then(msg => msg.delete({timeout: 7000}));

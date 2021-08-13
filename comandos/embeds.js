@@ -365,7 +365,7 @@ let noEmbed = new Discord.MessageEmbed()
 \`▸\` Staff_manual
 \`▸\` Final_info`);
 
-  if (!args[0]) return message.channel.send(noEmbed).then(m => m.delete({ timeout: ms("10s") }));
+  if (!args[0]) return message.channel.send({embeds: [noEmbed]}).then(m => m.delete({ timeout: ms("10s") }));
   let embed1 = new Discord.MessageEmbed();
   let embed2 = new Discord.MessageEmbed();
   let embed3 = new Discord.MessageEmbed();
@@ -374,36 +374,36 @@ let noEmbed = new Discord.MessageEmbed()
   switch (args[0]) {
     case (caso = "informacion"):
       //niveles
-      await message.channel.send(lvlEmbed1);
-      await message.channel.send(lvlEmbed2);
+      await message.channel.send({embeds: [lvlEmbed1]});
+      await message.channel.send({embeds: [lvlEmbed2]});
       //canales
-      await message.channel.send(canalesEmbed);
-      await message.channel.send(canalesEmbed2);
-      await message.channel.send(canalesEmbed3);
-      await message.channel.send(canalesEmbed4);
-      await message.channel.send(canalesEmbed5);
+      await message.channel.send({embeds: [canalesEmbed]});
+      await message.channel.send({embeds: [canalesEmbed2]});
+      await message.channel.send({embeds: [canalesEmbed3]});
+      await message.channel.send({embeds: [canalesEmbed4]});
+      await message.channel.send({embeds: [canalesEmbed5]});
       //roles
-      await message.channel.send(rolesEmbed);
-      await message.channel.send(rolesEmbed2);
-      await message.channel.send(rolesEmbed3);
-      await message.channel.send(rolesEmbed4);
+      await message.channel.send({embeds: [rolesEmbed]});
+      await message.channel.send({embeds: [rolesEmbed2]});
+      await message.channel.send({embeds: [rolesEmbed3]});
+      await message.channel.send({embeds: [rolesEmbed4]});
       //jeffros
-      await message.channel.send(jeffrosEmbed);
-      await message.channel.send(jeffrosEmbed2);
+      await message.channel.send({embeds: [jeffrosEmbed]});
+      await message.channel.send({embeds: [jeffrosEmbed2]});
       //interes
-      await message.channel.send(interestEmbed);
-      await message.channel.send(interestEmbed2);
+      await message.channel.send({embeds: [interestEmbed]});
+      await message.channel.send({embeds: [interestEmbed2]});
       //awards
-      await message.channel.send(awardsEmbed);
-      await message.channel.send(awardsEmbed2);
-      await message.channel.send(awardsEmbed3);
+      await message.channel.send({embeds: [awardsEmbed]});
+      await message.channel.send({embeds: [awardsEmbed2]});
+      await message.channel.send({embeds: [awardsEmbed3]});
       //staff
-      await message.channel.send(staffEmbed);
-      await message.channel.send(staffEmbed2);
-      await message.channel.send(staffEmbed3);
-      await message.channel.send(staffEmbed4);
+      await message.channel.send({embeds: [staffEmbed]});
+      await message.channel.send({embeds: [staffEmbed2]});
+      await message.channel.send({embeds: [staffEmbed3]});
+      await message.channel.send({embeds: [staffEmbed4]});
       //final
-      await message.channel.send(finalInfoEmbed);
+      await message.channel.send({embeds: [finalInfoEmbed]});
       break;
 
       case (caso = "colores"):
@@ -418,8 +418,8 @@ let noEmbed = new Discord.MessageEmbed()
       );
       embed2.setColor(Colores.nocolor);
 
-      message.channel.send(embed1).then(m => {
-        message.channel.send(embed2);
+      message.channel.send({embeds: [embed1]}).then(m => {
+        message.channel.send({embeds: [embed2]});
       });
 
       break;
@@ -436,8 +436,8 @@ let noEmbed = new Discord.MessageEmbed()
       );
       embed2.setColor(Colores.nocolor);
 
-      message.channel.send(embed1).then(m => {
-        message.channel.send(embed2);
+      message.channel.send({embeds: [embed1]}).then(m => {
+        message.channel.send({embeds: [embed2]});
       });
 
       break;
@@ -457,8 +457,8 @@ let noEmbed = new Discord.MessageEmbed()
       );
       embed2.setColor(Colores.nocolor);
 
-      message.channel.send(embed1).then(m => {
-        message.channel.send(embed2);
+      message.channel.send({embeds: [embed1]}).then(m => {
+        message.channel.send({embeds: [embed2]});
       });
 
       break;
@@ -495,9 +495,9 @@ Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para c
       );
       embed3.setColor(Colores.verde);
 
-      message.channel.send(embed1).then(m => {
-        message.channel.send(embed2).then(s => {
-          message.channel.send(embed3);
+      message.channel.send({embeds: [embed1]}).then(m => {
+        message.channel.send({embeds: [embed2]}).then(s => {
+          message.channel.send({embeds: [embed3]});
         });
       });
 
@@ -513,8 +513,8 @@ Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para c
 🤖 ➟ <@&${Config.jbnews}>`);
       embed2.setColor(Colores.nocolor);
 
-      message.channel.send(embed1).then(m => {
-        message.channel.send(embed2);
+      message.channel.send({embeds: [embed1]}).then(m => {
+        message.channel.send({embeds: [embed2]});
       });
 
       break;
@@ -527,8 +527,8 @@ Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para c
       );
       embed2.setColor(Colores.nocolor);
 
-      message.channel.send(embed1).then(m => {
-        message.channel.send(embed2);
+      message.channel.send({embeds: [embed1]}).then(m => {
+        message.channel.send({embeds: [embed2]});
       });
 
       break;
@@ -541,74 +541,74 @@ Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para c
 🌠 ➟ <@&564144046591705089>`);
       embed2.setColor(Colores.nocolor);
 
-      message.channel.send(embed1).then(m => {
-        message.channel.send(embed2);
+      message.channel.send({embeds: [embed1]}).then(m => {
+        message.channel.send({embeds: [embed2]});
       });
 
       break;
 
     case (caso = "awards"):
-      message.channel.send(awardsEmbed).then(m => {
-        message.channel.send(awardsEmbed2).then(s => {
-          message.channel.send(awardsEmbed3);
+      message.channel.send({embeds: [awardsEmbed]}).then(m => {
+        message.channel.send({embeds: [awardsEmbed2]}).then(s => {
+          message.channel.send({embeds: [awardsEmbed3]});
         });
       });
 
       break;
 
     case (caso = "niveles"):
-      message.channel.send(lvlEmbed1).then(() => {
-        message.channel.send(lvlEmbed2);
+      message.channel.send({embeds: [lvlEmbed1]}).then(() => {
+        message.channel.send({embeds: [lvlEmbed2]});
       });
 
       break;
 
     case (caso = "roles"):
-      message.channel.send(rolesEmbed).then(() => {
-        message.channel.send(rolesEmbed2).then(() => {
-          message.channel.send(rolesEmbed3);
+      message.channel.send({embeds: [rolesEmbed]}).then(() => {
+        message.channel.send({embeds: [rolesEmbed2]}).then(() => {
+          message.channel.send({embeds: [rolesEmbed3]});
         });
       });
 
       break;
 
     case (caso = "canales"):
-      await message.channel.send(canalesEmbed);
-      await message.channel.send(canalesEmbed2);
-      await message.channel.send(canalesEmbed3);
-      await message.channel.send(canalesEmbed4);
-      await message.channel.send(canalesEmbed5);
+      await message.channel.send({embeds: [canalesEmbed]});
+      await message.channel.send({embeds: [canalesEmbed2]});
+      await message.channel.send({embeds: [canalesEmbed3]});
+      await message.channel.send({embeds: [canalesEmbed4]});
+      await message.channel.send({embeds: [canalesEmbed5]});
 
       break;
 
     case (caso = "jeffros"):
-      message.channel.send(jeffrosEmbed).then(() => {
-        message.channel.send(jeffrosEmbed2);
+      message.channel.send({embeds: [jeffrosEmbed]}).then(() => {
+        message.channel.send({embeds: [jeffrosEmbed2]});
       });
       break;
 
     case (caso = "interes"):
-      await message.channel.send(interestEmbed);
-      await message.channel.send(interestEmbed2);
+      await message.channel.send({embeds: [interestEmbed]});
+      await message.channel.send({embeds: [interestEmbed2]});
       break;
 
     case (caso = "staff"):
-      message.channel.send(staffEmbed).then(() => {
-        message.channel.send(staffEmbed2).then(() => {
-          message.channel.send(staffEmbed3).then(() => {
-            message.channel.send(staffEmbed4);
+      message.channel.send({embeds: [staffEmbed]}).then(() => {
+        message.channel.send({embeds: [staffEmbed2]}).then(() => {
+          message.channel.send({embeds: [staffEmbed3]}).then(() => {
+            message.channel.send({embeds: [staffEmbed4]});
           });
         });
       });
       break;
       
     case (caso = "staff_manual"):
-      message.channel.send(staffEmbed).then(() => {
-        message.channel.send(manualEmbed).then(() => {
-          message.channel.send(manualEmbed2).then(() => {
-            message.channel.send(manualEmbed3).then(() => {
-              message.channel.send(manualEmbed4).then(() => {
-                message.channel.send(manualEmbed5);
+      message.channel.send({embeds: [staffEmbed]}).then(() => {
+        message.channel.send({embeds: [manualEmbed]}).then(() => {
+          message.channel.send({embeds: [manualEmbed2]}).then(() => {
+            message.channel.send({embeds: [manualEmbed3]}).then(() => {
+              message.channel.send({embeds: [manualEmbed4]}).then(() => {
+                message.channel.send({embeds: [manualEmbed5]});
               });
             });
           });
@@ -617,7 +617,7 @@ Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para c
       break;
 
     case (caso = "final_info"):
-      message.channel.send(finalInfoEmbed);
+      message.channel.send({embeds: [finalInfoEmbed]});
       break;
 
     case (caso = "edit"):
@@ -633,7 +633,7 @@ Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para c
 💀 ➟ <@&${Config.dsnews}>`
             )
             .setColor(Colores.nocolor);
-          m.edit(nembed);
+          m.edit({embeds: [nembed]});
         });
       }
   }

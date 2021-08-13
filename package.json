@@ -1,13 +1,13 @@
 {
 	"name": "jeffrey-bot",
-	"version": "1.6.19",
+	"version": "1.6.20",
 	"description": "El bot del servidor oficial de JeffreyG, remasterizado.",
 	"main": "jb.js",
 	"scripts": {
 		"start": "node jb.js"
 	},
 	"engines": {
-		"node": "14.17.4"
+		"node": "16.6.1"
 	},
 	"author": "JeffreyG",
 	"license": "ISC",
@@ -15,7 +15,7 @@
 		"any-base": "^1.1.0",
 		"chance": "^1.1.6",
 		"cron": "^1.8.2",
-		"discord.js": "^12.5.1",
+		"discord.js": "^13.0.1",
 		"dotenv": "^8.2.0",
 		"express": "^4.17.1",
 		"fs": "0.0.2",

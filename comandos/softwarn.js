@@ -32,10 +32,10 @@ module.exports.run = async (client, message, args) => {
   .setDescription(`▸ El uso correcto es: ${prefix}softwarn <@usuario> <regla infringida> (alguna nota / observación) \n▸ Usar este comando cuando se le advierta a un usuario por chat.`)
   .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}swarn`);
 
-  if(!args[0]) return message.channel.send(embed);
-  if(!args[1]) return message.channel.send(embed);
+  if(!args[0]) return message.channel.send({embeds: [embed]});
+  if(!args[1]) return message.channel.send({embeds: [embed]});
 
-  let member = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[0]));
+  let member = message.mentions.users.first() ? guild.members.cache.get(message.mentions.users.first().id) : guild.members.cache.get(args[0]);
 
   // Get the size of an object
   var size = Object.keys(reglas).length;
@@ -59,7 +59,7 @@ module.exports.run = async (client, message, args) => {
   .setDescription(`**—** **${member.user.tag}** ya ha sido softwarneado por infringir la regla N°${args[1]}: \`${rule}\`.
 **—** Proceder con \`${prefix}warn\`.`);
 
-  if(rule === "na") return message.channel.send(rulesEmbed);
+  if(rule === "na") return message.channel.send({embeds: [rulesEmbed]});
 
   SoftWarn.findOne({
       userID: member.id
@@ -74,7 +74,7 @@ module.exports.run = async (client, message, args) => {
         \`▸\` Notas: \`${note}\`.`)
         .setColor(Colores.verde);
 
-        message.channel.send(confirmation).then(msg => {
+        message.channel.send({embeds: [confirmation]}).then(msg => {
             msg.react(":allow:558084462232076312")
             .then(r => {
                 msg.react(":denegar:558084461686947891");
@@ -88,9 +88,9 @@ module.exports.run = async (client, message, args) => {
             const noFilter = (reaction, user) => reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
             const collectorFilter = (reaction, user) => (reaction.emoji.id === "558084462232076312" || reaction.emoji.id === "558084461686947891") && user.id === message.author.id;
 
-            const yes = msg.createReactionCollector(yesFilter, { time: 60000 });
-            const no = msg.createReactionCollector(noFilter, { time: 60000 });
-            const collector = msg.createReactionCollector(collectorFilter, { time: 60000 });
+            const yes = msg.createReactionCollector({yesFilter, time: 60000 });
+            const no = msg.createReactionCollector({noFilter, time: 60000 });
+            const collector = msg.createReactionCollector({collectorFilter, time: 60000 });
 
             collector.on("collect", r => {
               collector.stop();
@@ -98,7 +98,7 @@ module.exports.run = async (client, message, args) => {
 
             collector.on("end", r => {
               if(r.size > 0 && (r.size === 1 && !r.first().me)) return;
-              return msg.edit(cancelEmbed).then(a => {
+              return msg.edit({embeds: [cancelEmbed]}).then(a => {
                 msg.reactions.removeAll().then(() => {
                   msg.react("795090708478033950");
                 });
@@ -121,7 +121,7 @@ module.exports.run = async (client, message, args) => {
                 } else {
                     for(let i = 0; i < swarn.warns.length; i++){
                         if(swarn.warns[i].rule === rule){
-                            return message.channel.send(alreadyWarned);
+                            return message.channel.send({embeds: [alreadyWarned]});
                         }
                     }
         
@@ -138,7 +138,7 @@ module.exports.run = async (client, message, args) => {
                 .setColor(Colores.rojo)
                 .setFooter(`Si vuelves a cometer esta misma falla serás warneado, ten cuidado.`, 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png');
                 
-                member.send(warnedEmbed)
+                member.send({embeds: [warnedEmbed]})
                 .catch(e => {
                   console.log('Tiene los MDs desactivados.')
                 });
@@ -152,13 +152,13 @@ module.exports.run = async (client, message, args) => {
 **—** Nota adjunta: \`${note}\`.`)
           .setColor(Colores.rojo);
                 
-              return msg.edit(warned).then(() => {
+              return msg.edit({embeds: [warned]}).then(() => {
                 msg.reactions.removeAll();
               });
             });
 
             no.on("collect", r => {
-              return msg.edit(cancelEmbed).then(a => {
+              return msg.edit({embeds: [cancelEmbed]}).then(a => {
                 msg.reactions.removeAll();
                 message.delete();
                 a.delete({timeout: ms("20s")});

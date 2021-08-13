@@ -28,7 +28,7 @@ module.exports.run = async (client, message, args) => {
               embed.setColor("#2fff3d")
           }
           
-          message.edit({content: "", embed: embed});
+          message.edit({content: null, embeds: [embed]});
         });
 
 }

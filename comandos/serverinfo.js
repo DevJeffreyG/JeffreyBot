@@ -29,7 +29,7 @@ module.exports.run = async (client, message, args) => {
   **— Miembros totales:** ${message.guild.memberCount}`)
   .addField(`— @${adminRole.name}`, `${admins}`)
   .addField(`— @${modRole.name}`, `${mods}`)
-  return message.channel.send(serverembed);
+  return message.channel.send({embeds: [serverembed]});
 
 }
 

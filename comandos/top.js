@@ -39,7 +39,7 @@ module.exports.run = async (client, message, args) => {
 
   let selTop1 = args[0];
   if (!args[0]) {
-    message.channel.send(noTopS).then(selectingTopMSG => {
+    message.channel.send({embeds: [noTopS]}).then(selectingTopMSG => {
       message.channel
         .awaitMessages(filter, { max: 1, time: 10000 })
         .then(collectedTop => {
@@ -49,7 +49,7 @@ module.exports.run = async (client, message, args) => {
             collectedTop.first().content.toLowerCase() === "cancelar"
           ) {
             collectedTop.first().delete();
-            return selectingTopMSG.edit(cancelE).then(r => r.delete(5000));
+            return selectingTopMSG.edit({embeds: [cancelE]}).then(r => r.delete(5000));
           }
 
           if (
@@ -627,7 +627,7 @@ module.exports.run = async (client, message, args) => {
             }
           }
 
-          return message.channel.send(jTop);
+          return message.channel.send({embeds: [jTop]});
         });
     }
 
@@ -815,7 +815,7 @@ module.exports.run = async (client, message, args) => {
               if (noMore === false) n++;
             }
 
-            return message.channel.send(exTop);
+            return message.channel.send({embeds: [exTop]});
           }
         });
     }

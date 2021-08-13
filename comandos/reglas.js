@@ -31,7 +31,7 @@ module.exports.run = async (client, message, args) => {
       rulesEmbed.addField(reglas[i], `N° **${i}**`);
   }
 
-  return message.channel.send(rulesEmbed);
+  return message.channel.send({embeds: [rulesEmbed]});
 
 }
 

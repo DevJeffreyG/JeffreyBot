@@ -29,11 +29,11 @@ module.exports.run = async (client, message, args) => {
   
   if(author.id != jeffreygID) return;
   
-  let member = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[0]));
+  let member = message.mentions.users.first() ? guild.members.cache.get(message.mentions.users.first().id) : guild.members.cache.get(args[0]);
   let nJeffros = Math.floor(args[1]);
   
-  if(!args[0]) return message.channel.send(embed);
-  if(!args[1]) return message.channel.send(embed);
+  if(!args[0]) return message.channel.send({embeds: [embed]});
+  if(!args[1]) return message.channel.send({embeds: [embed]});
   if(!args[2] || args[2] != "1") {
   
   
@@ -60,7 +60,7 @@ module.exports.run = async (client, message, args) => {
   **—** ${member.user.tag}
   **—** ${Emojis.Jeffros}${nJeffros}`)
         .setColor(Colores.verde);
-        message.channel.send(cEmbed);
+        message.channel.send({embeds: [cEmbed]});
       } else {
         jeffros.jeffros = jeffros.jeffros + nJeffros;
         
@@ -73,7 +73,7 @@ module.exports.run = async (client, message, args) => {
   **—** ${member.user.tag}
   **—** ${Emojis.Jeffros}${jeffros.jeffros}`)
         .setColor(Colores.verde);
-        message.channel.send(cEmbed);
+        message.channel.send({embeds: [cEmbed]});
       }
     })
   } else {
@@ -97,7 +97,7 @@ module.exports.run = async (client, message, args) => {
     **—** ${member.user.tag}
     **—** ${Emojis.Dark}${nJeffros}`)
         .setColor(Colores.verde);
-        message.channel.send(cEmbed)
+        message.channel.send({embeds: [cEmbed]})
     } else {
         stats.djeffros += nJeffros;
         stats.save();
@@ -107,7 +107,7 @@ module.exports.run = async (client, message, args) => {
     **—** ${member.user.tag}
     **—** ${Emojis.Dark}${stats.djeffros}`)
         .setColor(Colores.verde);
-        message.channel.send(cEmbed)
+        message.channel.send({embeds: [cEmbed]})
     }
     })
   }

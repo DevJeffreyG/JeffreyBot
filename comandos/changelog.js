@@ -8,7 +8,7 @@ const changes = Config.changes;
 module.exports.run = async (client, message, args) => {
 
   if(!message.content.startsWith(prefix))return;
-  let author = message.author;
+  let author = message.member;
   let viewExtension = "ꜝ";
 
   let added = "<:Plus:792966881350123540>";
@@ -80,7 +80,7 @@ module.exports.run = async (client, message, args) => {
       }
     }
 
-    return message.author.send(embed)
+    return message.author.send({embeds: [embed]})
     .catch(err => {
       if(userIsOnMobible){
         message.reply("lo siento, detecté que estás en u dispositivo móvil, pero no pude enviar este mensaje a tus MDs porque los tienes desactivados.");
@@ -150,7 +150,7 @@ module.exports.run = async (client, message, args) => {
     }
   }
   
-  return message.channel.send(embed);
+  return message.channel.send({embeds: [embed]});
 
 }
 

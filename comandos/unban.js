@@ -26,7 +26,7 @@ module.exports.run = async (client, message, args) => {
   .setFooter(`<> Obligatorio () Opcional`);
   
   if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
-  if(!args[0]) return message.channel.send(embed);
+  if(!args[0]) return message.channel.send({embeds: [embed]});
   let unbUser = args[0];
   
   let bEmbed = new Discord.MessageEmbed()
@@ -40,7 +40,7 @@ module.exports.run = async (client, message, args) => {
   guild.members.unban(unbUser)
   .then(s => {
     message.react("✅");
-    logC.send(bEmbed);
+    logC.send({embeds: [bEmbed]});
   })
   
 

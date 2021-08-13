@@ -26,7 +26,7 @@ module.exports.run = async (client, message, args) => {
   .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}bug`);
   
   let bug = args.join(" ");
-    if(!bug) return message.channel.send(embed);
+    if(!bug) return message.channel.send({embeds: [embed]});
 
     Banned.findOne({
       userID: author.id

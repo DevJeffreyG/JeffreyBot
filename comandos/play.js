@@ -12,7 +12,7 @@ module.exports.run = async (client, message, args, active) => {
   .setAuthor(`| Error`, Config.errorPng)
   .setColor(Colores.rojo)
   .setDescription(`Los comandos de música de Jeffrey Bot están desactivados debido a problemas con el host.\n[▸ Anuncio](https://discordapp.com/channels/447797737216278528/485191462422577182/733704080714629160)`)
-  //return message.channel.send(sadface)
+  //return message.channel.send({embeds: [sadface]})
 
   // Variables
   let author = message.author;
@@ -41,13 +41,13 @@ module.exports.run = async (client, message, args, active) => {
     .setColor(Colores.rojo);
 
   // author está en el canal?
-  if (!message.member.voice) return message.channel.send(errorE1);
+  if (!message.member.voice) return message.channel.send({embeds: [errorE1]});
 
   let pFetched = active.get(guild.id);
 
   // se dió la url?
   if (!args[0] && !pFetched) {
-    return message.channel.send(errorE3);
+    return message.channel.send({embeds: [errorE3]});
   } else if(pFetched){
     if (pFetched.dispatcher.paused) {
       let commandFile = require("./resume.js");
@@ -92,7 +92,7 @@ module.exports.run = async (client, message, args, active) => {
         `***️⃣ | Añadido a la cola: \`${info.videoDetails.title}\`, pedido por: ${author.tag}**`
       )
       .setColor(Colores.verde);
-    message.channel.send(addQueue);
+    message.channel.send({embeds: [addQueue]});
   }
 
   // actualizar el Map();
@@ -105,7 +105,7 @@ module.exports.run = async (client, message, args, active) => {
         `🎶 | **Reproduciendo: \`${data.queue[0].songTitle}\`, pedido por: ${data.queue[0].requester}**`
       )
       .setColor(Colores.verde);
-    client.channels.cache.get(data.queue[0].announceChannel).send(reproduciendoEmbed);
+    client.channels.cache.get(data.queue[0].announceChannel).send({embeds: [reproduciendoEmbed]});
     // actualizar la info del dispatcher
     data.dispatcher = await data.connection.play(
       ytdl(data.queue[0].url, {
@@ -148,7 +148,7 @@ module.exports.run = async (client, message, args, active) => {
           .setColor(Colores.verde);
 
         if (vc) vc.leave();
-        message.channel.send(finEmbed);
+        message.channel.send({embeds: [finEmbed]});
       }
     }, 2000);
   }

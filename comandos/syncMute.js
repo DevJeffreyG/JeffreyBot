@@ -17,12 +17,6 @@ module.exports.run = async (client, message, args) => {
   }
   
   if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
-    
-  let embed = new Discord.MessageEmbed()
-  .setTitle(`Ayuda: ${prefix}comando`)
-  .setColor(Colores.nocolor)
-  .setDescription(`▸ El uso correcto es: ${prefix}comando <> \n▸ Explicación.`)
-  .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}alias`);
 
   message.guild.channels.cache.each(async (channel, id) => {
     await channel.overwritePermissions(muteRole, {

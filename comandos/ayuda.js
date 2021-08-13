@@ -14,7 +14,7 @@ module.exports.run = async (client, message, args) => {
   const guild = message.guild;
   let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
-  let via = args[0];
+  let via = args[0] ? args[0].toLowerCase() : undefined;
 
   if(client.user.id === Config.testingJBID){
     jeffreyRole = guild.roles.cache.find(x => x.id === "482992290550382592");
@@ -98,83 +98,34 @@ module.exports.run = async (client, message, args) => {
 ▸ \`${prefix}embeds\`: Diferentes embeds preestablecidos para usarlos en los canales de información.
 ▸ \`${prefix}toggle\`: Deshabilita cualquier comando para uso público sin necesidad de cambiar el código.`)
   .setColor(Colores.nocolor);
-  
-    if(!via){
-    message.author.send(ayudaEmbed)
-    .then(() => {
-      message.author.send(funEmbed)
-    }).then(() => {
-      message.author.send(musicEmbed)
-    })
-    .then(() => {
-      message.author.send(economyEmbed)
-    }).then(() => {
-      if(message.member.roles.cache.find(x => x.id === staffRole.id)){
-        message.author.send(modEmbed)
-      } else {
-        console.log(`No tiene rol Staff.`);
-      }
-    })
-    .then(() => {
-      if(message.member.roles.cache.find(x => x.id === jeffreyRole.id)){
-        message.author.send(jeffreyEmbed)
-      } else {
-        console.log(`No es Jeffrey.`)
-      }
-    })
-    .catch(err => message.reply(`No te puedo ~~stalkear~~ enviar mensajes privados porque los tienes bloqueados. Intenta haciendo \`${prefix}ayuda ch\``));
-    
-  } else if (via == "ch") {
-    message.channel.send(ayudaEmbed)
-    .then(() => {
-      message.channel.send(funEmbed)
-    })
-    .then(() => {
-      message.channel.send(musicEmbed)
-    })
-    .then(() => {
-      message.channel.send(economyEmbed)
-    }).then(() => {
-      if(message.member.roles.cache.find(x => x.id === staffRole.id)){
-        message.channel.send(modEmbed)
-      } else {
-        console.log(`No tiene rol Staff.`);
-      }
-    })
-    .then(() => {
-      if(message.member.roles.cache.find(x => x.id === jeffreyRole.id)){
-        message.channel.send(jeffreyEmbed)
-      } else {
-        console.log(`No es Jeffrey.`)
-      }
-    })
-  } else if (via == "dm" || via == "md") {
-    message.author.send(ayudaEmbed)
-    .then(r => {
-      message.author.send(funEmbed)
-    })
-    .then(() => {
-      message.author.send(musicEmbed)
-    })
-    .then(() => {
-      message.author.send(economyEmbed)
-    }).then(() => {
-      if(message.member.roles.cache.find(x => x.id === staffRole.id)){
-        message.author.send(modEmbed)
-      } else {
-        console.log(`No tiene rol Staff.`);
-      }
-    })
-    .then(() => {
-      if(message.member.roles.cache.find(x => x.id === jeffreyRole.id)){
-        message.author.send(jeffreyEmbed)
-      } else {
-        console.log(`No es Jeffrey.`)
-      }
-    })
-    .catch(err => message.reply(`No te puedo ~~stalkear~~ enviar mensajes privados porque los tienes bloqueados. Intenta haciendo \`${prefix}ayuda ch\``));
-    }
 
+  let isStaff = message.member.roles.cache.find(x => x.id === staffRole.id) ? true : false;
+  let isJeffrey = message.member.roles.cache.find(x => x.id === jeffreyRole.id) ? true : false;
+
+  if(!via || via === "dm" || via === "md"){
+
+    if(isJeffrey){
+      message.author.send({embeds: [ayudaEmbed, funEmbed, musicEmbed, economyEmbed, modEmbed, jeffreyEmbed]})
+      .catch(err => message.reply(`Error! No te puedo enviar mensajes privados porque los tienes bloqueados. Intenta haciendo \`${prefix}ayuda ch\`, o activándolos.`));
+    } else if(isStaff){
+      message.author.send({embeds: [ayudaEmbed, funEmbed, musicEmbed, economyEmbed, modEmbed]})
+      .catch(err => message.reply(`Error! No te puedo enviar mensajes privados porque los tienes bloqueados. Intenta haciendo \`${prefix}ayuda ch\`, o activándolos.`));
+    } else {
+      message.author.send({embeds: [ayudaEmbed, funEmbed, musicEmbed, economyEmbed]})
+      .catch(err => message.reply(`Error! No te puedo enviar mensajes privados porque los tienes bloqueados. Intenta haciendo \`${prefix}ayuda ch\`, o activándolos.`));
+    }
+  } else {
+    if(isJeffrey){
+      message.channel.send({embeds: [ayudaEmbed, funEmbed, musicEmbed, economyEmbed, modEmbed, jeffreyEmbed]})
+      .catch(err => message.reply(`Error! No te puedo enviar mensajes privados porque los tienes bloqueados. Intenta haciendo \`${prefix}ayuda ch\`, o activándolos.`));
+    } else if(isStaff){
+      message.channel.send({embeds: [ayudaEmbed, funEmbed, musicEmbed, economyEmbed, modEmbed]})
+      .catch(err => message.reply(`Error! No te puedo enviar mensajes privados porque los tienes bloqueados. Intenta haciendo \`${prefix}ayuda ch\`, o activándolos.`));
+    } else {
+      message.channel.send({embeds: [ayudaEmbed, funEmbed, musicEmbed, economyEmbed]})
+      .catch(err => message.reply(`Error! No te puedo enviar mensajes privados porque los tienes bloqueados. Intenta haciendo \`${prefix}ayuda ch\`, o activándolos.`));
+    }
+  }
 }
 
 module.exports.help = {

@@ -30,11 +30,11 @@ module.exports.run = async (client, message, args) => {
   .setDescription(`▸ El uso correcto es: ${prefix}warns <@usuario || ID> \n▸ Ves cuántos warns tiene un usuario.`)
   .setFooter(`<> Obligatorio () Opcional`);
   
-  let member = guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[0]));
+  let member = message.mentions.users.first() ? guild.members.cache.get(message.mentions.users.first().id) : guild.members.cache.get(args[0]);
   if(!message.member.roles.cache.find(x => x.id === staffRole.id) || !args[0]) {
     member = message.member;
   }
-  if(!member) return message.channel.send(embed);
+  if(!member) return message.channel.send({embeds: [embed]});
   
   let error = new Discord.MessageEmbed()
   .setColor(Colores.rojo)
@@ -51,7 +51,7 @@ module.exports.run = async (client, message, args) => {
         if(err2) throw err;
 
         if((!soft || soft.warns.length === 0) && (!warns || warns.warns < 0)){
-          return message.channel.send(error)
+          return message.channel.send({embeds: [error]})
         }
 
         let w;
@@ -82,7 +82,7 @@ module.exports.run = async (client, message, args) => {
           }
         }
 
-        return message.channel.send(badguy).then(msg => {
+        return message.channel.send({embeds: [badguy]}).then(msg => {
           if(member == message.member){
             msg.delete({timeout: ms("10s")});
           }

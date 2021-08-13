@@ -29,9 +29,9 @@ module.exports.run = async (client, message, args) => {
   // Si el usuario no tiene permiso de banear
   if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
 
-    if(!args[0]) return message.channel.send(embed);
+    if(!args[0]) return message.channel.send({embeds: [embed]});
     
-    let bUser = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[0]));
+    let bUser = message.mentions.users.first() ? guild.members.cache.get(message.mentions.users.first().id) : guild.members.cache.get(args[0]);
     let bRazon = args.join(" ").slice(args[0].length + 1);
   
     if(!args[1]) bRazon = "Sin especificar.";
@@ -53,7 +53,7 @@ module.exports.run = async (client, message, args) => {
     .setTimestamp();
 
     message.guild.members.ban(bUser, {reason: bRazon}).then(x => message.react("✅")); // Baneado
-    logC.send(bEmbed);
+    logC.send({embeds: [bEmbed]});
 
 }
 

@@ -37,7 +37,7 @@ module.exports.run = async (client, message, args) => {
     )
     .setColor(Colores.rojo);
 
-  if (!args[0]) return message.channel.send(errorEmbed);
+  if (!args[0]) return message.channel.send({embeds: [errorEmbed]});
 
   if (args[0].toLowerCase() === "add") {
     if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
@@ -76,13 +76,13 @@ module.exports.run = async (client, message, args) => {
           .setDescription(`▸ El uso correcto es: /use add <id> <add || delete> <jeffros | warns | role> (id de role) ($duracion) (es un pago cada cierta $duracion "true" ; "false") (specialType "boostMultiplier") (specialObjetive "exp, jeffros, all") (specialValue [MULTIPLICADOR] "2" = Jeffros ganados normalmente * 2)`)
           .setColor(Colores.rojo);
 
-          if (!args[1]) return message.channel.send(correctUseAdd);
-          if (!args[2]) return message.channel.send(correctUseAdd);
-          if (!args[3]) return message.channel.send(correctUseAdd);
+          if (!args[1]) return message.channel.send({embeds: [correctUseAdd]});
+          if (!args[2]) return message.channel.send({embeds: [correctUseAdd]});
+          if (!args[3]) return message.channel.send({embeds: [correctUseAdd]});
 
           let cosaID = "na";
           if (args[3].toLowerCase() === "role" && !args[4] || args[3].toLowerCase() === "role" && isNaN(args[4])) {
-            return message.channel.send(correctUseAdd)
+            return message.channel.send({embeds: [correctUseAdd]})
           } else if (args[3].toLowerCase() === "role") {
             cosaID = args[4];
           }
@@ -170,7 +170,7 @@ module.exports.run = async (client, message, args) => {
         "https://cdn.discordapp.com/emojis/494267320097570837.png"
       );
 
-      message.channel.send(cancelConfirmation).then(msg => {
+      message.channel.send({embeds: [cancelConfirmation]}).then(msg => {
         msg.react(":allow:558084462232076312")
         .then(r => {
           msg.react(":denegar:558084461686947891");
@@ -184,9 +184,9 @@ module.exports.run = async (client, message, args) => {
         const noFilter = (reaction, user) =>  reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
         const collectorFilter = (reaction, user) => (reaction.emoji.id === "558084462232076312" || reaction.emoji.id === "558084461686947891") && user.id === message.author.id;
 
-        const yes = msg.createReactionCollector(yesFilter, { time: ms("30s") });
-        const no = msg.createReactionCollector(noFilter, { time: ms("30s") });
-        const collector = msg.createReactionCollector(collectorFilter, { time: ms("30s") });
+        const yes = msg.createReactionCollector({yesFilter, time: ms("30s") });
+        const no = msg.createReactionCollector({noFilter, time: ms("30s") });
+        const collector = msg.createReactionCollector({collectorFilter, time: ms("30s") });
 
         collector.on("collect", r => {
           collector.stop();
@@ -194,7 +194,7 @@ module.exports.run = async (client, message, args) => {
 
         collector.on("end", (r) => {
           if(r.size > 0 && (r.size === 1 && !r.first().me)) return;
-          return msg.edit(cancelEmbed).then(a => {
+          return msg.edit({embeds: [cancelEmbed]}).then(a => {
             msg.reactions.removeAll().then(() => {
               msg.react("795090708478033950");
             });
@@ -214,13 +214,13 @@ module.exports.run = async (client, message, args) => {
           **—** Puedes comprar \`${subbed.info.subName}\`, pero sólo lo podrás usar hasta que se acabe tu suscripción actual.`)
           .setColor(Colores.verde);
 
-          return msg.edit(cancelledEmbed).then(() => {
+          return msg.edit({embeds: [cancelledEmbed]}).then(() => {
             msg.reactions.removeAll();
           });
         });
 
         no.on("collect", r => {
-          return msg.edit(cancelEmbed).then(a => {
+          return msg.edit({embeds: [cancelEmbed]}).then(a => {
             msg.reactions.removeAll();
             message.delete();
             a.delete({timeout: ms("20s")});
@@ -258,14 +258,14 @@ module.exports.run = async (client, message, args) => {
               .setDescription(`**—** El item con id \`${args[0]}\` no existe.`)
               .setColor(Colores.rojo);
 
-            if (!item) return message.channel.send(noItem);
+            if (!item) return message.channel.send({embeds: [noItem]});
 
             let noPurchase = new Discord.MessageEmbed()
               .setAuthor(`| Error`, Config.errorPng)
               .setDescription(`**—** Aún no has comprado \`${item.itemName}\`.`)
               .setColor(Colores.rojo);
 
-            if (!purchase) return message.channel.send(noPurchase);
+            if (!purchase) return message.channel.send({embeds: [noPurchase]});
 
             /* 
         
@@ -335,7 +335,7 @@ module.exports.run = async (client, message, args) => {
 \`▸\` ${item.replyMessage}
 \`▸\` Ahora tienes: **${warns.warns}** warns.`);
 
-                            return message.channel.send(embed);
+                            return message.channel.send({embeds: [embed]});
                           } else {
                             warns.warns += 1;
                             warns.save();
@@ -347,7 +347,7 @@ module.exports.run = async (client, message, args) => {
 \`▸\` ${item.replyMessage}
 \`▸\` Ahora tienes: **${warns.warns}** warn(s).`);
 
-                            return message.channel.send(embed);
+                            return message.channel.send({embeds: [embed]});
                           }
                         }
                       );
@@ -366,7 +366,7 @@ module.exports.run = async (client, message, args) => {
                             .setColor(Colores.verde).setDescription(`
 \`▸\` ${item.replyMessage}.`);
 
-                          return message.channel.send(embed);
+                          return message.channel.send({embeds: [embed]});
                         });
                       } else {
                         let r = guild.roles.cache.find(x => x.id === use.thingID);
@@ -402,7 +402,7 @@ module.exports.run = async (client, message, args) => {
                               .setColor(Colores.verde)
                               .setDescription(`\`▸\` ${item.replyMessage}.`);
 
-                            return message.channel.send(embed);
+                            return message.channel.send({embeds: [embed]});
                           });
                         } else {
                           if(!isSub){ // no es una sub pero tiene tiempo limitado
@@ -414,7 +414,7 @@ module.exports.run = async (client, message, args) => {
                               .setColor(Colores.verde)
                               .setDescription(`\`▸\` ${item.replyMessage}.`);
 
-                            return message.channel.send(embed);
+                            return message.channel.send({embeds: [embed]});
                           } else {
                             functions.Subscription(guild, r.id, message.member, duration, jeffrosPrice, subscriptionName);
 
@@ -425,7 +425,7 @@ module.exports.run = async (client, message, args) => {
                               .setDescription(`\`▸\` ${item.replyMessage}.`)
                               .setFooter(`Para cancelar la suscripción usa ${prefix}usar cancel <${args[0]}>`);
 
-                            return message.channel.send(embed);
+                            return message.channel.send({embeds: [embed]});
                           }
                         }
                       }

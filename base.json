@@ -10,16 +10,19 @@
         },
         {
             "type": "added",
-            "desc": "Se han agregado las respuestas aptas del evento & algunas más, y se han cambiado algunas respuestas viejas",
-            "extended": "Algunas respuestas del evento han sido ligeramente modificadas."
-        },
-        {
-            "type": "added",
-            "desc": "Se han implementado las subidas de precio diferentes por item, en la tienda del servidor"
+            "desc": "Se han agregado algunos slash commands"
         },
         {
             "type": "updated",
-            "desc": "Se podrán usar los comandos con mayúsculas o minúsculas"
+            "desc": "Se ha actualizado la versión de discord.js (v12) a v13"
+        },
+        {
+            "type": "updated",
+            "desc": "El comando `{ PREFIX }ayuda` ahora enviará varios embeds en un sólo mensaje"
+        },
+        {
+            "type": "updated",
+            "desc": "Se han actualizado múltiples líneas de código, y puede que hayan problemas"
         }
     ],
     "bienPng": "http://i.imgur.com/M6hqbcc.png",

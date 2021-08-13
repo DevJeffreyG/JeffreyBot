@@ -20,20 +20,12 @@ module.exports.run = async (client, message, args) => {
   let author = message.author;
   const guild = message.guild;
   let mainChannel = guild.channels.cache.find(x => x.id === Config.mainChannel);
-  let member;
 
   if(client.user.id === Config.testingJBID){
     mainChannel = guild.channels.cache.find(x => x.id === "535500338015502357");
   }
   
-  if(!args[0]){
-    member = message.guild.member(author)
-  } else {
-    member = message.mentions.members.first() || message.guild.members.cache.find(x => x.id === args[0]);
-    if(!member) {
-      return message.reply("no encontré a ese usuario...");
-    }
-  }
+  let member = message.mentions.users.first() ? guild.members.cache.get(message.mentions.users.first().id) : guild.members.cache.get(args[0] || author.id);
   
   Exp.findOne({
     serverID: guild.id,
@@ -133,7 +125,7 @@ ${bdString}`)
         .setThumbnail(Config.jeffreyguildIcon)
         .setColor(Colores.verde);
 
-        return message.channel.send(meEmbed);
+        return message.channel.send({embeds: [meEmbed]});
     })
   })
 

@@ -32,7 +32,7 @@ module.exports.run = async (client, message, args) => {
 
 
     if(!args[0]){
-        return message.channel.send(embed);
+        return message.channel.send({embeds: [embed]});
     } else if(args[0].toLowerCase() === "update"){
         await functions.intervalGlobalDatas();
 
@@ -42,7 +42,7 @@ module.exports.run = async (client, message, args) => {
             m.delete({timeout: ms("10s")});
         });
     } else {
-        return message.channel.send(embed);
+        return message.channel.send({embeds: [embed]});
     }
 }
 

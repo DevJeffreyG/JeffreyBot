@@ -20,7 +20,7 @@ module.exports.run = async (client, message, args) => {
   let posibleGuild = args[args.length-1];
   let roleName = isNaN(args[args.length-1]) ? args.join(" ").slice(0) : args.join(" ").replace(posibleGuild, "").trimEnd();
 
-  if (!args[0]) return message.channel.send(embed);
+  if (!args[0]) return message.channel.send({embeds: [embed]});
   if(!isNaN(args[args.length-1])){
       notInThisGuild = true;
       guild = client.guilds.cache.find(x => x.id === args[args.length-1]);
@@ -39,7 +39,7 @@ module.exports.run = async (client, message, args) => {
     `)
     .setColor(Colores.verde);
 
-    return message.channel.send(finalEmbed);
+    return message.channel.send({embeds: [finalEmbed]});
 
 }
 

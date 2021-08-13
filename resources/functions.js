@@ -294,7 +294,7 @@ const intervalGlobalDatas = async function(justBoost){
                 // quitarle los jeffros, y dejarlo en negativo
                 console.log(jeffros.userID, "ha quedado en negativos por no poder pagar", subName);
                 jeffros.jeffros -= price;
-                member.send(notEnough);
+                member.send({embeds: [notEnough]});
                 subs[i].remove();
                 member.roles.remove(role);
                 jeffros.save();
@@ -307,7 +307,7 @@ const intervalGlobalDatas = async function(justBoost){
                 subs[i].markModified("info");
                 subs[i].save();
 
-                member.send(paidEmbed);
+                member.send({embeds: [paidEmbed]});
               }
             })
           }
@@ -460,12 +460,12 @@ const intervalGlobalDatas = async function(justBoost){
               console.log("Se han eliminado los DJ de", memberD.tag)
 
               // intentar enviar un mensaje al MD.
-              member.send(embed)
+              member.send({embeds: [embed]})
               .catch(err => {
                 staffC.send(`**${member.user.tag} no recibió MD de DarkJeffros eliminados.**\n\`\`\`javascript\n${err}\`\`\``)
               });
 
-              staffC.send(staffEmbed);
+              staffC.send({embeds: [staffEmbed]});
             }
           } else { // sus darkjeffros están en 0
             // revisar si caduracion para eliminar el globaldata
@@ -489,7 +489,7 @@ const intervalGlobalDatas = async function(justBoost){
               // eliminar dsDJDuration
               await dark[i].remove();
               console.log("Se ha eliminado el globaldata de DJ de", memberD.tag)
-              staffC.send(staffEmbed);
+              staffC.send({embeds: [staffEmbed]});
             }
           }
         })
@@ -697,7 +697,7 @@ const intervalGlobalDatas = async function(justBoost){
               .setTimestamp();
 
               dsChannel.send(`${dsNews}`).then(() => {
-                dsChannel.send(embed)
+                dsChannel.send({embeds: [embed]})
               })
               break;
 
@@ -710,7 +710,7 @@ const intervalGlobalDatas = async function(justBoost){
               .setTimestamp();
 
               dsChannel.send(`${dsNews}`).then(() => {
-                dsChannel.send(embed2)
+                dsChannel.send({embeds: [embed2]})
               })
               break;
 
@@ -723,7 +723,7 @@ const intervalGlobalDatas = async function(justBoost){
               .setTimestamp();
 
               dsChannel.send(`${dsNews}`).then(() => {
-                dsChannel.send(embed3)
+                dsChannel.send({embeds: [embed3]})
               })
               break;
           }
@@ -774,7 +774,7 @@ const intervalGlobalDatas = async function(justBoost){
             `)
           .setColor(Colores.verde);
 
-          logs.send(unBEmbed)
+          logs.send({embeds: [unBEmbed]})
           console.log("Se ha desbaneado a", userID)
         } else {
           // nada XD
@@ -1030,7 +1030,7 @@ const vaultMode = function(hint, author, message) {
                             )
                             .setDescription(pista[pistan - 1].hint);
 
-                          message.channel.send(embed).then(msg => {
+                          message.channel.send({embeds: [embed]}).then(msg => {
                             msg.react("⏪").then(r => {
                               msg.react("⏩");
 
@@ -1038,9 +1038,9 @@ const vaultMode = function(hint, author, message) {
                               const forwardsFilter = (reaction, user) => reaction.emoji.name === "⏩" && user.id === message.author.id;
                               const collectorFilter = (reaction, user) => (reaction.emoji.name === "⏪" || reaction.emoji.name === "⏩") && user.id === message.author.id;
 
-                              const backwards = msg.createReactionCollector(backwardsFilter, { time: 60000 });
-                              const forwards = msg.createReactionCollector(forwardsFilter, { time: 60000 });
-                              const collector = msg.createReactionCollector(collectorFilter, { time: 60000 });
+                              const backwards = msg.createReactionCollector({backwardsFilter, time: 60000 });
+                              const forwards = msg.createReactionCollector({forwardsFilter, time: 60000 });
+                              const collector = msg.createReactionCollector({collectorFilter, time: 60000 });
 
                               collector.on("end", r => {
                                 return msg.reactions.removeAll()
@@ -1056,7 +1056,7 @@ const vaultMode = function(hint, author, message) {
                                   `Pista ${pistan} de ${totalhints} | /vault [codigo] para decifrar.`
                                 );
                                 embed.setDescription(pista[pistan - 1].hint);
-                                msg.edit(embed);
+                                msg.edit({embeds: [embed]});
                               });
 
                               forwards.on("collect", r => {
@@ -1067,7 +1067,7 @@ const vaultMode = function(hint, author, message) {
                                 );
                                 embed.setDescription(pista[pistan - 1].hint);
 
-                                msg.edit(embed);
+                                msg.edit({embeds: [embed]});
                               });
                             });
                           });
@@ -1092,7 +1092,7 @@ const vaultMode = function(hint, author, message) {
                             .setColor(Colores.blanco);
 
                           return message.channel
-                            .send(r)
+                            .send({embeds: [r]})
                             .then(m => m.delete({ timeout: ms("5s") }));
                         }
                       }
