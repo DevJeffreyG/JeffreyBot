@@ -289,15 +289,17 @@ client.on("ready", async () => {
 
   let channel = client.channels.cache.get(logChannel);
   let dsChannel = client.channels.cache.find(x => x.id === Config.dsChannel);
-  let dsNews;
+  let dsNews, bellChannel;
 
   if(client.user.id === Config.testingJBID){
     channel = client.channels.cache.get("483108734604804107");
     guild = client.guilds.cache.find(x => x.id === "482989052136652800");
     dsNews = guild.roles.cache.find(x => x.id === "790431614378704906");
     dsChannel = client.channels.cache.find(x => x.id === "790431676970041356");
+    bellChannel = client.channels.cache.find(x => x.id === "537095712102416384");
   } else {
     dsNews = guild.roles.cache.find(x => x.id === Config.dsnews);
+    bellChannel = client.channels.cache.find(x => x.id === Config.bellChannel);
   }
 
   channel.send("Reviví.");
@@ -432,6 +434,10 @@ client.on("ready", async () => {
   }, null, true, 'America/Bogota');
 
   interestJob.start(); // iniciar cron job de interés
+
+  /* YOUTUBE NOTIFACTIONS */
+
+  functions.handleUploads(bellChannel);
 });
 
 client.on("messageDelete", async(message) => {

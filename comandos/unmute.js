@@ -3,6 +3,7 @@ const Colores = require("./../resources/colores.json");
 const Discord = require("discord.js");
 const prefix = Config.prefix;
 
+const GlobalData = require("../modelos/globalData.js");
 
 module.exports.run = async (client, message, args) => {
 
@@ -32,6 +33,16 @@ module.exports.run = async (client, message, args) => {
 
   let mUser = message.mentions.users.first() ? guild.members.cache.get(message.mentions.users.first().id) : guild.members.cache.get(args[0]);
   
+  let query = await GlobalData.findOne({
+    "info.type": "roleDuration",
+    "info.userID": mUser.id,
+    "info.roleID": muteRole.id
+  });
+
+  if(query){ // eliminar el globaldata
+    query.remove();
+  }
+
   mUser.roles.remove(muteRole).then(x => message.react("✅"));
   
   let umEmbed = new Discord.MessageEmbed()

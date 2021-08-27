@@ -11,6 +11,8 @@ let { client } = require("../jb.js");
 
 const fs = require("fs");
 const ms = require("ms");
+const rss = require("rss-parser");
+const request = new rss();
 var Chance = require("chance");
 var chance = new Chance();
 

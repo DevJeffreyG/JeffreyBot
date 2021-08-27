@@ -2,7 +2,6 @@ const Config = require("./../base.json");
 const Colores = require("./../resources/colores.json");
 const Emojis = require("./../resources/emojis.json");
 const Discord = require("discord.js");
-const client = new Discord.Client();
 const fs = require("fs");
 const ms = require("ms");
 const prefix = Config.prefix;
@@ -20,7 +19,6 @@ const Jeffros = require("../modelos/jeffros.js");
 const Reporte = require("../modelos/reporte.js");
 const Exp = require("../modelos/exp.js");
 const Warn = require("../modelos/warn.js");
-const Banned = require("../modelos/banned.js");
 
 /* ##### MONGOOSE ######## */
 

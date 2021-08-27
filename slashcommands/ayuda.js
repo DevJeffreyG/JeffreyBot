@@ -32,7 +32,6 @@ module.exports = {
         let ayudaEmbed = new Discord.MessageEmbed()
         .setAuthor(`| Comandos generales`, "https://cdn.discordapp.com/emojis/494282181296914432.png")
         .setDescription(`▸ \`${prefix}<comando>\`: Se han agregado diferentes Slash Commands, puedes ver sus descripciones al usuarlos en el chat.
-▸ \`${prefix}bugreport\`: Puedes reportar un bug, para que Jeffrey lo revise.
 ▸ \`${prefix}serverinfo\`: Información del servidor.
 ▸ \`${prefix}rep\`: Dale un punto de reputación a un usuario. ^^`)
         .setColor(Colores.verde);
@@ -96,7 +95,6 @@ module.exports = {
 ▸ \`${prefix}syncMute\`: Sincronizas el rol de Mute en todos los canales.
 ▸ \`${prefix}globaldatas\`: Todos los tipos de GlobalDatas actuales. / Forzar ciclo de GlobalDatas.
 ▸ \`${prefix}add-jeffros\`: Añades Jeffros o Dark Jeffros a un usuario.
-▸ \`${prefix}dbBan\`: Prohíbe a alguien enviar un reporte de bug.
 ▸ \`${prefix}emoji\`: Conoce la ID de un emote por su nombre en el server actual.
 ▸ \`${prefix}role\`: Conoce el ID de un rol por su nombre.
 ▸ \`${prefix}embeds\`: Diferentes embeds preestablecidos para usarlos en los canales de información.

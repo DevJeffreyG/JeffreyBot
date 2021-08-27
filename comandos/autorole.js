@@ -245,7 +245,15 @@ module.exports.run = async (client, message, args) => {
               embed.setAuthor(`| Error: grupo de toggle`, Config.errorPng)
               return message.channel.send({embeds: [embed]})
           }
-      }
+        }
+
+        if(!args[1] || isNaN(args[1])){
+            embed.setAuthor(`| Error: autorole id`, Config.errorPng)
+            return message.channel.send(embed)
+        } else if(!args[2] || isNaN(args[2])) {
+            embed.setAuthor(`| Error: grupo de toggle`, Config.errorPng)
+            return message.channel.send(embed)
+        }
 
       let autoroleID = args[1];
       let toggleGroup = args[2];

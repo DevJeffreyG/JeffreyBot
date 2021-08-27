@@ -7,42 +7,29 @@
     [
         {
             "type": "added",
-            "desc": "Se ha abierto la `{ PREFIX }darkshop` para los usuarios **nivel 5**"
+            "desc": "Jeffrey Bot ahora enviará las notificaciones de YouTube, Twitch y Twitter (WIP)"
         },
         {
             "type": "added",
-            "desc": "Se han agregado algunos **Slash Commands** y han sido eliminados de los comandos normales",
-            "extended": "{ PREFIX }ayuda, { PREFIX }coins, { PREFIX }ping, { PREFIX }changelog y { PREFIX }warns"
+            "desc": "Se ha agregado un sistema de tickets"
         },
         {
             "type": "added",
-            "desc": "Si un usuario tiene DarkJeffros, en el comando `{ PREFIX }top jeffros` __se tomarán en cuenta__ para el posicionamiento en el top"
+            "desc": "Se han agregado logros"
         },
         {
             "type": "updated",
-            "desc": "Se ha actualizado la versión de Discord.JS de **v12** a **v13**"
+            "desc": "Se ha agregado un impuesto en el cambio de DarkJeffros a Jeffros",
+            "extended": "Ahora si al cambiar la suma es mayor a 15K Jeffros, tendrás que pagar un 20% de intereses."
         },
         {
             "type": "updated",
-            "desc": "Ahora al usar el comando `{ PREFIX }say` no se eliminará el mensaje si contiene una mención, y en la respuesta del bot, **no se mencionará al usuario**"
+            "desc": "Se ha actualizado el comando `/top`",
+            "extended": "Ahora podrás ver más páginas además de los primeros 5."
         },
         {
             "type": "updated",
-            "desc": "El sistema de Awards ha sido pulido y **mejorado**",
-            "extended": "* Se ha arreglado el bug que si no se reaccionaba a la confirmación de un award no pasaba nada.\n* Se han agregado nuevas variantes para poder darle premios a más tipos de mensajes con embeds, o mensajes con fields."
-        },
-        {
-            "type": "updated",
-            "desc": "Se han actualizado múltiples líneas de código, **y puede que hayan problemas**"
-        },
-        {
-            "type": "updated",
-            "desc": "Los comandos de música se han **deshabilitado** __temporalmente__, se están investigando algunos **bugs**"
-        },
-        {
-            "type": "removed",
-            "desc": "Se ha eliminado la posibilidad de elegir el `{ PREFIX }top` por medio de mensajes consecutivos",
-            "extended": "'/top' -> ¿Qué top deseas ver? -> 'exp' o 'jeffros'."
+            "desc": "Se han arreglado algunos bugs en el sistema de música y autoroles"
         }
     ],
     "bienPng": "http://i.imgur.com/M6hqbcc.png",
@@ -60,6 +47,7 @@
     "supportChannel": "447797737216278531",
     "logChannel": "447816644765679616",
     "dsChannel": "790440004442521600",
+    "bellChannel": "447813323149410304",
     "dsRole": "790995699759448094",
     "_comment": "447816644765679616",
     "rulesChannel": "523159573935423509",

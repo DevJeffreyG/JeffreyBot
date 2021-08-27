@@ -108,9 +108,7 @@ module.exports.run = async (client, message, args, active) => {
     client.channels.cache.get(data.queue[0].announceChannel).send({embeds: [reproduciendoEmbed]});
     // actualizar la info del dispatcher
     data.dispatcher = await data.connection.play(
-      ytdl(data.queue[0].url, {
-        filter: "audioonly"
-      })
+      await ytdl(data.queue[0].url), { type: 'opus' }
     );
 
     data.dispatcher.guildID = data.guildID;

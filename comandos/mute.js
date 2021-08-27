@@ -43,9 +43,6 @@ module.exports.run = async (client, message, args) => {
   }
   
   if(!args[1]){ // Para siempre
-    if(mUser.roles.cache.find(x => x.id === staffRole.id)){
-      return console.log(`Staff, no....`);
-    }
 
     // llamar la funcion
     functions.LimitedTime(guild, muteRole.id, mUser, "permanent");
@@ -61,9 +58,6 @@ module.exports.run = async (client, message, args) => {
 
   } else { // Temp Mute
     let mTime = args[1]
-    if(mUser.roles.cache.find(x => x.id === staffRole.id)){
-      return console.log(`Staff`);
-    }
 
     // llamar la funcion
     functions.LimitedTime(guild, muteRole.id, mUser, ms(mTime));
