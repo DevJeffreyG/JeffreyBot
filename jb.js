@@ -56,6 +56,7 @@ let functions;
 // mantenimiento
 const disableEXPs = false; // deshabilitar ganar exp o jeffros
 const disableAwards = false; // deshabilitar awards.
+const disableInterestPerMonth = false; // deshabilitar el interés que se cobra los días 28 de cada mes.
 
 // WEAS PARA EVENTOS:
 
@@ -315,6 +316,7 @@ client.on("ready", async () => {
   // ################################################# PAGAR INTERESES LOS FINES DE MES
   // buscar gente con más de 20k
   let interestJob = new CronJob('0 12 28 * *', async function() { // los 28 de cada mes al medio día
+    if(disableInterestPerMonth) return console.log("No se ha iniciado el CronJob, están deshabilitados los intereses por mes.");
     console.log('CronJob iniciado.');
 
 
