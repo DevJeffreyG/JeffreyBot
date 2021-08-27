@@ -36,7 +36,7 @@ module.exports.run = async (client, message, args) => {
 
   const interest = 5;
 
-  let userIsOnMobible = author.presence.clientStatus && author.presence.clientStatus.mobile === "online" && !author.presence.clientStatus.desktop ? true : false;
+  let userIsOnMobible = message.member.presence && message.member.presence.clientStatus && message.member.presence.clientStatus.mobile === "online" && !message.member.presence.clientStatus.desktop ? true : false;
   let viewExtension = "ꜝ";
   let extendedDetails = "▸ Al comprar este item, su precio subirá."
 
@@ -78,7 +78,7 @@ Stats.findOne({
                         let tienda = new Discord.MessageEmbed()
                         .setAuthor(`| DarkShop`, Config.darkLogoPng)
                         .setColor(Colores.negro)
-                        .setDescription(`**—** Bienvenido a la DarkShop. \`${prefix}darkshop help\` para ver todos los comandos disponibles.
+                        .setDescription(`**—** Bienvenid@ a la DarkShop. \`${prefix}darkshop help\` para ver todos los comandos disponibles.
             **—** Para comprar items usa \`${prefix}darkshop <ID del item>\`.
             **—** Para tener más información del item usa \`${prefix}darkshop info <id>\`.
             **—** Esta tienda __**NO**__ usa los Jeffros convencionales.
@@ -186,14 +186,15 @@ Stats.findOne({
                                                 msg.react("⏩");
 
                                                 // filtros
+                                                console.log("author", message.author.id)
                                                 const backwardsFilter = (reaction, user) => reaction.emoji.name === "⏪" && user.id === message.author.id;
                                                 const forwardsFilter = (reaction, user) => reaction.emoji.name === "⏩" && user.id === message.author.id;
                                                 const collectorFilterMainPage = (reaction, user) => (reaction.emoji.name === "⏩" || reaction.emoji.name === "⏪") && user.id === message.author.id;
                         
                                                 // collectors
-                                                const backwards = msg.createReactionCollector({backwardsFilter, time: 60000});
-                                                const forwards = msg.createReactionCollector({forwardsFilter, time: 60000});
-                                                const collectorMainPage = msg.createReactionCollector({collectorFilterMainPage, time: 60000});
+                                                const backwards = msg.createReactionCollector({ filter: backwardsFilter, time: 60000 });
+                                                const forwards = msg.createReactionCollector({ filter: forwardsFilter, time: 60000 });
+                                                const collectorMainPage = msg.createReactionCollector({ filter: collectorFilterMainPage, time: 60000 });
 
                                                 collectorMainPage.on("end", r => {
                                                     return msg.reactions.removeAll()
@@ -213,7 +214,7 @@ Stats.findOne({
                                                     let embed = new Discord.MessageEmbed()
                                                     .setAuthor(`| DarkShop`, Config.darkLogoPng)
                                                     .setColor(Colores.negro)
-                                                    .setDescription(`**—** Bienvenido a la DarkShop. \`${prefix}darkshop <ID del item>\`.
+                                                    .setDescription(`**—** Bienvenid@ a la DarkShop. \`${prefix}darkshop <ID del item>\`.
 **—** Para tener más información del item usa \`${prefix}darkshop info <id>\`.
 **—** Esta tienda __**NO**__ usa los Jeffros convencionales.
 
@@ -283,7 +284,7 @@ Stats.findOne({
                                                     let embed = new Discord.MessageEmbed()
                                                     .setAuthor(`| DarkShop`, Config.darkLogoPng)
                                                     .setColor(Colores.negro)
-                                                    .setDescription(`**—** Bienvenido a la DarkShop. \`${prefix}darkshop <ID del item>\`.
+                                                    .setDescription(`**—** Bienvenid@ a la DarkShop. \`${prefix}darkshop <ID del item>\`.
     **—** Para tener más información del item usa \`${prefix}darkshop info <id>\`.
     **—** Esta tienda __**NO**__ usa los Jeffros convencionales.
     
@@ -1607,8 +1608,8 @@ Stats.findOne({
                                                         "558084461686947891" &&
                                                         user.id === message.author.id;
 
-                                                    const yes = msg.createReactionCollector({yesFilter, time: 60000 });
-                                                    const no = msg.createReactionCollector({noFilter, time: 60000});
+                                                    const yes = msg.createReactionCollector({ filter: yesFilter, time: 60000 });
+                                                    const no = msg.createReactionCollector({ filter: noFilter, time: 60000});
 
                                                     yes.on("collect", r => {
                                                         // agregar a la lista de items
@@ -1647,9 +1648,11 @@ Stats.findOne({
 
                                                     no.on("collect", r => {
                                                         return msg.edit({embeds: [cancelEmbed]}).then(a => {
-                                                        msg.reactions.removeAll();
-                                                        message.delete();
-                                                        a.delete({timeout: ms("20s")});
+                                                            msg.reactions.removeAll();
+                                                            message.delete();
+                                                            setTimeout(() => {
+                                                                a.delete();
+                                                            }, ms("20s"));
                                                         });
                                                     });
                                                 });

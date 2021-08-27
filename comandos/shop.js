@@ -27,7 +27,7 @@ module.exports.run = async (client, message, args) => {
   let item;
   //let interest = 2000; // CUANTO SUBE EL PRECIO POR COMPRA
 
-  let userIsOnMobible = author.presence.clientStatus && author.presence.clientStatus.mobile === "online" && !author.presence.clientStatus.desktop ? true : false;
+  let userIsOnMobible = message.member.presence.clientStatus && message.member.presence.clientStatus.mobile === "online" && !message.member.presence.clientStatus.desktop ? true : false;
   let viewExtension = "ꜝ";
   let extendedDetails = "▸ Al comprar este item, su precio subirá."
 
@@ -221,9 +221,9 @@ module.exports.run = async (client, message, args) => {
                     const forwardsFilter = (reaction, user) =>reaction.emoji.name === "⏩" && user.id === message.author.id;
                     const collectorFilterMainPage = (reaction, user) => (reaction.emoji.name === "⏩" || reaction.emoji.name === "⏪") && user.id === message.author.id;
 
-                    const backwards = msg.createReactionCollector({ backwardsFilter, time: 60000 });
-                    const forwards = msg.createReactionCollector({ forwardsFilter, time: 60000 });
-                    const collectorMainPage = msg.createReactionCollector({ collectorFilterMainPage, time: 60000 });
+                    const backwards = msg.createReactionCollector({ filter: backwardsFilter, time: 60000 });
+                    const forwards = msg.createReactionCollector({ filter: forwardsFilter, time: 60000 });
+                    const collectorMainPage = msg.createReactionCollector({ filter: collectorFilterMainPage, time: 60000 });
 
                     collectorMainPage.on("end", r => {
                       return msg.reactions.removeAll()
@@ -241,7 +241,7 @@ module.exports.run = async (client, message, args) => {
                       embed = new Discord.MessageEmbed()
                         .setAuthor(`| Shop`, author.displayAvatarURL())
                         .setColor(Colores.verde)
-                        .setDescription(`**—** ¡Bienvenido a la nueva tienda! para comprar items \`${prefix}shop <ID del item>\`.
+                        .setDescription(`**—** ¡Bienvenid@ a la tienda! para comprar items usa: \`${prefix}shop <ID del item>\`.
 **—** Para tener más información del item usa \`${prefix}shop info <id>\`.
 **—** Tienes ${Emojis.Jeffros}**${j.jeffros}**`);
 
@@ -331,7 +331,7 @@ module.exports.run = async (client, message, args) => {
                       embed = new Discord.MessageEmbed()
                         .setAuthor(`| Shop`, author.displayAvatarURL())
                         .setColor(Colores.verde)
-                        .setDescription(`**—** ¡Bienvenido a la nueva tienda! para comprar items \`${prefix}shop <ID del item>\`.
+                        .setDescription(`**—** ¡Bienvenid@ a la tienda! para comprar items usa: \`${prefix}shop <ID del item>\`.
 **—** Para tener más información del item usa \`${prefix}shop info <id>\`.
 **—** Tienes ${Emojis.Jeffros}**${j.jeffros}**`);
 
@@ -543,9 +543,9 @@ module.exports.run = async (client, message, args) => {
                               const noFilter = (reaction, user) =>  reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
                               const collectorFilter = (reaction, user) => (reaction.emoji.id === "558084462232076312" || reaction.emoji.id === "558084461686947891") && user.id === message.author.id;
 
-                              const yes = msg.createReactionCollector({yesFilter, time: ms("30s") });
-                              const no = msg.createReactionCollector({noFilter, time: ms("30s") });
-                              const collector = msg.createReactionCollector({collectorFilter, time: ms("30s") });
+                              const yes = msg.createReactionCollector({ filter:yesFilter, time: ms("30s") });
+                              const no = msg.createReactionCollector({ filter:noFilter, time: ms("30s") });
+                              const collector = msg.createReactionCollector({ filter:collectorFilter, time: ms("30s") });
 
                               collector.on("collect", r => {
                                 collector.stop();
@@ -558,7 +558,9 @@ module.exports.run = async (client, message, args) => {
                                     msg.react("795090708478033950");
                                   });
                                   message.delete();
-                                  a.delete({timeout: ms("20s")});
+                                  setTimeout(() => {
+                                    a.delete()
+                                  }, ms("20s"));
                                 });
                               });
 
@@ -592,7 +594,9 @@ module.exports.run = async (client, message, args) => {
                                 return msg.edit({embeds: [cancelEmbed]}).then(a => {
                                   msg.reactions.removeAll();
                                   message.delete();
-                                  a.delete({timeout: ms("20s")});
+                                  setTimeout(() => {
+                                    a.delete()
+                                  }, ms("20s"));
                                 });
                               });
                             });

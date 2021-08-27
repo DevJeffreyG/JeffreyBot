@@ -18,7 +18,7 @@ module.exports.run = async (client, message, args) => {
     .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}pregunta`);
 
   if (!args[1]) return message.channel.send({embeds: [embed]});
-  let replies = ["Sí.", "No.", "No lo sé", "Pregunta más tarde."];
+  let replies = ["Sí.", "No.", "No lo sé", "Te mentiría si no.", "¿Estamos tontos?", "Obvio.", "Bastante claro que no.", "La verdad es que no.", "La verdad, sí."];
 
   let answer = Math.floor(Math.random() * replies.length);
   let pregunta = args.slice(0).join(" ");

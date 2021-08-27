@@ -170,9 +170,9 @@ module.exports.run = async (client, message, args) => {
             const noFilter = (reaction, user) => reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
             const collectorFilter = (reaction, user) => (reaction.emoji.id === "558084461686947891" || reaction.emoji.id === "558084462232076312") && user.id === message.author.id;
 
-            const yes = msg.createReactionCollector({yesFilter, time: 60000 });
-            const no = msg.createReactionCollector({noFilter, time: 60000 });
-            const collector = msg.createReactionCollector({collectorFilter, time: 60000 });
+            const yes = msg.createReactionCollector({ filter:yesFilter, time: 60000 });
+            const no = msg.createReactionCollector({ filter:noFilter, time: 60000 });
+            const collector = msg.createReactionCollector({ filter:collectorFilter, time: 60000 });
 
             yes.on("collect", r => {
               let hoy = new Date();
@@ -189,7 +189,9 @@ module.exports.run = async (client, message, args) => {
               return msg.edit({embeds: [cancelEmbed]}).then(a => {
                 msg.reactions.removeAll();
                 message.delete();
-                a.delete({timeout: ms("20s")});
+                setTimeout(() => {
+                  a.delete();
+                }, ms("20s"))
               });
             })
 
@@ -205,7 +207,9 @@ module.exports.run = async (client, message, args) => {
                   msg.react("795090708478033950");
                 });
                 message.delete();
-                a.delete({timeout: ms("20s")});
+                setTimeout(() => {
+                  a.delete();
+                }, ms("20s"))
               });
             });
         })

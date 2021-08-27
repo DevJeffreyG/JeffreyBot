@@ -17,7 +17,9 @@ const Jeffros = require("../modelos/jeffros.js");
 
 module.exports.run = async (client, message, args) => {
   if (!message.content.startsWith(prefix)) return;
-  message.delete({ timeout: ms("5s") });
+  setTimeout(() => {
+    message.delete()
+  }, ms("5s"));
 
   // Variables
   let author = message.author;
@@ -255,7 +257,11 @@ module.exports.run = async (client, message, args) => {
         if (!textos) {
           return message.channel
             .send(efinal)
-            .then(m => m.delete({ timeout: ms("5s") }));
+            .then(m => {
+              setTimeout(() => {
+                m.delete()
+              }, ms("5s"));
+            });
         }
 
         WinVault.findOne(
@@ -269,7 +275,11 @@ module.exports.run = async (client, message, args) => {
             if (win) {
               return message.channel
                 .send(efinal)
-                .then(m => m.delete({ timeout: ms("5s") }));
+                .then(m => {
+                  setTimeout(() => {
+                    m.delete()
+                  }, ms("5s"));
+                });
             } else {
               Jeffros.findOne(
                 {

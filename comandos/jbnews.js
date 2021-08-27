@@ -52,9 +52,7 @@ module.exports.run = async (client, message, args) => {
       nEmbed.setThumbnail(client.user.displayAvatarURL());
     }
     
-    jbChannel.send(`${jbNRole}~`).then(r => {
-      jbChannel.send({embeds: [nEmbed]});
-    }).catch(e => console.log(e));
+    jbChannel.send({content: `${jbNRole}`, embeds: [nEmbed]});
 
 }
 

@@ -39,6 +39,59 @@ module.exports.run = async (client, message, args) => {
 
   /* ################## EMBEDS DE INFORMACION ######################### */
 
+  // FAQ TE AMO FRAZ
+  let faqEmbedIntro = new Discord.MessageEmbed()
+  .setImage(embedImages.faq)
+  .setColor(Colores.verde);
+
+  let faqEmbedIntro2 = new Discord.MessageEmbed()
+  .setDescription(`**<:jgThinking:869746312709537792> — Preguntas más frecuentes**
+  ➟ El término preguntas frecuentes (FAQ) se refiere a una lista de preguntas y respuestas que surgen frecuentemente dentro de un determinado contexto y para un tema en particular.
+  
+  ➟ Como puedes imaginar, veremos las preguntas frecuentes que se hacen en este servidor. Se irán actualizando a medida que hayan más preguntas frecuentes :)`)
+  .setColor(Colores.verde);
+
+  let faqEmbed2 = new Discord.MessageEmbed()
+  .setAuthor("DarkShop", "https://cdn.discordapp.com/attachments/494264018790514702/880595989713530980/emoji.png")
+  .setDescription(`\`DS.Q1\` **— ¿Qué pasó con la DarkShop "DS"?**
+> La **DS** ya está disponible, revisa <#836397833531818004> para enterarte como funciona el sistema si ya eres nivel 5.
+
+\`DS.Q2\` **— ¿Por qué la inflación no cambia?**
+> [Sí que cambia](https://discord.com/channels/447797737216278528/836397833531818004/870100021314478170), si no lo ha hecho, es porque hay mala suerte. Sé paciente.
+  
+\`DS.Q3\` **— ¿Qué significa ___ en la DarkShop?**
+> Toda la información base a cerca de la DarkShop se encuentra en <#836397833531818004>. Si después de leerlo, aún tienes dudas, puedes usar <#447797737216278531>.`)
+  .setColor(Colores.nocolor)
+
+  let faqEmbed3 = new Discord.MessageEmbed()
+  .setAuthor("Servidor", guild.iconURL())
+  .setDescription(`\`SV.Q1\` **— ¿Por qué se eliminan mis archivos?**
+> No se pueden enviar archivos [multimedia](https://www.significados.com/multimedia/) de **22:00** hasta **7:00** del día siguiente (GMT-5). Esto para evitar problemas debido a que en estas horas no hay STAFFs conectados.
+
+\`SV.Q2\` **— ¿Por qué no hay eventos o sorteos?**
+> **Por falta de ideas de parte de Jeffrey y del STAFF**. Así es, habrán eventos o sorteos pero pocos: por falta de ideas, mayormente los eventos son internos del servidor que todos pueden participar.
+
+\`SV.Q3\` **— ¿Qué pasa si cambio Jeffros por DarkJeffros antes de que me cobren los intereses mensuales?**
+> No pasa nada, los intereses que se cobran son por el **TOTAL** de Jeffros que tengas, primero se hace la conversión de los DarkJeffros que tengas por **Jeffros normales** y a partir de ahí de ahí se determina si tienes que pagar interés.
+> Por ejemplo, si tienes ${Emojis.Jeffros}0 pero tienes ${Emojis.Dark}100, tus Jeffros quedarán en negativo, pero podrás cambiar luego (\`${prefix}ds withdraw\`) esos DarkJeffros por Jeffros.
+
+\`SV.Q4\` **— ¿Cuánta EXP y Jeffros gano por mensaje? ¿Hay cooldown?**
+> Es aleatorio, pero en base, sin ningún tipo de multiplicador, o boost; ¡puedes ganar hasta **35 de EXP** y **15 Jeffros** por mensaje! Y sí, hay un cooldown base de 1 minuto.
+
+\`SV.Q5\` **— ¿Qué significan los DarkJeffros en el comando \`${prefix}top\`?**
+> Aquellos usuarios que tengan DarkJeffros, se mostrará la parte de los Jeffros que estos representan, haciendo la conversión dependiendo de la inflación actual. Esto para que se mantengan las posiciones de los usuarios equilibrados aunque se tengan algunos Jeffros invertidos en la **DarkShop**; los Jeffros que salen de primero son los totales que tiene el usuario, se incluyen los que están en la DarkShop.`)
+  .setColor(Colores.nocolor)
+
+  let faqEmbed4 = new Discord.MessageEmbed()
+  .setAuthor("JeffreyG", "https://cdn.discordapp.com/attachments/464810032081666048/880596286506696734/LOGO_2020.jpg")
+  .setDescription(`\`JG.Q1\` **— ¿Por qué [JeffreyG](https://youtube.com/c/JeffreyG) no sube videos?**
+> Por razones personales y por falta de ideas que tiene sobre el canal, además de que es tonto. Si tienes <@&529275759521431553> podrás ver los vídeos antes de tiempo, y a veces, algún adelanto. Mira <#485191307346837507>.
+  
+\`JG.Q2\` **— ¿Dónde está el GDPS de JeffreyG?** o **¿Dónde descargo el GDPS?**
+> Lamento comunicar que el GDPS ya no se encuentra entre nosotros, y no se podrá descargar ni jugar. Sin embargo, si tienes alguna duda sobre la creación de tu GDPS puedes usar <#502255217379770428>.`)
+  .setColor(Colores.nocolor)
+
+
   // NIVELES
 
   let lvlEmbed1 = new Discord.MessageEmbed()
@@ -59,7 +112,7 @@ module.exports.run = async (client, message, args) => {
 • Posibilidad de conseguir un 15% más de EXP y Jeffros.
 
 <@&${Config.lvl20}>
-• 15% de descuento en la Jeffrey Shop.
+• 15% de descuento en la tienda (\`${prefix}shop\`).
 
 <@&${Config.lvl30}>
 • Bono de **${Emojis.Jeffros}2000**.
@@ -130,9 +183,9 @@ let canalesEmbed4 = new Discord.MessageEmbed()
 
 <#502255217379770428> • Si vienes del tutorial del GDPS, y buscas ayuda, puedes preguntar en este canal.
 
-<#485192438701359135> • En este canal puedes hablar fuera de contexto, o hacer spam, **no se permite el flood**.
+<#821486638768455700> • En este canal puedes hablar fuera de contexto, o hacer spam, **no se permite el flood**.
 
-<#821486638768455700> • Aquí se puede hacer tanto SPAM como FLOOD, siendo este último el principal y el único sitio donde puede hacerse.`)
+<#485192438701359135> • Aquí se puede hacer tanto SPAM como FLOOD, siendo este último el principal y el único sitio donde puede hacerse.`)
 .setColor(Colores.nocolor);
 
 let canalesEmbed5 = new Discord.MessageEmbed()
@@ -254,9 +307,9 @@ let interestEmbed = new Discord.MessageEmbed()
 .setColor(Colores.verde);
 
 let interestEmbed2 = new Discord.MessageEmbed()
-.setDescription(`**—** Aquellos usuarios con una suma mayor a **${Emojis.Jeffros}20.000**, deberán pagar los siguientes intereses los días 28 de cada mes, a las 12:00 GMT-5:
+.setDescription(`**—** Aquellos usuarios con una suma mayor a **${Emojis.Jeffros}20.000** (Jeffros + equivalente a Jeffros de DarkJeffros), deberán pagar los siguientes intereses los días 28 de cada mes, a las 12:00 GMT-5:
 
-Más de **${Emojis.Jeffros}90.000** ➟ **20%**
+Más de **${Emojis.Jeffros}90.000** ➟ **15%**
 Más de **${Emojis.Jeffros}40.000** ➟ **10%**
 Más de **${Emojis.Jeffros}25.000** ➟ **5%**
 Más de **${Emojis.Jeffros}20.000** ➟ **1%**`)
@@ -298,7 +351,7 @@ let awardsEmbed3 = new Discord.MessageEmbed()
   // MANUAL
   let manualEmbed = new Discord.MessageEmbed()
   .setColor(Colores.nocolor)
-  .setDescription(`Bienvenido al Staff. ¿O simplemente estás aquí para aclarar dudas? Pues bienvenido seas, también.
+  .setDescription(`Bienvenid@ al Staff. ¿O simplemente estás aquí para aclarar dudas? Pues bienvenid@ seas, también.
 Ya supongo que sabes que función cumple cada rol de Staff. Sino, [pulsa acá](https://discordapp.com/channels/447797737216278528/485191307346837507/668568044146130959).
 
 En este manual se mostrarán las instrucciones a la hora de hacer ciertas acciones en el servidor. Este manual se actualizará cuando sea necesario, y cuando se haga se dirá en <#525068953500778518>.`)
@@ -351,80 +404,58 @@ let noEmbed = new Discord.MessageEmbed()
 \`▸\` Informacion
 \`▸\` Muted
 \`▸\` Reglas
-\`▸\` Niveles
-\`▸\` Roles
-\`▸\` Canales
-\`▸\` Jeffros
-\`▸\` Interes
-\`▸\` Awards
-\`▸\` Staff
 \`▸\` Colores
 \`▸\` Colores_especiales
 \`▸\` Auto_Roles
 \`▸\` Roles_especiales
-\`▸\` Staff_manual
-\`▸\` Final_info`);
+\`▸\` Staff_manual`);
 
-  if (!args[0]) return message.channel.send({embeds: [noEmbed]}).then(m => m.delete({ timeout: ms("10s") }));
+  if (!args[0]) return message.channel.send({embeds: [noEmbed]}).then(m => {
+    setTimeout(() => {
+      m.delete();
+    }, ms("10s"));
+  });
   let embed1 = new Discord.MessageEmbed();
   let embed2 = new Discord.MessageEmbed();
   let embed3 = new Discord.MessageEmbed();
   let caso = args[0].toLowerCase();
   let shrug = "¯\\_(ツ)_/¯";
-  switch (args[0]) {
-    case (caso = "informacion"):
+  switch (caso) {
+    case "faq":
+      await(message.channel.send({embeds: [faqEmbedIntro, faqEmbedIntro2, faqEmbed2, faqEmbed3, faqEmbed4]}))
+      break;
+    case "informacion":
       //niveles
-      await message.channel.send({embeds: [lvlEmbed1]});
-      await message.channel.send({embeds: [lvlEmbed2]});
+      await message.channel.send({embeds: [lvlEmbed1, lvlEmbed2]});
       //canales
-      await message.channel.send({embeds: [canalesEmbed]});
-      await message.channel.send({embeds: [canalesEmbed2]});
-      await message.channel.send({embeds: [canalesEmbed3]});
-      await message.channel.send({embeds: [canalesEmbed4]});
-      await message.channel.send({embeds: [canalesEmbed5]});
+      await message.channel.send({embeds: [canalesEmbed, canalesEmbed2, canalesEmbed3, canalesEmbed4, canalesEmbed5]});
       //roles
-      await message.channel.send({embeds: [rolesEmbed]});
-      await message.channel.send({embeds: [rolesEmbed2]});
-      await message.channel.send({embeds: [rolesEmbed3]});
-      await message.channel.send({embeds: [rolesEmbed4]});
+      await message.channel.send({embeds: [rolesEmbed, rolesEmbed2, rolesEmbed3, rolesEmbed4]});
       //jeffros
-      await message.channel.send({embeds: [jeffrosEmbed]});
-      await message.channel.send({embeds: [jeffrosEmbed2]});
+      await message.channel.send({embeds: [jeffrosEmbed, jeffrosEmbed2]});
       //interes
-      await message.channel.send({embeds: [interestEmbed]});
-      await message.channel.send({embeds: [interestEmbed2]});
+      await message.channel.send({embeds: [interestEmbed, interestEmbed2]});
       //awards
-      await message.channel.send({embeds: [awardsEmbed]});
-      await message.channel.send({embeds: [awardsEmbed2]});
-      await message.channel.send({embeds: [awardsEmbed3]});
+      await message.channel.send({embeds: [awardsEmbed, awardsEmbed2, awardsEmbed3]});
       //staff
-      await message.channel.send({embeds: [staffEmbed]});
-      await message.channel.send({embeds: [staffEmbed2]});
-      await message.channel.send({embeds: [staffEmbed3]});
-      await message.channel.send({embeds: [staffEmbed4]});
+      await message.channel.send({embeds: [staffEmbed, staffEmbed2, staffEmbed3, staffEmbed4]});
       //final
       await message.channel.send({embeds: [finalInfoEmbed]});
       break;
 
-      case (caso = "colores"):
+    case "colores":
       embed1.setImage(embedImages.colors);
       embed1.setColor(Colores.verde);
       embed2.setDescription(
-        `<:Colores:494280433765449733> **—** Aquí tienes variedad de 10 colores. ¡Usa uno solo!`
-      );
-      embed2.setFooter(
-        `— Reacciona con el color que desees.`,
-        Config.jeffreyguildIcon
+        `<:Colores:494280433765449733> **—** Aquí tienes variedad de 10 colores. ¡Con sólo reaccionar se te será asignado!`
       );
       embed2.setColor(Colores.nocolor);
 
-      message.channel.send({embeds: [embed1]}).then(m => {
-        message.channel.send({embeds: [embed2]});
-      });
+      await message.channel.send({embeds: [embed1, embed2]});
 
       break;
 
-    case (caso = "colores_especiales"):
+    case "colores_especiales":
       embed1.setImage(embedImages.specialColors);
       embed1.setColor(Colores.verde);
       embed2.setDescription(
@@ -436,13 +467,11 @@ let noEmbed = new Discord.MessageEmbed()
       );
       embed2.setColor(Colores.nocolor);
 
-      message.channel.send({embeds: [embed1]}).then(m => {
-        message.channel.send({embeds: [embed2]});
-      });
+      await message.channel.send({embeds: [embed1, embed2]});
 
       break;
 
-    case (caso = "spooky2019"):
+    case "spooky2019":
       embed1.setImage(
         "https://cdn.glitch.com/2c61ee42-4a04-4a21-b074-65934d0afc88%2Fspookycolors2019.png?v=1570763922001"
       );
@@ -463,27 +492,25 @@ let noEmbed = new Discord.MessageEmbed()
 
       break;
 
-    case (caso = "reglas"):
+    case "reglas":
       embed1.setImage(embedImages.reglas);
       embed1.setColor(Colores.verde);
-      embed2.setDescription(`**Regla N°1**: Escribe en el chat como si estuvieses hablando con alguien que te importa mucho, con **sentido común** y **sin incoherencias**.
+      embed2.setDescription(`**Regla N°1**: Intentemos mantener el chat con un grado de **Sentido Común**, no nos alejemos tanto de él: evita el uso **EXCESIVO** de cadenas, shitposts, comentarios sin sentido y/o fuera de lugar. Puedes ignorar esta regla completamente en <#821486638768455700>.
 
 **Regla N°2**: Trata a las personas con las que no tienes tanta confianza con **respeto y amabilidad**. No menciones innecesariamente. No gore ni contenido que pueda herir la sensibilidad de los demás **(NO NSFW)**.
 
 **Regla N°3**: Cada canal tiene un fin, **escribe dónde debas hacerlo**. Siempre lee las descripciones de los canales.
 
-**Regla N°4**: No hables de problemas personales en los chats, eso es privado y debería mantenerse así.
+**Regla N°4**: **No flood ni spam** en los canales generales.
 
-**Regla N°5**: **No flood ni spam** en los canales generales.
+**Regla N°5**: No nicknames inapropiados ni con símbolos que no te dejen mencionarlos ni que cambien drásticamente tu posición en la lista de miembros.
 
-**Regla N°6**: No nicknames inapropiados ni con símbolos que no te dejen mencionarlos ni que cambien drásticamente tu posición en la lista de miembros.
+**Regla N°6**: No reclames/quejes en **canales generales**, sobre acciones de moderación hacia tu persona, para ello, próximamente se **implementará** un sistema de tickets donde podras comunicarte con el STAFF directamente.
+➟ De mientras, si tienes quejas usa <#839861097770123334>.
 
-**Regla N°7**: No se permiten cadenas de mensajes en el chat.
+**Regla N°7**: Nada de usar "vacíos legales", sigue las reglas y ya está. Esto incluye el intentar tomar ventajas por deliberadamente con bugs/erróres.
 
-**Regla N°8**: No reclames/quejes en **canales generales**, acerca de tus warns/softwarns o cualquier acción de moderación que se haya aplicado, ya que puedes incomodar a otros usuarios con tus quejas, para ello, próximamente se **implementará** un sistema de tickets donde podras comunicarte con el STAFF directamente.
-➟ De mientras, mantén estos temas en <#839861097770123334>.
-
-**Regla N°9**: **Debes** cumplir las [Condiciones del servicio de Discord "TOS"](https://discord.com/terms) y sus [Directivas de la comunidad](https://discord.com/guidelines).
+**Regla N°8**: __**Debes**__ cumplir las [Condiciones del servicio de Discord "TOS"](https://discord.com/terms) y sus [Directivas de la comunidad](https://discord.com/guidelines).
 
 \`—\` Un dato curioso: ${client.user} te enviará un mensaje al recibir cualquier tipo de warn, siempre y cuando tengas los MDs activados.
 Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para conocer __tus__ warns.`);
@@ -495,15 +522,11 @@ Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para c
       );
       embed3.setColor(Colores.verde);
 
-      message.channel.send({embeds: [embed1]}).then(m => {
-        message.channel.send({embeds: [embed2]}).then(s => {
-          message.channel.send({embeds: [embed3]});
-        });
-      });
+      await message.channel.send({embeds: [embed1, embed2, embed3]});
 
       break;
 
-    case (caso = "auto_roles"):
+    case "auto_roles":
       //<:jgGDPS:572597912815796235> ➟ <@&${Config.gdpszone}>
       embed1.setImage(embedImages.autoroles);
       embed1.setColor(Colores.verde);
@@ -519,7 +542,7 @@ Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para c
 
       break;
 
-    case (caso = "muted"):
+    case "muted":
       embed1.setImage(embedImages.muted);
       embed1.setColor("#2C2F33");
       embed2.setDescription(
@@ -533,7 +556,7 @@ Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para c
 
       break;
 
-    case (caso = "roles_especiales"):
+    case "roles_especiales":
       embed1.setImage(embedImages.specialRoles);
       embed1.setColor(Colores.verde);
       embed2.setDescription(`**—** Como eres <@&529275759521431553>, tienes más roles **exclusivos** disponibles. Reacciona de acuerdo a los roles que quieras tener.
@@ -546,81 +569,12 @@ Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para c
       });
 
       break;
-
-    case (caso = "awards"):
-      message.channel.send({embeds: [awardsEmbed]}).then(m => {
-        message.channel.send({embeds: [awardsEmbed2]}).then(s => {
-          message.channel.send({embeds: [awardsEmbed3]});
-        });
-      });
-
-      break;
-
-    case (caso = "niveles"):
-      message.channel.send({embeds: [lvlEmbed1]}).then(() => {
-        message.channel.send({embeds: [lvlEmbed2]});
-      });
-
-      break;
-
-    case (caso = "roles"):
-      message.channel.send({embeds: [rolesEmbed]}).then(() => {
-        message.channel.send({embeds: [rolesEmbed2]}).then(() => {
-          message.channel.send({embeds: [rolesEmbed3]});
-        });
-      });
-
-      break;
-
-    case (caso = "canales"):
-      await message.channel.send({embeds: [canalesEmbed]});
-      await message.channel.send({embeds: [canalesEmbed2]});
-      await message.channel.send({embeds: [canalesEmbed3]});
-      await message.channel.send({embeds: [canalesEmbed4]});
-      await message.channel.send({embeds: [canalesEmbed5]});
-
-      break;
-
-    case (caso = "jeffros"):
-      message.channel.send({embeds: [jeffrosEmbed]}).then(() => {
-        message.channel.send({embeds: [jeffrosEmbed2]});
-      });
-      break;
-
-    case (caso = "interes"):
-      await message.channel.send({embeds: [interestEmbed]});
-      await message.channel.send({embeds: [interestEmbed2]});
-      break;
-
-    case (caso = "staff"):
-      message.channel.send({embeds: [staffEmbed]}).then(() => {
-        message.channel.send({embeds: [staffEmbed2]}).then(() => {
-          message.channel.send({embeds: [staffEmbed3]}).then(() => {
-            message.channel.send({embeds: [staffEmbed4]});
-          });
-        });
-      });
-      break;
       
-    case (caso = "staff_manual"):
-      message.channel.send({embeds: [staffEmbed]}).then(() => {
-        message.channel.send({embeds: [manualEmbed]}).then(() => {
-          message.channel.send({embeds: [manualEmbed2]}).then(() => {
-            message.channel.send({embeds: [manualEmbed3]}).then(() => {
-              message.channel.send({embeds: [manualEmbed4]}).then(() => {
-                message.channel.send({embeds: [manualEmbed5]});
-              });
-            });
-          });
-        });
-      })
+    case "staff_manual":
+      await message.channel.send({embeds: [staffEmbed, manualEmbed, manualEmbed2, manualEmbed3, manualEmbed4, manualEmbed5]});
       break;
 
-    case (caso = "final_info"):
-      message.channel.send({embeds: [finalInfoEmbed]});
-      break;
-
-    case (caso = "edit"):
+    case "edit":
       if (args[1] === "auto_roles") {
         let nchannel = guild.channels.cache.find(x => x.id === Config.gRoleC);
         nchannel.messages.fetch(Config.mGRoles).then(m => {

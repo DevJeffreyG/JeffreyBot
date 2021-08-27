@@ -22,6 +22,7 @@ module.exports.run = async (client, message, args) => {
   .setTitle(`Ayuda: ${prefix}globaldatas`)
   .setColor(Colores.nocolor)
   .setDescription(`▸ Alternativa: ${prefix}globaldatas update`)
+  .addField(`▸ userCooldowns`, `**—** Información de cumpleaños de un usuario.`)
   .addField(`▸ birthdayData`, `**—** Información de cumpleaños de un usuario.`)
   .addField(`▸ temporalGuildBan`, `**—** Información de un TempBan en el servidor.`)
   .addField(`▸ dsInflation`, `**—** La inflación actual de los DarkJeffros.`)
@@ -39,7 +40,9 @@ module.exports.run = async (client, message, args) => {
         return message.reply("Interval de global datas ejecutado.")
         .then(m => {
             message.delete();
-            m.delete({timeout: ms("10s")});
+            setTimeout(() => {
+                m.delete()
+            }, ms("10s"));
         });
     } else {
         return message.channel.send({embeds: [embed]});

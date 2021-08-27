@@ -9,14 +9,7 @@ module.exports.run = async (client, message, args) => {
 
     let argcustom = args.join(" ");
   
-    let wrongembed = new Discord.MessageEmbed()
-    .setColor(0xED0C0C)
-    .setAuthor(`| ERROR`, Config.errorPng)
-    .setDescription(`${message.author}, No eres desarrollador para hacer esto.`);
-
-  if (message.author.id != jeffreygID) {
-    return message.channel.send({embeds: [wrongembed]});
-  }
+    if(message.author.id != jeffreygID) return;
   
   if(argcustom == "default") {
       let setgamembed2 = new Discord.MessageEmbed()
