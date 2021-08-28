@@ -16,9 +16,10 @@ module.exports.run = async (client, message, args) => {
   if(!message.content.startsWith(prefix))return;
 
   if(client.user.id === Config.testingJBID){
+    console.log()
       if(!args[0] && !args[1]) return message.channel.send("No tengo nada que decir. ;_;");
       let botMessage = args.join(" ");
-      if(!message.mentions.users) message.delete();
+      if(message.mentions.users.size === 0) message.delete();
       message.channel.send({content: botMessage, allowedMentions: { parse: [] } });
   } else {
     if(message.channel.id != botsChannel && message.channel.id != botsVip && author.id === jeffreygID){
@@ -43,7 +44,7 @@ module.exports.run = async (client, message, args) => {
     } else {
       if(!args[0] && !args[1]) return message.channel.send("No tengo nada que decir. ;_;");
       let botMessage = args.join(" ");
-      if(!message.mentions.users) message.delete();
+      if(message.mentions.users.size === 0) message.delete();
       message.channel.send({content: botMessage, allowedMentions: { parse: [] } });
     }
   }
