@@ -56,7 +56,7 @@ let functions;
 // mantenimiento
 const disableEXPs = false; // deshabilitar ganar exp o jeffros
 const disableAwards = false; // deshabilitar awards.
-const disableInterestPerMonth = true; // deshabilitar el interés que se cobra los días 28 de cada mes.
+const disableInterestPerMonth = false; // deshabilitar el interés que se cobra los días 28 de cada mes.
 
 // WEAS PARA EVENTOS:
 
@@ -289,17 +289,15 @@ client.on("ready", async () => {
 
   let channel = client.channels.cache.get(logChannel);
   let dsChannel = client.channels.cache.find(x => x.id === Config.dsChannel);
-  let dsNews, bellChannel;
+  let dsNews;
 
   if(client.user.id === Config.testingJBID){
     channel = client.channels.cache.get("483108734604804107");
     guild = client.guilds.cache.find(x => x.id === "482989052136652800");
     dsNews = guild.roles.cache.find(x => x.id === "790431614378704906");
     dsChannel = client.channels.cache.find(x => x.id === "790431676970041356");
-    bellChannel = client.channels.cache.find(x => x.id === "537095712102416384");
   } else {
     dsNews = guild.roles.cache.find(x => x.id === Config.dsnews);
-    bellChannel = client.channels.cache.find(x => x.id === Config.bellChannel);
   }
 
   channel.send("Reviví.");
@@ -437,7 +435,7 @@ client.on("ready", async () => {
 
   /* YOUTUBE NOTIFACTIONS */
 
-  functions.handleUploads(bellChannel);
+  functions.handleUploads();
 });
 
 client.on("messageDelete", async(message) => {

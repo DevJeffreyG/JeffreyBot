@@ -7,7 +7,15 @@
     [
         {
             "type": "added",
-            "desc": "Jeffrey Bot ahora enviará las notificaciones de YouTube, Twitch y Twitter (WIP)"
+            "desc": "JeffreyBot x YouTube"
+        },
+        {
+            "type": "added",
+            "desc": "JeffreyBot x Twitter"
+        },
+        {
+            "type": "added",
+            "desc": "JeffreyBot x Twitch"
         },
         {
             "type": "added",
@@ -39,6 +47,9 @@
     "jeffreygID": "437668432604037142",
     "jgServer": "447797737216278528",
     "testingJBID": "514123686530383872",
+    "dsRole": "790995699759448094",
+    "bellRole": "460242238555815946",
+    "_comment": "Canales",
     "offtopicChannel": "821486638768455700",
     "spamChannel": "485192438701359135",
     "mainChannel": "447802627187539968",
@@ -47,9 +58,9 @@
     "supportChannel": "447797737216278531",
     "logChannel": "447816644765679616",
     "dsChannel": "790440004442521600",
-    "bellChannel": "447813323149410304",
-    "dsRole": "790995699759448094",
-    "_comment": "447816644765679616",
+    "bellytChannel": "447813323149410304",
+    "belltwChannel": "881030855370354740",
+    "belltvChannel": "881030920197521438",
     "rulesChannel": "523159573935423509",
     "infoChannel": "485191307346837507",
     "staffChat": "485191724369444865",

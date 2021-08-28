@@ -11,10 +11,11 @@ let { client } = require("../jb.js");
 
 const fs = require("fs");
 const ms = require("ms");
-const rss = require("rss-parser");
-const request = new rss();
 var Chance = require("chance");
 var chance = new Chance();
+
+const moment = require('moment-timezone');
+moment().tz("America/Bogota").format();
 
 /* ##### MONGOOSE ######## */
 
@@ -37,6 +38,13 @@ const GlobalData = require("../modelos/globalData.js");
 const Stats = require("../modelos/darkstats.js");
 const All = require("../modelos/allpurchases.js");
 const testingGuild = "482989052136652800";
+
+// JEFFREY BOT NOTIFICATIONS
+const { google } = require("googleapis");
+const Twitter = require("twitter");
+const { ApiClient } = require("twitch");
+const { StaticAuthProvider } = require("twitch-auth");
+const request = require("request");
 
 /* ##### MONGOOSE ######## */
 
@@ -1105,14 +1113,27 @@ const vaultMode = function(hint, author, message) {
       });
 }
 
-const handleUploads = async function(channel){
+const handleUploads = async function(){
+  let guild, bellytChannel, belltwChannel, belltvChannel, role;
+
+  if(client.user.id === Config.testingJBID){
+    guild = client.guilds.cache.find(x => x.id === "482989052136652800");
+    bellytChannel = client.channels.cache.find(x => x.id === "881031615084634182");
+    belltwChannel = client.channels.cache.find(x => x.id === "881031732369960990");
+    belltvChannel = client.channels.cache.find(x => x.id === "881031774174588968");
+    role = guild.roles.cache.find(x => x.id === "881028196282290256")
+  } else {
+    bellytChannel = client.channels.cache.find(x => x.id === Config.bellytChannel);
+    belltwChannel = client.channels.cache.find(x => x.id === Config.belltwChannel);
+    belltvChannel = client.channels.cache.find(x => x.id === Config.belltvChannel);
+    role = guild.roles.cache.find(x => x.id === Config.bellRole)
+  }
+
   // revisar si existe el globaldata
   let interval = ms("30s");
   let query = await GlobalData.findOne({
     "info.type": "bellNotification"
   });
-
-  let youtuberss = "https://www.youtube.com/feeds/videos.xml?channel_id=UCCYiF7GGja7iJgsc4LN0oHw";
   
   let twitterss = ["https://nitter.actionsack.com/JeffreyG__/rss", "https://nitter.database.red/JeffreyG__/rss", "https://nitter.moomoo.me/JeffreyG__/rss"]; // posiblidades
   let twitchrss = "https://twitchrss.appspot.com/vod/jeffreybot_tv";
@@ -1133,34 +1154,71 @@ const handleUploads = async function(channel){
     });
   }
     
-  setInterval(() => {
+  setInterval(async () => {
+
+        let config = {
+          youtube_channelId: "UCCYiF7GGja7iJgsc4LN0oHw",
+          twitter_screenname: "JeffreyG__",
+          twitch_username: "jeffreyg_"
+        }
+    
         // youtube
-        request.parseURL(youtuberss)
-        .then(async d => {
-            const data = d.items[0];
-
-            let noti = await GlobalData.findOne({
-              "info.type": "bellNotification"
-            });
-
-            let posted = false;
+        let comentarios = ["Ha llegado el momento, chécalo para evitar que Jeffrey entre en depresión", "Dale like o comenta algo si te gustó lo suficiente :D", "Espero que nos veamos en la próxima, ¡y que no sea en 3 meses!", "BROOOO Está rebueno míralo, a lo bien.", "No sabría decir si es lamentable, espero que no, ¿por qué no lo ves para comprobarlo y me dices qué tal?"]
+        let comentario = comentarios[Math.floor(Math.random() * comentarios.length)];
+        
+        google.youtube("v3").activities.list({
+          key: process.env.YOUTUBE_TOKEN,
+          part: "snippet, contentDetails",
+          channelId: config.youtube_channelId
+        })
+        .then(async response => {
+          //console.log(response.data.items[0])
+          let item;
+          
+          itemLoop:
+          for (let i = 0; i < response.data.items.length; i++) {
+            const _item = response.data.items[i];
             
-            lastlinkLoop:
-            for (let i = 0; i < noti.info.postedVideos.length; i++) {
-              const video = noti.info.postedVideos[i];
-              
-              if(video.link === data.link){
-                posted = true;
-                break lastlinkLoop;
-              }
+            if(_item.snippet.type === "upload"){
+              item = response.data.items[i];
+              break itemLoop;
+            } else {
+              item = null;
             }
+          }
+          
+          if(!item) return;
+          
+          const data = item.snippet;
+          const itemId = item.id;
+          const videoId = item.contentDetails.upload.videoId;
 
-            if (noti.info.postedVideos && posted) return;
+          let noti = await GlobalData.findOne({
+            "info.type": "bellNotification"
+          });
+
+          let posted = false;
+
+          lastlinkLoop:
+          for (let i = 0; i < noti.info.postedVideos.length; i++) {
+            const video = noti.info.postedVideos[i];
+            
+            if(video.id === itemId){
+              posted = true;
+              break lastlinkLoop;
+            }
+          }
+
+          if (noti.info.postedVideos && posted) return;
             else {
+
+              const videoLink = `https://www.youtube.com/watch?v=${videoId}`;
+
               let toPush = {
                   title: data.title,
-                  link: data.link,
-                  author: data.author
+                  id: itemId,
+                  link: videoLink,
+                  author: data.channelTitle
               }
 
               if((noti.info.postedVideos.length === 1 && noti.info.postedVideos[0].what) || !noti.info.postedVideos){
@@ -1173,52 +1231,49 @@ const handleUploads = async function(channel){
               await noti.save();
 
               let parsed = noti.info.postedVideos[noti.info.postedVideos.length -1];
-              if (!channel) return;
+              if (!bellytChannel) return;
 
-              channel.send(`__**:fire::zap:️NUEVO VÍDEO DE JEFFREY:zap:️:fire:**__ @everyone~\n\`➟\` **${parsed.title}**\n\n\`➟\` ${parsed.link}`);
+              bellytChannel.send({content: `**:fire::zap:️¡NUEVO VÍDEO, ${role}!:zap:️:fire:**\n\n${comentario}\n\n➟ ${parsed.link}`});
             }
+
         })
         .catch(err => console.log("YOUTUBE", err));
 
         // twitter
-        let twrequest = twitterss[Math.floor(Math.random() * twitterss.length)];
-        request.parseURL(twrequest)
-        .then(async d => {
-          let data = d.items[0];
-          
-          if(data.title.startsWith("Pinned:")) data = d.items[1];
+        const twitterClient = new Twitter({
+          consumer_key: process.env.TWITTER_API,
+          consumer_secret: process.env.TWITTER_SECRET,
+          access_token_key: process.env.TWITTER_ACCESS_TOKEN,
+          access_token_secret: process.env.TWITTER_ACCESS_SECRET
+        });
+
+        twitterClient.get('statuses/user_timeline', {screen_name: config.twitter_screenname, count: 5}, async function(error, tweets, response) {
+          const tweet = tweets[0]; // ultimo tweet de {config.twitter_screenname}
+          const tweetId = tweet.id_str;
+          const link = `https://twitter.com/${config.twitter_screenname}/status/${tweetId}`;
 
           let noti = await GlobalData.findOne({
             "info.type": "bellNotification"
           });
 
           let posted = false;
-
-          // cambiar el link
-          let jeffreygindex = data.link.search("/JeffreyG__");
-          //console.log(data.link, jeffreygindex)
-          let prelink = data.link.slice(jeffreygindex+1); // slice hasta la posicion anterior que dice /JeffreyG__
-          let link = prelink.slice(0, -2);
-
-          link = `https://twitter.com/${link}`
-          
           lastlinkLoop:
           for (let i = 0; i < noti.info.postedTweets.length; i++) {
-            const tweet = noti.info.postedTweets[i];
+            const _tweet = noti.info.postedTweets[i];
             
-            if(tweet.link === link){
+            if(_tweet.id === tweetId){
               posted = true;
               break lastlinkLoop;
             }
           }
 
-          if (noti.info.postedVideos && posted) return;
+          if (noti.info.postedTweets && posted) return;
           else {
             let toPush = {
-                title: data.title,
+                id: tweetId,
                 link: link,
-                author: data.creator,
-                time: data.pubDate
+                author: tweet.user.screen_name,
+                time: tweet.created_at
             }
 
             if((noti.info.postedTweets.length === 1 && noti.info.postedTweets[0].what) || !noti.info.postedTweets){
@@ -1231,69 +1286,104 @@ const handleUploads = async function(channel){
             await noti.save();
 
             let parsed = noti.info.postedTweets[noti.info.postedTweets.length -1];
-            if (!channel) return;
+            let tweetDate = new Date(parsed.time)
+            let time = moment(tweetDate).tz("America/Bogota");
 
-            channel.send(`Jeffrey escribió un tweet (${parsed.time}) @here~\n\n\`[\` ${parsed.link} \`]\``);
+            if (!belltwChannel) return;
+
+            belltwChannel.send(`Jeffrey escribió un tweet **(${time})**\n\n\`[\` ${parsed.link} \`]\``);
           }
-        })
-        .catch(err => console.log("TWITTER", twrequest, err))
+
+       });
 
         // twitch
         let saludos = ["Di hola", "Ven y saluda", "Llégate", "Esto no pasa todo el tiempo, ven"]
         let saludo = saludos[Math.floor(Math.random() * saludos.length)];
-        request.parseURL(twitchrss)
-        .then(async d => {
-          let data = d.items[0];
-          if(data){
-            let category = data.categories[0];
-            let guid = data.guid;
-            //console.log(data);
-              if(category == "live"){ // si está en directo
+        const streamLink = `https://twitch.tv/${config.twitch_username}`;
 
-                let noti = await GlobalData.findOne({
-                  "info.type": "bellNotification"
-                });
+        const options = {
+          url: 'https://id.twitch.tv/oauth2/token',
+          json: true,
+          body: {
+            client_id: process.env.TWITCH_CLIENT,
+            client_secret: process.env.TWITCH_SECRET,
+            grant_type: 'client_credentials'
+          }
+        }
 
-                let posted = false;
+        request.post(options, async (err, res, body) => {
+          if(err) throw err;
+          const accessTokenTwitch = body.access_token;
 
-                lastVod:
-                for (let i = 0; i < noti.info.postedOnLive.length; i++) {
-                  const vod = noti.info.postedOnLive[i];
-                  
-                  if(vod.guid === guid){
-                    posted = true;
-                    break lastVod;
-                  }
-                }
+          const authProvider = new StaticAuthProvider(process.env.TWITCH_CLIENT, accessTokenTwitch);
+          const apiClient = new ApiClient({ authProvider });
+          
+          let streaming = await isStreaming(config.twitch_username);
+          if(streaming){ // si está directo
+            const stream = await getHelixStream(config.twitch_username);
+            const streamId = stream.id;
+            const streamTitle = stream.title;
 
-              if(noti.info.postedOnLive && posted) return;
-              else {
-                let title = data.title.slice(0, -7)
-                let toPush = {
-                  title: title,
-                  link: data.link,
-                  guid: data.guid
-                }
+            let noti = await GlobalData.findOne({
+              "info.type": "bellNotification"
+            });
 
-                if((noti.info.postedOnLive.length === 1 && noti.info.postedOnLive[0].what) || !noti.info.postedOnLive){
-                  noti.info.postedOnLive[0] = toPush;
-                } else {
-                  noti.info.postedOnLive.push(toPush);
-                }
+            let posted = false;
 
-                noti.markModified("info");
-                await noti.save();
-
-                let parsed = noti.info.postedOnLive[noti.info.postedOnLive.length -1];
-                if (!channel) return;
-
-                channel.send(`**🔴 ¡Jeffrey está en directo!** @everyone 🔴\n\`➟\` **${parsed.title}**\n\n**${saludo} ➟ ${parsed.link} !! :D**`);
+            lastVod:
+            for (let i = 0; i < noti.info.postedOnLive.length; i++) {
+              const _stream = noti.info.postedOnLive[i];
+              
+              if(_stream.id === streamId){
+                posted = true;
+                break lastVod;
               }
             }
-          }
-        })
-        .catch(err => console.log("TWITCH", err))
 
+            if(noti.info.postedOnLive && posted) return;
+            else {
+              let toPush = {
+                title: streamTitle,
+                link: streamLink,
+                id: streamId
+              }
+
+              if((noti.info.postedOnLive.length === 1 && noti.info.postedOnLive[0].what) || !noti.info.postedOnLive){
+                noti.info.postedOnLive[0] = toPush;
+              } else {
+                noti.info.postedOnLive.push(toPush);
+              }
+
+              noti.markModified("info");
+              await noti.save();
+
+              let parsed = noti.info.postedOnLive[noti.info.postedOnLive.length -1];
+              if (!belltvChannel) return;
+
+              belltvChannel.send(`**🔴 ¡Jeffrey está en directo, ${role}!** 🔴\n\`➟\` **${parsed.title}**\n\n**${saludo} ➟ ${parsed.link} !! :D**`);
+            }
+          }
+
+          async function isStreaming(username) {
+            const user = await apiClient.helix.users.getUserByName(username);
+            if (!user) {
+              return false;
+            }
+            return await user.getStream() !== null;
+          }
+
+          async function getHelixStream(username){
+            const user = await apiClient.helix.users.getUserByName(username);
+
+            if(!user) return null;
+
+            const stream = await user.getStream()
+
+            if(!stream) return null;
+
+            return stream;
+          }
+      })
     }, interval);
 }
 
