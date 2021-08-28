@@ -12,7 +12,7 @@ module.exports.run = async (client, message, args, active) => {
   .setAuthor(`| Error`, Config.errorPng)
   .setColor(Colores.rojo)
   .setDescription(`Los comandos de música de Jeffrey Bot están desactivados debido a problemas con el host.\n[▸ Anuncio](https://discordapp.com/channels/447797737216278528/485191462422577182/733704080714629160)`)
-  //return message.channel.send(sadface)
+  //return message.channel.send({embeds: [sadface]})
   
   // Variables
   const guild = message.guild;
@@ -25,7 +25,7 @@ module.exports.run = async (client, message, args, active) => {
     .setDescription(`¡No hay ninguna canción en cola!`)
     .setColor(Colores.rojo);
   
-  if(!fetched) return message.channel.send(errorE1);
+  if(!fetched) return message.channel.send({embeds: [errorE1]});
   
   // variables comand
   let queue = fetched.queue;
@@ -42,7 +42,7 @@ module.exports.run = async (client, message, args, active) => {
   .setDescription(resp)
   .setColor(Colores.verde);
   
-  message.channel.send(embed);
+  message.channel.send({embeds: [embed]});
 
 };
 

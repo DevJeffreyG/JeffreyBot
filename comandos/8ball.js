@@ -17,8 +17,8 @@ module.exports.run = async (client, message, args) => {
     )
     .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}pregunta`);
 
-  if (!args[1]) return message.channel.send(embed);
-  let replies = ["Sí.", "No.", "No lo sé", "Pregunta más tarde."];
+  if (!args[1]) return message.channel.send({embeds: [embed]});
+  let replies = ["Sí.", "No.", "No lo sé", "Te mentiría si no.", "¿Estamos tontos?", "Obvio.", "Bastante claro que no.", "La verdad es que no.", "La verdad, sí."];
 
   let answer = Math.floor(Math.random() * replies.length);
   let pregunta = args.slice(0).join(" ");
@@ -29,7 +29,7 @@ module.exports.run = async (client, message, args) => {
     .addField("Pregunta", pregunta)
     .addField("Respuesta", replies[answer]);
 
-  message.channel.send(pregEmbed);
+  message.channel.send({embeds: [pregEmbed]});
 };
 
 module.exports.help = {

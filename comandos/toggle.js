@@ -25,7 +25,7 @@ module.exports.run = async (client, message, args) => {
   .setDescription(`▸ El uso correcto es: ${prefix}toggle <comando> (alias) \n▸ Cambia entre un comando deshabilitado o no.`)
   .setFooter(`<> Obligatorio () Opcional`);
 
-  if(!args[0]) return message.channel.send(embed);
+  if(!args[0]) return message.channel.send({embeds: [embed]});
 
   let comando = args[0];
   let alias = args[1] || "na";
@@ -49,7 +49,7 @@ module.exports.run = async (client, message, args) => {
 **—** Alias \`${prefix}${alias}\`.`)
       .setColor(Colores.verde);
 
-      return message.channel.send(added)
+      return message.channel.send({embeds: [added]})
     } else {
       // revisar si se está editando el alias
       if(toggle.alias != alias){ // si el alias en db no es igual al alias en el comando editar
@@ -63,7 +63,7 @@ module.exports.run = async (client, message, args) => {
 **—** Al alias \`${prefix}${alias}\`.`)
         .setColor(Colores.verde);
 
-        return message.channel.send(edited)
+        return message.channel.send({embeds: [edited]})
       } else { // borrar (desactivar) toggle
 
         let removed = new Discord.MessageEmbed()
@@ -74,7 +74,7 @@ module.exports.run = async (client, message, args) => {
 
         toggle.remove();
 
-        return message.channel.send(removed)
+        return message.channel.send({embeds: [removed]})
       }
     }
   })

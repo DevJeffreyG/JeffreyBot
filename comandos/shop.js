@@ -27,7 +27,7 @@ module.exports.run = async (client, message, args) => {
   let item;
   //let interest = 2000; // CUANTO SUBE EL PRECIO POR COMPRA
 
-  let userIsOnMobible = author.presence.clientStatus && author.presence.clientStatus.mobile === "online" && !author.presence.clientStatus.desktop ? true : false;
+  let userIsOnMobible = message.member.presence.clientStatus && message.member.presence.clientStatus.mobile === "online" && !message.member.presence.clientStatus.desktop ? true : false;
   let viewExtension = "ꜝ";
   let extendedDetails = "▸ Al comprar este item, su precio subirá."
 
@@ -62,7 +62,7 @@ module.exports.run = async (client, message, args) => {
             `— No hay nada`,
             `¡La tienda aún no tiene items, vuelve más tarde!`
           );
-          return message.channel.send(embed);
+          return message.channel.send({embeds: [embed]});
         } else {
           // si hay menos de 3 resultados
           if (items.length <= itemPerPage) {
@@ -129,7 +129,7 @@ module.exports.run = async (client, message, args) => {
                   }
 
                   if (i + 1 === items.length) {
-                    return message.channel.send(embed);
+                    return message.channel.send({embeds: [embed]});
                   }
                 }
               );
@@ -213,7 +213,7 @@ module.exports.run = async (client, message, args) => {
                 } 
               }
 
-              message.channel.send(embed).then(msg => {
+              message.channel.send({embeds: [embed]}).then(msg => {
                   msg.react("⏪").then(r => {
                     msg.react("⏩");
 
@@ -221,9 +221,9 @@ module.exports.run = async (client, message, args) => {
                     const forwardsFilter = (reaction, user) =>reaction.emoji.name === "⏩" && user.id === message.author.id;
                     const collectorFilterMainPage = (reaction, user) => (reaction.emoji.name === "⏩" || reaction.emoji.name === "⏪") && user.id === message.author.id;
 
-                    const backwards = msg.createReactionCollector(backwardsFilter, {time: 60000});
-                    const forwards = msg.createReactionCollector(forwardsFilter,{ time: 60000});
-                    const collectorMainPage = msg.createReactionCollector(collectorFilterMainPage,{time: 60000});
+                    const backwards = msg.createReactionCollector({ filter: backwardsFilter, time: 60000 });
+                    const forwards = msg.createReactionCollector({ filter: forwardsFilter, time: 60000 });
+                    const collectorMainPage = msg.createReactionCollector({ filter: collectorFilterMainPage, time: 60000 });
 
                     collectorMainPage.on("end", r => {
                       return msg.reactions.removeAll()
@@ -241,7 +241,7 @@ module.exports.run = async (client, message, args) => {
                       embed = new Discord.MessageEmbed()
                         .setAuthor(`| Shop`, author.displayAvatarURL())
                         .setColor(Colores.verde)
-                        .setDescription(`**—** ¡Bienvenido a la nueva tienda! para comprar items \`${prefix}shop <ID del item>\`.
+                        .setDescription(`**—** ¡Bienvenid@ a la tienda! para comprar items usa: \`${prefix}shop <ID del item>\`.
 **—** Para tener más información del item usa \`${prefix}shop info <id>\`.
 **—** Tienes ${Emojis.Jeffros}**${j.jeffros}**`);
 
@@ -317,7 +317,7 @@ module.exports.run = async (client, message, args) => {
                           }
                         }
 
-                        await msg.edit(embed);
+                        await msg.edit({embeds: [embed]});
                         return reactions.users.remove(user.id);
                       });
                     });
@@ -331,7 +331,7 @@ module.exports.run = async (client, message, args) => {
                       embed = new Discord.MessageEmbed()
                         .setAuthor(`| Shop`, author.displayAvatarURL())
                         .setColor(Colores.verde)
-                        .setDescription(`**—** ¡Bienvenido a la nueva tienda! para comprar items \`${prefix}shop <ID del item>\`.
+                        .setDescription(`**—** ¡Bienvenid@ a la tienda! para comprar items usa: \`${prefix}shop <ID del item>\`.
 **—** Para tener más información del item usa \`${prefix}shop info <id>\`.
 **—** Tienes ${Emojis.Jeffros}**${j.jeffros}**`);
 
@@ -409,7 +409,7 @@ module.exports.run = async (client, message, args) => {
                           }
                         }
 
-                        await msg.edit(embed);
+                        await msg.edit({embeds: [embed]});
                         return reactions.users.remove(user.id);
                       });
                     });
@@ -440,7 +440,7 @@ module.exports.run = async (client, message, args) => {
               )
               .setColor(Colores.rojo);
 
-              message.channel.send(error1);
+              message.channel.send({embeds: [error1]});
           } else {
             Items.findOne({
               serverID: guild.id,
@@ -490,7 +490,7 @@ module.exports.run = async (client, message, args) => {
                     .setDescription(`**—** Ya tienes \`${item.itemName}\`, úsalo con \`${prefix}usar ${item.id}\`.`)
                     .setColor(Colores.rojo);
 
-                  if (item.roleRequired != "na" && !message.member.roles.cache.find(x => x.id === item.roleRequired)) return message.channel.send(doesntHaveRole); // si no tiene el role requerido
+                  if (item.roleRequired != "na" && !message.member.roles.cache.find(x => x.id === item.roleRequired)) return message.channel.send({embeds: [doesntHaveRole]}); // si no tiene el role requerido
 
                   Use.findOne({
                     serverID: guild.id,
@@ -504,9 +504,9 @@ module.exports.run = async (client, message, args) => {
                         );
                       }
 
-                      if (use.thingID != "na" && use.thing === "role" && message.member.roles.cache.find(x => x.id === use.thingID)) return message.channel.send(hasRoleToGive); // tiene el rol que da el item
+                      if (use.thingID != "na" && use.thing === "role" && message.member.roles.cache.find(x => x.id === use.thingID)) return message.channel.send({embeds: [hasRoleToGive]}); // tiene el rol que da el item
 
-                      if (currency.jeffros < precio) return message.channel.send(doesntHaveEnough); // revisando que tenga el dinero para pagar
+                      if (currency.jeffros < precio) return message.channel.send({embeds: [doesntHaveEnough]}); // revisando que tenga el dinero para pagar
 
                       Purchased.findOne({
                         userID: author.id,
@@ -529,7 +529,7 @@ module.exports.run = async (client, message, args) => {
                                 "https://cdn.discordapp.com/emojis/494267320097570837.png"
                               );
 
-                            message.channel.send(buyEmbed).then(msg => {
+                            message.channel.send({embeds: [buyEmbed]}).then(msg => {
                               msg.react(":allow:558084462232076312")
                                 .then(r => {
                                   msg.react(":denegar:558084461686947891");
@@ -543,9 +543,9 @@ module.exports.run = async (client, message, args) => {
                               const noFilter = (reaction, user) =>  reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
                               const collectorFilter = (reaction, user) => (reaction.emoji.id === "558084462232076312" || reaction.emoji.id === "558084461686947891") && user.id === message.author.id;
 
-                              const yes = msg.createReactionCollector(yesFilter, { time: ms("30s") });
-                              const no = msg.createReactionCollector(noFilter, { time: ms("30s") });
-                              const collector = msg.createReactionCollector(collectorFilter, { time: ms("30s") });
+                              const yes = msg.createReactionCollector({ filter:yesFilter, time: ms("30s") });
+                              const no = msg.createReactionCollector({ filter:noFilter, time: ms("30s") });
+                              const collector = msg.createReactionCollector({ filter:collectorFilter, time: ms("30s") });
 
                               collector.on("collect", r => {
                                 collector.stop();
@@ -553,12 +553,14 @@ module.exports.run = async (client, message, args) => {
 
                               collector.on("end", (r) => {
                                 if(r.size > 0 && (r.size === 1 && !r.first().me)) return;
-                                return msg.edit(cancelEmbed).then(a => {
+                                return msg.edit({embeds: [cancelEmbed]}).then(a => {
                                   msg.reactions.removeAll().then(() => {
                                     msg.react("795090708478033950");
                                   });
                                   message.delete();
-                                  a.delete({timeout: ms("20s")});
+                                  setTimeout(() => {
+                                    a.delete()
+                                  }, ms("20s"));
                                 });
                               });
 
@@ -583,22 +585,24 @@ module.exports.run = async (client, message, args) => {
                                   )
                                   .setColor(Colores.verde);
 
-                                return msg.edit(useEmbed).then(() => {
+                                return msg.edit({embeds: [useEmbed]}).then(() => {
                                   msg.reactions.removeAll();
                                 });
                               });
 
                               no.on("collect", r => {
-                                return msg.edit(cancelEmbed).then(a => {
+                                return msg.edit({embeds: [cancelEmbed]}).then(a => {
                                   msg.reactions.removeAll();
                                   message.delete();
-                                  a.delete({timeout: ms("20s")});
+                                  setTimeout(() => {
+                                    a.delete()
+                                  }, ms("20s"));
                                 });
                               });
                             });
                           } else {
                             // si ya tiene el item, pero no lo ha activado
-                            return message.channel.send(hasThisItem);
+                            return message.channel.send({embeds: [hasThisItem]});
                           }
                         }
                       );
@@ -647,10 +651,10 @@ module.exports.run = async (client, message, args) => {
                   )
                   .setColor(Colores.nocolor);
 
-                if (!args[1]) return message.channel.send(errorEmbed);
-                if (!args[2]) return message.channel.send(errorEmbed);
-                if (!args[3] ||(args[3] && isNaN(args[3]))) return message.channel.send(errorEmbed);
-                if (!args[4]) return message.channel.send(errorEmbed);
+                if (!args[1]) return message.channel.send({embeds: [errorEmbed]});
+                if (!args[2]) return message.channel.send({embeds: [errorEmbed]});
+                if (!args[3] ||(args[3] && isNaN(args[3]))) return message.channel.send({embeds: [errorEmbed]});
+                if (!args[4]) return message.channel.send({embeds: [errorEmbed]});
 
                 let nameItem = args[1];
                 let priceItem = args[2];
@@ -685,7 +689,7 @@ module.exports.run = async (client, message, args) => {
 **—** ID: \`${lastID}\`.`
                   )
                   .setColor(Colores.verde);
-                return message.channel.send(goodEmbed);
+                return message.channel.send({embeds: [goodEmbed]});
               }
             );
           }
@@ -701,7 +705,7 @@ module.exports.run = async (client, message, args) => {
         .setDescription(`▸ El uso correcto es: /shop remove <id del item>`)
         .setColor(Colores.nocolor);
 
-      if (!args[1]) return message.channel.send(errorEmbed);
+      if (!args[1]) return message.channel.send({embeds: [errorEmbed]});
 
       Items.findOneAndDelete(
         {
@@ -723,7 +727,7 @@ module.exports.run = async (client, message, args) => {
         .setAuthor(`| Error`, Config.errorPng)
         .setDescription(`▸ El uso correcto es: /shop info <id del item>`);
 
-      if (!args[1]) return message.channel.send(errorEmbed);
+      if (!args[1]) return message.channel.send({embeds: [errorEmbed]});
 
       Items.findOne(
         {
@@ -758,7 +762,7 @@ module.exports.run = async (client, message, args) => {
               )
               .setColor(Colores.verde);
 
-            return message.channel.send(embed);
+            return message.channel.send({embeds: [embed]});
           }
         }
       );
@@ -770,9 +774,9 @@ module.exports.run = async (client, message, args) => {
           `▸ El uso correcto es: /shop edit <id> <nombre, precio, etc> <nuevo>`
         );
 
-      if (!args[1]) return message.channel.send(errorEmbed);
-      if (!args[2]) return message.channel.send(errorEmbed);
-      if (!args[3]) return message.channel.send(errorEmbed);
+      if (!args[1]) return message.channel.send({embeds: [errorEmbed]});
+      if (!args[2]) return message.channel.send({embeds: [errorEmbed]});
+      if (!args[3]) return message.channel.send({embeds: [errorEmbed]});
 
       let idItem = args[1];
       let toEdit = args[2].toLowerCase();
@@ -893,7 +897,7 @@ module.exports.run = async (client, message, args) => {
             }
 
             data.save();
-            return message.channel.send(embed);
+            return message.channel.send({embeds: [embed]});
           }
         }
       );

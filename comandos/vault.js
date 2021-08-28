@@ -17,7 +17,9 @@ const Jeffros = require("../modelos/jeffros.js");
 
 module.exports.run = async (client, message, args) => {
   if (!message.content.startsWith(prefix)) return;
-  message.delete({ timeout: ms("5s") });
+  setTimeout(() => {
+    message.delete()
+  }, ms("5s"));
 
   // Variables
   let author = message.author;
@@ -58,18 +60,16 @@ module.exports.run = async (client, message, args) => {
       .setColor(Colores.rojo)
       .setFooter(`Te falta ${r.name} para poder usar este comando.`);
 
-    return message.channel.send(e);
+    return message.channel.send({embeds: [e]});
   }
 
-  let userMention = message.guild.member(
-    message.mentions.users.first() || message.guild.members.cache.get(args[0])
-  );
+  let userMention = message.mentions.users.first() ? guild.members.cache.get(message.mentions.users.first().id) : guild.members.cache.get(args[0]);
 
   if (action === "help" || action === "ayuda") {
-    return message.channel.send(embed);
+    return message.channel.send({embeds: [embed]});
   } else if (userMention || action === "me" || action === "yo") {
     if (action === "me" || action === "yo") {
-      userMention = message.guild.member(author.id);
+      userMention = guild.members.cache.get(author.id);
     }
 
     WinVault.find(
@@ -95,7 +95,7 @@ module.exports.run = async (client, message, args) => {
               .setDescription(`▸ \`${user.length}\` / \`${c}\` descifrados.`)
               .setColor(Colores.verde);
 
-            return message.channel.send(e);
+            return message.channel.send({embeds: [e]});
           });
         }
       }
@@ -147,7 +147,7 @@ module.exports.run = async (client, message, args) => {
                 )
                 .setColor(Colores.verde);
 
-              message.channel.send(e);
+              message.channel.send({embeds: [e]});
             } else {
               const newHint = new Hint({
                 codeID: idCode,
@@ -168,7 +168,7 @@ module.exports.run = async (client, message, args) => {
                 )
                 .setColor(Colores.verde);
 
-              message.channel.send(e);
+              message.channel.send({embeds: [e]});
             }
           }
         );
@@ -212,7 +212,7 @@ module.exports.run = async (client, message, args) => {
                 )
                 .setColor(Colores.verde);
 
-              message.channel.send(e);
+              message.channel.send({embeds: [e]});
             } else {
               return message.reply(`esos textos ya existen aquí en la bóveda.`);
             }
@@ -257,7 +257,11 @@ module.exports.run = async (client, message, args) => {
         if (!textos) {
           return message.channel
             .send(efinal)
-            .then(m => m.delete({ timeout: ms("5s") }));
+            .then(m => {
+              setTimeout(() => {
+                m.delete()
+              }, ms("5s"));
+            });
         }
 
         WinVault.findOne(
@@ -271,7 +275,11 @@ module.exports.run = async (client, message, args) => {
             if (win) {
               return message.channel
                 .send(efinal)
-                .then(m => m.delete({ timeout: ms("5s") }));
+                .then(m => {
+                  setTimeout(() => {
+                    m.delete()
+                  }, ms("5s"));
+                });
             } else {
               Jeffros.findOne(
                 {
@@ -310,7 +318,7 @@ module.exports.run = async (client, message, args) => {
 
                   newWin.save();
 
-                  return message.channel.send(ggEmbed);
+                  return message.channel.send({embeds: [ggEmbed]});
                 }
               );
             }

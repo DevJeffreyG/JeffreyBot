@@ -81,7 +81,7 @@ module.exports.run = async (client, message, args) => {
       await userBD.save();
     }
 
-    if(!args[0]) return message.channel.send(embed);
+    if(!args[0]) return message.channel.send({embeds: [embed]});
 
     if(userBD.info.isLocked) return message.react("537804262600867860");
 
@@ -156,7 +156,7 @@ module.exports.run = async (client, message, args) => {
         **—** ${bdString}.`)
         .setColor(Colores.verde);
 
-        message.channel.send(confirmation).then(msg => {
+        message.channel.send({embeds: [confirmation]}).then(msg => {
             msg.react(":allow:558084462232076312")
             .then(r => {
               msg.react(":denegar:558084461686947891");
@@ -170,9 +170,9 @@ module.exports.run = async (client, message, args) => {
             const noFilter = (reaction, user) => reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
             const collectorFilter = (reaction, user) => (reaction.emoji.id === "558084461686947891" || reaction.emoji.id === "558084462232076312") && user.id === message.author.id;
 
-            const yes = msg.createReactionCollector(yesFilter, { time: 60000 });
-            const no = msg.createReactionCollector(noFilter, { time: 60000 });
-            const collector = msg.createReactionCollector(collectorFilter, { time: 60000 });
+            const yes = msg.createReactionCollector({ filter:yesFilter, time: 60000 });
+            const no = msg.createReactionCollector({ filter:noFilter, time: 60000 });
+            const collector = msg.createReactionCollector({ filter:collectorFilter, time: 60000 });
 
             yes.on("collect", r => {
               let hoy = new Date();
@@ -186,10 +186,12 @@ module.exports.run = async (client, message, args) => {
             })
 
             no.on("collect", r => {
-              return msg.edit(cancelEmbed).then(a => {
+              return msg.edit({embeds: [cancelEmbed]}).then(a => {
                 msg.reactions.removeAll();
                 message.delete();
-                a.delete({timeout: ms("20s")});
+                setTimeout(() => {
+                  a.delete();
+                }, ms("20s"))
               });
             })
 
@@ -200,12 +202,14 @@ module.exports.run = async (client, message, args) => {
             collector.on('end', collected => {
               if(collected.size > 0 && (collected.size === 1 && !collected.first().me)) return;
               
-              return msg.edit(cancelEmbed).then(a => {
+              return msg.edit({embeds: [cancelEmbed]}).then(a => {
                 msg.reactions.removeAll().then(() => {
                   msg.react("795090708478033950");
                 });
                 message.delete();
-                a.delete({timeout: ms("20s")});
+                setTimeout(() => {
+                  a.delete();
+                }, ms("20s"))
               });
             });
         })
@@ -216,7 +220,7 @@ module.exports.run = async (client, message, args) => {
         day = !isNaN(args[1]) && (Number(args[1]) <= 31) && (Number(args[1]) > 0) ? args[1] : null;
         month = !isNaN(args[2]) && (Number(args[2]) <= 12) && (Number(args[2]) > 0) ? args[2] : null;
 
-        if(!day || !month) return message.channel.send(embed);
+        if(!day || !month) return message.channel.send({embeds: [embed]});
 
         userBD.info.birthd = day;
         userBD.info.birthm = month;
@@ -229,7 +233,7 @@ module.exports.run = async (client, message, args) => {
         // bd dia DD
         day = !isNaN(args[1]) && (Number(args[1]) <= 31) && (Number(args[1]) > 0) ? args[1] : null;
 
-        if(!day) return message.channel.send(embed);
+        if(!day) return message.channel.send({embeds: [embed]});
 
         userBD.info.birthd = day;
 
@@ -240,7 +244,7 @@ module.exports.run = async (client, message, args) => {
         // bd mes MM
         month = !isNaN(args[1]) && (Number(args[1]) <= 12) && (Number(args[1]) > 0) ? args[1] : null;
 
-        if(!month) return message.channel.send(embed);
+        if(!month) return message.channel.send({embeds: [embed]});
 
         userBD.info.birthm = month;
 
@@ -249,7 +253,7 @@ module.exports.run = async (client, message, args) => {
         return message.react("✅")
         
       default:
-        return message.channel.send(embed);
+        return message.channel.send({embeds: [embed]});
     }
   })
 }

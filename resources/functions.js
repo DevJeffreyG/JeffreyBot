@@ -7,7 +7,7 @@ const { Structures } = require('discord.js');
 const anyBase = require("any-base");
 const prettyms = require("pretty-ms");
 const dec2hex = anyBase(anyBase.DEC, anyBase.HEX);
-let { client, boostedGeneral, boostedJeffros, boostedExp } = require("../jb.js");
+let { client } = require("../jb.js");
 
 const fs = require("fs");
 const ms = require("ms");
@@ -294,7 +294,7 @@ const intervalGlobalDatas = async function(justBoost){
                 // quitarle los jeffros, y dejarlo en negativo
                 console.log(jeffros.userID, "ha quedado en negativos por no poder pagar", subName);
                 jeffros.jeffros -= price;
-                member.send(notEnough);
+                member.send({embeds: [notEnough]});
                 subs[i].remove();
                 member.roles.remove(role);
                 jeffros.save();
@@ -307,7 +307,7 @@ const intervalGlobalDatas = async function(justBoost){
                 subs[i].markModified("info");
                 subs[i].save();
 
-                member.send(paidEmbed);
+                member.send({embeds: [paidEmbed]});
               }
             })
           }
@@ -460,12 +460,12 @@ const intervalGlobalDatas = async function(justBoost){
               console.log("Se han eliminado los DJ de", memberD.tag)
 
               // intentar enviar un mensaje al MD.
-              member.send(embed)
+              member.send({embeds: [embed]})
               .catch(err => {
                 staffC.send(`**${member.user.tag} no recibió MD de DarkJeffros eliminados.**\n\`\`\`javascript\n${err}\`\`\``)
               });
 
-              staffC.send(staffEmbed);
+              staffC.send({embeds: [staffEmbed]});
             }
           } else { // sus darkjeffros están en 0
             // revisar si caduracion para eliminar el globaldata
@@ -489,7 +489,7 @@ const intervalGlobalDatas = async function(justBoost){
               // eliminar dsDJDuration
               await dark[i].remove();
               console.log("Se ha eliminado el globaldata de DJ de", memberD.tag)
-              staffC.send(staffEmbed);
+              staffC.send({embeds: [staffEmbed]});
             }
           }
         })
@@ -696,9 +696,7 @@ const intervalGlobalDatas = async function(justBoost){
               .setFooter(`La inflación SUBE.`)
               .setTimestamp();
 
-              dsChannel.send(`${dsNews}`).then(() => {
-                dsChannel.send(embed)
-              })
+              dsChannel.send({content: `${dsNews}`, embeds: [embed]});
               break;
 
             case "b":
@@ -709,9 +707,7 @@ const intervalGlobalDatas = async function(justBoost){
               .setFooter(`La inflación BAJA.`)
               .setTimestamp();
 
-              dsChannel.send(`${dsNews}`).then(() => {
-                dsChannel.send(embed2)
-              })
+              dsChannel.send({content: `${dsNews}`, embeds: [embed2]});
               break;
 
             case "i":
@@ -722,9 +718,7 @@ const intervalGlobalDatas = async function(justBoost){
               .setFooter(`La inflación se MANTIENE.`)
               .setTimestamp();
 
-              dsChannel.send(`${dsNews}`).then(() => {
-                dsChannel.send(embed3)
-              })
+              dsChannel.send({content: `${dsNews}`, embeds: [embed3]});
               break;
           }
 
@@ -774,7 +768,7 @@ const intervalGlobalDatas = async function(justBoost){
             `)
           .setColor(Colores.verde);
 
-          logs.send(unBEmbed)
+          logs.send({embeds: [unBEmbed]})
           console.log("Se ha desbaneado a", userID)
         } else {
           // nada XD
@@ -908,7 +902,7 @@ const LimitedTime = function(guild, roleID, victimMember, duration, specialType,
                 "info.special.type": false
             }, (err, func) => {
                 if(err){
-                    console.log(err);
+                    console.log("e", err);
                 } else {
                     return true;
                 }
@@ -919,7 +913,7 @@ const LimitedTime = function(guild, roleID, victimMember, duration, specialType,
           // es permanente, no hacer nada
           return;
       }
-    } else {
+    } else { // es un boost
 
       let hoy = new Date();
 
@@ -951,7 +945,7 @@ const LimitedTime = function(guild, roleID, victimMember, duration, specialType,
               "info.userID": victimMember.id
           }, (err, func) => {
               if(err){
-                  console.log(err);
+                  console.log("e2", err);
               } else {
                   console.log("Role eliminado automaticamente")
               }
@@ -1030,7 +1024,7 @@ const vaultMode = function(hint, author, message) {
                             )
                             .setDescription(pista[pistan - 1].hint);
 
-                          message.channel.send(embed).then(msg => {
+                          message.channel.send({embeds: [embed]}).then(msg => {
                             msg.react("⏪").then(r => {
                               msg.react("⏩");
 
@@ -1038,9 +1032,9 @@ const vaultMode = function(hint, author, message) {
                               const forwardsFilter = (reaction, user) => reaction.emoji.name === "⏩" && user.id === message.author.id;
                               const collectorFilter = (reaction, user) => (reaction.emoji.name === "⏪" || reaction.emoji.name === "⏩") && user.id === message.author.id;
 
-                              const backwards = msg.createReactionCollector(backwardsFilter, { time: 60000 });
-                              const forwards = msg.createReactionCollector(forwardsFilter, { time: 60000 });
-                              const collector = msg.createReactionCollector(collectorFilter, { time: 60000 });
+                              const backwards = msg.createReactionCollector({ filter:backwardsFilter, time: 60000 });
+                              const forwards = msg.createReactionCollector({ filter:forwardsFilter, time: 60000 });
+                              const collector = msg.createReactionCollector({ filter:collectorFilter, time: 60000 });
 
                               collector.on("end", r => {
                                 return msg.reactions.removeAll()
@@ -1056,7 +1050,7 @@ const vaultMode = function(hint, author, message) {
                                   `Pista ${pistan} de ${totalhints} | /vault [codigo] para decifrar.`
                                 );
                                 embed.setDescription(pista[pistan - 1].hint);
-                                msg.edit(embed);
+                                msg.edit({embeds: [embed]});
                               });
 
                               forwards.on("collect", r => {
@@ -1067,7 +1061,7 @@ const vaultMode = function(hint, author, message) {
                                 );
                                 embed.setDescription(pista[pistan - 1].hint);
 
-                                msg.edit(embed);
+                                msg.edit({embeds: [embed]});
                               });
                             });
                           });
@@ -1092,8 +1086,12 @@ const vaultMode = function(hint, author, message) {
                             .setColor(Colores.blanco);
 
                           return message.channel
-                            .send(r)
-                            .then(m => m.delete({ timeout: ms("5s") }));
+                            .send({embeds: [r]})
+                            .then(m => {
+                              setTimeout(() => {
+                                m.delete();
+                              }, ms("5s"));
+                            });
                         }
                       }
                     );
@@ -1105,6 +1103,198 @@ const vaultMode = function(hint, author, message) {
       });
 }
 
+const handleUploads = async function(channel){
+  // revisar si existe el globaldata
+  let interval = ms("30s");
+  let query = await GlobalData.findOne({
+    "info.type": "bellNotification"
+  });
+
+  let youtuberss = "https://www.youtube.com/feeds/videos.xml?channel_id=UCCYiF7GGja7iJgsc4LN0oHw";
+  
+  let twitterss = ["https://nitter.actionsack.com/JeffreyG__/rss", "https://nitter.database.red/JeffreyG__/rss", "https://nitter.moomoo.me/JeffreyG__/rss"]; // posiblidades
+  let twitchrss = "https://twitchrss.appspot.com/vod/jeffreybot_tv";
+
+  if (!query){
+    const newNotification = new GlobalData({
+      info: {
+        type: "bellNotification",
+        postedVideos: [{"what": "DELETETHIS"}],
+        postedTweets: [{"what": "DELETETHIS"}],
+        postedOnLive: [{"what": "DELETETHIS"}]
+      }
+    })
+
+    await newNotification.save();
+    query = await GlobalData.findOne({
+      "info.type": "bellNotification"
+    });
+  }
+    
+  setInterval(() => {
+        // youtube
+        request.parseURL(youtuberss)
+        .then(async d => {
+            const data = d.items[0];
+
+            let noti = await GlobalData.findOne({
+              "info.type": "bellNotification"
+            });
+
+            let posted = false;
+            
+            lastlinkLoop:
+            for (let i = 0; i < noti.info.postedVideos.length; i++) {
+              const video = noti.info.postedVideos[i];
+              
+              if(video.link === data.link){
+                posted = true;
+                break lastlinkLoop;
+              }
+            }
+
+            if (noti.info.postedVideos && posted) return;
+            else {
+              let toPush = {
+                  title: data.title,
+                  link: data.link,
+                  author: data.author
+              }
+
+              if((noti.info.postedVideos.length === 1 && noti.info.postedVideos[0].what) || !noti.info.postedVideos){
+                noti.info.postedVideos[0] = toPush;
+              } else {
+                noti.info.postedVideos.push(toPush);
+              }
+
+              noti.markModified("info");
+              await noti.save();
+
+              let parsed = noti.info.postedVideos[noti.info.postedVideos.length -1];
+              if (!channel) return;
+
+              channel.send(`__**:fire::zap:️NUEVO VÍDEO DE JEFFREY:zap:️:fire:**__ @everyone~\n\`➟\` **${parsed.title}**\n\n\`➟\` ${parsed.link}`);
+            }
+        })
+        .catch(err => console.log("YOUTUBE", err));
+
+        // twitter
+        let twrequest = twitterss[Math.floor(Math.random() * twitterss.length)];
+        request.parseURL(twrequest)
+        .then(async d => {
+          let data = d.items[0];
+          
+          if(data.title.startsWith("Pinned:")) data = d.items[1];
+
+          let noti = await GlobalData.findOne({
+            "info.type": "bellNotification"
+          });
+
+          let posted = false;
+
+          // cambiar el link
+          let jeffreygindex = data.link.search("/JeffreyG__");
+          //console.log(data.link, jeffreygindex)
+          let prelink = data.link.slice(jeffreygindex+1); // slice hasta la posicion anterior que dice /JeffreyG__
+          let link = prelink.slice(0, -2);
+
+          link = `https://twitter.com/${link}`
+          
+          lastlinkLoop:
+          for (let i = 0; i < noti.info.postedTweets.length; i++) {
+            const tweet = noti.info.postedTweets[i];
+            
+            if(tweet.link === link){
+              posted = true;
+              break lastlinkLoop;
+            }
+          }
+
+          if (noti.info.postedVideos && posted) return;
+          else {
+            let toPush = {
+                title: data.title,
+                link: link,
+                author: data.creator,
+                time: data.pubDate
+            }
+
+            if((noti.info.postedTweets.length === 1 && noti.info.postedTweets[0].what) || !noti.info.postedTweets){
+              noti.info.postedTweets[0] = toPush;
+            } else {
+              noti.info.postedTweets.push(toPush);
+            }
+
+            noti.markModified("info");
+            await noti.save();
+
+            let parsed = noti.info.postedTweets[noti.info.postedTweets.length -1];
+            if (!channel) return;
+
+            channel.send(`Jeffrey escribió un tweet (${parsed.time}) @here~\n\n\`[\` ${parsed.link} \`]\``);
+          }
+        })
+        .catch(err => console.log("TWITTER", twrequest, err))
+
+        // twitch
+        let saludos = ["Di hola", "Ven y saluda", "Llégate", "Esto no pasa todo el tiempo, ven"]
+        let saludo = saludos[Math.floor(Math.random() * saludos.length)];
+        request.parseURL(twitchrss)
+        .then(async d => {
+          let data = d.items[0];
+          if(data){
+            let category = data.categories[0];
+            let guid = data.guid;
+            //console.log(data);
+              if(category == "live"){ // si está en directo
+
+                let noti = await GlobalData.findOne({
+                  "info.type": "bellNotification"
+                });
+
+                let posted = false;
+
+                lastVod:
+                for (let i = 0; i < noti.info.postedOnLive.length; i++) {
+                  const vod = noti.info.postedOnLive[i];
+                  
+                  if(vod.guid === guid){
+                    posted = true;
+                    break lastVod;
+                  }
+                }
+
+              if(noti.info.postedOnLive && posted) return;
+              else {
+                let title = data.title.slice(0, -7)
+                let toPush = {
+                  title: title,
+                  link: data.link,
+                  guid: data.guid
+                }
+
+                if((noti.info.postedOnLive.length === 1 && noti.info.postedOnLive[0].what) || !noti.info.postedOnLive){
+                  noti.info.postedOnLive[0] = toPush;
+                } else {
+                  noti.info.postedOnLive.push(toPush);
+                }
+
+                noti.markModified("info");
+                await noti.save();
+
+                let parsed = noti.info.postedOnLive[noti.info.postedOnLive.length -1];
+                if (!channel) return;
+
+                channel.send(`**🔴 ¡Jeffrey está en directo!** @everyone 🔴\n\`➟\` **${parsed.title}**\n\n**${saludo} ➟ ${parsed.link} !! :D**`);
+              }
+            }
+          }
+        })
+        .catch(err => console.log("TWITCH", err))
+
+    }, interval);
+}
+
 module.exports = {
     getChanges,
     loadBoosts,
@@ -1114,5 +1304,6 @@ module.exports = {
     vaultMode,
     findLvls5,
     LimitedTime,
-    Subscription
+    Subscription,
+    handleUploads
 }

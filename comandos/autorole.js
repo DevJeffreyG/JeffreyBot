@@ -32,7 +32,7 @@ module.exports.run = async (client, message, args) => {
     )
     .setFooter(`<> Obligatorio, () Opcional┊Alias: ${prefix}arole`);
   
-  if(!args[0]) return message.channel.send(embed);
+  if(!args[0]) return message.channel.send({embeds: [embed]});
 
   action = args[0].toLowerCase();
   arRole = message.mentions.roles.first() || guild.roles.cache.get(args[1]);
@@ -58,10 +58,10 @@ module.exports.run = async (client, message, args) => {
       if (action === "add") {
         let newID;
 
-        if (!arRole) return message.channel.send(embed);
-        if (!arEmoji) return message.channel.send(embed);
-        if (!arChannel) return message.channel.send(embed);
-        if (!arMessage) return message.channel.send(embed);
+        if (!arRole) return message.channel.send({embeds: [embed]});
+        if (!arEmoji) return message.channel.send({embeds: [embed]});
+        if (!arChannel) return message.channel.send({embeds: [embed]});
+        if (!arMessage) return message.channel.send({embeds: [embed]});
 
         AutoRole.countDocuments({}, function(err, c) {
           let lastid = c + 1;
@@ -199,7 +199,7 @@ module.exports.run = async (client, message, args) => {
             }
 
             if (i + 1 === aroles.length) {
-              return message.channel.send(listEmbed);
+              return message.channel.send({embeds: [listEmbed]});
             }
           }
         })
@@ -208,20 +208,20 @@ module.exports.run = async (client, message, args) => {
         embed.setDescription(`▸ ${prefix}autorole toggle <\`autorole id\`> <\`grupo de toggle\`>`)
         if(!args[1] || isNaN(args[1])){
             embed.setAuthor(`| Error: autorole id`, Config.errorPng)
-            return message.channel.send(embed)
+            return message.channel.send({embeds: [embed]})
         } else if(!args[2] || isNaN(args[2])) {
             embed.setAuthor(`| Error: grupo de toggle`, Config.errorPng)
-            return message.channel.send(embed)
+            return message.channel.send({embeds: [embed]})
         }
 
         if(args[1].toLowerCase() === "edit"){
           embed.setDescription(`▸ ${prefix}autorole edit <\`grupo de toggle\`> <\`nuevo nombre\`>`)
           if(!args[2] || isNaN(args[2])) {
               embed.setAuthor(`| Error: grupo de toggle`, Config.errorPng)
-              return message.channel.send(embed)
+              return message.channel.send({embeds: [embed]})
           } else if (!args[3]) {
               embed.setAuthor(`| Error: nuevo nombre`, Config.errorPng)
-              return message.channel.send(embed)
+              return message.channel.send({embeds: [embed]})
           }
 
           let grouptoedit = Number(args[2]);
@@ -240,10 +240,10 @@ module.exports.run = async (client, message, args) => {
               groupQuery.markModified("info");
 
               await groupQuery.save();
-              return message.channel.send(changedGroup);
+              return message.channel.send({embeds: [changedGroup]});
           } else {
               embed.setAuthor(`| Error: grupo de toggle`, Config.errorPng)
-              return message.channel.send(embed)
+              return message.channel.send({embeds: [embed]})
           }
       }
 
@@ -255,7 +255,7 @@ module.exports.run = async (client, message, args) => {
       
       if(!autoroleQuery) {
           embed.setAuthor(`| Error: autorole id`, Config.errorPng)
-          return message.channel.send(embed)
+          return message.channel.send({embeds: [embed]})
       }
       
       if(!toggleGroupQuery && toggleGroup != 0){
@@ -290,7 +290,7 @@ module.exports.run = async (client, message, args) => {
       autoroleQuery.toggleGroup = toggleGroup;
       await autoroleQuery.save();
 
-      message.channel.send(changedGroup);
+      message.channel.send({embeds: [changedGroup]});
       }
     }
   );

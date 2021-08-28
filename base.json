@@ -2,6 +2,7 @@
     "prefix": "/",
     "tvPrefix": "!",
     "mantenimiento": 0,
+    "multiplier": 1,
     "changes":
     [
         {
@@ -10,16 +11,38 @@
         },
         {
             "type": "added",
-            "desc": "Se han agregado las respuestas aptas del evento & algunas más, y se han cambiado algunas respuestas viejas",
-            "extended": "Algunas respuestas del evento han sido ligeramente modificadas."
+            "desc": "Se han agregado algunos **Slash Commands** y han sido eliminados de los comandos normales",
+            "extended": "{ PREFIX }ayuda, { PREFIX }coins, { PREFIX }ping, { PREFIX }changelog y { PREFIX }warns"
         },
         {
             "type": "added",
-            "desc": "Se han implementado las subidas de precio diferentes por item, en la tienda del servidor"
+            "desc": "Si un usuario tiene DarkJeffros, en el comando `{ PREFIX }top jeffros` __se tomarán en cuenta__ para el posicionamiento en el top"
         },
         {
             "type": "updated",
-            "desc": "Se podrán usar los comandos con mayúsculas o minúsculas"
+            "desc": "Se ha actualizado la versión de Discord.JS de **v12** a **v13**"
+        },
+        {
+            "type": "updated",
+            "desc": "Ahora al usar el comando `{ PREFIX }say` no se eliminará el mensaje si contiene una mención, y en la respuesta del bot, **no se mencionará al usuario**"
+        },
+        {
+            "type": "updated",
+            "desc": "El sistema de Awards ha sido pulido y **mejorado**",
+            "extended": "* Se ha arreglado el bug que si no se reaccionaba a la confirmación de un award no pasaba nada.\n* Se han agregado nuevas variantes para poder darle premios a más tipos de mensajes con embeds, o mensajes con fields."
+        },
+        {
+            "type": "updated",
+            "desc": "Se han actualizado múltiples líneas de código, **y puede que hayan problemas**"
+        },
+        {
+            "type": "updated",
+            "desc": "Los comandos de música se han **deshabilitado** __temporalmente__, se están investigando algunos **bugs**"
+        },
+        {
+            "type": "removed",
+            "desc": "Se ha eliminado la posibilidad de elegir el `{ PREFIX }top` por medio de mensajes consecutivos",
+            "extended": "'/top' -> ¿Qué top deseas ver? -> 'exp' o 'jeffros'."
         }
     ],
     "bienPng": "http://i.imgur.com/M6hqbcc.png",

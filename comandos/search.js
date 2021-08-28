@@ -11,7 +11,7 @@ module.exports.run = async (client, message, args, active) => {
   .setAuthor(`| Error`, Config.errorPng)
   .setColor(Colores.rojo)
   .setDescription(`Los comandos de música de Jeffrey Bot están desactivados debido a problemas con el host.\n[▸ Anuncio](https://discordapp.com/channels/447797737216278528/485191462422577182/733704080714629160)`)
-  //return message.channel.send(sadface)
+  //return message.channel.send({embeds: [sadface]})
 
   // Variables
   let author = message.author;
@@ -32,7 +32,7 @@ module.exports.run = async (client, message, args, active) => {
 
     if(videos.length === 0){
       console.log(args.join(" "))
-       return message.channel.send(errorE1)
+       return message.channel.send({embeds: [errorE1]})
     
       }
     
@@ -48,7 +48,7 @@ module.exports.run = async (client, message, args, active) => {
     searchEmbed.setDescription(resp);
     searchEmbed.setFooter(`▸ Elige un número entre 1-${videos.length}`);
 
-    message.channel.send(searchEmbed);
+    message.channel.send({embeds: [searchEmbed]});
 
     const filter = m =>
       !isNaN(m.content) && m.content < videos.length + 1 && m.content > 0;

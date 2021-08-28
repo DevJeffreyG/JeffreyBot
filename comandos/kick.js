@@ -25,10 +25,10 @@ module.exports.run = async (client, message, args) => {
   .setFooter(`<> Obligatorio () Opcional`);
   
   if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
-  let kUser = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[0]));
-  if(!kUser) return message.channel.send(embed);
+  let kUser = message.mentions.users.first() ? guild.members.cache.get(message.mentions.users.first().id) : guild.members.cache.get(args[0]);
+  if(!kUser) return message.channel.send({embeds: [embed]});
   let kRazon = args.join(" ").slice(args[0].length + 1);
-  if(!kRazon) return message.channel.send(embed);
+  if(!kRazon) return message.channel.send({embeds: [embed]});
   
   // Si el usuario a banear tiene el permiso de banear también
   if(kUser.roles.cache.has(staffRole)) return console.log("NO.");
@@ -43,7 +43,7 @@ module.exports.run = async (client, message, args) => {
   .setColor(Colores.rojo);
   
   kUser.kick(kRazon).then(x => message.react("✅"));
-  logC.send(kEmbed);
+  logC.send({embeds: [kEmbed]});
 
 }
 

@@ -40,13 +40,13 @@ module.exports.run = async (client, message, args) => {
   .setColor(Colores.rojo);  
   
   // author está en el canal?
-  if(!message.member.voice) return message.channel.send(errorE1);
+  if(!message.member.voice) return message.channel.send({embeds: [errorE1]});
   
   // client está en el canal?
-  if(!guild.me.voice) return message.channel.send(errorE2);
+  if(!guild.me.voice) return message.channel.send({embeds: [errorE2]});
   
   // están en el mismo canal?
-  if(guild.me.voice.channelID !== message.member.voice.channelID) return message.channel.send(errorE3);
+  if(guild.me.voice.channelID !== message.member.voice.channelID) return message.channel.send({embeds: [errorE3]});
   
   let userCount = message.member.voice.channel.members.size;
   if(userCount === 2 || message.member.roles.cache.find(x => x.id === staffRole.id)){
@@ -58,9 +58,9 @@ module.exports.run = async (client, message, args) => {
     guild.me.voice.channel.leave();
 
     // output
-    message.channel.send(embed);
+    message.channel.send({embeds: [embed]});
   } else {
-    return message.channel.send(errorE4);
+    return message.channel.send({embeds: [errorE4]});
   }
   
   

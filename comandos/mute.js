@@ -36,10 +36,10 @@ module.exports.run = async (client, message, args) => {
   
   if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
 
-  let mUser = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[0]));
+  let mUser = message.mentions.users.first() ? guild.members.cache.get(message.mentions.users.first().id) : guild.members.cache.get(args[0]);
 
   if(!args[0]) {
-    return message.channel.send(embed);
+    return message.channel.send({embeds: [embed]});
   }
   
   if(!args[1]){ // Para siempre
@@ -57,7 +57,7 @@ module.exports.run = async (client, message, args) => {
     .setColor(Colores.rojo);
 
     mUser.roles.add(muteRole).then(x => message.react("✅"));
-    return logC.send(mEmbed);
+    return logC.send({embeds: [mEmbed]});
 
   } else { // Temp Mute
     let mTime = args[1]
@@ -76,7 +76,7 @@ module.exports.run = async (client, message, args) => {
     .setColor(Colores.rojo);
 
     mUser.roles.add(muteRole).then(x => message.react("✅"));
-    logC.send(mEmbed);
+    logC.send({embeds: [mEmbed]});
   }
 }
 

@@ -19,7 +19,7 @@ module.exports.run = async (client, message, args) => {
   .setDescription(`▸ El uso correcto es: ${prefix}hackban <ID> (razón) \n▸ Baneas a alguien que no está en el servidor.`)
   .setFooter(`<> Obligatorio () Opcional`);
 
-    if(!args[0]) return message.channel.send(embed);
+    if(!args[0]) return message.channel.send({embeds: [embed]});
     
     let bUser = args[0];
     let bRazon = args.join(" ").slice(args[0].length + 1);
@@ -42,7 +42,7 @@ module.exports.run = async (client, message, args) => {
     .setColor(Colores.rojo);
 
     message.guild.members.ban(bUser, {reason: bRazon}).then(x => message.react("✅")); // Baneado
-    logC.send(bEmbed);
+    logC.send({embeds: [bEmbed]});
 
 }
 

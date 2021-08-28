@@ -25,15 +25,13 @@ module.exports.run = async (client, message, args) => {
     )
     .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}pagar`);
 
-  var user = message.guild.member(
-    message.mentions.users.first() || message.guild.members.cache.get(args[0])
-  );
-  if (!user) return message.channel.send(embed);
+  var user = message.mentions.users.first() ? guild.members.cache.get(message.mentions.users.first().id) : guild.members.cache.get(args[0]);
+  if (!user) return message.channel.send({embeds: [embed]});
 
   let toPay = Math.floor(args[1]);
-  if (!toPay) return message.channel.send(embed);
-  if (isNaN(toPay)) return message.channel.send(embed);
-  if (toPay<1) return message.channel.send(embed);
+  if (!toPay) return message.channel.send({embeds: [embed]});
+  if (isNaN(toPay)) return message.channel.send({embeds: [embed]});
+  if (toPay<1) return message.channel.send({embeds: [embed]});
   
   if(user.id === author.id){ // te autopagas
     let paidE = new Discord.MessageEmbed()
@@ -43,7 +41,7 @@ module.exports.run = async (client, message, args) => {
         )
         .setColor(Colores.verde);
     
-    return message.channel.send(paidE);
+    return message.channel.send({embeds: [paidE]});
   }
 
   Jeffros.findOne(
@@ -77,9 +75,9 @@ module.exports.run = async (client, message, args) => {
         (err2, uBy) => {
           if (err2) throw err2;
 
-          if (!uBy) return message.channel.send(errorEmbed);
+          if (!uBy) return message.channel.send({embeds: [errorEmbed]});
 
-          if (uBy.jeffros < toPay) return message.channel.send(errorEmbed);
+          if (uBy.jeffros < toPay) return message.channel.send({embeds: [errorEmbed]});
 
           if (!uPay) {
             const newJeffros = new Jeffros({
@@ -93,7 +91,7 @@ module.exports.run = async (client, message, args) => {
             uBy.save();
             newJeffros.save();
 
-            return message.channel.send(niceEmbed);
+            return message.channel.send({embeds: [niceEmbed]});
           }
 
           uPay.jeffros += toPay;
@@ -102,7 +100,7 @@ module.exports.run = async (client, message, args) => {
           uPay.save();
           uBy.save();
 
-          return message.channel.send(niceEmbed);
+          return message.channel.send({embeds: [niceEmbed]});
         }
       );
     }

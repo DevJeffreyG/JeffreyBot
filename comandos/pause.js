@@ -36,15 +36,15 @@ module.exports.run = async (client, message, args, active) => {
   .setColor(Colores.rojo);  
   
   // author está en el canal?
-  if(!message.member.voice) return message.channel.send(errorE1);
+  if(!message.member.voice) return message.channel.send({embeds: [errorE1]});
   
   // client está en el canal?
-  if(!guild.me.voice) return message.channel.send(errorE2);
+  if(!guild.me.voice) return message.channel.send({embeds: [errorE2]});
   
   // están en el mismo canal?
-  if(guild.me.voiceID !== message.member.voiceID) return message.channel.send(errorE3);
+  if(guild.me.voiceID !== message.member.voiceID) return message.channel.send({embeds: [errorE3]});
   
-  if(fetched.dispatcher.paused) return message.channel.send(errorE4);
+  if(fetched.dispatcher.paused) return message.channel.send({embeds: [errorE4]});
   
   fetched.dispatcher.pause();
   
@@ -53,7 +53,7 @@ module.exports.run = async (client, message, args, active) => {
   .setDescription(`**⏸️ | Pausado \`${fetched.queue[0].songTitle}\` con éxito.**`)
   .setColor(Colores.verde);
   
-  message.channel.send(embed);
+  message.channel.send({embeds: [embed]});
 
 }
 

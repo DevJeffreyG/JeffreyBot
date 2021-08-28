@@ -26,7 +26,7 @@ module.exports.run = async (client, message, args) => {
   .setDescription(`▸ El uso correcto es: ${prefix}jbnews <anuncio>`)
   .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}announcenews`);
   
-  if(!args[0] && message.attachments.size === 0) return message.channel.send(embed);
+  if(!args[0] && message.attachments.size === 0) return message.channel.send({embeds: [embed]});
   let anuncio = args.join(" ");
   
   if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
@@ -52,9 +52,7 @@ module.exports.run = async (client, message, args) => {
       nEmbed.setThumbnail(client.user.displayAvatarURL());
     }
     
-    jbChannel.send(`${jbNRole}~`).then(r => {
-      jbChannel.send(nEmbed);
-    }).catch(e => console.log(e));
+    jbChannel.send({content: `${jbNRole}`, embeds: [nEmbed]});
 
 }
 

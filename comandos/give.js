@@ -41,12 +41,12 @@ module.exports.run = async (client, message, args) => {
   .setDescription(`▸ El uso correcto es: ${prefix}give <ID | @usuario> <role | boost> <...> \n▸ Con este comando podrás agregar roles temporales o boosts temporales de cualquier tipo a algún usuario.`)
   .setFooter(`<> Obligatorio () Opcional`);
 
-  if(!args[0]) return message.channel.send(embed)
-  if(!args[1]) return message.channel.send(embed)
+  if(!args[0]) return message.channel.send({embeds: [embed]})
+  if(!args[1]) return message.channel.send({embeds: [embed]})
 
-  let member = guild.member(message.mentions.users.first() || guild.members.cache.get(args[0]));
+  let member = message.mentions.users.first() ? guild.members.cache.get(message.mentions.users.first().id) : guild.members.cache.get(args[0]);
 
-  if(!member) return message.channel.send(embed)
+  if(!member) return message.channel.send({embeds: [embed]})
 
   if(args[1].toLowerCase() === "role"){
     // /give @jeffreyg role id time
@@ -55,17 +55,17 @@ module.exports.run = async (client, message, args) => {
 
     // error id
     embed.setTitle(`Error: id`);
-    if(!args[2]) return message.channel.send(embed);
+    if(!args[2]) return message.channel.send({embeds: [embed]});
 
     let role = guild.roles.cache.get(message.mentions.roles.first().id || args[2]);
-    if(!role) return message.channel.send(embed);
+    if(!role) return message.channel.send({embeds: [embed]});
 
     // error tiempo
     embed.setTitle(`Error: tiempo`);
-    if(!args[3]) return message.channel.send(embed);
+    if(!args[3]) return message.channel.send({embeds: [embed]});
 
     let tiempo = ms(args[3]) || null;
-    if(!tiempo) return message.channel.send(embed);
+    if(!tiempo) return message.channel.send({embeds: [embed]});
 
     // llamar la funcion para hacer globaldata
     await functions.LimitedTime(guild, role.id, member, tiempo);
@@ -80,36 +80,36 @@ module.exports.run = async (client, message, args) => {
 
     // error id
     embed.setTitle(`Error: tipo`);
-    if(!args[2]) return message.channel.send(embed);
+    if(!args[2]) return message.channel.send({embeds: [embed]});
 
     let tipo = args[2];
 
     // error multiplicador
     embed.setTitle(`Error: multiplicador`);
-    if(!args[3]) return message.channel.send(embed);
+    if(!args[3]) return message.channel.send({embeds: [embed]});
 
     let multi = !isNaN(args[3]) ? args[3] : null;
-    if(!multi) return message.channel.send(embed);
+    if(!multi) return message.channel.send({embeds: [embed]});
 
     // error tiempo
     embed.setTitle(`Error: tiempo`);
-    if(!args[4]) return message.channel.send(embed);
+    if(!args[4]) return message.channel.send({embeds: [embed]});
 
     let tiempo = ms(args[4]) ? args[4] : null;
-    if(!tiempo) return message.channel.send(embed);
+    if(!tiempo) return message.channel.send({embeds: [embed]});
 
     // error id
     embed.setTitle(`Error: id`);
-    if(!args[5]) return message.channel.send(embed);
+    if(!args[5]) return message.channel.send({embeds: [embed]});
 
     let role = guild.roles.cache.get(message.mentions.roles.first().id || args[5]);
-    if(!role) return message.channel.send(embed);
+    if(!role) return message.channel.send({embeds: [embed]});
 
     // llamar la funcion para hacer un globaldata y dar el role con boost
     await functions.LimitedTime(guild, role.id, member, tiempo, "boostMultiplier", tipo, multi);
     message.react("✅")
   } else {
-      return message.channel.send(embed);
+      return message.channel.send({embeds: [embed]});
   }
 
 }

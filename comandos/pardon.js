@@ -46,11 +46,11 @@ module.exports.run = async (client, message, args) => {
       rulesEmbed.addField(reglas[i], `N° **${i}**`);
   }
   
-  let wUser = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[0]));
+  let wUser = message.mentions.users.first() ? guild.members.cache.get(message.mentions.users.first().id) : guild.members.cache.get(args[0]);
   let numW;
   let softW = args[2] || undefined;
 
-  if(!wUser) return message.channel.send(embed);
+  if(!wUser) return message.channel.send({embeds: [embed]});
   
   if(!args[1]){
     numW = 1;
@@ -59,7 +59,7 @@ module.exports.run = async (client, message, args) => {
   }
   
   let rule = reglas[softW] || "na";
-  if(rule === "na" && args[2]) return message.channel.send(rulesEmbed);
+  if(rule === "na" && args[2]) return message.channel.send({embeds: [rulesEmbed]});
 
   if(softW){
     //confirmacion madre mia
@@ -69,7 +69,7 @@ module.exports.run = async (client, message, args) => {
     \`▸\` Regla: Regla N°${args[2]} (${rule}).`)
     .setColor(Colores.verde);
 
-    message.channel.send(confirmationSoft).then(msg => {
+    message.channel.send({embeds: [confirmationSoft]}).then(msg => {
             msg.react(":allow:558084462232076312")
             .then(r => {
               msg.react(":denegar:558084461686947891");
@@ -83,9 +83,9 @@ module.exports.run = async (client, message, args) => {
             const noFilter = (reaction, user) => reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
             const collectorFilter = (reaction, user) => (reaction.emoji.id === "558084461686947891" || reaction.emoji.id === "558084462232076312") && user.id === message.author.id;
 
-            const yes = msg.createReactionCollector(yesFilter, { time: 60000 });
-            const no = msg.createReactionCollector(noFilter, { time: 60000 });
-            const collector = msg.createReactionCollector(collectorFilter, { time: 60000 });
+            const yes = msg.createReactionCollector({ filter:yesFilter, time: 60000 });
+            const no = msg.createReactionCollector({ filter:noFilter, time: 60000 });
+            const collector = msg.createReactionCollector({ filter:collectorFilter, time: 60000 });
 
             yes.on("collect", r => {
               // quitar el softwarn
@@ -100,7 +100,7 @@ module.exports.run = async (client, message, args) => {
                 .setColor(Colores.rojo);
 
                 if(swarns.warns.length == 0) {
-                  msg.edit(noSofts);
+                  msg.edit({embeds: [noSofts]});
                   msg.reactions.removeAll();
                 }
 
@@ -119,7 +119,7 @@ module.exports.run = async (client, message, args) => {
               **—** Mod: ${author}`)
                     .setColor(Colores.verde);
 
-                    msg.edit(sEmbed);
+                    msg.edit({embeds: [sEmbed]});
                     msg.reactions.removeAll()
                     
                     let sunwarnedEmbed = new Discord.MessageEmbed()
@@ -130,14 +130,14 @@ module.exports.run = async (client, message, args) => {
                     .setColor(Colores.verde)
                     .setFooter(`Tienes suerte.`, 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png');
                     
-                    return wUser.send(sunwarnedEmbed)
+                    return wUser.send({embeds: [sunwarnedEmbed]})
                     .catch(e => {
                       console.log('Tiene los MDs desactivados.')
                     });
                   } else { // si no tiene ese
                     if(swarns.warns.length - 1 === i){ // si es el ultimo
                       console.log("Es el ultimo soft que tiene el usuario");
-                      msg.edit(noSofts);
+                      msg.edit({embeds: [noSofts]});
                       return msg.reactions.removeAll();
                     }
                   }
@@ -148,10 +148,12 @@ module.exports.run = async (client, message, args) => {
             })
 
             no.on("collect", r => {
-              return msg.edit(cancelEmbed).then(async a => {
+              return msg.edit({embeds: [cancelEmbed]}).then(async a => {
                 msg.reactions.removeAll();
                 message.delete();
-                a.delete({timeout: ms("20s")});
+                setTimeout(() => {
+                  a.delete()
+                }, ms("20s"));
               });
             })
 
@@ -162,12 +164,14 @@ module.exports.run = async (client, message, args) => {
             collector.on('end', collected => {
               if(collected.size > 0 && (collected.size === 1 && !collected.first().me)) return;
 
-              return msg.edit(cancelEmbed).then(a => {
+              return msg.edit({embeds: [cancelEmbed]}).then(a => {
                 msg.reactions.removeAll().then(() => {
                   msg.react("795090708478033950");
                 });
                 message.delete();
-                a.delete({timeout: ms("20s")});
+                setTimeout(() => {
+                  a.delete()
+                }, ms("20s"));
               });
             });
     })
@@ -179,7 +183,7 @@ module.exports.run = async (client, message, args) => {
     .setDescription(`\`▸\` ¿Estás seguro de restar \`${numW}\` **warn(s)** a **${wUser.user.tag}**?`)
     .setColor(Colores.verde);
 
-    message.channel.send(confirmation).then(msg => {
+    message.channel.send({embeds: [confirmation]}).then(msg => {
 
       msg.react(":allow:558084462232076312")
       .then(r => {
@@ -194,9 +198,9 @@ module.exports.run = async (client, message, args) => {
       const noFilter = (reaction, user) => reaction.emoji.id === "558084461686947891" && user.id === message.author.id;
       const collectorFilter = (reaction, user) => reaction.emoji.id === ("558084461686947891" || reaction.emoji.id === "558084462232076312") && user.id === message.author.id;
 
-      const yes = msg.createReactionCollector(yesFilter, { time: 60000 });
-      const no = msg.createReactionCollector(noFilter, { time: 60000 });
-      const collector = msg.createReactionCollector(collectorFilter, { time: 60000 });
+      const yes = msg.createReactionCollector({ filter:yesFilter, time: 60000 });
+      const no = msg.createReactionCollector({ filter:noFilter, time: 60000 });
+      const collector = msg.createReactionCollector({ filter:collectorFilter, time: 60000 });
 
       yes.on("collect", r => {
         Warn.findOne({
@@ -209,7 +213,7 @@ module.exports.run = async (client, message, args) => {
           .setDescription(`**—** ${wUser.user.tag} no tiene warns por quitar.`)
           .setColor(Colores.rojo);
           if(!warns || warns.warns === 0 || warns.warns-numW <= -1){
-            msg.edit(noWarn);
+            msg.edit({embeds: [noWarn]});
             return msg.reactions.removeAll();
           } else {
             warns.warns = warns.warns - numW;
@@ -225,7 +229,7 @@ module.exports.run = async (client, message, args) => {
       **—** Mod: ${author}`)
             .setColor(Colores.verde);
 
-            msg.edit(wEmbed);
+            msg.edit({embeds: [wEmbed]});
             msg.reactions.removeAll();
             
             let unwarnedEmbed = new Discord.MessageEmbed()
@@ -236,7 +240,7 @@ module.exports.run = async (client, message, args) => {
             .setColor(Colores.verde)
             .setFooter(`Tienes suerte.`, 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png');
             
-            wUser.send(unwarnedEmbed)
+            wUser.send({embeds: [unwarnedEmbed]})
             .catch(e => {
               console.log('Tiene los MDs desactivados.')
             });
@@ -245,10 +249,12 @@ module.exports.run = async (client, message, args) => {
       })
 
       no.on("collect", r => {
-        return msg.edit(cancelEmbed).then(a => {
+        return msg.edit({embeds: [cancelEmbed]}).then(a => {
           msg.reactions.removeAll();
           message.delete();
-          a.delete({timeout: ms("20s")});
+          setTimeout(() => {
+            a.delete()
+          }, ms("20s"));
         });
       })
 
@@ -259,13 +265,15 @@ module.exports.run = async (client, message, args) => {
       collector.on('end', collected => {
         if(collected.size > 0 && (collected.size === 1 && !collected.first().me)) return;
         
-        return msg.edit(cancelEmbed).then(a => {
+        return msg.edit({embeds: [cancelEmbed]}).then(a => {
           msg.reactions.removeAll().then(() => {
             msg.react("795090708478033950");
           });
 
           message.delete();
-          a.delete({timeout: ms("20s")});
+          setTimeout(() => {
+            a.delete()
+          }, ms("20s"));
         });
       });
     })

@@ -36,7 +36,7 @@ module.exports.run = async (client, message, args) => {
 
   const interest = 5;
 
-  let userIsOnMobible = author.presence.clientStatus && author.presence.clientStatus.mobile === "online" && !author.presence.clientStatus.desktop ? true : false;
+  let userIsOnMobible = message.member.presence && message.member.presence.clientStatus && message.member.presence.clientStatus.mobile === "online" && !message.member.presence.clientStatus.desktop ? true : false;
   let viewExtension = "ꜝ";
   let extendedDetails = "▸ Al comprar este item, su precio subirá."
 
@@ -78,7 +78,7 @@ Stats.findOne({
                         let tienda = new Discord.MessageEmbed()
                         .setAuthor(`| DarkShop`, Config.darkLogoPng)
                         .setColor(Colores.negro)
-                        .setDescription(`**—** Bienvenido a la DarkShop. \`${prefix}darkshop help\` para ver todos los comandos disponibles.
+                        .setDescription(`**—** Bienvenid@ a la DarkShop. \`${prefix}darkshop help\` para ver todos los comandos disponibles.
             **—** Para comprar items usa \`${prefix}darkshop <ID del item>\`.
             **—** Para tener más información del item usa \`${prefix}darkshop info <id>\`.
             **—** Esta tienda __**NO**__ usa los Jeffros convencionales.
@@ -100,7 +100,7 @@ Stats.findOne({
                                     `Sal antes de que alguien te vea...`
                                 );
 
-                                return message.channel.send(tienda);
+                                return message.channel.send({embeds: [tienda]});
                             } else {
                                 // hay menos de itemPerPage
 
@@ -133,7 +133,7 @@ Stats.findOne({
                                             }
 
                                             if (i + 1 === items.length){
-                                                return message.channel.send(tienda);
+                                                return message.channel.send({embeds: [tienda]});
                                             }
                                         })
                                     }
@@ -181,19 +181,20 @@ Stats.findOne({
                                         }
 
                                         // REACCIONES
-                                        message.channel.send(tienda).then(msg => {
+                                        message.channel.send({embeds: [tienda]}).then(msg => {
                                             msg.react("⏪").then(r => {
                                                 msg.react("⏩");
 
                                                 // filtros
+                                                console.log("author", message.author.id)
                                                 const backwardsFilter = (reaction, user) => reaction.emoji.name === "⏪" && user.id === message.author.id;
                                                 const forwardsFilter = (reaction, user) => reaction.emoji.name === "⏩" && user.id === message.author.id;
                                                 const collectorFilterMainPage = (reaction, user) => (reaction.emoji.name === "⏩" || reaction.emoji.name === "⏪") && user.id === message.author.id;
                         
                                                 // collectors
-                                                const backwards = msg.createReactionCollector(backwardsFilter, {time: 60000});
-                                                const forwards = msg.createReactionCollector(forwardsFilter,{time: 60000});
-                                                const collectorMainPage = msg.createReactionCollector(collectorFilterMainPage,{time: 60000});
+                                                const backwards = msg.createReactionCollector({ filter: backwardsFilter, time: 60000 });
+                                                const forwards = msg.createReactionCollector({ filter: forwardsFilter, time: 60000 });
+                                                const collectorMainPage = msg.createReactionCollector({ filter: collectorFilterMainPage, time: 60000 });
 
                                                 collectorMainPage.on("end", r => {
                                                     return msg.reactions.removeAll()
@@ -213,7 +214,7 @@ Stats.findOne({
                                                     let embed = new Discord.MessageEmbed()
                                                     .setAuthor(`| DarkShop`, Config.darkLogoPng)
                                                     .setColor(Colores.negro)
-                                                    .setDescription(`**—** Bienvenido a la DarkShop. \`${prefix}darkshop <ID del item>\`.
+                                                    .setDescription(`**—** Bienvenid@ a la DarkShop. \`${prefix}darkshop <ID del item>\`.
 **—** Para tener más información del item usa \`${prefix}darkshop info <id>\`.
 **—** Esta tienda __**NO**__ usa los Jeffros convencionales.
 
@@ -239,7 +240,7 @@ Stats.findOne({
                                                         );
 
                                                         for (let i = inicio; i <= fin; i++) {
-                                                            if(!items[i]) return msg.edit(embed);
+                                                            if(!items[i]) return msg.edit({embeds: [embed]});
                                                             let all = await All.findOne({
                                                                 userID: author.id,
                                                                 itemID: items[i].id,
@@ -268,7 +269,7 @@ Stats.findOne({
                                                             }
                                                         }
 
-                                                        await msg.edit(embed);
+                                                        await msg.edit({embeds: [embed]});
                                                         return reactions.users.remove(user.id);
                                                     });
                                                 });
@@ -283,7 +284,7 @@ Stats.findOne({
                                                     let embed = new Discord.MessageEmbed()
                                                     .setAuthor(`| DarkShop`, Config.darkLogoPng)
                                                     .setColor(Colores.negro)
-                                                    .setDescription(`**—** Bienvenido a la DarkShop. \`${prefix}darkshop <ID del item>\`.
+                                                    .setDescription(`**—** Bienvenid@ a la DarkShop. \`${prefix}darkshop <ID del item>\`.
     **—** Para tener más información del item usa \`${prefix}darkshop info <id>\`.
     **—** Esta tienda __**NO**__ usa los Jeffros convencionales.
     
@@ -335,7 +336,7 @@ Stats.findOne({
                                                             }
                                                         }
                                                         
-                                                        await msg.edit(embed);
+                                                        await msg.edit({embeds: [embed]});
                                                         return reactions.users.remove(user.id);
                                                     });
                                                 });
@@ -365,7 +366,7 @@ Stats.findOne({
             **—** \`${prefix}ds <id>\`: Compra uno de los items.`)
                             .setColor(Colores.negro);
 
-                            message.channel.send(embedAyuda);
+                            message.channel.send({embeds: [embedAyuda]});
                             break;
 
                         case "status":
@@ -384,7 +385,7 @@ Stats.findOne({
     **—** Antes era de un \`${dark.info.oldinflation}%\`.`)
                             .setColor(Colores.negro);
 
-                            message.channel.send(stonksEmbed);
+                            message.channel.send({embeds: [stonksEmbed]});
                             break;
                         
                         case "duration":
@@ -404,7 +405,7 @@ Stats.findOne({
                                 if(err) throw err;
 
                                 if(!authorData){
-                                    return message.channel.send(error1);
+                                    return message.channel.send({embeds: [error1]});
                                 } else {
                                     // leer y cambiar si es necesario
 
@@ -424,7 +425,7 @@ Stats.findOne({
                                     .setThumbnail(Config.darkLogoPng)
                                     .setColor(Colores.negro);
                                     
-                                    message.channel.send(embed)
+                                    message.channel.send({embeds: [embed]})
                                 }
                             })
                             break;
@@ -440,9 +441,9 @@ Stats.findOne({
                             .setDescription(`▸ El uso correcto es: /darkshop change <DarkJeffros>
                             **—** Se calculará cuantos Jeffros necesitas para tener esa cantidad de DarkJeffros y se añadirán a tu cuenta de la DarkShop.`)
 
-                            if(!args[1]) return message.channel.send(instructions);
-                            if(isNaN(args[1])) return message.channel.send(instructions);
-                            if(args[1] < 1) return message.channel.send(instructions);
+                            if(!args[1]) return message.channel.send({embeds: [instructions]});
+                            if(isNaN(args[1])) return message.channel.send({embeds: [instructions]});
+                            if(args[1] < 1) return message.channel.send({embeds: [instructions]});
 
                             let wanted = Math.floor(args[1]);
 
@@ -467,8 +468,8 @@ Stats.findOne({
                             .setColor(Colores.negro);
 
                             // verificar si tiene o no jeffros suficientes.
-                            if(!jeffros) return message.channel.send(nope);
-                            if(totalJeffros > jeffros.jeffros) return message.channel.send(nope);
+                            if(!jeffros) return message.channel.send({embeds: [nope]});
+                            if(totalJeffros > jeffros.jeffros) return message.channel.send({embeds: [nope]});
 
                             Stats.findOne({
                                 userID: author.id
@@ -512,7 +513,7 @@ Stats.findOne({
                                     jeffros.save();
                                     newStats.save();
 
-                                    message.channel.send(embed)
+                                    message.channel.send({embeds: [embed]})
                                 } else {
                                     jeffros.jeffros -= totalJeffros;
                                     stats.djeffros += wanted;
@@ -520,7 +521,7 @@ Stats.findOne({
                                     jeffros.save();
                                     stats.save();
 
-                                    message.channel.send(embed);
+                                    message.channel.send({embeds: [embed]});
                                 }
                             })
                             
@@ -535,9 +536,9 @@ Stats.findOne({
                             .setDescription(`▸ El uso correcto es: /darkshop withdraw <DarkJeffros>
                             **—** Se cambiarán los DarkJeffros especificados, por Jeffros.`)
 
-                            if(!args[1]) return message.channel.send(instructions2);
-                            if(isNaN(args[1])) return message.channel.send(instructions);
-                            if(args[1] < 1) return message.channel.send(instructions);
+                            if(!args[1]) return message.channel.send({embeds: [instructions2]});
+                            if(isNaN(args[1])) return message.channel.send({embeds: [instructions]});
+                            if(args[1] < 1) return message.channel.send({embeds: [instructions]});
                             
                             let changing = Math.floor(args[1]);
 
@@ -567,11 +568,11 @@ Stats.findOne({
                                 .setColor(Colores.negro);
                                 
                                 if(!stats){
-                                    message.channel.send(nope)
+                                    message.channel.send({embeds: [nope]})
                                 } else {
                                     
                                     // verificar si tiene o no jeffros suficientes.
-                                    if(changing > stats.djeffros) return message.channel.send(nope);
+                                    if(changing > stats.djeffros) return message.channel.send({embeds: [nope]});
 
                                     jeffros.jeffros += totalJeffros;
                                     stats.djeffros -= changing;
@@ -579,7 +580,7 @@ Stats.findOne({
                                     jeffros.save();
                                     stats.save();
 
-                                    message.channel.send(embed);
+                                    message.channel.send({embeds: [embed]});
                                 }
                             })
                             
@@ -607,7 +608,7 @@ Stats.findOne({
         **— ${Emojis.Dark}? = ${Emojis.Jeffros}?**.`)
                                         .setColor(Colores.negro);
 
-                                        return message.channel.send(stonksEmbed);
+                                        return message.channel.send({embeds: [stonksEmbed]});
                                     } else {
 
                                         let stonksEmbed = new Discord.MessageEmbed()
@@ -616,7 +617,7 @@ Stats.findOne({
         **— ${Emojis.Dark}${stats.djeffros} = ${Emojis.Jeffros}${Math.floor(stats.djeffros*200*dark.info.inflation)}**.`)
                                         .setColor(Colores.negro);
 
-                                        message.channel.send(stonksEmbed);
+                                        message.channel.send({embeds: [stonksEmbed]});
                                     }
                                 } else if(!isNaN(args[1])){
                                     let stonksEmbed = new Discord.MessageEmbed()
@@ -625,7 +626,7 @@ Stats.findOne({
         **— ${Emojis.Dark}${args[1]} = ${Emojis.Jeffros}${Math.floor(args[1]*200*dark.info.inflation)}**.`)
                                         .setColor(Colores.negro);
 
-                                        message.channel.send(stonksEmbed);
+                                        message.channel.send({embeds: [stonksEmbed]});
                                 } else {
                                     let stonksEmbed = new Discord.MessageEmbed()
                                     .setAuthor(`| Cálculo`, Config.darkLogoPng)
@@ -633,7 +634,7 @@ Stats.findOne({
     **— ${Emojis.Dark}${stats.djeffros} = ${Emojis.Jeffros}${Math.floor(stats.djeffros*200*dark.info.inflation)}**.`)
                                     .setColor(Colores.negro);
 
-                                    message.channel.send(stonksEmbed);
+                                    message.channel.send({embeds: [stonksEmbed]});
                                 }
                             })
 
@@ -661,7 +662,7 @@ Stats.findOne({
                                 .setThumbnail(Config.darkLogoPng)
                                 .setColor(Colores.negro);
                                 
-                                message.channel.send(statsEmbed)
+                                message.channel.send({embeds: [statsEmbed]})
                             })
                             break;
 
@@ -696,8 +697,8 @@ Stats.findOne({
                                     )
                                     .setColor(Colores.nocolor);
 
-                                    if (!args[1]) return message.channel.send(errorEmbed);
-                                    if (!args[2]) return message.channel.send(errorEmbed);
+                                    if (!args[1]) return message.channel.send({embeds: [errorEmbed]});
+                                    if (!args[2]) return message.channel.send({embeds: [errorEmbed]});
 
                                     let nameItem = args[1];
                                     let priceItem = args[2];
@@ -725,7 +726,7 @@ Stats.findOne({
             **—** ID: \`${lastID}\`.`
                                     )
                                     .setColor(Colores.verde);
-                                    return message.channel.send(goodEmbed);
+                                    return message.channel.send({embeds: [goodEmbed]});
                                 
                                 });
                             });
@@ -743,7 +744,7 @@ Stats.findOne({
                                 .setDescription(`▸ El uso correcto es: /darkshop remove <id del item>`)
                                 .setColor(Colores.nocolor);
 
-                            if (!args[1]) return message.channel.send(errorEmbed);
+                            if (!args[1]) return message.channel.send({embeds: [errorEmbed]});
 
                             Items.findOneAndDelete(
                                 {
@@ -766,7 +767,7 @@ Stats.findOne({
                             .setAuthor(`| Error`, Config.errorPng)
                             .setDescription(`▸ El uso correcto es: ${prefix}darkshop info <id del item>`);
 
-                            if (!args[1]) return message.channel.send(errorEmbed2);
+                            if (!args[1]) return message.channel.send({embeds: [errorEmbed2]});
 
                             DarkUse.findOne({
                                 itemID: args[1]
@@ -802,7 +803,7 @@ Stats.findOne({
                                         )
                                         .setColor(Colores.negro);
 
-                                        return message.channel.send(embed);
+                                        return message.channel.send({embeds: [embed]});
                                     }
                                 });
                             });
@@ -817,9 +818,9 @@ Stats.findOne({
                                 `▸ El uso correcto es: ${prefix}darkshop edit <id> <nombre, precio, etc> <nuevo>`
                             );
                     
-                            if (!args[1]) return message.channel.send(errorEmbed3);
-                            if (!args[2]) return message.channel.send(errorEmbed3);
-                            if (!args[3]) return message.channel.send(errorEmbed3);
+                            if (!args[1]) return message.channel.send({embeds: [errorEmbed3]});
+                            if (!args[2]) return message.channel.send({embeds: [errorEmbed3]});
+                            if (!args[3]) return message.channel.send({embeds: [errorEmbed3]});
                     
                             let idItem = args[1];
                             let toEdit = args[2].toLowerCase();
@@ -892,7 +893,7 @@ Stats.findOne({
                                 }
                     
                                 data.save();
-                                return message.channel.send(embed);
+                                return message.channel.send({embeds: [embed]});
                                 }
                             });
 
@@ -917,15 +918,15 @@ Stats.findOne({
 
                             if (!args[1]){
                             useEmbedError.setAuthor(`| Error: itemID`, Config.errorPng);
-                            return message.channel.send(useEmbedError)
+                            return message.channel.send({embeds: [useEmbedError]})
                             }
                             if (!args[2]){
                                 useEmbedError.setAuthor(`| Error: add / remove`, Config.errorPng);
-                                return message.channel.send(useEmbedError)
+                                return message.channel.send({embeds: [useEmbedError]})
                             }
                             if (!args[3]) {
                             useEmbedError.setAuthor(`| Error: i / j / w / r`, Config.errorPng);
-                            return message.channel.send(useEmbedError)
+                            return message.channel.send({embeds: [useEmbedError]})
                             }
                             
                             let accion = args[2].toLowerCase();
@@ -939,7 +940,7 @@ Stats.findOne({
                                 case "item":
                                     if(!args[4]){
                                         useEmbedError.setAuthor(`| Error: negative / positive`, Config.errorPng);
-                                        return message.channel.send(useEmbedError)
+                                        return message.channel.send({embeds: [useEmbedError]})
                                     } else {
                                         efecto = args[4].toLowerCase();
                                     }
@@ -948,21 +949,21 @@ Stats.findOne({
                                 case "role":
                                     if(!args[4]){
                                         useEmbedError.setAuthor(`| Error: roleID`, Config.errorPng);
-                                        return message.channel.send(useEmbedError)
+                                        return message.channel.send({embeds: [useEmbedError]})
                                     } else {
                                         cosaID = args[4];
                                     }
 
                                     if(!args[5]){
                                         useEmbedError.setAuthor(`| Error: duración`, Config.errorPng);
-                                        return message.channel.send(useEmbedError)
+                                        return message.channel.send({embeds: [useEmbedError]})
                                     } else {
                                         duracion = Number(ms(args[5].toLowerCase()));
                                     }
 
                                     if(!args[6]){
                                         useEmbedError.setAuthor(`| Error: negative / positive`, Config.errorPng);
-                                        return message.channel.send(useEmbedError)
+                                        return message.channel.send({embeds: [useEmbedError]})
                                     } else {
                                         efecto = args[6].toLowerCase();
                                     }
@@ -971,14 +972,14 @@ Stats.findOne({
                                 case "warns":
                                     if(!args[4] || isNaN(args[4])){
                                         useEmbedError.setAuthor(`| Error: # Warns`, Config.errorPng);
-                                        return message.channel.send(useEmbedError)
+                                        return message.channel.send({embeds: [useEmbedError]})
                                     } else {
                                         cantidad = Number(args[4]);
                                     }
 
                                     if(!args[5]){
                                         useEmbedError.setAuthor(`| Error: negative / positive`, Config.errorPng);
-                                        return message.channel.send(useEmbedError)
+                                        return message.channel.send({embeds: [useEmbedError]})
                                     } else {
                                         efecto = args[5].toLowerCase();
                                     }
@@ -987,14 +988,14 @@ Stats.findOne({
                                 case "jeffros":
                                     if(!args[4] || isNaN(args[4])){
                                         useEmbedError.setAuthor(`| Error: # Jeffros`, Config.errorPng);
-                                        return message.channel.send(useEmbedError)
+                                        return message.channel.send({embeds: [useEmbedError]})
                                     } else {
                                         cantidad = Number(args[4]);
                                     }
 
                                     if(!args[5]){
                                         useEmbedError.setAuthor(`| Error: negative / positive`, Config.errorPng);
-                                        return message.channel.send(useEmbedError)
+                                        return message.channel.send({embeds: [useEmbedError]})
                                     } else {
                                         efecto = args[5].toLowerCase();
                                     }
@@ -1066,9 +1067,9 @@ Stats.findOne({
                                         if(err) throw err;
 
                                         if(!stats){
-                                            return message.channel.send(noStats)
+                                            return message.channel.send({embeds: [noStats]})
                                         } else { // tiene cuenta
-                                            if(stats.items.length === 0) return message.channel.send(noItems);
+                                            if(stats.items.length === 0) return message.channel.send({embeds: [noItems]});
 
                                             if(!args[1]){
                                                 let itemsEmbed = new Discord.MessageEmbed()
@@ -1081,7 +1082,7 @@ Stats.findOne({
                                                     itemsEmbed.addField(`— ${stats.items[i].name}`, `**— ID**: \`${stats.items[i].id}\`.`)
                                                 }
 
-                                                message.channel.send(itemsEmbed);
+                                                message.channel.send({embeds: [itemsEmbed]});
                                             } else {    
                                                 // USAR UN ITEM
                                                 let idUse = args[1];
@@ -1092,7 +1093,7 @@ Stats.findOne({
                                                     if(err) throw err;
 
                                                     // verificar que tenga ese item
-                                                    if(!stats.items.find(x => x.id === Number(idUse))) return message.channel.send(noItem);
+                                                    if(!stats.items.find(x => x.id === Number(idUse))) return message.channel.send({embeds: [noItem]});
 
                                                     if(!use) return message.channel.send(`[002] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas usar tu item... :)`)
 
@@ -1114,7 +1115,7 @@ Stats.findOne({
                                                             if(!message.mentions.users.first()){
                                                                 return message.reply(`menciona con quien quieras interactuar con este item. \`${prefix}darkshop info ${use.itemID}\`.`)
                                                             } else {
-                                                                victim = message.guild.member(message.mentions.users.first());
+                                                                victim = message.mentions.users.first() ? guild.members.cache.get(message.mentions.users.first().id) : null;
 
                                                                 let skipped2 = new Discord.MessageEmbed()
                                                                 .setAuthor(`| Interacción`, Config.darkLogoPng)
@@ -1147,11 +1148,11 @@ Stats.findOne({
 
                                                                         if(!victimStats){
                                                                             if(!victim.roles.cache.find(x => x.id === dsRole.id)){
-                                                                                return dsChannel.send(fail2);
+                                                                                return dsChannel.send({embeds: [fail2]});
                                                                             } else {
                                                                                 functions.Warns(victim, cantidad);
 
-                                                                                dsChannel.send(success2);
+                                                                                dsChannel.send({embeds: [success2]});
         
                                                                                 //eliminar item del autor
                                                                                 stats.items.splice(index, 1);
@@ -1164,7 +1165,7 @@ Stats.findOne({
                                                                         } else {
                                                                             if(victimStats.items.length === 0){ // tiene cuenta pero no items, proseguir
                                                                                 functions.Warns(victim, cantidad);                                                                                
-                                                                                dsChannel.send(success2);
+                                                                                dsChannel.send({embeds: [success2]});
 
                                                                                 //eliminar item del autor
                                                                                 stats.items.splice(index, 1);
@@ -1185,7 +1186,7 @@ Stats.findOne({
 
                                                                                     if(skip2 === true){ // skip firewall
                                                                                         functions.Warns(victim, cantidad);                                                                                
-                                                                                        dsChannel.send(skipped2);
+                                                                                        dsChannel.send({embeds: [skipped2]});
 
                                                                                         //eliminar item del autor
                                                                                         stats.items.splice(index, 1);
@@ -1195,7 +1196,7 @@ Stats.findOne({
                                                                                         
                                                                                         return stats.save();
                                                                                     } else {
-                                                                                        dsChannel.send(fail2);
+                                                                                        dsChannel.send({embeds: [fail2]});
 
                                                                                         // eliminar firewall
                                                                                         victimStats.items.splice(firewallIndex, 1);
@@ -1211,7 +1212,7 @@ Stats.findOne({
                                                                                     }
                                                                                 } else {
                                                                                     functions.Warns(victim, cantidad);                                                                                
-                                                                                    dsChannel.send(success2);
+                                                                                    dsChannel.send({embeds: [success2]});
 
                                                                                     //eliminar item del autor
                                                                                     stats.items.splice(index, 1);
@@ -1223,7 +1224,7 @@ Stats.findOne({
                                                                                 }
                                                                             } else { // no tienen ningun item con nombre firewall
                                                                                 functions.Warns(victim, cantidad);                                                                                
-                                                                                dsChannel.send(success2);
+                                                                                dsChannel.send({embeds: [success2]});
 
                                                                                 //eliminar item del autor
                                                                                 stats.items.splice(index, 1);
@@ -1238,7 +1239,7 @@ Stats.findOne({
                                                                 } else {
                                                                     // no es negativo agregar warns
                                                                     functions.Warns();
-                                                                    dsChannel.send(success2);
+                                                                    dsChannel.send({embeds: [success2]});
 
                                                                     //eliminar item del autor
                                                                     stats.items.splice(index, 1);
@@ -1258,7 +1259,7 @@ Stats.findOne({
                                                             if(!message.mentions.users.first()){
                                                                 return message.reply(`menciona con quien quieras interactuar con este item. \`${prefix}darkshop info ${use.itemID}\`.`)
                                                             } else {
-                                                                victim = message.guild.member(message.mentions.users.first());
+                                                                victim = message.mentions.users.first() ? guild.members.cache.get(message.mentions.users.first().id) : null;
 
                                                                 let skipped3 = new Discord.MessageEmbed()
                                                                 .setAuthor(`| Interacción`, Config.darkLogoPng)
@@ -1299,10 +1300,10 @@ Stats.findOne({
 
                                                                         if(!victimStats){
                                                                             if(!victim.roles.cache.find(x => x.id === dsRole.id)){
-                                                                                return dsChannel.send(fail3);
+                                                                                return dsChannel.send({embeds: [fail3]});
                                                                             } else {
                                                                                 // revisar si ya tiene el role a dar.
-                                                                                if(victim.roles.cache.find(x => x.id === role.id)) return dsChannel.send(failhasRole);
+                                                                                if(victim.roles.cache.find(x => x.id === role.id)) return dsChannel.send({embeds: [failhasRole]});
                                                                                 
                                                                                 dsChannel.send(success3);
                                                                                 victim.roles.add(role);
@@ -1321,7 +1322,7 @@ Stats.findOne({
                                                                         } else {
                                                                             if(victimStats.items.length === 0){ // tiene cuenta pero no items, proseguir
                                                                                 // revisar si ya tiene el role a dar.
-                                                                                if(victim.roles.cache.find(x => x.id === role.id)) return dsChannel.send(failhasRole);
+                                                                                if(victim.roles.cache.find(x => x.id === role.id)) return dsChannel.send({embeds: [failhasRole]});
 
                                                                                 dsChannel.send(success3);
                                                                                 victim.roles.add(role);
@@ -1346,7 +1347,7 @@ Stats.findOne({
                                                                                     let skip3 = chance.bool({likelihood: accu3});
 
                                                                                     if(skip3 == true){ // skip firewall
-                                                                                        dsChannel.send(skipped3);
+                                                                                        dsChannel.send({embeds: [skipped3]});
                                                                                         victim.roles.add(role);
 
                                                                                         //eliminar item del autor
@@ -1360,7 +1361,7 @@ Stats.findOne({
                                                                                         // tiene una duración?
                                                                                         return functions.LimitedTime(guild, role.id, victim, duracion);
                                                                                     } else {
-                                                                                        dsChannel.send(fail3);
+                                                                                        dsChannel.send({embeds: [fail3]});
 
                                                                                         // eliminar firewall
                                                                                         victimStats.items.splice(firewallIndex, 1);
@@ -1376,7 +1377,7 @@ Stats.findOne({
                                                                                     }
                                                                                 } else {
                                                                                     // revisar si ya tiene el role a dar.
-                                                                                    if(victim.roles.cache.find(x => x.id === role.id)) return dsChannel.send(failhasRole);
+                                                                                    if(victim.roles.cache.find(x => x.id === role.id)) return dsChannel.send({embeds: [failhasRole]});
 
                                                                                     dsChannel.send(success3);
                                                                                     victim.roles.add(role);
@@ -1395,7 +1396,7 @@ Stats.findOne({
                                                                             } else { // no tienen ningun item con nombre firewall
 
                                                                                 // revisar si ya tiene el role a dar.
-                                                                                if(victim.roles.cache.find(x => x.id === role.id)) return dsChannel.send(failhasRole);
+                                                                                if(victim.roles.cache.find(x => x.id === role.id)) return dsChannel.send({embeds: [failhasRole]});
 
                                                                                 dsChannel.send(success3);
                                                                                 victim.roles.add(role);
@@ -1422,7 +1423,7 @@ Stats.findOne({
                                                                     .setTimestamp();
 
                                                                     // revisar si ya tiene el role a dar.
-                                                                    if(victim.roles.cache.find(x => x.id === role.id)) return dsChannel.send(failhasRole);
+                                                                    if(victim.roles.cache.find(x => x.id === role.id)) return dsChannel.send({embeds: [failhasRole]});
 
                                                                     // no es negativo, dar el rol
                                                                     victim.roles.add(role);
@@ -1463,7 +1464,7 @@ Stats.findOne({
                                                                 .setAuthor(`| Listo`, Config.darkLogoPng)
                                                                 .setDescription(`**—** Se ha usado el item **${item.name}**.`)
                                                                 .setColor(Colores.negro);
-                                                                return message.channel.send(activated2);
+                                                                return message.channel.send({embeds: [activated2]});
                                                             } else
                                                             
                                                             if(item.active === false && action4 === "add"){ // entonces activarlo.
@@ -1483,7 +1484,7 @@ Stats.findOne({
                                                                 .setAuthor(`| Listo`, Config.darkLogoPng)
                                                                 .setDescription(`**—** Se ha activado el item **${stats.items[index].name}**.`)
                                                                 .setColor(Colores.negro);
-                                                                return message.channel.send(activated)
+                                                                return message.channel.send({embeds: [activated]})
                                                             } else {
                                                                 // revisar si se ignora el interes o no
                                                                 functions.Interest(author, idUse);
@@ -1510,7 +1511,7 @@ Stats.findOne({
                             )
                             .setColor(Colores.negro);
 
-                            if(isNaN(args[0])) return message.channel.send(error);
+                            if(isNaN(args[0])) return message.channel.send({embeds: [error]});
                             itemID = args[0];
 
                             DarkUse.findOne({
@@ -1560,14 +1561,14 @@ Stats.findOne({
                                                 .setColor(Colores.negro);
 
                                                 // tiene darkjeffros suficientes?
-                                                if(stats.djeffros < precio) return message.channel.send(doesntHaveEnough);
+                                                if(stats.djeffros < precio) return message.channel.send({embeds: [doesntHaveEnough]});
 
                                                 // verificar si ya tiene lo que está comprando
 
                                                 // buscar si hay algún item con esa id
                                                 for (let x = 0; x < stats.items.length; x++){
                                                     if(stats.items != undefined && stats.items[x].id === item.id){
-                                                        return message.channel.send(hasThisItem);
+                                                        return message.channel.send({embeds: [hasThisItem]});
                                                     }
                                                 }
                                                         
@@ -1587,7 +1588,7 @@ Stats.findOne({
                                                         "https://cdn.discordapp.com/emojis/494267320097570837.png"
                                                     );
 
-                                                    message.channel.send(buyEmbed).then(msg => {
+                                                    message.channel.send({embeds: [buyEmbed]}).then(msg => {
                                                     msg
                                                         .react(":allow:558084462232076312")
                                                         .then(r => {
@@ -1607,16 +1608,8 @@ Stats.findOne({
                                                         "558084461686947891" &&
                                                         user.id === message.author.id;
 
-                                                    const yes = msg.createReactionCollector(
-                                                        yesFilter,
-                                                        { time: 60000 }
-                                                    );
-                                                    const no = msg.createReactionCollector(
-                                                        noFilter,
-                                                        {
-                                                        time: 60000
-                                                        }
-                                                    );
+                                                    const yes = msg.createReactionCollector({ filter: yesFilter, time: 60000 });
+                                                    const no = msg.createReactionCollector({ filter: noFilter, time: 60000});
 
                                                     yes.on("collect", r => {
                                                         // agregar a la lista de items
@@ -1648,16 +1641,18 @@ Stats.findOne({
                                                         )
                                                         .setColor(Colores.negro);
 
-                                                        return msg.edit(useEmbed).then(() => {
+                                                        return msg.edit({embeds: [useEmbed]}).then(() => {
                                                         msg.reactions.removeAll();
                                                         });
                                                     });
 
                                                     no.on("collect", r => {
-                                                        return msg.edit(cancelEmbed).then(a => {
-                                                        msg.reactions.removeAll();
-                                                        message.delete();
-                                                        a.delete({timeout: ms("20s")});
+                                                        return msg.edit({embeds: [cancelEmbed]}).then(a => {
+                                                            msg.reactions.removeAll();
+                                                            message.delete();
+                                                            setTimeout(() => {
+                                                                a.delete();
+                                                            }, ms("20s"));
                                                         });
                                                     });
                                                 });
@@ -1689,7 +1684,7 @@ Stats.findOne({
                     .setDescription(desc)
                     .setFooter("▸ Vuelve cuando seas nivel 5.");
 
-                    return message.channel.send(notReady);
+                    return message.channel.send({embeds: [notReady]});
                 }
             })
     })
