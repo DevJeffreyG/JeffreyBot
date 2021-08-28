@@ -56,7 +56,7 @@ let functions;
 // mantenimiento
 const disableEXPs = false; // deshabilitar ganar exp o jeffros
 const disableAwards = false; // deshabilitar awards.
-const disableInterestPerMonth = false; // deshabilitar el interés que se cobra los días 28 de cada mes.
+const disableInterestPerMonth = true; // deshabilitar el interés que se cobra los días 28 de cada mes.
 
 // WEAS PARA EVENTOS:
 
