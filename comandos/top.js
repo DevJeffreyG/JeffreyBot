@@ -184,7 +184,7 @@ module.exports.run = async (client, message, args) => {
           }
         } else {
           // Más de 5 resultados
-          jTop.setColor(Colores.verde);
+          jeffrosEmbed.setColor(Colores.verde);
           let n;
           let isIgnored = false;
           for (i = 0; i < 5; i++) {
