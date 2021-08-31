@@ -256,7 +256,7 @@ module.exports.run = async (client, message, args) => {
 
         if (!textos) {
           return message.channel
-            .send(efinal)
+            .send({embeds: [efinal]})
             .then(m => {
               setTimeout(() => {
                 m.delete()
@@ -274,7 +274,7 @@ module.exports.run = async (client, message, args) => {
 
             if (win) {
               return message.channel
-                .send(efinal)
+                .send({embeds: [efinal]})
                 .then(m => {
                   setTimeout(() => {
                     m.delete()
