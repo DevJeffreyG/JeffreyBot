@@ -40,6 +40,10 @@
             "desc": "Los comandos de música se han **deshabilitado** __temporalmente__, se están investigando algunos **bugs**"
         },
         {
+            "type": "updated",
+            "desc": "Bugfixes en múltiples sistemas con reacciones"
+        },
+        {
             "type": "removed",
             "desc": "Se ha eliminado la posibilidad de elegir el `{ PREFIX }top` por medio de mensajes consecutivos",
             "extended": "'/top' -> ¿Qué top deseas ver? -> 'exp' o 'jeffros'."
