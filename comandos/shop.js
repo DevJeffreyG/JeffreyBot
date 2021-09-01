@@ -552,7 +552,7 @@ module.exports.run = async (client, message, args) => {
                               })
 
                               collector.on("end", (r) => {
-                                if(r.size > 0 && (r.size === 1 && !r.first().me)) return;
+                                if(r.size > 0 && (r.size === 1 && r.first().me)) return;
                                 return msg.edit({embeds: [cancelEmbed]}).then(a => {
                                   msg.reactions.removeAll().then(() => {
                                     msg.react("795090708478033950");
