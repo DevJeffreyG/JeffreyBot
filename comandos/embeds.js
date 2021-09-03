@@ -192,9 +192,11 @@ let canalesEmbed5 = new Discord.MessageEmbed()
 .setTitle(`🎮 — ARCADE`)
 .setDescription(`<#564971690304602113> • <@!467377486141980682> Cuenta con los demás usuarios del sevidor, ¿hasta dónde podrán llegar?
 
-<#723304597191393301> • <@!520282851925688321> ¡Simulador de minería de minecraft en el servidor!
+<#723304597191393301> • <@520282851925688321> ¡Simulador de minería de minecraft en el servidor!
 
-<#820002227958841344> • <@!715906723982082139> Puedes jugar un juego de trivia con todos los miembros del servidor.`)
+<#820002227958841344> • <@715906723982082139> Puedes jugar un juego de trivia con todos los miembros del servidor.
+
+<#883160875693916180> • <@356065937318871041> ¿Recuerdas a Akinator? Bueno, ahora puedes jugar con él aquí mismo... ¡en Discord!`)
 .setColor(Colores.nocolor);
 
   // ROLES
