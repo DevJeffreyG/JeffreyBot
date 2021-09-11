@@ -20,6 +20,7 @@ module.exports = {
 		.setName('coins')
 		.setDescription('Gana Jeffros extras en un intervalo de 10 minutos!'),
 	async execute(interaction, client) {
+        await interaction.deferReply();
         var randomCumplidos = Cumplidos.c[Math.floor(Math.random() * Cumplidos.c.length)];
 
         const guild = client.guilds.cache.find(x => x.id === interaction.guildId);
@@ -108,7 +109,7 @@ module.exports = {
             if (workCooldown.has(author.id)){
                 let timer = coolded.get(author.id)
                 let left = prettyms((ms("10m")) - (new Date().getTime() - timer), {secondsDecimalDigits: 0 });
-                return interaction.reply(
+                return interaction.editReply(
                 `Usa este comando en ${left}, ${randomCumplidos}`
                 );
             } else {
@@ -136,7 +137,7 @@ module.exports = {
             }
 
 
-            interaction.reply({embeds: [embed]});
+            interaction.editReply({embeds: [embed]});
             }
         );
 

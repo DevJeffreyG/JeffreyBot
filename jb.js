@@ -1180,7 +1180,7 @@ client.on("messageReactionAdd", (reaction, user) => {
 
     embed.setAuthor(message.author.tag, message.author.displayAvatarURL());
     embed.setImage(firstAttachment.url);
-    embed.setDescription(`[★](${message.url}) ${message.content}`);
+    embed.setDescription(`[★](${message.url}) ${message.content} [(archivo)](${firstAttachment.url})`);
   } else if (message.embeds.length != 0) {
     let firstEmbed = message.embeds[0];
     let msgEmbed;
