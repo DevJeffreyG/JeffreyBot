@@ -52,14 +52,42 @@ const UserSchema = new Schema({
             }
         ],
         customrole: { type: String, required: true, default: "0" },
+        lastExpJeffros: {
+            exp: { type: Number },
+            jeffros: { type: Number }
+        },
         unlockedVaults: [
             {
                 code_id: { type: Number, required: true }
             }
         ],
-        roles: [ // guardar roles cuando te salgas del server.
+        birthday: {
+            day: { type: Number, default: null },
+            month: { type: Number, default: null },
+            locked: { type: Boolean, default: false },
+            locked_since: { type: Date, default: null }
+        },
+        backup_roles: [ // guardar roles cuando te salgas del server.
             {
                 role_id: { type: String, required: true }
+            }
+        ],
+        temp_roles: [
+            {
+                role_id : { type: String, required: true },
+                active_since: { type: Date, required: true },
+                duration: { type: Number, required: true },
+                special: {
+                    type: { type: String, default: null },
+                    objetive: { type: String, default: null },
+                    value: { type: Number, default: null }
+                },
+                isSub: { type: Boolean, required: true, default: false },
+                sub_info: {
+                    price: { type: Number },
+                    name: { type: String },
+                    isCancelled: { type: Boolean }
+                }
             }
         ]
     },
@@ -72,7 +100,9 @@ const UserSchema = new Schema({
         },
         dark: {
             darkjeffros: { type: Number },
-            accuracy: { type: Number }
+            accuracy: { type: Number },
+            duration: { type: Number },
+            dj_since: { type: Date }
         }
     }
 })

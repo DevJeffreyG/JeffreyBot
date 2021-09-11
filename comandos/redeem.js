@@ -49,7 +49,7 @@ module.exports.run = async (client, message, args) => {
   .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}key`);
 
   if(args[0] && args[0].toLowerCase() == "add"){
-      if(!message.member.roles.cache.find(x => x.id === staffRole.id)) return message.channel.send(embed);
+      if(!message.member.roles.cache.find(x => x.id === staffRole.id)) return message.channel.send({embeds: [added]});
       // poder agregar jeffros, roles, exp, boosts
 
       // generar nueva key
@@ -75,16 +75,16 @@ module.exports.run = async (client, message, args) => {
       .setDescription(`▸ El uso correcto es: ${prefix}redeem add <jeffros | role | exp | boost> <$ | id | # | tipo de boost> (usos máximos de la key) (tiempo del boost | role) \n▸ Generas una nueva KEY.`)
       .setFooter(`<> Obligatorio () Opcional┊Alias: ${prefix}key`);
 
-      if(!args[1]) return message.channel.send(staff);
+      if(!args[1]) return message.channel.send({embeds: [staff]});
       if(!args[2]) return message.channel.send(staff);
-      if(args[1].toLowerCase() == "boost" && !args[4]) return message.channel.send(staff);
-      if(args[1].toLowerCase() == "role" && !args[4]) return message.channel.send(staff);
+      if(args[1].toLowerCase() == "boost" && !args[4]) return message.channel.send({embeds: [staff]});
+      if(args[1].toLowerCase() == "role" && !args[4]) return message.channel.send({embeds: [staff]});
       let action = args[1].toLowerCase();
 
       if(action === "jeffros" || action === "exp"){
         let value = Number(args[2]) ? Number(args[2]) : null;
         let maxuses = Number(args[3]) ? Number(args[3]) : 1;
-        if(!value) return message.channel.send(staff);
+        if(!value) return message.channel.send({embeds: [staff]});
 
         const newKey = new Key({
             guild_id: message.guild.id,
@@ -111,10 +111,11 @@ module.exports.run = async (client, message, args) => {
 **—** ID: \`${generatedID}\`.`)
       .setColor(Colores.verde)
 
-      return message.channel.send(added);
+      return message.channel.send({embeds: [added]});
 
   } else {
-    return message.channel.send(embed);
+      // validar key
+    return message.channel.send({embeds: [added]});
   }
 
     function generateCode(){

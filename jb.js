@@ -76,6 +76,8 @@ mongoose.connect(`${process.env.MONGOCONNECT}`, {
   useUnifiedTopology: true
 });
 
+const User = require("./modelos/User.model.js");
+
 const Jeffros = require("./modelos/jeffros.js");
 const Exp = require("./modelos/exp.js");
 const AutoRole = require("./modelos/autorole.js");
@@ -190,7 +192,7 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
 
 client.on("guildMemberRemove", member => {
   if(client.user.id === Config.testingJBID){
-    return;
+    return console.log(member);
   }
 
   let channel = member.guild.channels.cache.find(x => x.id === mainChannel);
@@ -222,7 +224,7 @@ client.on("guildMemberRemove", member => {
   });
 });
 
-client.on("guildMemberAdd", member => {
+client.on("guildMemberAdd", async member => {
   
   let tag = member.user.tag;
   let guild = member.guild;
@@ -264,6 +266,21 @@ client.on("guildMemberAdd", member => {
   member.send({embeds: [embed]}).catch(e => {
     channel.send({embeds: [embed]});
   });
+
+  // crear usuario nuevo
+  let query = await User.findOne({
+    user_id: member.id,
+    guild_id: member.guild.id
+  });
+
+  if(!query){
+    const newUser = newUser({
+      user_id: member.id,
+      guild_id: guild.id
+    });
+
+    newUser.save();
+  }
 
   client.user.setActivity(`${prefix}ayuda - ${member.guild.memberCount} usuarios🔎`);
 });
@@ -319,9 +336,8 @@ client.on("ready", async () => {
     if(disableInterestPerMonth) return console.log("No se ha iniciado el CronJob, están deshabilitados los intereses por mes.");
     console.log('CronJob iniciado.');
 
-
-    let jeffrosq = await Jeffros.find({
-      serverID: guild.id
+    let jeffrosq = await User.find({
+      guild_id: guild.id
     });
 
     let globalq = await GlobalData.findOne({
@@ -332,18 +348,17 @@ client.on("ready", async () => {
 
     let res = []; // array para los usuarios con jeffros & dj si es que tienen
     for (let i = 0; i < jeffrosq.length; i++) {
-      const member = guild.members.cache.get(jeffrosq[i].userID) || null;
+      const member = guild.members.cache.get(jeffrosq[i].user_id) || null;
       
       // agregar la cantidad de darkjeffros
       if(member){
 
-        let djeffrosq = await Stats.findOne({
-          userID: jeffrosq[i].userID
-        });
+        const djeffrosq = jeffrosq[i].economy.dark;
+        const jeffros = jeffrosq[i].economy.global;
 
-        let darkjeffros = djeffrosq ? Number(djeffrosq.djeffros) : 0;
-        let darkjeffrosValue = djeffrosq ? Number(inflation*200*djeffrosq.djeffros) : 0;
-        let finalQuantity = darkjeffrosValue != 0 ? (darkjeffrosValue) + jeffrosq[i].jeffros: jeffrosq[i].jeffros;
+        let darkjeffros = djeffrosq ? Number(djeffrosq.darkjeffros) : 0;
+        let darkjeffrosValue = djeffrosq ? Number(inflation*200*darkjeffros) : 0;
+        let finalQuantity = darkjeffrosValue != 0 ? (darkjeffrosValue) + jeffros.jeffros: jeffros.jeffros;
 
         let toPush = { userID: member.user.id, darkjeffros: darkjeffros, darkjeffrosValue: darkjeffrosValue, total: finalQuantity }
 
@@ -394,18 +409,18 @@ client.on("ready", async () => {
 
         // eliminar los jeffros
 
-        let newquery = await Jeffros.findOne({
-          userID: quser.userID,
-          serverID: guild.id
+        let newquery = await User.findOne({
+          user_id: quser.userID,
+          guild_id: guild.id
         });
 
-        newquery.jeffros -= toReduce;
+        newquery.economy.global.jeffros -= toReduce;
         await newquery.save();
 
         let log = new Discord.MessageEmbed()
         .setAuthor(`| Interés`, member.user.displayAvatarURL())
         .setDescription(`**—** Tenía: **${Emojis.Jeffros}${jeffros}**.
-**—** Ahora tiene en Jeffros: **${Emojis.Jeffros}${newquery.jeffros}**.
+**—** Ahora tiene en Jeffros: **${Emojis.Jeffros}${newquery.economy.global.jeffros}**.
 **—** Y en total: **${Emojis.Jeffros}${quser.total-toReduce}**.
 **—** Pagó: **${Emojis.Jeffros}${toReduce} (${finalinterest*100}%)**.`)
         .setColor(Colores.verde);
@@ -413,7 +428,7 @@ client.on("ready", async () => {
         let userLog = new Discord.MessageEmbed()
         .setAuthor(`| Interés`, member.user.displayAvatarURL())
         .setDescription(`**—** Tenías: **${Emojis.Jeffros}${jeffros}**.
-**—** Ahora tienes en Jeffros: **${Emojis.Jeffros}${newquery.jeffros}**.
+**—** Ahora tienes en Jeffros: **${Emojis.Jeffros}${newquery.economy.global.jeffros}**.
 **—** Y en total: **${Emojis.Jeffros}${quser.total-toReduce}**.
 **—** Pagaste: **${Emojis.Jeffros}${toReduce} (${finalinterest*100}%)**.`)
         .setColor(Colores.verde);
@@ -442,39 +457,30 @@ client.on("messageDelete", async(message) => {
   let author = message.author;
 
   if (jeffrosExpCooldown.has(author.id)) {
-    let q = await GlobalData.findOne({
-      "info.type": "lastExpJeffros",
-      "info.userID": author.id
+    let q = await User.findOne({
+      user_id: author.id,
+      guild_id: message.guild.id
     });
 
     if(!q) return;
     if(message.channel.id != Config.mainChannel) return;
 
-    let j = await Jeffros.findOne({
-      serverID: message.guild.id,
-      userID: author.id
-    });
+    let global = q.economy.global
 
-    let e = await Exp.findOne({
-      serverID: message.guild.id,
-      userID: message.author.id
-    });
+    let nxtLvl = 10 * ((global.level-1) ** 2) + 50 * (global.level-1) + 100; // fórmula de MEE6.
 
-    let nxtLvl = 10 * ((e.level-1) ** 2) + 50 * (e.level-1) + 100; // fórmula de MEE6.
-
-    j.jeffros -= q.info.jeffros;
+    global.jeffros -= q.data.lastExpJeffros.jeffros;
     
 
-    if (e.exp - q.info.exp >= nxtLvl) console.log("Subió de nivel");
+    if (global.exp - q.data.lastExpJeffros.exp >= nxtLvl) console.log("Subió de nivel");
     else {
-      e.exp -= q.info.exp;
+      global.exp -= q.data.lastExpJeffros.exp;
     }
 
 
-    await j.save();
-    await e.save();
+    await q.save();
 
-    console.log(j.jeffros, e.exp, author.username);
+    console.log(global.jeffros, global.exp, author.username);
   }
 })
 
@@ -534,12 +540,14 @@ client.on("messageCreate", async message => {
     let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
     let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
     let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
+    let logC = guild.channels.cache.find(x => x.id === logChannel);
 
     if(client.user.id === Config.testingJBID){
       jeffreyRole = guild.roles.cache.find(x => x.id === "482992290550382592");
       adminRole = guild.roles.cache.find(x => x.id === "483105079285776384");
       modRole = guild.roles.cache.find(x => x.id === "483105108607893533");
       staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
+      logC = guild.channels.cache.find(x => x.id === "483108734604804107");
     }
     
     // COOLDOWN COMANDOS
@@ -561,11 +569,7 @@ client.on("messageCreate", async message => {
       let jeffreyRole = guild.roles.cache.find(
         x => x.id === Config.jeffreyRole
       );
-      let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
-      let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
-      let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
       let uPrest = message.mentions.users.first() ? guild.members.cache.get(message.mentions.users.first().id) : guild.members.cache.get(args[0]);
-      let logC = guild.channels.cache.find(x => x.id === logChannel);
 
       let embed = new Discord.MessageEmbed()
         .setTitle(`Ayuda: ${prefix}rep`)
@@ -577,10 +581,10 @@ client.on("messageCreate", async message => {
 
       if (!uPrest) return message.channel.send({embeds: [embed]});
 
-      Exp.findOne(
+      User.findOne(
         {
-          serverID: guild.id,
-          userID: uPrest.user.id
+          guild_id: guild.id,
+          user_id: uPrest.user.id
         },
         (err, pres) => {
           if (err) throw err;
@@ -596,7 +600,7 @@ client.on("messageCreate", async message => {
                 `**—** Usuario: **${uPrest}**.
 **—** Por: **${message.author.username}**.
 **—** En: **${message.channel}**.
-**—** Reputación actual: **${pres.reputacion + 1}**.`
+**—** Reputación actual: **${pres.economy.global.reputation + 1}**.`
               )
               .setColor(Colores.verde);
 
@@ -610,7 +614,7 @@ client.on("messageCreate", async message => {
                   `Sólo puedes usar este comando cada 24 horas.`
                 );
 
-              pres.reputacion = pres.reputacion + 1;
+              pres.economy.global.reputation += 1;
               pres.save().catch(err => console.log(err));
 
               repCool.add(message.author.id);
@@ -907,10 +911,10 @@ client.on("messageCreate", async message => {
                         serverID: guild.id,
                         userID: author.id
                       },
-                      (err, j) => {
-                        j.jeffros = j.jeffros + 2000;
+                      (err, global) => {
+                        global.jeffros = global.jeffros + 2000;
 
-                        j.save();
+                        global.save();
                       }
                     );
                   } else if (uExp.level === 40) {

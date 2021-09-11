@@ -24,6 +24,7 @@ mongoose.connect(`${process.env.MONGOCONNECT}`, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
+const User = require("../modelos/User.model.js");
 
 const Jeffros = require("../modelos/jeffros.js");
 const Exp = require("../modelos/exp.js");
@@ -149,8 +150,8 @@ const loadBoosts = async function() {
   }
 }
 
-const intervalGlobalDatas = async function(justBoost){
-  justBoost = justBoost || false;
+const intervalGlobalDatas = async function(justTempRoles){
+  justTempRoles = justTempRoles || false;
 
   let guild;
   let bdRole;
@@ -171,128 +172,53 @@ const intervalGlobalDatas = async function(justBoost){
     dsNews = guild.roles.cache.find(x => x.id === Config.dsnews);
   }
 
-  // buscar un tipo de boost
-  GlobalData.find({
-    "info.type": "roleDuration",
-    "info.special.type": "boostMultiplier"
-  }, (err, boosts) => {
-    if(err) throw err;
+  await guild.members.fetch();
+  let members = guild.members.cache;
+  // buscar roles temporales
+  members.forEach(async (member) => {
+    let dbUser = await User.findOne({
+      user_id: member.id,
+      guild_id: guild.id
+    });
 
-    if(boosts) {
-      for (let i = 0; i < boosts.length; i++){
-        let boost = boosts[i];
-        let role = guild.roles.cache.find(x => x.id === boost.info.roleID);
-        let member = guild.members.cache.find(x => x.id === boost.info.userID);
-        let since = boost.info.since;
-        let realDuration = boost.info.duration;
-        let specialData = boost.info.special;
+    let roles = dbUser && dbUser.data.temp_roles ? true : false;
+
+    if(roles) {
+      for (let i = 0; i < dbUser.data.temp_roles.length; i++){
+        const temprole = dbUser.data.temp_roles[i];
+        let role = guild.roles.cache.find(x => x.id === temprole.role_id);
+        let since = temprole.active_since;
+        let realDuration = temprole.duration;
         let today = new Date();
-        /*
-        info: {
-          type: "roleDuration":
-          roleID: roleID,
-          userID: victimMember,
-          since: hoy,
-          duration: ms(duration),
-          special: {
-            "type": specialType, // boostMultiplier
-            "specialObjective": specialObjective, // exp, jeffros, all
-            "specialValue": specialValue // (2) = exp || jeffros normales x 2
-          }
-        }
-      */
 
         if(today - since >= realDuration){
-          // sacarle el role
-          console.log("ha pasado el tiempo 0001")
-          member.roles.remove(role);
 
-          // eliminar global data
-          boosts[i].remove();
+          if(!temprole.isSub){
+            // sacarle el role
+            console.log("ha pasado el tiempo 0001")
+            member.roles.remove(role);
 
-          /* // buscar el set y eliminarlo
-          if(specialData.specialObjective === "exp"){ // si el boost es de exp
-            new Promise((resolve, reject) => {
-              boostedExp.delete(member.id)
-              resolve(`${member.user.username} eliminado de boostedExp`);
-            })
-          } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
-            new Promise((resolve, reject) => {
-              boostedJeffros.delete(member.id)
-              resolve(`${member.user.username} eliminado de boostedJeffros`);
-            })
-          } else if(specialData.specialObjective === "all"){ // si el boost es de todo
-            new Promise((resolve, reject) => {
-              boostedGeneral.delete(member.id)
-              resolve(`${member.user.username} eliminado de boostedGeneral`);
-            })
-          } */
-        } else {
-          /* // es un usuario con un boost comprado, entonces...
-          
-          if(specialData.specialObjective === "exp"){ // si el boost es de exp
-            new Promise((resolve, reject) => {
-              boostedExp.add(member.id)
-              resolve(`${member.user.username} agregado a boostedExp`);
-            })
-          } else if(specialData.specialObjective === "jeffros"){ // si el boost de de jeffros
-            new Promise((resolve, reject) => {
-              boostedJeffros.add(member.id)
-              resolve(`${member.user.username} agregado a boostedJeffros`);
-            })
-          } else if(specialData.specialObjective === "all"){ // si el boost es de todo
-            new Promise((resolve, reject) => {
-              boostedGeneral.add(member.id)
-              resolve(`${member.user.username} agregado a boostedGeneral`);
-            })
-          } else {
-            new Promise((resolve, reject) => {
-              reject("No es ninguno de los boosts predeterminados.")
-            })
-          } */
-        }
-      }
-    }
-  })
+            // eliminar el temprole de la db
+            dbUser.data.temp_roles.splice(i, 1);
+          } else { // es una suscripción
+            let price = Number(temprole.sub_info.price);
+            let subName = temprole.sub_info.name;
+            let isCancelled = temprole.sub_info.isCancelled;
 
-  if(justBoost === true) return;
+            let notEnough = new Discord.MessageEmbed()
+            .setAuthor(`| Error`, Config.errorPng)
+            .setDescription(`**—** No tienes suficientes Jeffros **(${Emojis.Jeffros}${price})** para pagar la suscripción a \`${subName}\`.
+**—** Tu saldo ha quedado en **alerta roja**.`)
+            .setColor(Colores.rojo);
 
-  // buscar sub
-  GlobalData.find({
-    "info.type": "jeffrosSubscription"
-  }, (err, subs) => {
-    if(err) throw err;
-
-    if (subs) {
-      for(let i = 0; i < subs.length; i++){
-        let sub = subs[i]
-        let role = guild.roles.cache.find(x => x.id === sub.info.roleID);
-        let member = guild.members.cache.find(x => x.id === sub.info.userID);
-        let since = sub.info.since;
-        let interval = sub.info.interval;
-        let price = Number(sub.info.price);
-        let subName = sub.info.subName;
-        let isCancelled = sub.info.isCancelled;
-        let today = new Date();
-
-        let notEnough = new Discord.MessageEmbed()
-        .setAuthor(`| Error`, Config.errorPng)
-        .setDescription(`**—** No tienes suficientes Jeffros **(${Emojis.Jeffros}${price})** para pagar la suscripción a \`${subName}\`.
-        **—** Tu saldo ha quedado en **alerta roja**.`)
-        .setColor(Colores.rojo);
-
-        if(today - since >= interval){
-          // si fue cancelada ya
-          if(isCancelled){
+            if(isCancelled){
               member.roles.remove(role);
-              subs[i].remove();
-          } else {
-            // cobrar jeffros
-            Jeffros.findOne({
-              serverID: guild.id,
-              userID: sub.info.userID
-            }, (err, jeffros) => {
-              if(err) throw err;
+
+              // eliminar el temprole de la db
+              dbUser.data.temp_roles.splice(i, 1);
+            } else {
+              // cobrar jeffros
+              let jeffros = dbUser.economy.global;
 
               let paidEmbed = new Discord.MessageEmbed()
               .setAuthor(`| Pagado`, Config.bienPng)
@@ -305,55 +231,30 @@ const intervalGlobalDatas = async function(justBoost){
                 console.log(jeffros.userID, "ha quedado en negativos por no poder pagar", subName);
                 jeffros.jeffros -= price;
                 member.send({embeds: [notEnough]});
-                subs[i].remove();
+                
+                // eliminar el temprole de la db
+                dbUser.data.temp_roles.splice(i, 1);
+
                 member.roles.remove(role);
-                jeffros.save();
+                dbUser.save();
               } else { // cobrar
                 jeffros.jeffros -= price;
-                jeffros.save();
+                dbUser.save();
 
                 // actualizar el globaldata
-                subs[i].info.since = today;
-                subs[i].markModified("info");
-                subs[i].save();
+                temprole.active_since = today;
+                dbUser.save();
 
                 member.send({embeds: [paidEmbed]});
               }
-            })
+            }
           }
         }
       }
     }
   })
-  // buscar muteados
-  GlobalData.find({
-    "info.type": "roleDuration",
-    "info.special.type": false
-  }, (err, roled) => {
-    if(err) throw err;
 
-    if(roled) {
-      for (let i = 0; i < roled.length; i++){
-        let role = guild.roles.cache.find(x => x.id === roled[i].info.roleID);
-        let member = guild.members.cache.find(x => x.id === roled[i].info.userID);
-        let since = roled[i].info.since;
-        let realDuration = roled[i].info.duration;
-        let today = new Date();
-
-        if(today - since >= realDuration){
-          // sacarle el role
-          member.roles.remove(role);
-
-          // eliminar global data
-          roled[i].remove();
-
-          console.log(member.user.tag, "se le ha eliminado el rol", role.name, "luego de pasar", realDuration);
-        } else {
-          // nada XD
-        }
-      }
-    }
-  })
+  if(justTempRoles === true) return;
 
   // inflacion DARKSHOP
 

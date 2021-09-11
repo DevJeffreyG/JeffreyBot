@@ -249,10 +249,10 @@ module.exports.run = async (client, message, args) => {
 
         if(!args[1] || isNaN(args[1])){
             embed.setAuthor(`| Error: autorole id`, Config.errorPng)
-            return message.channel.send(embed)
+            return message.channel.send({embeds: [embed]})
         } else if(!args[2] || isNaN(args[2])) {
             embed.setAuthor(`| Error: grupo de toggle`, Config.errorPng)
-            return message.channel.send(embed)
+            return message.channel.send({embeds: [embed]})
         }
 
       let autoroleID = args[1];

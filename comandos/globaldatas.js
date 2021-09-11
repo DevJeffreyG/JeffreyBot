@@ -22,15 +22,12 @@ module.exports.run = async (client, message, args) => {
   .setTitle(`Ayuda: ${prefix}globaldatas`)
   .setColor(Colores.nocolor)
   .setDescription(`▸ Alternativa: ${prefix}globaldatas update`)
-  .addField(`▸ userCooldowns`, `**—** Información de cumpleaños de un usuario.`)
   .addField(`▸ birthdayData`, `**—** Información de cumpleaños de un usuario.`)
   .addField(`▸ temporalGuildBan`, `**—** Información de un TempBan en el servidor.`)
   .addField(`▸ dsInflation`, `**—** La inflación actual de los DarkJeffros.`)
   .addField(`▸ dsDJDuration`, `**—** Información de la duración de los DarkJeffros de un usuario.`)
   .addField(`▸ dsEventRandomInflation`, `**—** El próximo evento de para la inflación de los DarkJeffros.`)
   .addField(`▸ roleDuration`, `**—** Información de Roles temporales (o no) que se les da a un usuario.`)
-  .addField(`▸ jeffrosSubscription`, `**—** Información de una suscripción de un usuario.`)
-
 
     if(!args[0]){
         return message.channel.send({embeds: [embed]});
