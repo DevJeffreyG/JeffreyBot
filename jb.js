@@ -664,7 +664,7 @@ client.on("messageCreate", async message => {
           if(err) throw err;
 
           if(!aliasDisabled && commandFile){ // si no encuentra tampoco el alias entonces correr comando
-            await functions.intervalGlobalDatas();
+            await functions.intervalGlobalDatas(); // correr el interval por cosas como la duracion de inflacion
             if (commandFile) {
               if (commandsCooldown.has(author.id)) { // revisar si tiene cooldown
                 message.delete();
