@@ -347,6 +347,9 @@ const intervalGlobalDatas = async function(justBoost){
 
   // inflacion DARKSHOP
 
+  const maxDaysNormalInflation = Config.daysNormalInflation;
+  const maxDaysEventInflation = Config.daysEventInflation;
+
   GlobalData.findOne({
     "info.type": "dsInflation"
   }, (err, dark) => {
@@ -355,7 +358,7 @@ const intervalGlobalDatas = async function(justBoost){
     inflation = Number(Math.random() * 10).toFixed(2);
     if(Number(inflation) < 1) inflation = Number(inflation) + 1; // no puede ser menor a 1, sólo con los eventos
     date = new Date() // hoy
-    duration = Number(Math.random() * 30).toFixed(1); // duración máxima 30 días.
+    duration = Number(Math.random() * maxDaysNormalInflation).toFixed(1); // duración máxima de inflacion
 
     if(!dark){
       const newInflation = new GlobalData({
@@ -414,8 +417,7 @@ const intervalGlobalDatas = async function(justBoost){
 
         let oldDate = new Date(dark[i].info.since);
         let newDate = new Date()
-        let newDuration = Number(q.info.duration) + Math.floor(Math.random() * 60); // duración máxima 60 días & minima de la duracion de la inflacion actual.
-
+       
         let diference1 = newDate.getTime() - oldDate.getTime();
         let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
 
@@ -428,7 +430,7 @@ const intervalGlobalDatas = async function(justBoost){
           if(user.djeffros != 0){
             // si tiene darkjeffros, ¿caducaron?
             if(pastDays >= dark[i].info.duration){
-              let staffCID = "514124198205980713";
+              let staffCID = Config.logChannel;
               if(client.user.id === Config.testingJBID){
                 staffCID = "537095712102416384";
               }
@@ -470,7 +472,7 @@ const intervalGlobalDatas = async function(justBoost){
           } else { // sus darkjeffros están en 0
             // revisar si caduracion para eliminar el globaldata
             if(pastDays >= dark[i].info.duration){
-              let staffCID = "514124198205980713";
+              let staffCID = Config.logChannel;
               if(client.user.id === Config.testingJBID){
                 staffCID = "537095712102416384";
               }
@@ -507,9 +509,9 @@ const intervalGlobalDatas = async function(justBoost){
       let event = "b";
       let ecuation = Math.random()*100;
 
-      if(ecuation >= 52){ // SUBE EL PRECIO (INFLACION) EN EL EVENTO.
+      if(ecuation >= 52){ // BAJA EL PRECIO (INFLACION) EN EL EVENTO. -> EL MÁS PROBABLE A PASAR
         event = "b";
-      } else  if(ecuation >= 14){ // BAJA EL PRECIO (INFLACION) EN EL EVENTO. -> EL MÁS PROBABLE A PASAR
+      } else  if(ecuation >= 14){ // SUBE  EL PRECIO (INFLACION) EN EL EVENTO. 
         event = "s";
       } else { // SI ES MENOR QUE 14 EL PRECIO NO CAMBIA
         event = "i";
@@ -517,7 +519,7 @@ const intervalGlobalDatas = async function(justBoost){
 
       let eventinflation;
       date = new Date() // hoy
-      duration = Number((Math.random() * 30) + 1).toFixed(1); // duración máxima 31 días.
+      duration = Number((Math.random() * maxDaysEventInflation) + 1).toFixed(1); // duración máxima de eventos
 
       if(event === "s"){ // si el precio DEBE subir
         console.log("Evento próximo va a subir");

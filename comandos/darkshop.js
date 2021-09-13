@@ -435,6 +435,7 @@ Stats.findOne({
                         case "depositar":
                         case "cambio":
                         case "change":
+                            const maxDaysForDarkJeffros = Config.daysDarkJeffros;
                             let instructions = new Discord.MessageEmbed()
                             .setAuthor(`| Error`, Config.darkLogoPng)
                             .setColor(Colores.negro)
@@ -484,7 +485,7 @@ Stats.findOne({
                                     if(err) throw err;
 
                                     date = new Date() // hoy
-                                    duration = Number(dark.info.duration) + Math.floor(Math.random() * 60); // duración máxima 60 días & minima de la duracion de la inflacion actual.
+                                    duration = Math.ceil(dark.info.duration) + Math.floor(Math.random() * maxDaysForDarkJeffros); // duración máxima de darkjeffros & minima de la duracion de la inflacion actual.
 
                                     if(!djDuration){ // si no existe ninguna data global de tipo dsDJDuration, simplemente crear una nueva para este usuario
                                         const newData = new GlobalData({

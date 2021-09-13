@@ -37,6 +37,8 @@ module.exports.run = async (client, message, args) => {
     rulesChannel = "482993020472393741";
   }
 
+  if(!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
+
   /* ################## EMBEDS DE INFORMACION ######################### */
 
   // FAQ TE AMO FRAZ
@@ -349,6 +351,71 @@ let awardsEmbed3 = new Discord.MessageEmbed()
 
 **${platinium} Platino** • Cuesta **${Emojis.Jeffros}1800**, se envía el mensaje a <#${Config.hallChannel}>, se le da __**${Emojis.Jeffros}700**__ al autor del mensaje premiado.`)
 .setColor(Colores.nocolor);
+
+  // DARKSHOP
+  let darkshop = new Discord.MessageEmbed()
+  .setImage("https://cdn.discordapp.com/attachments/464810032081666048/836365066864558091/DarkShop.png")
+  .setColor(Colores.negro);
+
+  let items = new Discord.MessageEmbed()
+  .setImage("https://cdn.discordapp.com/attachments/464810032081666048/836362815710429224/Items.png")
+  .setColor(Colores.negro);
+
+  let inflacion = new Discord.MessageEmbed()
+  .setImage("https://cdn.discordapp.com/attachments/464810032081666048/836364066578497546/Inflacion.png")
+  .setColor(Colores.negro);
+
+  let eventos = new Discord.MessageEmbed()
+  .setImage("https://cdn.discordapp.com/attachments/464810032081666048/836368266938810398/Eventos.png")
+  .setColor(Colores.negro);
+
+  let inversiones = new Discord.MessageEmbed()
+  .setImage("https://cdn.discordapp.com/attachments/464810032081666048/836369259101028402/Inversiones.png")
+  .setColor(Colores.negro);
+
+  let darkshopInformation1 = new Discord.MessageEmbed()
+  .setAuthor(`| Lo básico:`, Config.darkLogoPng)
+  .setDescription(`**—** Bienvenid@ a la DarkShop.
+**—** Con esta guía podrás entender básicamente todo acerca de esta nueva tienda dentro del servidor.
+**—** Lo básico vendría siendo los comandos dentro de la tienda, los cuales puedes ver usando \`${prefix}ds ayuda\`, cuando los hayas visto, vuelve aquí.`)
+  .setColor(Colores.negro);
+
+  let darkshopInformation2 = new Discord.MessageEmbed()
+  .setAuthor(`| Los items:`, Config.darkLogoPng)
+  .setDescription(`Esta nueva tienda tiene items principalmente que afectan a otros usuarios, **temporalmente, claro**.
+Y así como tú mismo puedes ser quien lo origine, también puedes ser perjudicado. Esto puede ser evitado, y es comprando el **Item #1, el __Firewall__**.
+Con este item, cualquier otro item que tenga un **efecto negativo** sobre quien se use, __será anulado__. **SIN EMBARGO...**
+Cuando cambias tus primeros ${Emojis.Jeffros}Jeffros por ${Emojis.Dark}DarkJeffros, se creará aleatoriamente un porcentaje (1% - ~15%) llamado **Precisión**.
+  
+**— ¿Qué significa el porcentaje de la Precisión?**
+El porcentaje que se le da a un usuario al cambiar sus primeros Jeffros por DarkJeffros... larga historia corta, es la probabilidad que tiene alguien de saltarse el **Firewall** de un usuario y así afectarlo con un item.`)
+  .setColor(Colores.negro)
+
+  let darkshopInformation3 = new Discord.MessageEmbed()
+  .setAuthor(`| ¿Cómo funciona la inflación?`, Config.darkLogoPng)
+  .setDescription(`Lo mágico de la DarkShop es la inflación. Esta es global, la misma para todos los usuarios, y esta va del 0.01% al 10%.
+La forma de determinar el precio actual de **${Emojis.Dark}1** es: **${Emojis.Jeffros}200 x <inflación>**, haciendo así que **${Emojis.Dark}1** pueda costar **${Emojis.Jeffros}2** hasta **${Emojis.Jeffros}2000**.
+La inflación dura un plazo máximo de **${Config.daysNormalInflation} días** y se genera de forma aleatoria. **SIN EMBARGO...**`)
+  .setColor(Colores.negro);
+
+  let darkshopInformation4 = new Discord.MessageEmbed()
+  .setAuthor(`| Los eventos:`, Config.darkLogoPng)
+  .setDescription(`A partir de aquí empieza a ponerse interesante la cosa, dentro de un periodo de inflación puede haber, **o no** eventos con la inflación.
+La inflación puede subir, bajar o quedarse igual en un momento indeterminado.
+Pero... ¿cómo que interesante? ... ¿por qué? Ahora se viene el plot twist.`)
+  .setColor(Colores.negro);
+
+  let darkshopInformation5 = new Discord.MessageEmbed()
+  .setAuthor(`| Inversiones:`, Config.darkLogoPng)
+  .setDescription(`Ahhh, las inversiones. Debido a la inflación, puedes llegar incluso a comprar ${Emojis.Dark}100 por **${Emojis.Jeffros}200** que esos mismos ${Emojis.Dark}100 cuesten **${Emojis.Jeffros}200.000**.
+Bastante increíble, aunque este es sólo un escenario, que es muy poco probable, puede llegar a pasar. Así como puedes ganar, también puedes perder. Nunca olvides la duración de tus DarkJeffros.
+Ten cuidado, aquellos que tengan **${Emojis.Jeffros}20.000** o más; deberán pagar un interés, el cuál es detallado en <#${Config.infoChannel}>, así que ten eso en cuenta.
+  
+**— La duración de los ${Emojis.Dark}DarkJeffros:**
+Cuando un usuario cambia sus Jeffros por DarkJeffros, su cuenta en esta tienda se verá comprometida por las autoridades del servidor, por esto, la misma tienda se encargará que a un plazo aleatorio todos los DarkJeffros que tengas en tu cuenta sean borrados para evitar problemas.
+Este plazo será definido por: \`La duración oculta de la inflación actual + 1 a ${Config.daysDarkJeffros} días adicionales\`.
+Puedes ver este plazo con \`${prefix}ds duration\`. Si no cambias tus DarkJeffros a Jeffros antes de este plazo, los perderás.`)
+  .setColor(Colores.negro);
   
   // MANUAL
   let manualEmbed = new Discord.MessageEmbed()
@@ -574,6 +641,10 @@ Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para c
       
     case "staff_manual":
       await message.channel.send({embeds: [staffEmbed, manualEmbed, manualEmbed2, manualEmbed3, manualEmbed4, manualEmbed5]});
+      break;
+
+    case "darkshop_info":
+      await message.channel.send({embeds: [darkshop, darkshopInformation1, items, darkshopInformation2, inflacion, darkshopInformation3, eventos, darkshopInformation4, inversiones, darkshopInformation5]})
       break;
 
     case "edit":
