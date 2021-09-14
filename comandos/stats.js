@@ -6,8 +6,7 @@ const prefix = Config.prefix;
 
 /* ##### MONGOOSE ######## */
 
-const Jeffros = require("../modelos/jeffros.js");
-const Exp = require("../modelos/exp.js");
+const User = require("../modelos/User.model.js");
 const GlobalData = require("../modelos/globalData.js");
 
 /* ##### MONGOOSE ######## */
@@ -27,107 +26,99 @@ module.exports.run = async (client, message, args) => {
   
   let member = message.mentions.users.first() ? guild.members.cache.get(message.mentions.users.first().id) : guild.members.cache.get(args[0] || author.id);
   
-  Exp.findOne({
-    serverID: guild.id,
-    userID: member.user.id
-  }, (err, exp) => {
-    if(err) throw err;
+
+  let user = await User.findOne({
+    user_id: member.id,
+    guild_id: guild.id
+  });
+
+  let actualJeffros = user ? user.economy.global.jeffros : 0;
+  let curExp = user ? user.economy.global.exp : 0;
+  let curLvl = user ? user.economy.global.level : 0;
+  let rep = user ? user.economy.global.reputation : 0;
     
-    Jeffros.findOne({
-      serverID: guild.id,
-      userID: member.user.id
-    }, async (err2, jeffros) => {
-      if(err2) throw err2;
-      
-      let actualJeffros = jeffros ? jeffros.jeffros : 0;
-      let curExp = exp ? exp.exp : 0;
-      let curLvl = exp ? exp.level : 0;
-      let rep = exp ? exp.reputacion : 0;
-        
-      let nxtLvlExp = 10 * (curLvl ** 2) + 50 * curLvl + 100; // fórmula de MEE6. 5 * (level ^ 2) + 50 * level + 100
-        
-      let bdData = await GlobalData.findOne({
-        "info.type": "birthdayData",
-        "info.userID": author.id
-      });
+  let nxtLvlExp = 10 * (curLvl ** 2) + 50 * curLvl + 100; // fórmula de MEE6. 5 * (level ^ 2) + 50 * level + 100
 
-        let dataExists = bdData ? true : false;
-        let bdString = "";
+  let bdData = await GlobalData.findOne({
+    "info.type": "birthdayData",
+    "info.userID": author.id
+  });
 
-        if(dataExists && bdData.info.isLocked === true){
-          day = bdData.info.birthd;
-          month = bdData.info.birthm;
+  let dataExists = bdData ? true : false;
+  let bdString = "";
 
-          switch(month){
-            case "1":
-              month = "Enero"
-              break;
+  if(dataExists && bdData.info.isLocked === true){
+    day = bdData.info.birthd;
+    month = bdData.info.birthm;
 
-            case "2":
-              month = "Febrero"
-              break;
+    switch(month){
+      case "1":
+        month = "Enero"
+        break;
 
-            case "3":
-              month = "Marzo"
-              break;
+      case "2":
+        month = "Febrero"
+        break;
 
-            case "4":
-              month = "Abril"
-              break;
+      case "3":
+        month = "Marzo"
+        break;
 
-            case "5":
-              month = "Mayo"
-              break;
+      case "4":
+        month = "Abril"
+        break;
 
-            case "6":
-              month = "Junio"
-              break;
+      case "5":
+        month = "Mayo"
+        break;
 
-            case "7":
-              month = "Julio"
-              break;
+      case "6":
+        month = "Junio"
+        break;
 
-            case "8":
-              month = "Agosto"
-              break;
+      case "7":
+        month = "Julio"
+        break;
 
-            case "9":
-              month = "Septiembre"
-              break;
+      case "8":
+        month = "Agosto"
+        break;
 
-            case "10":
-              month = "Octubre"
-              break;
+      case "9":
+        month = "Septiembre"
+        break;
 
-            case "11":
-              month = "Noviembre"
-              break;
+      case "10":
+        month = "Octubre"
+        break;
 
-            case "12":
-              month = "Diciembre"
-              break;
+      case "11":
+        month = "Noviembre"
+        break;
 
-            default:
-              month = null;
-              break;
-          }
+      case "12":
+        month = "Diciembre"
+        break;
 
-          bdString = day != null && month != null ? `**— Cumpleaños**: ${day} de ${month}.` : "";
-        }
+      default:
+        month = null;
+        break;
+    }
 
-        let meEmbed = new Discord.MessageEmbed()
-        .setAuthor(`| Estadísticas de ${member.user.tag}`, member.user.displayAvatarURL())
-        .setDescription(`**— Nivel**: ${curLvl}
+    bdString = day != null && month != null ? `**— Cumpleaños**: ${day} de ${month}.` : "";
+  }
+
+  let meEmbed = new Discord.MessageEmbed()
+  .setAuthor(`| Estadísticas de ${member.user.tag}`, member.user.displayAvatarURL())
+  .setDescription(`**— Nivel**: ${curLvl}
 **— EXP**: ${curExp} / ${nxtLvlExp}.
 **— Jeffros**: ${Emojis.Jeffros}${actualJeffros}.  
 **— Reputación**: ${rep}.
 ${bdString}`)
-        .setThumbnail(Config.jeffreyguildIcon)
-        .setColor(Colores.verde);
+  .setThumbnail(Config.jeffreyguildIcon)
+  .setColor(Colores.verde);
 
-        return message.channel.send({embeds: [meEmbed]});
-    })
-  })
+  return message.channel.send({embeds: [meEmbed]});
 
 }
 

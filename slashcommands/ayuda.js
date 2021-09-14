@@ -72,6 +72,7 @@ module.exports = {
         let modEmbed = new Discord.MessageEmbed()
         .setAuthor(`| Comandos de Staff`, "https://cdn.discordapp.com/emojis/494282181296914432.png")
         .setDescription(`▸ \`${prefix}autorole\`: Se inicia proceso de creación de un nuevo autorole.
+▸ \`${prefix}dbuser\`: Busca la información que tiene JeffreyBot de un usuario en la base de datos.
 ▸ \`${prefix}dmuser\`: Jeffrey Bot enviará un mensaje a el usuario con lo que se especifique.
 ▸ \`${prefix}jbnews\`: Se crea un anuncio mencionando a el rol de JB News con un embed con la noticia.
 ▸ \`${prefix}reglas\`: Se envía un mensaje con las reglas registradas por Jeffrey Bot para ser usadas en comandos como \`${prefix}warn\`, \`${prefix}softwarn\` o \`${prefix}pardon\`.

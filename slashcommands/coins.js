@@ -9,8 +9,7 @@ const Colores = require("../resources/colores.json");
 const Cumplidos = require("../resources/cumplidos.json");
 let { multiplier } = require("../base.json");
 
-const GlobalData = require("../modelos/globalData.js");
-const Jeffros = require("../modelos/jeffros.js");
+const User = require("../modelos/User.model.js");
 
 const workCooldown = new Set();
 const coolded = new Map();
@@ -45,25 +44,33 @@ module.exports = {
             tmoney = `**${Emojis.Jeffros}${money}**`;
         }
 
-        // buscar la globaldata
-        let query = await GlobalData.find({
-            "info.type": "roleDuration",
-            "info.userID": author.id,
-            "info.special.type": "boostMultiplier"
-        }, (err, boosts) => {
-            if(err) throw err;
+        // buscar usuario
+        let user = await User.findOne({
+            user_id: author.id,
+            guild_id: guild.id
         });
 
-        for (let i = 0; i < query.length; i++) {
-            const q = query[i];
+        if(!user){
+            const newUser = new User({
+            user_id: member.id,
+            guild_id: guild.id
+            });
+        
+            await newUser.save();
+            user = newUser;
+        }
+
+        // buscar si tiene boost
+        for (let i = 0; i < user.data.temp_roles.length; i++) {
+            const temprole = user.data.temp_roles[i];
+            const specialInfo = temprole.special;
             
-            let specialData = q.info.special;
-
-            if(specialData.specialObjective === "jeffros" || specialData.specialObjective === "all"){ // si el boost de de jeffros
-            money = money * Number(specialData.specialValue);
-            tmoney = `**${Emojis.Jeffros}${money}📈**`;
-
-            console.log(author.tag, tmoney);
+            if(specialInfo.type === "boostMulitplier"){
+                if(specialInfo.objetive === "jeffros" || specialInfo.objetive === "all"){
+                    money = money * Number(specialData.specialValue);
+                    tmoney = `**${Emojis.Jeffros}${money}📈**`;
+                    console.log(author.tag, "Boost de JEFFROS.")
+                }
             }
         }
 
@@ -99,48 +106,25 @@ module.exports = {
             embed.setFooter(`• Respuesta sugerida por ${suggestor}`, img)
         }
 
-        Jeffros.findOne(
-        {
-            serverID: guild.id,
-            userID: author.id
-        }, (err, jeffros) => {
-            if (err) throw err;
+        if (workCooldown.has(author.id)){
+            let timer = coolded.get(author.id)
+            let left = prettyms((ms("10m")) - (new Date().getTime() - timer), {secondsDecimalDigits: 0 });
+            return interaction.editReply(`Usa este comando en ${left}, ${randomCumplidos}`);
+        } else {
+            workCooldown.add(author.id);
+            let timeMS = new Date().getTime();
+            coolded.set(author.id, timeMS);
 
-            if (workCooldown.has(author.id)){
-                let timer = coolded.get(author.id)
-                let left = prettyms((ms("10m")) - (new Date().getTime() - timer), {secondsDecimalDigits: 0 });
-                return interaction.editReply(
-                `Usa este comando en ${left}, ${randomCumplidos}`
-                );
-            } else {
-                workCooldown.add(author.id);
-                let timeMS = new Date().getTime();
-                coolded.set(author.id, timeMS);
-
-                setTimeout(() => {
+            setTimeout(() => {
                 coolded.delete(author.id)
                 workCooldown.delete(author.id);
-                }, ms("10m"));
-            }
+            }, ms("10m"));
+        }
 
-            if (!jeffros) {
-                const newJeffros = new Jeffros({
-                userID: author.id,
-                serverID: guild.id,
-                jeffros: money
-                });
+        user.economy.global.jeffros += money;
+        await user.save();
 
-                newJeffros.save();
-            } else {
-                jeffros.jeffros += money;
-                jeffros.save();
-            }
-
-
-            interaction.editReply({embeds: [embed]});
-            }
-        );
-
+        interaction.editReply({embeds: [embed]});
 
 	},
 };

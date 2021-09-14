@@ -142,14 +142,11 @@ const getChanges = function(entryChanges) {
   return { old: oldKey, new: newKey };
 }
 
-const loadBoosts = async function() {
-  try {
-    await intervalGlobalDatas(true)
-  } catch (err) {
-    console.log(err);
-  }
-}
-
+/**
+ * 
+ * @param {boolean} [justTempRoles=false] Just execute interval of temporal roles
+ * @returns void
+ */
 const intervalGlobalDatas = async function(justTempRoles){
   justTempRoles = justTempRoles || false;
 
@@ -256,6 +253,8 @@ const intervalGlobalDatas = async function(justTempRoles){
 
   if(justTempRoles === true) return;
 
+
+  /** ###### DARKSHOP ###### */
   // inflacion DARKSHOP
 
   const maxDaysNormalInflation = Config.daysNormalInflation;
@@ -653,6 +652,8 @@ const intervalGlobalDatas = async function(justTempRoles){
     }
   });
 
+  /** ###### DARKSHOP ###### */
+
   // buscar temp bans
   GlobalData.find({
     "info.type": "temporalGuildBan",
@@ -723,6 +724,11 @@ const intervalGlobalDatas = async function(justTempRoles){
   return;
 }
 
+/**
+ * Add warns to an user
+ * @param {string} v The ID of the user
+ * @param {number} c The number of warns to add
+ */
 const Warns = function (v, c){
     Warn.findOne({
         userID: v.id
@@ -742,6 +748,11 @@ const Warns = function (v, c){
     })
 }
 
+/**
+ * Add Interest if the item does not ignore it.
+ * @param {Object[]} author The Discord.JS User
+ * @param {number} idUse The ID of the item to check
+ */
 const Interest = function (author, idUse) {
     DarkItems.findOne({
         id: idUse
@@ -771,6 +782,22 @@ const Interest = function (author, idUse) {
     })
 }
 
+/**
+ * Adds a temporary role into the database ands adds the role to the user.
+ * @param {Object[]} guild - The Discord.JS Guild
+ * @param {string} roleID - The ID of the temporary role
+ * @param {Object[]} victimMember - The Discord.JS Member
+ * @param {(number | string)} duration The duration of the temporary role in ms.
+ * - "permanent" for not being an temporary role.
+ * @param {string} [specialType=false] The special type of this temporary role.
+ * - boostMultiplier
+ * @param {string} [specialObjective=false] The objetive for this special type of temporary role.
+ * - exp
+ * - jeffros
+ * - all
+ * @param {number} [specialValue=false] The value for the objetive of this special temporary role.
+ * @returns void
+ */
 const LimitedTime = function(guild, roleID, victimMember, duration, specialType, specialObjective, specialValue){
     specialType = specialType || false;
     specialObjective = specialObjective || false;
@@ -867,13 +894,23 @@ const LimitedTime = function(guild, roleID, victimMember, duration, specialType,
     }
 }
 
+/**
+ * Adds a new subscription to the database and adds the role to the user.
+ * @param {object[]} guild The Discord.JS Guild
+ * @param {string} roleID The ID for the role given by the suscription
+ * @param {object[]} victimMember The Discord.JS GuildMember
+ * @param {string} intervalTime The interval of time in which the user will pay
+ * - "1d", "30d", "10m"
+ * @param {string} jeffrosPerInterval The price the user will pay every interval
+ * @param {string} subscriptionName The name of the suscription
+ * @returns 
+ */
 const Subscription = function(guild, roleID, victimMember, intervalTime, jeffrosPerInterval, subscriptionName){
     let role = guild.roles.cache.find(x => x.id === roleID);
 
     if(intervalTime === "permanent" || intervalTime === "na"){
       // no es una sub
-      console.log("no es una sub al parecer")
-      return;
+      return console.error("Using Subscription() with erroneous interval.");
     } else {
       let hoy = new Date();
 
@@ -895,7 +932,7 @@ const Subscription = function(guild, roleID, victimMember, intervalTime, jeffros
     }
 }
 
-const vaultMode = function(hint, author, message) {
+const vaultMode = function(hint, author, message) { // tengo que rehacer esto XD
     console.log(hint);
       Vault.find({}, function(err, pistas) {
         if (pistas.length === 0) {
@@ -1290,9 +1327,134 @@ const handleUploads = async function(){
     }, interval);
 }
 
+/**
+ * Initialize the base variables used on the commands.
+ * @param {*} client - The Discord.JS Client
+ * @param {*} message - The Discord.JS Message that triggers the command
+ * @returns Object including the [guild, author, prefix, jeffrey_role, admin_role, mod_role, staff_role] variables
+ */
+const Initialize = async function(client, message){
+  // Variables
+  const guild = message.guild;
+  const author = message.author;
+  const prefix = Config.prefix;
+  let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
+  let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
+  let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
+  let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
+
+  if(client.user.id === Config.testingJBID){
+      jeffreyRole = guild.roles.cache.find(x => x.id === "482992290550382592");
+      adminRole = guild.roles.cache.find(x => x.id === "483105079285776384");
+      modRole = guild.roles.cache.find(x => x.id === "483105108607893533");
+      staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
+  }
+
+  return {
+    "guild": guild,
+    "author": author,
+    "prefix": prefix,
+    "jeffrey_role": jeffreyRole,
+    "admin_role": adminRole,
+    "mod_role": modRole,
+    "staff_role": staffRole
+  };
+}
+
+/**
+ * Creation of the principal help embed of a command, or the verification of the parameters given by the user.
+ * @param {Object[]} commandTree - The configuration for the command, including the parameters if it has.
+ * @param {Object[]} executionInfo The information of the execution of the command.
+ * - guild
+ * - author
+ * - message
+ * @param {Array} [args=null] - The arguments of the user by using the command
+ * @returns Embed, or an error if any required parameter is missing
+ */
+const TutorialEmbed = function(commandTree, executionInfo, args){
+  args = args || null;
+
+  const { guild, message } = executionInfo;
+
+  let Embed = new Discord.MessageEmbed()
+  .setAuthor(`▸ ${Config.prefix}${commandTree.name}`, guild.iconURL())
+  .setColor(Colores.nocolor);
+
+  let FooterString = commandTree.alias ? `<> Obligatorio () Opcional┊Alias: ${Config.prefix}alias` : `<> Obligatorio () Opcional`;
+
+  let DescriptionString = `▸ El uso correcto es: ${Config.prefix}${commandTree.name}`;
+  for (let i = 0; i < commandTree.params.length; i++) {
+    const param = commandTree.params[i];
+    
+    if(!param.optional){
+      DescriptionString += ` <${param.name}>`
+    } else {
+      DescriptionString += ` (${param.name})`
+    }
+  }
+
+  Embed.setDescription(DescriptionString);
+  Embed.setFooter(FooterString);
+
+  if(!args){ // no se dan args, se creó el embed
+    return message.channel.send({embeds: [Embed]});
+  } else {
+
+    let response = [];
+
+    verificationLoop:
+    for (let i = 0; i < commandTree.params.length; i++) {
+      const param = commandTree.params[i];
+      const arg = args[i] ? args[i] : null;
+
+      let toReturn;
+      if(!arg){ // null, revisar que sea opcional
+        if(!param.optional) { // no es opcional, regresar error
+          response = [null, i];
+          break verificationLoop;
+        } else {
+          toReturn = null;
+        }
+      } else {
+        // validar el tipo de parámetro dado
+
+        switch(param.type){
+          case "Member":
+            // buscar por mención, o id
+            toReturn = message.mentions.members.first() ? message.mentions.members.first() : guild.members.cache.find(x => x.id === arg);
+            break;
+
+          case "Array":
+            toReturn = arg.split(`${param.split}`)
+            break;
+        }
+
+        if(!toReturn){
+          response = [null, i];
+          break verificationLoop;
+        }
+      }
+
+      response.push({
+        "param": param.name,
+        "data": toReturn
+      });
+      
+    }
+    
+    if(!response[0]) {
+      Embed.setAuthor(`Error ▸ ${Config.prefix}${commandTree.name}: ${commandTree.params[response[1]].name}`, guild.iconURL())
+      Embed.setColor(Colores.rojo);
+      return message.channel.send({embeds: [Embed]}); // Si la response está mal, enviar embed (wip)
+    } else { // no hay ningún parámetro mal
+      return response;
+    }
+  }
+  
+}
+
 module.exports = {
     getChanges,
-    loadBoosts,
     intervalGlobalDatas,
     Warns,
     Interest,
@@ -1300,5 +1462,7 @@ module.exports = {
     findLvls5,
     LimitedTime,
     Subscription,
-    handleUploads
+    handleUploads,
+    Initialize,
+    TutorialEmbed
 }

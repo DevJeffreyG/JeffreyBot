@@ -17,14 +17,19 @@ const commandInfo = {
     "info": "Busca la información que tiene JeffreyBot de un usuario en la base de datos.",
     "params": [
         {
-            "name": "usuario", "type": "Member", "optional": false
+            "name": "miembro", "type": "Member", "optional": false
+        },
+        {
+            "name": "query", "type": "Array", "split": ".", "optional": true
         }
     ]
 }
 
 module.exports.run = async (client, message, args) => {
 
-  const { guild, author, prefix, staffRole} = await Initialize(client, message);
+    const { guild, author, staff_role} = await Initialize(client, message);
+
+    if(!message.member.roles.cache.find(x => x.id === staff_role.id)) return;
 
     const executionInfo = {
         "guild": guild,
@@ -36,9 +41,26 @@ module.exports.run = async (client, message, args) => {
 
     if(!response[0]) return; // si es "null"
 
+    const miembro = await response.find(x => x.param === "miembro").data;
+    let q = await response.find(x => x.param === "query").data;
+
+    let query = await User.findOne({
+        user_id: miembro.id,
+        guild_id: guild.id
+    });
+
+    if(q && q.length >= 1){
+        for (let i = 0; i < q.length; i++) {
+            const queryQ = q[i];
+            
+            query = query[queryQ]
+        }
+    }
+
+    message.channel.send(`**${miembro.user.tag}**\n\`\`\`json\n${query}\n\`\`\``);
+
 }
 
 module.exports.help = {
-    name: commandInfo.name,
-    alias: commandInfo.alias
+    name: commandInfo.name
 }
