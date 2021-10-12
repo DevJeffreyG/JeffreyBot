@@ -30,28 +30,14 @@ moment().tz("America/Bogota").format();
 
 const prefix = Config.prefix;
 const jeffreygID = Config.jeffreygID;
-const jgServer = Config.jgServer;
-const logChannel = Config.logChannel;
-const offtopicChannel = Config.offtopicChannel;
-const mainChannel = Config.mainChannel;
-const mainVip = Config.mainVip;
-const botsChannel = Config.botsChannel;
-const botsVip = Config.botsVip;
-const staffComandos = Config.staffComandos;
-const staffChat = Config.staffChat;
 
 const commandsCooldown = new Set();
 const jeffrosExpCooldown = new Set();
 const repCool = new Set();
 
-const coolded = new Map();
 const active = new Map();
 
-const boostedExp = new Set();
-const boostedJeffros = new Set();
-const boostedGeneral = new Set(); // exp + jeffros boosteados
-
-let functions;
+let functions = require("./resources/functions.js");
 
 // mantenimiento
 const disableEXPs = false; // deshabilitar ganar exp o jeffros
@@ -78,17 +64,16 @@ mongoose.connect(`${process.env.MONGOCONNECT}`, {
 
 const User = require("./modelos/User.model.js");
 
-const Jeffros = require("./modelos/jeffros.js");
-const Exp = require("./modelos/exp.js");
 const AutoRole = require("./modelos/autorole.js");
-const ToggleGroup = require("./modelos/toggleGroup.js");
 const Toggle = require("./modelos/toggle.js");
 
 const GlobalData = require("./modelos/globalData.js");
-const Stats = require("./modelos/darkstats.js");
 
 /* ##### MONGOOSE ######## */
 
+
+// ### HANDLERS
+// comandos normales
 client.comandos = new Discord.Collection();
 fs.readdir("./comandos/", (err, files) => {
   if (err) console.log(err);
@@ -104,6 +89,44 @@ fs.readdir("./comandos/", (err, files) => {
   });
 });
 
+// new
+const baseCommands = [];
+const baseCommandsFolder = fs.readdirSync("./aa").filter(file => !file.endsWith(".txt")); // quitar el layout LMAO
+
+for (const folder of baseCommandsFolder) {
+  const baseCommandsFiles = fs.readdirSync(`./aa/${folder}`).filter(file => file.endsWith(".js"));
+
+  for (const file of baseCommandsFiles) {
+      const command = require(`./aa/${folder}/${file}`);
+  
+      // push name onto aliases
+      const aliases = command.data.aliases || [];
+      aliases.push(command.data.name);
+      command.data.aliases = aliases;
+      // set filename
+      command.data.file = folder+"/"+file;
+      baseCommands.push(command.data);
+  }
+}
+
+
+/* const baseCommands = []; ESTO ES LO QUE SERVIA XDDDDD
+const baseCommandsFiles = fs.readdirSync("./aa").filter(file => file.endsWith(".js"));
+
+for (const file of baseCommandsFiles) {
+    const command = require(`./aa/${file}`);
+
+    // push name onto aliases
+    const aliases = command.data.aliases || [];
+    aliases.push(command.data.name);
+    command.data.aliases = aliases;
+    // set filename
+    command.data.file = file;
+    baseCommands.push(command.data);
+} */
+
+
+// slash commands
 client.slash = new Discord.Collection();
 const scommands = [];
 
@@ -152,10 +175,10 @@ client.on("interactionCreate", async interaction => {
   }, async (err, cmdDisabled) => {
     if(err) throw err;
     if(!cmdDisabled && slashCommand){ // si no encuentra un toggle y existe el archivo ejectuar
-      await functions.intervalGlobalDatas();
+      await functions.intervalGlobalDatas(client);
       executeSlash(interaction, client)
     } else if(author.id === jeffreygID || author.id === "460913577105293313") { // si es jeffrey
-      await functions.intervalGlobalDatas();
+      await functions.intervalGlobalDatas(client);
       executeSlash(interaction, client)
     } else { // si encuentra el comando toggleado return nomas
       return interaction.reply({content: "Este comando se encuentra deshabilitado, intenta de nuevo más tarde.", ephemeral: true});
@@ -192,11 +215,11 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
 
 client.on("guildMemberRemove", member => {
   if(client.user.id === Config.testingJBID){
-    return console.log(member);
+    return;
   }
 
-  let channel = member.guild.channels.cache.find(x => x.id === mainChannel);
-  let logC = member.guild.channels.cache.find(x => x.id === logChannel);
+  let channel = member.guild.channels.cache.find(x => x.id === Config.mainChannel);
+  let logC = member.guild.channels.cache.find(x => x.id === Config.logChannel);
   let tag = member.user.tag;
   let despedidas = [
     `¡**${tag}** se ha ido a un lugar mejor...! A su casa.`,
@@ -304,7 +327,7 @@ client.on("ready", async () => {
   
   console.log(`${client.user.username} ONLINE`);
 
-  let channel = client.channels.cache.get(logChannel);
+  let channel = client.channels.cache.get(Config.logChannel);
   let dsChannel = client.channels.cache.find(x => x.id === Config.dsChannel);
   let dsNews;
 
@@ -320,137 +343,19 @@ client.on("ready", async () => {
   channel.send("Reviví.");
 
   /* Buscar usuarios nivel 5 sin role nivel 5 */
-  await functions.findLvls5(guild)
+  await functions.findLvls5(client, guild)
 
   /* ############ GLOBAL DATAS ############ */
   console.log("Ciclo de Global Datas iniciado por primera vez")
-  functions.intervalGlobalDatas();
+  functions.intervalGlobalDatas(client);
 
   setInterval(function(){
-    functions.intervalGlobalDatas();
+    functions.intervalGlobalDatas(client);
   }, ms("1m"));
-
-  // ################################################# PAGAR INTERESES LOS FINES DE MES
-  // buscar gente con más de 20k
-  let interestJob = new CronJob('0 12 28 * *', async function() { // los 28 de cada mes al medio día
-    if(disableInterestPerMonth) return console.log("No se ha iniciado el CronJob, están deshabilitados los intereses por mes.");
-    console.log('CronJob iniciado.');
-
-    let jeffrosq = await User.find({
-      guild_id: guild.id
-    });
-
-    let globalq = await GlobalData.findOne({
-      "info.type": "dsInflation"
-    });
-
-    const inflation = globalq.info.inflation;
-
-    let res = []; // array para los usuarios con jeffros & dj si es que tienen
-    for (let i = 0; i < jeffrosq.length; i++) {
-      const member = guild.members.cache.get(jeffrosq[i].user_id) || null;
-      
-      // agregar la cantidad de darkjeffros
-      if(member){
-
-        const djeffrosq = jeffrosq[i].economy.dark;
-        const jeffros = jeffrosq[i].economy.global;
-
-        let darkjeffros = djeffrosq ? Number(djeffrosq.darkjeffros) : 0;
-        let darkjeffrosValue = djeffrosq ? Number(inflation*200*darkjeffros) : 0;
-        let finalQuantity = darkjeffrosValue != 0 ? (darkjeffrosValue) + jeffros.jeffros: jeffros.jeffros;
-
-        let toPush = { userID: member.user.id, darkjeffros: darkjeffros, darkjeffrosValue: darkjeffrosValue, total: finalQuantity }
-
-        res.push(toPush)
-      }
-    }
-
-    res.sort(function(a, b){ // ordenar el array mayor a menor, por array.total
-      if(a.total > b.total){
-        return -1;
-      }
-      if(a.total < b.total){
-        return 1;
-      }
-
-      return 0;
-    })
-
-    res = res.filter(user => user.total >= 20000); // sacar de todos los resultados los que sean mayores a 20k
-
-    console.log(res);
-
-    let finalinterest;
-
-    for (let i = 0; i < res.length; i++) {
-      const quser = res[i];
-      
-      let member = guild.members.cache.get(quser.userID) || null;
-
-      if(member){ // si el usuario está en el servidor, cobrar interés.
-        let jeffros = quser.total;
-
-        // definir el interés a pagar
-
-        if(jeffros >= 90000){ // que el interés sea del 15%
-          finalinterest = 0.15;
-        } else if(jeffros >= 40000) { // que el interés sea del 10%
-          finalinterest = 0.10;
-        } else if(jeffros >= 25000) { // que el interés sea del 5%
-          finalinterest = 0.05;
-        } else if(jeffros >= 20000) { // que el interés sea del 1%
-          finalinterest = 0.01;
-        }
-
-        let toReduce = Math.floor(jeffros*finalinterest);
-        
-        console.log("(J)"+jeffros, "de", member.user.tag, "pasa a:", jeffros - toReduce, "por el interés seleccionado:", finalinterest*100+"%");
-
-        // eliminar los jeffros
-
-        let newquery = await User.findOne({
-          user_id: quser.userID,
-          guild_id: guild.id
-        });
-
-        newquery.economy.global.jeffros -= toReduce;
-        await newquery.save();
-
-        let log = new Discord.MessageEmbed()
-        .setAuthor(`| Interés`, member.user.displayAvatarURL())
-        .setDescription(`**—** Tenía: **${Emojis.Jeffros}${jeffros}**.
-**—** Ahora tiene en Jeffros: **${Emojis.Jeffros}${newquery.economy.global.jeffros}**.
-**—** Y en total: **${Emojis.Jeffros}${quser.total-toReduce}**.
-**—** Pagó: **${Emojis.Jeffros}${toReduce} (${finalinterest*100}%)**.`)
-        .setColor(Colores.verde);
-
-        let userLog = new Discord.MessageEmbed()
-        .setAuthor(`| Interés`, member.user.displayAvatarURL())
-        .setDescription(`**—** Tenías: **${Emojis.Jeffros}${jeffros}**.
-**—** Ahora tienes en Jeffros: **${Emojis.Jeffros}${newquery.economy.global.jeffros}**.
-**—** Y en total: **${Emojis.Jeffros}${quser.total-toReduce}**.
-**—** Pagaste: **${Emojis.Jeffros}${toReduce} (${finalinterest*100}%)**.`)
-        .setColor(Colores.verde);
-
-        channel.send({embeds: [log]}); // logchannel predefinido arriba
-
-        // quitar los comentarios de esto tambien #########################################################
-        try {
-          member.send({embeds: [userLog]})
-        } catch {
-          // error al enviar mensaje al usuario
-          channel.send("No se pudo enviar el mensaje al usuario.")
-        }
-      }
-    }
-  }, null, true, 'America/Bogota');
-
-  interestJob.start(); // iniciar cron job de interés
 
   /* YOUTUBE NOTIFACTIONS */
 
-  functions.handleUploads();
+  functions.handleUploads(client);
 });
 
 client.on("messageDelete", async(message) => {
@@ -500,7 +405,7 @@ client.on("messageCreate", async message => {
   if (message.author.bot) return;
   if (message.channel.type == "DM") return;
 
-  await functions.intervalGlobalDatas(true); // verificar si existen BOOSTS.
+  await functions.intervalGlobalDatas(client, true); // verificar si existen BOOSTS.
   // joder
   let ahora = moment().tz("America/Bogota");
   let hour = ahora.hour();
@@ -533,13 +438,26 @@ client.on("messageCreate", async message => {
     }
   }
 
+  let authorExists = await User.findOne({
+    user_id: author.id,
+    guild_id: guild.id
+  });
+
+  if(!authorExists){
+    new User({
+      user_id: author.id,
+      guild_id: guild.id
+    }).save()
+  }
+
   if (message.content.startsWith(prefix)) {
     // Si el mensaje empieza por el prefijo, entonces...
+
     let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
     let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
     let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
     let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
-    let logC = guild.channels.cache.find(x => x.id === logChannel);
+    let logC = guild.channels.cache.find(x => x.id === Config.logChannel);
 
     if(client.user.id === Config.testingJBID){
       jeffreyRole = guild.roles.cache.find(x => x.id === "482992290550382592");
@@ -554,9 +472,9 @@ client.on("messageCreate", async message => {
     if (!message.content.startsWith(prefix)) return;
 
     let commandsEnabled = [
-      botsChannel,
-      staffComandos,
-      botsVip
+      Config.botsChannel,
+      Config.staffComandos,
+      Config.botsVip
     ];
 
     if (!commandsEnabled.find(x => x === message.channel.id) && !(message.author.id === jeffreygID || message.author.id === "460913577105293313") && !message.member.roles.cache.find(x => x.id === staffRole.id)) return;
@@ -650,7 +568,8 @@ client.on("messageCreate", async message => {
     }, cmdCooldown);
 
     // handler
-    let commandFile = client.comandos.get(cmd.slice(prefix.length));
+    let commandFile = await findCommand(cmd);
+    let oldCommandFile = client.comandos.get(cmd.slice(prefix.length));
 
     Toggle.findOne({
       command: cmd.slice(prefix.length)
@@ -663,34 +582,54 @@ client.on("messageCreate", async message => {
           if(err) throw err;
 
           if(!aliasDisabled && commandFile){ // si no encuentra tampoco el alias entonces correr comando
-            await functions.intervalGlobalDatas(); // correr el interval por cosas como la duracion de inflacion
+            await functions.intervalGlobalDatas(client); // correr el interval por cosas como la duracion de inflacion
             if (commandFile) {
               if (commandsCooldown.has(author.id)) { // revisar si tiene cooldown
                 message.delete();
                 return message.channel.send(`${author}, Relájate un poco con los comandos, ${randomCumplidos}.`);
               }
 
-              await commandFile.run(client, message, args, active);
+              await commandFile.execute(client, message, args, active);
+
+              // agregar el cooldown      
+              if (!message.member.roles.cache.find(x => x.id === staffRole.id)) {
+                commandsCooldown.add(author.id);
+              }
+            } else
+
+            if(oldCommandFile){
+              if (commandsCooldown.has(author.id)) { // revisar si tiene cooldown
+                message.delete();
+                return message.channel.send(`${author}, Relájate un poco con los comandos, ${randomCumplidos}.`);
+              }
+
+              await oldCommandFile.run(client, message, args, active);
 
               // agregar el cooldown      
               if (!message.member.roles.cache.find(x => x.id === staffRole.id)) {
                 commandsCooldown.add(author.id);
               }
             }
-          } else if(!commandFile){ // si no existe el comando, return
+          } else if(!commandFile && !oldCommandFile){ // si no existe el comando, return
             return;
           } else if(author.id === jeffreygID || author.id === "460913577105293313") { // si es jeffrey
-            await functions.intervalGlobalDatas();
-            if (commandFile) commandFile.run(client, message, args, active);
+            await functions.intervalGlobalDatas(client);
+            if (commandFile) commandFile.execute(client, message, args, active);
+            else 
+
+            if(oldCommandFile) oldCommandFile.run(client, message, args, active);
           } else { // si encuentra el comando toggleado return nomas
             return message.reply("este comando está deshabilitado.");
           }
         })
-      } else if(!commandFile){ // si no existe el comando, return
+      } else if(!commandFile && !oldCommandFile){ // si no existe el comando, return
         return;
       } else if(author.id === jeffreygID || author.id === "460913577105293313") { // si es jeffrey
-        await functions.intervalGlobalDatas();
-        if (commandFile) commandFile.run(client, message, args, active);
+        await functions.intervalGlobalDatas(client);
+        if (commandFile) commandFile.execute(client, message, args, active);
+        else 
+        
+        if(oldCommandFile) oldCommandFile.run(client, message, args, active);
       } else { // si encuentra el comando toggleado return nomas
         return message.reply("este comando está deshabilitado.");
       }
@@ -748,8 +687,8 @@ client.on("messageCreate", async message => {
         "100": "887151285009281044",
       }
     } else {
-      main = guild.channels.cache.find(x => x.id === mainChannel);
-      vipmain = guild.channels.cache.find(x => x.id === mainVip);
+      main = guild.channels.cache.find(x => x.id === Config.mainChannel);
+      vipmain = guild.channels.cache.find(x => x.id === Config.mainVip);
       
       if (message.member.roles.cache.find(x => x.id === Config.lvl40)) jexpCooldown = jexpCooldown / 2;
     }
@@ -813,13 +752,10 @@ client.on("messageCreate", async message => {
       });
 
       if(!user){
-        const newUser = new User({
-          user_id: member.id,
+        user = await new User({
+          user_id: author.id,
           guild_id: guild.id
-        });
-    
-        await newUser.save();
-        user = newUser;
+        }).save();
       }
 
       // buscar si tiene boost
@@ -878,18 +814,9 @@ client.on("messageCreate", async message => {
             message.channel.send(`**${author} parece no detenerse.\n— ¡SUBE A NIVEL 30!**`)
             message.member.roles.add(rewards.roles[30]);
 
-            // BONO DE 2000 POR LLEGAR AL LVL 30
-            Jeffros.findOne(
-              {
-                serverID: guild.id,
-                userID: author.id
-              },
-              (err, global) => {
-                global.jeffros = global.jeffros + 2000;
+            user.economy.global.jeffros += 2000;
 
-                global.save();
-              }
-            );
+            await user.save();
           } else if (curLvl === 40) {
             message.channel.send(`**${author} casi logra llegar al punto medio.\n— ¡SUBE A NIVEL 40!**`)
             message.member.roles.add(rewards.roles[40]);
@@ -1202,7 +1129,7 @@ client.on("messageReactionAdd", (reaction, user) => {
     .setAuthor(`| Confirmación`, Config.jeffreyguildIcon)
     .setDescription(
       `**—** ${user.tag}, ¿Estás seguro de darle a este usuario el premio de **__${award}__**?
-**—**( **${Emojis.Jeffros}${price}** )
+**—**( **${Emojis.Jeffros}${price.toLocaleString('es-CO')}** )
 
 *— Para más información de las recompensas de los premios [mira esto](https://discordapp.com/channels/447797737216278528/485191307346837507/668568017042538507).*`
     )
@@ -1249,93 +1176,89 @@ client.on("messageReactionAdd", (reaction, user) => {
         }
       });
 
-      yes.on("collect", r => {
+      yes.on("collect", async r => {
         msg.reactions.removeAll();
-        Jeffros.findOne(
-          {
-            serverID: guild.id,
-            userID: user.id
-          },
-          (err, author) => {
-            if (err) throw err;
 
-            if (!author || author.jeffros < price) {
-              return msg.edit({content: `No tienes **${Emojis.Jeffros}${price}**.`, embeds: null});
-            }
+        let user_author = await User.findOne({ // buscar al que paga el premio
+          user_id: user.id,
+          guild: guild.id
+        });
 
-            if (award === "oro" || award === "platino") {
-              Jeffros.findOne(
-                {
-                  serverID: guild.id,
-                  userID: message.author.id
-                },
-                (err, reciever) => {
-                  if (err) throw err;
+        let user_reciever = await User.findOne({ // buscar el que recibe el premio
+          user_id: user.id,
+          guild_id: guild.id
+        });
 
-                  if (reciever === author) {
-                    reciever.jeffros -= price - gift;
+        if (!user_author || user_author.economy.global.jeffros < price) { // si no existe un documento con jeffros o son insuficientes
+          return msg.edit({content: `No tienes **${Emojis.Jeffros}${price.toLocaleString('es-CO')}**.`, embeds: null});
+        }
 
-                    msg.edit({content: null, embeds: [paid]}).then(m => {
-                      setTimeout(() => {
-                        m.delete()
-                      }, ms("4s"));
-                    });
-                    return hallChannel.send({embeds: [embed]});
-                  }
+        if (award === "oro" || award === "platino") { // si el award es de oro o platino
+          if (user_reciever === user_author) { // si es el mismo usuario
+            user_reciever.economy.global.jeffros -= price - gift;
 
-                  if (!reciever) {
-                    const newJeffros = new Jeffros({
-                      userID: message.author.id,
-                      serverID: guild.id,
-                      jeffros: gift
-                    });
-
-                    newJeffros.save();
-                    author.jeffros -= price;
-                    author.save();
-
-                    // despues del pago
-
-                    msg.edit({content: null, embeds: [paid]}).then(m => {
-                      setTimeout(() => {
-                        m.delete()
-                      }, ms("4s"));
-                    });
-                    return hallChannel.send({embeds: [embed]});
-                  } else {
-                    author.jeffros -= price;
-                    author.save();
-                    reciever.jeffros += gift;
-                    reciever.save();
-
-                    // despues del pago
-
-                    msg.edit({content: null, embeds: [paid]}).then(m => {
-                      setTimeout(() => {
-                        m.delete()
-                      }, ms("4s"));
-                    });
-                    return hallChannel.send({embeds: [embed]});
-                  }
-                }
-              );
-            } else {
-              // SI EL PREMIO ES SILVER ENTONCES
-              author.jeffros -= price;
-
-              author.save();
-
-              msg.edit({content: null, embeds: [paid]}).then(m => {
-                msg.reactions.removeAll();
-
-                setTimeout(() => {
-                  m.delete();
-                }, ms("4s"));
-              });
-              return hallChannel.send({embeds: [embed]});
-            }
+            msg.edit({content: null, embeds: [paid]}).then(m => {
+              setTimeout(() => {
+                m.delete()
+              }, ms("4s"));
+            });
+            return hallChannel.send({embeds: [embed]});
           }
-        );
+
+          if (!user_reciever) {
+            const newUser = new User({
+              user_id: message.author.id,
+              guild: guild.id,
+              economy: {
+                global: {
+                  jeffros: gift
+                }
+              }
+            });
+
+            user_author.economy.global.jeffros -= price;
+            await newUser.save();
+            await user_author.save();
+
+            // despues del pago
+
+            msg.edit({content: null, embeds: [paid]}).then(m => {
+              setTimeout(() => {
+                m.delete()
+              }, ms("4s"));
+            });
+            return hallChannel.send({embeds: [embed]});
+          } else {
+            user_author.economy.global.jeffros -= price;
+            user_reciever.economy.global.jeffros += gift;
+
+            await user_reciever.save();
+            await user_author.save();
+
+            // despues del pago
+
+            msg.edit({content: null, embeds: [paid]}).then(m => {
+              setTimeout(() => {
+                m.delete()
+              }, ms("4s"));
+            });
+            return hallChannel.send({embeds: [embed]});
+          }
+        } else {
+          // SI EL PREMIO ES SILVER ENTONCES
+          user_author.economy.global.jeffros -= price;
+
+          await user_author.save();
+
+          msg.edit({content: null, embeds: [paid]}).then(m => {
+            msg.reactions.removeAll();
+
+            setTimeout(() => {
+              m.delete();
+            }, ms("4s"));
+          });
+          return hallChannel.send({embeds: [embed]});
+        }
       });
 
       no.on("collect", r => {
@@ -1355,139 +1278,194 @@ client.on("messageReactionAdd", (reaction, user) => {
     });
 });
 
-client.on("messageCreate", async msg => {
-  // Si mencionan a Jeffrey, mención en #log
-  if (msg.author.bot) return;
-  if (msg.channel.type == "DM") return;
-  let contentMsg = msg.content.toLowerCase();
-  let logC = msg.guild.channels.cache.find(x => x.id === logChannel);
+/* ########## WATCHER #########*/
 
-  let adminRole = msg.guild.roles.cache.find(x => x.id === Config.adminRole);
-  let modRole = msg.guild.roles.cache.find(x => x.id === Config.modRole);
-  let staffRole = msg.guild.roles.cache.find(x => x.id === Config.staffRole);
+let jeffreyMentions = {
+  real: ["jeff", "jeffrey", "jeffry", "jefry", "jefri", "jeffri", "yefri", "yeffri", "yefry", "yefrei", "yeffrig"],
+  false: ["jeffros"]
+};
+
+let startLinks = [
+  "https://", "http://", "www."
+];
+
+client.on("messageCreate", async message => {
+  let channel = message.channel;
+  let author = message.author;
+
+  if (author.bot) return;
+  if (message.channel.type == "DM") return;
+  if (author.bot) return;
+  if (author.id === jeffreygID) return;
+  if (message.content.startsWith(prefix)) return;
+  
+  let log = message.guild.channels.cache.find(x => x.id === Config.logChannel);
+
+  let adminRole = message.guild.roles.cache.find(x => x.id === Config.adminRole);
+  let modRole = message.guild.roles.cache.find(x => x.id === Config.modRole);
+  let staffRole = message.guild.roles.cache.find(x => x.id === Config.staffRole);
+  let offtopicChannel = message.guild.channels.cache.find(x => x.id === Config.offtopicChannel);
+  let spamChannel = message.guild.channels.cache.find(x => x.id === Config.spamChannel);
+  let gdpsSupportChannel = message.guild.channels.cache.find(x => x.id === Config.gdpsSupportChannel);
 
   if(client.user.id === Config.testingJBID){
-    adminRole = msg.guild.roles.cache.find(x => x.id === "483105079285776384");
-    modRole = msg.guild.roles.cache.find(x => x.id === "483105108607893533");
-    staffRole = msg.guild.roles.cache.find(x => x.id === "535203102534402063");
+    adminRole = message.guild.roles.cache.find(x => x.id === "483105079285776384");
+    modRole = message.guild.roles.cache.find(x => x.id === "483105108607893533");
+    staffRole = message.guild.roles.cache.find(x => x.id === "535203102534402063");
+    log = message.guild.channels.cache.find(x => x.id === "537095712102416384");
+    offtopicChannel = message.guild.channels.cache.find(x => x.id === "537095712102416384");
+    spamChannel = message.guild.channels.cache.find(x => x.id === "537095712102416384");
+    gdpsSupportChannel = message.guild.channels.cache.find(x => x.id === "537095712102416384");
   }
+
+  // Si mencionan a Jeffrey, mención en #log
+  
+  let contentMsg = message.content.toLowerCase();
 
   let embed = new Discord.MessageEmbed()
-    .setAuthor(`${msg.author.tag}`, msg.author.displayAvatarURL())
-    .setDescription(
-      `**__${msg.author.username}__** dice: "\`${msg.content}\`".`
-    )
-    .setFooter(`Mencionaron a Jeffrey.`, msg.guild.iconURL())
-    .setColor(Colores.verde);
+  .setAuthor(`${author.tag}`, author.displayAvatarURL())
+  .setDescription(`**__${author.username}__** dice: "\`${message.content}\`".`)
+  .setFooter(`Mencionaron a Jeffrey.`, message.guild.iconURL())
+  .setColor(Colores.verde)
+  .setTimestamp();
 
-  if (
-    contentMsg.includes("jeff") ||
-    contentMsg.includes("jeffrey") ||
-    contentMsg.includes("jeffry") ||
-    contentMsg.includes("jefry") ||
-    contentMsg.includes("jefri") ||
-    contentMsg.includes("jeffri")
-  ) {
-    if (msg.author.bot) return;
-    if (msg.author.id === jeffreygID) return;
-    if (msg.content.startsWith(prefix)) return;
-    if (msg.channel.id === Config.offtopicChannel) return;
-    if (msg.channel.id === "829153564353101854") return; // evento de coins 2
-    if (msg.channel.id === Config.spamChannel) return;
-    if (msg.member.roles.cache.find(x => x.id === staffRole.id)) {
-      return logC
-        .send(`Un **STAFF** ha mencionado a Jeffrey en ${msg.channel}.`)
-        .then(m => logC.send({embeds: [embed]}));
+
+  for (let i = 0; i < jeffreyMentions.real.length; i++) {
+    const mention = jeffreyMentions.real[i];
+    
+    if(contentMsg.includes(mention)){
+      // falsos positivos JAJA
+      let fake = false;
+      
+      falso:
+      for (let i = 0; i < jeffreyMentions.false.length; i++) {
+        const falso = jeffreyMentions.false[i];
+        
+        if(contentMsg.includes(falso)) {
+          fake = true;
+          break falso;
+        }
+      }
+
+      if(fake) return;
+      if (message.channel.id === Config.offtopicChannel) return;
+      if (message.channel.id === "829153564353101854") return; // evento de coins 2
+      if (message.channel.id === Config.spamChannel) return;
+
+      if (message.member.roles.cache.find(x => x.id === staffRole.id)) return log.send({content: `Un **STAFF** ha mencionado a Jeffrey en ${message.channel}.`, embeds: [embed]});
+      else return log.send({content: `Han mencionado a <@${jeffreygID}> en ${message.channel}.`, embeds: [embed]});
     }
-    return logC
-      .send(`Han mencionado a <@!${jeffreygID}> en ${msg.channel}.`)
-      .then(m => logC.send({embeds: [embed]}));
+  }
+
+  // links
+  if (message.member.permissions.has("EMBED_LINKS") || channel === offtopicChannel || channel === spamChannel || channel === gdpsSupportChannel) return;
+
+  for (let i = 0; i < startLinks.length; i++) {
+    const start = startLinks[i];
+    
+    if(contentMsg.includes(start)){
+      await message.delete();
+      return message.channel.send({content: `No envíes links, **${author.tag}**`, ephemeral: true});
+    }
   }
 });
 
-client.on("messageCreate", message => {
+client.on("messageUpdate", async (old, message) => {
   let channel = message.channel;
   let author = message.author;
 
   if (author.bot) return;
-  if (!message.member) return;
-
-  if (message.member.permissions.has("EMBED_LINKS") || channel.id === Config.offtopicChannel || channel.id === Config.spamChannel || channel.id === Config.gdpsSupportChannel) {
-    return;
-  }
-
-  if (message.content.includes("https://")) {
-    message.delete();
-    message.author.send(`No envíes links, **${author.tag}**.`).catch(e => {
-      message.channel
-        .send(`No envíes links, **${author.tag}**.`)
-        .then(m => m.delete(ms("10s")));
-    });
-  }
-  if (message.content.includes("http://")) {
-    message.delete();
-    message.author.send(`No envíes links, **${author.tag}**.`).catch(e => {
-      message.channel
-        .send(`No envíes links, **${author.tag}**.`)
-        .then(m => m.delete(ms("10s")));
-    });
-  }
-  if (message.content.includes("www.")) {
-    message.delete();
-    message.author.send(`No envíes links, **${author.tag}**.`).catch(e => {
-      message.channel
-        .send(`No envíes links, **${author.tag}**.`)
-        .then(m => m.delete(ms("10s")));
-    });
-  }
-});
-
-client.on("messageUpdate", (oldmessage, message) => {
-  let channel = message.channel;
-  let author = message.author;
-
+  if (message.channel.type == "DM") return;
   if (author.bot) return;
-  if (message.channel.type === "DM") return;
+  if (author.id === jeffreygID) return;
+  if (message.content.startsWith(prefix)) return;
+  
+  let log = message.guild.channels.cache.find(x => x.id === Config.logChannel);
 
-  if (message.member.permissions.has("EMBED_LINKS") || channel.id === Config.offtopicChannel || channel.id === Config.spamChannel || channel.id === Config.gdpsSupportChannel) {
-    return;
+  let adminRole = message.guild.roles.cache.find(x => x.id === Config.adminRole);
+  let modRole = message.guild.roles.cache.find(x => x.id === Config.modRole);
+  let staffRole = message.guild.roles.cache.find(x => x.id === Config.staffRole);
+  let offtopicChannel = message.guild.channels.cache.find(x => x.id === Config.offtopicChannel);
+  let spamChannel = message.guild.channels.cache.find(x => x.id === Config.spamChannel);
+  let gdpsSupportChannel = message.guild.channels.cache.find(x => x.id === Config.gdpsSupportChannel);
+
+  if(client.user.id === Config.testingJBID){
+    adminRole = message.guild.roles.cache.find(x => x.id === "483105079285776384");
+    modRole = message.guild.roles.cache.find(x => x.id === "483105108607893533");
+    staffRole = message.guild.roles.cache.find(x => x.id === "535203102534402063");
+    log = message.guild.channels.cache.find(x => x.id === "483108734604804107");
+    offtopicChannel = message.guild.channels.cache.find(x => x.id === "537095712102416384");
+    spamChannel = message.guild.channels.cache.find(x => x.id === "537095712102416384");
+    gdpsSupportChannel = message.guild.channels.cache.find(x => x.id === "537095712102416384");
   }
 
-  if (message.content.includes("https://")) {
-    message.delete();
-    message.author.send(`No envíes links, **${author.tag}**.`).catch(e => {
-      message.channel
-        .send(`No envíes links, **${author.tag}**.`)
-        .then(m => m.delete(ms("10s")));
-    });
+  // Si mencionan a Jeffrey, mención en #log
+  
+  let contentMsg = message.content.toLowerCase();
+
+  let embed = new Discord.MessageEmbed()
+  .setAuthor(`${author.tag}`, author.displayAvatarURL())
+  .setDescription(`**__${author.username}__** dice: "\`${message.content}\`".`)
+  .setFooter(`Mencionaron a Jeffrey.`, message.guild.iconURL())
+  .setColor(Colores.verde)
+  .setTimestamp();
+
+
+  for (let i = 0; i < jeffreyMentions.real.length; i++) {
+    const mention = jeffreyMentions.real[i];
+    
+    if(contentMsg.includes(mention)){
+      // falsos positivos JAJA
+      let fake = false;
+
+      falso:
+      for (let i = 0; i < jeffreyMentions.false.length; i++) {
+        const falso = jeffreyMentions.false[i];
+        
+        if(contentMsg.includes(falso)) {
+          fake = true;
+          break falso;
+        }
+      }
+
+      if(fake) return;
+      if (message.channel.id === Config.offtopicChannel) return;
+      if (message.channel.id === "829153564353101854") return; // evento de coins 2
+      if (message.channel.id === Config.spamChannel) return;
+
+      if (message.member.roles.cache.find(x => x.id === staffRole.id)) return log.send({content: `Un **STAFF** ha mencionado a Jeffrey en ${message.channel}.`, embeds: [embed]});
+      else return log.send({content: `Han mencionado a <@${jeffreygID}> en ${message.channel}.`, embeds: [embed]});
+    }
   }
-  if (message.content.includes("http://")) {
-    message.delete();
-    message.author.send(`No envíes links, **${author.tag}**.`).catch(e => {
-      message.channel
-        .send(`No envíes links, **${author.tag}**.`)
-        .then(m => m.delete(ms("10s")));
-    });
-  }
-  if (message.content.includes("www.")) {
-    message.delete();
-    message.author.send(`No envíes links, **${author.tag}**.`).catch(e => {
-      message.channel
-        .send(`No envíes links, **${author.tag}**.`)
-        .then(m => m.delete(ms("10s")));
-    });
+
+  // links
+  if (message.member.permissions.has("EMBED_LINKS") || channel === offtopicChannel || channel === spamChannel || channel === gdpsSupportChannel) return;
+
+  for (let i = 0; i < startLinks.length; i++) {
+    const start = startLinks[i];
+    
+    if(contentMsg.includes(start)){
+      await message.delete();
+      return message.channel.send({content: `No envíes links, **${author.tag}**`, ephemeral: true});
+    }
   }
 });
+
+async function findCommand(cmd){
+  let file;
+  baseCommands.forEach(async command => {
+    let foundAlias = command.aliases.find(x => x === cmd.slice(prefix.length)) ? true : false;
+
+    if(foundAlias) {
+        file = require("./aa/" + command.file);
+    }
+  });
+
+  return file;
+}
 
 if (process.env.mantenimiento != 1) {
   client.login(process.env.TOKEN);
-
-  module.exports = {
-    client: client
-  }
-
-  functions = require("./resources/functions.js");
-  
 } else {
   console.log("########## BOT EN MANTENIMIENTO, NO LOGEADO #############");
 }

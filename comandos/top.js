@@ -168,15 +168,15 @@ module.exports.run = async (client, message, args) => {
                 `**—** ${Emojis.Jeffros}${res[i].jeffros}`
               );*/
             } else {
-              let darkshopMoney = res[n].darkjeffros != 0 ? ` (${Emojis.Dark}${res[n].darkjeffros}➟**${Emojis.Jeffros}${res[n].darkjeffrosValue}**)` : "";
+              let darkshopMoney = res[n].darkjeffros != 0 ? ` (${Emojis.Dark}${res[n].darkjeffros.toLocaleString('es-CO')}➟**${Emojis.Jeffros}${res[n].darkjeffrosValue.toLocaleString('es-CO')}**)` : "";
               if (n + 1 === 1) {
-                jeffrosEmbed.addField(`🏆 ${member.user.username}`, `**—** ${Emojis.Jeffros}${res[n].total}${darkshopMoney}`);
+                jeffrosEmbed.addField(`🏆 ${member.user.username}`, `**—** ${Emojis.Jeffros}${res[n].total.toLocaleString('es-CO')}${darkshopMoney}`);
               } else if (n + 1 === 2) {
-                jeffrosEmbed.addField(`🥈 ${member.user.username}`, `**—** ${Emojis.Jeffros}${res[n].total}${darkshopMoney}`);
+                jeffrosEmbed.addField(`🥈 ${member.user.username}`, `**—** ${Emojis.Jeffros}${res[n].total.toLocaleString('es-CO')}${darkshopMoney}`);
               } else if (n + 1 === 3) {
-                jeffrosEmbed.addField(`🥉 ${member.user.username}`, `**—** ${Emojis.Jeffros}${res[n].total}${darkshopMoney}`);
+                jeffrosEmbed.addField(`🥉 ${member.user.username}`, `**—** ${Emojis.Jeffros}${res[n].total.toLocaleString('es-CO')}${darkshopMoney}`);
               } else {
-                jeffrosEmbed.addField(`${i + 1}. ${member.user.username}`, `**—** ${Emojis.Jeffros}${res[n].total}${darkshopMoney}`);
+                jeffrosEmbed.addField(`${i + 1}. ${member.user.username}`, `**—** ${Emojis.Jeffros}${res[n].total.toLocaleString('es-CO')}${darkshopMoney}`);
               }
             }
 
@@ -206,15 +206,15 @@ module.exports.run = async (client, message, args) => {
                 `**—** ${Emojis.Jeffros}${res[i].jeffros}`
               );*/
             } else {
-              let darkshopMoney = res[n].darkjeffros != 0 ? ` (${Emojis.Dark}${res[n].darkjeffros}➟**${Emojis.Jeffros}${res[n].darkjeffrosValue}**)` : "";
+              let darkshopMoney = res[n].darkjeffros != 0 ? ` (${Emojis.Dark}${res[n].darkjeffros}➟**${Emojis.Jeffros}${res[n].darkjeffrosValue.toLocaleString('es-CO')}**)` : "";
               if (n + 1 === 1) {
-                jeffrosEmbed.addField(`🏆 ${member.user.username}`, `**—** ${Emojis.Jeffros}${res[n].total}${darkshopMoney}`);
+                jeffrosEmbed.addField(`🏆 ${member.user.username}`, `**—** ${Emojis.Jeffros}${res[n].total.toLocaleString('es-CO')}${darkshopMoney}`);
               } else if (n + 1 === 2) {
-                jeffrosEmbed.addField(`🥈 ${member.user.username}`, `**—** ${Emojis.Jeffros}${res[n].total}${darkshopMoney}`);
+                jeffrosEmbed.addField(`🥈 ${member.user.username}`, `**—** ${Emojis.Jeffros}${res[n].total.toLocaleString('es-CO')}${darkshopMoney}`);
               } else if (n + 1 === 3) {
-                jeffrosEmbed.addField(`🥉 ${member.user.username}`, `**—** ${Emojis.Jeffros}${res[n].total}${darkshopMoney}`);
+                jeffrosEmbed.addField(`🥉 ${member.user.username}`, `**—** ${Emojis.Jeffros}${res[n].total.toLocaleString('es-CO')}${darkshopMoney}`);
               } else {
-                jeffrosEmbed.addField(`${i + 1}. ${member.user.username}`, `**—** ${Emojis.Jeffros}${res[n].total}${darkshopMoney}`);
+                jeffrosEmbed.addField(`${i + 1}. ${member.user.username}`, `**—** ${Emojis.Jeffros}${res[n].total.toLocaleString('es-CO')}${darkshopMoney}`);
               }
             }
 

@@ -1,0 +1,41 @@
+const Config = require("../../base.json");
+const Colores = require("../../resources/colores.json");
+const Emojis = require("../../resources/emojis.json");
+const Discord = require("discord.js");
+const ms = require("ms");
+
+const { Initialize, TutorialEmbed } = require("../../resources/functions.js");
+
+/* ##### MONGOOSE ######## */
+
+const User = require("../../modelos/User.model.js");
+
+/* ##### MONGOOSE ######## */
+
+const commandInfo = {
+    name: "nombre_del_comando",
+    aliases: ["alias1"],
+    info: "Información del comando",
+    params: [
+        {
+            name: "nombre_del_parametro", display: "a mostrar en vez de 'name'", type: "tipo_de_parametro", optional: false
+        }
+    ],
+    userlevel: "USER, STAFF, ADMIN, DEVELOPER",
+    category: "GENERAL, FUN, MODERATION, STAFF, ECONOMY, MUSIC, DEVELOPER"
+}
+
+module.exports = {
+    data: commandInfo,
+    async execute(client, message, args){
+
+        const { guild, author, prefix, executionInfo } = await Initialize(client, message);
+
+        let response = await TutorialEmbed(commandInfo, executionInfo, args);
+
+        if(response[0] === "ERROR") return console.log(response); // si hay algún error
+
+        // Comando
+
+    }
+}

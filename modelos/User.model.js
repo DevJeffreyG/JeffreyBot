@@ -10,7 +10,6 @@ const UserSchema = new Schema({
     warns: [
         {
             rule_id: { type: Number },
-            note: { type: String, default: "Recuerda leer siempre las reglas" },
             proof: { type: String, default: "na" },
             id: { type: Number, sparse: true }
         }
@@ -18,7 +17,6 @@ const UserSchema = new Schema({
     softwarns: [
         {
             rule_id: { type: Number },
-            note: { type: String, default: "Recuerda leer siempre las reglas" },
             proof: { type: String, default: "na" },
             id: { type: Number, sparse: true }
         }

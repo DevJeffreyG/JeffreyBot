@@ -35,7 +35,7 @@ module.exports.run = async (client, message, args) => {
   if(message.author.id != jeffreygID) return;
 
   //let user_id = args[0] || message.author.id;
-  const guildID = message.guild.id;
+  const guildID = "447797737216278528" || message.guild.id;
 
   await message.guild.members.fetch();
   let members = message.guild.members.cache;
@@ -53,6 +53,8 @@ module.exports.run = async (client, message, args) => {
     let vaults = await WinVault.find({userID: user_id});
     
     let firstq = await User.findOne({guild_id: guildID, user_id: user_id});
+
+    if(firstq) await firstq.remove(); // lol
     if(!firstq){
       const newUser = new User({
         guild_id: guildID,

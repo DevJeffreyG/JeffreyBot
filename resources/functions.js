@@ -7,7 +7,6 @@ const { Structures } = require('discord.js');
 const anyBase = require("any-base");
 const prettyms = require("pretty-ms");
 const dec2hex = anyBase(anyBase.DEC, anyBase.HEX);
-let { client } = require("../jb.js");
 
 const fs = require("fs");
 const ms = require("ms");
@@ -46,10 +45,11 @@ const Twitter = require("twitter");
 const { ApiClient } = require("twitch");
 const { StaticAuthProvider } = require("twitch-auth");
 const request = require("request");
+const { resolve, join } = require("path");
 
 /* ##### MONGOOSE ######## */
 
-const findLvls5 = async function(guild){
+const findLvls5 = async function(client, guild){
   let role = client.user.id === Config.testingJBID ? guild.roles.cache.find(x => x.id === "791006500973576262") : guild.roles.cache.find(x => x.id === Config.dsRole);
   Exp.find({
     serverID: guild.id
@@ -147,7 +147,7 @@ const getChanges = function(entryChanges) {
  * @param {boolean} [justTempRoles=false] Just execute interval of temporal roles
  * @returns void
  */
-const intervalGlobalDatas = async function(justTempRoles){
+const intervalGlobalDatas = async function(client, justTempRoles){
   justTempRoles = justTempRoles || false;
 
   let guild;
@@ -197,6 +197,7 @@ const intervalGlobalDatas = async function(justTempRoles){
 
             // eliminar el temprole de la db
             dbUser.data.temp_roles.splice(i, 1);
+            dbUser.save();
           } else { // es una suscripción
             let price = Number(temprole.sub_info.price);
             let subName = temprole.sub_info.name;
@@ -204,7 +205,7 @@ const intervalGlobalDatas = async function(justTempRoles){
 
             let notEnough = new Discord.MessageEmbed()
             .setAuthor(`| Error`, Config.errorPng)
-            .setDescription(`**—** No tienes suficientes Jeffros **(${Emojis.Jeffros}${price})** para pagar la suscripción a \`${subName}\`.
+            .setDescription(`**—** No tienes suficientes Jeffros **(${Emojis.Jeffros}${price.toLocaleString('es-CO')})** para pagar la suscripción a \`${subName}\`.
 **—** Tu saldo ha quedado en **alerta roja**.`)
             .setColor(Colores.rojo);
 
@@ -213,14 +214,15 @@ const intervalGlobalDatas = async function(justTempRoles){
 
               // eliminar el temprole de la db
               dbUser.data.temp_roles.splice(i, 1);
+              dbUser.save();
             } else {
               // cobrar jeffros
               let jeffros = dbUser.economy.global;
 
               let paidEmbed = new Discord.MessageEmbed()
               .setAuthor(`| Pagado`, Config.bienPng)
-              .setDescription(`**—** Has pagado **${Emojis.Jeffros}${price}** para pagar la suscripción a \`${subName}\`.
-              **—** Tu saldo ha quedado en **${Emojis.Jeffros}${jeffros.jeffros - price}**.`)
+              .setDescription(`**—** Has pagado **${Emojis.Jeffros}${price.toLocaleString('es-CO')}** para pagar la suscripción a \`${subName}\`.
+              **—** Tu saldo ha quedado en **${Emojis.Jeffros}${(jeffros.jeffros - price).toLocaleString('es-CO')}**.`)
               .setColor(Colores.verde);
 
               if(!jeffros || jeffros.jeffros < price){
@@ -742,7 +744,7 @@ const Warns = function (v, c){
             });
             newWarn.save();
         } else {
-            victimWarns.warns += c;
+            victimtotalWarns += c;
             victimWarns.save();
         }
     })
@@ -798,12 +800,19 @@ const Interest = function (author, idUse) {
  * @param {number} [specialValue=false] The value for the objetive of this special temporary role.
  * @returns void
  */
-const LimitedTime = function(guild, roleID, victimMember, duration, specialType, specialObjective, specialValue){
+const LimitedTime = async function(guild, roleID, victimMember, duration, specialType, specialObjective, specialValue){
     specialType = specialType || false;
     specialObjective = specialObjective || false;
     specialValue = specialValue || false;
 
     let role = guild.roles.cache.find(x => x.id === roleID);
+
+    let user = await User.findOne({
+      user_id: victimMember.id,
+      guild_id: victimMember.guild.id
+    });
+
+
 
     // si no es un boost (por ahora)
     if(!specialType){
@@ -829,29 +838,29 @@ const LimitedTime = function(guild, roleID, victimMember, duration, specialType,
             }
         })
 
-        newData.save();
+        let toPush = {
+          role_id: roleID,
+          active_since: hoy,
+          duration: duration
+        }
+
+        user.data.temp_roles.push(toPush);
+        await user.save();
+
+        let lastAddedIndex = user.data.temp_roles.length - 1;
+        victimMember.roles.add(role);
 
         // timeout, por si pasa el tiempo antes de que el bot pueda reiniciarse
         setTimeout(function(){
             victimMember.roles.remove(role);
 
-            GlobalData.findOneAndDelete({
-                "info.type": "roleDuration",
-                "info.roleID": roleID,
-                "info.userID": victimMember.id,
-                "info.special.type": false
-            }, (err, func) => {
-                if(err){
-                    console.log("e", err);
-                } else {
-                    return true;
-                }
-            });
+            user.data.temp_roles.splice(lastAddedIndex, 1);
+            user.save()
         }, duration);
 
       } else {
           // es permanente, no hacer nada
-          return;
+          return console.log("Por qué llamas literalmente una función que se llama 'Limited Time' para un role que es permanente? ¿No tienes sentido común o qué?");
       }
     } else { // es un boost
 
@@ -863,7 +872,7 @@ const LimitedTime = function(guild, roleID, victimMember, duration, specialType,
           roleID: roleID,
           userID: victimMember,
           since: hoy,
-          duration: ms(duration),
+          duration: duration,
           special: {
             "type": specialType, // boostMultiplier
             "specialObjective": specialObjective, // exp, jeffros, all
@@ -890,7 +899,7 @@ const LimitedTime = function(guild, roleID, victimMember, duration, specialType,
                   console.log("Role eliminado automaticamente")
               }
           });
-        }, ms(duration));
+        }, duration);
     }
 }
 
@@ -1053,7 +1062,7 @@ const vaultMode = function(hint, author, message) { // tengo que rehacer esto XD
       });
 }
 
-const handleUploads = async function(){
+const handleUploads = async function(client){
   let guild, bellytChannel, belltwChannel, belltvChannel, role;
 
   if(client.user.id === Config.testingJBID){
@@ -1074,9 +1083,6 @@ const handleUploads = async function(){
   let query = await GlobalData.findOne({
     "info.type": "bellNotification"
   });
-  
-  let twitterss = ["https://nitter.actionsack.com/JeffreyG__/rss", "https://nitter.database.red/JeffreyG__/rss", "https://nitter.moomoo.me/JeffreyG__/rss"]; // posiblidades
-  let twitchrss = "https://twitchrss.appspot.com/vod/jeffreybot_tv";
 
   if (!query){
     const newNotification = new GlobalData({
@@ -1331,12 +1337,13 @@ const handleUploads = async function(){
  * Initialize the base variables used on the commands.
  * @param {*} client - The Discord.JS Client
  * @param {*} message - The Discord.JS Message that triggers the command
- * @returns Object including the [guild, author, prefix, jeffrey_role, admin_role, mod_role, staff_role] variables
+ * @returns Object including the [guild, author, prefix, jeffrey_role, admin_role, mod_role, staff_role, executionInfo] variables
  */
 const Initialize = async function(client, message){
   // Variables
   const guild = message.guild;
   const author = message.author;
+  const member = message.member;
   const prefix = Config.prefix;
   let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
   let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
@@ -1350,14 +1357,24 @@ const Initialize = async function(client, message){
       staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
   }
 
+  const executionInfo = {
+    client: client,
+    guild: guild,
+    author: author,
+    message: message,
+    member: message.member
+  }
+
   return {
-    "guild": guild,
-    "author": author,
-    "prefix": prefix,
-    "jeffrey_role": jeffreyRole,
-    "admin_role": adminRole,
-    "mod_role": modRole,
-    "staff_role": staffRole
+    guild: guild,
+    author: author,
+    member: member,
+    prefix: prefix,
+    jeffrey_role: jeffreyRole,
+    admin_role: adminRole,
+    mod_role: modRole,
+    staff_role: staffRole,
+    executionInfo: executionInfo
   };
 }
 
@@ -1367,50 +1384,110 @@ const Initialize = async function(client, message){
  * @param {Object[]} executionInfo The information of the execution of the command.
  * - guild
  * - author
+ * - member
  * - message
  * @param {Array} [args=null] - The arguments of the user by using the command
  * @returns Embed, or an error if any required parameter is missing
  */
-const TutorialEmbed = function(commandTree, executionInfo, args){
+const TutorialEmbed = async function(commandTree, executionInfo, args){
   args = args || null;
 
-  const { guild, message } = executionInfo;
+  const { client, guild, message, member } = executionInfo;
+  let { userlevel, params } = commandTree;
 
-  let Embed = new Discord.MessageEmbed()
-  .setAuthor(`▸ ${Config.prefix}${commandTree.name}`, guild.iconURL())
-  .setColor(Colores.nocolor);
+  let originalParams = params;
 
-  let FooterString = commandTree.alias ? `<> Obligatorio () Opcional┊Alias: ${Config.prefix}alias` : `<> Obligatorio () Opcional`;
+  let response = [];
+  
+  // Revisar permisos
+  const { jeffrey_role, admin_role, staff_role } = await Initialize(client, message);
+  let permissions_role_id; // id del rol a
+  switch(userlevel){
+    case "DEVELOPER":
+      permissions_role_id = jeffrey_role.id;
+      break;
 
-  let DescriptionString = `▸ El uso correcto es: ${Config.prefix}${commandTree.name}`;
-  for (let i = 0; i < commandTree.params.length; i++) {
-    const param = commandTree.params[i];
-    
-    if(!param.optional){
-      DescriptionString += ` <${param.name}>`
-    } else {
-      DescriptionString += ` (${param.name})`
-    }
+    case "ADMIN":
+      permissions_role_id = admin_role.id;
+      break;
+
+    case "STAFF":
+      permissions_role_id = staff_role.id;
+      break;
+
+    default:
+      permissions_role_id = null;
+      break;
   }
 
-  Embed.setDescription(DescriptionString);
-  Embed.setFooter(FooterString);
+  if(permissions_role_id && !member.roles.cache.find(x => x.id === permissions_role_id) && !member.roles.cache.find(x => x.id === jeffrey_role.id)) response = ["ERROR", `INSUFFICIENT PERMISSIONS '${userlevel}'`];
+
+  if(!params) return response;
+
+  let Embed = await createEmbedWithParams(commandTree, guild, params)
 
   if(!args){ // no se dan args, se creó el embed
-    return message.channel.send({embeds: [Embed]});
-  } else {
+    return Embed;
+  } else if(args && response.length === 0){ // si hay args llamando con la función, y no hay error de permisos
 
-    let response = [];
+    // cargar nuevos parametros en caso de ser necesario
+    let newParams = [];
+    paramsLoop:
+    for (let i = 0; i < originalParams.length; i++) {
+      const param = originalParams[i];
+      
+      newParams.push(param)
+    
+      if(param.type === "Options"){
+        break paramsLoop;
+      }
+    }
+
+    // definir los parámetros que ya fueron escogidos
+    let alreadyPassed = "";
+
+    for (let i = 0; i < newParams.length; i++) {
+      alreadyPassed += `${args[i]} `;
+    }
+
+    let futureParams = false;
+    
+    // agregar los nuevos parámetros en caso de tener active_on de lo que ya se pasó antes
+    let index = originalParams.findIndex(element => element.type === "Options");
+    originalParams.forEach(async p => {
+      if(p.active_on && p.active_on.param === originalParams[index].name && p.active_on.is === args[index]) {
+        // revisar que no esté repetido
+        
+        futureParams = true;
+
+        newParams.push(p);
+
+        params = newParams;
+      }
+    })
+
+    if(!futureParams){
+      originalParams.forEach(p => {
+        let isOnParams = newParams.find(x => x.name === p.name) ? true : false;
+        if(!p.active_on && !isOnParams) newParams.push(p);
+      });
+
+      params = newParams;
+
+      Embed = await createEmbedWithParams(commandTree, guild, params);
+    } else {
+      Embed = await createEmbedWithParams(commandTree, guild, params, alreadyPassed);
+    }
 
     verificationLoop:
-    for (let i = 0; i < commandTree.params.length; i++) {
-      const param = commandTree.params[i];
+    for (let i = 0; i < params.length; i++) {
+      let param = params[i];
       const arg = args[i] ? args[i] : null;
 
       let toReturn;
       if(!arg){ // null, revisar que sea opcional
-        if(!param.optional) { // no es opcional, regresar error
-          response = [null, i];
+        if(param && !param.optional) { // no es opcional, regresar error
+          response = ["ERROR", `in ${i} - REQUIRED PARAMETER NOT DEFINED`, i, " "];
           break verificationLoop;
         } else {
           toReturn = null;
@@ -1418,19 +1495,49 @@ const TutorialEmbed = function(commandTree, executionInfo, args){
       } else {
         // validar el tipo de parámetro dado
 
-        switch(param.type){
-          case "Member":
-            // buscar por mención, o id
-            toReturn = message.mentions.members.first() ? message.mentions.members.first() : guild.members.cache.find(x => x.id === arg);
-            break;
+        toReturn = await switchParams(param, arg, args, message, guild, member, client, i);
 
-          case "Array":
-            toReturn = arg.split(`${param.split}`)
-            break;
+        let joinStringExists = params.find(x => x.type === "JoinString");
+
+        let nothingElseAfterJoinString = params[params.findIndex(x => x === joinStringExists) + 2] ? false : true;
+        if(!nothingElseAfterJoinString && joinStringExists) toReturn = "FATAL JOINSTRING";
+
+        if(params[params.findIndex(x => x === joinStringExists) + 1] && nothingElseAfterJoinString){ // esto para cuando haya una solo cosa después de JoinString
+          if(joinStringExists && param.type === "JoinString"){
+            let indexOfJoinString = params.findIndex(x => x === joinStringExists); // el index del param del JoinString
+
+            let indexFTR = indexOfJoinString + 1 - params.length + args.length; // el index del primer elemento que se SUPONE va justo después del JoinString
+
+            let isValid = await validateAnArg(params[params.findIndex(x => x === joinStringExists) + 1], args[indexFTR], args, message, guild, member, client, i);
+
+            let afterArgs = args.slice(indexFTR, args.length); // el array de lo que está después del JoinString
+
+            // cambiar el "args"
+            args = args.slice(0, indexFTR - 1); // actualizar el args, para que no sobren args, el arg que queda en la posicion del JoinString NO son los args juntados.
+
+            if(isValid){ // el arg después de JoinString es valido de acuerdo a los que están en los params.
+              afterArgs.forEach(after => {
+                toReturn = toReturn.replace(after, "").trimEnd(); // eliminar del toReturn del JoinString cada elemento de afterArgs
+                args.push(after); // push al args actualizado
+              })
+            }
+          }
         }
 
+
         if(!toReturn){
-          response = [null, i];
+          const limit = 30;
+          let given = arg;
+          if(arg.length > limit){
+            given = arg.slice(0, limit+1) + "..."
+          }
+          response = ["ERROR", `in ${i} - INVALID PARAMETER GIVEN`, i, given];
+          break verificationLoop;
+        } else if(toReturn === "FATAL"){
+          response = ["ERROR", `in ${i} - INVALID PARAMETER TYPE`, `UNKOWN ${param.type}`, "FATAL ERROR"];
+          break verificationLoop;
+        } else if(toReturn === "FATAL JOINSTRING"){
+          response = ["ERROR", `in ${i} - INVALID PARAMETERS WRITTEN`, `ONLY ONE PARAM AFTER JOINSTRING`, "FATAL ERROR"];
           break verificationLoop;
         }
       }
@@ -1441,16 +1548,392 @@ const TutorialEmbed = function(commandTree, executionInfo, args){
       });
       
     }
-    
-    if(!response[0]) {
-      Embed.setAuthor(`Error ▸ ${Config.prefix}${commandTree.name}: ${commandTree.params[response[1]].name}`, guild.iconURL())
+
+    if(response[3] === "FATAL ERROR"){
+      message.channel.send(`¡${jeffrey_role}, ayuda por aquí!\n\n${member} espera un momento que Jeffrey es un poco lento en las computadoras y tiene que revisar algo para que todo funcione bien.\n\`\`\`json\n${response}\`\`\``);
+      return response;
+    } else
+
+    if(response[0] === "ERROR") {
+      Embed.setAuthor(`Error ▸ ${Config.prefix}${commandTree.name}: ${params[response[2]].name}, invalid "${response[3]}"`, guild.iconURL())
       Embed.setColor(Colores.rojo);
-      return message.channel.send({embeds: [Embed]}); // Si la response está mal, enviar embed (wip)
+      message.channel.send({embeds: [Embed]}); // Si la response está mal, enviar embed (wip)
+      return response;
     } else { // no hay ningún parámetro mal
       return response;
     }
+  } else { // si hay un error de permisos
+    return response;
   }
   
+}
+
+/**
+ * 
+ * @param {String} toConfirm What is trying to be confirmed
+ * @param {Array} dataToConfirm The text that will apear on the embed separated by "▸"
+ * @param {*} msg The Discord.JS Message that triggers the command
+ * @returns {Promise} Discord.JS Message if the confirmation is positive, if not, returns false
+ */
+const Confirmation = async function(toConfirm, dataToConfirm, msg){
+  let DescriptionString = "";
+
+  dataToConfirm.forEach(data => {
+    DescriptionString += `\`▸\` ${data}\n`;
+  });
+
+  let confirmation = new Discord.MessageEmbed()
+  .setAuthor(`| ${toConfirm}?`, msg.guild.iconURL())
+  .setDescription(DescriptionString)
+  .setColor(Colores.rojo);
+
+  let cancelEmbed = new Discord.MessageEmbed()
+  .setDescription(`Cancelado.`)
+  .setColor(Colores.nocolor);
+
+  let message = await msg.channel.send({embeds: [confirmation]}); // enviar mensaje de confirmación
+
+  // reaccionar
+  await message.react(":allow:558084462232076312");
+  await message.react(":denegar:558084461686947891");
+
+  return new Promise(async (resolve, reject) => {
+    const yesFilter = (reaction, user) => reaction.emoji.id === "558084462232076312" && user.id === msg.author.id;
+    const noFilter = (reaction, user) => reaction.emoji.id === "558084461686947891" && user.id === msg.author.id;
+    const collectorFilter = (reaction, user) => (reaction.emoji.id === "558084462232076312" || reaction.emoji.id === "558084461686947891") && user.id === msg.author.id;
+  
+    const yes = message.createReactionCollector({ filter: yesFilter, time: 60000 });
+    const no = message.createReactionCollector({ filter: noFilter, time: 60000 });
+    const collector = message.createReactionCollector({ filter: collectorFilter, time: 60000 });
+  
+    collector.on("collect", r => {
+      collector.stop();
+    });
+  
+    collector.on("end", async r => {
+      if(!(r.size > 0 && (r.size === 1 && r.first().me))) {
+        let finalmsg = await message.edit({embeds: [cancelEmbed]});
+    
+        await message.reactions.removeAll();
+    
+        await message.react("795090708478033950");
+        msg.delete();
+        
+        setTimeout(() => {
+          finalmsg.delete()
+        }, ms("20s"));
+    
+        resolve(false);
+      }
+    });
+  
+    yes.on("collect", async r => {
+      confirmation
+      .setColor(Colores.verde)
+      .setAuthor(`| ${toConfirm}, continuando...`, Config.loadingGif);
+
+      await message.edit({embeds: [confirmation]})
+      
+      message.reactions.removeAll();
+      resolve(message);
+    });
+  
+    no.on("collect", async r => {
+      resolve(false);
+
+      let finalmsg = await message.edit({embeds: [cancelEmbed]})
+      
+      message.reactions.removeAll();
+      await msg.delete();
+      setTimeout(() => {
+        finalmsg.delete()
+      }, ms("20s"));
+    });
+  });
+}
+
+/**
+ * 
+ * @param {*} user Mongoose User Query with one document
+ * @param {Array} data Needed member, rule string, and proof object used for the infraction
+ * @param {Boolean} [isSoftwarn=false] The infraction is a softwarn?
+ */
+const AfterInfraction = async function(user, data, isSoftwarn){
+  isSoftwarn = isSoftwarn || false;
+  const { member, rule, proof, message } = data;
+  const { prefix } = Config;
+
+  if(!isSoftwarn){ // es un warn normal
+    const warns = user.warns;
+    const totalWarns = warns.length;
+
+    const guild = member.guild;
+    
+    // acciones de automod
+    let arrayEmbeds = [];
+    
+    let warnedEmbed = new Discord.MessageEmbed()
+    .setAuthor(`| Warn`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
+    .setDescription(`
+**—** Has sido __warneado__ por el STAFF.
+**—** Warns actuales: **${totalWarns}**.
+**—** Por infringir la regla: **${rule}**.
+**—** **[Pruebas](${proof.url})**.`)
+    .setColor(Colores.rojo)
+    .setFooter(`Ten más cuidado la próxima vez!`, 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png');
+
+    arrayEmbeds.push(warnedEmbed);
+    let banMember = false;
+
+    if(totalWarns >= 4){
+      let autoMod = new Discord.MessageEmbed()
+      .setAuthor(`| Ban PERMANENTE.`, "https://cdn.discordapp.com/emojis/537804262600867860.png")
+      .setDescription(`**—** PERMABAN.
+**—** Warns actuales: **${totalWarns}**.
+**—** Razón de ban (AutoMod): Muchos warns.
+**—** Último warn por infringir la regla: **${rule}**.`)
+      .setColor(Colores.rojo);
+
+      arrayEmbeds.push(autoMod);
+      banMember = true;
+    } else
+
+    if(totalWarns >= 3){
+      let autoMod = new Discord.MessageEmbed()
+      .setAuthor(`| TempBan`, "https://cdn.discordapp.com/emojis/537792425129672704.png")
+      .setDescription(`**—** Ban (24h).
+**—** Warns actuales: **${totalWarns}**.
+**—** Razón de ban (AutoMod): 3 warns acumulados.
+**—** Último warn por infringir la regla: **${rule}**.`)
+      .setColor(Colores.rojo);
+
+      arrayEmbeds.push(autoMod);
+      banMember = true
+      
+
+      GlobalData.findOne({
+        "info.type": "temporalGuildBan",
+        "info.userID": member.id,
+        "info.serverID": guild.id
+      }, (err, guildBan) => {
+        if(err) throw err;
+
+        let now = new Date();
+
+        if(!guildBan){
+          const newBan = new GlobalData({
+            info: {
+              type: "temporalGuildBan",
+              userID: member.id,
+              serverID: guild.id,
+              reason: `AutoMod. (Infringir "${rule}")`,
+              since: now,
+              duration: ms("1d")
+            }
+          });
+
+          newBan.save();
+        } else {
+          // si ya existe (how) cambiar el since
+          guildBan.info.since = now;
+          guildBan.save();
+
+        }
+
+        setTimeout(function() {
+          guild.unban(member.id)
+        }, ms("1d"));
+      });
+    } else
+
+    if(totalWarns >= 2){
+      let infoEmbed = new Discord.MessageEmbed()
+      .setAuthor(`| Información`, "https://cdn.discordapp.com/emojis/494267320097570837.png?v=1")
+    .setDescription(`**—** ${member.user.tag}, este es tu **warn número ❛ \`2\` ❜**
+*— ¿Qué impacto tendrá este warn?*
+**—** Tranquil@. Este warn no afectará en nada tu estadía en el servidor, sin embargo; el siguiente warn será un **ban de un día**.
+**—** Te sugiero comprar un **-1 Warn** en la tienda del servidor. *( \`${prefix}shop\` para más info de precios, etc. )*`)
+    .setColor(Colores.rojo);
+      
+      arrayEmbeds.push(infoEmbed);
+    }
+
+    // mensaje de warn normal
+    // embed que se le envía al usuario por el warn
+    
+    await member.send({embeds: arrayEmbeds})
+    .catch(e => {
+      console.log(e);
+      message.react("494267320097570837");
+      message.channel.send("¡Usuario con MDs desactivados // Usuario no encontrado! **¡No sabe cuántos WARNS tiene!**");
+    });
+
+    if(banMember) console.log("Te baneo");//member.ban({reason: `AutoMod. (Infringir "${rule}")`});
+  } else {
+    const { member, rule, proof } = data;
+
+    let warnedEmbed = new Discord.MessageEmbed()
+    .setAuthor(`¡Cuidado! (Softwarn)`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
+    .setDescription(`
+**—** Esto es sólo un llamado de atención.
+**—** Por infringir la regla: **${rule}**.
+**—** [Pruebas](${proof.url})`)
+    .setColor(Colores.rojo)
+    .setFooter(`Si vuelves a cometer esta misma falla serás warneado, ten cuidado.`, 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png');
+    
+    member.send({embeds: [warnedEmbed]})
+    .catch(e => {
+      message.react("494267320097570837");
+      message.channel.send("¡Usuario con MDs desactivados // Usuario no encontrado! **¡No sabe cuántos WARNS tiene!**");
+    });
+  }
+}
+
+async function createEmbedWithParams(commandTree, guild, params, already){
+  already = already ? already : "";
+
+  let Embed = new Discord.MessageEmbed()
+  .setAuthor(`▸ ${Config.prefix}${commandTree.name}`, guild.iconURL())
+  .setColor(Colores.nocolor)
+  .setFooter("<> Obligatorio () Opcional");
+
+  let DescriptionString = `▸ El uso correcto es: ${Config.prefix}${commandTree.name} ${already}`;
+  for (let i = already.split(" ").length - 1; i < params.length; i++) {
+    const param = params[i]
+    
+    if(!param.optional){
+      DescriptionString += ` <${param.display ? param.display : param.name}>`
+    } else {
+      DescriptionString += ` (${param.display ? param.display : param.name})`
+    }
+  }
+
+  Embed.setDescription(DescriptionString);
+
+  return Embed;
+}
+
+async function switchParams(param, arg, args, message, guild, member, client, i){
+  switch(param.type){
+    case "Member":
+      // buscar por mención, o id
+      toReturn = message.mentions.members.first() ? message.mentions.members.first() : guild.members.cache.find(x => x.id === arg); 
+
+      if(!toReturn && (arg.toLowerCase() === "yo" || arg.toLowerCase() === "me")){
+        toReturn = message.member;
+      }
+
+      break;
+
+    case "NotSelfMember":
+      // no puede ser el mismo usuario que ejecuta el comando
+      let possibleReturn = message.mentions.members.first() ? message.mentions.members.first() : guild.members.cache.find(x => x.id === arg);
+      toReturn = possibleReturn.id != member.id ? possibleReturn : null;
+      break;
+
+    case "Role":
+      // buscar por mención, o id
+      toReturn = message.mentions.roles.first() ? message.mentions.roles.first() : guild.roles.cache.find(x => x.id === arg);
+      break;
+
+    case "Emoji":
+      let isCustom = arg.length > 5 ? true : false;
+
+      if(isCustom){
+        let emote = arg.match(/\d/g); // sacando los números del emoji
+        emote = emote.join("");
+        toReturn = guild.emojis.cache.find(x => x.id === emote);
+      } else {
+        toReturn = arg;
+      }
+      break;
+
+    case "Channel":
+      toReturn = message.mentions.channels.first() ? message.mentions.channels.first() : guild.channels.cache.find(x => x.id === arg);
+      break;
+
+    case "Message":
+      const message_channel = response.find(x => x.param === param.requires_param).data;
+      toReturn = await message_channel.messages.fetch(arg);
+      break;
+
+    case "MessageLink":
+      const linkArray = arg.split("/");
+      const numbers = linkArray.filter(element => !isNaN(element) && element.length > 0);
+
+      const actualguild = client.guilds.cache.find(x => x.id === numbers[0]);
+      const actualchannel = actualguild.channels.cache.find(x => x.id === numbers[1]);
+      const actualmessage = await actualchannel.messages.fetch(numbers[2]).catch(err => console.log());
+      
+      toReturn = actualmessage;
+      break;
+
+    case "Guild":
+      if(Number(arg)) toReturn = client.guilds.cache.find(x => x.id === arg);
+      break;
+
+    case "String":
+      toReturn = arg;
+      break;
+    
+    case "JoinString":
+      toReturn = args.join(" ");
+
+      if(i != 0){
+        for (let k = 0; k < i; k++) {
+          toReturn = toReturn.slice(args[k].length + 1)
+        }
+      }
+      break;
+
+    case "Array":
+      toReturn = arg.split(`${param.split}`)
+      break;
+    
+    case "Number":
+      if(Number(arg)) toReturn = Number(arg);
+      break;
+
+    case "NaturalNumber":
+      if(Math.floor(arg) > 0) {
+        toReturn = Math.floor(arg)
+      }
+      break;
+
+    case "Time":
+      toReturn = ms(arg);
+      break;
+
+    case "Boolean":
+      if(arg === "1" || arg === "true" || arg === "si" || arg === "sí" || arg === "yes" || arg === "y" || arg === "s") toReturn = true;
+      else if(arg === "0" || arg === "false" || arg === "no" || arg === "no" || arg === "n") toReturn = false;
+      break;
+
+    case "Options":
+      let possibleOptions = param.options;
+
+      optionsLoop:
+      for (let i = 0; i < possibleOptions.length; i++) {
+        const option = possibleOptions[i];
+        
+        if(option === arg){
+          toReturn = arg;
+          break optionsLoop;
+        }
+      }
+      break;
+
+    default:
+      toReturn = "FATAL"
+  }
+
+  return toReturn;
+}
+
+async function validateAnArg(param, arg, args, message, guild, member, client){
+  let toReturn = await switchParams(param, arg, args, message, guild, member, client)
+
+  return toReturn != "FATAL" && toReturn ? true : false;
 }
 
 module.exports = {
@@ -1464,5 +1947,7 @@ module.exports = {
     Subscription,
     handleUploads,
     Initialize,
-    TutorialEmbed
+    TutorialEmbed,
+    Confirmation,
+    AfterInfraction
 }

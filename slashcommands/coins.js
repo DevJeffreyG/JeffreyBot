@@ -27,7 +27,7 @@ module.exports = {
         const member = guild.members.cache.find(x => x.id === interaction.user.id);
 
         let money = Math.ceil(Math.random() * 20);
-        let tmoney = `**${Emojis.Jeffros}${money}**`;
+        let tmoney = `**${Emojis.Jeffros}${money.toLocaleString('es-CO')}**`;
         let randommember = guild.members.cache.random();
 
         while (randommember.user.id === author.id) { // el randommember NO puede ser el mismo usuario
@@ -41,7 +41,7 @@ module.exports = {
 
         if (multiplier != 1) {
             money = money * multiplier;
-            tmoney = `**${Emojis.Jeffros}${money}**`;
+            tmoney = `**${Emojis.Jeffros}${money.toLocaleString('es-CO')}**`;
         }
 
         // buscar usuario
@@ -51,13 +51,10 @@ module.exports = {
         });
 
         if(!user){
-            const newUser = new User({
+            user = await new User({
             user_id: member.id,
             guild_id: guild.id
-            });
-        
-            await newUser.save();
-            user = newUser;
+            }).save();
         }
 
         // buscar si tiene boost
@@ -68,7 +65,7 @@ module.exports = {
             if(specialInfo.type === "boostMulitplier"){
                 if(specialInfo.objetive === "jeffros" || specialInfo.objetive === "all"){
                     money = money * Number(specialData.specialValue);
-                    tmoney = `**${Emojis.Jeffros}${money}📈**`;
+                    tmoney = `**${Emojis.Jeffros}${money.toLocaleString('es-CO')}📈**`;
                     console.log(author.tag, "Boost de JEFFROS.")
                 }
             }

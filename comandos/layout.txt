@@ -13,32 +13,26 @@ const User = require("../modelos/User.model.js");
 /* ##### MONGOOSE ######## */
 
 const commandInfo = {
-    "name": "dbuser",
-    "info": "Busca la información que tiene JeffreyBot de un usuario en la base de datos.",
-    "params": [
+    name: "nombre_del_comando",
+    info: "Información del comando",
+    params: [
         {
-            "name": "usuario", "type": "Member", "optional": false
+            name: "nombre_del_parametro", display: "a mostrar en vez de 'name'", type: "tipo_de_parametro", optional: false
         }
-    ]
+    ],
+    userlevel: "USER, STAFF, ADMIN, DEVELOPER"
 }
 
 module.exports.run = async (client, message, args) => {
 
-  const { guild, author, prefix, staffRole} = await Initialize(client, message);
+    const { guild, author, prefix, executionInfo } = await Initialize(client, message);
 
-    const executionInfo = {
-        "guild": guild,
-        "author": author,
-        "message": message
-    }
+    let response = await TutorialEmbed(commandInfo, executionInfo, args);
 
-    let response = TutorialEmbed(commandInfo, executionInfo, args);
+    if(response[0] === "ERROR") return console.log(response); // si hay algún error
 
-    if(!response[0]) return; // si es "null"
+    // Comando
 
 }
 
-module.exports.help = {
-    name: commandInfo.name,
-    alias: commandInfo.alias
-}
+module.exports.help = commandInfo

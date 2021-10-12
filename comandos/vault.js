@@ -207,7 +207,7 @@ module.exports.run = async (client, message, args) => {
                 .setAuthor(`| Nuevos textos`, Config.bienPng)
                 .setDescription(
                   `**—** Código: \`${strCode}\`
-**—** Recompensa: **${Emojis.Jeffros}${award}**
+**—** Recompensa: **${Emojis.Jeffros}${award.toLocaleString('es-CO')}**
 **—** __ID de Código__: \`${newCode.id}\``
                 )
                 .setColor(Colores.verde);
@@ -303,7 +303,7 @@ module.exports.run = async (client, message, args) => {
                   let ggs = gg[Math.floor(Math.random() * gg.length)];
                   let finale = ggs.replace(
                     new RegExp("{ JEFFROS }", "g"),
-                    `**${Emojis.Jeffros}${textos.reward}**`
+                    `**${Emojis.Jeffros}${textos.reward.toLocaleString('es-CO')}**`
                   );
 
                   let ggEmbed = new Discord.MessageEmbed()

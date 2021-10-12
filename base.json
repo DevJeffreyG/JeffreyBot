@@ -30,21 +30,21 @@
         },
         {
             "type": "updated",
-            "desc": "Se ha agregado un impuesto en el cambio de DarkJeffros a Jeffros",
-            "extended": "Ahora si al cambiar la suma es mayor a 15K Jeffros, tendrás que pagar un 20% de intereses."
-        },
-        {
-            "type": "updated",
             "desc": "Se ha actualizado el comando `/top`",
             "extended": "Ahora podrás ver más páginas además de los primeros 5."
         },
         {
             "type": "updated",
             "desc": "Se han arreglado algunos bugs en el sistema de música y autoroles"
+        },
+        {
+            "type": "updated",
+            "desc": "**Se ha cambiado una cantidad _ABSURDA_ de código, puede que hayan errores**"
         }
     ],
     "bienPng": "http://i.imgur.com/M6hqbcc.png",
     "errorPng": "https://i.imgur.com/obwiHcn.png",
+    "loadingGif": "https://cdn.discordapp.com/emojis/664205203163054084.gif?size=1024",
     "jeffreyguildIcon": "https://media.discordapp.net/attachments/464810032081666048/563200897954611219/DiscordLogo2019.png",
     "darkLogoPng": "https://cdn.discordapp.com/emojis/739625446961840129.png",
     "jeffreygID": "437668432604037142",

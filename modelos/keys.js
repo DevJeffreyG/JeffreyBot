@@ -8,7 +8,7 @@ const KeysSchema = new Schema({
     config: {
         maxuses: { type: Number, required: true, default: 1 },
         used: { type: Number, required: true, default: 0 },
-        usedBY: { type: Array }
+        usedBy: { type: Array }
     },
     reward: {
         type: { type: String, required: true },

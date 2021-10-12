@@ -4,9 +4,10 @@ const Config = require("./../base.json");
 const Colores = require("./../resources/colores.json");
 const reglas = require("./../resources/reglas.json");
 
+const User = require("../modelos/User.model.js");
+
 const Warn = require("../modelos/warn.js");
 const SoftWarn = require("../modelos/softwarn.js");
-const softwarn = require('../modelos/softwarn.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -38,77 +39,70 @@ module.exports = {
     
         const member = interaction.options.getUser("usuario") && isStaff ? guild.members.cache.find(x => x.id === interaction.options.getUser("usuario").id) : author;
 
+        if(!member) return interaction.reply({content: "No pude encontrar a ese usuario", ephemeral: true});
+
         let error = new Discord.MessageEmbed()
         .setColor(Colores.rojo)
         .setAuthor(`| ${member.user.tag}`, member.user.displayAvatarURL())
         .setDescription(`Este usuario no tiene warns de ningún tipo.`);
         
-        Warn.findOne({
-            userID: member.id
-        }, (err, warns) => {
-            if(err) throw err;
+        const user = await User.findOne({
+            user_id: member.id,
+            guild_id: guild.id
+        });
 
-            SoftWarn.findOne({
-                userID: member.id
-            }, async (err2, soft) => {
-                if(err2) throw err;
+        if(!user) return interaction.reply({embeds: [error], ephemeral: true});
+        
+        const warns = user.warns;
+        const softwarns = user.softwarns;
 
-                if((!soft || soft.warns.length === 0) && (!warns || warns.warns === 0)){
-                    return interaction.reply({embeds: [error], ephemeral: true})
-                }
+        if((!softwarns || softwarns.length === 0) && (!warns || warns.length === 0)){
+            return interaction.reply({embeds: [error], ephemeral: true})
+        }
 
-                let w = !warns ? 0 : warns.warns;
-                let n = !soft ? 0 : soft.warns.length;
+        let warnsE = new Discord.MessageEmbed()
+        .setAuthor(`| ${member.user.tag}'s warns`, member.user.displayAvatarURL())
+        .setDescription(`**Número de warns ** ❛ \`${warns.length}\` ❜`)
+        .setColor(Colores.verde);
 
-                let badguy = new Discord.MessageEmbed()
-                .setAuthor(`| ${member.user.tag}'s warns`, member.user.displayAvatarURL())
-                .setDescription(`**Número de warns ** ❛ \`${w}\` ❜
-**Número de Softwarns —** ❛ \`${n}\` ❜`)
-                .setColor(Colores.verde);
-                    
-                if (n != 0){
-                    let reglasArray = Object.values(reglas);
-                    for (let i = 0; i < n; i++){
+        let softwarnsE = new Discord.MessageEmbed()
+        .setAuthor(`| ${member.user.tag}'s softwarns`, member.user.displayAvatarURL())
+        .setDescription(`**Número de softwarns ** ❛ \`${softwarns.length}\` ❜`)
+        .setColor(Colores.verde);
 
-                        let regla = soft.warns[i].rule;
+        // foreach
+        warns.forEach(warn => {
+            // sacar la regla
+            let regla = reglas[warn.rule_id];
 
-                        switch (regla){ // algunas reglas cambiaron de nombre D:
-                            case "Problemas personales":
-                            case "No Contenido NSFW / Comportamiento respetuoso":
-                                regla = "Ambiente sano"
-                                break;
-                            
-                            case "Cadenas de mensajes en el chat":
-                                regla = "Sentido común"
-                                break;
-                        }
+            warnsE.addField(`— ${regla} : Regla N°${warn.rule_id}`, `**— [Pruebas](${warn.proof})\n— ID: ${warn.id}**`)
+        });
 
-                        let index = reglasArray.indexOf(regla) + 1;
-                            badguy.addField(`${i+1} — ${regla} : Regla N°${index}`, `**— Nota: ${soft.warns[i].note}**`)
-                    }
-                }
+        softwarns.forEach(softwarn => {
+            // sacar la regla
+            let regla = reglas[softwarn.rule_id];
 
-                if(isStaff){
-                    interaction.reply({embeds: [badguy], ephemeral: false, components: [row]});
-                    const reply = await interaction.fetchReply()
+            softwarnsE.addField(`— ${regla} : Regla N°${softwarn.rule_id}`, `**— [Pruebas](${softwarn.proof})\n— ID: ${softwarn.id}**`)
+        });
 
-                    const f = i => i.customId === 'delmsg' && i.user.id === author.id;
+        if(isStaff){
+            interaction.reply({embeds: [warnsE, softwarnsE], ephemeral: false, components: [row]});
+            const reply = await interaction.fetchReply()
 
-                    const collector = interaction.channel.createMessageComponentCollector({ filter: f, time: 15000, max: 1 });
+            const f = i => i.customId === 'delmsg' && i.user.id === author.id;
 
-                    collector.on('collect', async i => {
-                        await i.deferUpdate();
-                        await i.deleteReply();
-                    });
+            const collector = interaction.channel.createMessageComponentCollector({ filter: f, time: 15000, max: 1 });
 
-                    collector.on("end", async i => {
-                        await reply.edit({ components: []})
-                    })
-                } else {
-                    return interaction.reply({embeds: [badguy], ephemeral: true});
-                }
+            collector.on('collect', async i => {
+                await i.deferUpdate();
+                await i.deleteReply();
+            });
+
+            collector.on("end", async i => {
+                await reply.edit({ components: []})
             })
-            
-        })
+        } else {
+            return interaction.reply({embeds: [warnsE, softwarnsE], ephemeral: true});
+        }
 	},
 };
