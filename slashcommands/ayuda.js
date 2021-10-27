@@ -65,7 +65,6 @@ module.exports = {
 ▸ \`${prefix}shop\`: Compra items en la tienda del servidor!
 ▸ \`${prefix}usar\`: Usa los items que hayas comprado en la tienda usando su ID.
 ▸ \`${prefix}darkshop\`: Compra items, e invierte en Dark${Emojis.Dark}effros en la ${Emojis.DarkShop}Dark Shop!
-▸ \`${prefix}stats\`: Tus estadísticas: EXP, nivel, ${Emojis.Jeffros}effros, etc.
 ▸ \`${prefix}pay\`: Le das de tus ${Emojis.Jeffros}effros a otro usuario.
 `)  
         .setColor(Colores.verde);
