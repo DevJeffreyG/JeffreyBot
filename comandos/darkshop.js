@@ -32,7 +32,7 @@ module.exports.run = async (client, message, args) => {
   const guild = message.guild;
   let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
   let dsChannel = guild.channels.cache.find(x => x.id === Config.dsChannel);
-  let dsRole = guild.channels.cache.find(x => x.id === Config.dsRole);
+  let dsRole = guild.roles.cache.find(x => x.id === Config.dsRole);
 
   const interest = 5;
 
