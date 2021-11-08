@@ -13,6 +13,10 @@
             "desc": "Se ha agregado el **Slash Command** `{ PREFIX }stats`"
         },
         {
+            "type": "updated",
+            "desc": "Se ha aplicado un parche para el correcto funcionamiento de los items de la DarkShop"
+        },
+        {
             "type": "removed",
             "desc": "Se ha elimiando el comando `{ PREFIX }stats`"
         }

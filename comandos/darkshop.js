@@ -1306,7 +1306,7 @@ Stats.findOne({
                                                                                 // revisar si ya tiene el role a dar.
                                                                                 if(victim.roles.cache.find(x => x.id === role.id)) return dsChannel.send({embeds: [failhasRole]});
                                                                                 
-                                                                                dsChannel.send(success3);
+                                                                                dsChannel.send({embeds: [success3]});
                                                                                 victim.roles.add(role);
     
                                                                                 //eliminar item del autor
@@ -1325,7 +1325,7 @@ Stats.findOne({
                                                                                 // revisar si ya tiene el role a dar.
                                                                                 if(victim.roles.cache.find(x => x.id === role.id)) return dsChannel.send({embeds: [failhasRole]});
 
-                                                                                dsChannel.send(success3);
+                                                                                dsChannel.send({embeds: [success3]});
                                                                                 victim.roles.add(role);
 
                                                                                 //eliminar item del autor
@@ -1380,7 +1380,7 @@ Stats.findOne({
                                                                                     // revisar si ya tiene el role a dar.
                                                                                     if(victim.roles.cache.find(x => x.id === role.id)) return dsChannel.send({embeds: [failhasRole]});
 
-                                                                                    dsChannel.send(success3);
+                                                                                    dsChannel.send({embeds: [success3]});
                                                                                     victim.roles.add(role);
 
                                                                                     //eliminar item del autor
@@ -1399,7 +1399,7 @@ Stats.findOne({
                                                                                 // revisar si ya tiene el role a dar.
                                                                                 if(victim.roles.cache.find(x => x.id === role.id)) return dsChannel.send({embeds: [failhasRole]});
 
-                                                                                dsChannel.send(success3);
+                                                                                dsChannel.send({embeds: [success3]});
                                                                                 victim.roles.add(role);
 
                                                                                 //eliminar item del autor
@@ -1428,7 +1428,7 @@ Stats.findOne({
 
                                                                     // no es negativo, dar el rol
                                                                     victim.roles.add(role);
-                                                                    dsChannel.send(success3);
+                                                                    dsChannel.send({embeds: [success3]});
 
                                                                     //eliminar item del autor
                                                                     stats.items.splice(index, 1);
