@@ -14,23 +14,25 @@ module.exports.run = async (client, message, args) => {
 
   if(client.user.id === Config.testingJBID){
     staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
+    muteRole = guild.roles.cache.find(x => x.id === "544691532104728597");
   }
   
   if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
 
   message.guild.channels.cache.each(async (channel, id) => {
-    await channel.overwritePermissions(muteRole, {
+    await channel.permissionOverwrites.edit(muteRole, {
       VIEW_CHANNEL: false,
       SEND_MESSAGES: false,
       ADD_REACTIONS: false
-    });
+    })
+    .catch(err => console.log(err));
   });
   
-  message.react("✅");
+  await message.react("✅");
 
 }
 
 module.exports.help = {
     name: "syncmute",
-    alias: "sMute"
+    alias: "smute"
 }
