@@ -635,7 +635,7 @@ const intervalGlobalDatas = async function(justBoost){
         let diference1 = newDate.getTime() - oldDate.getTime();
         let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
 
-        if(pastDays >= dark.info.duration){
+        if(pastDays >= Number(dark.info.duration)){
           console.log("Ahora mismo hay un evento.", dark)
           // enviar mensaje random de evento
           let newInflation = `**${dark.info.inflation}%**`;
