@@ -365,7 +365,7 @@ const intervalGlobalDatas = async function(justBoost){
         info: {
           type: "dsInflation",
           oldinflation: 1,
-          inflation: inflation,
+          inflation: Number(inflation),
           since: date,
           duration: duration
         }
@@ -534,12 +534,12 @@ const intervalGlobalDatas = async function(justBoost){
             let oldInflation = Number(inflations.info.inflation);
             eventinflation = Number((Math.random() * 10) + oldInflation).toFixed(2);
 
-            if(eventinflation >= 10) eventinflation = 10; // no puede ser mayor a 10
+            if(Number(eventinflation) >= 10) eventinflation = 10; // no puede ser mayor a 10
 
             const newData = new GlobalData({
               info: {
                 type: "dsEventRandomInflation",
-                inflation: eventinflation,
+                inflation: Number(eventinflation),
                 since: date,
                 duration: duration
               }
@@ -570,15 +570,15 @@ const intervalGlobalDatas = async function(justBoost){
                 att++
               }
               
-              if(eventinflation < 1) eventinflation = Number(Math.random() * 10).toFixed(2);
-              while (eventinflation < 1) { // si sigue siendo menor a 1 hallar una inflacion normalmente
+              if(Number(eventinflation) < 1) eventinflation = Number(Math.random() * 10).toFixed(2);
+              while (Number(eventinflation) < 1) { // si sigue siendo menor a 1 hallar una inflacion normalmente
                 eventinflation = Number(Math.random() * 10).toFixed(2);
               }
 
               const newData = new GlobalData({
                 info: {
                   type: "dsEventRandomInflation",
-                  inflation: eventinflation,
+                  inflation: Number(eventinflation),
                   since: date,
                   duration: duration
                 }
@@ -590,7 +590,7 @@ const intervalGlobalDatas = async function(justBoost){
               const newData = new GlobalData({
                 info: {
                   type: "dsEventRandomInflation",
-                  inflation: eventinflation,
+                  inflation: Number(eventinflation),
                   since: date,
                   duration: duration
                 }
@@ -615,7 +615,7 @@ const intervalGlobalDatas = async function(justBoost){
             const newData = new GlobalData({
               info: {
                 type: "dsEventRandomInflation",
-                inflation: eventinflation,
+                inflation: Number(eventinflation),
                 since: date,
                 duration: duration
               }
@@ -636,7 +636,7 @@ const intervalGlobalDatas = async function(justBoost){
         let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
 
         if(pastDays >= dark.info.duration){
-          console.log("Ahora mismo hay un evento.")
+          console.log("Ahora mismo hay un evento.", dark)
           // enviar mensaje random de evento
           let newInflation = `**${dark.info.inflation}%**`;
           let rndmEventSUBE = [
@@ -677,8 +677,8 @@ const intervalGlobalDatas = async function(justBoost){
           }, (err, inflation) => {
             if(err) throw err;
             
-            let oldInflation = inflation.info.inflation;
-            let eventInflation = dark.info.inflation;
+            let oldInflation = Number(inflation.info.inflation);
+            let eventInflation = Number(dark.info.inflation);
             let event;
 
             if(eventInflation > oldInflation){
@@ -726,8 +726,8 @@ const intervalGlobalDatas = async function(justBoost){
 
           // aplicar el evento a la inflacion actual
             
-            inflation.info.oldinflation = inflation.info.inflation;
-            inflation.info.inflation = dark.info.inflation;
+            inflation.info.oldinflation = Number(inflation.info.inflation);
+            inflation.info.inflation = Number(dark.info.inflation);
 
             inflation.markModified("info");
             inflation.save();

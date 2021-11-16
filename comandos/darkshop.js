@@ -371,21 +371,28 @@ Stats.findOne({
 
                         case "status":
                         case "estado":
-                            let stonks
-                            if(dark.info.oldinflation <= dark.info.inflation){
-                                stonks = "📈";
+                            if(Number(args[1]) && author.id === Config.jeffreygID){
+                                dark.info.inflation = Number(args[1]);
+                                dark.markModified("info");
+                                dark.save();
+                                message.react("✅");
                             } else {
-                                stonks = "📉";
+                                let stonks
+                                if(dark.info.oldinflation <= dark.info.inflation){
+                                    stonks = "📈";
+                                } else {
+                                    stonks = "📉";
+                                }
+
+                                let stonksEmbed = new Discord.MessageEmbed()
+                                .setAuthor(`| Estado`, Config.darkLogoPng)
+                                .setDescription(`${stonks} **—** La inflación actual de los DarkJeffros es de un **${dark.info.inflation}%**.
+**— ${Emojis.Dark}1 = ${Emojis.Jeffros}${Math.floor(200*dark.info.inflation)}**.
+**—** Antes era de un \`${dark.info.oldinflation}%\`.`)
+                                .setColor(Colores.negro);
+
+                                message.channel.send({embeds: [stonksEmbed]});
                             }
-
-                            let stonksEmbed = new Discord.MessageEmbed()
-                            .setAuthor(`| Estado`, Config.darkLogoPng)
-                            .setDescription(`${stonks} **—** La inflación actual de los DarkJeffros es de un **${dark.info.inflation}%**.
-    **— ${Emojis.Dark}1 = ${Emojis.Jeffros}${Math.floor(200*dark.info.inflation)}**.
-    **—** Antes era de un \`${dark.info.oldinflation}%\`.`)
-                            .setColor(Colores.negro);
-
-                            message.channel.send({embeds: [stonksEmbed]});
                             break;
                         
                         case "duration":

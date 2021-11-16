@@ -14,11 +14,7 @@
         },
         {
             "type": "updated",
-            "desc": "Se ha aplicado un parche para el correcto funcionamiento de los items de la DarkShop"
-        },
-        {
-            "type": "removed",
-            "desc": "Se ha elimiando el comando `{ PREFIX }stats`"
+            "desc": "Se está investigando un error en el correcto cálculo de eventos e inflaciones para la DarkShop"
         }
     ],
     "bienPng": "http://i.imgur.com/M6hqbcc.png",
