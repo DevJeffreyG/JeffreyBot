@@ -64,8 +64,9 @@ module.exports = {
 ➟ El término preguntas frecuentes (FAQ) se refiere a una lista de preguntas y respuestas que surgen frecuentemente dentro de un determinado contexto y para un tema en particular.
         
 ➟ Como puedes imaginar, veremos las preguntas frecuentes que se hacen en este servidor. Se irán actualizando a medida que hayan más preguntas frecuentes :)`)
-        .setColor(Colores.verde);
-      
+        .setColor(Colores.nocolor);
+
+        // DARKSHOP
         let faqEmbed2 = new Discord.MessageEmbed()
         .setAuthor("DarkShop", "https://cdn.discordapp.com/attachments/494264018790514702/880595989713530980/emoji.png")
         .setDescription(`\`DS.Q1\` **— ¿Qué pasó con la DarkShop "DS"?**
@@ -75,9 +76,15 @@ module.exports = {
 > [Sí que cambia](https://discord.com/channels/447797737216278528/836397833531818004/870100021314478170), si no lo ha hecho, es porque hay mala suerte. Sé paciente.
         
 \`DS.Q3\` **— ¿Qué significa ___ en la DarkShop?**
-> Toda la información base a cerca de la DarkShop se encuentra en <#836397833531818004>. Si después de leerlo, aún tienes dudas, puedes usar <#447797737216278531>.`)
-        .setColor(Colores.nocolor)
+> Toda la información base a cerca de la DarkShop se encuentra en <#836397833531818004>. Si después de leerlo, aún tienes dudas, puedes usar <#447797737216278531>.
+
+\`DS.Q4\` **— Ya no me sirven los comandos, ¿qué pasa?**
+> Antes de la actualización de Jeffrey Bot v1.7.0 la DarkShop era un solo comando que contenía la inflación, cambios, depósitos, tienda, etc.
+> Con la llegada de la actualización, tanto la DarkShop como la tienda ha tenido cambios en cuanto a sus comandos (los cuales puedes ver usando el Slash Command \`${prefix}ayuda\`), ya que se han creado más de estos que ya hacían las mismas acciones.
+> Esto se hizo con el fin de mantener un mejor orden tanto para los nuevos usuarios como para los veteranos en el servidor.`)
+        .setColor(Colores.negro);
       
+        // SERVER
         let faqEmbed3 = new Discord.MessageEmbed()
         .setAuthor("Servidor", guild.iconURL())
         .setDescription(`\`SV.Q1\` **— ¿Por qué se eliminan mis archivos?**
@@ -86,25 +93,28 @@ module.exports = {
 \`SV.Q2\` **— ¿Por qué no hay eventos o sorteos?**
 > **Por falta de ideas de parte de Jeffrey y del STAFF**. Así es, habrán eventos o sorteos pero pocos: por falta de ideas, mayormente los eventos son internos del servidor que todos pueden participar.
 
-\`SV.Q3\` **— ¿Qué pasa si cambio Jeffros por DarkJeffros antes de que me cobren los intereses mensuales?**
-> No pasa nada, los intereses que se cobran son por el **TOTAL** de Jeffros que tengas, primero se hace la conversión de los DarkJeffros que tengas por **Jeffros normales** y a partir de ahí de ahí se determina si tienes que pagar interés.
-> Por ejemplo, si tienes ${Emojis.Jeffros}0 pero tienes ${Emojis.Dark}100, tus Jeffros quedarán en negativo, pero podrás cambiar luego (\`${prefix}ds withdraw\`) esos DarkJeffros por Jeffros.
-
-\`SV.Q4\` **— ¿Cuánta EXP y Jeffros gano por mensaje? ¿Hay cooldown?**
+\`SV.Q3\` **— ¿Cuánta EXP y Jeffros gano por mensaje? ¿Hay cooldown?**
 > Es aleatorio, pero en base, sin ningún tipo de multiplicador, o boost; ¡puedes ganar hasta **35 de EXP** y **15 Jeffros** por mensaje! Y sí, hay un cooldown base de 1 minuto.
 
-\`SV.Q5\` **— ¿Qué significan los DarkJeffros en el comando \`${prefix}top\`?**
-> Aquellos usuarios que tengan DarkJeffros, se mostrará la parte de los Jeffros que estos representan, haciendo la conversión dependiendo de la inflación actual. Esto para que se mantengan las posiciones de los usuarios equilibrados aunque se tengan algunos Jeffros invertidos en la **DarkShop**; los Jeffros que salen de primero son los totales que tiene el usuario, se incluyen los que están en la DarkShop.`)
-        .setColor(Colores.nocolor)
+\`SV.Q4\` **— ¿Qué significan los ${Emojis.Dark} en el comando \`${prefix}top\`?**
+> Aquellos usuarios que tengan DarkJeffros, se mostrará la parte de los Jeffros que estos representan, haciendo la conversión dependiendo de la inflación actual. Esto para que se mantengan las posiciones de los usuarios equilibrados aunque se tengan algunos Jeffros invertidos en la **DarkShop**; los Jeffros que salen de primero son los totales que tiene el usuario, se incluyen los que están en la DarkShop.
+
+\`SV.Q5\` **— ¿Cuál es la invitación al server?**
+> La invitación al servidor está en la biografía de Jeffrey Bot, y en la descripción del último vídeo de Jeffrey. Ah, y aquí: https://discord.gg/fJvVgkN.`)
+        .setColor(Colores.verdeclaro);
       
+        // JEFFREY
         let faqEmbed4 = new Discord.MessageEmbed()
-        .setAuthor("JeffreyG", "https://cdn.discordapp.com/attachments/464810032081666048/880596286506696734/LOGO_2020.jpg")
-        .setDescription(`\`JG.Q1\` **— ¿Por qué [JeffreyG](https://youtube.com/c/JeffreyG) no sube videos?**
+        .setAuthor("JeffreyG", "https://cdn.discordapp.com/attachments/464810032081666048/886986232322740287/LOGO_29-08-2021.png")
+        .setDescription(`\`JG.Q1\` **— ¿Por qué [JeffreyG](https://youtube.com/JeffreyG) no sube videos?**
 > Por razones personales y por falta de ideas que tiene sobre el canal, además de que es tonto. Si tienes <@&529275759521431553> podrás ver los vídeos antes de tiempo, y a veces, algún adelanto. Mira <#485191307346837507>.
   
 \`JG.Q2\` **— ¿Dónde está el GDPS de JeffreyG?** o **¿Dónde descargo el GDPS?**
-> Lamento comunicar que el GDPS ya no se encuentra entre nosotros, y no se podrá descargar ni jugar. Sin embargo, si tienes alguna duda sobre la creación de tu GDPS puedes usar <#502255217379770428>.`)
-        .setColor(Colores.nocolor)
+> Lamento comunicar que el GDPS ya no se encuentra entre nosotros, y no se podrá descargar ni jugar.
+
+\`JG.Q3\` **— ¿Y el canal de ayuda de GDPS?**
+> Con el vídeo tutorial del GDPS de Jeffrey oculto, no seguiría siendo necesario este canal en el servidor.`)
+        .setColor(Colores.verdejeffrey)
       
       
         // NIVELES
@@ -116,35 +126,52 @@ module.exports = {
         let lvlEmbed2 = new Discord.MessageEmbed()
           .setDescription(`<@&${Config.lvl1}>
 • Puedes colorear tu nombre en <#524647331551772672>.
-• Archivos y links.
-• Emojis globales.
+• Adjuntar archivos y links.
 • Agregar reacciones a los mensajes.
+• Crear nuevos hilos.
+• Usar Stickers exteriores.
 
 <@&${Config.lvl10}>
 • Cambiarse el apodo.
 • Posibilidad de conseguir un 15% más de EXP y Jeffros.
+• Compartir pantalla, o stremear un juego en los chat de voz.
 
 <@&${Config.lvl20}>
 • 15% de descuento en la tienda (\`${prefix}shop\`).
 
 <@&${Config.lvl30}>
-• Bono de **${Emojis.Jeffros}2,000**.
+• Bono de **${Emojis.Jeffros}2.000**.
 
 <@&${Config.lvl40}>
-• Cooldown para conseguir Jeffros y EXP reducido a la mitad. (30s)
+• Cooldown para conseguir Jeffros y EXP reducido a la mitad. (\`30s\`)
 
 <@&${Config.lvl50}>
 • Posibilidad de conseguir un 50% más de EXP y Jeffros.
+• Colores nuevos desbloqueados en <#552580632266407957>.
 
-...
+<@&${Config.lvl60}>
+• Cooldown para usar el comando \`${prefix}coins\` reducido a la mitad. (\`5m\`)
+• Bono de **${Emojis.Jeffros}5.000**.
+
+<@&${Config.lvl70}>
+• Posibilidad de conseguir un 70% más de EXP y Jeffros.
+• Cooldown para conseguir Jeffros y EXP reducido a la cuarta parte. (\`15s\`).
+
+<@&${Config.lvl80}>
+• Puedes crear invitaciones nuevas al server.
+• Bono de **${Emojis.Jeffros}6.000**.
+
+<@&${Config.lvl90}>
+• Bono de **${Emojis.Jeffros}10.000**.
+Cooldown para conseguir Jeffros y EXP reducido a la octava parte. (\`7.5s\`).
 
 <@&${Config.lvl99}>
 • VIP Desbloqueado.
+• Cooldown para usar el comando \`${prefix}coins\` reducido a la cuarta parte. (\`2.5m\`).
 
 <@&${Config.lvl100}>
-• Rol personalizado.`)
-          .setFooter(`Existen más roles, pero por el momento no tienen beneficios.`, Config.jeffreyguildIcon)
-          .setColor(Colores.nocolor);
+• Rol personalizado (nombre + color personalizado).`)
+        .setColor(Colores.nocolor);
       
         // CANALES
       let canalesEmbed = new Discord.MessageEmbed()
@@ -257,7 +284,7 @@ module.exports = {
 
 <@&461259197368107020> • Personas las cuales tienen algún tipo de relación IRL con Jeffrey o/
 
-<@&460586399981109278> • Gente activa con más de 5,000 mensajes en <#${mainChannel}>.
+<@&460586399981109278> • Gente activa con más de 5.000 mensajes en <#${mainChannel}>.
 
 <@&460517579941740544> • Personas que lleva mucho tiempo dentro del servidor, o está desde tiempos inmemorables, o simplemente estaba en el servidor viejo (...) este rol es muy extraño.`)
           .setColor(Colores.nocolor);
@@ -281,7 +308,7 @@ module.exports = {
 **—** ¿Como consigo DarkJeffros?
 ➟ Piensa en los DarkJeffros como si fuesen bitcoins... ¿Por qué bitcoins? Porque es divertido.
 ➟ Los DarkJeffros solo se podrán conseguir cambiando Jeffros. Estos pueden ser más costosos dependiendo de la **inflación actual**.
-➟ Usando el comando \`${prefix}darkshop ayuda\` podrás tener más información.`)
+➟ Usando el comando \`${prefix}ayuda\` podrás tener más información en la categoría DarkShop de los comandos disponibles.`)
           .setColor(Colores.nocolor);
       
         // STAFF
@@ -308,28 +335,14 @@ ${adminRole} • ${modRole}.
 ➟ Usando el comando \`${prefix}serverinfo\` podrás ver quiénes hacen parte del equipo del Staff más cómodamente.`)
           .setColor(Colores.verde);
       
-      // INTERESES
-      let interestEmbed = new Discord.MessageEmbed()
-      .setImage(embedImages.interest)
-      .setColor(Colores.verde);
-      
-      let interestEmbed2 = new Discord.MessageEmbed()
-      .setDescription(`**—** Aquellos usuarios con una suma mayor a **${Emojis.Jeffros}20.000** (Jeffros + equivalente a Jeffros de DarkJeffros), deberán pagar los siguientes intereses los días 28 de cada mes, a las 12:00 GMT-5:
-
-Más de **${Emojis.Jeffros}90.000** ➟ **15%**
-Más de **${Emojis.Jeffros}40.000** ➟ **10%**
-Más de **${Emojis.Jeffros}25.000** ➟ **5%**
-Más de **${Emojis.Jeffros}20.000** ➟ **1%**`)
-      .setColor(Colores.nocolor)
-      
       // AWARDS
       let silver = guild.emojis.cache.find(x => x.id === Config.silverAward);
       let gold = guild.emojis.cache.find(x => x.id === Config.goldAward);
       let platinium = guild.emojis.cache.find(x => x.id === Config.platiniumAward);
       
-      silver = silver ? silver : "SILVER EMOTE";
-      gold = gold ? gold : "GOLD EMOTE";
-      platinium = platinium ? platinium : "PLAT EMOTE";
+      silver = silver ?? "SILVER EMOTE";
+      gold = gold ?? "GOLD EMOTE";
+      platinium = platinium ?? "PLAT EMOTE";
       
       let awardsEmbed = new Discord.MessageEmbed()
       .setImage(embedImages.awards)
@@ -374,17 +387,17 @@ Más de **${Emojis.Jeffros}20.000** ➟ **1%**`)
         .setColor(Colores.negro);
       
         let darkshopInformation1 = new Discord.MessageEmbed()
-        .setAuthor(`| Lo básico:`, Config.darkLogoPng)
+        .setAuthor(`Lo básico:`, Config.darkLogoPng)
         .setDescription(`**—** Bienvenid@ a la DarkShop.
 **—** Con esta guía podrás entender básicamente todo acerca de esta nueva tienda dentro del servidor.
 **—** Lo básico vendría siendo los comandos dentro de la tienda, los cuales puedes ver usando \`${prefix}ds ayuda\`, cuando los hayas visto, vuelve aquí.`)
         .setColor(Colores.negro);
       
         let darkshopInformation2 = new Discord.MessageEmbed()
-        .setAuthor(`| Los items:`, Config.darkLogoPng)
+        .setAuthor(`Los items:`, Config.darkLogoPng)
         .setDescription(`Esta nueva tienda tiene items principalmente que afectan a otros usuarios, **temporalmente, claro**.
 Y así como tú mismo puedes ser quien lo origine, también puedes ser perjudicado. Esto puede ser evitado, y es comprando el **Item #1, el __Firewall__**.
-Con este item, cualquier otro item que tenga un **efecto negativo** sobre quien se use, __será anulado__. **SIN EMBARGO...**
+Con este item, cualquier otro item que tenga un **efecto negativo** sobre quien se use, __será anulado__. **A no ser...**
 Cuando cambias tus primeros ${Emojis.Jeffros}Jeffros por ${Emojis.Dark}DarkJeffros, se creará aleatoriamente un porcentaje (1% - ~15%) llamado **Precisión**.
 
 **— ¿Qué significa el porcentaje de la Precisión?**
@@ -392,21 +405,21 @@ El porcentaje que se le da a un usuario al cambiar sus primeros Jeffros por Dark
         .setColor(Colores.negro)
       
         let darkshopInformation3 = new Discord.MessageEmbed()
-        .setAuthor(`| ¿Cómo funciona la inflación?`, Config.darkLogoPng)
+        .setAuthor(`¿Cómo funciona la inflación?`, Config.darkLogoPng)
         .setDescription(`Lo mágico de la DarkShop es la inflación. Esta es global, la misma para todos los usuarios, y esta va del 0.01% al 10%.
-La forma de determinar el precio actual de **${Emojis.Dark}1** es: **${Emojis.Jeffros}200 x <inflación>**, haciendo así que **${Emojis.Dark}1** pueda costar **${Emojis.Jeffros}2** hasta **${Emojis.Jeffros}2000**.
+La forma de determinar el precio actual de **${Emojis.Dark}1** es: **${Emojis.Jeffros}200 x <inflación>**, haciendo así que **${Emojis.Dark}1** pueda costar **${Emojis.Jeffros}2** hasta **${Emojis.Jeffros}2.000**.
 La inflación dura un plazo máximo de **${Config.daysNormalInflation} días** y se genera de forma aleatoria. **SIN EMBARGO...**`)
         .setColor(Colores.negro);
       
         let darkshopInformation4 = new Discord.MessageEmbed()
-        .setAuthor(`| Los eventos:`, Config.darkLogoPng)
-        .setDescription(`A partir de aquí empieza a ponerse interesante la cosa, dentro de un periodo de inflación puede haber, **o no** eventos con la inflación.
+        .setAuthor(`Los eventos:`, Config.darkLogoPng)
+        .setDescription(`A partir de aquí empieza a ponerse interesante la cosa: dentro de un periodo de inflación puede haber, **o no** eventos con la inflación.
 La inflación puede subir, bajar o quedarse igual en un momento indeterminado.
 Pero... ¿cómo que interesante? ... ¿por qué? Ahora se viene el plot twist.`)
         .setColor(Colores.negro);
       
         let darkshopInformation5 = new Discord.MessageEmbed()
-        .setAuthor(`| Inversiones:`, Config.darkLogoPng)
+        .setAuthor(`Inversiones:`, Config.darkLogoPng)
         .setDescription(`Ahhh, las inversiones. Debido a la inflación, puedes llegar incluso a comprar ${Emojis.Dark}100 por **${Emojis.Jeffros}200** que esos mismos ${Emojis.Dark}100 cuesten **${Emojis.Jeffros}200.000**.
 Bastante increíble, aunque este es sólo un escenario, que es muy poco probable, puede llegar a pasar. Así como puedes ganar, también puedes perder. Nunca olvides la duración de tus DarkJeffros.
 Ten cuidado, aquellos que tengan **${Emojis.Jeffros}20.000** o más; deberán pagar un interés, el cuál es detallado en <#${Config.infoChannel}>, así que ten eso en cuenta.
@@ -467,7 +480,7 @@ Y la más importante:
 • Esperamos te la pases bien en el server, si tienes dudas del server no dudes preguntar en <#${supportChannel}> y no olvides leer las <#${rulesChannel}>.`)
       
       let noEmbed = new Discord.MessageEmbed()
-      .setAuthor(`| ¿Qué necesitas?`, author.displayAvatarURL())
+      .setAuthor(`¿Qué necesitas?`, author.displayAvatarURL())
       .setColor(Colores.nocolor)
       .setDescription(`**—** ${prefix}embed <embed>
 \`▸\` Informacion
@@ -491,8 +504,12 @@ Y la más importante:
         let shrug = "¯\\_(ツ)_/¯";
         switch (caso) {
           case "faq":
-            await(message.channel.send({embeds: [faqEmbedIntro, faqEmbedIntro2, faqEmbed2, faqEmbed3, faqEmbed4]}))
+            await message.channel.send({embeds: [faqEmbedIntro, faqEmbedIntro2]})
+            await message.channel.send({embeds: [faqEmbed2]})
+            await message.channel.send({embeds: [faqEmbed3]})
+            await message.channel.send({embeds: [faqEmbed4]})
             break;
+
           case "informacion":
             //niveles
             await message.channel.send({embeds: [lvlEmbed1, lvlEmbed2]});
@@ -502,8 +519,6 @@ Y la más importante:
             await message.channel.send({embeds: [rolesEmbed, rolesEmbed2, rolesEmbed3, rolesEmbed4]});
             //jeffros
             await message.channel.send({embeds: [jeffrosEmbed, jeffrosEmbed2]});
-            //interes
-            await message.channel.send({embeds: [interestEmbed, interestEmbed2]});
             //awards
             await message.channel.send({embeds: [awardsEmbed, awardsEmbed2, awardsEmbed3]});
             //staff

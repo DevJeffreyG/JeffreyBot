@@ -43,7 +43,7 @@ module.exports = {
 
       let setgamembed2 = new Discord.MessageEmbed()
       .setColor(0x07DE47)
-      .setAuthor(`| Actividad seleccionada sin problemas.`, Config.bienPng)
+      .setAuthor(`Actividad seleccionada sin problemas.`, Config.bienPng)
       .setDescription(`${client.user.username} tiene el juego por DEFAULT.`)
       .setFooter(`Puesto por ${author.username}.`, author.avatarURL);
       client.user.setActivity(`${prefix}ayuda - ${totalMembers} usuarios🔎`);
@@ -53,7 +53,7 @@ module.exports = {
 
     let setgamembed = new Discord.MessageEmbed()
       .setColor(0x07DE47)
-      .setAuthor(`| Actividad seleccionada sin problemas.`, Config.bienPng)
+      .setAuthor(`Actividad seleccionada sin problemas.`, Config.bienPng)
       .setDescription(`${client.user.username} ahora juega \`${argcustom}\`.`)
       .setFooter(`Puesto por ${author.username}.`, author.avatarURL);
 

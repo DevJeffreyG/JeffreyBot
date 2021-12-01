@@ -44,7 +44,7 @@ module.exports.run = async (client, message, args) => {
       newToggle.save();
 
       let added = new Discord.MessageEmbed()
-      .setAuthor(`| Toggled`, Config.bienPng)
+      .setAuthor(`Toggled`, Config.bienPng)
       .setDescription(`**—** Se ha agregado el comando \`${prefix}${comando}\`.
 **—** Alias \`${prefix}${alias}\`.`)
       .setColor(Colores.verde);
@@ -58,7 +58,7 @@ module.exports.run = async (client, message, args) => {
         toggle.save();
 
         let edited = new Discord.MessageEmbed()
-        .setAuthor(`| Editado`, Config.bienPng)
+        .setAuthor(`Editado`, Config.bienPng)
         .setDescription(`**—** Se ha editado el alias del comando \`${prefix}${comando}\`.
 **—** Al alias \`${prefix}${alias}\`.`)
         .setColor(Colores.verde);
@@ -67,7 +67,7 @@ module.exports.run = async (client, message, args) => {
       } else { // borrar (desactivar) toggle
 
         let removed = new Discord.MessageEmbed()
-        .setAuthor(`| Eliminado`, Config.bienPng)
+        .setAuthor(`Eliminado`, Config.bienPng)
         .setDescription(`**—** Se ha eliminado el comando \`${prefix}${comando}\`.
 **—** Alias \`${prefix}${toggle.alias}\`.`)
         .setColor(Colores.verde);

@@ -193,8 +193,7 @@ client.on("interactionCreate", async interaction => {
       await interaction.reply({ content: 'Jeffrey es tonto, hubo un error ejecutando este comando, por fa, avísale de su grado de inservibilidad. **(ni siquiera sé si esa palabra existe...)**', ephemeral: true });
     }
   }
-  
-})
+});
 
 // #### PENDING WELCOME SCREEN
 client.on('guildMemberUpdate', async (oldMember, newMember) => {
@@ -444,7 +443,7 @@ client.on("messageCreate", async message => {
   });
 
   if(!authorExists){
-    new User({
+    await new User({
       user_id: author.id,
       guild_id: guild.id
     }).save()
@@ -512,7 +511,7 @@ client.on("messageCreate", async message => {
             );
           } else {
             let corEmbed = new Discord.MessageEmbed()
-              .setAuthor(`| Rep`, `${uPrest.user.displayAvatarURL()}`)
+              .setAuthor(`Rep`, `${uPrest.user.displayAvatarURL()}`)
               .setDescription(
                 `**—** Usuario: **${uPrest}**.
 **—** Por: **${message.author.username}**.
@@ -763,7 +762,7 @@ client.on("messageCreate", async message => {
         const temprole = user.data.temp_roles[i];
         const specialInfo = temprole.special;
         
-        if(specialInfo.type === "boostMulitplier"){
+        if(specialInfo.type === "boostMultiplier"){
           if(specialInfo.objetive === "jeffros" || specialInfo.objetive === "all"){
             jeffrosToAdd = jeffrosToAdd * Number(specialInfo.value);
             console.log(author.tag, "Boost de JEFFROS.")
@@ -1068,7 +1067,7 @@ client.on("messageReactionAdd", (reaction, user) => {
     firstEmbed.fields.forEach(function(field){
       incaseofField += `\n${field.name} ${field.value}`
     })
-      msgEmbed = firstEmbed.description ? firstEmbed.description : incaseofField;
+      msgEmbed = firstEmbed.description ?? incaseofField;
     }
 
     embed.setAuthor(message.author.tag, message.author.displayAvatarURL());
@@ -1126,7 +1125,7 @@ client.on("messageReactionAdd", (reaction, user) => {
   }
 
   let confirmation = new Discord.MessageEmbed()
-    .setAuthor(`| Confirmación`, Config.jeffreyguildIcon)
+    .setAuthor(`Confirmación`, Config.jeffreyguildIcon)
     .setDescription(
       `**—** ${user.tag}, ¿Estás seguro de darle a este usuario el premio de **__${award}__**?
 **—**( **${Emojis.Jeffros}${price.toLocaleString('es-CO')}** )

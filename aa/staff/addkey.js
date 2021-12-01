@@ -4,30 +4,30 @@ const Emojis = require("../../resources/emojis.json");
 const Discord = require("discord.js");
 const ms = require("ms");
 
-const { Initialize, TutorialEmbed } = require("../../resources/functions.js");
+const { Initialize, TutorialEmbed, FindNewId } = require("../../resources/functions.js");
 
 /* ##### MONGOOSE ######## */
 
-const Key = require("../../modelos/keys.js");
+const Key = require("../../modelos/Key.model.js");
 
 /* ##### MONGOOSE ######## */
 
 const commandInfo = {
-    name: "generatekey",
-    aliases: ["addredeem", "akey", "aredeem", "genkey", "genredeem", "addkey"],
+    name: "addkey",
+    aliases: ["addredeem", "akey", "aredeem", "genkey", "genredeem", "generatekey"],
     info: "Generar una nueva clave",
     params: [
         {
             name: "tipo", display: "jeffros | exp | role | boost", type: "Options", options: ["jeffros", "exp", "role", "boost"], optional: false
         },
         {
-            name: "valor", display: "jeffros a dar", active_on: {param: "tipo", is: "jeffros"}, type: "NaturalNumber", optional: false
+            name: "valor", display: "jeffros a dar", active_on: {param: "tipo", is: "jeffros"}, type: "NaturalNumberNotInfinity", optional: false
         },
         {
             name: "usos", display: "usos máximos", active_on: {param: "tipo", is: "jeffros"}, type: "NaturalNumber", optional: true
         },
         {
-            name: "valor", display: "exp a dar", active_on: {param: "tipo", is: "exp"}, type: "NaturalNumber", optional: false
+            name: "valor", display: "exp a dar", active_on: {param: "tipo", is: "exp"}, type: "NaturalNumberNotInfinity", optional: false
         },
         {
             name: "usos", display: "usos máximos", active_on: {param: "tipo", is: "exp"}, type: "NaturalNumber", optional: true
@@ -36,16 +36,25 @@ const commandInfo = {
             name: "role", display: "id | @role", active_on: {param: "tipo", is: "role"}, type: "Role", optional: false
         },
         {
+            name: "duración", active_on: {param: "tipo", is: "role"}, type: "Time", optional: false
+        },
+        {
             name: "usos", display: "usos máximos", active_on: {param: "tipo", is: "role"}, type: "NaturalNumber", optional: true
         },
         {
-            name: "tipo de boost", active_on: {param: "tipo", is: "boost"}, type: "Options", options: ["multiplier", "chanceMultiplier"], optional: false
+            name: "role", display: "id | @role dado", active_on: {param: "tipo", is: "boost"}, type: "Role", optional: false
         },
         {
-            name: "cantidad", display: "numero a multiplicar", active_on: {param: "tipo", is: "boost"}, type: "Number", optional: false
+            name: "tipo de boost", display: "boostMultiplier | boostProbabilities", active_on: {param: "tipo", is: "boost"}, type: "Options", options: ["boostMultiplier", "boostProbabilities"], optional: false
         },
         {
-            name: "tiempo", active_on: {param: "tipo", is: "boost"}, type: "Time", optional: false
+            name: "valor de boost", display: "numero a multiplicar", active_on: {param: "tipo", is: "boost"}, type: "NaturalNumberNotInfinity", optional: false
+        },
+        {
+            name: "objetivo", display: "jeffros | exp | all", active_on: {param: "tipo", is: "boost"}, type: "Options", options: ["jeffros", "exp", "all"], optional: false
+        },
+        {
+            name: "duración", active_on: {param: "tipo", is: "boost"}, type: "Time", optional: false
         },
         {
             name: "usos", display: "usos máximos", active_on: {param: "tipo", is: "boost"}, type: "NaturalNumber", optional: true
@@ -72,15 +81,8 @@ module.exports = {
         // Comando
 
         // generar nueva key
-        let generatedID = 1;
         let keysq = await Key.find();
-
-        // id
-        for (let i = 0; i < keysq.length; i++) {
-            const keys = keysq[i];
-            
-            if(keys.id == generatedID) generatedID++
-        }
+        let generatedID = await FindNewId(keysq, "", "id");
 
         // code
         let generatedCode = generateCode()
@@ -92,7 +94,7 @@ module.exports = {
             let value = response.find(x => x.param === "valor").data;
             let maxuses = response.find(x => x.param === "usos").data || Infinity;
 
-            const newKey = new Key({
+            await new Key({
                 guild_id: message.guild.id,
                 config: {
                     maxuses: maxuses
@@ -103,16 +105,41 @@ module.exports = {
                 },
                 code: generatedCode,
                 id: generatedID
-            })
-    
-            await newKey.save();
+            }).save();
 
         } else {
-            // tipo boost o role
+            let boost_type = null;
+            let boost_value = null;
+            let boost_objetive = null;
+
+            if(tipo === "boost") boost_type = response.find(x => x.param === "tipo de boost").data;
+            if(tipo === "boost") boost_value = response.find(x => x.param === "valor de boost").data;
+            if(tipo === "boost") boost_objetive = response.find(x => x.param === "objetivo").data;
+            
+            let value = response.find(x => x.param === "role").data;
+            let duration = response.find(x => x.param === "duración").data;
+            let maxuses = response.find(x => x.param === "usos").data || Infinity;
+
+            await new Key({
+                guild_id: message.guild.id,
+                config: {
+                    maxuses: maxuses
+                },
+                reward: {
+                    type: tipo,
+                    boost_type: boost_type,
+                    boost_value: boost_value,
+                    boost_objetive: boost_objetive,
+                    value: value.id,
+                    duration: duration
+                },
+                code: generatedCode,
+                id: generatedID
+            }).save();
         }
 
         let added = new Discord.MessageEmbed()
-      .setAuthor("| Listo", Config.bienPng)
+      .setAuthor("Listo", Config.bienPng)
       .setDescription(`**—** Se ha generado una nueva llave.
 **—** \`${generatedCode}\`.
 **—** ID: \`${generatedID}\`.`)

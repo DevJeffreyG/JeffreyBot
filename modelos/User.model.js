@@ -45,8 +45,9 @@ const UserSchema = new Schema({
             {
                 isDarkShop: { type: Boolean, required: true, default: false},
                 item_id: { type: Number, required: true },
+                use_id: { type: Number, required: true, sparse: true },
                 active: { type: Boolean, required: true, default: false },
-                active_since: { type: Date }
+                active_since: { type: Date, default: null }
             }
         ],
         customrole: { type: String, required: true, default: "0" },
@@ -54,11 +55,7 @@ const UserSchema = new Schema({
             exp: { type: Number },
             jeffros: { type: Number }
         },
-        unlockedVaults: [
-            {
-                code_id: { type: Number, required: true }
-            }
-        ],
+        unlockedVaults: { type: Array },
         birthday: {
             day: { type: Number, default: null },
             month: { type: Number, default: null },

@@ -22,26 +22,25 @@ module.exports = {
         const helpEmojiURL = "https://cdn.discordapp.com/emojis/494282181296914432.png";
 
         // get all commands
-        const baseCommands = [];
-        const baseCommandsFolder = fs.readdirSync("./aa").filter(file => !file.endsWith(".txt")); // quitar el layout LMAO
+        const helpBaseCommands = [];
+        const helpBaseCommandsFolder = fs.readdirSync("./aa").filter(file => !file.endsWith(".txt")); // quitar el layout LMAO
 
-        for (const folder of baseCommandsFolder) {
+        for (const folder of helpBaseCommandsFolder) {
             const baseCommandsFiles = fs.readdirSync(`./aa/${folder}`).filter(file => file.endsWith(".js"));
 
             for (const file of baseCommandsFiles) {
-                const command = require(`../aa/${folder}/${file}`);
+                const helpCommand = require(`../aa/${folder}/${file}`);
             
                 // push name onto aliases
-                const aliases = command.data.aliases || [];
-                aliases.push(command.data.name);
-                command.data.aliases = aliases;
-                // set filename
-                command.data.file = file;
-                baseCommands.push(command.data);
+                const aliases = helpCommand.data.aliases || [];
+                aliases.push(helpCommand.data.name);
+                helpCommand.data.aliases = aliases;
+                
+                helpBaseCommands.push(helpCommand.data);
             }
         }
 
-        baseCommands.sort((a, b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0)); // me lo robe y no entiendo como funciona :D
+        helpBaseCommands.sort((a, b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0)); // me lo robe y no entiendo como funciona :D
 
         // roles
         let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
@@ -69,6 +68,10 @@ module.exports = {
         let economy = new Discord.MessageEmbed()
         .setAuthor(`Comandos de economía`, helpEmojiURL)
         .setColor(Colores.verde);
+        
+        let darkshop = new Discord.MessageEmbed()
+        .setAuthor(`Comandos de la DarkShop`, helpEmojiURL)
+        .setColor(Colores.negro);
 
         let moderation = new Discord.MessageEmbed()
         .setAuthor(`Comandos de moderación`, helpEmojiURL)
@@ -82,14 +85,14 @@ module.exports = {
         .setAuthor(`Comandos de desarrollador`, helpEmojiURL)
         .setColor(Colores.nocolor);
 
-        let [generalDescription, funDescription, musicDescription, economyDescription, moderationDescription, staffDescription, devDescription] = ["", "", "", "", "", "", ""];
+        let [generalDescription, funDescription, musicDescription, economyDescription, darkshopDescription, moderationDescription, staffDescription, devDescription] = ["", "", "", "", "", "", "", ""];
 
-        for (let i = 0; i < baseCommands.length; i++) {
-            const command = baseCommands[i];
+        for (let i = 0; i < helpBaseCommands.length; i++) {
+            const helpCommand = helpBaseCommands[i];
 
-            const toAdd = `▸ \`${prefix}${command.name}\`: ${command.info}.\n`;
+            const toAdd = `▸ \`${prefix}${helpCommand.name}\`: ${helpCommand.info}.\n`;
 
-            switch(command.category){
+            switch(helpCommand.category){
                 case "GENERAL":
                     generalDescription += toAdd;
                     break;
@@ -105,6 +108,10 @@ module.exports = {
                 case "ECONOMY":
                     economyDescription += toAdd;
                     break;
+
+                case "DARKSHOP":
+                    darkshopDescription += toAdd;
+                    break;
                 
                 case "MODERATION":
                     moderationDescription += toAdd;
@@ -119,7 +126,7 @@ module.exports = {
                     break;
 
                 default:
-                    console.log("ERROR HOLA?!!?? XDXDXDDX", command);
+                    console.log("ERROR HOLA?!!?? XDXDXDDX", helpCommand);
             }
 
         }
@@ -128,6 +135,7 @@ module.exports = {
         fun.setDescription(funDescription);
         music.setDescription(musicDescription);
         economy.setDescription(economyDescription);
+        darkshop.setDescription(darkshopDescription);
         moderation.setDescription(moderationDescription);
         staff.setDescription(staffDescription);
         dev.setDescription(devDescription);
@@ -141,6 +149,7 @@ module.exports = {
         if(fun.description) arrayEmbeds.push(fun);
         if(music.description) arrayEmbeds.push(music);
         if(economy.description) arrayEmbeds.push(economy);
+        if(darkshop.description) arrayEmbeds.push(darkshop);
 
         if(isJeffrey){
             if(moderation.description) arrayEmbeds.push(moderation);
@@ -151,6 +160,6 @@ module.exports = {
             if(staff.description) arrayEmbeds.push(staff);
         }
 
-        interaction.editReply({embeds: arrayEmbeds, ephemeral: true});
+        return interaction.editReply({embeds: arrayEmbeds, ephemeral: true});
     }
 }

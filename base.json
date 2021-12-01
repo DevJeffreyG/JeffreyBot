@@ -29,13 +29,26 @@
             "desc": "Se han agregado logros"
         },
         {
+            "type": "added",
+            "desc": "Se han agregado los comandos `{ PREFIX }buy` y `{ PREFIX }dsbuy`"
+        },
+        {
             "type": "updated",
-            "desc": "Se ha actualizado el comando `/top`",
+            "desc": "Se ha actualizado el comando `{ PREFIX }top`",
             "extended": "Ahora podrás ver más páginas además de los primeros 5."
         },
         {
             "type": "updated",
+            "desc": "Se han actualizado varios comandos de economía",
+            "extended": "Los comandos /shop y /darkshop ahora sólo mostrarán los items de la tienda.\nCuando se vayan a usar los items se usará una ID DE USO, ya no se usará la ID del item comprado.\nSe ha agregado una confirmación cuando se van a pagar Jeffros a otro usuario."
+        },
+        {
+            "type": "updated",
             "desc": "Se han arreglado algunos bugs en el sistema de música y autoroles"
+        },
+        {
+            "type": "updated",
+            "desc": "Se han cambiado ligeramente los colores de los embeds"
         },
         {
             "type": "updated",

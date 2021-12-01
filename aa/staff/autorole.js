@@ -225,20 +225,20 @@ module.exports = {
           // /a toggle idAUTOROLE togglegroup
           embed.setDescription(`▸ ${prefix}autorole toggle <\`autorole id\`> <\`grupo de toggle\`>`)
           if(!args[1] || isNaN(args[1])){
-              embed.setAuthor(`| Error: autorole id`, Config.errorPng)
+              embed.setAuthor(`Error: autorole id`, Config.errorPng)
               return message.channel.send({embeds: [embed]})
           } else if(!args[2] || isNaN(args[2])) {
-              embed.setAuthor(`| Error: grupo de toggle`, Config.errorPng)
+              embed.setAuthor(`Error: grupo de toggle`, Config.errorPng)
               return message.channel.send({embeds: [embed]})
           }
   
           if(args[1].toLowerCase() === "edit"){
             embed.setDescription(`▸ ${prefix}autorole edit <\`grupo de toggle\`> <\`nuevo nombre\`>`)
             if(!args[2] || isNaN(args[2])) {
-                embed.setAuthor(`| Error: grupo de toggle`, Config.errorPng)
+                embed.setAuthor(`Error: grupo de toggle`, Config.errorPng)
                 return message.channel.send({embeds: [embed]})
             } else if (!args[3]) {
-                embed.setAuthor(`| Error: nuevo nombre`, Config.errorPng)
+                embed.setAuthor(`Error: nuevo nombre`, Config.errorPng)
                 return message.channel.send({embeds: [embed]})
             }
   
@@ -249,7 +249,7 @@ module.exports = {
   
             if(groupQuery){
                 let changedGroup = new Discord.MessageEmbed()
-                .setAuthor(`| Listo`, Config.bienPng)
+                .setAuthor(`Listo`, Config.bienPng)
                 .setColor(Colores.verde)
                 .setDescription(`▸ Se ha cambiado el nombre del grupo \`${grouptoedit}\`.
                 ▸ \`${groupQuery.info.group_name}\` ➜ \`${newname}\`.`);
@@ -260,16 +260,16 @@ module.exports = {
                 await groupQuery.save();
                 return message.channel.send({embeds: [changedGroup]});
             } else {
-                embed.setAuthor(`| Error: grupo de toggle`, Config.errorPng)
+                embed.setAuthor(`Error: grupo de toggle`, Config.errorPng)
                 return message.channel.send({embeds: [embed]})
             }
           }
   
           if(!args[1] || isNaN(args[1])){
-              embed.setAuthor(`| Error: autorole id`, Config.errorPng)
+              embed.setAuthor(`Error: autorole id`, Config.errorPng)
               return message.channel.send({embeds: [embed]})
           } else if(!args[2] || isNaN(args[2])) {
-              embed.setAuthor(`| Error: grupo de toggle`, Config.errorPng)
+              embed.setAuthor(`Error: grupo de toggle`, Config.errorPng)
               return message.channel.send({embeds: [embed]})
           }
   
@@ -277,7 +277,7 @@ module.exports = {
         let autoroleQuery = await AutoRole.findOne({serverID: message.guild.id, id: autoroleID});
         
         if(!autoroleQuery) {
-            embed.setAuthor(`| Error: autorole id`, Config.errorPng)
+            embed.setAuthor(`Error: autorole id`, Config.errorPng)
             return message.channel.send({embeds: [embed]})
         }
         
@@ -297,13 +297,13 @@ module.exports = {
         let changedGroup = new Discord.MessageEmbed();
   
         if(toggleGroup != 0){
-          changedGroup.setAuthor(`| Listo`, Config.bienPng)
+          changedGroup.setAuthor(`Listo`, Config.bienPng)
           changedGroup.setColor(Colores.verde)
           changedGroup.setDescription(`▸ Se ha agregado el autorole con id \`${autoroleID}\` al grupo ${toggleGroup}, "${toggleGroupQuery.info.group_name}".
           ▸ Cambia el nombre del grupo con: \`${prefix}autorole toggle edit <grupo id>\`.`);
         } else {
           let oldGroup = await ToggleGroup.findOne({guild_id: message.guild.id, "info.group_id": autoroleQuery.toggleGroup});
-          changedGroup.setAuthor(`| Listo`, Config.bienPng)
+          changedGroup.setAuthor(`Listo`, Config.bienPng)
           changedGroup.setColor(Colores.rojo)
           changedGroup.setDescription(`▸ Se ha eliminado el autorole con id \`${autoroleID}\` del grupo ${autoroleQuery.toggleGroup}, "${oldGroup.info.group_name}".
           ▸ Cambia el nombre del grupo con: \`${prefix}autorole toggle edit <grupo id>\`.`);

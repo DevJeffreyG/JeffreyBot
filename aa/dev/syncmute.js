@@ -13,16 +13,16 @@ const User = require("../../modelos/User.model.js");
 /* ##### MONGOOSE ######## */
 
 const commandInfo = {
-    name: "nombre_del_comando",
-    aliases: ["alias1"],
-    info: "Información del comando",
+    name: "syncmute",
+    aliases: ["smute"],
+    info: "Sincronizar automáticamente el role Muted predeterminado o uno dado",
     params: [
         {
-            name: "nombre_del_parametro", display: "a mostrar en vez de 'name'", type: "tipo_de_parametro", optional: false
+            name: "role", type: "Role", optional: true
         }
     ],
-    userlevel: "USER, STAFF, ADMIN, DEVELOPER",
-    category: "GENERAL, FUN, MODERATION, STAFF, ECONOMY, DARKSHOP, MUSIC, DEVELOPER"
+    userlevel: "DEVELOPER",
+    category: "DEVELOPER"
 }
 
 module.exports = {
@@ -35,7 +35,20 @@ module.exports = {
 
         if(response[0] === "ERROR") return console.log(response); // si hay algún error
 
-        // Comando
+        let defaultmuteRole = client.user.id === Config.testingJBID ? guild.roles.cache.find(x => x.id === "544691532104728597") : guild.roles.cache.find(x => x.id === Config.muteRole);
 
+        const role = response.find(x => x.param === "role").data || defaultmuteRole;
+
+        // Comando
+        message.guild.channels.cache.each(async (channel, id) => {
+            await channel.permissionOverwrites.edit(role, {
+              VIEW_CHANNEL: false,
+              SEND_MESSAGES: false,
+              ADD_REACTIONS: false
+            })
+            .catch(err => console.log(err));
+        });
+
+        await message.react("✅");
     }
 }

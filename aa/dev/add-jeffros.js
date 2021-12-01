@@ -44,17 +44,13 @@ module.exports = {
     const jeffrosToAdd = response.find(x => x.param === "a añadir").data;
     const isDark = response.find(x => x.param === "darkjeffros?").data;
   
-    let user = await User.findOne({
-      user_id: member.id,
+    const user = await User.findOne({
+      user_id: author.id,
       guild_id: guild.id
-    });
-  
-    if(!user){
-      user = await new User({
-        user_id: member.id,
+    }) ?? await new User({
+        user_id: author.id,
         guild_id: guild.id
-      }).save();
-    }
+    }).save();
   
     if(isDark){
       if(!user.economy.dark.darkjeffros) return message.reply("No ha cambiado por primera vez DarkJeffros, abortando porque no se puede generar una duración de DarkJeffros.");

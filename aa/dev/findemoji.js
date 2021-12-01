@@ -37,7 +37,7 @@ module.exports = {
         if(!emoji) return message.reply(`No encontré ese emoji, verifica que hayas escrito bien el nombre.`);
 
         let finalEmbed = new Discord.MessageEmbed()
-        .setAuthor(`| Emote: ${emojiName}`, emoji.url)
+        .setAuthor(`Emote: ${emojiName}`, emoji.url)
         .setDescription(`**—** Nombre del Role: \`${emojiName}\`.
 **—** ID: \`${emoji.id}\`.
 **—** Es animado: \`${emoji.animated ? "Sí" : "No"}\`.

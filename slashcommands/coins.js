@@ -45,26 +45,23 @@ module.exports = {
         }
 
         // buscar usuario
-        let user = await User.findOne({
+        const user = await User.findOne({
             user_id: author.id,
             guild_id: guild.id
-        });
-
-        if(!user){
-            user = await new User({
-            user_id: member.id,
+        }) ?? await new User({
+            user_id: author.id,
             guild_id: guild.id
-            }).save();
-        }
+        }).save();
+        
 
         // buscar si tiene boost
         for (let i = 0; i < user.data.temp_roles.length; i++) {
             const temprole = user.data.temp_roles[i];
             const specialInfo = temprole.special;
             
-            if(specialInfo.type === "boostMulitplier"){
+            if(specialInfo.type === "boostMultiplier"){
                 if(specialInfo.objetive === "jeffros" || specialInfo.objetive === "all"){
-                    money = money * Number(specialData.specialValue);
+                    money = money * Number(specialInfo.value);
                     tmoney = `**${Emojis.Jeffros}${money.toLocaleString('es-CO')}📈**`;
                     console.log(author.tag, "Boost de JEFFROS.")
                 }

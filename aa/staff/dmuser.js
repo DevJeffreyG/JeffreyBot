@@ -40,7 +40,7 @@ module.exports = {
           let finalStr = yoStr.replace(new RegExp('{user}', "g"), `**${mdMember.user.tag}**`);
       
           let finalEmbed = new Discord.MessageEmbed()
-          .setAuthor(`| Hola:`, "https://i.pinimg.com/originals/85/7f/d7/857fd79dfd7bd025e4cbb2169cd46e03.png")
+          .setAuthor(`Hola:`, "https://i.pinimg.com/originals/85/7f/d7/857fd79dfd7bd025e4cbb2169cd46e03.png")
           .setDescription(`${finalStr}`)
           .setFooter("Este es un mensaje directamente del staff del servidor.")
           .setColor(Colores.verde);

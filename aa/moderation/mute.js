@@ -6,6 +6,12 @@ const prettyms = require("pretty-ms");
 
 const { Initialize, TutorialEmbed, LimitedTime } = require("../../resources/functions.js");
 
+/* ##### MONGOOSE ######## */
+
+const User = require("../../modelos/User.model.js");
+
+/* ##### MONGOOSE ######## */
+
 const commandInfo = {
     name: "mute",
     info: "Para mutear a algún usuario",
@@ -49,7 +55,12 @@ module.exports = {
             await member.roles.add(muteRole)
         } else { // Temp mute
             // llamar la funcion
-            await LimitedTime(guild, muteRole.id, member, tiempo);
+            let user = await User.findOne({
+                user_id: member.id,
+                guild_id: guild.id
+            });
+
+            await LimitedTime(guild, muteRole.id, member, user, tiempo);
         }
 
         message.react("✅");

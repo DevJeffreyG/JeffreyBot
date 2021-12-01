@@ -36,7 +36,7 @@ module.exports = {
         let logC = client.user.id === Config.testingJBID ? message.guild.channels.cache.find(x => x.id === "483108734604804107") : message.guild.channels.cache.find(x => x.id === Config.logChannel);
 
         let bEmbed = new Discord.MessageEmbed()
-        .setAuthor(`| Unban`, author.displayAvatarURL())
+        .setAuthor(`Unban`, author.displayAvatarURL())
         .setDescription(`**—** Usuario desbaneado: **${user}**.
 **—** Moderador: **${message.author.username}**.`)
         .setColor(Colores.verde);

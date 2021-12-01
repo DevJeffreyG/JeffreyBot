@@ -28,11 +28,11 @@ const All = require("../../modelos/allpurchases.js");
 /* ##### MONGOOSE ######## */
 
 const commandInfo = {
-    name: "darkshop",
-    aliases: ["ds", "dark", "darks"],
-    info: "Interactúa con la DarkShop",
+    name: "odarkshop",
+    aliases: ["ods", "odark", "odarks"],
+    info: "Interactúa con la vieja DarkShop",
     userlevel: "USER",
-    category: "ECONOMY"
+    category: "DARKSHOP"
 }
 
 module.exports = {
@@ -364,6 +364,7 @@ module.exports = {
                             } else {
         
                             switch(args[0]){
+                                    // listo
                                 case "help":
                                 case "ayuda":
                                     let embedAyuda = new Discord.MessageEmbed()
@@ -382,6 +383,7 @@ module.exports = {
                                     message.channel.send({embeds: [embedAyuda]});
                                     break;
         
+                                    // listo
                                 case "status":
                                 case "estado":
                                     let stonks
@@ -401,6 +403,7 @@ module.exports = {
                                     message.channel.send({embeds: [stonksEmbed]});
                                     break;
                                 
+                                    // listo
                                 case "duration":
                                 case "dur":
                                 case "d":
@@ -443,6 +446,7 @@ module.exports = {
                                     })
                                     break;
         
+                                    // listo
                                 case "dep":
                                 case "deposit":
                                 case "depositar":
@@ -541,6 +545,7 @@ module.exports = {
                                     
                                     break;
         
+                                    // listo
                                 case "with":
                                 case "withdraw":
                                 case "retirar":
@@ -600,6 +605,7 @@ module.exports = {
                                     
                                     break;
                 
+                                    // listo
                                 case "calc":
                                 case "calculator":
                                     Stats.findOne({
@@ -653,7 +659,8 @@ module.exports = {
                                     })
         
                                     break;
-                                
+
+                                    // listo
                                 case "stats":
                                 case "stat":
                                 case "me":

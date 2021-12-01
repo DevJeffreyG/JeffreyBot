@@ -1,7 +1,9 @@
 {
-    "verde": "#00ff00",
-    "rojo": "#ff0000",
-    "blanco": "#ffffff",
-    "negro": "#000000",
+    "verde": "#5cff5c",
+    "verdeclaro": "#b2f155",
+    "verdejeffrey": "#9ee436",
+    "rojo": "#ff3d3d",
+    "blanco": "#ebebeb",
+    "negro": "#121212",
     "nocolor": "#36393e"
 }

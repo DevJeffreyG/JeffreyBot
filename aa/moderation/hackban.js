@@ -36,7 +36,7 @@ module.exports = {
 
         // Comando
         let bEmbed = new Discord.MessageEmbed()
-        .setAuthor(`| HackBan`, author.displayAvatarURL())
+        .setAuthor(`HackBan`, author.displayAvatarURL())
           .setDescription(`**—** Usuario baneado { ID }: **${user}**.
 **—** Usuario baneado { @ }: <@${user}>
 **—** Ban en: **${message.channel}**.

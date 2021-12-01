@@ -9,20 +9,16 @@ const { Initialize, TutorialEmbed } = require("../../resources/functions.js");
 /* ##### MONGOOSE ######## */
 
 const User = require("../../modelos/User.model.js");
+const DarkShop = require("../../modelos/DarkShop.model.js");
 
 /* ##### MONGOOSE ######## */
 
 const commandInfo = {
-    name: "nombre_del_comando",
-    aliases: ["alias1"],
-    info: "Información del comando",
-    params: [
-        {
-            name: "nombre_del_parametro", display: "a mostrar en vez de 'name'", type: "tipo_de_parametro", optional: false
-        }
-    ],
-    userlevel: "USER, STAFF, ADMIN, DEVELOPER",
-    category: "GENERAL, FUN, MODERATION, STAFF, ECONOMY, DARKSHOP, MUSIC, DEVELOPER"
+    name: "dsinventory",
+    aliases: ["darkinventory", "dsinv", "darkinv", "dinv"],
+    info: "Muestra los items que tengas en tu inventario de la DarkShop",
+    userlevel: "USER",
+    category: "DARKSHOP"
 }
 
 module.exports = {
@@ -37,5 +33,9 @@ module.exports = {
 
         // Comando
 
+        let commandFile = require("../economy/inventory.js");
+
+        args.push("true");
+        return commandFile.execute(client, message, args);
     }
 }

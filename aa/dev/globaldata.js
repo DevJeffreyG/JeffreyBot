@@ -6,6 +6,7 @@ const { Initialize, TutorialEmbed, intervalGlobalDatas } = require("../../resour
 
 const commandInfo = {
     name: "globaldatas",
+    aliases: ["globaldata"],
     info: "Todos los tipos de GlobalDatas actuales. / Forzar ciclo de GlobalDatas",
     params: [
         {
@@ -32,13 +33,8 @@ module.exports = {
         let embed = new Discord.MessageEmbed()
         .setTitle(`Ayuda: ${prefix}globaldatas`)
         .setColor(Colores.nocolor)
-        .setDescription(`▸ Alternativa: ${prefix}globaldatas update`)
-        .addField(`▸ birthdayData`, `**—** Información de cumpleaños de un usuario.`)
+        .setDescription(`▸ Alternativa: ${prefix}globaldatas <update?>`)
         .addField(`▸ temporalGuildBan`, `**—** Información de un TempBan en el servidor.`)
-        .addField(`▸ dsInflation`, `**—** La inflación actual de los DarkJeffros.`)
-        .addField(`▸ dsDJDuration`, `**—** Información de la duración de los DarkJeffros de un usuario.`)
-        .addField(`▸ dsEventRandomInflation`, `**—** El próximo evento de para la inflación de los DarkJeffros.`)
-        .addField(`▸ roleDuration`, `**—** Información de Roles temporales (o no) que se les da a un usuario.`)
       
           if(!update){
               return message.channel.send({embeds: [embed]});

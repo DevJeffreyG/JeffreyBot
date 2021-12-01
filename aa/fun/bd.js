@@ -63,17 +63,13 @@ module.exports = {
         let dateString;
 
 
-        let user = await User.findOne({
+        const user = await User.findOne({
             user_id: author.id,
             guild_id: guild.id
-        });
-
-        if(!user){
-            user = await new User({
-              user_id: author.id,
-              guild_id: guild.id
-            }).save();
-        }
+        }) ?? await new User({
+            user_id: author.id,
+            guild_id: guild.id
+        }).save();
 
         const userBD = user.data.birthday;
 

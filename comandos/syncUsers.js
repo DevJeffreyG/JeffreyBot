@@ -213,9 +213,7 @@ module.exports.run = async (client, message, args) => {
           for (let i = 0; i < vaults.length; i++) {
             let codeID = Number(vaults[i].codeID);
             
-            toPush.push({
-              code_id: codeID
-            })
+            toPush.push(codeID)
           }
     
           finalQuery.data.unlockedVaults = toPush;
@@ -359,7 +357,7 @@ function getKeyByValue(object, value) {
       break;
   }
 
-  return Object.keys(object).find(key => object[key] === value);
+  return Object.keys(object).find(key => object[key].regla === value);
 }
 
 module.exports.help = {

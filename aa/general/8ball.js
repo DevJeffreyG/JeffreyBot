@@ -36,7 +36,7 @@ module.exports = {
 
     let pregEmbed = new Discord.MessageEmbed()
       .setColor(Colores.verde)
-      .setAuthor(`| ${message.author.tag}`, author.displayAvatarURL())
+      .setAuthor(`${message.author.tag}`, author.displayAvatarURL())
       .addField("Pregunta", pregunta)
       .addField("Respuesta", replies[answer]);
 

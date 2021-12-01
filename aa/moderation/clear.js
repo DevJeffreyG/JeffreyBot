@@ -39,7 +39,7 @@ module.exports = {
             }, ms("7s"));
           });
         }).catch(err => {
-          message.reply(`Sólo puedo eliminar mensajes que sean menores de 14 días.`).then(msg => {
+          message.channel.send(`Sólo puedo eliminar mensajes que sean menores de 14 días.`).then(msg => {
             setTimeout(() => {
               msg.delete();
             }, ms("7s"));

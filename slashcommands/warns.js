@@ -43,7 +43,7 @@ module.exports = {
 
         let error = new Discord.MessageEmbed()
         .setColor(Colores.rojo)
-        .setAuthor(`| ${member.user.tag}`, member.user.displayAvatarURL())
+        .setAuthor(`${member.user.tag}`, member.user.displayAvatarURL())
         .setDescription(`Este usuario no tiene warns de ningún tipo.`);
         
         const user = await User.findOne({
@@ -61,26 +61,26 @@ module.exports = {
         }
 
         let warnsE = new Discord.MessageEmbed()
-        .setAuthor(`| ${member.user.tag}'s warns`, member.user.displayAvatarURL())
+        .setAuthor(`${member.user.tag}'s warns`, member.user.displayAvatarURL())
         .setDescription(`**Número de warns ** ❛ \`${warns.length}\` ❜`)
         .setColor(Colores.verde);
 
         let softwarnsE = new Discord.MessageEmbed()
-        .setAuthor(`| ${member.user.tag}'s softwarns`, member.user.displayAvatarURL())
+        .setAuthor(`${member.user.tag}'s softwarns`, member.user.displayAvatarURL())
         .setDescription(`**Número de softwarns ** ❛ \`${softwarns.length}\` ❜`)
         .setColor(Colores.verde);
 
         // foreach
         warns.forEach(warn => {
             // sacar la regla
-            let regla = reglas[warn.rule_id];
+            let regla = reglas[warn.rule_id].regla;
 
             warnsE.addField(`— ${regla} : Regla N°${warn.rule_id}`, `**— [Pruebas](${warn.proof})\n— ID: ${warn.id}**`)
         });
 
         softwarns.forEach(softwarn => {
             // sacar la regla
-            let regla = reglas[softwarn.rule_id];
+            let regla = reglas[softwarn.rule_id].regla;
 
             softwarnsE.addField(`— ${regla} : Regla N°${softwarn.rule_id}`, `**— [Pruebas](${softwarn.proof})\n— ID: ${softwarn.id}**`)
         });

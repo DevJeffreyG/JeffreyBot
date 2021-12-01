@@ -46,17 +46,13 @@ module.exports = {
             guild_id: guild.id
         });
 
-        let user = await User.findOne({
+        const user = await User.findOne({
             user_id: member.id,
-            guild_id: member.guild.id
-        });
-
-        if(!user){
-            user = await new User({
-                user_id: member.id,
-                guild_id: member.guild.id
-            }).save();
-        }
+            guild_id: guild.id
+        }) ?? await new User({
+            user_id: member.id,
+            guild_id: guild.id
+        }).save();
 
         let toConfirm = [
             `¿Deseas pagarle **${Emojis.Jeffros}${quantity.toLocaleString('es-CO')}** a ${member}?`,
@@ -70,7 +66,7 @@ module.exports = {
         if(!confirmation) return;
 
         let notEnough = new Discord.MessageEmbed()
-        .setAuthor(`| Pagar Jeffros: Error`, Config.errorPng)
+        .setAuthor(`Pagar Jeffros: Error`, Config.errorPng)
         .setDescription(`**—** ¡No tienes tantos Jeffros!
 **—** Tienes: **${Emojis.Jeffros}${author_user.economy.global.jeffros.toLocaleString('es-CO') || 0}**.`)
         .setColor(Colores.rojo);
@@ -98,7 +94,7 @@ module.exports = {
         let description = possibleDescriptions[Math.floor(Math.random() * possibleDescriptions.length)];
 
         let doneEmbed = new Discord.MessageEmbed()
-        .setAuthor(`| Hecho`, Config.bienPng)
+        .setAuthor(`Hecho`, Config.bienPng)
         .setDescription(description)
         .setColor(Colores.verde);
 

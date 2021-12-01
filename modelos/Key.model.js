@@ -12,8 +12,11 @@ const KeysSchema = new Schema({
     },
     reward: {
         type: { type: String, required: true },
+        boost_type: {type: String, default: null },
+        boost_value: {type: Number, default: null },
+        boost_objetive: {type: String, default: null },
         value: { type: String, required: true },
-        duration: { type: String }
+        duration: { type: Number }
     },
     code: { type: String, required: true, unique: true },
     id: { type: Number, required: true, unique: true }

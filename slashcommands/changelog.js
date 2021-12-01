@@ -52,7 +52,7 @@ module.exports = {
 
             // regex
             let str = changes[i].desc;
-            let str2 = changes[i].extended ? changes[i].extended : false;
+            let str2 = changes[i].extended ?? false;
             let extendedDetails;
             let desc = str.replace(
                 new RegExp("{ PREFIX }", "g"),
@@ -115,7 +115,7 @@ module.exports = {
 
             // regex
             let str = changes[i].desc;
-            let str2 = changes[i].extended ? changes[i].extended : false;
+            let str2 = changes[i].extended ?? false;
             let extendedDetails;
             let desc = str.replace(
             new RegExp("{ PREFIX }", "g"),

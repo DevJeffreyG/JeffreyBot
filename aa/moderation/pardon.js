@@ -13,7 +13,7 @@ const User = require("../../modelos/User.model.js");
 const commandInfo = {
     name: "pardon",
     aliases: ["unwarn", "unsoftwarn", "uw", "us"],
-    info: "Eliminar un softwarn, o un warn por su id.",
+    info: "Eliminar un softwarn, o un warn por su id",
     params: [
         {
             name: "id", display: "id de la infraccion", type: "Number", optional: false
@@ -69,7 +69,7 @@ module.exports = {
         let idFound = idsNow.find(x => x.id === id);
 
         let notFound = new Discord.MessageEmbed()
-        .setAuthor(`| Pardon ${textInfraction}: Error`, Config.errorPng)
+        .setAuthor(`Pardon ${textInfraction}: Error`, Config.errorPng)
         .setDescription(`**—** No existe el ${textInfraction} con id "**${id}**".`)
         .setFooter(`Verifica que estés usando el ID correcto, en warns o en softwarns.`, guild.iconURL())
         .setColor(Colores.rojo);
@@ -86,7 +86,7 @@ module.exports = {
         const member = guild_member ? guild_member.members.cache.find(x => x.id === user.user_id) : null;
 
         let memberNotFound = new Discord.MessageEmbed()
-        .setAuthor(`| Pardon ${textInfraction}: Error`, Config.errorPng)
+        .setAuthor(`Pardon ${textInfraction}: Error`, Config.errorPng)
         .setDescription(`**—** No pude encontrar al miembro "${idFound.user_id}" en este servidor.`)
         .setColor(Colores.rojo);
 
@@ -109,7 +109,7 @@ module.exports = {
         await user.save();
 
         let pardon = new Discord.MessageEmbed()
-        .setAuthor(`| Pardon ${textInfraction}`, Config.bienPng)
+        .setAuthor(`Pardon ${textInfraction}`, Config.bienPng)
         .setDescription(`**—** Miembro: ${member}
 **—** ${textInfraction+"s"} actuales: **${infractions.length}**.`)
         .setColor(Colores.verde);
@@ -117,7 +117,7 @@ module.exports = {
         confirmation.edit({embeds: [pardon]});
 
         let memberEmbed = new Discord.MessageEmbed()
-        .setAuthor(`| Pardon`, "https://cdn.discordapp.com/emojis/537004318667177996.png")
+        .setAuthor(`Pardon`, "https://cdn.discordapp.com/emojis/537004318667177996.png")
         .setDescription(`**—** Se ha eliminado el ${textInfraction} con ID "**${id}**".
 **—** ${textInfraction+"s"} actuales: **${infractions.length}**.`)
         .setColor(Colores.verde)

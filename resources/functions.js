@@ -12,6 +12,7 @@ const fs = require("fs");
 const ms = require("ms");
 var Chance = require("chance");
 var chance = new Chance();
+const prettyMilliseconds = require("pretty-ms");
 
 const moment = require('moment-timezone');
 moment().tz("America/Bogota").format();
@@ -23,7 +24,10 @@ mongoose.connect(`${process.env.MONGOCONNECT}`, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
+
 const User = require("../modelos/User.model.js");
+const DarkShop = require("../modelos/DarkShop.model.js");
+const Shop = require("../modelos/Shop.model.js");
 
 const Jeffros = require("../modelos/jeffros.js");
 const Exp = require("../modelos/exp.js");
@@ -45,7 +49,6 @@ const Twitter = require("twitter");
 const { ApiClient } = require("twitch");
 const { StaticAuthProvider } = require("twitch-auth");
 const request = require("request");
-const { resolve, join } = require("path");
 
 /* ##### MONGOOSE ######## */
 
@@ -178,7 +181,7 @@ const intervalGlobalDatas = async function(client, justTempRoles){
       guild_id: guild.id
     });
 
-    let roles = dbUser && dbUser.data.temp_roles ? true : false;
+    let roles = (dbUser && dbUser.data.temp_roles) ?? false;
 
     if(roles) {
       for (let i = 0; i < dbUser.data.temp_roles.length; i++){
@@ -192,7 +195,7 @@ const intervalGlobalDatas = async function(client, justTempRoles){
 
           if(!temprole.isSub){
             // sacarle el role
-            console.log("ha pasado el tiempo 0001")
+            console.log("TEMPROLE, Ha pasado el tiempo 0001")
             member.roles.remove(role);
 
             // eliminar el temprole de la db
@@ -204,7 +207,7 @@ const intervalGlobalDatas = async function(client, justTempRoles){
             let isCancelled = temprole.sub_info.isCancelled;
 
             let notEnough = new Discord.MessageEmbed()
-            .setAuthor(`| Error`, Config.errorPng)
+            .setAuthor(`Error`, Config.errorPng)
             .setDescription(`**—** No tienes suficientes Jeffros **(${Emojis.Jeffros}${price.toLocaleString('es-CO')})** para pagar la suscripción a \`${subName}\`.
 **—** Tu saldo ha quedado en **alerta roja**.`)
             .setColor(Colores.rojo);
@@ -220,7 +223,7 @@ const intervalGlobalDatas = async function(client, justTempRoles){
               let jeffros = dbUser.economy.global;
 
               let paidEmbed = new Discord.MessageEmbed()
-              .setAuthor(`| Pagado`, Config.bienPng)
+              .setAuthor(`Pagado`, Config.bienPng)
               .setDescription(`**—** Has pagado **${Emojis.Jeffros}${price.toLocaleString('es-CO')}** para pagar la suscripción a \`${subName}\`.
               **—** Tu saldo ha quedado en **${Emojis.Jeffros}${(jeffros.jeffros - price).toLocaleString('es-CO')}**.`)
               .setColor(Colores.verde);
@@ -257,402 +260,7 @@ const intervalGlobalDatas = async function(client, justTempRoles){
 
 
   /** ###### DARKSHOP ###### */
-  // inflacion DARKSHOP
-
-  const maxDaysNormalInflation = Config.daysNormalInflation;
-  const maxDaysEventInflation = Config.daysEventInflation;
-
-  GlobalData.findOne({
-    "info.type": "dsInflation"
-  }, (err, dark) => {
-    if(err) throw err;
-
-    inflation = Number(Math.random() * 10).toFixed(2);
-    if(Number(inflation) < 1) inflation = Number(inflation) + 1; // no puede ser menor a 1, sólo con los eventos
-    date = new Date() // hoy
-    duration = Number(Math.random() * maxDaysNormalInflation).toFixed(1); // duración máxima de inflacion
-
-    if(!dark){
-      const newInflation = new GlobalData({
-        info: {
-          type: "dsInflation",
-          oldinflation: 1,
-          inflation: inflation,
-          since: date,
-          duration: duration
-        }
-      });
-
-      newInflation.save();
-
-      console.log("Se ha creado una nueva inflación desde cero.")
-    } else {
-      // leer y cambiar si es necesario
-      let oldDate = new Date(dark.info.since);
-      let newDate = new Date()
-
-      let diference1 = newDate.getTime() - oldDate.getTime();
-      let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
-      let oldInflation = dark.info.inflation;
-
-      if(pastDays >= dark.info.duration){
-
-
-        dark.info.oldinflation = dark.info.inflation;
-        dark.info.since = date;
-        dark.info.duration = duration;
-        dark.info.inflation = inflation;
-
-        dark.markModified("info");
-        dark.save();
-
-        console.log("Se ha cambiado la inflación, ahora es", inflation, "|| era:", oldInflation);
-      }
-    }
-  })
-
-  // ELIMINAR DARKJEFFROS CADUCADOS
-  GlobalData.find({
-    "info.type": "dsDJDuration"
-  }, async (err, dark) => { // buscar todas las duraciones de darkjeffros
-    if(err) throw err;
-
-    if(dark) { // si hay
-      let q = await GlobalData.findOne({
-        "info.type": "dsInflation"
-      });
-
-      for(let i = 0; i < dark.length; i++){
-        // variables
-        let id = dark[i].info.userID; // id de usuario
-        let member = guild.members.cache.find(x => x.id === id); // miembro actual
-
-        let oldDate = new Date(dark[i].info.since);
-        let newDate = new Date()
-       
-        let diference1 = newDate.getTime() - oldDate.getTime();
-        let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
-
-        // revisar si tiene darkjeffros el usuario
-        Stats.findOne({
-          userID: id
-        }, async (err, user) => {
-          if(err) throw err;
-
-          if(user.djeffros != 0){
-            // si tiene darkjeffros, ¿caducaron?
-            if(pastDays >= dark[i].info.duration){
-              let staffCID = Config.logChannel;
-              if(client.user.id === Config.testingJBID){
-                staffCID = "537095712102416384";
-              }
-
-              let staffC = guild.channels.cache.find(x => x.id === staffCID);
-              let memberD = guild.members.cache.find(x => x.id === user.userID);
-
-              let staffEmbed = new Discord.MessageEmbed()
-              .setColor(Colores.verde)
-              .setDescription(`**—** Se han elimando los Dark Jeffros de **${memberD.user.tag}**.
-              **—** Desde: \`${dark[i].info.since}\`.
-              **—** Duración: \`${dark[i].info.duration}\`.
-              **—** Tenía: **${Emojis.Dark}${user.djeffros}**`)
-              .setFooter("Mensaje enviado a la vez que al usuario")
-              .setTimestamp();
-
-              let embed = new Discord.MessageEmbed()
-              .setAuthor(`| ...`, Config.darkLogoPng)
-              .setColor(Colores.negro)
-              .setDescription(`**—** Parece que no has vendido todos tus DarkJeffros. Han sido eliminados de tu cuenta tras haber concluido los días estipulados. (\`${dark[i].info.duration} días.\`)`)
-              .setFooter("▸ Si crees que se trata de un error, contacta al Staff.");
-
-              // eliminarlos de la cuenta (0)
-              user.djeffros = 0;
-              user.save();
-
-              // eliminar dsDJDuration
-              await dark[i].remove();
-              console.log("Se han eliminado los DJ de", memberD.tag)
-
-              // intentar enviar un mensaje al MD.
-              member.send({embeds: [embed]})
-              .catch(err => {
-                staffC.send(`**${member.user.tag} no recibió MD de DarkJeffros eliminados.**\n\`\`\`javascript\n${err}\`\`\``)
-              });
-
-              staffC.send({embeds: [staffEmbed]});
-            }
-          } else { // sus darkjeffros están en 0
-            // revisar si caduracion para eliminar el globaldata
-            if(pastDays >= dark[i].info.duration){
-              let staffCID = Config.logChannel;
-              if(client.user.id === Config.testingJBID){
-                staffCID = "537095712102416384";
-              }
-
-              let staffC = guild.channels.cache.find(x => x.id === staffCID);
-              let memberD = guild.members.cache.find(x => x.id === user.userID);
-
-              let staffEmbed = new Discord.MessageEmbed()
-              .setColor(Colores.verde)
-              .setDescription(`**—** Se ha eliminado la dsDJDuration de ${memberD.user.tag}.
-              **—** Desde: \`${dark[i].info.since}\`.
-              **—** Duración: \`${dark[i].info.duration}\`.`)
-              .setFooter("No se ha enviado mensaje al usuario porque sus darkjeffros eran 0.")
-              .setTimestamp();
-
-              // eliminar dsDJDuration
-              await dark[i].remove();
-              console.log("Se ha eliminado el globaldata de DJ de", memberD.tag)
-              staffC.send({embeds: [staffEmbed]});
-            }
-          }
-        })
-      }
-    }
-  })
-
-  // CREAR EVENTO EN UN DIA RANDOM EN UN PLAZO DE 30 DIAS
-  GlobalData.findOne({
-    "info.type": "dsEventRandomInflation"
-  }, (err, dark) => {
-    if (err) throw err;
-
-    if(!dark){ // si no existe un evento random, crearlo
-      let event = "b";
-      let ecuation = Math.random()*100;
-
-      if(ecuation >= 52){ // BAJA EL PRECIO (INFLACION) EN EL EVENTO. -> EL MÁS PROBABLE A PASAR
-        event = "b";
-      } else  if(ecuation >= 14){ // SUBE  EL PRECIO (INFLACION) EN EL EVENTO. 
-        event = "s";
-      } else { // SI ES MENOR QUE 14 EL PRECIO NO CAMBIA
-        event = "i";
-      }
-
-      let eventinflation;
-      date = new Date() // hoy
-      duration = Number((Math.random() * maxDaysEventInflation) + 1).toFixed(1); // duración máxima de eventos
-
-      if(event === "s"){ // si el precio DEBE subir
-        console.log("Evento próximo va a subir");
-        GlobalData.findOne({
-          "info.type": "dsInflation"
-        }, (err, inflations) => {
-          if(err) throw err;
-
-          if(!inflations){
-            console.log("No hay inflaciones");
-          } else {
-            let oldInflation = Number(inflations.info.inflation);
-            eventinflation = Number((Math.random() * 10) + oldInflation).toFixed(2);
-
-            if(eventinflation >= 10) eventinflation = 10; // no puede ser mayor a 10
-
-            const newData = new GlobalData({
-              info: {
-                type: "dsEventRandomInflation",
-                inflation: eventinflation,
-                since: date,
-                duration: duration
-              }
-            });
-            newData.save();
-          }
-        })
-      } else if(event === "b"){ // si el precio DEBE bajar
-        console.log("Evento próximo va a bajar");
-        GlobalData.findOne({
-          "info.type": "dsInflation"
-        }, (err, inflations) => {
-          if(err) throw err;
-
-          if(!inflations){
-            console.log("No hay inflaciones");
-          } else {
-            let oldInflation = Number(inflations.info.inflation);
-
-            // si es menor a 1 no bajar más
-
-            if(oldInflation < 1){
-              eventinflation = Number(Math.random() * oldInflation).toFixed(2);
-            
-              let att = 0; // intentos máximos pa que no se muera si la inflacion es muy baja de por si
-              while (eventinflation < 1 && att < 15) {
-                eventinflation = Number(Math.random() * (inflation*6)).toFixed(2);
-                att++
-              }
-              
-              if(eventinflation < 1) eventinflation = Number(Math.random() * 10).toFixed(2);
-              while (eventinflation < 1) { // si sigue siendo menor a 1 hallar una inflacion normalmente
-                eventinflation = Number(Math.random() * 10).toFixed(2);
-              }
-
-              const newData = new GlobalData({
-                info: {
-                  type: "dsEventRandomInflation",
-                  inflation: eventinflation,
-                  since: date,
-                  duration: duration
-                }
-              });
-              newData.save();
-            } else { // si es mayor a 1 entonces bajar la inflacion, ahora también puede ser menor a 1
-              eventinflation = Number(Math.random() * oldInflation).toFixed(2);
-
-              const newData = new GlobalData({
-                info: {
-                  type: "dsEventRandomInflation",
-                  inflation: eventinflation,
-                  since: date,
-                  duration: duration
-                }
-              });
-              newData.save();
-            }
-          }
-        })
-      } else { // el precio no cambia
-        console.log("Evento próximo queda igual la inflación");
-        GlobalData.findOne({
-          "info.type": "dsInflation"
-        }, (err, inflations) => {
-          if(err) throw err;
-
-          if(!inflations){
-            console.log("No hay inflaciones");
-          } else {
-            let oldInflation = Number(inflations.info.inflation);
-            eventinflation = Number(oldInflation);
-
-            const newData = new GlobalData({
-              info: {
-                type: "dsEventRandomInflation",
-                inflation: eventinflation,
-                since: date,
-                duration: duration
-              }
-            });
-            newData.save();
-          }
-        })
-      }
-    } else { // si ya existe un evento, leerlo y revisar si ya es momento de cambiarlo
-      if(dark.info.inflation === "NaN"){ // error por alguna razón, elimina el evento
-        dark.remove();
-      } else { // si no hay error proseguir
-      
-        let oldDate = new Date(dark.info.since);
-        let newDate = new Date()
-
-        let diference1 = newDate.getTime() - oldDate.getTime();
-        let pastDays = Math.floor(diference1 / (1000 * 3600 * 24));
-
-        if(pastDays >= dark.info.duration){
-          console.log("Ahora mismo hay un evento.")
-          // enviar mensaje random de evento
-          let newInflation = `**${dark.info.inflation}%**`;
-          let rndmEventSUBE = [
-            `Estamos de suerte, se han devaluado los Jeffros, la inflación ha subido al ${newInflation}`,
-            `Los Jeffros se levantaron con pie izquierdo, la inflación sube a ${newInflation}`,
-            `Nuestro momento ha llegado, los Jeffros se han devaluado y la inflación sube a ${newInflation}`,
-            `Hora de sacar nuestra artillería, han hecho que los Jeffros se devalúen, la inflacion sube a ${newInflation}`,
-            `Esto no pasa muy seguido ¿verdad? hoy estamos de suerte, la inflación sube a ${newInflation}`,
-            `Bastante espectacular, ¿no? la inflación ha subido a ${newInflation}`
-          ];
-
-          let rndmEventBAJA = [
-            `Parece que algo en las oficinas ha hecho que la inflación baje al ${newInflation}`,
-            `Mira que hay que tener mala suerte, se han regalado miles de Jeffros por todo el planeta y ha hecho que la inflación baje a ${newInflation}`,
-            `Al otro lado de la moneda se le dio por fortalecerse, la inflación baja a ${newInflation}`,
-            `Han intenado raidearnos, tuvimos que tomar decisiones, la inflación baja a ${newInflation}`,
-            `La inflación baja a ${newInflation}. Hay que ver el lado positivo, con suerte nos va mejor para la próxima`,
-            `Hay días buenos, y otras veces, sólo hay días. La inflación baja a ${newInflation}`
-          ];
-
-          let rndmEventIGUAL = [
-            `Por poco... nos han intentado robar en una de nuestras sucursales, la inflación se queda en ${newInflation}`,
-            `Parece que casi nos involucran en una mala jugada, la inflación queda en ${newInflation}`,
-            `Casi que no lo logramos, pero la inflación queda en ${newInflation}`,
-            `Menos mal, la cosa se puso difícil pero logramos hacer que la inflación quedase en ${newInflation}`,
-            `¿Qué tal? Casi que nos hacen la jugada, pero somos mejores que ellos. La inflación se queda en ${newInflation}`,
-            `Esto es increíble, logramos quedarnos en ${newInflation}, buen trabajo, equipo.`
-          ];
-
-          let rSube = rndmEventSUBE[Math.floor(Math.random() * rndmEventSUBE.length)];
-          let rBaja = rndmEventBAJA[Math.floor(Math.random() * rndmEventBAJA.length)];
-          let rIgual = rndmEventIGUAL[Math.floor(Math.random() * rndmEventIGUAL.length)];
-
-          // revisar si baja, sube o se queda igual de acuerdo a la inflación actual
-
-          GlobalData.findOne({
-            "info.type": "dsInflation"
-          }, (err, inflation) => {
-            if(err) throw err;
-            
-            let oldInflation = inflation.info.inflation;
-            let eventInflation = dark.info.inflation;
-            let event;
-
-            if(eventInflation > oldInflation){
-              event = "s";
-            } else if(eventInflation < oldInflation){
-              event = "b";
-            } else {
-              event = "i";
-            }
-
-          switch(event){
-            case "s":
-              let embed = new Discord.MessageEmbed()
-              .setAuthor(`| Evento`, Config.darkLogoPng)
-              .setDescription(rSube)
-              .setColor(Colores.negro)
-              .setFooter(`La inflación SUBE.`)
-              .setTimestamp();
-
-              dsChannel.send({content: `${dsNews}`, embeds: [embed]});
-              break;
-
-            case "b":
-              let embed2 = new Discord.MessageEmbed()
-              .setAuthor(`| Evento`, Config.darkLogoPng)
-              .setDescription(rBaja)
-              .setColor(Colores.negro)
-              .setFooter(`La inflación BAJA.`)
-              .setTimestamp();
-
-              dsChannel.send({content: `${dsNews}`, embeds: [embed2]});
-              break;
-
-            case "i":
-              let embed3 = new Discord.MessageEmbed()
-              .setAuthor(`| Evento`, Config.darkLogoPng)
-              .setDescription(rIgual)
-              .setColor(Colores.negro)
-              .setFooter(`La inflación se MANTIENE.`)
-              .setTimestamp();
-
-              dsChannel.send({content: `${dsNews}`, embeds: [embed3]});
-              break;
-          }
-
-          // aplicar el evento a la inflacion actual
-            
-            inflation.info.oldinflation = inflation.info.inflation;
-            inflation.info.inflation = dark.info.inflation;
-
-            inflation.markModified("info");
-            inflation.save();
-
-            console.log("# Se ha actualizado la inflación debido al evento.")
-          })
-
-          // eliminar el evento
-          dark.remove();
-        }
-      }
-    }
-  });
+  await DarkShopWork(client, guild.id);
 
   /** ###### DARKSHOP ###### */
 
@@ -677,7 +285,7 @@ const intervalGlobalDatas = async function(client, justTempRoles){
           tempBans[i].remove();
 
           let unBEmbed = new Discord.MessageEmbed()
-          .setAuthor(`| Unban`, guild.iconURL())
+          .setAuthor(`Unban`, guild.iconURL())
           .setDescription(`
         **—** Usuario desbaneado: **${userID}**.
         **—** Razón: **${ban.info.reason}**.
@@ -703,7 +311,7 @@ const intervalGlobalDatas = async function(client, justTempRoles){
         let member = guild.members.cache.find(x => x.id === bd.info.userID);
         let bdDay = bd.info.birthd;
         let bdMonth = bd.info.birthm;
-        let isLocked = bd.info.isLocked ? bd.info.isLocked : false;
+        let isLocked = bd.info.isLocked ?? false;
 
         if(isLocked) {
           if(bdDay && bdMonth){
@@ -789,10 +397,12 @@ const Interest = function (author, idUse) {
  * @param {Object[]} guild - The Discord.JS Guild
  * @param {string} roleID - The ID of the temporary role
  * @param {Object[]} victimMember - The Discord.JS Member
+ * @param {Object[]} user - The mongoose User.Model
  * @param {(number | string)} duration The duration of the temporary role in ms.
  * - "permanent" for not being an temporary role.
  * @param {string} [specialType=false] The special type of this temporary role.
  * - boostMultiplier
+ * - boostProbabilities
  * @param {string} [specialObjective=false] The objetive for this special type of temporary role.
  * - exp
  * - jeffros
@@ -800,107 +410,41 @@ const Interest = function (author, idUse) {
  * @param {number} [specialValue=false] The value for the objetive of this special temporary role.
  * @returns void
  */
-const LimitedTime = async function(guild, roleID, victimMember, duration, specialType, specialObjective, specialValue){
-    specialType = specialType || false;
-    specialObjective = specialObjective || false;
-    specialValue = specialValue || false;
+const LimitedTime = async function(guild, roleID, victimMember, user, duration, specialType, specialObjective, specialValue){
+    specialType = specialType || null;
+    specialObjective = specialObjective || null;
+    specialValue = specialValue || null;
 
     let role = guild.roles.cache.find(x => x.id === roleID);
 
-    let user = await User.findOne({
-      user_id: victimMember.id,
-      guild_id: victimMember.guild.id
-    });
+    if(duration === Infinity) return victimMember.roles.add(role); // es un role permanente???
 
+    let hoy = new Date();
 
-
-    // si no es un boost (por ahora)
-    if(!specialType){
-      console.log("Nuevo roleDuration que NO es un BOOST.")
-
-      /* "duration" DEBE SER ms ( no se usa ms() ) */
-      if(duration != "permanent"){
-        // agregar una global data con la fecha
-
-        let hoy = new Date();
-        const newData = new GlobalData({
-            info: {
-                type: "roleDuration",
-                roleID: roleID,
-                userID: victimMember.id,
-                since: hoy,
-                duration: duration,
-                special: {
-                  "type": false,
-                  "specialObjective": false, 
-                  "specialValue": false
-                }
-            }
-        })
-
-        let toPush = {
-          role_id: roleID,
-          active_since: hoy,
-          duration: duration
-        }
-
-        user.data.temp_roles.push(toPush);
-        await user.save();
-
-        let lastAddedIndex = user.data.temp_roles.length - 1;
-        victimMember.roles.add(role);
-
-        // timeout, por si pasa el tiempo antes de que el bot pueda reiniciarse
-        setTimeout(function(){
-            victimMember.roles.remove(role);
-
-            user.data.temp_roles.splice(lastAddedIndex, 1);
-            user.save()
-        }, duration);
-
-      } else {
-          // es permanente, no hacer nada
-          return console.log("Por qué llamas literalmente una función que se llama 'Limited Time' para un role que es permanente? ¿No tienes sentido común o qué?");
+    let toPush = {
+      role_id: roleID,
+      active_since: hoy,
+      duration: duration,
+      special: {
+        type: specialType,
+        objetive: specialObjective,
+        value: specialValue
       }
-    } else { // es un boost
-
-      let hoy = new Date();
-
-      const newData = new GlobalData({
-        info: {
-          type: "roleDuration",
-          roleID: roleID,
-          userID: victimMember,
-          since: hoy,
-          duration: duration,
-          special: {
-            "type": specialType, // boostMultiplier
-            "specialObjective": specialObjective, // exp, jeffros, all
-            "specialValue": specialValue // (2) = exp || jeffros normales x 2
-          }
-        }
-      })
-
-      victimMember.roles.add(role);
-      newData.save();
-
-      // timeout, por si pasa el tiempo antes de que el bot pueda reiniciarse
-        setTimeout(function(){
-          victimMember.roles.remove(role);
-
-          GlobalData.findOneAndDelete({
-              "info.type": "roleDuration",
-              "info.roleID": roleID,
-              "info.userID": victimMember.id
-          }, (err, func) => {
-              if(err){
-                  console.log("e2", err);
-              } else {
-                  console.log("Role eliminado automaticamente")
-              }
-          });
-        }, duration);
     }
+
+    user.data.temp_roles.push(toPush);
+    await user.save();
+
+    let lastAddedIndex = user.data.temp_roles.length - 1;
+    victimMember.roles.add(role);
+
+    // timeout, por si pasa el tiempo antes de que el bot pueda reiniciarse
+    setTimeout(function(){
+      victimMember.roles.remove(role);
+
+      user.data.temp_roles.splice(lastAddedIndex, 1);
+      user.save()
+    }, duration);
 }
 
 /**
@@ -939,6 +483,82 @@ const Subscription = function(guild, roleID, victimMember, intervalTime, jeffros
       victimMember.roles.add(role);
       newData.save();
     }
+}
+
+const VaultWork = function(vault, user, message, notCodeEmbed){ // mostrar y buscar un codigo no descifrado aún por el usuario
+  if(user.data.unlockedVaults.length === vault.codes.length) return message.channel.send({content: `${message.member}`, embeds: [notCodeEmbed]}).then(m => {
+    setTimeout(() => {
+    m.delete();
+    message.delete();
+    }, ms("10s"));
+  });
+
+  const unlocked = user.data.unlockedVaults;
+
+  let code = vault.codes[Math.floor(Math.random() * vault.codes.length)];
+  
+  while(unlocked.find(x => x === code.id)){
+    code = vault.codes[Math.floor(Math.random() * vault.codes.length)];
+  }
+
+  const totalhints = code.hints.length;
+  let pistan = 1;
+
+  const embed = new Discord.MessageEmbed()
+  .setColor(Colores.verde)
+  .setFooter(`Pista ${pistan} de ${totalhints} | /vault [codigo] para decifrar.`)
+  .setDescription(code.hints[pistan - 1]);
+
+  return message.reply({embeds: [embed]}).then(msg => {
+    msg.react("⏪").then(r => {
+      msg.react("⏩");
+
+      const backwardsFilter = (reaction, user) => reaction.emoji.name === "⏪" && user.id === message.author.id;
+      const forwardsFilter = (reaction, user) => reaction.emoji.name === "⏩" && user.id === message.author.id;
+      const collectorFilter = (reaction, user) => (reaction.emoji.name === "⏪" || reaction.emoji.name === "⏩") && user.id === message.author.id;
+
+      const backwards = msg.createReactionCollector({ filter:backwardsFilter, time: 60000 });
+      const forwards = msg.createReactionCollector({ filter:forwardsFilter, time: 60000 });
+      const collector = msg.createReactionCollector({ filter:collectorFilter, time: 60000 });
+
+      collector.on("end", r => {
+        return msg.reactions.removeAll()
+        .then(() => {
+          msg.react("795090708478033950");
+        });
+      });
+
+      backwards.on("collect", async (r, user) => {
+        let reactions = r.message.reactions.cache.find(x => x.emoji.name === "⏪");
+
+        if (pistan === 1) return reactions.users.remove(user.id);;
+        pistan--;
+        embed.setFooter(
+          `Pista ${pistan} de ${totalhints} | /vault [codigo] para decifrar.`
+        );
+        embed.setDescription(code.hints[pistan - 1]);
+        await msg.edit({embeds: [embed]});
+
+        reactions.users.remove(user.id);;
+      });
+
+      forwards.on("collect", async (r, user) => {
+        let reactions = r.message.reactions.cache.find(x => x.emoji.name === "⏩");
+
+        if (pistan === code.hints.length) return reactions.users.remove(user.id);;
+        pistan++;
+        embed.setFooter(
+          `Pista ${pistan} de ${totalhints} | /vault [codigo] para decifrar.`
+        );
+        embed.setDescription(code.hints[pistan - 1]);
+
+        await msg.edit({embeds: [embed]});
+        
+        reactions.users.remove(user.id);;
+      });
+    });
+  });
+
 }
 
 const vaultMode = function(hint, author, message) { // tengo que rehacer esto XD
@@ -1194,6 +814,7 @@ const handleUploads = async function(client){
         });
 
         twitterClient.get('statuses/user_timeline', {screen_name: config.twitter_screenname, count: 5}, async function(error, tweets, response) {
+          if(error) throw error;
           const tweet = tweets[0]; // ultimo tweet de {config.twitter_screenname}
           const tweetId = tweet.id_str;
           const link = `https://twitter.com/${config.twitter_screenname}/status/${tweetId}`;
@@ -1485,7 +1106,7 @@ const TutorialEmbed = async function(commandTree, executionInfo, args){
       const arg = args[i] ? args[i] : null;
 
       let toReturn;
-      if(!arg){ // null, revisar que sea opcional
+      if(!arg && param.type != "Attachment"){ // null, revisar que sea opcional
         if(param && !param.optional) { // no es opcional, regresar error
           response = ["ERROR", `in ${i} - REQUIRED PARAMETER NOT DEFINED`, i, " "];
           break verificationLoop;
@@ -1528,8 +1149,10 @@ const TutorialEmbed = async function(commandTree, executionInfo, args){
         if(!toReturn){
           const limit = 30;
           let given = arg;
-          if(arg.length > limit){
+          if(arg && arg.length > limit){
             given = arg.slice(0, limit+1) + "..."
+          } else {
+            given = " ";
           }
           response = ["ERROR", `in ${i} - INVALID PARAMETER GIVEN`, i, given];
           break verificationLoop;
@@ -1583,7 +1206,7 @@ const Confirmation = async function(toConfirm, dataToConfirm, msg){
   });
 
   let confirmation = new Discord.MessageEmbed()
-  .setAuthor(`| ${toConfirm}?`, msg.guild.iconURL())
+  .setAuthor(`${toConfirm}?`, msg.guild.iconURL())
   .setDescription(DescriptionString)
   .setColor(Colores.rojo);
 
@@ -1630,11 +1253,11 @@ const Confirmation = async function(toConfirm, dataToConfirm, msg){
     yes.on("collect", async r => {
       confirmation
       .setColor(Colores.verde)
-      .setAuthor(`| ${toConfirm}, continuando...`, Config.loadingGif);
+      .setAuthor(`${toConfirm}, continuando...`, Config.loadingGif);
 
       await message.edit({embeds: [confirmation]})
       
-      message.reactions.removeAll();
+      await message.reactions.removeAll();
       resolve(message);
     });
   
@@ -1643,7 +1266,7 @@ const Confirmation = async function(toConfirm, dataToConfirm, msg){
 
       let finalmsg = await message.edit({embeds: [cancelEmbed]})
       
-      message.reactions.removeAll();
+      await message.reactions.removeAll();
       await msg.delete();
       setTimeout(() => {
         finalmsg.delete()
@@ -1660,7 +1283,7 @@ const Confirmation = async function(toConfirm, dataToConfirm, msg){
  */
 const AfterInfraction = async function(user, data, isSoftwarn){
   isSoftwarn = isSoftwarn || false;
-  const { member, rule, proof, message } = data;
+  const { member, rule, proof, message, id } = data;
   const { prefix } = Config;
 
   if(!isSoftwarn){ // es un warn normal
@@ -1673,12 +1296,13 @@ const AfterInfraction = async function(user, data, isSoftwarn){
     let arrayEmbeds = [];
     
     let warnedEmbed = new Discord.MessageEmbed()
-    .setAuthor(`| Warn`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
+    .setAuthor(`Warn`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
     .setDescription(`
 **—** Has sido __warneado__ por el STAFF.
 **—** Warns actuales: **${totalWarns}**.
 **—** Por infringir la regla: **${rule}**.
-**—** **[Pruebas](${proof.url})**.`)
+**—** **[Pruebas](${proof.url})**.
+**—** ID de Warn: \`${id}\`.`)
     .setColor(Colores.rojo)
     .setFooter(`Ten más cuidado la próxima vez!`, 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png');
 
@@ -1687,7 +1311,7 @@ const AfterInfraction = async function(user, data, isSoftwarn){
 
     if(totalWarns >= 4){
       let autoMod = new Discord.MessageEmbed()
-      .setAuthor(`| Ban PERMANENTE.`, "https://cdn.discordapp.com/emojis/537804262600867860.png")
+      .setAuthor(`Ban PERMANENTE.`, "https://cdn.discordapp.com/emojis/537804262600867860.png")
       .setDescription(`**—** PERMABAN.
 **—** Warns actuales: **${totalWarns}**.
 **—** Razón de ban (AutoMod): Muchos warns.
@@ -1700,7 +1324,7 @@ const AfterInfraction = async function(user, data, isSoftwarn){
 
     if(totalWarns >= 3){
       let autoMod = new Discord.MessageEmbed()
-      .setAuthor(`| TempBan`, "https://cdn.discordapp.com/emojis/537792425129672704.png")
+      .setAuthor(`TempBan`, "https://cdn.discordapp.com/emojis/537792425129672704.png")
       .setDescription(`**—** Ban (24h).
 **—** Warns actuales: **${totalWarns}**.
 **—** Razón de ban (AutoMod): 3 warns acumulados.
@@ -1748,7 +1372,7 @@ const AfterInfraction = async function(user, data, isSoftwarn){
 
     if(totalWarns >= 2){
       let infoEmbed = new Discord.MessageEmbed()
-      .setAuthor(`| Información`, "https://cdn.discordapp.com/emojis/494267320097570837.png?v=1")
+      .setAuthor(`Información`, "https://cdn.discordapp.com/emojis/494267320097570837.png?v=1")
     .setDescription(`**—** ${member.user.tag}, este es tu **warn número ❛ \`2\` ❜**
 *— ¿Qué impacto tendrá este warn?*
 **—** Tranquil@. Este warn no afectará en nada tu estadía en el servidor, sin embargo; el siguiente warn será un **ban de un día**.
@@ -1789,8 +1413,818 @@ const AfterInfraction = async function(user, data, isSoftwarn){
   }
 }
 
+/**
+ * 
+ * @param {String} guildId The Guild#id
+ * @param {Object} message The Discord.JS Message
+ * @param {Number} [itemsPerPage = 3] The number of items that will be per page
+ * @param {Boolean} isDarkShop If the pages to generate are from the darkshop or not
+ * @returns {Array|null} Each element of the array will be the description of the page or null if items do not exist
+ */
+const GeneratePages = async function(guildId, message, itemsPerPage, isDarkShop){
+  itemsPerPage = itemsPerPage || 3;
+  isDarkShop = isDarkShop || false;
+
+  const user = await User.findOne({
+    user_id: message.author.id,
+    guild_id: guildId
+  });
+
+  const interest_txt = "Al comprar este item, su precio subirá";
+  const viewExtension = "ꜝ";
+
+  const shop = isDarkShop ? await DarkShop.findOne({guild_id: guildId}) : await Shop.findOne({guild_id: guildId});
+  const emote = isDarkShop ? Emojis.Dark : Emojis.Jeffros;
+
+  if(!shop || shop.items.length === 0) return null;
+
+  const items = shop.items;
+
+  let pag_actual = 1;
+  let totalpags = shop.items.length / itemsPerPage; 
+
+  let inicio = itemsPerPage * pag_actual - itemsPerPage; // el index del primer item a mostrar
+  let fin = itemsPerPage * pag_actual - 1; // el index del ultimo item a mostrar
+
+  if(items.length <= fin){
+    fin = items.length - 1;
+  }
+
+  let pags = [];
+  let actualpage = [];
+
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    
+    if(i > fin) { // ayuda no se como hace varias paginas
+      pags.push(actualpage);
+
+      actualpage = [];
+      pag_actual++;
+      fin = itemsPerPage * pag_actual - 1;
+
+      if(items.length <= fin){
+        fin = items.length - 1;
+      }
+    }
+    
+    const userIsOnMobible = await isOnMobible(message);
+
+    const precio = await DeterminePrice(user, item, true, isDarkShop);
+    const nombre = item.name;
+    const desc = item.description;
+    const id = item.id;
+    const interest = item.interest.toLocaleString("es-CO");
+    const hasInterest = item.interest != 0 ? true : false;
+    const isSub = item.use_info.isSub;
+
+    if(isSub){
+      actualpage.push(`**— { ${id} } ${nombre}**\n\`▸\` ${desc}\n▸ ${emote}${precio} **/${prettyMilliseconds(item.use_info.duration)}**\n\n`);
+    } else {
+      if(userIsOnMobible && hasInterest){
+        actualpage.push(`**— { ${id} } ${nombre}**\n\`▸\` ${desc}\n▸ ${emote}${precio}\n\`▸\` ${interest_txt} (+${interest})\n\n`);
+      } else if(!userIsOnMobible && hasInterest){ // esta en pc, y el item tiene interés
+        actualpage.push(`**— { ${id} } ${nombre}**\n\`▸\` ${desc}\n▸ ${emote}${precio} [${viewExtension}](${message.url} '${interest_txt} (+${interest})')\n\n`);
+      } else { // no tiene interés
+        actualpage.push(`**— { ${id} } ${nombre}**\n\`▸\` ${desc}\n▸ ${emote}${precio}\n\n`);
+      }
+    }
+  }
+
+  pags.push(actualpage);
+
+  return pags || null;
+}
+
+const InteractivePages = async function(message, msg, pages, base){
+  if(pages.length === 1) return null;
+  let pagn = 0;
+  await msg.react("⏪");
+  await msg.react("⏩");
+
+  let totalitems = 0;
+  pages.forEach(arr => {
+    totalitems += arr.length;
+  });
+
+  const backwardsFilter = (reaction, user) => reaction.emoji.name === "⏪" && user.id === message.author.id;
+  const forwardsFilter = (reaction, user) =>reaction.emoji.name === "⏩" && user.id === message.author.id;
+  const collectorFilterMainPage = (reaction, user) => (reaction.emoji.name === "⏩" || reaction.emoji.name === "⏪") && user.id === message.author.id;
+
+  const backwards = msg.createReactionCollector({ filter: backwardsFilter, time: 60000 });
+  const forwards = msg.createReactionCollector({ filter: forwardsFilter, time: 60000 });
+  const collectorMainPage = msg.createReactionCollector({ filter: collectorFilterMainPage, time: 60000 });
+
+  collectorMainPage.on("end", r => {
+    return msg.reactions.removeAll()
+    .then(() => {
+        msg.react("795090708478033950");
+    });
+  })
+
+  backwards.on("collect", async(r, user) => {
+    let reactions = r.message.reactions.cache.find(x => x.emoji.name === "⏪");
+
+    if (pagn === 0) return reactions.users.remove(user.id);;
+    pagn--;
+
+    embed = new Discord.MessageEmbed()
+    .setAuthor(base.title, base.icon)
+    .setColor(base.color ?? Colores.verde)
+    .setDescription(`${base.description ? base.description + "\n\n" : ""}${pages[pagn].join(" ")}`)
+    .setFooter(base.footer.replace(new RegExp("{ACTUAL}", "g"), `${pagn+1}`).replace(new RegExp("{TOTAL}", "g"), `${pages.length}`), base.icon_footer);
+
+    await msg.edit({embeds: [embed]});
+    return reactions.users.remove(user.id);
+  });
+
+  forwards.on("collect", async(r, user) => {
+    let reactions = r.message.reactions.cache.find(x => x.emoji.name === "⏩");
+
+    if (pagn === pages.length - 1) return reactions.users.remove(user.id);;
+    pagn++;
+
+    embed = new Discord.MessageEmbed()
+    .setAuthor(base.title, base.icon)
+    .setColor(base.color ?? Colores.verde)
+    .setDescription(`${base.description ? base.description + "\n\n" : ""}${pages[pagn].join(" ")}`)
+    .setFooter(base.footer.replace(new RegExp("{ACTUAL}", "g"), `${pagn+1}`).replace(new RegExp("{TOTAL}", "g"), `${pages.length}`), base.icon_footer);
+
+    await msg.edit({embeds: [embed]});
+    return reactions.users.remove(user.id);
+  });
+}
+
+const CollectMessage = async function(message, own_message, custom_filter){
+  custom_filter = custom_filter || null;
+
+  if(custom_filter) custom_filter.push("cancel");
+
+  return new Promise(async(resolve, reject) => {
+    const filter = custom_filter ? m => m.author.id === message.author.id && custom_filter.find(x => x.toLowerCase() === m.content.toLowerCase()) : m => m.author.id === message.author.id;
+    const channel = message.channel;
+    const collector = channel.createMessageCollector({ filter, time: ms("1m"), max: 1});
+
+    collector.on("collect", async collected => {
+      await collected.delete();
+    })
+  
+    collector.on("end", async collected => {
+      let resolvable = collected.size > 0 && collected.first().content.toLowerCase() != "cancel" ? true : false;
+      resolve(resolvable ? collected.first() : null);
+
+      if(!resolvable) own_message.edit("Cancelado.");
+    });
+  })
+}
+
+const ValidateParam = async function(type, message){
+  const arg = message.content;
+  let toReturn;
+
+  switch(type){
+    case "Member":
+      // buscar por mención, o id
+      toReturn = message.mentions.members.first() ? message.mentions.members.first() : message.guild.members.cache.find(x => x.id === arg); 
+
+      if(!toReturn && (arg.toLowerCase() === "yo" || arg.toLowerCase() === "me")){
+        toReturn = message.member;
+      }
+
+      break;
+
+    case "NotSelfMember":
+      // no puede ser el mismo usuario que ejecuta el comando
+      let possibleReturn = message.mentions.members.first() ? message.mentions.members.first() : message.guild.members.cache.find(x => x.id === arg);
+      toReturn = possibleReturn.id != message.member.id ? possibleReturn : null;
+      break;
+
+    case "Role":
+      // buscar por mención, o id
+      toReturn = message.mentions.roles.first() ? message.mentions.roles.first() : message.guild.roles.cache.find(x => x.id === arg);
+      break;
+
+    case "Emoji":
+      let isCustom = arg.length > 5 ? true : false;
+
+      if(isCustom){
+        let emote = arg.match(/\d/g); // sacando los números del emoji
+        emote = emote.join("");
+        toReturn = message.guild.emojis.cache.find(x => x.id === emote);
+      } else {
+        toReturn = arg;
+      }
+      break;
+
+    case "Channel":
+      toReturn = message.mentions.channels.first() ? message.mentions.channels.first() : message.guild.channels.cache.find(x => x.id === arg);
+      break;
+
+    case "Message":
+      toReturn = await message.channel.messages.fetch(arg);
+      break;
+
+    case "MessageLink":
+      const linkArray = arg.split("/");
+      const numbers = linkArray.filter(element => !isNaN(element) && element.length > 0);
+
+      const actualguild = message.guild;
+      const actualchannel = actualguild.channels.cache.find(x => x.id === numbers[1]);
+      const actualmessage = await actualchannel.messages.fetch(numbers[2]).catch(err => console.log());
+      
+      toReturn = actualmessage;
+      break;
+    
+    case "Number":
+      if(Number(arg)) toReturn = Number(arg);
+      break;
+
+    case "NaturalNumberDiff0":
+      if(Math.floor(arg) > 0) {
+        toReturn = Math.floor(arg)
+      }
+      break;
+
+    case "NaturalNumber":
+      if(Math.floor(arg) >= 0) {
+        toReturn = Math.floor(arg)
+      }
+      break;
+
+    case "Time":
+      toReturn = ms(arg);
+      break;
+
+    case "Boolean":
+      if(arg === "1" || arg === "true" || arg === "si" || arg === "sí" || arg === "yes" || arg === "y" || arg === "s") toReturn = true;
+      else if(arg === "0" || arg === "false" || arg === "no" || arg === "no" || arg === "n") toReturn = false;
+      break;
+
+    default:
+      toReturn = null;
+  }
+
+  return toReturn;
+}
+
+/**
+ * 
+ * @param {*} client The Discord.JS Client
+ * @param {String} guildId The Sting of the Guild#id where the commands is executed
+ */
+const DarkShopWork = async function(client, guildId){
+  const maxDaysNormalInflation = Config.daysNormalInflation;
+  const maxDaysEventInflation = Config.daysEventInflation;
+  const guild = client.guilds.cache.find(x => x.id === guildId);
+  
+  const dsChannel = client.user.id === Config.testingJBID ? client.channels.cache.find(x => x.id === "790431676970041356") : client.channels.cache.find(x => x.id === Config.dsChannel);
+  const dsNews = client.user.id === Config.testingJBID ? guild.roles.cache.find(x => x.id === "790431614378704906") : guild.roles.cache.find(x => x.id === Config.dsnews);
+  const logchannel = client.user.id === Config.testingJBID ? guild.channels.cache.find(x => x.id === "537095712102416384") : guild.channels.cache.find(x => x.id === Config.logChannel);
+
+  // datas nuevas en caso de necesarias
+  const today = new Date();
+  
+  let inflation = Number(Math.random() * 10 + 1).toFixed(2);
+  if(Number(inflation) > 10) inflation = 10;
+
+  const baseDuration = Number(Math.random() * maxDaysNormalInflation).toFixed(1); // duración máxima de inflacion
+
+  // eventos
+  const percentage = Math.random() * 100;
+  const event = percentage >= 52 ? 0 : percentage >= 14 ? 1 : 2; // 0 baja, 1 sube, 2 igual
+
+  const eventDuration = Number((Math.random() * maxDaysEventInflation) + 1).toFixed(1); // duración máxima de eventos
+
+  const darkshop = await DarkShop.findOne({guild_id: guildId}) ?? await new DarkShop({
+    guild_id: guildId,
+    inflation: {
+      value: inflation,
+      since: today,
+      duration: Number(baseDuration)
+    },
+    event: {
+      newinflation: await generateNewEventInflation(event),
+      since: today,
+      count: Number(eventDuration)
+    }
+  }).save();
+
+  // leer y cambiar inflaciones si es necesario
+  // INFLACIÓN NORMAL
+  const oldDateInflation = new Date(darkshop.inflation.since);
+  
+  const pastDaysInflation = await DaysUntilToday(oldDateInflation);
+  const actualInflation = darkshop.inflation.value;
+
+  if(pastDaysInflation >= darkshop.inflation.duration){
+    darkshop.inflation.old = actualInflation;
+    darkshop.inflation.since = today;
+    darkshop.inflation.duration = baseDuration;
+    darkshop.inflation.value = inflation;
+
+    await darkshop.save();
+
+    console.log("Se ha cambiado la inflación, ahora es", inflation, "|| era:", actualInflation);
+  }
+
+  // EVENTOS
+  const oldDateEvent = new Date(darkshop.event.since);
+
+  const pastDaysEvent = await DaysUntilToday(oldDateEvent);
+
+  if(pastDaysEvent >= darkshop.event.count){
+    console.log("Ahora mismo hay un evento.")
+    // enviar mensaje random de evento
+    let newInflation = `**${darkshop.event.newinflation}%**`;
+    let rndmEventSUBE = [
+      `Estamos de suerte, se han devaluado los Jeffros, la inflación ha subido al ${newInflation}`,
+      `Los Jeffros se levantaron con pie izquierdo, la inflación sube a ${newInflation}`,
+      `Nuestro momento ha llegado, los Jeffros se han devaluado y la inflación sube a ${newInflation}`,
+      `Hora de sacar nuestra artillería, han hecho que los Jeffros se devalúen, la inflacion sube a ${newInflation}`,
+      `Esto no pasa muy seguido ¿verdad? hoy estamos de suerte, la inflación sube a ${newInflation}`,
+      `Bastante espectacular, ¿no? la inflación ha subido a ${newInflation}`
+    ];
+
+    let rndmEventBAJA = [
+      `Parece que algo en las oficinas ha hecho que la inflación baje al ${newInflation}`,
+      `Mira que hay que tener mala suerte, se han regalado miles de Jeffros por todo el planeta y ha hecho que la inflación baje a ${newInflation}`,
+      `Al otro lado de la moneda se le dio por fortalecerse, la inflación baja a ${newInflation}`,
+      `Han intenado raidearnos, tuvimos que tomar decisiones, la inflación baja a ${newInflation}`,
+      `La inflación baja a ${newInflation}. Hay que ver el lado positivo, con suerte nos va mejor para la próxima`,
+      `Hay días buenos, y otras veces, sólo hay días. La inflación baja a ${newInflation}`
+    ];
+
+    let rndmEventIGUAL = [
+      `Por poco... nos han intentado robar en una de nuestras sucursales, la inflación se queda en ${newInflation}`,
+      `Parece que casi nos involucran en una mala jugada, la inflación queda en ${newInflation}`,
+      `Casi que no lo logramos, pero la inflación queda en ${newInflation}`,
+      `Menos mal, la cosa se puso difícil pero logramos hacer que la inflación quedase en ${newInflation}`,
+      `¿Qué tal? Casi que nos hacen la jugada, pero somos mejores que ellos. La inflación se queda en ${newInflation}`,
+      `Esto es increíble, logramos quedarnos en ${newInflation}, buen trabajo, equipo.`
+    ];
+
+    let rSube = rndmEventSUBE[Math.floor(Math.random() * rndmEventSUBE.length)];
+    let rBaja = rndmEventBAJA[Math.floor(Math.random() * rndmEventBAJA.length)];
+    let rIgual = rndmEventIGUAL[Math.floor(Math.random() * rndmEventIGUAL.length)];
+
+    // revisar si baja, sube o se queda igual de acuerdo a la inflación actual
+      
+    const oldInflation = Number(darkshop.inflation.value);
+    const eventInflation = Number(darkshop.event.newinflation);
+    let actualEvent;
+
+    if(eventInflation > oldInflation){
+      actualEvent = 1;
+    } else if(eventInflation < oldInflation){
+      actualEvent = 0;
+    } else {
+      actualEvent = 2;
+    }
+
+    switch(actualEvent){
+      case 1:
+        let embed = new Discord.MessageEmbed()
+        .setAuthor(`Evento`, Config.darkLogoPng)
+        .setDescription(rSube)
+        .setColor(Colores.negro)
+        .setFooter(`La inflación SUBE.`)
+        .setTimestamp();
+
+        dsChannel.send({content: `${dsNews}`, embeds: [embed]});
+        break;
+
+      case 0:
+        let embed2 = new Discord.MessageEmbed()
+        .setAuthor(`Evento`, Config.darkLogoPng)
+        .setDescription(rBaja)
+        .setColor(Colores.negro)
+        .setFooter(`La inflación BAJA.`)
+        .setTimestamp();
+
+        dsChannel.send({content: `${dsNews}`, embeds: [embed2]});
+        break;
+
+      case 2:
+        let embed3 = new Discord.MessageEmbed()
+        .setAuthor(`Evento`, Config.darkLogoPng)
+        .setDescription(rIgual)
+        .setColor(Colores.negro)
+        .setFooter(`La inflación se MANTIENE.`)
+        .setTimestamp();
+
+        dsChannel.send({content: `${dsNews}`, embeds: [embed3]});
+        break;
+    }
+
+    // aplicar el evento a la inflacion actual
+      
+    darkshop.inflation.old = oldInflation;
+    darkshop.inflation.value = eventInflation;
+
+    await darkshop.save();
+
+    console.log("# Se ha actualizado la inflación debido al evento.")
+
+    // crear de una el nuevo evento
+    darkshop.event = {
+      newinflation: await generateNewEventInflation(event),
+      since: today,
+      count: eventDuration
+    }
+
+    await darkshop.save();
+  }
+
+  // DURACION DE LOS DARKJEFFROS
+  const darkusers = await User.find({
+    guild_id: guildId,
+    "economy.dark.duration": {$gt: 0}
+  });
+
+  darkusers.forEach(async darkuser => {
+    const darkdata = darkuser.economy.dark;
+
+    const pastDaysDJ = await DaysUntilToday(darkdata.dj_since);
+
+    //console.log("Han pasado %s de %s días de %s", pastDaysDJ, darkdata.duration, darkuser.user_id);
+
+    if(pastDaysDJ >= darkdata.duration){ // ya pasaron los días para cambiar los darkjeffros.
+      let memberDJ = guild.members.cache.find(x => x.id === darkuser.user_id);
+      
+      if(darkdata.darkjeffros === 0){
+        let log = new Discord.MessageEmbed()
+        .setColor(Colores.verde)
+        .setDescription(`**—** Se ha eliminado la Duración de DarkJeffros de ${memberDJ.user.tag}.
+**—** Desde: \`${darkdata.dj_since}\`.
+**—** Duración: \`${darkdata.duration}\`.`)
+        .setFooter("No se ha enviado mensaje al usuario porque sus darkjeffros eran 0.")
+        .setTimestamp();
+        
+        darkdata.dj_since = null;
+        darkdata.duration = null;
+
+        await darkuser.save();
+
+        console.log("Se ha eliminado la duración de DJ de", memberDJ.user.tag)
+        logchannel.send({embeds: [log]});
+      } else {
+        let log = new Discord.MessageEmbed()
+        .setColor(Colores.verde)
+        .setDescription(`**—** Se han eliminado los DarkJeffros de **${memberDJ.user.tag}**.
+**—** Desde: \`${darkdata.dj_since}\`.
+**—** Duración: \`${darkdata.duration}\`.
+**—** Tenía: **${Emojis.Dark}${darkdata.darkjeffros}**`)
+        .setFooter("Mensaje enviado a la vez que al usuario")
+        .setTimestamp();
+
+        let embed = new Discord.MessageEmbed()
+        .setAuthor(`...`, Config.darkLogoPng)
+        .setColor(Colores.negro)
+        .setDescription(`**—** Parece que no has vendido todos tus DarkJeffros. Han sido eliminados de tu cuenta tras haber concluido los días estipulados. (\`${darkdata.duration} días.\`)`)
+        .setFooter("▸ Si crees que se trata de un error, contacta al Staff.");
+
+        darkdata.darkjeffros = 0;
+        darkdata.dj_since = null;
+        darkdata.duration = null;
+        
+        await darkuser.save();
+        
+        console.log("Se ha eliminado la duración de DJ de", memberDJ.user.tag)
+
+        // intentar enviar un mensaje al MD.
+        memberDJ.send({embeds: [embed]})
+        .catch(err => {
+          logchannel.send(`**${memberDJ.user.tag} no recibió MD de DarkJeffros eliminados.**\n\`\`\`javascript\n${err}\`\`\``)
+        });
+
+        logchannel.send({embeds: [log]});
+      }
+    }
+  })
+
+  return darkshop;
+
+  async function generateNewEventInflation(event){ // nuevo evento de inflacion en caso de necesitarse
+    const oldinflation = darkshop ? darkshop.inflation.value : inflation; // tomar la inflación actual o la que se generó si no existe
+
+    let newinflation;
+
+    if(event === 0){ // baja
+      if(oldinflation < 1){
+        newinflation = Number(Math.random() * oldinflation).toFixed(2);
+      
+        let att = 0; // intentos máximos pa que no se muera si la inflacion es muy baja de por si
+        while (newinflation < 1 && att < 15) {
+          newinflation = Number(Math.random() * (inflation*6)).toFixed(2);
+          att++
+        }
+        
+        if(newinflation < 1) newinflation = Number(Math.random() * 10).toFixed(2); // por si el while no es suficiente
+        while (newinflation < 1) { // si sigue siendo menor a 1 hallar una inflacion normalmente
+          newinflation = Number(Math.random() * 10).toFixed(2);
+        }
+      } else { // si es mayor a 1 entonces bajar la inflacion, ahora también puede ser menor a 1
+        newinflation = Number(Math.random() * oldinflation).toFixed(2);
+      }
+
+    } else if(event === 1){ // sube
+      newinflation = Number(Math.random() * 10).toFixed(2);
+
+      while(newinflation <= oldinflation){
+        newinflation = Number(Math.random() * 10).toFixed(2);
+      }
+
+      if(newinflation > 10) newinflation = 10;
+    } else { // igual
+      newinflation = oldinflation;
+    }
+
+    return Number(newinflation);
+  }
+}
+
+/**
+ * 
+ * @param {*} user The mongoose User
+ * @param {*} author The Discord.JS User
+ * @returns 
+ */
+const ValidateDarkShop = async function(user, author){
+  const r = [
+    "{you}... No estás listo.",
+    "No tienes el valor para hacerlo.",
+    "Esto no va a terminar bien para ti, {you}."
+  ];
+
+  let res = r[Math.floor(Math.random() * r.length)];
+
+  const desc = res.replace(
+      new RegExp("{you}", "g"),
+      `**${author.tag}**`
+  );
+
+  const notReady = new Discord.MessageEmbed()
+  .setColor(Colores.rojo)
+  .setDescription(desc)
+  .setFooter("▸ Vuelve cuando seas nivel 5.");
+
+  if(user.economy.global.level < 5) return [false, notReady];
+  else return [true];
+}
+
+const DaysUntilToday = async function(date){
+  let hoy = new Date();
+  let oldDate = new Date(date); // fecha del dia inicial
+
+  let diference1 = hoy - oldDate
+
+  let response = diference1 / (1000 * 3600 * 24); // dias transcurridos
+
+  if(isNaN(response)) return "?";
+  else return Number(response.toFixed(1));
+}
+
+/**
+ * 
+ * @param {*} message The Discord.JS Message
+ * @param {*} user The buyer's document inside the database
+ * @param {Object} item The object of the item being purchased
+ * @param {Boolean} [isDarkShop=false]
+ * @returns {Array} Returns [0] true on success, returns [0] false on any error. [1] Is Embed
+ */
+const ComprarItem = async function(message, user, item, isDarkShop){
+  isDarkShop = isDarkShop || false;
+  const { prefix } = Config;
+  
+  const actualJeffros = isDarkShop ? user.economy.dark.darkjeffros : user.economy.global.jeffros;
+
+  // si NaN actualJeffros...
+  let doesntDS = new Discord.MessageEmbed()
+  .setAuthor(`Error`, Config.errorPng)
+  .setDescription(`**—** Aún no tienes una cuenta, cambia unos cuantos Jeffros por DarkJeffros antes de venir a comprar.\n▸ \`${prefix}dschange\`.`)
+  .setColor(Colores.rojo);
+
+  if(isNaN(actualJeffros)) return [false, doesntDS];
+
+  const member = message.member;
+
+  // determinar datos generales
+  const toPay = await DeterminePrice(user, item, false, isDarkShop);
+  const nombre = item.name;
+  
+  let doesntHaveRole = new Discord.MessageEmbed()
+  .setAuthor(`Error`, Config.errorPng)
+  .setDescription(`**—** Necesitas el role "<@&${item.req_role}>" para comprar \`${nombre}\`.`)
+  .setColor(Colores.rojo);
+
+  let doesntHaveEnough = new Discord.MessageEmbed()
+  .setAuthor(`Error`, Config.errorPng)
+  .setDescription(`**—** Necesitas **${isDarkShop ? Emojis.Dark : Emojis.Jeffros}${toPay.toLocaleString("es-CO")}** para comprar \`${nombre}\`. Tienes **${isDarkShop ? Emojis.Dark : Emojis.Jeffros}${actualJeffros}**.`)
+  .setColor(Colores.rojo);
+
+  let hasRoleToGive = new Discord.MessageEmbed()
+  .setAuthor(`Error`, Config.errorPng)
+  .setDescription(`**—** Ya tienes el role que te da este item, no puedes comprar \`${nombre}\` otra vez.`)
+  .setColor(Colores.rojo);
+
+  // role requerido
+  if (item.req_role != "0" && !member.roles.cache.find(x => x.id === item.req_role)) return [false, doesntHaveRole];
+
+  // buscar si ya tiene el role que se da
+  if (item.use_info.action === "add" && item.use_info.objetive === "role" && member.roles.cache.find(x => x.id === item.use_info.given)) return [false, hasRoleToGive];
+
+  // buscar el item en el inventario
+  const inventoryFilter = x => x.isDarkShop === isDarkShop && x.item_id === item.id;
+  if(user.data.inventory.find(inventoryFilter)){
+
+    let hasThisItem = new Discord.MessageEmbed()
+    .setAuthor(`Error`, Config.errorPng)
+    .setDescription(`**—** Ya tienes \`${nombre}\`, úsalo con \`${prefix}use ${user.data.inventory.find(inventoryFilter).use_id}\`.`)
+    .setColor(Colores.rojo);
+
+    return [false, hasThisItem];
+  }
+
+  // cobrar
+  if(actualJeffros < toPay) return [false, doesntHaveEnough];;
+  
+  if(isDarkShop) user.economy.dark.darkjeffros -= toPay;
+  else user.economy.global.jeffros -= toPay
+
+  // id
+  let usos = await User.find();
+  let newId = await FindNewId(usos, "data.inventory", "use_id");
+
+  // agregarlo al inventario (Array)
+  await user.data.inventory.push({isDarkShop: isDarkShop, item_id: item.id, use_id: newId});
+  
+  // revisar si debe agregarse interés
+  if(item.interest > 0){
+    const interestFilter = x => x.isDarkShop === isDarkShop && x.item_id === item.id;
+    if(!user.data.purchases.find(interestFilter)) user.data.purchases.push({isDarkShop: isDarkShop, item_id: item.id, quantity: 1});
+    else {
+      user.data.purchases.find(interestFilter).quantity++;
+    }
+  }
+  
+  // guardar y success
+  await user.save();
+
+  let success = new Discord.MessageEmbed()
+  .setAuthor(`Listo!`, Config.bienPng)
+  .setDescription(`\`▸\` Pago realizado con éxito.
+\`▸\` Compraste: \`${nombre}\` por **${isDarkShop ? Emojis.Dark : Emojis.Jeffros}${toPay.toLocaleString("es-CO")}**.
+\`▸\` **Úsalo con \`${prefix}use ${newId}\`**.
+\`▸\` Ahora tienes: **${isDarkShop ? Emojis.Dark : Emojis.Jeffros}${isDarkShop ? user.economy.dark.darkjeffros.toLocaleString("es-CO") : user.economy.global.jeffros.toLocaleString("es-CO")}**.`)
+  .setColor(isDarkShop ? Colores.negro : Colores.verde);
+
+  return [true, success];
+}
+
+/**
+ * 
+ * @param {*} user The user's document inside the database
+ * @param {*} item The item's object inside the database
+ * @param {Boolean} [returnString=false] The function returns an String with the original price and the new one?
+ * @param {Boolean} [isDarkShop=false] This is for the DarkShop?
+ * @returns {String | Number} Returns a String or a Number in the case
+ */
+const DeterminePrice = async function(user, item, returnString, isDarkShop){
+  isDarkShop = isDarkShop || false;
+  returnString = returnString || false;
+
+  const discounts = [
+    {
+      forDarkShop: false,
+      level: 20,
+      discount: 15
+    }
+  ]
+
+  const originalPrice = item.price;
+  const user_level = user.economy.global.level;
+
+  // nuevo precio a partir de interés
+  const interest = item.interest;
+  const searchInterest = x => (x.isDarkShop === isDarkShop) && (x.item_id === item.id);
+  const totalpurchases = user.data.purchases.find(searchInterest) ? user.data.purchases.find(searchInterest).quantity : 0;
+
+  const interestPrice = originalPrice + (totalpurchases * interest);
+  let precio = interestPrice;
+
+  // descuentos
+  let query = discounts.filter(x => user_level >= x.level && x.forDarkShop === isDarkShop).sort(function(a, b){ // ordenar el array mayor a menor, por array.level
+    if(a.level > b.level){
+      return -1;
+    }
+    if(a.level < b.level){
+      return 1;
+    }
+
+    return 0;
+  });
+
+  let discounted = false;
+
+  if(query[0]){
+    discounted = true;
+    precio -= ((precio) / 100) * query[0].discount;
+  }
+  
+
+  precio = Math.floor(precio) > 0 ? Math.floor(precio) : Math.ceil(precio);
+
+  if(returnString && discounted){
+    return `~~${interestPrice.toLocaleString("es-CO")}~~ ${precio.toLocaleString("es-CO")}`;
+  } else {
+    return precio;
+  }
+}
+
+const FindNewId = async function(generalQuery, specificQuery, toCheck){
+  // id
+  let idsNow = []; // ids en uso actualmente
+  let newId = 1;
+
+  for (let i = 0; i < generalQuery.length; i++) {
+    const document = generalQuery[i];
+    
+    let forEachLoop = document;
+    let split = specificQuery.split(".");
+
+    if(split && split.length >= 1 && split[0].length > 0){
+      for (let i = 0; i < split.length; i++) {
+          const queryQ = split[i];
+          
+          forEachLoop = forEachLoop[queryQ]
+      }
+
+      forEachLoop.forEach(i => {
+        idsNow.push(i[toCheck]); // pushear cada id en uso
+      });
+
+    } else {
+      idsNow.push(forEachLoop[toCheck])
+    }
+  }
+
+  while (idsNow.find(x => x === newId)){ // mientras se encuentre la id en las que ya están en uso sumar una hasta que ya no lo esté
+    newId++;
+  }
+
+  return newId;
+}
+
+/**
+ * 
+ * @param {*} member The Discord.JS Member to check for benefit
+ * @param {Array} [objetivesToCheck="[any]"] The objetive of boost to check.
+ * - jeffros
+ * - exp
+ * - all
+ * - any
+ * @returns {Boolean} This Member already has a temp role with the objetive searched for.
+ */
+const WillBenefit = async function(member, objetivesToCheck){
+  objetivesToCheck = objetivesToCheck ?? ["any"];
+
+  const user = await User.findOne({
+    user_id: member.id,
+    guild_id: member.guild.id
+  });
+
+  const temp_roles = user.data.temp_roles;
+
+  let hasBoost = false;
+
+  temp_roles.forEach(temprole => {
+    const special = temprole.special;
+    if(special){
+      objetivesToCheck.forEach(objetiveToCheck => {
+        switch(objetiveToCheck){
+          case "jeffros":
+          case "exp":
+          case "all":
+            if(special.objetive === objetiveToCheck) hasBoost = true;
+            break;
+  
+          case "any":
+            if(special.objetive === "jeffros" || special.objetive === "exp" || special.objetive === "all") hasBoost = true;
+            break;
+  
+          default:
+            hasBoost = false;
+            break;
+        }
+      })
+    }
+  });
+
+  return hasBoost;
+}
+
 async function createEmbedWithParams(commandTree, guild, params, already){
-  already = already ? already : "";
+  already = already ?? "";
 
   let Embed = new Discord.MessageEmbed()
   .setAuthor(`▸ ${Config.prefix}${commandTree.name}`, guild.iconURL())
@@ -1802,9 +2236,9 @@ async function createEmbedWithParams(commandTree, guild, params, already){
     const param = params[i]
     
     if(!param.optional){
-      DescriptionString += ` <${param.display ? param.display : param.name}>`
+      DescriptionString += ` <${param.display ?? param.name}>`
     } else {
-      DescriptionString += ` (${param.display ? param.display : param.name})`
+      DescriptionString += ` (${param.display ?? param.name})`
     }
   }
 
@@ -1814,15 +2248,22 @@ async function createEmbedWithParams(commandTree, guild, params, already){
 }
 
 async function switchParams(param, arg, args, message, guild, member, client, i){
+  let toReturn;
   switch(param.type){
     case "Member":
       // buscar por mención, o id
-      toReturn = message.mentions.members.first() ? message.mentions.members.first() : guild.members.cache.find(x => x.id === arg); 
+      toReturn = message.mentions.members.first() ?? guild.members.cache.find(x => x.id === arg); 
 
       if(!toReturn && (arg.toLowerCase() === "yo" || arg.toLowerCase() === "me")){
         toReturn = message.member;
       }
 
+      break;
+
+    case "Attachment":
+      if(message.attachments.size != 0) { // si hay attachements, hacer proof
+        toReturn = message.attachments.first();
+      }
       break;
 
     case "NotSelfMember":
@@ -1900,8 +2341,15 @@ async function switchParams(param, arg, args, message, guild, member, client, i)
       }
       break;
 
+    case "NaturalNumberNotInfinity":
+      if(Math.floor(arg) > 0 && Number(arg) != Infinity) {
+        toReturn = Math.floor(arg)
+      }
+      break;
+
     case "Time":
-      toReturn = ms(arg);
+      if(Number(arg) === Infinity) toReturn = Infinity;
+      else toReturn = ms(arg);
       break;
 
     case "Boolean":
@@ -1936,12 +2384,16 @@ async function validateAnArg(param, arg, args, message, guild, member, client){
   return toReturn != "FATAL" && toReturn ? true : false;
 }
 
+async function isOnMobible(message){
+  return message.member.presence && message.member.presence.clientStatus && message.member.presence.clientStatus.mobile === "online" && !message.member.presence.clientStatus.desktop ? true : false;
+}
+
 module.exports = {
     getChanges,
     intervalGlobalDatas,
     Warns,
     Interest,
-    vaultMode,
+    VaultWork,
     findLvls5,
     LimitedTime,
     Subscription,
@@ -1949,5 +2401,16 @@ module.exports = {
     Initialize,
     TutorialEmbed,
     Confirmation,
-    AfterInfraction
+    AfterInfraction,
+    GeneratePages,
+    CollectMessage,
+    ValidateParam,
+    InteractivePages,
+    DarkShopWork,
+    ValidateDarkShop,
+    ComprarItem,
+    DeterminePrice,
+    FindNewId,
+    DaysUntilToday,
+    WillBenefit
 }

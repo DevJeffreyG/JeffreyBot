@@ -31,12 +31,12 @@ module.exports = {
             
         //errores
         let rulesEmbed = new Discord.MessageEmbed()
-        .setAuthor(`| Reglas`, Config.jeffreyguildIcon)
+        .setAuthor(`Reglas`, Config.jeffreyguildIcon)
         .setColor(Colores.verde)
         .setDescription(`▸ Las reglas enumeradas que son usadas en comandos como \`${prefix}softwarn\` y \`${prefix}warn\`.`)
         //agregar cada regla de la variable de reglas
         for(let i = 1; i <= size; i++){
-            rulesEmbed.addField(reglas[i], `N° **${i}**`);
+            rulesEmbed.addField(reglas[i].regla, `N° **${i}**`);
         }
 
         return message.channel.send({embeds: [rulesEmbed]});

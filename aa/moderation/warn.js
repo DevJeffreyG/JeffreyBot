@@ -3,7 +3,7 @@ const Colores = require("../../resources/colores.json");
 const Discord = require("discord.js");
 const reglas = require("../../resources/reglas.json");
 
-const { Initialize, TutorialEmbed, Confirmation, AfterInfraction } = require("../../resources/functions.js");
+const { Initialize, TutorialEmbed, Confirmation, AfterInfraction, FindNewId } = require("../../resources/functions.js");
 
 /* ##### MONGOOSE ######## */
 
@@ -17,13 +17,10 @@ const commandInfo = {
     info: "Comando usado para agregar warns a los usuarios",
     params: [
         {
-            name: "miembro", type: "NotSelfMember", optional: false
+            name: "miembro", type: "Member", optional: false
         },
         {
-            name: "regla", display: "N° Regla", type: "Number", optional: false
-        },
-        {
-            name: "prueba", display: "url msg de prueba | adjuntar imagen", type: "MessageLink", optional: true
+            name: "prueba", display: "adjuntar imagen", type: "Attachment", optional: false
         }
     ],
     userlevel: "STAFF",
@@ -41,107 +38,116 @@ module.exports = {
         if(response[0] === "ERROR") return console.log(response); // si hay algún error
 
         const member = response.find(x => x.param === "miembro").data;
-        const rule = response.find(x => x.param === "regla").data;
-        let proof = response.find(x => x.param === "prueba").data || null;
+        const proof = response.find(x => x.param === "prueba").data;
         
         // Comando
 
-        if(!proof && message.attachments.size === 0) return message.reply("Si no hay un link de mensaje como prueba, debes adjuntar UNA imagen al mensaje como prueba.");
-        let proofIsAtt = false;
+        let selectMenu = new Discord.MessageSelectMenu()
+        .setCustomId("selectRule")
+        .setPlaceholder("Selecciona la regla infringida");
 
-        if(message.attachments.size != 0) { // si hay attachements, hacer proof
-            proof = message.attachments.first();
-            proofIsAtt = true
+        for (let i = 1; i <= Object.keys(reglas).length; i++) {
+            const regla = reglas[i];
+
+            selectMenu.addOptions({label: regla.regla, value: i.toString(), description: regla.description});
         }
 
-        const user = await User.findOne({
-            user_id: member.id,
-            guild_id: member.guild.id
-        });
+        selectMenu.addOptions({label: "Cancelar", value: "cancel", emoji: "❌"});
 
-        // Definir cuál es la regla "rule"
-        let ruleTxt = reglas[rule];
+        let row = new Discord.MessageActionRow().addComponents([selectMenu]);
 
-        let toConfirm = [
-            `¿Estás segur@ de warnear a **${member.user.tag}**?`,
-            `Razón: Infringir la regla N°${rule} (${ruleTxt})`,
-            `[Pruebas](${proof.url})`
-        ];
-        let confirmation = await Confirmation("Agregar Warn", toConfirm, message);
+        let selectRuleMsg = await message.reply({content: "**¿Qué regla infringió?**", components: [row]})
 
-        if(!confirmation) return;
+        const filter = (interaction) => interaction.isSelectMenu() && interaction.user.id === author.id;
 
-        const softwarns = user.softwarns;
-        const warns = user.warns;
+        const collector = message.channel.createMessageComponentCollector({filter, max: "1"});
 
-        // como se confirmó, primero revisar si tiene el softwarn para después agregar el warn
-        let hasSoft = false;
-        let indexOfSoftwarn;
-        softwarns.forEach((soft) => {
-            if(soft.rule_id === rule){
-                hasSoft = true;
-                indexOfSoftwarn = softwarns.indexOf(soft);
+        collector.on("collect", async(collected) => {
+            const rule = Number(collected.values[0]) ?? collected.values[0];
+
+            await collected.deferUpdate();
+
+            if(rule === "cancel"){
+                message.delete();
+                return selectRuleMsg.delete();
             }
-        });
+        
+            const user = await User.findOne({
+                user_id: member.id,
+                guild_id: member.guild.id
+            });
 
-        if(!hasSoft) {
-            await confirmation.delete();
-            let skipConfirmation = [
-                `**${member.user.tag}** __NO__ tiene el **softwarn** de la regla "${ruleTxt}"`,
+            // Definir cuál es la regla "rule"
+            let ruleTxt = reglas[rule].regla;
+
+            let toConfirm = [
                 `¿Estás segur@ de warnear a **${member.user.tag}**?`,
                 `Razón: Infringir la regla N°${rule} (${ruleTxt})`,
                 `[Pruebas](${proof.url})`
             ];
-            confirmation = await Confirmation("Continuar", skipConfirmation, message);
-            if(!confirmation) return;
-        }
+            let confirmation = await Confirmation("Agregar Warn", toConfirm, message);
 
-        // como sí tiene el soft, agregar warn
-        let idsNow = []; // ids en uso actualmente
-        let newId = 1;
+            if(!confirmation) return selectRuleMsg.delete();
 
-        let users = await User.find();
+            const softwarns = user.softwarns;
+            const warns = user.warns;
 
-        for (let i = 0; i < users.length; i++) {
-            const document = users[i];
-            
-            let warns = document.warns;
-
-            warns.forEach(warn => {
-                idsNow.push(warn.id); // pushear cada id en uso
+            // como se confirmó, primero revisar si tiene el softwarn para después agregar el warn
+            let hasSoft = false;
+            let indexOfSoftwarn;
+            softwarns.forEach((soft) => {
+                if(soft.rule_id === rule){
+                    hasSoft = true;
+                    indexOfSoftwarn = softwarns.indexOf(soft);
+                }
             });
-        }
 
-        while (idsNow.find(x => x === newId)){ // mientras se encuentre la id en las que ya están en uso sumar una hasta que ya no lo esté
-            newId++;
-        }
+            if(!hasSoft) {
+                await confirmation.delete();
+                let skipConfirmation = [
+                    `**${member.user.tag}** __NO__ tiene el **softwarn** de la regla "${ruleTxt}"`,
+                    `¿Estás segur@ de warnear a **${member.user.tag}**?`,
+                    `Razón: Infringir la regla N°${rule} (${ruleTxt})`,
+                    `[Pruebas](${proof.url})`
+                ];
+                confirmation = await Confirmation("Continuar", skipConfirmation, message);
+                if(!confirmation) return;
+            }
 
-        warns.push({rule_id: rule, proof: proof.url, id: newId});
-        if(hasSoft) softwarns.splice(indexOfSoftwarn, 1);
-        await user.save();
+            // como sí tiene el soft, agregar warn
+            let users = await User.find();
+            
+            let newId = await FindNewId(users, "warns", "id");
 
-        const data = {
-            member: member,
-            rule: ruleTxt,
-            proof: proof,
-            message: confirmation
-        }
-        
-        await AfterInfraction(user, data); // enviar mensaje con la informacion del warn al usuario
+            warns.push({rule_id: rule, proof: proof.url, id: newId});
+            if(hasSoft) softwarns.splice(indexOfSoftwarn, 1);
+            await user.save();
 
-        let log = new Discord.MessageEmbed()
-        .setAuthor(`| Warn`, Config.bienPng)
-        .setDescription(`**—** Warneado: **${member}**.
+            const data = {
+                member: member,
+                rule: ruleTxt,
+                proof: proof,
+                message: confirmation,
+                id: newId
+            }
+            
+            await AfterInfraction(user, data); // enviar mensaje con la informacion del warn al usuario
+
+            let log = new Discord.MessageEmbed()
+            .setAuthor(`Warn`, Config.bienPng)
+            .setDescription(`**—** Warneado: **${member}**.
 **—** Warns actuales: **${user.warns.length}**.
-**—** Por infringir la regla: **${ruleTxt}**.`)
-        .setColor(Colores.rojo);
+**—** Por infringir la regla: **${ruleTxt}**.
+**—** ID: \`${newId}\`.`)
+            .setColor(Colores.rojo);
 
-        let proofE = new Discord.MessageEmbed()
-        .setTitle("Pruebas")
-        .setDescription(proofIsAtt ? proof.url : `[Mensaje](${proof.url})`)
-        .setImage(proofIsAtt ? proof.url : null)
-        .setColor(Colores.nocolor);
+            let proofE = new Discord.MessageEmbed()
+            .setTitle("Pruebas")
+            .setDescription(proof.url)
+            .setImage(proof.url)
+            .setColor(Colores.nocolor);
 
-        confirmation.edit({embeds: [log, proofE]});
+            confirmation.edit({embeds: [log, proofE]});
+        })
     }
 }
