@@ -62,11 +62,7 @@ const UserSchema = new Schema({
             locked: { type: Boolean, default: false },
             locked_since: { type: Date, default: null }
         },
-        backup_roles: [ // guardar roles cuando te salgas del server.
-            {
-                role_id: { type: String, required: true }
-            }
-        ],
+        backup_roles: { type: Array },
         temp_roles: [
             {
                 role_id : { type: String, required: true },
@@ -84,7 +80,12 @@ const UserSchema = new Schema({
                     isCancelled: { type: Boolean }
                 }
             }
-        ]
+        ],
+        cooldowns: {
+            coins: { type: Date, default: null },
+            jeffros_exp: { type: Date, default: null },
+            rep: { type: Date, default: null }
+        }
     },
     economy: {
         global: {

@@ -73,7 +73,7 @@ module.exports = {
         // foreach
         warns.forEach(warn => {
             // sacar la regla
-            let regla = reglas[warn.rule_id].regla;
+            let regla = reglas[warn.rule_id] ? reglas[warn.rule_id].regla : "Víctima de la DARKSHOP.";
 
             warnsE.addField(`— ${regla} : Regla N°${warn.rule_id}`, `**— [Pruebas](${warn.proof})\n— ID: ${warn.id}**`)
         });

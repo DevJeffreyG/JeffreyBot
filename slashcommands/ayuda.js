@@ -26,10 +26,10 @@ module.exports = {
         const helpBaseCommandsFolder = fs.readdirSync("./aa").filter(file => !file.endsWith(".txt")); // quitar el layout LMAO
 
         for (const folder of helpBaseCommandsFolder) {
-            const baseCommandsFiles = fs.readdirSync(`./aa/${folder}`).filter(file => file.endsWith(".js"));
+            const baseCommandsFiles = fs.readdirSync(`./commands/${folder}`).filter(file => file.endsWith(".js"));
 
             for (const file of baseCommandsFiles) {
-                const helpCommand = require(`../aa/${folder}/${file}`);
+                const helpCommand = require(`../commands/${folder}/${file}`);
             
                 // push name onto aliases
                 const aliases = helpCommand.data.aliases || [];

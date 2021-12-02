@@ -5,26 +5,34 @@ const prettyms = require("pretty-ms");
 
 const Emojis = require("../resources/emojis.json");
 const Responses = require("../resources/coinsresponses.json");
-const Colores = require("../resources/colores.json");
 const Cumplidos = require("../resources/cumplidos.json");
-let { multiplier } = require("../base.json");
+
+const Config = require("../base.json");
+const { multiplier } = require("../base.json");
 
 const User = require("../modelos/User.model.js");
-
-const workCooldown = new Set();
-const coolded = new Map();
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('coins')
 		.setDescription('Gana Jeffros extras en un intervalo de 10 minutos!'),
 	async execute(interaction, client) {
+        let coinsCooldown = ms("10m");
+
         await interaction.deferReply();
         var randomCumplidos = Cumplidos.c[Math.floor(Math.random() * Cumplidos.c.length)];
 
         const guild = client.guilds.cache.find(x => x.id === interaction.guildId);
         const author = client.users.cache.find(x => x.id === interaction.user.id);
         const member = guild.members.cache.find(x => x.id === interaction.user.id);
+
+        if(client.user.id === Config.testingJBID){
+            if (member.roles.cache.find(x => x.id === "887151110861779035")) coinsCooldown /= 2; //5m
+            if (member.roles.cache.find(x => x.id === "887151260086702081")) coinsCooldown /= 2; //2.5m
+        } else {
+            if (member.roles.cache.find(x => x.id === Config.lvl60)) coinsCooldown /= 2;
+            if (member.roles.cache.find(x => x.id === Config.lvl99)) coinsCooldown /= 2;
+        }
 
         let money = Math.ceil(Math.random() * 20);
         let tmoney = `**${Emojis.Jeffros}${money.toLocaleString('es-CO')}**`;
@@ -53,7 +61,6 @@ module.exports = {
             guild_id: guild.id
         }).save();
         
-
         // buscar si tiene boost
         for (let i = 0; i < user.data.temp_roles.length; i++) {
             const temprole = user.data.temp_roles[i];
@@ -73,23 +80,19 @@ module.exports = {
         let text = textString.replace(
             new RegExp("{ MONEY }", "g"),
             `${tmoney}`
-        );
-
-        text = text.replace(
+        ).replace(
             new RegExp("{ MEMBER }", "g"),
             `${randommember}`
-        );
-
-        text = text.replace(
+        ).replace(
             new RegExp("{ FAKE MONEY }", "g"),
             `${fakemoney}`
-        );
+        ).replace(new RegExp("{ COOLDOWN }", "g"), `${coinsCooldown/60000}`);
 
         let memberColor = member.displayHexColor;
 
         let embed = new Discord.MessageEmbed()
-            .setColor(memberColor)
-            .setDescription(`${text}.`);
+        .setColor(memberColor)
+        .setDescription(`${text}.`);
 
         if(index.author.toUpperCase() === "NONE"){
             
@@ -100,25 +103,19 @@ module.exports = {
             embed.setFooter(`• Respuesta sugerida por ${suggestor}`, img)
         }
 
-        if (workCooldown.has(author.id)){
-            let timer = coolded.get(author.id)
-            let left = prettyms((ms("10m")) - (new Date().getTime() - timer), {secondsDecimalDigits: 0 });
+        if (user.data.cooldowns.coins){
+            let timer = user.data.cooldowns.coins;
+            let toCheck = (coinsCooldown) - (new Date().getTime() - timer);
+            let left = prettyms(toCheck, {secondsDecimalDigits: 0 });
+            if(toCheck < 0) user.data.cooldowns.coins = null;
+            else
             return interaction.editReply(`Usa este comando en ${left}, ${randomCumplidos}`);
-        } else {
-            workCooldown.add(author.id);
-            let timeMS = new Date().getTime();
-            coolded.set(author.id, timeMS);
-
-            setTimeout(() => {
-                coolded.delete(author.id)
-                workCooldown.delete(author.id);
-            }, ms("10m"));
         }
+
+        user.data.cooldowns.coins = new Date();
 
         user.economy.global.jeffros += money;
         await user.save();
-
-        interaction.editReply({embeds: [embed]});
-
-	},
+        return interaction.editReply({embeds: [embed]});
+	}
 };

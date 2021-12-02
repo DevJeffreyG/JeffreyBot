@@ -1,8 +1,7 @@
 const mongoose = require("mongoose");
 
 const toggleSchema = mongoose.Schema({
-    command: String,
-    alias: String
+    command: String
 });
 
 module.exports = mongoose.model("togglecommands", toggleSchema);
