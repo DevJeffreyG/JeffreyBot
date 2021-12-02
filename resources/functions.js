@@ -258,7 +258,6 @@ const intervalGlobalDatas = async function(client, justTempRoles){
 
   if(justTempRoles === true) return;
 
-
   /** ###### DARKSHOP ###### */
   await DarkShopWork(client, guild.id);
 
