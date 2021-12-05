@@ -630,7 +630,8 @@ Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para c
       embed1.setColor(Colores.verde);
       embed2.setDescription(`**—** Como eres <@&529275759521431553>, tienes más roles **exclusivos** disponibles. Reacciona de acuerdo a los roles que quieras tener.
 
-🌠 ➟ <@&564144046591705089>`);
+🌠 ➟ <@&564144046591705089>
+📸 ➟ <@&909980351953268736>`);
       embed2.setColor(Colores.nocolor);
 
       message.channel.send({embeds: [embed1]}).then(m => {
@@ -660,6 +661,17 @@ Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para c
 💀 ➟ <@&${Config.dsnews}>`
             )
             .setColor(Colores.nocolor);
+          m.edit({embeds: [nembed]});
+        });
+      } else if(args[1] === "roles_especiales"){
+        let nchannel = guild.channels.cache.find(x => x.id === Config.gERoleC);
+        nchannel.messages.fetch(Config.mGERoles).then(m => {
+          let nembed = new Discord.MessageEmbed()
+          .setDescription(`**—** Como eres <@&529275759521431553>, tienes más roles **exclusivos** disponibles. Reacciona de acuerdo a los roles que quieras tener.
+
+🌠 ➟ <@&564144046591705089>
+📸 ➟ <@&909980351953268736>`)
+          .setColor(Colores.nocolor);
           m.edit({embeds: [nembed]});
         });
       }
