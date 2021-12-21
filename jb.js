@@ -492,7 +492,7 @@ client.on("messageCreate", async message => {
 
   await functions.loadBoosts(); // verificar si existen BOOSTS.
 
-  // joder
+  /* // joder
   let ahora = moment().tz("America/Bogota");
   let hour = ahora.hour();
 
@@ -522,7 +522,7 @@ client.on("messageCreate", async message => {
         return message.delete();
       }
     }
-  }
+  } */
 
   if (message.content.startsWith(prefix)) {
     // Si el mensaje empieza por el prefijo, entonces...

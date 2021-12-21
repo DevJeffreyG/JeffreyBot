@@ -15,6 +15,10 @@
         {
             "type": "updated",
             "desc": "Se está investigando un error en el correcto cálculo de eventos e inflaciones para la DarkShop"
+        },
+        {
+            "type": "updated",
+            "desc": "Ya se podrán enviar archivos multimedia después de 22:00 GMT-5, por ahora"
         }
     ],
     "bienPng": "http://i.imgur.com/M6hqbcc.png",
