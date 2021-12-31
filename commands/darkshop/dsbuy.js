@@ -72,6 +72,8 @@ module.exports = {
         const error = !buy[0] ? true : false;
         const embed = buy[1];
 
+        await message.delete();
+
         if(error) return confirmation.edit({embeds: [embed]});
         else
         return confirmation.edit({embeds: [embed]});

@@ -17,7 +17,7 @@ const commandInfo = {
   info: "Administrar autoroles",
   params: [
       {
-        name: "action", display: "add | remove | toggle | list | sync", type: "Options", options: ["add", "remove", "toggle", "list", "sync"], optional: false
+        name: "action", display: "add | remove | edittoggle | toggle | list | sync", type: "Options", options: ["add", "remove", "edittoggle", "toggle", "list", "sync"], optional: false
       },
       {
         name: "autorole id", type: "Number", active_on: {param: "action", is: "remove"}, optional: false
@@ -232,39 +232,6 @@ module.exports = {
               return message.channel.send({embeds: [embed]})
           }
   
-          if(args[1].toLowerCase() === "edit"){
-            embed.setDescription(`▸ ${prefix}autorole edit <\`grupo de toggle\`> <\`nuevo nombre\`>`)
-            if(!args[2] || isNaN(args[2])) {
-                embed.setAuthor(`Error: grupo de toggle`, Config.errorPng)
-                return message.channel.send({embeds: [embed]})
-            } else if (!args[3]) {
-                embed.setAuthor(`Error: nuevo nombre`, Config.errorPng)
-                return message.channel.send({embeds: [embed]})
-            }
-  
-            let grouptoedit = Number(args[2]);
-            let newname = args.join(" ").slice(args[0].length + args[1].length + args[2].length + 3);
-  
-            let groupQuery = await ToggleGroup.findOne({guild_id: message.guild.id, "info.group_id": grouptoedit})
-  
-            if(groupQuery){
-                let changedGroup = new Discord.MessageEmbed()
-                .setAuthor(`Listo`, Config.bienPng)
-                .setColor(Colores.verde)
-                .setDescription(`▸ Se ha cambiado el nombre del grupo \`${grouptoedit}\`.
-                ▸ \`${groupQuery.info.group_name}\` ➜ \`${newname}\`.`);
-  
-                groupQuery.info.group_name = newname;
-                groupQuery.markModified("info");
-  
-                await groupQuery.save();
-                return message.channel.send({embeds: [changedGroup]});
-            } else {
-                embed.setAuthor(`Error: grupo de toggle`, Config.errorPng)
-                return message.channel.send({embeds: [embed]})
-            }
-          }
-  
           if(!args[1] || isNaN(args[1])){
               embed.setAuthor(`Error: autorole id`, Config.errorPng)
               return message.channel.send({embeds: [embed]})
@@ -314,6 +281,37 @@ module.exports = {
         await autoroleQuery.save();
   
         message.channel.send({embeds: [changedGroup]});
+        } else if(action === "edittoggle"){
+          embed.setDescription(`▸ ${prefix}autorole edit <\`grupo de toggle\`> <\`nuevo nombre\`>`)
+          if(!args[1] || isNaN(args[1])) {
+              embed.setAuthor(`Error: grupo de toggle`, Config.errorPng)
+              return message.channel.send({embeds: [embed]})
+          } else if (!args[2]) {
+              embed.setAuthor(`Error: nuevo nombre`, Config.errorPng)
+              return message.channel.send({embeds: [embed]})
+          }
+
+          let grouptoedit = Number(args[1]);
+          let newname = args.join(" ").slice(args[0].length + args[1].length + 2);
+
+          let groupQuery = await ToggleGroup.findOne({guild_id: message.guild.id, "info.group_id": grouptoedit})
+
+          if(groupQuery){
+              let changedGroup = new Discord.MessageEmbed()
+              .setAuthor(`Listo`, Config.bienPng)
+              .setColor(Colores.verde)
+              .setDescription(`▸ Se ha cambiado el nombre del grupo \`${grouptoedit}\`.
+              ▸ \`${groupQuery.info.group_name}\` ➜ \`${newname}\`.`);
+
+              groupQuery.info.group_name = newname;
+              groupQuery.markModified("info");
+
+              await groupQuery.save();
+              return message.channel.send({embeds: [changedGroup]});
+          } else {
+              embed.setAuthor(`Error: grupo de toggle`, Config.errorPng)
+              return message.channel.send({embeds: [embed]})
+          }
         } else if(action === "sync"){
           let syncQuery = await AutoRole.find({serverID: message.guild.id});
           if(!syncQuery || syncQuery.length == 0) return message.reply(`lo siento, no he encontrado autoroles en este servidor.`);

@@ -2,7 +2,7 @@ const { User } = require('discord.js')
 const mongoose = require('mongoose')
 
 const Schema = mongoose.Schema
-const ObjectId = mongoose.Types.ObjectId
+
 
 const UserSchema = new Schema({
     guild_id: { type: String, required: true },
@@ -10,6 +10,7 @@ const UserSchema = new Schema({
     warns: [
         {
             rule_id: { type: Number },
+            madeTicket: { type: Boolean, default: false },
             proof: { type: String, default: "na" },
             id: { type: Number, sparse: true }
         }
@@ -17,6 +18,7 @@ const UserSchema = new Schema({
     softwarns: [
         {
             rule_id: { type: Number },
+            madeTicket: { type: Boolean, default: false },
             proof: { type: String, default: "na" },
             id: { type: Number, sparse: true }
         }
@@ -24,6 +26,8 @@ const UserSchema = new Schema({
     data: {
         isBanned: {
             bugreports: { type: Boolean, required: true, default: false },
+            communitypolls: { type: Boolean, required: true, default: false },
+            polls: { type: Boolean, required: true, default: false },
             suggestions: { type: Boolean, required: true, default: false },
             customrole: { type: Boolean, required: true, default: false },
             tickets: { type: Boolean, required: true, default: false },

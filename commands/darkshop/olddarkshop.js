@@ -5,7 +5,6 @@ const Discord = require("discord.js");
 var Chance = require("chance");
 var chance = new Chance();
 const ms = require("ms");
-const prettyms = require("pretty-ms");
 const prefix = Config.prefix;
 const functions = require("../../resources/functions.js");
 
@@ -805,7 +804,7 @@ module.exports = {
                                                 let giventhing = use.info.thing;
                                                 let givenrole = guild.roles.cache.find(x => x.id === use.info.thingID);
                                                 let givencantidad = use.info.extra.quantity;
-                                                let givenduration = use.info.extra.duration != "na" ? prettyms(use.info.extra.duration, {secondsDecimalDigits: 0 }) : "Ninguna";
+                                                let givenduration = use.info.extra.duration != "na" ? ms(use.info.extra.duration) : "Ninguna";
                                                 let giveneffect = use.info.extra.effect != "na" ? use.info.extra.effect : "Ninguno";
         
                                                 givenrole = givenrole ? givenrole : "Ninguno";

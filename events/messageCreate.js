@@ -1,34 +1,38 @@
 //packages
 const Discord = require("discord.js");
 const ms = require("ms");
-const moment = require('moment-timezone');
-const prettyms = require("pretty-ms");
+const moment = require('moment');
 
 const Config = require("../base.json");
-const { deleteLateMedia, disableEXPs, jeffreygID, prefix, multiplier } = Config;
-const { active, baseCommands, jeffreyMentions, startLinks } = require("../jb.js");
+const { deleteLateMedia, disableEXPs, jeffreygID, multiplier, mantenimiento } = Config;
+const { active, baseCommands, jeffreyMentions, startLinks } = require("../index.js");
 
-const { intervalGlobalDatas } = require("../resources/functions.js");
+const { intervalGlobalDatas, GenerateLog } = require("../resources/functions.js");
 
 const Cumplidos = require("../resources/cumplidos.json");
 const Colores = require("../resources/colores.json");
 
 const User = require("../modelos/User.model.js");
+const Guild = require("../modelos/Guild.model.js");
 const Toggle = require("../modelos/Toggle.model.js");
 
 const cmdCooldown = ms("2s");
 
 module.exports = async (client, message) => {
+    // Captcha.
+    if (message.author.bot) return;
+    if (message.channel.type == "DM") return;
+    
+    const docGuild = await Guild.findOne({guild_id: message.guild.id}) ?? await new Guild({guild_id: message.guild.id}).save();
+    const prefix = docGuild.settings.prefix;
     const messageArray = message.content.split(" ");
     const cmd = messageArray[0].toLowerCase();
     const args = messageArray.slice(1);
     const guild = message.guild;
     const author = message.author;
     const channel = message.channel;
-  
-    // Captcha.
-    if (message.author.bot) return;
-    if (message.channel.type == "DM") return;
+
+    if(mantenimiento && author.id != jeffreygID) return console.log("MANTENIMIENTO");
   
     await intervalGlobalDatas(client, true); // verificar si existen BOOSTS.
 
@@ -74,9 +78,8 @@ module.exports = async (client, message) => {
     }
 
     const jeffreyRole = client.user.id === Config.testingJBID ? guild.roles.cache.find(x => x.id === "482992290550382592") : guild.roles.cache.find(x => x.id === Config.jeffreyRole);
-    const adminRole = client.user.id === Config.testingJBID ? guild.roles.cache.find(x => x.id === "483105079285776384") : guild.roles.cache.find(x => x.id === Config.adminRole);
-    const modRole = client.user.id === Config.testingJBID ? guild.roles.cache.find(x => x.id === "483105108607893533") : guild.roles.cache.find(x => x.id === Config.modRole);
-    const staffRole = client.user.id === Config.testingJBID ? guild.roles.cache.find(x => x.id === "535203102534402063") : guild.roles.cache.find(x => x.id === Config.staffRole);
+    const adminRole = guild.roles.cache.find(x => x.id === docGuild.roles.admin);
+    const staffRole = guild.roles.cache.find(x => x.id === docGuild.roles.staff);
     const logC = client.user.id === Config.testingJBID ? guild.channels.cache.find(x => x.id === "483108734604804107") : guild.channels.cache.find(x => x.id === Config.logChannel);
     const gdpsSupportChannel = client.user.id === Config.testingJBID ? message.guild.channels.cache.find(x => x.id === "537095712102416384") : message.guild.channels.cache.find(x => x.id === Config.gdpsSupportChannel);
     const spamChannel = client.user.id === Config.testingJBID ? message.guild.channels.cache.find(x => x.id === "537095712102416384") : message.guild.channels.cache.find(x => x.id === Config.spamChannel);
@@ -101,7 +104,7 @@ module.exports = async (client, message) => {
         if(user.data.cooldowns.jeffros_exp){
           let timer = user.data.cooldowns.jeffros_exp;
           let toCheck = (cmdCooldown) - (new Date().getTime() - timer);
-          let left = prettyms(toCheck, {secondsDecimalDigits: 0 });
+          let left = ms(toCheck);
           if(toCheck < 0) user.data.cooldowns.jeffros_exp = null;
           else
           return message.reply(`Usa este comando en ${left}, ${randomCumplidos}`);
@@ -122,6 +125,9 @@ module.exports = async (client, message) => {
         
         await intervalGlobalDatas(client);
         await commandFile.execute(client, message, args, active);
+
+        // enviar log
+        GenerateLog(guild, "Se ha usado un comando", "", [`${author.tag}`, `${cmd}`, `En: ${message.channel}`], author.displayAvatarURL(), guild.iconURL(), Colores.verdejeffrey);
         
         //agregar cooldown
         user.data.cooldowns.jeffros_exp = new Date();
@@ -172,6 +178,7 @@ module.exports = async (client, message) => {
         }
       }
 
+      // jeffros & exp
       let main;
       let vipmain;
   
@@ -397,17 +404,17 @@ module.exports = async (client, message) => {
         return console.log("EXP y JEFFROS están deshabilitados, no es Jeffrey, no se han dado ni EXP ni JEFFROS.");
       }
     }
-}
 
-async function findCommand(cmd){
-    let file;
-    baseCommands.forEach(async command => {
-      let foundAlias = command.aliases.find(x => x === cmd.slice(prefix.length)) ? true : false;
-  
-      if(foundAlias) {
-          file = require("../commands/" + command.file);
-      }
-    });
-  
-    return file;
-  }
+    async function findCommand(cmd){
+      let file;
+      baseCommands.forEach(async command => {
+        let foundAlias = command.aliases.find(x => x === cmd.slice(prefix.length)) ? true : false;
+    
+        if(foundAlias) {
+            file = require("../commands/" + command.file);
+        }
+      });
+    
+      return file;
+    }
+}

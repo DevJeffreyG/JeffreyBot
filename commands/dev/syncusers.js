@@ -51,7 +51,7 @@ module.exports = {
         if(response[0] === "ERROR") return console.log(response); // si hay algún error
 
         // Comando
-        const guildID = "447797737216278528"//message.guild.id;
+        const guildToSearch = "447797737216278528"; //message.guild.id;
 
         await message.guild.members.fetch();
         let members = message.guild.members.cache;
@@ -61,8 +61,8 @@ module.exports = {
       
           let totalpurchases = await All.find({userID: user_id}); // interés
           let darkstats = await DarkStats.findOne({userID: user_id}); // estadisiticas de darkshop & items de darkshop
-          let exp = await Exp.findOne({userID: user_id, serverID: guildID});
-          let jeffros = await Jeffros.findOne({userID: user_id, serverID: guildID});
+          let exp = await Exp.findOne({userID: user_id, serverID: guildToSearch});
+          let jeffros = await Jeffros.findOne({userID: user_id, serverID: guildToSearch});
           let purchases = await Purchases.find({userID: user_id}); // inventario de tienda normal
           let softwarns = await SoftWarn.findOne({userID: user_id});
           let warns = await Warn.findOne({userID: user_id});
@@ -80,7 +80,7 @@ module.exports = {
           
             newUser.save()
             .then(async finalQuery => {
-              if(warns){
+              /* if(warns){
                 let warnstotal = warns.warns; // WARNS EN LA CUENTA VIEJA
             
                 let toPush = [];
@@ -175,7 +175,7 @@ module.exports = {
                 }
           
                 finalQuery.softwarns = toPush;
-              }
+              } */
       
               if(totalpurchases){ // interes
                 let toPush = [];

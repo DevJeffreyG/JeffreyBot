@@ -43,7 +43,7 @@ module.exports = {
             randommember = guild.members.cache.random()
         }
 
-        randommember = `**${randommember.user.tag}**`;
+        randommember = `**${randommember.displayName}**`;
 
         let fakemoney = `${Math.ceil(Math.random() * 1000) + 999} Jeffros`;
 

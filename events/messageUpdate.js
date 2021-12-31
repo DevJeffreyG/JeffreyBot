@@ -1,14 +1,17 @@
 const Discord = require("discord.js");
 
 const Config = require("../base.json");
-const { prefix, jeffreygID } = Config;
+const { jeffreygID } = Config;
 
 const User = require("../modelos/User.model.js");
+const Guild = require("../modelos/Guild.model.js");
 const AutoRole = require("../modelos/autorole.js");
 
-const { jeffreyMentions, startLinks } = require("../jb.js");
+const { jeffreyMentions, startLinks } = require("../index.js");
 
 module.exports = async (client, oldMessage, message) => {
+    const docGuild = await Guild.findOne({guild_id: message.guild.id}) ?? await new Guild({guild_id: message.guild.id}).save();
+    const prefix = docGuild.settings.prefix;
     const channel = message.channel;
     const author = message.author;
   

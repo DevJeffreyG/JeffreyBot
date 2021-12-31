@@ -14,7 +14,6 @@ module.exports = async (client, reaction, user) => {
     const channel = reaction.message.channel;
     const message = reaction.message;
     const member = guild.members.cache.get(user.id);
-    const role = guild.roles.cache.find(x => x.id === msg.roleID);;
   
     AutoRole.findOne({
         serverID: guild.id,
@@ -23,8 +22,9 @@ module.exports = async (client, reaction, user) => {
         emoji: reaction.emoji.id || reaction.emoji.name
     }, (err, msg) => {
         if (err) throw err;
-
         if(!msg) return;
+        
+        const role = guild.roles.cache.find(x => x.id === msg.roleID);
 
         if (msg.custom === 1) {
             if (reaction.emoji.id === msg.emoji) {
@@ -32,7 +32,6 @@ module.exports = async (client, reaction, user) => {
             }
         } else {
             if (reaction.emoji.name === msg.emoji) {
-                role = guild.roles.cache.find(x => x.id === msg.roleID);
                 member.roles.remove(role);
             }
         }

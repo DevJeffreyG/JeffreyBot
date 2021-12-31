@@ -147,6 +147,7 @@ module.exports = {
             
             if(action === "add"){
                 if(interaction[0]){
+                    if(member.roles.cache.find(x => x.id === role.id)) return message.reply(`No puedes usar este item porque ya ${member.id === author.id ? "tienes" : `${member.user.tag} tiene`} el role que se da.`);
                     if(isTemp) await LimitedTime(guild, given, member, victim, duration);
                     else member.roles.add(role);
                 } else return dsChannel.send({embeds: [interaction[1]]});
@@ -188,8 +189,10 @@ module.exports = {
 
         } else if(objetive === "item"){
             member = message.member;
+            let deleteItem = false;
 
             if(isDarkShop && item.id === 4){ // stackoverflow
+                deleteItem = true;
                 let randomPercentage = Number(Number(Math.random() * 5).toFixed(1));
                 let finalAc = Number(Number(victim.economy.dark.accuracy += randomPercentage).toFixed(1));
 
@@ -199,6 +202,7 @@ module.exports = {
                 await victim.save();
                 await user.save();
             } else if(isDarkShop && item.id === 5){
+                deleteItem = true;
                 args[1] = "yo";
 
                 console.log(args);
@@ -224,8 +228,10 @@ module.exports = {
             }
 
             //eliminar item del autor
-            user.data.inventory.splice(itemOnInventoryIndex, 1);
-            await user.save();
+            if(deleteItem){
+                user.data.inventory.splice(itemOnInventoryIndex, 1);
+                await user.save();
+            }
         } else {
             return message.channel.send(`¡${jeffrey_role}, ayuda por aquí!\n\n${message.member} espera un momento que Jeffrey es un poco lento en las computadoras y tiene que revisar algo para que todo funcione bien.\n\`\`\`json\n{ FATAL ERROR, in ${id}, UKNOWN OBJETIVE "${objetive}" }\`\`\``);
         }

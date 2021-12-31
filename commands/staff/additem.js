@@ -1,7 +1,6 @@
-const Colores = require("../../resources/colores.json");
 const Emojis = require("../../resources/emojis.json");
-const Discord = require("discord.js");
-const prettyMilliseconds = require('pretty-ms');
+
+const prettyms = require('pretty-ms');
 
 const { Initialize, TutorialEmbed, CollectMessage, Confirmation, ValidateParam, DarkShopWork, FindNewId } = require("../../resources/functions.js");
 
@@ -178,7 +177,7 @@ module.exports = {
                         duration = await ValidateParam("Time", duration);
                     }
 
-                    toConfirm.push(`Es una **suscripción** de cada **${prettyMilliseconds(duration, {compact: true})}**.`);
+                    toConfirm.push(`Es una **suscripción** de cada **${prettyms(duration)}**.`);
                 } else {
                     await msg.edit("¿Es un role temporal? <si | no>");
                     isTemp = await CollectMessage(message, msg, ["si", "no"]);
@@ -194,7 +193,7 @@ module.exports = {
                             duration = await ValidateParam("Time", duration);
                         }
                         
-                        toConfirm.push(`Es un rol **temporal** que se quita al cabo de **${prettyMilliseconds(duration, {compact: true})}**.`);
+                        toConfirm.push(`Es un rol **temporal** que se quita al cabo de **${prettyms(duration)}**.`);
                     }
                 }
 

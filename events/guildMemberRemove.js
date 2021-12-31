@@ -1,13 +1,14 @@
 const Discord = require("discord.js");
 
+const { Initialize } = require("../resources/functions.js");
+
 const Config = require("../base.json");
+const User = require("../modelos/User.model.js");
 
 module.exports = async (client, member) => {
-    if(client.user.id === Config.testingJBID){
-        return;
-    }
-    
-    let channel = member.guild.channels.cache.find(x => x.id === Config.mainChannel);
+    const prefix = await Initialize(member.guild.id);
+
+    let channel = client.user.id === Config.testingJBID ? member.guild.channels.cache.find(x => x.id === "797258710997139537") : member.guild.channels.cache.find(x => x.id === Config.mainChannel);
     let tag = member.user.tag;
 
     let despedidas = [
@@ -31,7 +32,21 @@ module.exports = async (client, member) => {
     .setColor("#66a0ff");
 
     client.user.setActivity(`${prefix}ayuda - ${member.guild.memberCount} usuarios🔎`);
+
+    // guardar los roles
+    User.findOne({
+        user_id: member.id,
+        guild_id: member.guild.id
+    }, (err, user) => {
+        if(err) throw err;
+        member.roles.cache.forEach(role => {
+            if(role.id != member.guild.id) user.data.backup_roles.push(role.id);
+        })
+
+        user.save();
+    });
+
     return channel.send({embeds: [embed]}).then(msg => {
-    msg.react(member.guild.emojis.cache.get("524673704655847427"));
+        msg.react(client.user.id === Config.testingJBID ? "🤬" : member.guild.emojis.cache.get("524673704655847427"));
     });
 }

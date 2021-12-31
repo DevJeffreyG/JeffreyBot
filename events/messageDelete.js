@@ -1,7 +1,7 @@
 const User = require("../modelos/User.model.js");
 const Config = require("../base.json");
 
-const { jeffrosExpCooldown } = require("../jb.js");
+const { jeffrosExpCooldown } = require("../index.js");
 
 module.exports = async (client, message) => {
     const author = message.author;

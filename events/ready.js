@@ -4,19 +4,30 @@ const { prefix } = Config;
 let functions = require("../resources/functions.js");
 
 const ms = require("ms");
+const CronJob = require("cron").CronJob;
+
 
 module.exports = async (client) => {
+    client.invites = [];
+
     // para cada guild fetchear(?
     let guilds = await client.guilds.fetch();
     let guild = client.guilds.cache.find(x => x.id === Config.jgServer);
-    //console.log(guilds);
 
+    // conteo
     let totalMembers = 0;
     for(const key of guilds.keys()){
         let actualGuild = client.guilds.cache.find(x => x.id === key);
         actualGuild.members.fetch();
 
         totalMembers += actualGuild.memberCount;
+
+        // invitaciones
+        let invites = await actualGuild.invites.fetch();
+
+        invites.forEach(invite => {
+            client.invites[invite.code] = invite.uses;
+        })
     }
 
     client.user.setActivity(`${prefix}ayuda - ${totalMembers} usuarios🔎`);
@@ -42,13 +53,13 @@ module.exports = async (client) => {
     /* Buscar usuarios nivel 5 sin role nivel 5 */
     await functions.findLvls5(client, guild)
 
-    /* ############ GLOBAL DATAS ############ */
     console.log("Ciclo de Global Datas iniciado por primera vez")
     functions.intervalGlobalDatas(client);
 
-    setInterval(function(){
+    /* ############ GLOBAL DATAS ############ */
+    new CronJob("1 * * * * *", async function(){
         functions.intervalGlobalDatas(client);
-    }, ms("1m"));
+    }, null, true, "America/Bogota");
 
     /* YOUTUBE NOTIFACTIONS */
 

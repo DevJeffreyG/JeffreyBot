@@ -9,7 +9,7 @@ let supportChannel = Config.supportChannel;
 let gdps = Config.gdpsSupportChannel;
 let rulesChannel = Config.rulesChannel;
 
-const { Initialize, TutorialEmbed } = require("../../resources/functions.js");
+const { Initialize, TutorialEmbed, importImage } = require("../../resources/functions.js");
 
 const commandInfo = {
     name: "embeds",
@@ -30,7 +30,7 @@ module.exports = {
         if(response[0] === "ERROR") return console.log(response); // si hay algún error
 
         // Comando
-        message.delete();
+        await message.delete();
 
         // Variables
         let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
@@ -55,16 +55,17 @@ module.exports = {
         /* ################## EMBEDS DE INFORMACION ######################### */
       
         // FAQ TE AMO FRAZ
+        let faq = importImage("preguntas");
         let faqEmbedIntro = new Discord.MessageEmbed()
-        .setImage(embedImages.faq)
-        .setColor(Colores.verde);
+        .setImage(faq.attachment)
+        .setColor(Colores.verdejeffrey);
       
         let faqEmbedIntro2 = new Discord.MessageEmbed()
         .setDescription(`**<:jgThinking:869746312709537792> — Preguntas más frecuentes**
 ➟ El término preguntas frecuentes (FAQ) se refiere a una lista de preguntas y respuestas que surgen frecuentemente dentro de un determinado contexto y para un tema en particular.
         
 ➟ Como puedes imaginar, veremos las preguntas frecuentes que se hacen en este servidor. Se irán actualizando a medida que hayan más preguntas frecuentes :)`)
-        .setColor(Colores.nocolor);
+        .setColor(Colores.verde);
 
         // DARKSHOP
         let faqEmbed2 = new Discord.MessageEmbed()
@@ -118,10 +119,10 @@ module.exports = {
       
       
         // NIVELES
-      
+        let niveles = importImage("niveles");
         let lvlEmbed1 = new Discord.MessageEmbed()
-          .setImage(`${embedImages.niveles}`)
-          .setColor(Colores.verde);
+          .setImage(niveles.attachment)
+          .setColor(Colores.verdejeffrey);
       
         let lvlEmbed2 = new Discord.MessageEmbed()
           .setDescription(`<@&${Config.lvl1}>
@@ -171,22 +172,27 @@ Cooldown para conseguir Jeffros y EXP reducido a la octava parte. (\`7.5s\`).
 
 <@&${Config.lvl100}>
 • Rol personalizado (nombre + color personalizado).`)
-        .setColor(Colores.nocolor);
+        .setColor(Colores.verde);
       
         // CANALES
+        let canales = importImage("canales");
       let canalesEmbed = new Discord.MessageEmbed()
-      .setImage(embedImages.canales)
-      .setColor(Colores.verde);
+      .setImage(canales.attachment)
+      .setColor(Colores.verdejeffrey);
       
       let canalesEmbed2 = new Discord.MessageEmbed()
       .setTitle(`— Información de los canales del servidor`)
       .setDescription(`**—** A continuación se explicarán la mayoría de los canales por categorías del servidor y sus respectivas funciones.
 **—** Para información más específica, algunos canales tienen información en sus respectivas descripciones.
 **—** Algunos de los canales no explicados aquí son canales ocultos que sólo aquellos que los desbloqueen podrán verlos.`)
-      .setColor(Colores.nocolor)
+      .setColor(Colores.verdeclaro)
       
+      let global = importImage("global"); // chapter one
+      let chapterone = new Discord.MessageEmbed()
+      .setImage(global.attachment)
+      .setColor(Colores.verdejeffrey);
+
       let canalesEmbed3 = new Discord.MessageEmbed()
-      .setTitle(`📖 — CHAPTER ONE`)
       .setDescription(`<#523159573935423509> • Las reglas del servidor, si hablas en el chat aseguras haberlas leído.
 
 <#485191307346837507> • Información general de todo el servidor, aquí pueden resolverse varias dudas que puedas tener.
@@ -205,10 +211,14 @@ Cooldown para conseguir Jeffros y EXP reducido a la octava parte. (\`7.5s\`).
 
 <#447813323149410304> • Puedes recibir opcionalmente notificaciones de las redes sociales de Jeffrey en este canal
 ➟ Consíguelo en <#473627930396852226>.`)
-      .setColor(Colores.nocolor);
-      
+      .setColor(Colores.verde);
+
+      let generales = importImage("generales");
+      let surface = new Discord.MessageEmbed()
+      .setImage(generales.attachment)
+      .setColor(Colores.verdejeffrey);
+
       let canalesEmbed4 = new Discord.MessageEmbed()
-      .setTitle(`🌎 — SURFACE`)
       .setDescription(`<#447802627187539968> • Este es canal general, aquí puedes hablar con los demás usuarios del servidor de cualquier tema.
 
 <#447797737216278531> • Si tienes problemas, dudas, quejas, sugerencias del servidor este es lugar para pedir soporte.
@@ -222,10 +232,14 @@ Cooldown para conseguir Jeffros y EXP reducido a la octava parte. (\`7.5s\`).
 <#821486638768455700> • En este canal puedes hablar fuera de contexto, o hacer spam, **no se permite el flood**.
 
 <#485192438701359135> • Aquí se puede hacer tanto SPAM como FLOOD, siendo este último el principal y el único sitio donde puede hacerse.`)
-      .setColor(Colores.nocolor);
+      .setColor(Colores.verdeclaro);
       
+      let bots = importImage("bots"); 
+      let arcade = new Discord.MessageEmbed()
+      .setImage(bots.attachment)
+      .setColor(Colores.verdejeffrey);
+
       let canalesEmbed5 = new Discord.MessageEmbed()
-      .setTitle(`🎮 — ARCADE`)
       .setDescription(`<#564971690304602113> • <@!467377486141980682> Cuenta con los demás usuarios del sevidor, ¿hasta dónde podrán llegar?
 
 <#723304597191393301> • <@520282851925688321> ¡Simulador de minería de minecraft en el servidor!
@@ -233,23 +247,28 @@ Cooldown para conseguir Jeffros y EXP reducido a la octava parte. (\`7.5s\`).
 <#820002227958841344> • <@715906723982082139> Puedes jugar un juego de trivia con todos los miembros del servidor.
 
 <#883160875693916180> • <@356065937318871041> ¿Recuerdas a Akinator? Bueno, ahora puedes jugar con él aquí mismo... ¡en Discord!`)
-      .setColor(Colores.nocolor);
+      .setColor(Colores.verde);
       
         // ROLES
       
+        let roles = importImage("roles");
         let rolesEmbed = new Discord.MessageEmbed()
-          .setImage(`${embedImages.roles}`)
-          .setColor(Colores.verde);
+          .setImage(roles.attachment)
+          .setColor(Colores.verdejeffrey);
       
         let rolesEmbed2 = new Discord.MessageEmbed()
           .setTitle(`<:Users:494281768883716096> — Roles básicos y especiales`)
           .setDescription(`\`➟\` Los roles básicos se obtienen sin esfuerzo alguno. Y no tienen mucha influencia a la hora de estar en el server.
 
 \`➟\` Y por el contrario, los roles especiales, tienen cierto impacto en el server. Estos también tienen más dificultad para conseguirlos.`)
-          .setColor(Colores.nocolor);
+          .setColor(Colores.verdeclaro);
       
+          let basicos = importImage("rbasicos");
+          let rolesbasicos = new Discord.MessageEmbed()
+          .setImage(basicos.attachment)
+          .setColor(Colores.verdejeffrey);
+
         let rolesEmbed3 = new Discord.MessageEmbed()
-          .setTitle(`Roles básicos`)
           .setDescription(`<@&460966148704436235> • Todos aquellos que hayan aceptado las reglas tendrán este rol.
 
 <@&447821238631530498> • Todos los Bots del server tendrán este rol.
@@ -273,10 +292,14 @@ Cooldown para conseguir Jeffros y EXP reducido a la octava parte. (\`7.5s\`).
 <@&461553370277347328> • Persona de confianza para Jeffrey.
 
 <@&508385695929466881> • Persona que ha ayudado al desarrollo de Jeffrey Bot de alguna forma. 💚`)
-          .setColor(Colores.nocolor);
+          .setColor(Colores.verde);
       
+        let especiales = importImage("respeciales");
+        let rolesespeciales = new Discord.MessageEmbed()
+        .setImage(especiales.attachment)
+        .setColor(Colores.verdejeffrey);
+
         let rolesEmbed4 = new Discord.MessageEmbed()
-        .setTitle(`Roles especiales`)
         .setDescription(`<@&595022419123634228> • Alguien que está boosteando el servidor, aparecerá en la lista de miembros por encima de todos menos del Staff.
 
 <@&529275759521431553> • Usuario que ha ascendido en el servidor, tendrá colores exclusivos y acceso anticipado a las notificaciones de Jeffrey, etc.
@@ -287,16 +310,17 @@ Cooldown para conseguir Jeffros y EXP reducido a la octava parte. (\`7.5s\`).
 <@&460586399981109278> • Gente activa con más de 5.000 mensajes en <#${mainChannel}>.
 
 <@&460517579941740544> • Personas que lleva mucho tiempo dentro del servidor, o está desde tiempos inmemorables, o simplemente estaba en el servidor viejo (...) este rol es muy extraño.`)
-          .setColor(Colores.nocolor);
+          .setColor(Colores.verdeclaro);
       
         // JEFFROS
       
+        let jeffros = importImage("jeffros");
         let jeffrosEmbed = new Discord.MessageEmbed()
-          .setImage(`${embedImages.jeffros}`)
-          .setColor(Colores.verde);
+        .setImage(jeffros.attachment)
+        .setColor(Colores.verdejeffrey);
       
         let jeffrosEmbed2 = new Discord.MessageEmbed()
-          .setDescription(`**—** ¿Qué son los ${Emojis.Jeffros}effros y como conseguirlos?
+        .setDescription(`**—** ¿Qué son los ${Emojis.Jeffros}effros y como conseguirlos?
 ➟ Los Jeffros son la moneda virtual del servidor. Puedes conseguirlos al hablar en <#${mainChannel}>.
 
 **—** ¿Cómo gasto mis Jeffros?
@@ -309,21 +333,23 @@ Cooldown para conseguir Jeffros y EXP reducido a la octava parte. (\`7.5s\`).
 ➟ Piensa en los DarkJeffros como si fuesen bitcoins... ¿Por qué bitcoins? Porque es divertido.
 ➟ Los DarkJeffros solo se podrán conseguir cambiando Jeffros. Estos pueden ser más costosos dependiendo de la **inflación actual**.
 ➟ Usando el comando \`${prefix}ayuda\` podrás tener más información en la categoría DarkShop de los comandos disponibles.`)
-          .setColor(Colores.nocolor);
-      
-        // STAFF
-      
-        let staffEmbed = new Discord.MessageEmbed()
-          .setImage(`${embedImages.staff}`)
           .setColor(Colores.verde);
       
+        // STAFF
+        let staff = importImage("staff");
+        let staffEmbed = new Discord.MessageEmbed()
+          .setImage(staff.attachment)
+          .setColor(Colores.verdejeffrey);
+      
+        let sentinels = importImage("sentinels")
+        let guardians = importImage("guardians")
         let staffEmbed2 = new Discord.MessageEmbed()
-          .setImage(`${embedImages.ceo}`)
-          .setColor(Colores.nocolor);
+          .setImage(sentinels.attachment)
+          .setColor(Colores.verdeclaro);
       
         let staffEmbed3 = new Discord.MessageEmbed()
-          .setImage(`${embedImages.mod}`)
-          .setColor(Colores.nocolor);
+          .setImage(guardians.attachment)
+          .setColor(Colores.verdeclaro);
       
         let staffEmbed4 = new Discord.MessageEmbed()
           .setDescription(`${staffRole} • Todo aquel que tenga este rol, es parte del equipo del STAFF.
@@ -344,9 +370,10 @@ ${adminRole} • ${modRole}.
       gold = gold ?? "GOLD EMOTE";
       platinium = platinium ?? "PLAT EMOTE";
       
+      let awards = importImage("awards");
       let awardsEmbed = new Discord.MessageEmbed()
-      .setImage(embedImages.awards)
-      .setColor(Colores.verde);
+      .setImage(awards.attachment)
+      .setColor(Colores.verdejeffrey);
       
       let awardsEmbed2 = new Discord.MessageEmbed()
       .setDescription(`**—** ¿Qué son los Awards?
@@ -355,15 +382,15 @@ ${adminRole} • ${modRole}.
 **—** ¿Como le doy un premio a un mensaje?
 **➟** Para dar un Award, es tan fácil como reaccionar al mensaje que quieres darle el premio, con el premio deseado.`)
       .setFooter(`Idea de los Awards tomada de REDDIT.`, "https://www.redditinc.com/assets/images/site/reddit-logo.png")
-      .setColor(Colores.nocolor);
+      .setColor(Colores.verdeclaro);
       
       let awardsEmbed3 = new Discord.MessageEmbed()
       .setDescription(`**${silver} Plata** • Cuesta **${Emojis.Jeffros}100**, se envía el mensaje a <#${Config.hallChannel}> y ya está.
 
 **${gold} Oro** • Cuesta **${Emojis.Jeffros}500**, se envía el mensaje a <#${Config.hallChannel}>, se le da **${Emojis.Jeffros}100** al autor del mensaje premiado.
 
-**${platinium} Platino** • Cuesta **${Emojis.Jeffros}1800**, se envía el mensaje a <#${Config.hallChannel}>, se le da __**${Emojis.Jeffros}700**__ al autor del mensaje premiado.`)
-      .setColor(Colores.nocolor);
+**${platinium} Platino** • Cuesta **${Emojis.Jeffros}1.800**, se envía el mensaje a <#${Config.hallChannel}>, se le da __**${Emojis.Jeffros}700**__ al autor del mensaje premiado.`)
+      .setColor(Colores.verde);
       
         // DARKSHOP
         let darkshop = new Discord.MessageEmbed()
@@ -489,7 +516,7 @@ Y la más importante:
 \`▸\` Colores
 \`▸\` Colores_especiales
 \`▸\` Auto_Roles
-\`▸\` Roles_especiales
+\`▸\` vip_roles
 \`▸\` Staff_manual`);
       
         if (!args[0]) return message.channel.send({embeds: [noEmbed]}).then(m => {
@@ -502,9 +529,14 @@ Y la más importante:
         let embed3 = new Discord.MessageEmbed();
         let caso = args[0].toLowerCase();
         let shrug = "¯\\_(ツ)_/¯";
+
+        let query = await lastMsgsByMe(message.channel);
+        const last = query[0];
+        const lastMsgs = query[1];
+
         switch (caso) {
           case "faq":
-            await message.channel.send({embeds: [faqEmbedIntro, faqEmbedIntro2]})
+            await message.channel.send({embeds: [faqEmbedIntro, faqEmbedIntro2], files: [faq.file]})
             await message.channel.send({embeds: [faqEmbed2]})
             await message.channel.send({embeds: [faqEmbed3]})
             await message.channel.send({embeds: [faqEmbed4]})
@@ -512,39 +544,50 @@ Y la más importante:
 
           case "informacion":
             //niveles
-            await message.channel.send({embeds: [lvlEmbed1, lvlEmbed2]});
+            await message.channel.send({embeds: [lvlEmbed1, lvlEmbed2], files: [niveles.file]});
             //canales
-            await message.channel.send({embeds: [canalesEmbed, canalesEmbed2, canalesEmbed3, canalesEmbed4, canalesEmbed5]});
+            await message.channel.send({embeds: [canalesEmbed, canalesEmbed2, chapterone, canalesEmbed3, surface, canalesEmbed4, arcade, canalesEmbed5], files: [canales.file, global.file, generales.file, bots.file]});
             //roles
-            await message.channel.send({embeds: [rolesEmbed, rolesEmbed2, rolesEmbed3, rolesEmbed4]});
+            await message.channel.send({embeds: [rolesEmbed, rolesEmbed2, rolesbasicos, rolesEmbed3, rolesespeciales, rolesEmbed4], files: [roles.file, basicos.file, especiales.file]});
             //jeffros
-            await message.channel.send({embeds: [jeffrosEmbed, jeffrosEmbed2]});
+            await message.channel.send({embeds: [jeffrosEmbed, jeffrosEmbed2], files: [jeffros.file]});
             //awards
-            await message.channel.send({embeds: [awardsEmbed, awardsEmbed2, awardsEmbed3]});
+            await message.channel.send({embeds: [awardsEmbed, awardsEmbed2, awardsEmbed3], files: [awards.file]});
             //staff
-            await message.channel.send({embeds: [staffEmbed, staffEmbed2, staffEmbed3, staffEmbed4]});
+            await message.channel.send({embeds: [staffEmbed, staffEmbed2, staffEmbed3, staffEmbed4], files: [staff.file, sentinels.file, guardians.file]});
             //final
             await message.channel.send({embeds: [finalInfoEmbed]});
             break;
       
           case "colores":
-            embed1.setImage(embedImages.colors);
+            let colores = importImage("colores");
+            embed1.setImage(colores.attachment);
             embed1.setColor(Colores.verde);
             embed2.setDescription(`<:Colores:494280433765449733> **—** Aquí tienes variedad de 10 colores. ¡Con sólo reaccionar se te será asignado!`);
             embed2.setColor(Colores.nocolor);
       
-            await message.channel.send({embeds: [embed1, embed2]});
+            if(last){
+              editLastMsgs(lastMsgs, embed2);
+            } else {
+              await message.channel.send({embeds: [embed1], files: [colores.file]});
+              return message.channel.send({embeds: [embed2]});
+            }
       
             break;
       
           case "colores_especiales":
-            embed1.setImage(embedImages.specialColors);
+            let coloresespeciales = importImage("coloresespeciales");
+            embed1.setImage(coloresespeciales.attachment);
             embed1.setColor(Colores.verde);
             embed2.setDescription(`<:Colores:494280433765449733> **—** Más colores para gente con suerte ${shrug}.`);
-            embed2.setFooter(`— Reacciona con el color que desees.`, Config.jeffreyguildIcon);
             embed2.setColor(Colores.nocolor);
       
-            await message.channel.send({embeds: [embed1, embed2]});
+            if(last){
+              editLastMsgs(lastMsgs, embed2);
+            } else {
+              await message.channel.send({embeds: [embed1], files: [coloresespeciales.file]});
+              return message.channel.send({embeds: [embed2]});
+            }
       
             break;
       
@@ -563,8 +606,9 @@ Y la más importante:
             break;
       
           case "reglas":
-            embed1.setImage(embedImages.reglas);
-            embed1.setColor(Colores.verde);
+            let reglas = importImage("reglas");
+            embed1.setImage(reglas.attachment)
+            embed1.setColor(Colores.verdejeffrey);
             embed2.setDescription(`**Regla N°1**: Intentemos mantener el chat con un grado de **Sentido Común**, no nos alejemos tanto de él: evita el uso **EXCESIVO** de cadenas, shitposts, comentarios sin sentido y/o fuera de lugar. Puedes ignorar esta regla completamente en <#821486638768455700>.
       
 **Regla N°2**: Trata a las personas con las que no tienes tanta confianza con **respeto y amabilidad**. No menciones innecesariamente. No gore ni contenido que pueda herir la sensibilidad de los demás **(NO NSFW)**.
@@ -584,18 +628,19 @@ Y la más importante:
 
 \`—\` Un dato curioso: ${client.user} te enviará un mensaje al recibir cualquier tipo de warn, siempre y cuando tengas los MDs activados.
 Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para conocer __tus__ warns.`);
-            embed2.setColor(Colores.nocolor);
+            embed2.setColor(Colores.verde);
       
             embed3.setFooter(`— ¡Gracias por leer! | Al hablar en el chat aseguras que has leído las reglas del servidor y que las cumplirás.`, Config.jeffreyguildIcon);
-            embed3.setColor(Colores.verde);
+            embed3.setColor(Colores.verdeclaro);
       
-            await message.channel.send({embeds: [embed1, embed2, embed3]});
+            await message.channel.send({embeds: [embed1, embed2, embed3], files: [reglas.file]});
       
             break;
       
           case "auto_roles":
             //<:jgGDPS:572597912815796235> ➟ <@&${Config.gdpszone}>
-            embed1.setImage(embedImages.autoroles);
+            let autoroles = importImage("autoroles");
+            embed1.setImage(autoroles.attachment);
             embed1.setColor(Colores.verde);
             embed2.setDescription(`**—** Reacciona de acuerdo a los roles que quieras tener.
       
@@ -603,38 +648,47 @@ Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para c
 🤖 ➟ <@&${Config.jbnews}>`);
             embed2.setColor(Colores.nocolor);
       
-            message.channel.send({embeds: [embed1]}).then(m => {
-              message.channel.send({embeds: [embed2]});
-            });
+            if(last){
+              editLastMsgs(lastMsgs, embed2);
+            } else {
+              await message.channel.send({embeds: [embed1], files: [autoroles.file]});
+              return message.channel.send({embeds: [embed2]});
+            }
       
             break;
       
           case "muted":
-            embed1.setImage(embedImages.muted);
+            let muted = importImage("muted");
+            embed1.setImage(muted.attachment);
             embed1.setColor("#2C2F33");
             embed2.setDescription(`**—** Haz sido muteado, ten la esperanza de que en algún momento serás desmuteado, **Stay Determined! <:determined:572982380852412436>**`);
             embed2.setColor(Colores.nocolor);
       
-            message.channel.send({embeds: [embed1]}).then(m => {
+            message.channel.send({embeds: [embed1], files: [muted.file]}).then(m => {
               message.channel.send({embeds: [embed2]});
             });
       
             break;
       
-          case "roles_especiales":
-            embed1.setImage(embedImages.specialRoles);
+          case "vip_roles":
+            let viproles = importImage("rolesvip");
+            embed1.setImage(viproles.attachment);
             embed1.setColor(Colores.verde);
-            embed2.setDescription(`**—** Como eres <@&529275759521431553>, tienes más roles **exclusivos** disponibles. Reacciona de acuerdo a los roles que quieras tener.
+            embed2.setDescription(`**—**Como eres <@&529275759521431553>, tienes más roles **exclusivos** disponibles. Reacciona de acuerdo a los roles que quieras tener.
       
-🌠 ➟ <@&564144046591705089>`);
+🌠 ➟ <@&564144046591705089>
+📸 ➟ <@&909980351953268736>`);
             embed2.setColor(Colores.nocolor);
-      
-            message.channel.send({embeds: [embed1]}).then(m => {
-              message.channel.send({embeds: [embed2]});
-            });
-      
+
+            if(last){
+              editLastMsgs(lastMsgs, embed2);
+            } else {
+              await message.channel.send({embeds: [embed1], files: [viproles.file]});
+              return message.channel.send({embeds: [embed2]});
+            }
+
             break;
-            
+
           case "staff_manual":
             await message.channel.send({embeds: [staffEmbed, manualEmbed, manualEmbed2, manualEmbed3, manualEmbed4, manualEmbed5]});
             break;
@@ -642,22 +696,21 @@ Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para c
           case "darkshop_info":
             await message.channel.send({embeds: [darkshop, darkshopInformation1, items, darkshopInformation2, inflacion, darkshopInformation3, eventos, darkshopInformation4, inversiones, darkshopInformation5]})
             break;
-      
-          case "edit":
-            if (args[1] === "auto_roles") {
-              let nchannel = guild.channels.cache.find(x => x.id === Config.gRoleC);
-              nchannel.messages.fetch(Config.mGRoles).then(m => {
-                let nembed = new Discord.MessageEmbed()
-                  .setDescription(`**—** Reacciona de acuerdo a los roles que quieras tener.
-      
-🔔 ➟ <@&${Config.teamcampanita}>
-🤖 ➟ <@&${Config.jbnews}>
-💀 ➟ <@&${Config.dsnews}>`
-                  )
-                  .setColor(Colores.nocolor);
-                m.edit({embeds: [nembed]});
-              });
-            }
+        }
+
+        async function lastMsgsByMe(channel){
+          let msgs = await channel.messages.fetch({limit: 2});
+          return [(msgs.every(x => x.author.id === client.user.id) && msgs.size != 0) ?? false, msgs];
+        }
+
+        async function editLastMsgs(msgs, embed2){
+          if(msgs.size === 2){
+            msgs.forEach(msg => {
+              if(msg.reactions.cache.size != 0) return msg.edit({embeds: [embed2]});
+            })
+          } else if(msgs.size === 1){
+            return message.channel.send("No puedo hacer eso D:");
+          }
         }
     }
 }

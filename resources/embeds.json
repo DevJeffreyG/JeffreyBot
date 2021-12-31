@@ -1,21 +1,4 @@
 {
-  "muted": "https://cdn.glitch.com/2c61ee42-4a04-4a21-b074-65934d0afc88%2FMuted.png?1556679872253",
-  "reglas": "https://cdn.discordapp.com/attachments/464810032081666048/843142823587086366/Reglas.png",
-  "niveles": "https://cdn.discordapp.com/attachments/464810032081666048/843142821225824256/Niveles.png",
-  "canales": "https://cdn.discordapp.com/attachments/464810032081666048/843142822639173652/Canales.png",
-  "roles": "https://cdn.discordapp.com/attachments/464810032081666048/843142820499161098/Roles.png",
-  "jeffros": "https://cdn.discordapp.com/attachments/464810032081666048/843142817546764348/Jeffros.png",
-  "interest": "https://cdn.discordapp.com/attachments/464810032081666048/843143617644331028/Interes.png",
-  "awards": "https://cdn.discordapp.com/attachments/464810032081666048/843142815927894056/Awards.png",
-  "staff": "https://cdn.discordapp.com/attachments/464810032081666048/843142813926424626/staff.png",
-  "faq": "https://cdn.discordapp.com/attachments/835180556236226571/835215074003124284/Preguntas.png",
-  "helper": "https://cdn.glitch.com/2c61ee42-4a04-4a21-b074-65934d0afc88%2FHelper.png?1550541048733",
-  "mod": "https://cdn.discordapp.com/attachments/464810032081666048/880653946253877248/Guardian.png",
-  "ceo": "https://cdn.discordapp.com/attachments/464810032081666048/843142823946879016/Sentinel.png",
-  "colors": "https://cdn.glitch.com/2c61ee42-4a04-4a21-b074-65934d0afc88%2FColores.png?1550101971550",
-  "specialColors": "https://cdn.glitch.com/2c61ee42-4a04-4a21-b074-65934d0afc88%2FColoresEspeciales.png?1556675585881",
-  "autoroles": "https://cdn.glitch.com/2c61ee42-4a04-4a21-b074-65934d0afc88%2FAutoRoles.png?1556676975935",
-  "specialRoles": "https://cdn.discordapp.com/attachments/464810032081666048/595988831702876181/RolesEspeciales.png",
   "warns": "https://cdn.glitch.com/2c61ee42-4a04-4a21-b074-65934d0afc88%2FWarns.png?v=1581977082004",
   "req": "https://cdn.glitch.com/2c61ee42-4a04-4a21-b074-65934d0afc88%2FRequirements.png?v=1581977076920"
 }

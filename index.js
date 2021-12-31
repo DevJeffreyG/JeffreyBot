@@ -3,6 +3,7 @@ require("dotenv").config();
 // packages
 const Discord = require("discord.js");
 const fs = require("fs");
+const CronJob = require("cron").CronJob;
 
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
@@ -30,6 +31,8 @@ const active = new Map(); // musica
 
 /* ##### MONGOOSE ######## */
 
+const User = require("./modelos/User.model.js");
+
 const mongoose = require("mongoose");
 mongoose.connect(`${process.env.MONGOCONNECT}`, {
   useNewUrlParser: true,
@@ -39,25 +42,8 @@ mongoose.connect(`${process.env.MONGOCONNECT}`, {
 /* ##### MONGOOSE ######## */
 
 // ########### ############# HANDLERS #################### ########
-// comandos normales
-client.comandos = new Discord.Collection();
-fs.readdir("./comandos/", (err, files) => {
-  if (err) console.log(err);
-  let jsfile = files.filter(f => f.split(".").pop() === "js");
-  if (jsfile.length <= 0) {
-    console.log("No hay comandos.");
-    return;
-  }
-  jsfile.forEach((f, i) => {
-    let props = require(`./comandos/${f}`);
-    client.comandos.set(props.help.name, props);
-    client.comandos.set(props.help.alias, props);
-  });
-});
-
-// new
 const baseCommands = [];
-const baseCommandsFolder = fs.readdirSync("./aa").filter(file => !file.endsWith(".txt")); // quitar el layout LMAO
+const baseCommandsFolder = fs.readdirSync("./commands").filter(file => !file.endsWith(".txt")); // quitar el layout LMAO
 
 for (const folder of baseCommandsFolder) {
   const baseCommandsFiles = fs.readdirSync(`./commands/${folder}`).filter(file => file.endsWith(".js"));
@@ -89,7 +75,6 @@ for (const file of commandFiles) {
   scommands.push(command.data.toJSON());
 }
 
-// SLASH COMMANDS
 const rest = new REST({ version: '9'}).setToken(process.env.TOKEN);
 
 (async () => {
@@ -125,8 +110,18 @@ for(const file of eventFiles){
 }
 // ########### ############# HANDLERS #################### ########
 
-if (process.env.mantenimiento != 1) {
-  client.login(process.env.TOKEN);
-} else {
-  console.log("########## BOT EN MANTENIMIENTO, NO LOGEADO #############");
-}
+new CronJob('0 0 31 11 *', async function(){ // reiniciar precios de la darkshop anualmente
+  const users = await User.find();
+
+  users.forEach(user => {
+    user.data.purchases.forEach(async (purchase, index) => {
+      if(purchase.isDarkShop){
+        user.data.purchases.splice(index, 1);
+        user.markModified("data");
+        await user.save();
+      }
+    })
+  })
+}, null, true, 'America/Bogota');
+
+client.login(process.env.TOKEN);

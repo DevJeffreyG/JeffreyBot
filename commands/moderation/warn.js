@@ -65,6 +65,8 @@ module.exports = {
         collector.on("collect", async(collected) => {
             const rule = Number(collected.values[0]) ?? collected.values[0];
 
+            console.log(collected)
+
             await collected.deferUpdate();
 
             if(rule === "cancel"){
@@ -111,7 +113,7 @@ module.exports = {
                     `[Pruebas](${proof.url})`
                 ];
                 confirmation = await Confirmation("Continuar", skipConfirmation, message);
-                if(!confirmation) return;
+                if(!confirmation) return selectRuleMsg.delete();
             }
 
             // como sí tiene el soft, agregar warn
@@ -148,6 +150,7 @@ module.exports = {
             .setColor(Colores.nocolor);
 
             confirmation.edit({embeds: [log, proofE]});
+            selectRuleMsg.delete();
         })
     }
 }

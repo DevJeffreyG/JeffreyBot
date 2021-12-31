@@ -45,10 +45,10 @@ module.exports = {
     const isDark = response.find(x => x.param === "darkjeffros?").data;
   
     const user = await User.findOne({
-      user_id: author.id,
+      user_id: member.id,
       guild_id: guild.id
     }) ?? await new User({
-        user_id: author.id,
+        user_id: member.id,
         guild_id: guild.id
     }).save();
   

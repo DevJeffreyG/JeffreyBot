@@ -2,7 +2,7 @@ const Config = require("../../base.json");
 const Colores = require("../../resources/colores.json");
 const Emojis = require("../../resources/emojis.json");
 const Discord = require("discord.js");
-const moment = require("moment-timezone");
+const moment = require("moment");
 
 const { Initialize, TutorialEmbed, DaysUntilToday, ValidateDarkShop } = require("../../resources/functions.js");
 
@@ -14,7 +14,7 @@ const User = require("../../modelos/User.model.js");
 
 const commandInfo = {
     name: "darkstats",
-    aliases: ["dsstats", "dstats"],
+    aliases: ["dsstats", "dstats", "dsbal"],
     info: "Revisa tus DarkJeffros, su duración, y tu precisión o el de otro usuario",
     params: [
         {

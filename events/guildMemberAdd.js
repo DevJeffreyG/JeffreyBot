@@ -1,6 +1,9 @@
 const Discord = require("discord.js");
 
+const { time } = require("@discordjs/builders");
+const { GenerateLog, DaysUntilToday, Initialize } = require("../resources/functions.js");
 const Config = require("../base.json");
+const Colores = require("../resources/colores.json");
 
 const User = require("../modelos/User.model.js");
 
@@ -11,6 +14,8 @@ module.exports = async (client, member) => {
     let reglasC = guild.channels.cache.find(x => x.id === Config.rulesChannel);
     let infoC = guild.channels.cache.find(x => x.id === Config.infoChannel);
     let botRole = guild.roles.cache.find(x => x.id === Config.botRole);
+
+    const prefix = await Initialize(member.guild.id);
   
     if(client.user.id === Config.testingJBID){
       channel = guild.channels.cache.find(x => x.id === "535500338015502357");
@@ -59,7 +64,30 @@ module.exports = async (client, member) => {
       });
   
       newUser.save();
+    } else { // cargar los roles que tenia antes
+      query.data.backup_roles.forEach(roleId => {
+        const role = guild.roles.cache.find(x => x.id === roleId);
+        if(role) member.roles.add(role);
+      })
+
+      query.data.backup_roles = [];
+      query.save();
     }
+
+    member.guild.invites.fetch().then((invites) => {
+      invites.forEach(async invite => {
+        if(invite.uses != client.invites[invite.code]){
+          GenerateLog(guild, "Nuevo miembro en el servidor", "", [
+          `${member} el ${time(member.joinedAt)}.`,
+          `Usando la invitación **discord.gg/${invite.code}**, con **${invite.uses}** usos.`,
+          `Su cuenta tiene **${Math.floor(await DaysUntilToday(member.user.createdAt))}** días de edad (${time(member.user.createdAt)}).`,
+          `¡Ahora somos **${member.guild.memberCount}** miembros en el servidor!`
+        ], member.user.displayAvatarURL(), member.guild.iconURL(), Colores.verde);
+        }
+      })
+    })
+
+    
   
     client.user.setActivity(`${prefix}ayuda - ${member.guild.memberCount} usuarios🔎`);
 }

@@ -15,7 +15,11 @@ module.exports = {
 		.setDescription('Revisa tus warns, o si tienes permisos, los de algún usuario')
         .addUserOption(option =>
             option.setName('usuario')
-                .setDescription("El usuario a revisar de warns")),
+                .setDescription("El usuario a revisar de warns"))
+        .addIntegerOption(option => 
+            option
+            .setName('id')
+            .setDescription("La id del warn/softwarn a ver")),
 	async execute(interaction, client) {
         const guild = client.guilds.cache.find(x => x.id === interaction.guildId);
         const author = guild.members.cache.find(x => x.id === interaction.user.id);
@@ -32,12 +36,13 @@ module.exports = {
         const row = new Discord.MessageActionRow()
             .addComponents(
                 new Discord.MessageButton()
-                    .setCustomId("delmsg")
+                    .setCustomId("deleteMessage")
                     .setLabel("Eliminar mensaje")
                     .setStyle("DANGER")
             )
     
         const member = interaction.options.getUser("usuario") && isStaff ? guild.members.cache.find(x => x.id === interaction.options.getUser("usuario").id) : author;
+        const id = interaction.options.getInteger("id");
 
         if(!member) return interaction.reply({content: "No pude encontrar a ese usuario", ephemeral: true});
 
@@ -70,11 +75,14 @@ module.exports = {
         .setDescription(`**Número de softwarns ** ❛ \`${softwarns.length}\` ❜`)
         .setColor(Colores.verde);
 
+        if(id) warnsE.setTitle(`Para la ID: ${id}`);
+
         // foreach
         warns.forEach(warn => {
             // sacar la regla
-            let regla = reglas[warn.rule_id] ? reglas[warn.rule_id].regla : "Víctima de la DARKSHOP.";
+            let regla = reglas[warn.rule_id] ? reglas[warn.rule_id].regla : "Víctima de la DARKSHOP";
 
+            if(id && warn.id != id) return;
             warnsE.addField(`— ${regla} : Regla N°${warn.rule_id}`, `**— [Pruebas](${warn.proof})\n— ID: ${warn.id}**`)
         });
 
@@ -82,14 +90,15 @@ module.exports = {
             // sacar la regla
             let regla = reglas[softwarn.rule_id].regla;
 
+            if(id && softwarn.id != id) return;
             softwarnsE.addField(`— ${regla} : Regla N°${softwarn.rule_id}`, `**— [Pruebas](${softwarn.proof})\n— ID: ${softwarn.id}**`)
         });
 
         if(isStaff){
             interaction.reply({embeds: [warnsE, softwarnsE], ephemeral: false, components: [row]});
-            const reply = await interaction.fetchReply()
+            /* const reply = await interaction.fetchReply()
 
-            const f = i => i.customId === 'delmsg' && i.user.id === author.id;
+            const f = i => i.customId === 'deleteMessage' && i.user.id === author.id;
 
             const collector = interaction.channel.createMessageComponentCollector({ filter: f, time: 15000, max: 1 });
 
@@ -100,7 +109,7 @@ module.exports = {
 
             collector.on("end", async i => {
                 await reply.edit({ components: []})
-            })
+            }) */
         } else {
             return interaction.reply({embeds: [warnsE, softwarnsE], ephemeral: true});
         }

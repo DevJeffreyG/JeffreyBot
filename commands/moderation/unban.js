@@ -43,7 +43,7 @@ module.exports = {
 
         await GlobalData.findOneAndRemove({
             "info.type": "temporalGuildBan",
-            "info.serverID": guild.id,
+            "info.guild_id": guild.id,
             "info.userID": user
         });
         

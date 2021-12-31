@@ -1,7 +1,7 @@
 {
     "prefix": "/",
     "tvPrefix": "!",
-    "mantenimiento": 0,
+    "mantenimiento": false,
     "deleteLateMedia": false,
     "disableEXPs": false,
     "disableAwards": false,
@@ -13,15 +13,20 @@
     [
         {
             "type": "added",
-            "desc": "JeffreyBot x YouTube"
+            "desc": "Jeffrey Bot x Furros",
+            "extended": "¡NOOOOOOOOOOOOOOOOOOOOO!\nHace más de 3 años que Jeffrey Bot no tenía una nueva foto, moderna y concuerdo a Jeffrey, así que, lo siento furry haters D:"
         },
         {
             "type": "added",
-            "desc": "JeffreyBot x Twitter"
+            "desc": "Jeffrey Bot x YouTube"
         },
         {
             "type": "added",
-            "desc": "JeffreyBot x Twitch"
+            "desc": "Jeffrey Bot x Twitter"
+        },
+        {
+            "type": "added",
+            "desc": "Jeffrey Bot x Twitch"
         },
         {
             "type": "added",
@@ -43,7 +48,7 @@
         {
             "type": "updated",
             "desc": "Se han actualizado varios comandos de economía",
-            "extended": "Los comandos /shop y /darkshop ahora sólo mostrarán los items de la tienda.\nCuando se vayan a usar los items se usará una ID DE USO, ya no se usará la ID del item comprado.\nSe ha agregado una confirmación cuando se van a pagar Jeffros a otro usuario."
+            "extended": "Los comandos { PREFIX }shop y { PREFIX }darkshop ahora sólo mostrarán los items de la tienda.\nCuando se vayan a usar los items se usará una ID DE USO, ya no se usará la ID del item comprado.\nSe ha agregado una confirmación cuando se van a pagar Jeffros a otro usuario."
         },
         {
             "type": "updated",
@@ -60,8 +65,11 @@
     ],
     "bienPng": "http://i.imgur.com/M6hqbcc.png",
     "errorPng": "https://i.imgur.com/obwiHcn.png",
+    "confirmEmojiId": "558084462232076312",
+    "cancelEmojiId": "558084461686947891",
     "loadingGif": "https://cdn.discordapp.com/emojis/664205203163054084.gif?size=1024",
-    "jeffreyguildIcon": "https://media.discordapp.net/attachments/464810032081666048/563200897954611219/DiscordLogo2019.png",
+    "jeffreyguildIcon": "https://drive.google.com/uc?export=download&id=1y6qiuloX3jYbSVVELxpmTw630_5v-7sB",
+    "votePollImage": "https://drive.google.com/uc?export=download&id=1PXAn2X_53ShzF8yU4aOAAqVuV292uFdD",
     "darkLogoPng": "https://cdn.discordapp.com/emojis/739625446961840129.png",
     "jeffreygID": "437668432604037142",
     "jgServer": "447797737216278528",
@@ -69,6 +77,7 @@
     "dsRole": "790995699759448094",
     "bellRole": "460242238555815946",
     "_comment": "Canales",
+    "ticketsCategory": "919010692940570704",
     "offtopicChannel": "821486638768455700",
     "spamChannel": "485192438701359135",
     "mainChannel": "447802627187539968",
@@ -82,6 +91,7 @@
     "belltvChannel": "881030920197521438",
     "rulesChannel": "523159573935423509",
     "infoChannel": "485191307346837507",
+    "faqChannel": "834053291532615770",
     "staffChat": "485191724369444865",
     "staffComandos": "485191757101924352",
     "botsVip": "653782932733034507",
@@ -119,6 +129,7 @@
     "__comment": "Mensajes",
     "mRainbow": "572617072711041026",
     "sMRainbow": "572964150674849802",
+    "mIGRoles": "572973885876862996",
     "mGRoles": "572973886510071828",
     "mGERoles": "595996559707996231",
     "__comment": "Roles de colores",

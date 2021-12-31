@@ -17,7 +17,7 @@ const Shop = require("../../modelos/Shop.model.js");
 const commandInfo = {
     name: "inventory",
     aliases: ["inv"],
-    info: "Información del comando",
+    info: "Te muestra los items actualmente en tu inventario",
     params: [
         {
             name: "darkshop?", type: "Boolean", optional: true
@@ -67,11 +67,18 @@ module.exports = {
 
         user.data.inventory.forEach(item => {
             const real_item = shop && shop.items.length > 0 ? shop.items.find(x => x.id === item.item_id) : null;
-            if(real_item && item.isDarkShop === isDarkShop) itemsEmbed.addField(`— ${real_item.name}`, `**— ID**: \`${item.use_id}\`.`)
+            if(real_item && item.isDarkShop === isDarkShop) itemsEmbed.addField(`— ${real_item.name}`, `**— Activo**: \`${item.active ? "sí" : "no"}\`.\n**— ID**: \`${item.use_id}\`.`)
         });
 
         if(user.data.inventory.filter(x => x.isDarkShop === isDarkShop).length === 0) return message.channel.send({embeds: [noItems]});
 
-        message.channel.send({embeds: [itemsEmbed]});
+        let msg = await message.channel.send({embeds: [itemsEmbed]});
+
+        if(isDarkShop){
+            setTimeout(() => {
+                message.delete();
+                msg.delete()
+            }, ms("15s"))
+        }
     }
 }

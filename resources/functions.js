@@ -4,18 +4,14 @@ const Colores = require("./colores.json");
 const Emojis = require("./emojis.json");
 const Discord = require("discord.js");
 const { Structures } = require('discord.js');
-const anyBase = require("any-base");
-const prettyms = require("pretty-ms");
-const dec2hex = anyBase(anyBase.DEC, anyBase.HEX);
 
 const fs = require("fs");
 const ms = require("ms");
 var Chance = require("chance");
 var chance = new Chance();
-const prettyMilliseconds = require("pretty-ms");
+const prettyms = require("pretty-ms");
 
-const moment = require('moment-timezone');
-moment().tz("America/Bogota").format();
+const moment = require('moment');
 
 /* ##### MONGOOSE ######## */
 
@@ -26,6 +22,7 @@ mongoose.connect(`${process.env.MONGOCONNECT}`, {
 });
 
 const User = require("../modelos/User.model.js");
+const Guild = require("../modelos/Guild.model.js");
 const DarkShop = require("../modelos/DarkShop.model.js");
 const Shop = require("../modelos/Shop.model.js");
 
@@ -46,9 +43,9 @@ const testingGuild = "482989052136652800";
 // JEFFREY BOT NOTIFICATIONS
 const { google } = require("googleapis");
 const Twitter = require("twitter");
-const { ApiClient } = require("twitch");
-const { StaticAuthProvider } = require("twitch-auth");
-const request = require("request");
+const { ApiClient } = require("@twurple/api");
+const { ClientCredentialsAuthProvider } = require("@twurple/auth");
+const { discriminator } = require("../modelos/User.model.js");
 
 /* ##### MONGOOSE ######## */
 
@@ -174,7 +171,7 @@ const intervalGlobalDatas = async function(client, justTempRoles){
 
   await guild.members.fetch();
   let members = guild.members.cache;
-  // buscar roles temporales
+  // buscar roles temporales & cumpleaños
   members.forEach(async (member) => {
     let dbUser = await User.findOne({
       user_id: member.id,
@@ -182,6 +179,7 @@ const intervalGlobalDatas = async function(client, justTempRoles){
     });
 
     let roles = (dbUser && dbUser.data.temp_roles) ?? false;
+    let birthday = (dbUser && dbUser.data.birthday.locked) ?? false;
 
     if(roles) {
       for (let i = 0; i < dbUser.data.temp_roles.length; i++){
@@ -254,19 +252,34 @@ const intervalGlobalDatas = async function(client, justTempRoles){
         }
       }
     }
+
+    if(birthday){
+      let bdDay = dbUser.data.birthday.day;
+      let bdMonth = dbUser.data.birthday.month;
+
+      let now = new Date();
+      let actualDay = now.getDate();
+      let actualMonth = now.getMonth();
+
+      if((actualDay == bdDay) && (actualMonth + 1 == bdMonth)){ // actualMonth + 1 ( 0 = ENERO && 11 = DICIEMBRE )
+        // ES EL CUMPLEAÑOS
+        if(!member.roles.cache.find(x => x.id === bdRole.id)) member.roles.add(bdRole);
+      } else {
+        // revisar si tiene el rol de cumpleaños, entonces quitarselo
+        if(member.roles.cache.find(x => x.id === bdRole.id)) member.roles.remove(bdRole);
+      }
+    }
   })
 
   if(justTempRoles === true) return;
 
-  /** ###### DARKSHOP ###### */
+  // ###### DARKSHOP ######
   await DarkShopWork(client, guild.id);
-
-  /** ###### DARKSHOP ###### */
 
   // buscar temp bans
   GlobalData.find({
     "info.type": "temporalGuildBan",
-    "info.serverID": guild.id
+    "info.guild_id": guild.id
   }, (err, tempBans) => {
     if(err) throw err;
 
@@ -280,7 +293,11 @@ const intervalGlobalDatas = async function(client, justTempRoles){
 
         if(today - since >= realDuration){
           // ya pasó el tiempo, unban
-          guild.members.unban(userID);
+          try {
+            guild.members.unban(userID);
+          } catch (err) {
+            console.log(err);
+          }
           tempBans[i].remove();
 
           let unBEmbed = new Discord.MessageEmbed()
@@ -293,39 +310,67 @@ const intervalGlobalDatas = async function(client, justTempRoles){
 
           logs.send({embeds: [unBEmbed]})
           console.log("Se ha desbaneado a", userID)
-        } else {
-          // nada XD
         }
       }
     }
   })
 
-  // buscar usuarios de cumpleaños
-  GlobalData.find({
-    "info.type": "birthdayData"
-  }, (err, birthdays) => {
-    if(birthdays){
-      for (let i = 0; i < birthdays.length; i++){
-        let bd = birthdays[i];
-        let member = guild.members.cache.find(x => x.id === bd.info.userID);
-        let bdDay = bd.info.birthd;
-        let bdMonth = bd.info.birthm;
-        let isLocked = bd.info.isLocked ?? false;
+  // buscar encuestas
+  GlobalData.find({"info.type": "temporalPoll", "info.guild_id": guild.id}, async (err, polls) => {
+    if(err) throw err;
 
-        if(isLocked) {
-          if(bdDay && bdMonth){
-              let now = new Date();
-              let actualDay = now.getDate();
-              let actualMonth = now.getMonth();
+    if(polls){
+      for (let i = 0; i < polls.length; i++) {
+        const poll = polls[i].info;
+        
+        if(moment().isAfter(poll.until)){
+          let c = guild.channels.cache.find(x => x.id === poll.channel_id);
+          let msg = await c.messages.fetch(poll.message_id);
 
-              if((actualDay == bdDay) && (actualMonth + 1 == bdMonth)){ // actualMonth + 1 ( 0 = ENERO && 11 = DICIEMBRE )
-                // ES EL CUMPLEAÑOS
-                if(!member.roles.cache.find(x => x.id === bdRole.id)) member.roles.add(bdRole);
+          const reactions = msg.reactions.cache;
+
+          let reactionsInPoll = await new Promise(async (resolve, reject) => {
+            let count = {
+              no: [],
+              yes: []
+            }
+
+            for(const reaction of reactions){
+
+              let usersInThis = await reaction[1].users.fetch();
+
+              if(reaction[0] === "❌"){
+                usersInThis.forEach(async user => {
+                  if(!user.bot) count.no.push(user.id)
+                });
               } else {
-                // revisar si tiene el rol de cumpleaños, entonces quitarselo
-                if(member.roles.cache.find(x => x.id === bdRole.id)) member.roles.remove(bdRole);
+                usersInThis.forEach(async user => {
+                  if(!user.bot) count.yes.push(user.id)
+                });
               }
             }
+            resolve(count);
+          })
+
+          let imageEmbed = new Discord.MessageEmbed(msg.embeds[0]);
+          let textEmbed = new Discord.MessageEmbed(msg.embeds[1]);
+
+          await msg.reactions.removeAll();
+
+          // checkar que no hayan votos en ambos lados y si los hay, anularlos
+          let yes = reactionsInPoll.yes.filter(x => !reactionsInPoll.no.includes(x))
+          let no = reactionsInPoll.no.filter(x => !reactionsInPoll.yes.includes(x))
+
+          textEmbed.setFooter("TERMINÓ");
+          textEmbed.setDescription(textEmbed.description + `\n\n**RESULTADOS:**`)
+          textEmbed.addField(`✅ SÍ:`, `${yes.length}`, true)
+          textEmbed.addField(`❌ NO:`, `${no.length}`, true)
+
+          if(no.length === 0 && yes.length === 0) textEmbed.setFooter("TERMINÓ...! y... no... ¿votó nadie...? :(");
+
+          await msg.edit({embeds: [imageEmbed, textEmbed]});
+
+          polls[i].remove();
         }
       }
     }
@@ -560,127 +605,6 @@ const VaultWork = function(vault, user, message, notCodeEmbed){ // mostrar y bus
 
 }
 
-const vaultMode = function(hint, author, message) { // tengo que rehacer esto XD
-    console.log(hint);
-      Vault.find({}, function(err, pistas) {
-        if (pistas.length === 0) {
-          return message.reply(`No deberías estar aquí.`);
-        }
-
-        Vault.findOne(
-          {
-            id: hint
-          },
-          (err, pista1) => {
-            if (err) throw err;
-            Hint.countDocuments(
-              {
-                codeID: pista1.id
-              },
-              (err, totalhints) => {
-                Hint.find({
-                  codeID: pista1.id
-                })
-                  .sort([["num", "ascending"]])
-                  .exec((err, pista) => {
-                    // captcha si el código ya se descifró.
-
-                    WinVault.findOne(
-                      {
-                        codeID: pista[0].codeID,
-                        userID: author.id
-                      },
-                      (err, won) => {
-                        //console.log(`${pista1.code}: ${pista1.id} || ${pista[0].hint}`);
-                        if (!won) {
-                          let pistan = 1;
-
-                          const embed = new Discord.MessageEmbed()
-                            .setColor(Colores.verde)
-                            .setFooter(
-                              `Pista ${pistan} de ${totalhints} | /vault [codigo] para decifrar.`
-                            )
-                            .setDescription(pista[pistan - 1].hint);
-
-                          message.channel.send({embeds: [embed]}).then(msg => {
-                            msg.react("⏪").then(r => {
-                              msg.react("⏩");
-
-                              const backwardsFilter = (reaction, user) => reaction.emoji.name === "⏪" && user.id === message.author.id;
-                              const forwardsFilter = (reaction, user) => reaction.emoji.name === "⏩" && user.id === message.author.id;
-                              const collectorFilter = (reaction, user) => (reaction.emoji.name === "⏪" || reaction.emoji.name === "⏩") && user.id === message.author.id;
-
-                              const backwards = msg.createReactionCollector({ filter:backwardsFilter, time: 60000 });
-                              const forwards = msg.createReactionCollector({ filter:forwardsFilter, time: 60000 });
-                              const collector = msg.createReactionCollector({ filter:collectorFilter, time: 60000 });
-
-                              collector.on("end", r => {
-                                return msg.reactions.removeAll()
-                                .then(() => {
-                                  msg.react("795090708478033950");
-                                });
-                              });
-
-                              backwards.on("collect", r => {
-                                if (pistan === 1) return;
-                                pistan--;
-                                embed.setFooter(
-                                  `Pista ${pistan} de ${totalhints} | /vault [codigo] para decifrar.`
-                                );
-                                embed.setDescription(pista[pistan - 1].hint);
-                                msg.edit({embeds: [embed]});
-                              });
-
-                              forwards.on("collect", r => {
-                                if (pistan === pista.length) return;
-                                pistan++;
-                                embed.setFooter(
-                                  `Pista ${pistan} de ${totalhints} | /vault [codigo] para decifrar.`
-                                );
-                                embed.setDescription(pista[pistan - 1].hint);
-
-                                msg.edit({embeds: [embed]});
-                              });
-                            });
-                          });
-                        } else {
-                          let respRelleno = [
-                            "Jeffrey sube vídeo",
-                            "No seas malo",
-                            "Las rosas son rojas",
-                            "Los caballos comen manzanas",
-                            "siganme en twitter xfa @pewdiepie",
-                            "No tengo plata. ¿me donan?",
-                            "Mindblowing"
-                          ];
-
-                          let relleno =
-                            respRelleno[
-                              Math.floor(Math.random() * respRelleno.length)
-                            ];
-
-                          let r = new Discord.MessageEmbed()
-                            .setDescription(relleno)
-                            .setColor(Colores.blanco);
-
-                          return message.channel
-                            .send({embeds: [r]})
-                            .then(m => {
-                              setTimeout(() => {
-                                m.delete();
-                              }, ms("5s"));
-                            });
-                        }
-                      }
-                    );
-                  });
-              }
-            );
-          }
-        );
-      });
-}
-
 const handleUploads = async function(client){
   let guild, bellytChannel, belltwChannel, belltvChannel, role;
 
@@ -720,7 +644,6 @@ const handleUploads = async function(client){
   }
     
   setInterval(async () => {
-
         let config = {
           youtube_channelId: "UCCYiF7GGja7iJgsc4LN0oHw",
           twitter_screenname: "JeffreyG__",
@@ -867,122 +790,107 @@ const handleUploads = async function(client){
         let saludo = saludos[Math.floor(Math.random() * saludos.length)];
         const streamLink = `https://twitch.tv/${config.twitch_username}`;
 
-        const options = {
-          url: 'https://id.twitch.tv/oauth2/token',
-          json: true,
-          body: {
-            client_id: process.env.TWITCH_CLIENT,
-            client_secret: process.env.TWITCH_SECRET,
-            grant_type: 'client_credentials'
+        const authProvider = new ClientCredentialsAuthProvider(process.env.TWITCH_CLIENT, process.env.TWITCH_SECRET);
+        const apiClient = new ApiClient({ authProvider });
+        
+        let streaming = await isStreaming(config.twitch_username);
+
+        if(streaming){ // si está directo
+          const stream = await getStream(config.twitch_username);
+          const streamId = stream.id;
+
+          const streamTitle = stream.title;
+
+          let noti = await GlobalData.findOne({
+            "info.type": "bellNotification"
+          });
+
+          let posted = false;
+
+          lastVod:
+          for (let i = 0; i < noti.info.postedOnLive.length; i++) {
+            const _stream = noti.info.postedOnLive[i];
+            
+            if(_stream.id === streamId){
+              posted = true;
+              break lastVod;
+            }
+          }
+
+          if(noti.info.postedOnLive && posted) return console.log("ESTÁ EN DIRECTO, PERO YA SE HA PUBLICADO");
+          else {
+            let toPush = {
+              title: streamTitle,
+              link: streamLink,
+              id: streamId
+            }
+
+            if((noti.info.postedOnLive.length === 1 && noti.info.postedOnLive[0].what) || !noti.info.postedOnLive){
+              noti.info.postedOnLive[0] = toPush;
+            } else {
+              noti.info.postedOnLive.push(toPush);
+            }
+
+            noti.markModified("info");
+            await noti.save();
+
+            let parsed = noti.info.postedOnLive[noti.info.postedOnLive.length -1];
+            if (!belltvChannel) return;
+
+            belltvChannel.send(`**🔴 ¡Jeffrey está en directo, ${role}!** 🔴\n\`➟\` **${parsed.title}**\n\n**${saludo} ➟ ${parsed.link} !! :D**`);
           }
         }
 
-        request.post(options, async (err, res, body) => {
-          if(err) throw err;
-          const accessTokenTwitch = body.access_token;
+        async function isStreaming(username) {
+          const user = await apiClient.users.getUserByName(username);
+          if (!user) return false;
+          return await user.getStream() !== null;
+        }
 
-          const authProvider = new StaticAuthProvider(process.env.TWITCH_CLIENT, accessTokenTwitch);
-          const apiClient = new ApiClient({ authProvider });
-          
-          let streaming = await isStreaming(config.twitch_username);
-          if(streaming){ // si está directo
-            const stream = await getHelixStream(config.twitch_username);
-            const streamId = stream.id;
-            const streamTitle = stream.title;
+        async function getStream(username){
+          const user = await apiClient.users.getUserByName(username);
 
-            let noti = await GlobalData.findOne({
-              "info.type": "bellNotification"
-            });
+          if(!user) return null;
 
-            let posted = false;
+          const stream = await user.getStream()
 
-            lastVod:
-            for (let i = 0; i < noti.info.postedOnLive.length; i++) {
-              const _stream = noti.info.postedOnLive[i];
-              
-              if(_stream.id === streamId){
-                posted = true;
-                break lastVod;
-              }
-            }
+          if(!stream) return null;
 
-            if(noti.info.postedOnLive && posted) return;
-            else {
-              let toPush = {
-                title: streamTitle,
-                link: streamLink,
-                id: streamId
-              }
-
-              if((noti.info.postedOnLive.length === 1 && noti.info.postedOnLive[0].what) || !noti.info.postedOnLive){
-                noti.info.postedOnLive[0] = toPush;
-              } else {
-                noti.info.postedOnLive.push(toPush);
-              }
-
-              noti.markModified("info");
-              await noti.save();
-
-              let parsed = noti.info.postedOnLive[noti.info.postedOnLive.length -1];
-              if (!belltvChannel) return;
-
-              belltvChannel.send(`**🔴 ¡Jeffrey está en directo, ${role}!** 🔴\n\`➟\` **${parsed.title}**\n\n**${saludo} ➟ ${parsed.link} !! :D**`);
-            }
-          }
-
-          async function isStreaming(username) {
-            const user = await apiClient.helix.users.getUserByName(username);
-            if (!user) {
-              return false;
-            }
-            return await user.getStream() !== null;
-          }
-
-          async function getHelixStream(username){
-            const user = await apiClient.helix.users.getUserByName(username);
-
-            if(!user) return null;
-
-            const stream = await user.getStream()
-
-            if(!stream) return null;
-
-            return stream;
-          }
-      })
-    }, interval);
+          return stream;
+        }
+  }, interval);
 }
 
 /**
  * Initialize the base variables used on the commands.
- * @param {*} client - The Discord.JS Client
+ * @param {*} client - The Discord.JS Client | Guild ID
  * @param {*} message - The Discord.JS Message that triggers the command
  * @returns Object including the [guild, author, prefix, jeffrey_role, admin_role, mod_role, staff_role, executionInfo] variables
+ * - Or the prefix if message is not defined
  */
 const Initialize = async function(client, message){
+  if(!message){
+    const docGuild = await Guild.findOne({guild_id: client}) ?? await new Guild({guild_id: client}).save();
+  }
+  const docGuild = await Guild.findOne({guild_id: message.guild.id}) ?? await new Guild({guild_id: message.guild.id}).save();
+
   // Variables
+  const prefix = docGuild.settings.prefix;
   const guild = message.guild;
   const author = message.author;
   const member = message.member;
-  const prefix = Config.prefix;
-  let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
-  let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
-  let modRole = guild.roles.cache.find(x => x.id === Config.modRole);
-  let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
 
-  if(client.user.id === Config.testingJBID){
-      jeffreyRole = guild.roles.cache.find(x => x.id === "482992290550382592");
-      adminRole = guild.roles.cache.find(x => x.id === "483105079285776384");
-      modRole = guild.roles.cache.find(x => x.id === "483105108607893533");
-      staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
-  }
+  let jeffreyRole = client.user.id === Config.testingJBID ? guild.roles.cache.find(x => x.id === "482992290550382592") : guild.roles.cache.find(x => x.id === Config.jeffreyRole);
+  const adminRole = guild.roles.cache.find(x => x.id === docGuild.roles.admin) ?? null;
+  const staffRole = guild.roles.cache.find(x => x.id === docGuild.roles.staff) ?? null;
 
   const executionInfo = {
     client: client,
     guild: guild,
     author: author,
     message: message,
-    member: message.member
+    member: message.member,
+    prefix: prefix,
   }
 
   return {
@@ -992,7 +900,6 @@ const Initialize = async function(client, message){
     prefix: prefix,
     jeffrey_role: jeffreyRole,
     admin_role: adminRole,
-    mod_role: modRole,
     staff_role: staffRole,
     executionInfo: executionInfo
   };
@@ -1012,8 +919,8 @@ const Initialize = async function(client, message){
 const TutorialEmbed = async function(commandTree, executionInfo, args){
   args = args || null;
 
-  const { client, guild, message, member } = executionInfo;
-  let { userlevel, params } = commandTree;
+  const { client, guild, message, member, prefix } = executionInfo;
+  let { userlevel, params, name } = commandTree;
 
   let originalParams = params;
 
@@ -1021,17 +928,21 @@ const TutorialEmbed = async function(commandTree, executionInfo, args){
   
   // Revisar permisos
   const { jeffrey_role, admin_role, staff_role } = await Initialize(client, message);
-  let permissions_role_id; // id del rol a
+  let permissions_role_id; // id del rol a revisar
   switch(userlevel){
     case "DEVELOPER":
       permissions_role_id = jeffrey_role.id;
       break;
 
     case "ADMIN":
+      if(!admin_role) permissions_role_id = "notdetermined";
+      else
       permissions_role_id = admin_role.id;
       break;
 
     case "STAFF":
+      if(!staff_role) permissions_role_id = "notdetermined";
+      else
       permissions_role_id = staff_role.id;
       break;
 
@@ -1040,7 +951,9 @@ const TutorialEmbed = async function(commandTree, executionInfo, args){
       break;
   }
 
-  if(permissions_role_id && !member.roles.cache.find(x => x.id === permissions_role_id) && !member.roles.cache.find(x => x.id === jeffrey_role.id)) response = ["ERROR", `INSUFFICIENT PERMISSIONS '${userlevel}'`];
+  if(permissions_role_id === "notdetermined" && name != "setup") response = ["ERROR", `NOT CONFIGURED YET 'admin: ${admin_role}, staff: ${staff_role}'`];
+  else if(permissions_role_id === "notdetermined" && name === "setup" && !member.permissions.has("ADMINISTRATOR")) response = ["ERROR", "CAN'T USE /SETUP"]
+  else if(permissions_role_id && permissions_role_id != "notdetermined" && !member.roles.cache.find(x => x.id === permissions_role_id) && !member.roles.cache.find(x => x.id === jeffrey_role.id)) response = ["ERROR", `INSUFFICIENT PERMISSIONS '${userlevel}'`];
 
   if(!params) return response;
 
@@ -1177,14 +1090,30 @@ const TutorialEmbed = async function(commandTree, executionInfo, args){
     } else
 
     if(response[0] === "ERROR") {
-      Embed.setAuthor(`Error ▸ ${Config.prefix}${commandTree.name}: ${params[response[2]].name}, invalid "${response[3]}"`, guild.iconURL())
+      const docGuild = await Guild.findOne({guild_id: message.guild.id}) ?? await new Guild({guild_id: message.guild.id}).save();
+
+      Embed.setAuthor(`Error ▸ ${docGuild.settings.prefix}${commandTree.name}: ${params[response[2]].name}, invalid "${response[3]}"`, guild.iconURL())
       Embed.setColor(Colores.rojo);
       message.channel.send({embeds: [Embed]}); // Si la response está mal, enviar embed (wip)
       return response;
     } else { // no hay ningún parámetro mal
       return response;
     }
-  } else { // si hay un error de permisos
+  } else { // si hay un error de permisos O no se puede determinar si tiene los permisos necesarios
+    const docGuild = await Guild.findOne({guild_id: message.guild.id}) ?? await new Guild({guild_id: message.guild.id}).save();
+
+    let notDetermined = new Discord.MessageEmbed()
+    .setAuthor("Error", Config.errorPng)
+    .setDescription(`**—** No se pudo determinar si puedes usar este comando, un administrador del servidor tiene que usar el comando \`${docGuild.settings.prefix}setup\` primero.`)
+    .setColor(Colores.rojo);
+
+    let notDeterminedUseSetup = new Discord.MessageEmbed()
+    .setAuthor("Error", Config.errorPng)
+    .setDescription(`**—** Sólo un usuario con permisos de administrador puede usar este comando.`)
+    .setColor(Colores.rojo);
+
+    if(permissions_role_id === "notdetermined" && name != "setup") message.channel.send({embeds: [notDetermined]});
+    else if(permissions_role_id === "notdetermined" && name === "setup" && !message.member.permissions.has("ADMINISTRATOR")) message.channel.send({embeds: [notDeterminedUseSetup]});
     return response;
   }
   
@@ -1192,12 +1121,76 @@ const TutorialEmbed = async function(commandTree, executionInfo, args){
 
 /**
  * 
+ * @param {*} message The Discord.JS Message that triggers the command
+ * @param {String} dataSearch The Data to search in the setup of this Guill
+ * - STAFF_LOGS_CHANNEL
+ * @returns 
+ */
+const DataWork = async function(message, dataSearch){
+
+  const guild = message.guild;
+
+  const docGuild = await Guild.findOne({guild_id: guild.id}) ?? await new Guild({guild_id: guild.id});
+
+  const insuficientSetup = new Discord.MessageEmbed()
+  .setAuthor("Error", Config.errorPng)
+  .setDescription(`**—** No se puede usar este comando sin antes configurar el bot "\`${dataSearch.toUpperCase()}\`". Un administrador del servidor tiene que usar el comando \`${docGuild.settings.prefix}setup\` primero.`)
+  .setColor(Colores.rojo);
+
+  let response;
+
+  switch(dataSearch.toUpperCase()){
+    case "STAFF_LOGS_CHANNEL":
+      if(docGuild.channels.staff_logs){
+        response = guild.channels.cache.find(x => x.id === docGuild.channels.staff_logs);
+      }
+      break;
+
+    default:
+      response = null;
+  }
+
+  if(!response) message.channel.send({embeds: [insuficientSetup]});
+  return response;
+
+}
+
+/**
+ * 
+ * @param {*} message The Discord.JS Message that triggers the command
+ * @param {String} query The Banning to search to this user in the Guild
+ * @returns 
+ */
+const isBannedFrom = async function(message, query){
+  const user = await User.findOne({user_id: message.author.id, guild_id: message.guild.id}) ?? await new User({user_id: message.author.id, guild_id: message.guild.id}).save();
+
+  let response = false;
+
+  switch(query.toUpperCase()){
+    case "SUGGESTIONS":
+    case "SUGGEST":
+      if(user.data.isBanned.suggestions) response = true;
+      break;
+
+    default:
+      response = null;
+  }
+
+  if(response == null) return `COULD'T DETERMINE BANNED FROM '${query.toUpperCase()}'`;
+  else
+  return response;
+}
+
+/**
+ * 
  * @param {String} toConfirm What is trying to be confirmed
  * @param {Array} dataToConfirm The text that will apear on the embed separated by "▸"
  * @param {*} msg The Discord.JS Message that triggers the command
+ * @param {Boolean} [isEphemeral=false] The Confirmation is used in an Discord.JS Interaction and it's ephemeral?
  * @returns {Promise} Discord.JS Message if the confirmation is positive, if not, returns false
  */
-const Confirmation = async function(toConfirm, dataToConfirm, msg){
+const Confirmation = async function(toConfirm, dataToConfirm, msg, isEphemeral){
+  isEphemeral ?? false;
   let DescriptionString = "";
 
   dataToConfirm.forEach(data => {
@@ -1213,65 +1206,51 @@ const Confirmation = async function(toConfirm, dataToConfirm, msg){
   .setDescription(`Cancelado.`)
   .setColor(Colores.nocolor);
 
-  let message = await msg.channel.send({embeds: [confirmation]}); // enviar mensaje de confirmación
+  // componentes
+  const row = new Discord.MessageActionRow()
+    .addComponents(
+        new Discord.MessageButton()
+            .setCustomId("confirmAction")
+            .setLabel("Aceptar")
+            .setStyle("SUCCESS")
+            .setEmoji(Config.confirmEmojiId),
+        new Discord.MessageButton()
+            .setCustomId("cancelAction")
+            .setLabel("Cancelar")
+            .setStyle("DANGER")
+            .setEmoji(Config.cancelEmojiId)
+    )
 
-  // reaccionar
-  await message.react(":allow:558084462232076312");
-  await message.react(":denegar:558084461686947891");
+  let confirmationMessage = !isEphemeral ? await msg.channel.send({content: null, embeds: [confirmation], components: [row]}) : await msg.editReply({content: null, embeds: [confirmation], components: [row]}); // enviar mensaje de confirmación
 
-  return new Promise(async (resolve, reject) => {
-    const yesFilter = (reaction, user) => reaction.emoji.id === "558084462232076312" && user.id === msg.author.id;
-    const noFilter = (reaction, user) => reaction.emoji.id === "558084461686947891" && user.id === msg.author.id;
-    const collectorFilter = (reaction, user) => (reaction.emoji.id === "558084462232076312" || reaction.emoji.id === "558084461686947891") && user.id === msg.author.id;
-  
-    const yes = message.createReactionCollector({ filter: yesFilter, time: 60000 });
-    const no = message.createReactionCollector({ filter: noFilter, time: 60000 });
-    const collector = message.createReactionCollector({ filter: collectorFilter, time: 60000 });
-  
-    collector.on("collect", r => {
-      collector.stop();
-    });
-  
-    collector.on("end", async r => {
-      if(!(r.size > 0 && (r.size === 1 && r.first().me))) {
-        let finalmsg = await message.edit({embeds: [cancelEmbed]});
-    
-        await message.reactions.removeAll();
-    
-        await message.react("795090708478033950");
-        msg.delete();
-        
-        setTimeout(() => {
-          finalmsg.delete()
-        }, ms("20s"));
-    
-        resolve(false);
+  return new Promise (async (resolve, reject) => {
+    const filter = !isEphemeral ? i => i.user.id === msg.author.id : i => i.user.id === msg.user.id;
+
+    const collector = confirmationMessage.channel.createMessageComponentCollector({ filter, time: ms("1m"), max: 1});
+
+    collector.on("collect", async i => {
+      await i.deferUpdate();
+
+      if(i.customId === "confirmAction"){
+        confirmation
+        .setColor(Colores.verde)
+        .setAuthor(`${toConfirm}, continuando...`, Config.loadingGif);
+
+        i.editReply({embeds: [confirmation], components: []});
+
+        return resolve(confirmationMessage);
+      } else {
+        i.editReply({embeds: [cancelEmbed], components: []});
+
+        if(!isEphemeral) setTimeout(() => {
+          msg.delete();
+          confirmationMessage.delete();
+        }, ms("10s"));
+
+        return resolve(false);
       }
-    });
-  
-    yes.on("collect", async r => {
-      confirmation
-      .setColor(Colores.verde)
-      .setAuthor(`${toConfirm}, continuando...`, Config.loadingGif);
-
-      await message.edit({embeds: [confirmation]})
-      
-      await message.reactions.removeAll();
-      resolve(message);
-    });
-  
-    no.on("collect", async r => {
-      resolve(false);
-
-      let finalmsg = await message.edit({embeds: [cancelEmbed]})
-      
-      await message.reactions.removeAll();
-      await msg.delete();
-      setTimeout(() => {
-        finalmsg.delete()
-      }, ms("20s"));
-    });
-  });
+    })
+  })
 }
 
 /**
@@ -1283,7 +1262,7 @@ const Confirmation = async function(toConfirm, dataToConfirm, msg){
 const AfterInfraction = async function(user, data, isSoftwarn){
   isSoftwarn = isSoftwarn || false;
   const { member, rule, proof, message, id } = data;
-  const { prefix } = Config;
+  const { prefix } = await Initialize(member.guild.id);
 
   if(!isSoftwarn){ // es un warn normal
     const warns = user.warns;
@@ -1337,7 +1316,7 @@ const AfterInfraction = async function(user, data, isSoftwarn){
       GlobalData.findOne({
         "info.type": "temporalGuildBan",
         "info.userID": member.id,
-        "info.serverID": guild.id
+        "info.guild_id": guild.id
       }, (err, guildBan) => {
         if(err) throw err;
 
@@ -1348,7 +1327,7 @@ const AfterInfraction = async function(user, data, isSoftwarn){
             info: {
               type: "temporalGuildBan",
               userID: member.id,
-              serverID: guild.id,
+              guild_id: guild.id,
               reason: `AutoMod. (Infringir "${rule}")`,
               since: now,
               duration: ms("1d")
@@ -1478,7 +1457,7 @@ const GeneratePages = async function(guildId, message, itemsPerPage, isDarkShop)
     const isSub = item.use_info.isSub;
 
     if(isSub){
-      actualpage.push(`**— { ${id} } ${nombre}**\n\`▸\` ${desc}\n▸ ${emote}${precio} **/${prettyMilliseconds(item.use_info.duration)}**\n\n`);
+      actualpage.push(`**— { ${id} } ${nombre}**\n\`▸\` ${desc}\n▸ ${emote}${precio} **/${prettyms(item.use_info.duration)}**\n\n`);
     } else {
       if(userIsOnMobible && hasInterest){
         actualpage.push(`**— { ${id} } ${nombre}**\n\`▸\` ${desc}\n▸ ${emote}${precio}\n\`▸\` ${interest_txt} (+${interest})\n\n`);
@@ -1554,6 +1533,13 @@ const InteractivePages = async function(message, msg, pages, base){
   });
 }
 
+/**
+ * 
+ * @param {*} message The Discord.JS executer Message
+ * @param {*} own_message The Discord.JS client Message
+ * @param {Array} custom_filter Needs to be one of the elements of the Array
+ * @returns 
+ */
 const CollectMessage = async function(message, own_message, custom_filter){
   custom_filter = custom_filter || null;
 
@@ -1993,7 +1979,7 @@ const DaysUntilToday = async function(date){
  */
 const ComprarItem = async function(message, user, item, isDarkShop){
   isDarkShop = isDarkShop || false;
-  const { prefix } = Config;
+  const { prefix } = await Initialize(message.guild.id);
   
   const actualJeffros = isDarkShop ? user.economy.dark.darkjeffros : user.economy.global.jeffros;
 
@@ -2158,9 +2144,10 @@ const FindNewId = async function(generalQuery, specificQuery, toCheck){
           forEachLoop = forEachLoop[queryQ]
       }
 
-      forEachLoop.forEach(i => {
+      if(Array.isArray(forEachLoop)) forEachLoop.forEach(i => {
         idsNow.push(i[toCheck]); // pushear cada id en uso
       });
+      else idsNow.push(forEachLoop[toCheck]);
 
     } else {
       idsNow.push(forEachLoop[toCheck])
@@ -2177,7 +2164,7 @@ const FindNewId = async function(generalQuery, specificQuery, toCheck){
 /**
  * 
  * @param {*} member The Discord.JS Member to check for benefit
- * @param {Array} [objetivesToCheck="[any]"] The objetive of boost to check.
+ * @param {Array} [objetivesToCheck=["any"]] The objetive of boost to check.
  * - jeffros
  * - exp
  * - all
@@ -2222,15 +2209,91 @@ const WillBenefit = async function(member, objetivesToCheck){
   return hasBoost;
 }
 
+const importImage = function(filename){
+  let file = new Discord.MessageAttachment(`./resources/imgs/${filename.toUpperCase()}.png`, `${filename.toLowerCase()}.png`);
+  return {
+    attachment: `attachment://${filename.toLowerCase()}.png`,
+    file: file
+  }
+}
+
+/**
+ * 
+ * @param {*} guild The Discord.JS guild where this comes from
+ * @param {String} header The text that appears at the title of the embed
+ * @param {String} footer The text that appears at the footer of the embed
+ * @param {Array} description The items that are separated by "—"
+ * @param {String} headerPng The image (url) that appears at the left of the title
+ * @param {String} footerPng The image (url) that appears at the left of the footer
+ * @param {String} color The HEX color of the embed
+ * @param {String} [logType="GENERAL"] The type of the log
+ * - GENERAL
+ * - MODERATION
+ * - STAFF
+ * @returns {Promise} The Discord.JS Message sent
+ */
+const GenerateLog = async function(guild, header, footer, description, headerPng, footerPng, color, logType){
+  logType = logType ?? "GENERAL";
+  
+  const embed = new Discord.MessageEmbed()
+  .setAuthor(header, headerPng ?? null)
+  .setTimestamp()
+  .setFooter(footer, footerPng ?? null)
+  .setColor(color);
+
+  let desc = "";
+
+  for(let i = 0; i < description.length; i++){
+    const item = description[i];
+
+    desc += "**—** " + item + "\n";
+  }
+
+  embed.setDescription(desc);
+
+  let docGuild = await Guild.findOne({guild_id: guild.id}) ?? null;
+
+  if(!docGuild) return console.error("No se ha configurado un logchannel en el servidor", guild.name);
+
+  let channel;
+  
+  switch(logType.toUpperCase()){
+    case "GENERAL":
+      if(!docGuild.channels.general_logs) return;
+      channel = guild.channels.cache.find(x => x.id === docGuild.channels.general_logs);
+      break;
+
+    case "MODERATION":
+      if(!docGuild.channels.moderation_logs) return;
+      channel = guild.channels.cache.find(x => x.id === docGuild.channels.moderation_logs);
+      break;
+
+    case "STAFF":
+      if(!docGuild.channels.staff_logs) return;
+      channel = guild.channels.cache.find(x => x.id === docGuild.channels.staff_logs);
+      break;
+  }
+
+  if(!channel) return console.error("No se ha configurado un logchannel en el servidor", guild.name, logType.toUpperCase());
+
+  return sendLog(channel, embed);
+}
+
+async function sendLog(logChannel, embed){
+  let msg = await logChannel.send({embeds: [embed], content: null, components: []});
+  return msg;
+}
+
 async function createEmbedWithParams(commandTree, guild, params, already){
+  const docGuild = await Guild.findOne({guild_id: guild.id}) ?? await new Guild({guild_id: guild.id}).save();
   already = already ?? "";
 
   let Embed = new Discord.MessageEmbed()
-  .setAuthor(`▸ ${Config.prefix}${commandTree.name}`, guild.iconURL())
+  .setAuthor(`▸ ${docGuild.settings.prefix}${commandTree.name}`, guild.iconURL())
   .setColor(Colores.nocolor)
   .setFooter("<> Obligatorio () Opcional");
 
-  let DescriptionString = `▸ El uso correcto es: ${Config.prefix}${commandTree.name} ${already}`;
+  let DescriptionString = `▸ El uso correcto es: ${docGuild.settings.prefix}${commandTree.name} ${already}`;
   for (let i = already.split(" ").length - 1; i < params.length; i++) {
     const param = params[i]
     
@@ -2246,7 +2309,7 @@ async function createEmbedWithParams(commandTree, guild, params, already){
   return Embed;
 }
 
-async function switchParams(param, arg, args, message, guild, member, client, i){
+async function switchParams(param, arg, args, message, guild, member, client, i){ // EL QUE SE USA EN LOS COMANDOS
   let toReturn;
   switch(param.type){
     case "Member":
@@ -2260,7 +2323,7 @@ async function switchParams(param, arg, args, message, guild, member, client, i)
       break;
 
     case "Attachment":
-      if(message.attachments.size != 0) { // si hay attachements, hacer proof
+      if(message.attachments.size != 0) {
         toReturn = message.attachments.first();
       }
       break;
@@ -2352,6 +2415,7 @@ async function switchParams(param, arg, args, message, guild, member, client, i)
       break;
 
     case "Boolean":
+      arg = arg.toLowerCase();
       if(arg === "1" || arg === "true" || arg === "si" || arg === "sí" || arg === "yes" || arg === "y" || arg === "s") toReturn = true;
       else if(arg === "0" || arg === "false" || arg === "no" || arg === "no" || arg === "n") toReturn = false;
       break;
@@ -2399,6 +2463,8 @@ module.exports = {
     handleUploads,
     Initialize,
     TutorialEmbed,
+    DataWork,
+    isBannedFrom,
     Confirmation,
     AfterInfraction,
     GeneratePages,
@@ -2411,5 +2477,7 @@ module.exports = {
     DeterminePrice,
     FindNewId,
     DaysUntilToday,
-    WillBenefit
+    WillBenefit,
+    importImage,
+    GenerateLog
 }

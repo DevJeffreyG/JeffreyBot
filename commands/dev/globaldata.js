@@ -35,6 +35,7 @@ module.exports = {
         .setColor(Colores.nocolor)
         .setDescription(`▸ Alternativa: ${prefix}globaldatas <update?>`)
         .addField(`▸ temporalGuildBan`, `**—** Información de un TempBan en el servidor.`)
+        .addField(`▸ temporalPoll`, `**—** Información de una encuesta en el servidor.`)
       
           if(!update){
               return message.channel.send({embeds: [embed]});

@@ -6,10 +6,11 @@ const ms = require("ms");
 const Config = require("../base.json");
 const Colores = require("../resources/colores.json");
 const Emojis = require("../resources/emojis.json");
-const prefix = Config.prefix;
 
 const jeffreygID = Config.jeffreygID;
 const jgServer = Config.jgServer;
+
+const Guild = require("../modelos/Guild.model.js");
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -21,9 +22,12 @@ module.exports = {
         const member = guild.members.cache.find(x => x.id === interaction.user.id);
         const helpEmojiURL = "https://cdn.discordapp.com/emojis/494282181296914432.png";
 
+        const docGuild = await Guild.findOne({guild_id: guild.id}) ?? await new Guild({guild_id: guild.id}).save();
+        const prefix = docGuild.settings.prefix;
+
         // get all commands
         const helpBaseCommands = [];
-        const helpBaseCommandsFolder = fs.readdirSync("./aa").filter(file => !file.endsWith(".txt")); // quitar el layout LMAO
+        const helpBaseCommandsFolder = fs.readdirSync("./commands").filter(file => !file.endsWith(".txt")); // quitar el layout LMAO
 
         for (const folder of helpBaseCommandsFolder) {
             const baseCommandsFiles = fs.readdirSync(`./commands/${folder}`).filter(file => file.endsWith(".js"));

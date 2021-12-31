@@ -12,7 +12,7 @@ const changes = Config.changes;
 
 const jeffreygID = Config.jeffreygID;
 const jgServer = Config.jgServer;
-const prefix = Config.prefix;
+const Guild = require("../modelos/Guild.model.js");
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -24,6 +24,9 @@ module.exports = {
 	async execute(interaction, client) {
         const guild = client.guilds.cache.find(x => x.id === interaction.guildId);
         const member = guild.members.cache.find(x => x.id === interaction.user.id);
+
+        const docGuild = await Guild.findOne({guild_id: guild.id}) ?? await new Guild({guild_id: guild.id}).save();
+        const prefix = docGuild.settings.prefix;
 
         const extended = interaction.options.getBoolean('extended');
         const fetch = await interaction.channel.messages.fetch({ limit: 25})
@@ -105,6 +108,7 @@ module.exports = {
         }
 
         let embed = new Discord.MessageEmbed()
+        .setThumbnail(client.user.displayAvatarURL())
         .setDescription(`**Jeffrey Bot v\`${Package.version}\` — Últimos cambios hechos al bot.**\n`)
         .setFooter(`* Si estás en PC, poniendo el mouse sobre '!', podrás ver detalles extendidos de los cambios, el link no lleva a nada importante.\n— En móvil usa '${prefix}changelog extended: True'.`)
         .setColor(Colores.verde);
