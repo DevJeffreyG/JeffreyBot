@@ -4,7 +4,8 @@
   "description": "El bot del servidor oficial de JeffreyG, remasterizado.",
   "main": "jb.js",
   "scripts": {
-    "start": "node jb.js"
+    "start": "node jb.js",
+    "dev": "nodemon ."
   },
   "engines": {
     "node": "16.7.0"
