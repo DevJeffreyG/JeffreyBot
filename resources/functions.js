@@ -69,7 +69,160 @@ const findLvls5 = async function(client, guild){
   })
 }
 
-const getChanges = function(entryChanges) {
+const GetChangesAndCreateFields = async function(logsFetched){
+  let fields = [];
+  let separator = "**—**";
+
+  logsFetched.forEach(log => {
+    let changesArray = log.changes;
+
+    let target = log.target;
+    let extra = log.extra;
+    let extraType = extra ? extra.user ? "member" : "role" : null;
+
+    changesLoop:
+    for (let i = 0; i < changesArray.length; i++) {
+      const change = changesArray[i];
+      let resetQuery = changesArray.slice(0);
+      resetQuery.splice(i, 1);
+
+      console.log(resetQuery, "reset query")
+
+      console.log("key:", change.key, "nuevo:", change.new, "viejo:", change.old)
+  
+      let cambio;
+      let ahora = change.new;
+      let antes = change.old;
+      let nuevosPermisos, viejosPermisos, diff;
+      
+      switch(change.key){
+        case "topic":
+          cambio = "Nuevo tema";
+          break;
+  
+        case "name":
+          cambio = "Nuevo nombre";
+          break;
+
+        case "deny": {
+          nuevosPermisos = new Discord.Permissions(change.new);
+          viejosPermisos = new Discord.Permissions(change.old);
+
+          let permissionOverwrite = target.permissionOverwrites.cache.find(x => x.deny.bitfield === nuevosPermisos.bitfield && x.type === extraType);
+          let changed = permissionOverwrite.type === "role" ? permissionOverwrite.channel.guild.roles.cache.find(x => x.id === permissionOverwrite.id) : permissionOverwrite.channel.guild.members.cache.find(x => x.id === permissionOverwrite.id);
+
+          cambio = `${permissionOverwrite.type === "role" ? "Role" : "Usuario"} ${permissionOverwrite.type === "role" ? changed.name : changed.displayName}`;
+          
+          ahora = "";
+
+          diff = viejosPermisos.missing(nuevosPermisos)
+
+          diff.forEach(permiso => {
+            ahora += `${Emojis.Deny} ${permiso}\n`;
+          });
+
+          // se está reseteando?
+          if(nuevosPermisos.bitfield === 0n){
+            if(resetQuery.find(x => x.key === "allow" && new Discord.Permissions(x.new).has(viejosPermisos))) continue changesLoop;
+            
+            antes = "";
+            viejosPermisos.toArray().forEach(permiso => {
+              antes += `${Emojis.Neutral} ${permiso}\n`;
+            });
+            
+            fields.push({
+              name: `${separator} ` + cambio,
+              value: `**Reseteados**\n${antes}`
+            });
+
+          } else
+
+          if(ahora.length != 0) fields.push({
+            name: `${separator} ` + cambio,
+            value: `**Denegados**\n${ahora}`
+          });
+          continue changesLoop;
+        }
+
+        case "allow": {
+          nuevosPermisos = new Discord.Permissions(change.new);
+          viejosPermisos = new Discord.Permissions(change.old);
+
+          let permissionOverwrite = target.permissionOverwrites.cache.find(x => x.allow.bitfield === nuevosPermisos.bitfield && x.type === extraType);
+          let changed = permissionOverwrite.type === "role" ? permissionOverwrite.channel.guild.roles.cache.find(x => x.id === permissionOverwrite.id) : permissionOverwrite.channel.guild.members.cache.find(x => x.id === permissionOverwrite.id);
+
+          cambio = `${permissionOverwrite.type === "role" ? "Role" : "Usuario"} ${permissionOverwrite.type === "role" ? changed.name : changed.displayName}`;
+          
+          ahora = "";
+
+          diff = viejosPermisos.missing(nuevosPermisos)
+
+          diff.forEach(permiso => {
+            ahora += `${Emojis.Allow} ${permiso}\n`;
+          });
+
+          // se está reseteando?
+          if(nuevosPermisos.bitfield === 0n){
+            if(resetQuery.find(x => x.key === "deny" && new Discord.Permissions(x.new).has(viejosPermisos))) continue changesLoop;
+            
+            antes = "";
+            viejosPermisos.toArray().forEach(permiso => {
+              antes += `${Emojis.Neutral} ${permiso}\n`;
+            });
+
+            fields.push({
+              name: `${separator} ` + cambio,
+              value: `**Reseteados**\n${antes}`
+            });
+
+          } else
+
+          if(ahora.length != 0) fields.push({
+            name: `${separator} ` + cambio,
+            value: `**Permitidos**\n${ahora}`
+          });
+          continue changesLoop;
+        }
+  
+        default:
+          console.log(change.key);
+          cambio = "Cambios";
+      }
+
+      fields.push({
+        name: `${separator} ` + cambio,
+        value: `**Ahora**\n${ahora}\n\n**Antes**\n${antes}`
+      });
+    }
+  })
+
+  console.log("FIELDS BASE", fields);
+
+  /* let fieldMap = fields.map(function(item) { return item.name });
+  let isDuplicate = fieldMap.some(function(item, idx){ 
+    return fieldMap.indexOf(item) != idx 
+  }); */
+
+  let repeatedQuery = new Map();
+
+  fields.forEach((field, index) => {
+    let getInMap = repeatedQuery.get(field.name); // index
+    if(isNaN(getInMap)) return repeatedQuery.set(field.name, index);
+
+    fields[getInMap].value += `${field.value}`;
+    fields.splice(index, 1);
+  })
+
+  console.log("FIELDS ACTUALIZADOS", fields);
+
+  console.log("----------------")
+  
+
+  if(fields.length > 0) return fields;
+  else null;
+}
+
+const oldGetChanges = function(entryChanges) {
   switch (entryChanges.key) {
     case "afk_timeout":
       oldKey = `**${entryChanges.old / 60}** minutos`;
@@ -140,6 +293,37 @@ const getChanges = function(entryChanges) {
       newKey = "**" + entryChanges.new + "**" || "**Nulo**";
   }
   return { old: oldKey, new: newKey };
+}
+
+const FetchAuditLogs = async function(client, guild, types){
+  return new Promise(async (resolve, reject) => {
+    let toReturn = [];
+
+    for(let i = 0; i < types.length; i++){
+      const type = types[i];
+
+      const fetchedLogs = await guild.fetchAuditLogs({limit: 1, type});
+  
+      const fetched = fetchedLogs.entries.first();
+
+      // revisar si ya se habia enviado al log
+      if(client.logsFetched[fetched.id]) continue;
+
+      client.logsFetched[fetched.id] = true;
+    
+      if(!fetched) return;
+      const { executor, target, changes, extra } = fetched;
+  
+      toReturn.push({
+        changes,
+        executor,
+        target,
+        extra
+      })
+    }
+
+    resolve(toReturn);
+  })
 }
 
 /**
@@ -2232,8 +2416,9 @@ const importImage = function(filename){
  * - STAFF
  * @returns {Promise} The Discord.JS Message sent
  */
-const GenerateLog = async function(guild, header, footer, description, headerPng, footerPng, color, logType){
+const GenerateLog = async function(guild, header, footer, description, headerPng, footerPng, color, logType, fields){
   logType = logType ?? "GENERAL";
+  fields = fields ?? null;
   
   const embed = new Discord.MessageEmbed()
   .setAuthor(header, headerPng ?? null)
@@ -2250,6 +2435,12 @@ const GenerateLog = async function(guild, header, footer, description, headerPng
   }
 
   embed.setDescription(desc);
+
+  if(fields){
+    fields.forEach(field => {
+      embed.addField(field.name, field.value);
+    })
+  }
 
   let docGuild = await Guild.findOne({guild_id: guild.id}) ?? null;
 
@@ -2452,7 +2643,8 @@ async function isOnMobible(message){
 }
 
 module.exports = {
-    getChanges,
+    GetChangesAndCreateFields,
+    FetchAuditLogs,
     intervalGlobalDatas,
     Warns,
     Interest,

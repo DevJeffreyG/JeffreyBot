@@ -1,10 +1,13 @@
 const Discord = require("discord.js");
 
-const { time } = require("@discordjs/builders");
-const { GenerateLog } = require("../resources/functions.js");
+const { GenerateLog, FetchAuditLogs, GetChangesAndCreateFields } = require("../resources/functions.js");
 const Colores = require("../resources/colores.json");
 
-module.exports = async (client, channel) => {
+module.exports = async (client, oldchannel, channel) => {
+    const guild = channel.guild;
+
+    const logs = await FetchAuditLogs(client, guild, ["CHANNEL_UPDATE", "CHANNEL_OVERWRITE_UPDATE"]);
+
     let type;
     switch(channel.type){
         case "GUILD_TEXT":
@@ -23,8 +26,10 @@ module.exports = async (client, channel) => {
             type = "un canal";
     }
 
+    let fields = await GetChangesAndCreateFields(logs);
+
     GenerateLog(channel.guild, `Se ha actualizado ${type}`, "", [
         `${channel}`,
         `ID: \`${channel.id}\`.`
-    ], channel.guild.iconURL(), null, Colores.verdejeffrey);
+    ], channel.guild.iconURL(), null, Colores.verdejeffrey, "GENERAL", fields);
 }

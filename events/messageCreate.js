@@ -126,9 +126,6 @@ module.exports = async (client, message) => {
         await intervalGlobalDatas(client);
         await commandFile.execute(client, message, args, active);
 
-        // enviar log
-        GenerateLog(guild, "Se ha usado un comando", "", [`${author.tag}`, `${cmd}`, `En: ${message.channel}`], author.displayAvatarURL(), guild.iconURL(), Colores.verdejeffrey);
-        
         //agregar cooldown
         user.data.cooldowns.jeffros_exp = new Date();
         user.save();

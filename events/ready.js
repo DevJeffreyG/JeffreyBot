@@ -9,6 +9,7 @@ const CronJob = require("cron").CronJob;
 
 module.exports = async (client) => {
     client.invites = [];
+    client.logsFetched = [];
 
     // para cada guild fetchear(?
     let guilds = await client.guilds.fetch();

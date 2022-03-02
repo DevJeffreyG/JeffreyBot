@@ -597,9 +597,21 @@ module.exports = async (client, interaction) => {
         docGuild.save();
         break;
 
-      case "acceptSuggestion":
+      case "acceptSuggestion": {
         if(!interaction.deferred) await interaction.deferReply({ephemeral: true});
+
+        let suggestion = docGuild.data.suggestions.find(x => x.message_id === interaction.message.id);
+
+        suggestion.accepted = true;
+        docGuild.save();
+
+        message = interaction.message;
+        message.edit({components: []});
+
+        interaction.editReply({content: "Se ha aceptado la sugerencia, se ha enviado un mensaje al usuario y se le ha dado el rol de colaborador."});
+
         break;
+      }
 
       case "denySuggestion":
         if(!interaction.deferred) await interaction.deferReply({ephemeral: true});
