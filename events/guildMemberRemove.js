@@ -1,8 +1,8 @@
 const Discord = require("discord.js");
 
-const { Initialize } = require("../resources/functions.js");
+const { Initialize } = require("../src/utils/");
 
-const Config = require("../base.json");
+const Config = require("../src/resources/base.json");
 const User = require("../modelos/User.model.js");
 
 module.exports = async (client, member) => {

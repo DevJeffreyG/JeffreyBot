@@ -1,9 +1,9 @@
 const Discord = require("discord.js");
 const ms = require("ms");
 
-const Config = require("../base.json");
-const Colores = require("../resources/colores.json");
-const Emojis = require("../resources/emojis.json");
+const Config = require("../src/resources/base.json");
+const Colores = require("../src/resources/colores.json");
+const Emojis = require("../src/resources/emojis.json");
 const { disableAwards, jeffreygID } = Config;
 
 const User = require("../modelos/User.model.js");

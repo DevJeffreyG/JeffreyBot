@@ -1,5 +1,5 @@
-const { GenerateLog } = require("../resources/functions.js");
-const Colores = require("../resources/colores.json");
+const { GenerateLog } = require("../src/utils/");
+const Colores = require("../src/resources/colores.json");
 
 module.exports = async (client, channel) => {
     let type;

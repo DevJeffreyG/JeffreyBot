@@ -3,9 +3,9 @@ const Discord = require("discord.js");
 const fs = require("fs");
 const ms = require("ms");
 
-const Config = require("./../base.json");
-const Colores = require("./../resources/colores.json");
-const Emojis = require("./../resources/emojis.json");
+const Config = require("./../src/resources/base.json");
+const Colores = require("./../src/resources/colores.json");
+const Emojis = require("./../src/resources/emojis.json");
 
 const Package = require("./../package.json");
 const changes = Config.changes;

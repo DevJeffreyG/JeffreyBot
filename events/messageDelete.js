@@ -1,5 +1,5 @@
 const User = require("../modelos/User.model.js");
-const Config = require("../base.json");
+const Config = require("../src/resources/base.json");
 
 const { jeffrosExpCooldown } = require("../index.js");
 

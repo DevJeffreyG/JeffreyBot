@@ -1,4 +1,4 @@
-const Config = require("../base.json");
+const Config = require("../src/resources/base.json");
 
 module.exports = async (client, oldMember, newMember) => {
     let guild = newMember.guild;

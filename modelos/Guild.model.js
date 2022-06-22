@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { prefix } = require("../base.json");
+const { prefix } = require("../src/resources/base.json");
 
 const Schema = mongoose.Schema;
 

@@ -1,16 +1,16 @@
 //packages
 const Discord = require("discord.js");
 const ms = require("ms");
-const moment = require('moment');
+const moment = require('moment-timezone');
 
-const Config = require("../base.json");
+const Config = require("../src/resources/base.json");
 const { deleteLateMedia, disableEXPs, jeffreygID, multiplier, mantenimiento } = Config;
 const { active, baseCommands, jeffreyMentions, startLinks } = require("../index.js");
 
-const { intervalGlobalDatas, GenerateLog } = require("../resources/functions.js");
+const { intervalGlobalDatas, GenerateLog } = require("../src/utils/");
 
-const Cumplidos = require("../resources/cumplidos.json");
-const Colores = require("../resources/colores.json");
+const Cumplidos = require("../src/resources/cumplidos.json");
+const Colores = require("../src/resources/colores.json");
 
 const User = require("../modelos/User.model.js");
 const Guild = require("../modelos/Guild.model.js");

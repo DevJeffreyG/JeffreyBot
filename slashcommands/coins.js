@@ -1,14 +1,15 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const Discord = require("discord.js");
 const ms = require("ms");
-const prettyms = require("pretty-ms");
+const moment = require("moment");
 
-const Emojis = require("../resources/emojis.json");
-const Responses = require("../resources/coinsresponses.json");
-const Cumplidos = require("../resources/cumplidos.json");
+const Emojis = require("../src/resources/emojis.json");
+const Responses = require("../src/resources/coinsresponses.json");
+const Cumplidos = require("../src/resources/cumplidos.json");
+const { HumanMs } = require("../src/utils/");
 
-const Config = require("../base.json");
-const { multiplier } = require("../base.json");
+const Config = require("../src/resources/base.json");
+const { multiplier } = require("../src/resources/base.json");
 
 const User = require("../modelos/User.model.js");
 
@@ -100,14 +101,17 @@ module.exports = {
             let rAuthor = guild.members.cache.find(x => x.id === index.author);
             let suggestor = rAuthor ? rAuthor.user.tag : "un usuario";
             let img = rAuthor ? rAuthor.user.displayAvatarURL() : guild.iconURL();
-            embed.setFooter(`• Respuesta sugerida por ${suggestor}`, img)
+            embed.setFooter({text: `• Respuesta sugerida por ${suggestor}`, iconURL: img})
         }
 
         if (user.data.cooldowns.coins){
+
             let timer = user.data.cooldowns.coins;
-            let toCheck = (coinsCooldown) - (new Date().getTime() - timer);
-            let left = prettyms(toCheck, {secondsDecimalDigits: 0 });
-            if(toCheck < 0) user.data.cooldowns.coins = null;
+            let toCheck = moment(timer).add(coinsCooldown, "ms")
+            console.log(moment(toCheck).toObject());
+            let left = new HumanMs(moment(toCheck).toObject()).left({precise: true});
+
+            if(moment().isAfter(toCheck)) user.data.cooldowns.coins = null;
             else
             return interaction.editReply(`Usa este comando en ${left}, ${randomCumplidos}`);
         }

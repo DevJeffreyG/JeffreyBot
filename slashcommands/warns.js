@@ -1,8 +1,8 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const Discord = require("discord.js");
-const Config = require("./../base.json");
-const Colores = require("./../resources/colores.json");
-const reglas = require("./../resources/reglas.json");
+const Config = require("./../src/resources/base.json");
+const Colores = require("./../src/resources/colores.json");
+const reglas = require("./../src/resources/reglas.json");
 
 const User = require("../modelos/User.model.js");
 

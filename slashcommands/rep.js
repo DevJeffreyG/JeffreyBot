@@ -1,7 +1,8 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const ms = require("ms");
-const prettyms = require("pretty-ms");
+const moment = require("moment");
 
+const { HumanMs } = require("../src/utils/");
 const User = require("../modelos/User.model.js");
 
 const repCooldown = ms("1d");
@@ -41,7 +42,7 @@ module.exports = {
         if (user_author.data.cooldowns.rep){
             let timer = user_author.data.cooldowns.rep;
             let toCheck = (repCooldown) - (new Date().getTime() - timer);
-            let left = prettyms(toCheck, {secondsDecimalDigits: 0 });
+            let left = new HumanMs(moment(toCheck).toObject()).left({precise: true});
             if(toCheck < 0) user_author.data.cooldowns.rep = null;
             else
             return interaction.reply(`Usa este comando en ${left}`);

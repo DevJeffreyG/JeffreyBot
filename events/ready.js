@@ -1,7 +1,7 @@
-const Config = require("../base.json");
+const Config = require("../src/resources/base.json");
 const { prefix } = Config;
 
-let functions = require("../resources/functions.js");
+let functions = require("../src/utils/");
 
 const ms = require("ms");
 const CronJob = require("cron").CronJob;

@@ -1,9 +1,9 @@
 const Discord = require("discord.js");
 
 const { time } = require("@discordjs/builders");
-const { GenerateLog, DaysUntilToday, Initialize } = require("../resources/functions.js");
-const Config = require("../base.json");
-const Colores = require("../resources/colores.json");
+const { GenerateLog, DaysUntilToday, Initialize } = require("../src/utils/");
+const Config = require("../src/resources/base.json");
+const Colores = require("../src/resources/colores.json");
 
 const User = require("../modelos/User.model.js");
 

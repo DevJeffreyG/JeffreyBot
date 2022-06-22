@@ -1,6 +1,6 @@
 const Discord = require("discord.js");
 
-const Config = require("../base.json");
+const Config = require("../src/resources/base.json");
 const { jeffreygID } = Config;
 
 const User = require("../modelos/User.model.js");

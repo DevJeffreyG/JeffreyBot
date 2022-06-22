@@ -1,7 +1,7 @@
 const Discord = require("discord.js");
 
-const { GenerateLog, FetchAuditLogs, GetChangesAndCreateFields } = require("../resources/functions.js");
-const Colores = require("../resources/colores.json");
+const { GenerateLog, FetchAuditLogs, GetChangesAndCreateFields } = require("../src/utils/");
+const Colores = require("../src/resources/colores.json");
 
 module.exports = async (client, oldchannel, channel) => {
     const guild = channel.guild;

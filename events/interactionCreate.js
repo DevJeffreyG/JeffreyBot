@@ -6,11 +6,11 @@ const Toggle = require("../modelos/Toggle.model.js");
 const User = require("../modelos/User.model.js");
 const Guild = require("../modelos/Guild.model.js");
 
-let functions = require("../resources/functions.js");
-const Colores = require("../resources/colores.json");
-const Config = require("../base.json");
+let functions = require("../src/utils/");
+const Colores = require("../src/resources/colores.json");
+const Config = require("../src/resources/base.json");
 const { jeffreygID, mantenimiento } = Config;
-const reglas = require("../resources/reglas.json");
+const reglas = require("../src/resources/reglas.json");
 
 const activeCreatingTicket = new Map();
 
@@ -47,10 +47,16 @@ module.exports = async (client, interaction) => {
   
     async function executeSlash(interaction, client){
       try {
+        //console.log(slashCommand)
         await slashCommand.execute(interaction, client);
       } catch (error) {
         console.error(error);
-        await interaction.reply({ content: 'Jeffrey es tonto, hubo un error ejecutando este comando, por fa, avísale de su grado de inservibilidad. **(ni siquiera sé si esa palabra existe...)**', ephemeral: true });
+        let help = 'Jeffrey es tonto, hubo un error ejecutando este comando, por fa, avísale de su grado de inservibilidad. **(ni siquiera sé si esa palabra existe...)**';
+        try {
+          await interaction.reply({ content: help, ephemeral: true });
+        } catch(er) {
+          await interaction.editReply({ content: help, ephemeral: true });
+        }
       }
     }
   } else if(interaction.isButton()){ // BOTONES
@@ -606,20 +612,124 @@ module.exports = async (client, interaction) => {
         docGuild.save();
 
         message = interaction.message;
-        message.edit({components: []});
+        let newembed = message.embeds[0].setFooter({text: `Aceptada por ${interaction.user.tag}`, iconURL: Config.bienPng}).setTimestamp();
+        message.edit({embeds: [newembed], components: []});
+
+        let r = interaction.guild.id === Config.testingServer ? interaction.guild.roles.cache.find(x => x.id === "983832210966732840") : interaction.guild.roles.cache.find(x => x.id === Config.suggestorRole);
+        
+        let acceptedEmbed = new Discord.MessageEmbed()
+        .setAuthor({name: "¡Se ha aceptado una sugerencia tuya!", iconURL: Config.bienPng})
+        .setDescription(`**—** ¡Gracias por ayudarnos a mejorar!
+**—** Se ha aceptado tu sugerencia:
+\`\`\`
+${suggestion.suggestion}
+\`\`\`
+**—** Nos tomamos la libertad de agregarte un role como forma de agradecimiento 😉`)
+        .setColor(Colores.verde)
+        .setFooter({text: interaction.guild.name, iconURL: interaction.guild.iconURL()})
+        .setTimestamp();
+        
+        let suggestor = interaction.guild.members.cache.find(x => x.id === suggestion.user_id);
+
+        try {
+          suggestor.send({embeds: [acceptedEmbed]});
+        } catch (e) {
+          interaction.followUp("No se pueden enviar mensajes a este usuario...")
+        }
+        
+        await suggestor.roles.add(r);
 
         interaction.editReply({content: "Se ha aceptado la sugerencia, se ha enviado un mensaje al usuario y se le ha dado el rol de colaborador."});
 
         break;
       }
 
-      case "denySuggestion":
+      case "denySuggestion": {
         if(!interaction.deferred) await interaction.deferReply({ephemeral: true});
-        break;
 
-      case "invalidateSuggestion":
-        if(!interaction.deferred) await interaction.deferReply({ephemeral: true});
+        let suggestion = docGuild.data.suggestions.find(x => x.message_id === interaction.message.id);
+        
+        suggestion.accepted = false;
+        docGuild.save();
+
+        message = interaction.message;
+        let newembed = message.embeds[0]
+        .setFooter({text: `Denegada por ${interaction.user.tag}`, iconURL: Config.errorPng})
+        .setColor(Colores.rojo)
+        .setTimestamp();
+
+        message.edit({embeds: [newembed], components: []});
+
+        let r = interaction.guild.id === Config.testingServer ? interaction.guild.roles.cache.find(x => x.id === "983832210966732840") : interaction.guild.roles.cache.find(x => x.id === Config.suggestorRole);
+        
+        let acceptedEmbed = new Discord.MessageEmbed()
+        .setAuthor({name: "¡Gracias por el interés!", iconURL: Config.errorPng})
+        .setDescription(`**—** Hemos denegado tu sugerencia:
+\`\`\`
+${suggestion.suggestion}
+\`\`\`
+**—** ¡Gracias por ayudarnos a mejorar, siempre te tendremos en cuenta!`)
+        .setColor(Colores.rojo)
+        .setFooter({text: interaction.guild.name, iconURL: interaction.guild.iconURL()})
+        .setTimestamp();
+        
+        let suggestor = interaction.guild.members.cache.find(x => x.id === suggestion.user_id);
+
+        try {
+          suggestor.send({embeds: [acceptedEmbed]});
+        } catch (e) {
+          interaction.followUp("No se pueden enviar mensajes a este usuario...")
+        }
+        
+        await suggestor.roles.add(r);
+
+        interaction.editReply({content: "Se ha denegado la sugerencia, se ha enviado un mensaje al usuario informándole."});
         break;
+      }
+
+      case "invalidateSuggestion": {
+        if(!interaction.deferred) await interaction.deferReply({ephemeral: true});
+
+        let suggestion = docGuild.data.suggestions.find(x => x.message_id === interaction.message.id);
+        
+        suggestion.accepted = false;
+        docGuild.save();
+
+        message = interaction.message;
+        let newembed = message.embeds[0]
+        .setFooter({text: `Invalidada por ${interaction.user.tag}`, iconURL: Config.errorPng})
+        .setColor(Colores.rojo)
+        .setTimestamp();
+
+        message.edit({embeds: [newembed], components: []});
+
+        let r = interaction.guild.id === Config.testingServer ? interaction.guild.roles.cache.find(x => x.id === "983832210966732840") : interaction.guild.roles.cache.find(x => x.id === Config.suggestorRole);
+        
+        let acceptedEmbed = new Discord.MessageEmbed()
+        .setAuthor({name: "¡Gracias por el interés!", iconURL: Config.errorPng})
+        .setDescription(`**—** Hemos determinado que tu sugerencia es inválida:
+\`\`\`
+${suggestion.suggestion}
+\`\`\`
+**—** Puede que esta haya sido una sugerencia repetida, o una ya denegada anteriormente.
+**—** ¡Gracias por ayudarnos a mejorar, siempre te tendremos en cuenta!`)
+        .setColor(Colores.rojo)
+        .setFooter({text: interaction.guild.name, iconURL: interaction.guild.iconURL()})
+        .setTimestamp();
+        
+        let suggestor = interaction.guild.members.cache.find(x => x.id === suggestion.user_id);
+
+        try {
+          suggestor.send({embeds: [acceptedEmbed]});
+        } catch (e) {
+          interaction.followUp("No se pueden enviar mensajes a este usuario...")
+        }
+        
+        await suggestor.roles.add(r);
+
+        interaction.editReply({content: "Se ha denegado la sugerencia, se ha enviado un mensaje al usuario informándole."});
+        break;
+      }
 
       default:
         console.log("No hay acciones para el botón con customId", customId);

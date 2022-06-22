@@ -43,13 +43,13 @@ mongoose.connect(`${process.env.MONGOCONNECT}`, {
 
 // ########### ############# HANDLERS #################### ########
 const baseCommands = [];
-const baseCommandsFolder = fs.readdirSync("./commands").filter(file => !file.endsWith(".txt")); // quitar el layout LMAO
+const baseCommandsFolder = fs.readdirSync("./oldcommands").filter(file => !file.endsWith(".txt")); // quitar el layout LMAO
 
 for (const folder of baseCommandsFolder) {
-  const baseCommandsFiles = fs.readdirSync(`./commands/${folder}`).filter(file => file.endsWith(".js"));
+  const baseCommandsFiles = fs.readdirSync(`./oldcommands/${folder}`).filter(file => file.endsWith(".js"));
 
   for (const file of baseCommandsFiles) {
-      const command = require(`./commands/${folder}/${file}`);
+      const command = require(`./oldcommands/${folder}/${file}`);
   
       // push name onto aliases
       const aliases = command.data.aliases || [];
@@ -61,7 +61,23 @@ for (const folder of baseCommandsFolder) {
   }
 }
 
-// slash commands
+client.slash = new Discord.Collection();
+
+const commands = [];
+const commandsFolder = fs.readdirSync("./commands").filter(file => !file.endsWith(".txt"));
+
+for (const folder of commandsFolder) {
+  const commandFiles = fs.readdirSync(`./commands/${folder}`).filter(file => file.endsWith(".js"));
+
+  for(const file of commandFiles) {
+    const command = require(`./commands/${folder}/${file}`);
+
+    client.slash.set(command.data.name, command);
+    commands.push(command.data.toJSON())
+  }
+}
+
+/* // slash commands
 client.slash = new Discord.Collection();
 const scommands = [];
 
@@ -73,7 +89,7 @@ for (const file of commandFiles) {
 	// with the key as the command name and the value as the exported module
 	client.slash.set(command.data.name, command);
   scommands.push(command.data.toJSON());
-}
+} */
 
 const rest = new REST({ version: '9'}).setToken(process.env.TOKEN);
 
@@ -83,7 +99,7 @@ const rest = new REST({ version: '9'}).setToken(process.env.TOKEN);
 
     await rest.put(
       Routes.applicationGuildCommands(process.env.slashClientId, process.env.slashGuildId),
-      { body: scommands }
+      { body: commands }
     );
 
     console.log("Se han actualizado los slash commands.")
