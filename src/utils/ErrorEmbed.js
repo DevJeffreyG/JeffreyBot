@@ -1,0 +1,50 @@
+const Embed = require("./Embed");
+const Colores = require("../resources/colores.json");
+const Config = require("../resources/base.json");
+
+class ErrorEmbed extends Embed {
+    /**
+     * 
+     * @param {Object} options La configuración de este ErrorEmbed {type, data}
+     */
+    constructor(options) {
+        super()
+        this.options = options;
+        this.#setup(options)
+    }
+
+    #setup(options){
+        this.defColor(Colores.rojo)
+
+        const { type, data } = options;
+
+        switch(type){
+            case "commandNotFound":
+                this.#errorAuthor(1);
+                this.defDesc(`**▸ No se pudo encontrar el comando** ▸ (\`/${data}\`)`)
+                this.defFooter({text: `Usa el comando /ayuda para ver todos los comandos del bot`})
+                break;
+
+            case "toggledCommand":
+                this.#errorAuthor(2);
+                this.defDesc(`**▸ Este comando está deshabilitado** ▸ (\`/${data.commandName}\`)\n**${data.reason}** desde ${data.since}`)
+                break;
+
+            case "badCommand":
+                this.#errorAuthor(3);
+                this.defDesc(`**▸ Jeffrey es tonto, y por eso hubo un error ejecutando este comando** ▸ (\`/${data.commandName}\`)\nPor fa, avísale de su grado de inservibilidad. **(ni siquiera sé si esa palabra existe...)**
+**▸ También dile que...**
+\`\`\`js
+${data.error}
+\`\`\``)
+                break;
+        }
+    }
+
+    #errorAuthor(errorNumber){
+        this.defAuthor({text: `Error ${errorNumber} — ${this.options.type}`, icon: Config.errorPng})
+        return this;
+    }
+}
+
+module.exports = ErrorEmbed

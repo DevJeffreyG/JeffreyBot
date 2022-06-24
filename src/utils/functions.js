@@ -1,10 +1,11 @@
+const Discord = require("discord.js");
+
 const Config = require("../../src/resources/base.json");
 const Rainbow = require("../resources/rainbow.json");
 const Colores = require("../resources/colores.json");
 const Emojis = require("../resources/emojis.json");
-const Discord = require("discord.js");
 
-const { HumanMs } = require(".");
+const HumanMs = require("./HumanMs");
 
 const fs = require("fs");
 const ms = require("ms");
@@ -2645,8 +2646,11 @@ async function validateAnArg(param, arg, args, message, guild, member, client){
   return toReturn != "FATAL" && toReturn ? true : false;
 }
 
-async function isOnMobible(message){
-  return message.member.presence && message.member.presence.clientStatus && message.member.presence.clientStatus.mobile === "online" && !message.member.presence.clientStatus.desktop ? true : false;
+const isOnMobible = function (message){
+  return message.member.presence &&
+  message.member.presence.clientStatus &&
+  message.member.presence.clientStatus.mobile === "online" &&
+  !message.member.presence.clientStatus.desktop ? true : false;
 }
 
 module.exports = {
@@ -2678,5 +2682,6 @@ module.exports = {
     DaysUntilToday,
     WillBenefit,
     importImage,
-    GenerateLog
+    GenerateLog,
+    isOnMobible
 }

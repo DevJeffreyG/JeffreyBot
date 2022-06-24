@@ -1,12 +1,12 @@
-const Discord = require("discord.js")
 const { Command, Embed } = require("../../src/utils")
+const { Colores } = require("../../src/resources/");
 
 const command = new Command({
     name: "ping",
-    desc: "Revisa la latencia del bot con los servers de discord",
+    desc: "Revisa la latencia del bot con los servers de Discord",
     category: "GENERAL"
 });
-command.execute = async (interaction, client) => {
+command.execute = async (interaction, params, client) => {
     let start = Date.now();
     interaction.reply("Pong!").then(() => {
         let diff = (Date.now() - start);
@@ -19,15 +19,15 @@ command.execute = async (interaction, client) => {
         
         switch(true){
           case diff >= 180:
-            embed.setColor("#ff2f2f")
+            embed.setColor(Colores.rojooscuro)
             break;
             
           case diff >= 120: 
-            embed.setColor("#ffa12f")
+            embed.setColor(Colores.rojo)
             break;
             
           default:
-            embed.setColor("#2fff3d")
+            embed.setColor(Colores.verde)
         }
         
         interaction.editReply({content: null, embeds: [embed]});

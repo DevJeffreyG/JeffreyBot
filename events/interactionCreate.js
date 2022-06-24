@@ -1,16 +1,15 @@
 const moment = require("moment");
 const Discord = require("discord.js");
+const { time } = require('@discordjs/builders');
 const ms = require("ms");
 
 const Toggle = require("../modelos/Toggle.model.js");
 const User = require("../modelos/User.model.js");
 const Guild = require("../modelos/Guild.model.js");
 
-let functions = require("../src/utils/");
-const Colores = require("../src/resources/colores.json");
-const Config = require("../src/resources/base.json");
+const { ErrorEmbed, FindNewId, Confirmation, intervalGlobalDatas, } = require("../src/utils");
+const { Config, Colores, Reglas } = require("../src/resources");
 const { jeffreygID, mantenimiento } = Config;
-const reglas = require("../src/resources/reglas.json");
 
 const activeCreatingTicket = new Map();
 
@@ -28,8 +27,8 @@ module.exports = async (client, interaction) => {
   const user = await User.findOne({guild_id: guild.id, user_id: author.id}) ?? await new User({guild_id: guild.id, user_id: author.id}).save();
 
   if(interaction.isCommand()){ // SLASH COMMANDS
-    const slashCommand = client.slash.get(interaction.commandName);
     const commandName = interaction.commandName;
+    const slashCommand = client.slash.get(commandName);
 
     if(mantenimiento && author.id != jeffreygID) return interaction.reply({content: "Todos las funciones de Jeffrey Bot se encuentran en mantenimiento, lo siento", ephemeral: true});
 
@@ -37,25 +36,34 @@ module.exports = async (client, interaction) => {
       command: commandName
     });
 
-    if(toggledQuery && author.id != jeffreygID){
-      let since = moment(toggledQuery.since).format("DD/MM/YY")
-      return interaction.reply({content: `Este comando está deshabilitado.\n${toggledQuery.reason} desde ${since}`, ephemeral: true});
+    if(toggledQuery /* && author.id != jeffreygID */){
+      let since = time(toggledQuery.since);
+      return interaction.reply({content: null, embeds: [new ErrorEmbed({type: "toggledCommand", data: {commandName, since, reason: toggledQuery.reason}})], ephemeral: true});
     }
 
-    await functions.intervalGlobalDatas(client);
-    executeSlash(interaction, client)
+    // params
+    const params = {};
+
+    slashCommand.data.options.forEach(o => {
+      //console.log(interaction)
+      let { name } = o;
+      params[name] = interaction.options.get(name)
+    })
+
+    await intervalGlobalDatas(client);
+    executeSlash(interaction, params, client)
   
-    async function executeSlash(interaction, client){
+    async function executeSlash(interaction, params, client){
       try {
         //console.log(slashCommand)
-        await slashCommand.execute(interaction, client);
+        await slashCommand.execute(interaction, params, client);
       } catch (error) {
         console.error(error);
-        let help = 'Jeffrey es tonto, hubo un error ejecutando este comando, por fa, avísale de su grado de inservibilidad. **(ni siquiera sé si esa palabra existe...)**';
+        let help = new ErrorEmbed({type: "badCommand", data: {commandName, error}});
         try {
-          await interaction.reply({ content: help, ephemeral: true });
+          await interaction.reply({ content: null, embeds: [help], ephemeral: true });
         } catch(er) {
-          await interaction.editReply({ content: help, ephemeral: true });
+          await interaction.editReply({ content: null, embeds: [help], ephemeral: true });
         }
       }
     }
@@ -112,7 +120,7 @@ module.exports = async (client, interaction) => {
 
         if(userId === interaction.user.id) return interaction.editReply({content: "Sólo el STAFF puede reabrir el ticket."});
 
-        confirmation = await functions.Confirmation("Abrir ticket", [`¿Estás segur@ de que quieres volver a abrir el ticket?`, `Se mencionará al creador original del ticket`], interaction, true);
+        confirmation = await Confirmation("Abrir ticket", [`¿Estás segur@ de que quieres volver a abrir el ticket?`, `Se mencionará al creador original del ticket`], interaction, true);
         if(!confirmation) return;
 
         ticket = docGuild.data.tickets.find(x => x.channel_id === interaction.channel.id);
@@ -159,7 +167,7 @@ module.exports = async (client, interaction) => {
 
         if(userId != interaction.user.id) return interaction.editReply({content: "Sólo el creador del ticket puede marcarlo como resuelto."});
         
-        confirmation = await functions.Confirmation("Marcar como resuelto", [`¿Estás segur@ de que quieres cerrar el ticket?`, `Sólo podría ser vuelto a abrir por un miembro del STAFF`], interaction, true);
+        confirmation = await Confirmation("Marcar como resuelto", [`¿Estás segur@ de que quieres cerrar el ticket?`, `Sólo podría ser vuelto a abrir por un miembro del STAFF`], interaction, true);
         if(!confirmation) return;
           
         ticket = docGuild.data.tickets.find(x => x.channel_id === interaction.channel.id);
@@ -203,7 +211,7 @@ module.exports = async (client, interaction) => {
 
         if(userId === interaction.user.id) return interaction.editReply({content: "Sólo el STAFF puede forzar el cierre del ticket."});
         else {
-          confirmation = await functions.Confirmation("Forzar cierre", [`El autor del ticket no lo ha marcado como resuelto`, `¿Estás segur@ de que quieres cerrar el ticket?`], interaction, true);
+          confirmation = await Confirmation("Forzar cierre", [`El autor del ticket no lo ha marcado como resuelto`, `¿Estás segur@ de que quieres cerrar el ticket?`], interaction, true);
           if(!confirmation) return;
 
           //interaction.message.channel.delete();
@@ -290,10 +298,10 @@ module.exports = async (client, interaction) => {
           // reiniciar el cooldown
           resetCooldown(ticketTimeout, activeCreatingTicket);
 
-          let confirmation = await functions.Confirmation("Nuevo ticket", ["¿Estás segur@ de crear un nuevo ticket de ayuda?", "Las preguntas deben estar relacionadas con el servidor de Discord, nada fuera de él.", "El STAFF te responderá en cuanto pueda.", `Recuerda que en los canales <#${Config.infoChannel}> y <#${Config.faqChannel}> se aclaran las dudas más comúnes, si no has revisado si tu duda está ahí, revísa primero antes de hacer un ticket.`], interaction, true);
+          let confirmation = await Confirmation("Nuevo ticket", ["¿Estás segur@ de crear un nuevo ticket de ayuda?", "Las preguntas deben estar relacionadas con el servidor de Discord, nada fuera de él.", "El STAFF te responderá en cuanto pueda.", `Recuerda que en los canales <#${Config.infoChannel}> y <#${Config.faqChannel}> se aclaran las dudas más comúnes, si no has revisado si tu duda está ahí, revísa primero antes de hacer un ticket.`], interaction, true);
           if(!confirmation) return;
 
-          newId = await functions.FindNewId(await Guild.find(), "data.tickets", "id"); // crear la nueva id para el ticket
+          newId = await FindNewId(await Guild.find(), "data.tickets", "id"); // crear la nueva id para el ticket
           
           const channelName = `ticket${newId}-help-${author.id}`;
           const category = client.user.id === Config.testingJBID ? guild.channels.cache.find(x => x.id === "919009755857555496") : guild.channels.cache.find(x => x.id === Config.ticketsCategory);
@@ -337,10 +345,10 @@ module.exports = async (client, interaction) => {
             "El STAFF te atendrá en cuanto pueda."
           ]
 
-          let confirmation = await functions.Confirmation("Nuevo ticket", reportConfirm, interaction, true);
+          let confirmation = await Confirmation("Nuevo ticket", reportConfirm, interaction, true);
           if(!confirmation) return;
 
-          newId = await functions.FindNewId(await Guild.find(), "data.tickets", "id"); // crear la nueva id para el ticket
+          newId = await FindNewId(await Guild.find(), "data.tickets", "id"); // crear la nueva id para el ticket
 
           const channelName = `ticket${newId}-report-${author.id}`;
           const category = client.user.id === Config.testingJBID ? guild.channels.cache.find(x => x.id === "919009755857555496") : guild.channels.cache.find(x => x.id === Config.ticketsCategory);
@@ -387,9 +395,9 @@ module.exports = async (client, interaction) => {
           for (let i = 0; i < user.warns.length; i++) {
             const warn = user.warns[i];
             
-            const label = `ID: ${warn.id} — Por: ${reglas[warn.rule_id].regla}`
+            const label = `ID: ${warn.id} — Por: ${Reglas[warn.rule_id].regla}`
             
-            selectMenuWarn.addOptions({label, value: warn.id.toString(), description: reglas[warn.rule_id].description});
+            selectMenuWarn.addOptions({label, value: warn.id.toString(), description: Reglas[warn.rule_id].description});
           }
           
           selectMenuWarn.addOptions({label: "Cancelar", value: "cancel", emoji: "❌"});
@@ -414,17 +422,17 @@ module.exports = async (client, interaction) => {
 
           let toConfirm = [
             `Crear un nuevo ticket para el warn con id \`${selectedWarn.id}\`.`,
-            `Regla N°${selectedWarn.rule_id} (${reglas[selectedWarn.rule_id].regla}).`,
+            `Regla N°${selectedWarn.rule_id} (${Reglas[selectedWarn.rule_id].regla}).`,
             `Las pruebas dadas por el STAFF las puedes ver usando \`${prefix}warns id: ${selectedWarn.id}\`.`
           ];
 
-          let confirmation = await functions.Confirmation("Nuevo ticket", toConfirm, warnCollector, true);
+          let confirmation = await Confirmation("Nuevo ticket", toConfirm, warnCollector, true);
           if(!confirmation) return;
 
           selectedWarn.madeTicket = true; // guardar que se ha hecho un ticket de este warn
           user.save();
 
-          newId = await functions.FindNewId(await Guild.find(), "data.tickets", "id"); // crear la nueva id para el ticket
+          newId = await FindNewId(await Guild.find(), "data.tickets", "id"); // crear la nueva id para el ticket
           
           const channelName = `ticket${newId}-warn-${author.id}`;
           const category = client.user.id === Config.testingJBID ? guild.channels.cache.find(x => x.id === "919009755857555496") : guild.channels.cache.find(x => x.id === Config.ticketsCategory);
@@ -438,7 +446,7 @@ module.exports = async (client, interaction) => {
           // enviar el embed primero
           let general = new Discord.MessageEmbed()
           .setTitle(`Warn, ID: ${selectedWarn.id}.`)
-          .setDescription(`Regla N°${selectedWarn.rule_id}, "**${reglas[selectedWarn.rule_id].regla}**".`)
+          .setDescription(`Regla N°${selectedWarn.rule_id}, "**${Reglas[selectedWarn.rule_id].regla}**".`)
           .setFooter(`ID del Ticket: ${newId}`, guild.iconURL())
           .setColor(Colores.verdeclaro);
 
@@ -476,9 +484,9 @@ module.exports = async (client, interaction) => {
           for (let i = 0; i < user.softwarns.length; i++) {
             const softwarn = user.softwarns[i];
             
-            const label = `ID: ${softwarn.id} — Por: ${reglas[softwarn.rule_id].regla}`
+            const label = `ID: ${softwarn.id} — Por: ${Reglas[softwarn.rule_id].regla}`
             
-            selectMenuSoftWarn.addOptions({label, value: softwarn.id.toString(), description: reglas[softwarn.rule_id].description});
+            selectMenuSoftWarn.addOptions({label, value: softwarn.id.toString(), description: Reglas[softwarn.rule_id].description});
           }
           
           selectMenuSoftWarn.addOptions({label: "Cancelar", value: "cancel", emoji: "❌"});
@@ -503,17 +511,17 @@ module.exports = async (client, interaction) => {
 
           let toConfirm = [
             `Crear un nuevo ticket para el softwarn con id \`${selectedSoftWarn.id}\`.`,
-            `Regla N°${selectedSoftWarn.rule_id} (${reglas[selectedSoftWarn.rule_id].regla}).`,
+            `Regla N°${selectedSoftWarn.rule_id} (${Reglas[selectedSoftWarn.rule_id].regla}).`,
             `Las pruebas dadas por el STAFF las puedes ver usando \`${prefix}warns id: ${selectedSoftWarn.id}\`.`
           ];
 
-          let confirmation = await functions.Confirmation("Nuevo ticket", toConfirm, softwarnCollector, true);
+          let confirmation = await Confirmation("Nuevo ticket", toConfirm, softwarnCollector, true);
           if(!confirmation) return;
 
           selectedSoftWarn.madeTicket = true; // guardar que se ha hecho un ticket de este warn
           user.save();
 
-          newId = await functions.FindNewId(await Guild.find(), "data.tickets", "id"); // crear la nueva id para el ticket
+          newId = await FindNewId(await Guild.find(), "data.tickets", "id"); // crear la nueva id para el ticket
           
           const channelName = `ticket${newId}-softwarn-${author.id}`;
           const category = client.user.id === Config.testingJBID ? guild.channels.cache.find(x => x.id === "919009755857555496") : guild.channels.cache.find(x => x.id === Config.ticketsCategory);
@@ -527,7 +535,7 @@ module.exports = async (client, interaction) => {
           // enviar el embed primero
           let general = new Discord.MessageEmbed()
           .setTitle(`Softwarn, ID: ${selectedSoftWarn.id}.`)
-          .setDescription(`Regla N°${selectedSoftWarn.rule_id}, "**${reglas[selectedSoftWarn.rule_id].regla}**".`)
+          .setDescription(`Regla N°${selectedSoftWarn.rule_id}, "**${Reglas[selectedSoftWarn.rule_id].regla}**".`)
           .setFooter(`ID del Ticket: ${newId}`, guild.iconURL())
           .setColor(Colores.verdeclaro);
 
@@ -555,10 +563,10 @@ module.exports = async (client, interaction) => {
           // reiniciar el cooldown
           resetCooldown(ticketTimeout, activeCreatingTicket);
 
-          let confirmation = await functions.Confirmation("Nuevo ticket", ["¿Estás segur@ de crear un nuevo ticket de problemas con Jeffrey Bot?", "El STAFF te puede ayudar, sin embargo ten en cuenta que: el que soluciona los bugs es Jeffrey."], interaction, true);
+          let confirmation = await Confirmation("Nuevo ticket", ["¿Estás segur@ de crear un nuevo ticket de problemas con Jeffrey Bot?", "El STAFF te puede ayudar, sin embargo ten en cuenta que: el que soluciona los bugs es Jeffrey."], interaction, true);
           if(!confirmation) return;
 
-          newId = await functions.FindNewId(await Guild.find(), "data.tickets", "id"); // crear la nueva id para el ticket
+          newId = await FindNewId(await Guild.find(), "data.tickets", "id"); // crear la nueva id para el ticket
           
           const channelName = `ticket${newId}-jb-${author.id}`;
           const category = client.user.id === Config.testingJBID ? guild.channels.cache.find(x => x.id === "919009755857555496") : guild.channels.cache.find(x => x.id === Config.ticketsCategory);

@@ -61,6 +61,10 @@
         {
             "type": "updated",
             "desc": "**Se ha cambiado una cantidad _ABSURDA_ de código, puede que hayan errores**"
+        },
+        {
+            "type": "removed",
+            "desc": "Se han eliminado todos los comandos normales, y se han convertido en Slash Commands"
         }
     ],
     "bienPng": "http://i.imgur.com/M6hqbcc.png",

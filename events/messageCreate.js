@@ -408,7 +408,7 @@ module.exports = async (client, message) => {
         let foundAlias = command.aliases.find(x => x === cmd.slice(prefix.length)) ? true : false;
     
         if(foundAlias) {
-            file = require("../commands/" + command.file);
+            file = require("../oldcommands/" + command.file);
         }
       });
     

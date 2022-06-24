@@ -1,9 +1,6 @@
-const { Command, Embed } = require("../../src/utils");
-
-const fs = require("fs");
-
+const { Command, ErrorEmbed, Embed } = require("../../src/utils");
 const { Config, Colores } = require("../../src/resources/");
-const Guild = require("../../modelos/Guild.model");
+const Chance = require("chance");
 
 const command = new Command({
     name: "ayuda",
@@ -11,7 +8,14 @@ const command = new Command({
     category: "GENERAL"
 });
 
-command.execute = async (interaction, client) => {
+command.addOption({
+    type: "string", name: "comando", desc: "Recibe ayuda de un comando específico"
+});
+
+command.execute = async (interaction, params, client) => {
+    const { comando } = params;
+    if(comando) return command.execGetHelp(interaction, comando, client);
+    
     await interaction.deferReply({ephemeral: true});
     const guild = client.guilds.cache.find(x => x.id === interaction.guildId);
     const member = guild.members.cache.find(x => x.id === interaction.user.id);
@@ -106,7 +110,7 @@ command.execute = async (interaction, client) => {
                 break;
 
             default:
-                console.log("ERROR HOLA?!!?? XDXDXDDX", helpCommand);
+                console.error("HAY UN COMANDO CON CATEGORÍA INCORRECTA !!", helpCommand);
         }
 
     }
@@ -139,7 +143,31 @@ command.execute = async (interaction, client) => {
         if(moderation.description) arrayEmbeds.push(moderation);
         if(staff.description) arrayEmbeds.push(staff);
     }
+
+    if(new Chance().bool({likelihood: 20})) {
+        let sug = new Embed({
+            type: "didYouKnow",
+            data: `Puedes obtener ayuda de un comando específico usando este mismo comando:\n\`/ayuda comando:(nombre)\``
+        })
+
+        arrayEmbeds.push(sug);
+    }
+
     return interaction.editReply({embeds: arrayEmbeds, ephemeral: true});
+}
+
+command.execGetHelp = async (interaction, commandHelp, client) => {
+    await interaction.deferReply();
+    let comando = client.slash.get(commandHelp.value)
+    
+    if(!comando) return interaction.editReply({embeds: [
+        new ErrorEmbed({
+            type: "commandNotFound",
+            data: commandHelp.value,
+        })
+    ]})
+
+    return comando.getHelp(interaction);
 }
 
 module.exports = command;

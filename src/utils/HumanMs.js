@@ -3,10 +3,10 @@ const moment = require("moment")
 class HumanMs {
     constructor(data){
         this.data = data;
-        this.human = this._convert(this.data);
+        this.human = this.#convert(this.data);
     }
 
-    _convert(c){
+    #convert(c){
         let conv = {
             día: Math.trunc(c / 86400000),
             hora: Math.trunc(c / 3600000) % 24,
@@ -24,32 +24,9 @@ class HumanMs {
         return this.returnable.join(" ");
     }
 
-    left(options = {}) { // to now
-        let now = moment();
-
-        let año = this.data.years - now.year();
-        let mes = this.data.months - now.month();
-        let día = this.data.date - now.date();
-        let hora = this.data.hours - now.hour();
-        let minuto = this.data.minutes - now.minutes();
-        let segundo = this.data.seconds - now.seconds();
-
-        this.left = {año, mes, día, hora, minuto, segundo};
-        
-        if(options.precise){
-            this.prep = [];
-
-            for(let key in this.left) {
-                if(this.left[key] != 0) this.prep.push({key, value: this.left[key]});
-            }
-
-            this._leftworker();
-
-            console.log(this.returnable);
-
-            return this.returnable.join(options.separator ?? " ");
-        }
-
+    left() {
+        let left = this.data.diff(new Date());
+        return this.#convert(left);
     }
     
     _leftworker(){
