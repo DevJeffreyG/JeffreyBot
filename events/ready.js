@@ -34,7 +34,7 @@ module.exports = async (client) => {
     client.user.setActivity(`${prefix}ayuda - ${totalMembers} usuarios🔎`);
 
     
-    console.log(`${client.user.username} ONLINE`);
+    console.log(`❗❗❗ 💚 ${client.user.username} ONLINE 💚 ❗❗❗`);
 
     let channel = client.channels.cache.get(Config.logChannel);
     let dsChannel = client.channels.cache.find(x => x.id === Config.dsChannel);
@@ -54,7 +54,7 @@ module.exports = async (client) => {
     /* Buscar usuarios nivel 5 sin role nivel 5 */
     await functions.findLvls5(client, guild)
 
-    console.log("Ciclo de Global Datas iniciado por primera vez")
+    console.log("🔄 Ciclo de Global Datas iniciado por primera vez")
     functions.intervalGlobalDatas(client);
 
     /* ############ GLOBAL DATAS ############ */

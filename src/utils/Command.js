@@ -15,7 +15,7 @@ class Command {
         this.name = this.data.name;
         this.info = data.helpdesc ?? this.data.description;
         this.category = data.category;
-        this.#staffPerms();
+        this.#setPerms();
         this.execute = async (interaction, models, params, client) => {
             await interaction.deferReply()
             interaction.editReply("Hola mundo!")
@@ -86,9 +86,9 @@ class Command {
         )
     }
 
-    async #staffPerms() {
+    async #setPerms() {
         if(this.category == "STAFF" || this.category == "MODERATION" || this.category == "ADMIN") this.data.setDefaultMemberPermissions(PermissionFlagsBits.Administrator | PermissionFlagsBits.ManageMessages);
-        if(this.category == "DEV") this.data.setDefaultMemberPermissions(0)
+        if(this.category == "DEV") this.dev = true;
     }
 
     #optionWork(option, data) {

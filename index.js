@@ -4,7 +4,6 @@ const fs = require("fs");
 const Discord = require("discord.js");
 const CronJob = require("cron").CronJob;
 
-const Commands = require("./Commands");
 const Events = require("./Events");
 
 const myIntents = new Discord.Intents()
@@ -13,7 +12,12 @@ const client = new Discord.Client({ allowedMentions: { parse: ['users', 'roles']
 
 const { connection } = require('./db')
 
-connection.then(async () => {
+console.log("🦊 INICIALIZANDO ...")
+
+connection.then(async (c) => {
+  console.log(`🔄 Conectado a la base de datos ${c.connection.name} 🖥️`)
+  const Commands = require("./Commands");
+
   // events
   Events(client);
 
@@ -52,6 +56,6 @@ connection.then(async () => {
   }, null, true, 'America/Bogota');
   
   // slash commands
-  Commands.prepare(client);
+  await Commands.prepare(client, ["482989052136652800"]);
   client.login(process.env.TOKEN);
 })

@@ -17,7 +17,6 @@ const startLinks = [
 
 const active = new Map(); // musica
 
-
 const { intervalGlobalDatas, GenerateLog } = require("../src/utils/");
 
 const Cumplidos = require("../src/resources/cumplidos.json");
