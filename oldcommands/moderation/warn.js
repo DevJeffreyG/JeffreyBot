@@ -4,12 +4,7 @@ const Discord = require("discord.js");
 const reglas = require("../../src/resources/reglas.json");
 
 const { Initialize, TutorialEmbed, Confirmation, AfterInfraction, FindNewId } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const User = require("../../modelos/User.model.js");
-
-/* ##### MONGOOSE ######## */
+const { Users } = require("mongoose").models;
 
 const commandInfo = {
     name: "warn",
@@ -74,7 +69,7 @@ module.exports = {
                 return selectRuleMsg.delete();
             }
         
-            const user = await User.findOne({
+            const user = await Users.findOne({
                 user_id: member.id,
                 guild_id: member.guild.id
             });
@@ -117,7 +112,7 @@ module.exports = {
             }
 
             // como sí tiene el soft, agregar warn
-            let users = await User.find();
+            let users = await Users.find();
             
             let newId = await FindNewId(users, "warns", "id");
 

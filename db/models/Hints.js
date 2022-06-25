@@ -9,4 +9,4 @@ const hintSchema = mongoose.Schema({
 
 })
 
-module.exports = mongoose.model("hints", hintSchema);
+module.exports = mongoose.model("Hints", hintSchema);

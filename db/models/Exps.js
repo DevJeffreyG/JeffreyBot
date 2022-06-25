@@ -12,4 +12,4 @@ const expSchema = mongoose.Schema({
 
 })
 
-module.exports = mongoose.model("Exp", expSchema);
+module.exports = mongoose.model("Exps", expSchema);

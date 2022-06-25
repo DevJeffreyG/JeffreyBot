@@ -7,4 +7,4 @@ const dUseSchema = mongoose.Schema({
 
 })
 
-module.exports = mongoose.model("darkuses", dUseSchema);
+module.exports = mongoose.model("DarkUses", dUseSchema);

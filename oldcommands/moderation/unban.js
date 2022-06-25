@@ -3,12 +3,8 @@ const Colores = require("../../src/resources/colores.json");
 const Discord = require("discord.js");
 
 const { Initialize, TutorialEmbed } = require("../../src/utils/");
+const { GlobalDatas } = require("mongoose").models;
 
-/* ##### MONGOOSE ######## */
-
-const GlobalData = require("../../modelos/globalData.js");
-
-/* ##### MONGOOSE ######## */
 const commandInfo = {
     name: "unban",
     info: "Desbanear a un usuario",
@@ -41,7 +37,7 @@ module.exports = {
 **—** Moderador: **${message.author.username}**.`)
         .setColor(Colores.verde);
 
-        await GlobalData.findOneAndRemove({
+        await GlobalDatas.findOneAndRemove({
             "info.type": "temporalGuildBan",
             "info.guild_id": guild.id,
             "info.userID": user

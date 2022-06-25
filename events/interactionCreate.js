@@ -3,9 +3,8 @@ const Discord = require("discord.js");
 const { time } = require('@discordjs/builders');
 const ms = require("ms");
 
-const Toggle = require("../modelos/Toggle.model.js");
-const User = require("../modelos/User.model.js");
-const Guild = require("../modelos/Guild.model.js");
+const models = require("mongoose").models;
+const { ToggledCommands, Users, Guilds } = models
 
 const { ErrorEmbed, FindNewId, Confirmation, intervalGlobalDatas, } = require("../src/utils");
 const { Config, Colores, Reglas } = require("../src/resources");
@@ -20,11 +19,11 @@ module.exports = async (client, interaction) => {
   const guild = interaction.guild;
   const customId = interaction.customId;
 
-  const docGuild = await Guild.findOne({guild_id: guild.id}) ?? await new Guild({guild_id: guild.id}).save();
-  const prefix = docGuild.settings.prefix;
-  const staff_role = guild.roles.cache.find(x => x.id === docGuild.roles.staff);
+  const docGuild = await Guilds.findOne({guild_id: guild.id}) ?? await new Guilds({guild_id: guild.id}).save();
+  const prefix = "/";
+  const staff_role = guild.roles.cache.find(x => x.id === docGuild.roles.staffs[0]);
 
-  const user = await User.findOne({guild_id: guild.id, user_id: author.id}) ?? await new User({guild_id: guild.id, user_id: author.id}).save();
+  const user = await Users.findOne({guild_id: guild.id, user_id: author.id}) ?? await new Users({guild_id: guild.id, user_id: author.id}).save();
 
   if(interaction.isCommand()){ // SLASH COMMANDS
     const commandName = interaction.commandName;
@@ -32,7 +31,7 @@ module.exports = async (client, interaction) => {
 
     if(mantenimiento && author.id != jeffreygID) return interaction.reply({content: "Todos las funciones de Jeffrey Bot se encuentran en mantenimiento, lo siento", ephemeral: true});
 
-    let toggledQuery = await Toggle.findOne({
+    let toggledQuery = await ToggledCommands.findOne({
       command: commandName
     });
 
@@ -48,15 +47,49 @@ module.exports = async (client, interaction) => {
       //console.log(interaction)
       let { name } = o;
       params[name] = interaction.options.get(name)
+
+      // subcommands & groups
+      if(!params[name] && o.options){
+        params["subcommand"] = interaction.options.getSubcommand(false); // guarda el subcomando que se está ejecutando
+        params["subgroup"] = interaction.options.getSubcommandGroup(false); // guarda el grupo de subcomandos
+
+        params[name] = undefined;
+        subcommandFix(o.options, (x => {
+            params[name] = x
+        }));
+
+        function subcommandFix(options, callback){
+            let x = {};
+
+            options.forEach((option, i) => {
+                ({ name } = option);
+                x[name] = interaction.options.get(name);
+
+                if(!x[name]) subcgroupFix(option, (y => {
+                    x[name] = y;
+                }))
+            })
+
+            callback(x)
+        }
+
+        function subcgroupFix(options, callback) {
+            if(options.options){
+                subcommandFix(options.options, z => {
+                    callback(z)
+                });
+            }
+        }
+    }
     })
 
     await intervalGlobalDatas(client);
-    executeSlash(interaction, params, client)
+    executeSlash(interaction, models, params, client)
   
-    async function executeSlash(interaction, params, client){
+    async function executeSlash(interaction, models, params, client){
       try {
         //console.log(slashCommand)
-        await slashCommand.execute(interaction, params, client);
+        await slashCommand.execute(interaction, models, params, client);
       } catch (error) {
         console.error(error);
         let help = new ErrorEmbed({type: "badCommand", data: {commandName, error}});
@@ -101,7 +134,7 @@ module.exports = async (client, interaction) => {
           deny: ["VIEW_CHANNEL", "SEND_MESSAGES"]
       },
       {
-        id: staff_role.id,
+        id: staff_role ? staff_role.id : "483105079285776384",
         allow: [Discord.Permissions.ALL]
       },
       {
@@ -301,7 +334,7 @@ module.exports = async (client, interaction) => {
           let confirmation = await Confirmation("Nuevo ticket", ["¿Estás segur@ de crear un nuevo ticket de ayuda?", "Las preguntas deben estar relacionadas con el servidor de Discord, nada fuera de él.", "El STAFF te responderá en cuanto pueda.", `Recuerda que en los canales <#${Config.infoChannel}> y <#${Config.faqChannel}> se aclaran las dudas más comúnes, si no has revisado si tu duda está ahí, revísa primero antes de hacer un ticket.`], interaction, true);
           if(!confirmation) return;
 
-          newId = await FindNewId(await Guild.find(), "data.tickets", "id"); // crear la nueva id para el ticket
+          newId = await FindNewId(await Guilds.find(), "data.tickets", "id"); // crear la nueva id para el ticket
           
           const channelName = `ticket${newId}-help-${author.id}`;
           const category = client.user.id === Config.testingJBID ? guild.channels.cache.find(x => x.id === "919009755857555496") : guild.channels.cache.find(x => x.id === Config.ticketsCategory);
@@ -348,7 +381,7 @@ module.exports = async (client, interaction) => {
           let confirmation = await Confirmation("Nuevo ticket", reportConfirm, interaction, true);
           if(!confirmation) return;
 
-          newId = await FindNewId(await Guild.find(), "data.tickets", "id"); // crear la nueva id para el ticket
+          newId = await FindNewId(await Guilds.find(), "data.tickets", "id"); // crear la nueva id para el ticket
 
           const channelName = `ticket${newId}-report-${author.id}`;
           const category = client.user.id === Config.testingJBID ? guild.channels.cache.find(x => x.id === "919009755857555496") : guild.channels.cache.find(x => x.id === Config.ticketsCategory);
@@ -432,7 +465,7 @@ module.exports = async (client, interaction) => {
           selectedWarn.madeTicket = true; // guardar que se ha hecho un ticket de este warn
           user.save();
 
-          newId = await FindNewId(await Guild.find(), "data.tickets", "id"); // crear la nueva id para el ticket
+          newId = await FindNewId(await Guilds.find(), "data.tickets", "id"); // crear la nueva id para el ticket
           
           const channelName = `ticket${newId}-warn-${author.id}`;
           const category = client.user.id === Config.testingJBID ? guild.channels.cache.find(x => x.id === "919009755857555496") : guild.channels.cache.find(x => x.id === Config.ticketsCategory);
@@ -521,7 +554,7 @@ module.exports = async (client, interaction) => {
           selectedSoftWarn.madeTicket = true; // guardar que se ha hecho un ticket de este warn
           user.save();
 
-          newId = await FindNewId(await Guild.find(), "data.tickets", "id"); // crear la nueva id para el ticket
+          newId = await FindNewId(await Guilds.find(), "data.tickets", "id"); // crear la nueva id para el ticket
           
           const channelName = `ticket${newId}-softwarn-${author.id}`;
           const category = client.user.id === Config.testingJBID ? guild.channels.cache.find(x => x.id === "919009755857555496") : guild.channels.cache.find(x => x.id === Config.ticketsCategory);
@@ -566,7 +599,7 @@ module.exports = async (client, interaction) => {
           let confirmation = await Confirmation("Nuevo ticket", ["¿Estás segur@ de crear un nuevo ticket de problemas con Jeffrey Bot?", "El STAFF te puede ayudar, sin embargo ten en cuenta que: el que soluciona los bugs es Jeffrey."], interaction, true);
           if(!confirmation) return;
 
-          newId = await FindNewId(await Guild.find(), "data.tickets", "id"); // crear la nueva id para el ticket
+          newId = await FindNewId(await Guilds.find(), "data.tickets", "id"); // crear la nueva id para el ticket
           
           const channelName = `ticket${newId}-jb-${author.id}`;
           const category = client.user.id === Config.testingJBID ? guild.channels.cache.find(x => x.id === "919009755857555496") : guild.channels.cache.find(x => x.id === Config.ticketsCategory);

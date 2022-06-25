@@ -1,0 +1,36 @@
+const { Command, Embed } = require("../../src/utils")
+const { Colores, Config, Emojis } = require("../../src/resources")
+
+const command = new Command({
+    name: "inflacion",
+    desc: "Te muestra la inflación actual de los DarkJeffros",
+    category: "DARKSHOP"
+})
+
+command.execute = async (interaction, models, params, client) => {
+    const { DarkShops } = models;
+    const guild = client.guilds.cache.find(x => x.id === interaction.guildId);
+
+    // codigo
+    const dark = await DarkShops.findOne({
+        guild_id: guild.id
+    });
+
+    let stonks;
+    if(dark.inflation.old <= dark.inflation.value){
+        stonks = "📈";
+    } else {
+        stonks = "📉";
+    }
+
+    let stonksEmbed = new Embed()
+    .defAuthor({text: `DarkShop: Inflación`, icon: Config.darkLogoPng})
+    .defDesc(`${stonks} **—** La inflación actual de los DarkJeffros es de un **${dark.inflation.value}%**.
+**— ${Emojis.Dark}1 = ${Emojis.Jeffros}${Math.floor(200*dark.inflation.value).toLocaleString('es-CO')}**.
+**—** Antes era de un \`${dark.inflation.old}%\`.`)
+    .defColor(Colores.negro);
+
+    interaction.reply({embeds: [stonksEmbed]});
+}
+
+module.exports = command;

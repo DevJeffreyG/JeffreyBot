@@ -5,13 +5,7 @@ const Discord = require("discord.js");
 const moment = require("moment");
 
 const { Initialize, TutorialEmbed, Confirmation, importImage, FindNewId } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const User = require("../../modelos/User.model.js");
-const GlobalData = require("../../modelos/globalData.js");
-
-/* ##### MONGOOSE ######## */
+const { GlobalDatas } = require("mongoose").models;
 
 const commandInfo = {
     name: "sencuesta",
@@ -65,9 +59,9 @@ module.exports = {
 
         let msg = await channel.send({embeds: [imgEmbed, embed]});
         //let msg = await channel.send({embeds: [embed]});
-        let pollId = await FindNewId(await GlobalData.find({"info.type": "temporalPoll", "info.guild_id": guild.id}), "info", "id");
+        let pollId = await FindNewId(await GlobalDatas.find({"info.type": "temporalPoll", "info.guild_id": guild.id}), "info", "id");
 
-        await new GlobalData({
+        await new GlobalDatas({
             info: {
                 type: "temporalPoll",
                 guild_id: guild.id,

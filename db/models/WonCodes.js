@@ -7,4 +7,4 @@ const wonSchema = mongoose.Schema({
 
 })
 
-module.exports = mongoose.model("wonCodes", wonSchema);
+module.exports = mongoose.model("WonCodes", wonSchema);

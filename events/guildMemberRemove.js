@@ -3,7 +3,7 @@ const Discord = require("discord.js");
 const { Initialize } = require("../src/utils/");
 
 const Config = require("../src/resources/base.json");
-const User = require("../modelos/User.model.js");
+const { Users } = require("mongoose").models;
 
 module.exports = async (client, member) => {
     const prefix = await Initialize(member.guild.id);
@@ -34,7 +34,7 @@ module.exports = async (client, member) => {
     client.user.setActivity(`${prefix}ayuda - ${member.guild.memberCount} usuarios🔎`);
 
     // guardar los roles
-    User.findOne({
+    Users.findOne({
         user_id: member.id,
         guild_id: member.guild.id
     }, (err, user) => {

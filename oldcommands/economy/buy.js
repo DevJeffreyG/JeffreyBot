@@ -5,13 +5,7 @@ const Discord = require("discord.js");
 const ms = require("ms");
 
 const { Initialize, TutorialEmbed, Confirmation, ComprarItem, DeterminePrice } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const User = require("../../modelos/User.model.js");
-const Shop = require("../../modelos/Shop.model.js");
-
-/* ##### MONGOOSE ######## */
+const { Users, Shops } = require("mongoose").models;
 
 const commandInfo = {
     name: "buy",
@@ -38,12 +32,12 @@ module.exports = {
         const id = response.find(x => x.param === "id").data;
 
         // Comando
-        const user = await User.findOne({
+        const user = await Users.findOne({
             user_id: author.id,
             guild_id: guild.id
         });
 
-        const shop = await Shop.findOne({
+        const shop = await Shops.findOne({
             guild_id: guild.id
         });
 

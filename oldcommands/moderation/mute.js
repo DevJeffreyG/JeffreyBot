@@ -5,12 +5,7 @@ const Discord = require("discord.js");
 const { HumanMs } = require("../../src/utils/");
 
 const { Initialize, TutorialEmbed, LimitedTime } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const User = require("../../modelos/User.model.js");
-
-/* ##### MONGOOSE ######## */
+const { Users } = require("mongoose").models;
 
 const commandInfo = {
     name: "mute",
@@ -55,7 +50,7 @@ module.exports = {
             await member.roles.add(muteRole)
         } else { // Temp mute
             // llamar la funcion
-            let user = await User.findOne({
+            let user = await Users.findOne({
                 user_id: member.id,
                 guild_id: guild.id
             });

@@ -5,6 +5,7 @@ const Chance = require("chance");
 const command = new Command({
     name: "ayuda",
     desc: "Una lista de todos los comandos en el bot",
+    helpdesc: "¡Este comando!",
     category: "GENERAL"
 });
 
@@ -12,7 +13,7 @@ command.addOption({
     type: "string", name: "comando", desc: "Recibe ayuda de un comando específico"
 });
 
-command.execute = async (interaction, params, client) => {
+command.execute = async (interaction, models, params, client) => {
     const { comando } = params;
     if(comando) return command.execGetHelp(interaction, comando, client);
     
@@ -74,7 +75,7 @@ command.execute = async (interaction, params, client) => {
     for (let i = 0; i < commands.length; i++) {
         const helpCommand = commands[i];
         
-        const toAdd = `▸ \`/${helpCommand.name}\`: ${helpCommand.info}.\n`;
+        const toAdd = `▸ \`/${helpCommand.name}\`: ${helpCommand.info}${helpCommand.info.endsWith("!") || helpCommand.info.endsWith("?") ? "" : "."}\n`;
 
         switch(helpCommand.category){
             case "GENERAL":

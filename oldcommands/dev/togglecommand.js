@@ -3,13 +3,7 @@ const Colores = require("../../src/resources/colores.json");
 const Discord = require("discord.js");
 
 const { Initialize, TutorialEmbed } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const Toggle = require("../../modelos/Toggle.model.js");
-const mongoose = require("mongoose");
-
-/* ##### MONGOOSE ######## */
+const { ToggledCommands } = require("mongoose").models;
 
 const commandInfo = {
     name: "togglecommand",
@@ -51,13 +45,13 @@ module.exports = {
         .setColor(Colores.verde);
 
         // Comando
-        Toggle.findOne({
+        ToggledCommands.findOne({
             command: comando
         }, (err, toggle) => {
             if(err) throw err;
 
             if(!toggle){
-                new Toggle({
+                new ToggledCommands({
                     command: comando,
                     reason: reason
                 }).save();

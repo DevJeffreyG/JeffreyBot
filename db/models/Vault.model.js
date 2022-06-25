@@ -16,4 +16,4 @@ const VaultsSchema = new Schema({
     ]
 });
 
-module.exports = mongoose.model('Vault', VaultsSchema);
+module.exports = mongoose.model('Vaults', VaultsSchema);

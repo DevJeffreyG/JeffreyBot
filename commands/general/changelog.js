@@ -22,7 +22,7 @@ const command = new Command({
 
 command.addOption({type: "boolean", name: "extended", desc: "Mostrar los detalles más extendidos? (Para usuarios de móvil)"})
 
-command.execute = async (interaction, params, client) => {
+command.execute = async (interaction, models, params, client) => {
     const { extended } = params;
     const fetch = await interaction.channel.messages.fetch({ limit: 25})
     const message = await fetch.first();

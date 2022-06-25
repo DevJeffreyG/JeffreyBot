@@ -6,12 +6,6 @@ const ms = require("ms");
 
 const { Initialize, TutorialEmbed } = require("../../src/utils/");
 
-/* ##### MONGOOSE ######## */
-
-const User = require("../../modelos/User.model.js");
-
-/* ##### MONGOOSE ######## */
-
 const commandInfo = {
     name: "serverinfo",
     aliases: ["server"],

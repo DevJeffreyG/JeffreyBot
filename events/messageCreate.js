@@ -3,18 +3,27 @@ const Discord = require("discord.js");
 const ms = require("ms");
 const moment = require('moment-timezone');
 
-const Config = require("../src/resources/base.json");
+const { Config } = require("../src/resources/");
 const { deleteLateMedia, disableEXPs, jeffreygID, multiplier, mantenimiento } = Config;
-const { active, baseCommands, jeffreyMentions, startLinks } = require("../index.js");
+
+const jeffreyMentions = {
+  real: ["jeff", "jeffrey", "jeffry", "jefry", "jefri", "jeffri", "yefri", "yeffri", "yefry", "yefrei", "yeffrig"],
+  false: ["jeffros"]
+};
+
+const startLinks = [
+"https://", "http://", "www."
+];
+
+const active = new Map(); // musica
+
 
 const { intervalGlobalDatas, GenerateLog } = require("../src/utils/");
 
 const Cumplidos = require("../src/resources/cumplidos.json");
 const Colores = require("../src/resources/colores.json");
 
-const User = require("../modelos/User.model.js");
-const Guild = require("../modelos/Guild.model.js");
-const Toggle = require("../modelos/Toggle.model.js");
+const { ToggledCommands, Users, Guilds } = require("mongoose").models;
 
 const cmdCooldown = ms("2s");
 
@@ -23,8 +32,8 @@ module.exports = async (client, message) => {
     if (message.author.bot) return;
     if (message.channel.type == "DM") return;
     
-    const docGuild = await Guild.findOne({guild_id: message.guild.id}) ?? await new Guild({guild_id: message.guild.id}).save();
-    const prefix = docGuild.settings.prefix;
+    const docGuild = await Guilds.findOne({guild_id: message.guild.id}) ?? await new Guilds({guild_id: message.guild.id}).save();
+    const prefix = "/";
     const messageArray = message.content.split(" ");
     const cmd = messageArray[0].toLowerCase();
     const args = messageArray.slice(1);
@@ -37,10 +46,10 @@ module.exports = async (client, message) => {
     await intervalGlobalDatas(client, true); // verificar si existen BOOSTS.
 
     // buscar usuario
-    const user = await User.findOne({
+    const user = await Users.findOne({
       user_id: author.id,
       guild_id: guild.id
-    }) ?? await new User({
+    }) ?? await new Users({
       user_id: author.id,
       guild_id: guild.id
     }).save();
@@ -113,7 +122,7 @@ module.exports = async (client, message) => {
         for (let i = 0; i < commandFile.data.aliases.length; i++) {
           const alias = commandFile.data.aliases[i];
           
-          let toggledQuery = await Toggle.findOne({
+          let toggledQuery = await ToggledCommands.findOne({
             command: alias
           });
 
@@ -404,7 +413,7 @@ module.exports = async (client, message) => {
 
     async function findCommand(cmd){
       let file;
-      baseCommands.forEach(async command => {
+      client.baseCommands.forEach(async command => {
         let foundAlias = command.aliases.find(x => x === cmd.slice(prefix.length)) ? true : false;
     
         if(foundAlias) {

@@ -1,10 +1,5 @@
 const { Initialize, TutorialEmbed, LimitedTime, Confirmation, WillBenefit } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const User = require("../../modelos/User.model.js");
-
-/* ##### MONGOOSE ######## */
+const { Users } = require("mongoose").models;
 
 const commandInfo = {
     name: "temp",
@@ -57,7 +52,7 @@ module.exports = {
         const member = response.find(x => x.param === "member").data;
         const tipo = response.find(x => x.param === "tipo").data;
 
-        let user = await User.findOne({
+        let user = await Users.findOne({
             user_id: member.id,
             guild_id: guild.id
         });

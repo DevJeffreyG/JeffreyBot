@@ -4,12 +4,7 @@ const Emojis = require("../../src/resources/emojis.json");
 const Discord = require("discord.js");
 
 const { Initialize, TutorialEmbed, Confirmation } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const User = require("../../modelos/User.model.js");
-
-/* ##### MONGOOSE ######## */
+const { Users } = require("mongoose").models;
 
 const commandInfo = {
     name: "pay",
@@ -41,15 +36,15 @@ module.exports = {
         const quantity = response.find(x => x.param === "cantidad").data;
 
         // Comando
-        let author_user = await User.findOne({
+        let author_user = await Users.findOne({
             user_id: author.id,
             guild_id: guild.id
         });
 
-        const user = await User.findOne({
+        const user = await Users.findOne({
             user_id: member.id,
             guild_id: guild.id
-        }) ?? await new User({
+        }) ?? await new Users({
             user_id: member.id,
             guild_id: guild.id
         }).save();

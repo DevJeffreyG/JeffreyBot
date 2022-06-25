@@ -5,12 +5,7 @@ const Discord = require("discord.js");
 const ms = require("ms");
 
 const { Initialize, TutorialEmbed, FindNewId } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const Key = require("../../modelos/Key.model.js");
-
-/* ##### MONGOOSE ######## */
+const { Keys } = require("mongoose").models;
 
 const commandInfo = {
     name: "addkey",
@@ -81,7 +76,7 @@ module.exports = {
         // Comando
 
         // generar nueva key
-        let keysq = await Key.find();
+        let keysq = await Keys.find();
         let generatedID = await FindNewId(keysq, "", "id");
 
         // code
@@ -94,7 +89,7 @@ module.exports = {
             let value = response.find(x => x.param === "valor").data;
             let maxuses = response.find(x => x.param === "usos").data || Infinity;
 
-            await new Key({
+            await new Keys({
                 guild_id: message.guild.id,
                 config: {
                     maxuses: maxuses
@@ -120,7 +115,7 @@ module.exports = {
             let duration = response.find(x => x.param === "duración").data;
             let maxuses = response.find(x => x.param === "usos").data || Infinity;
 
-            await new Key({
+            await new Keys({
                 guild_id: message.guild.id,
                 config: {
                     maxuses: maxuses
@@ -165,7 +160,7 @@ module.exports = {
         }
     
         async function findKey(key){
-            let q = await Key.findOne({
+            let q = await Keys.findOne({
                 code: key
             });
     

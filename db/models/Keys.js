@@ -22,4 +22,4 @@ const KeysSchema = new Schema({
     id: { type: Number, required: true, unique: true }
 })
 
-module.exports = mongoose.model('Key', KeysSchema)
+module.exports = mongoose.model('Keys', KeysSchema)

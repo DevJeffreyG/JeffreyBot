@@ -1,58 +1,34 @@
 const Discord = require("discord.js");
 
 const Config = require("../../src/resources/base.json");
-const Rainbow = require("../resources/rainbow.json");
 const Colores = require("../resources/colores.json");
 const Emojis = require("../resources/emojis.json");
+const Cumplidos = require("../resources/cumplidos.json");
 
 const HumanMs = require("./HumanMs");
 
-const fs = require("fs");
 const ms = require("ms");
 var Chance = require("chance");
-var chance = new Chance();
 
 const moment = require('moment');
 
 /* ##### MONGOOSE ######## */
 
-const mongoose = require("mongoose");
-mongoose.connect(`${process.env.MONGOCONNECT}`, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-});
-
-const User = require("../../modelos/User.model.js");
-const Guild = require("../../modelos/Guild.model.js");
-const DarkShop = require("../../modelos/DarkShop.model.js");
-const Shop = require("../../modelos/Shop.model.js");
-
-const Jeffros = require("../../modelos/jeffros.js");
-const Exp = require("../../modelos/exp.js");
-const AutoRole = require("../../modelos/autorole.js");
-const Toggle = require("../../modelos/toggle.js");
-const Warn = require("../../modelos/warn.js");
-const DarkItems = require("../../modelos/darkitems.js");
-const Vault = require("../../modelos/vault.js");
-const WinVault = require("../../modelos/winVault.js");
-const Hint = require("../../modelos/hint.js");
-const GlobalData = require("../../modelos/globalData.js");
-const Stats = require("../../modelos/darkstats.js");
-const All = require("../../modelos/allpurchases.js");
-const testingGuild = "482989052136652800";
+const { Users, Exps, Guilds, DarkShops, Shops, Warns, DarkItems, GlobalDatas, TotalPurchases } = require("mongoose").models;
 
 // JEFFREY BOT NOTIFICATIONS
 const { google } = require("googleapis");
 const Twitter = require("twitter");
 const { ApiClient } = require("@twurple/api");
 const { ClientCredentialsAuthProvider } = require("@twurple/auth");
-const { discriminator } = require("../../modelos/User.model.js");
 
 /* ##### MONGOOSE ######## */
-
+const RandomCumplido = function (force = null) {
+  return force ? Cumplidos.c[force] : Cumplidos.c[Math.floor(Math.random() * Cumplidos.c.length)];
+}
 const findLvls5 = async function(client, guild){
   let role = client.user.id === Config.testingJBID ? guild.roles.cache.find(x => x.id === "791006500973576262") : guild.roles.cache.find(x => x.id === Config.dsRole);
-  Exp.find({
+  Exps.find({
     serverID: guild.id
   }, async (err, exps) => {
     if(err) throw err;
@@ -358,7 +334,7 @@ const intervalGlobalDatas = async function(client, justTempRoles){
   let members = guild.members.cache;
   // buscar roles temporales & cumpleaños
   members.forEach(async (member) => {
-    let dbUser = await User.findOne({
+    let dbUser = await Users.findOne({
       user_id: member.id,
       guild_id: guild.id
     });
@@ -462,7 +438,7 @@ const intervalGlobalDatas = async function(client, justTempRoles){
   await DarkShopWork(client, guild.id);
 
   // buscar temp bans
-  GlobalData.find({
+  GlobalDatas.find({
     "info.type": "temporalGuildBan",
     "info.guild_id": guild.id
   }, (err, tempBans) => {
@@ -501,7 +477,7 @@ const intervalGlobalDatas = async function(client, justTempRoles){
   })
 
   // buscar encuestas
-  GlobalData.find({"info.type": "temporalPoll", "info.guild_id": guild.id}, async (err, polls) => {
+  GlobalDatas.find({"info.type": "temporalPoll", "info.guild_id": guild.id}, async (err, polls) => {
     if(err) throw err;
 
     if(polls){
@@ -568,14 +544,14 @@ const intervalGlobalDatas = async function(client, justTempRoles){
  * @param {string} v The ID of the user
  * @param {number} c The number of warns to add
  */
-const Warns = function (v, c){
-    Warn.findOne({
+const AddWarns = function (v, c){
+    Warns.findOne({
         userID: v.id
     }, (err, victimWarns) => {
         if(err) throw err;
 
         if(!victimWarns) {
-            const newWarn = new Warn({
+            const newWarn = new Warns({
                 userID: v.id,
                 warns: c
             });
@@ -596,13 +572,13 @@ const Interest = function (author, idUse) {
     DarkItems.findOne({
         id: idUse
     }, (err, item) => {
-        All.findOne({
+        TotalPurchases.findOne({
             userID: author.id,
             itemID: idUse
         }, (err, alli) => {
 
             if(item.ignoreInterest == false && !alli){
-                const newAll = new All({
+                const newAll = new TotalPurchases({
                     userID: author.id,
                     itemID: idUse,
                     quantity: 1,
@@ -626,7 +602,7 @@ const Interest = function (author, idUse) {
  * @param {Object[]} guild - The Discord.JS Guild
  * @param {string} roleID - The ID of the temporary role
  * @param {Object[]} victimMember - The Discord.JS Member
- * @param {Object[]} user - The mongoose User.Model
+ * @param {Object[]} user - The mongoose Users.Model
  * @param {(number | string)} duration The duration of the temporary role in ms.
  * - "permanent" for not being an temporary role.
  * @param {string} [specialType=false] The special type of this temporary role.
@@ -696,7 +672,7 @@ const Subscription = function(guild, roleID, victimMember, intervalTime, jeffros
     } else {
       let hoy = new Date();
 
-      const newData = new GlobalData({
+      const newData = new GlobalDatas({
         info: {
           type: "jeffrosSubscription",
           roleID: roleID,
@@ -808,12 +784,12 @@ const handleUploads = async function(client){
 
   // revisar si existe el globaldata
   let interval = ms("30s");
-  let query = await GlobalData.findOne({
+  let query = await GlobalDatas.findOne({
     "info.type": "bellNotification"
   });
 
   if (!query){
-    const newNotification = new GlobalData({
+    const newNotification = new GlobalDatas({
       info: {
         type: "bellNotification",
         postedVideos: [{"what": "DELETETHIS"}],
@@ -823,7 +799,7 @@ const handleUploads = async function(client){
     })
 
     await newNotification.save();
-    query = await GlobalData.findOne({
+    query = await GlobalDatas.findOne({
       "info.type": "bellNotification"
     });
   }
@@ -866,7 +842,7 @@ const handleUploads = async function(client){
           const itemId = item.id;
           const videoId = item.contentDetails.upload.videoId;
 
-          let noti = await GlobalData.findOne({
+          let noti = await GlobalDatas.findOne({
             "info.type": "bellNotification"
           });
 
@@ -926,7 +902,7 @@ const handleUploads = async function(client){
           const tweetId = tweet.id_str;
           const link = `https://twitter.com/${config.twitter_screenname}/status/${tweetId}`;
 
-          let noti = await GlobalData.findOne({
+          let noti = await GlobalDatas.findOne({
             "info.type": "bellNotification"
           });
 
@@ -986,7 +962,7 @@ const handleUploads = async function(client){
 
           const streamTitle = stream.title;
 
-          let noti = await GlobalData.findOne({
+          let noti = await GlobalDatas.findOne({
             "info.type": "bellNotification"
           });
 
@@ -1055,12 +1031,12 @@ const handleUploads = async function(client){
  */
 const Initialize = async function(client, message){
   if(!message){
-    const docGuild = await Guild.findOne({guild_id: client}) ?? await new Guild({guild_id: client}).save();
+    const docGuild = await Guilds.findOne({guild_id: client}) ?? await new Guilds({guild_id: client}).save();
   }
-  const docGuild = await Guild.findOne({guild_id: message.guild.id}) ?? await new Guild({guild_id: message.guild.id}).save();
+  const docGuild = await Guilds.findOne({guild_id: message.guild.id}) ?? await new Guilds({guild_id: message.guild.id}).save();
 
   // Variables
-  const prefix = docGuild.settings.prefix;
+  const prefix = "/";
   const guild = message.guild;
   const author = message.author;
   const member = message.member;
@@ -1275,9 +1251,9 @@ const TutorialEmbed = async function(commandTree, executionInfo, args){
     } else
 
     if(response[0] === "ERROR") {
-      const docGuild = await Guild.findOne({guild_id: message.guild.id}) ?? await new Guild({guild_id: message.guild.id}).save();
+      const docGuild = await Guilds.findOne({guild_id: message.guild.id}) ?? await new Guilds({guild_id: message.guild.id}).save();
 
-      Embed.setAuthor(`Error ▸ ${docGuild.settings.prefix}${commandTree.name}: ${params[response[2]].name}, invalid "${response[3]}"`, guild.iconURL())
+      Embed.setAuthor(`Error ▸ /${commandTree.name}: ${params[response[2]].name}, invalid "${response[3]}"`, guild.iconURL())
       Embed.setColor(Colores.rojo);
       message.channel.send({embeds: [Embed]}); // Si la response está mal, enviar embed (wip)
       return response;
@@ -1285,11 +1261,11 @@ const TutorialEmbed = async function(commandTree, executionInfo, args){
       return response;
     }
   } else { // si hay un error de permisos O no se puede determinar si tiene los permisos necesarios
-    const docGuild = await Guild.findOne({guild_id: message.guild.id}) ?? await new Guild({guild_id: message.guild.id}).save();
+    const docGuild = await Guilds.findOne({guild_id: message.guild.id}) ?? await new Guilds({guild_id: message.guild.id}).save();
 
     let notDetermined = new Discord.MessageEmbed()
     .setAuthor("Error", Config.errorPng)
-    .setDescription(`**—** No se pudo determinar si puedes usar este comando, un administrador del servidor tiene que usar el comando \`${docGuild.settings.prefix}setup\` primero.`)
+    .setDescription(`**—** No se pudo determinar si puedes usar este comando, un administrador del servidor tiene que usar el comando \`/setup\` primero.`)
     .setColor(Colores.rojo);
 
     let notDeterminedUseSetup = new Discord.MessageEmbed()
@@ -1315,11 +1291,11 @@ const DataWork = async function(message, dataSearch){
 
   const guild = message.guild;
 
-  const docGuild = await Guild.findOne({guild_id: guild.id}) ?? await new Guild({guild_id: guild.id});
+  const docGuild = await Guilds.findOne({guild_id: guild.id}) ?? await new Guilds({guild_id: guild.id});
 
   const insuficientSetup = new Discord.MessageEmbed()
   .setAuthor("Error", Config.errorPng)
-  .setDescription(`**—** No se puede usar este comando sin antes configurar el bot "\`${dataSearch.toUpperCase()}\`". Un administrador del servidor tiene que usar el comando \`${docGuild.settings.prefix}setup\` primero.`)
+  .setDescription(`**—** No se puede usar este comando sin antes configurar el bot "\`${dataSearch.toUpperCase()}\`". Un administrador del servidor tiene que usar el comando \`/setup\` primero.`)
   .setColor(Colores.rojo);
 
   let response;
@@ -1347,7 +1323,7 @@ const DataWork = async function(message, dataSearch){
  * @returns 
  */
 const isBannedFrom = async function(message, query){
-  const user = await User.findOne({user_id: message.author.id, guild_id: message.guild.id}) ?? await new User({user_id: message.author.id, guild_id: message.guild.id}).save();
+  const user = await Users.findOne({user_id: message.author.id, guild_id: message.guild.id}) ?? await new Users({user_id: message.author.id, guild_id: message.guild.id}).save();
 
   let response = false;
 
@@ -1498,7 +1474,7 @@ const AfterInfraction = async function(user, data, isSoftwarn){
       banMember = true
       
 
-      GlobalData.findOne({
+      GlobalDatas.findOne({
         "info.type": "temporalGuildBan",
         "info.userID": member.id,
         "info.guild_id": guild.id
@@ -1508,7 +1484,7 @@ const AfterInfraction = async function(user, data, isSoftwarn){
         let now = new Date();
 
         if(!guildBan){
-          const newBan = new GlobalData({
+          const newBan = new GlobalDatas({
             info: {
               type: "temporalGuildBan",
               userID: member.id,
@@ -1588,7 +1564,7 @@ const GeneratePages = async function(guildId, message, itemsPerPage, isDarkShop)
   itemsPerPage = itemsPerPage || 3;
   isDarkShop = isDarkShop || false;
 
-  const user = await User.findOne({
+  const user = await Users.findOne({
     user_id: message.author.id,
     guild_id: guildId
   });
@@ -1596,7 +1572,7 @@ const GeneratePages = async function(guildId, message, itemsPerPage, isDarkShop)
   const interest_txt = "Al comprar este item, su precio subirá";
   const viewExtension = "ꜝ";
 
-  const shop = isDarkShop ? await DarkShop.findOne({guild_id: guildId}) : await Shop.findOne({guild_id: guildId});
+  const shop = isDarkShop ? await DarkShops.findOne({guild_id: guildId}) : await Shops.findOne({guild_id: guildId});
   const emote = isDarkShop ? Emojis.Dark : Emojis.Jeffros;
 
   if(!shop || shop.items.length === 0) return null;
@@ -1865,7 +1841,7 @@ const DarkShopWork = async function(client, guildId){
 
   const eventDuration = Number((Math.random() * maxDaysEventInflation) + 1).toFixed(1); // duración máxima de eventos
 
-  const darkshop = await DarkShop.findOne({guild_id: guildId}) ?? await new DarkShop({
+  const darkshop = await DarkShops.findOne({guild_id: guildId}) ?? await new DarkShops({
     guild_id: guildId,
     inflation: {
       value: inflation,
@@ -2006,7 +1982,7 @@ const DarkShopWork = async function(client, guildId){
   }
 
   // DURACION DE LOS DARKJEFFROS
-  const darkusers = await User.find({
+  const darkusers = await Users.find({
     guild_id: guildId,
     "economy.dark.duration": {$gt: 0}
   });
@@ -2229,7 +2205,7 @@ const ComprarItem = async function(message, user, item, isDarkShop){
   else user.economy.global.jeffros -= toPay
 
   // id
-  let usos = await User.find();
+  let usos = await Users.find();
   let newId = await FindNewId(usos, "data.inventory", "use_id");
 
   // agregarlo al inventario (Array)
@@ -2366,7 +2342,7 @@ const FindNewId = async function(generalQuery, specificQuery, toCheck){
 const WillBenefit = async function(member, objetivesToCheck){
   objetivesToCheck = objetivesToCheck ?? ["any"];
 
-  const user = await User.findOne({
+  const user = await Users.findOne({
     user_id: member.id,
     guild_id: member.guild.id
   });
@@ -2450,7 +2426,7 @@ const GenerateLog = async function(guild, header, footer, description, headerPng
     })
   }
 
-  let docGuild = await Guild.findOne({guild_id: guild.id}) ?? null;
+  let docGuild = await Guilds.findOne({guild_id: guild.id}) ?? null;
 
   if(!docGuild) return console.error("No se ha configurado un logchannel en el servidor", guild.name);
 
@@ -2484,15 +2460,15 @@ async function sendLog(logChannel, embed){
 }
 
 async function createEmbedWithParams(commandTree, guild, params, already){
-  const docGuild = await Guild.findOne({guild_id: guild.id}) ?? await new Guild({guild_id: guild.id}).save();
+  const docGuild = await Guilds.findOne({guild_id: guild.id}) ?? await new Guilds({guild_id: guild.id}).save();
   already = already ?? "";
 
   let Embed = new Discord.MessageEmbed()
-  .setAuthor(`▸ ${docGuild.settings.prefix}${commandTree.name}`, guild.iconURL())
+  .setAuthor(`▸ /${commandTree.name}`, guild.iconURL())
   .setColor(Colores.nocolor)
   .setFooter("<> Obligatorio () Opcional");
 
-  let DescriptionString = `▸ El uso correcto es: ${docGuild.settings.prefix}${commandTree.name} ${already}`;
+  let DescriptionString = `▸ El uso correcto es: /${commandTree.name} ${already}`;
   for (let i = already.split(" ").length - 1; i < params.length; i++) {
     const param = params[i]
     
@@ -2657,7 +2633,7 @@ module.exports = {
     GetChangesAndCreateFields,
     FetchAuditLogs,
     intervalGlobalDatas,
-    Warns,
+    AddWarns,
     Interest,
     VaultWork,
     findLvls5,
@@ -2683,5 +2659,6 @@ module.exports = {
     WillBenefit,
     importImage,
     GenerateLog,
-    isOnMobible
+    isOnMobible,
+    RandomCumplido
 }

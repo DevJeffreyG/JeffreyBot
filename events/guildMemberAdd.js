@@ -5,7 +5,7 @@ const { GenerateLog, DaysUntilToday, Initialize } = require("../src/utils/");
 const Config = require("../src/resources/base.json");
 const Colores = require("../src/resources/colores.json");
 
-const User = require("../modelos/User.model.js");
+const { Users } = require("mongoose").models;
 
 module.exports = async (client, member) => {
     let tag = member.user.tag;
@@ -52,13 +52,13 @@ module.exports = async (client, member) => {
     });
   
     // crear usuario nuevo
-    let query = await User.findOne({
+    let query = await Users.findOne({
       user_id: member.id,
       guild_id: member.guild.id
     });
   
     if(!query){
-      const newUser = new User({
+      const newUser = new Users({
         user_id: member.id,
         guild_id: guild.id
       });

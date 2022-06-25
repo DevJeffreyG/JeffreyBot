@@ -1,4 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const { PermissionFlagsBits } = require('discord-api-types/v10');
+
 const Embed = require("./Embed");
 const Colores = require("../resources/colores.json");
 
@@ -13,7 +15,8 @@ class Command {
         this.name = this.data.name;
         this.info = data.helpdesc ?? this.data.description;
         this.category = data.category;
-        this.execute = async (interaction, params, client) => {
+        this.#staffPerms();
+        this.execute = async (interaction, models, params, client) => {
             await interaction.deferReply()
             interaction.editReply("Hola mundo!")
         };
@@ -24,51 +27,68 @@ class Command {
         }
     }
 
-    async addOption(data = {type, name: "foo", desc: "bar", req: false}) {
+    async addOption(data = {type, name: "foo", desc: "bar", req: false, sub: null}) {
         if(!(data.type && data.name && data.desc)) return console.error("No están todos los datos para crear una opción:", this.data, data)
         
+        const toAdd = data.sub ? this.data.options.find(x => x.name === data.sub) : this.data;
+
         const x = option => this.#optionWork(option, data);
         switch(data.type) {
             case "string":
-                this.data.addStringOption(x);
+                toAdd.addStringOption(x);
                 break;
 
             case "integer":
-                this.data.addIntegerOption(x)
+                toAdd.addIntegerOption(x)
                 break;
             
             case "boolean":
-                this.data.addBooleanOption(x);
+                toAdd.addBooleanOption(x);
                 break;
 
             case "user":
-                this.data.addUserOption(x);
+                toAdd.addUserOption(x);
                 break;
             
             case "channel":
-                this.data.addChannelOption(x);
+                toAdd.addChannelOption(x);
                 break;
 
             case "role":
-                this.data.addRoleOption(x);
+                toAdd.addRoleOption(x);
                 break;
             
             case "mentionable":
-                this.data.addMentionableOption(x);
+                toAdd.addMentionableOption(x);
                 break;
 
             case "number":
-                this.data.addNumberOption(x);
+                toAdd.addNumberOption(x);
                 break;
 
             case "attachment":
-                this.data.addAttachmentOption(x);
+                toAdd.addAttachmentOption(x);
                 break;
 
             case "default":
                 console.error("No se ha creado ninguna opción, 'type' incorrecto", data)
                 break;
         }
+    }
+
+    async addSubcommand(data = {name: "foo", desc: "bar"}) {
+        if(!(data.name && data.desc)) return console.error("No están todos los datos para crear un subcommand:", this.data, data)
+
+        this.data.addSubcommand(sub => 
+            sub
+                .setName(data.name)
+                .setDescription(data.desc)
+        )
+    }
+
+    async #staffPerms() {
+        if(this.category == "STAFF" || this.category == "MODERATION" || this.category == "ADMIN") this.data.setDefaultMemberPermissions(PermissionFlagsBits.Administrator | PermissionFlagsBits.ManageMessages);
+        if(this.category == "DEV") this.data.setDefaultMemberPermissions(0)
     }
 
     #optionWork(option, data) {

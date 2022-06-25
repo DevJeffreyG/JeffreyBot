@@ -6,13 +6,7 @@ const Discord = require("discord.js");
 const { HumanMs } = require("../../src/utils/");
 
 const { Initialize, TutorialEmbed, LimitedTime, WillBenefit } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const User = require("../../modelos/User.model.js");
-const Key = require("../../modelos/Key.model.js");
-
-/* ##### MONGOOSE ######## */
+const { Users, Keys } = require("mongoose").models;
 
 const commandInfo = {
     name: "canjear",
@@ -42,16 +36,16 @@ module.exports = {
         // Comando
         // validar key
 
-        Key.findOne({
+        Keys.findOne({
             code: _key
         }, async (err, key) => {
             if(err) throw err;
             
             if(key){
-                const user = await User.findOne({
+                const user = await Users.findOne({
                     user_id: author.id,
                     guild_id: guild.id
-                }) ?? await new User({
+                }) ?? await new Users({
                     user_id: author.id,
                     guild_id: guild.id
                 });

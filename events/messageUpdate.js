@@ -3,15 +3,12 @@ const Discord = require("discord.js");
 const Config = require("../src/resources/base.json");
 const { jeffreygID } = Config;
 
-const User = require("../modelos/User.model.js");
-const Guild = require("../modelos/Guild.model.js");
-const AutoRole = require("../modelos/autorole.js");
+const { Guilds } = require("mongoose").models;
 
 const { jeffreyMentions, startLinks } = require("../index.js");
 
 module.exports = async (client, oldMessage, message) => {
-    const docGuild = await Guild.findOne({guild_id: message.guild.id}) ?? await new Guild({guild_id: message.guild.id}).save();
-    const prefix = docGuild.settings.prefix;
+    const prefix = "/";
     const channel = message.channel;
     const author = message.author;
   

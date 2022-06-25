@@ -1,16 +1,6 @@
 const Config = require("../../src/resources/base.json");
-const Colores = require("../../src/resources/colores.json");
-const Emojis = require("../../src/resources/emojis.json");
-const Discord = require("discord.js");
-const ms = require("ms");
 
 const { Initialize, TutorialEmbed } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const User = require("../../modelos/User.model.js");
-
-/* ##### MONGOOSE ######## */
 
 const commandInfo = {
     name: "syncmute",

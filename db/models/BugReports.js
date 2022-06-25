@@ -8,4 +8,4 @@ const breporteSchema = mongoose.Schema({
     time: String
 });
 
-module.exports = mongoose.model("BugReport", breporteSchema);
+module.exports = mongoose.model("BugReports", breporteSchema);

@@ -6,7 +6,7 @@ const command = new Command({
     desc: "Revisa la latencia del bot con los servers de Discord",
     category: "GENERAL"
 });
-command.execute = async (interaction, params, client) => {
+command.execute = async (interaction, models, params, client) => {
     let start = Date.now();
     interaction.reply("Pong!").then(() => {
         let diff = (Date.now() - start);

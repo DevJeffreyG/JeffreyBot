@@ -5,12 +5,7 @@ const Discord = require("discord.js");
 const ms = require("ms");
 
 const { Initialize, TutorialEmbed, CollectMessage, ValidateParam, Confirmation } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const Guild = require("../../modelos/Guild.model.js");
-
-/* ##### MONGOOSE ######## */
+const { Guilds } = require("mongoose").models;
 
 const modulos = "prefix | adminrole | staffrole | userrole | botrole | generallogs | moderationlogs | stafflogs";
 
@@ -45,14 +40,7 @@ module.exports = {
         // Comando
 
         if(action === "wizard"){
-            let msg = await message.reply("¿Cuál es el nuevo prefijo para los comandos?");
-            let prefix = await CollectMessage(message, msg);
-            if(!prefix) return;
-
-            prefix = prefix.content;
-
-            await msg.edit("¿Cuál es el nuevo role de ADMINS?");
-
+            let msg = await message.reply("¿Cuál es el nuevo role de ADMINS?");
             let adminRole;
 
             while(!adminRole){
@@ -98,37 +86,32 @@ module.exports = {
             // confirmacion
 
             let toConfirm = [
-                `Nuevo prefix: \`${prefix}\`.`,
-                `Role de Administradores: ${adminRole}.`,
-                `Role de STAFF: ${staffRole}.`,
-                `Role de Usuarios: ${userRole}.`,
-                `Role de Bots: ${botsRole}.`
+                `+Role de Administradores: ${adminRole}.`,
+                `+Role de STAFF: ${staffRole}.`,
+                `+Role de Usuarios: ${userRole}.`,
+                `+Role de Bots: ${botsRole}.`
             ];
 
             let confirmation = await Confirmation("Nueva configuración", toConfirm, message);
             if(!confirmation) return;
 
-            const docGuild = await Guild.findOne({guild_id: guild.id});
+            const docGuild = await Guilds.findOne({guild_id: guild.id});
 
             if(!docGuild){
-                await new Guild({
+                await new Guilds({
                     guild_id: guild.id,
-                    settings: {
-                        prefix: prefix
-                    },
                     roles: {
-                        admin: adminRole.id,
-                        staff: staffRole.id,
-                        users: userRole.id,
-                        bots: botsRole.id
+                        admin: [adminRole.id],
+                        staff: [staffRole.id],
+                        users: [userRole.id],
+                        bots: [botsRole.id]
                     }
                 }).save();
             } else {
-                docGuild.settings.prefix = prefix;
-                docGuild.roles.admin = adminRole.id;
-                docGuild.roles.staff = staffRole.id;
-                docGuild.roles.users = userRole.id;
-                docGuild.roles.bots = botsRole.id;
+                docGuild.roles.admins.push(adminRole.id)
+                docGuild.roles.staffs.push(staffRole.id)
+                docGuild.roles.users.push(userRole.id)
+                docGuild.roles.bots.push(botsRole.id)
 
                 await docGuild.save()
             }
@@ -138,7 +121,7 @@ module.exports = {
 
             return message.react("✅");
         } else {
-            const docGuild = await Guild.findOne({guild_id: guild.id}) ?? await new Guild({guild_id: guild.id}).save();
+            const docGuild = await Guilds.findOne({guild_id: guild.id}) ?? await new Guilds({guild_id: guild.id}).save();
 
             const modulo = response.find(x => x.param === "modulo").data;
 

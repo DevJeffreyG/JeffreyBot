@@ -6,9 +6,7 @@ const Colores = require("../src/resources/colores.json");
 const Emojis = require("../src/resources/emojis.json");
 const { disableAwards, jeffreygID } = Config;
 
-const User = require("../modelos/User.model.js");
-const GlobalData = require("../modelos/globalData.js");
-const AutoRole = require("../modelos/autorole.js");
+const { Users, GlobalDatas, AutoRoles } = require("mongoose").models;
 
 module.exports = async (client, reaction, user) => {
     if (user.bot) return;
@@ -19,7 +17,7 @@ module.exports = async (client, reaction, user) => {
     const member = guild.members.cache.get(user.id);
 
     // AUTOROLES
-    AutoRole.findOne({
+    AutoRoles.findOne({
         serverID: guild.id,
         channelID: channel.id,
         messageID: message.id,
@@ -34,7 +32,7 @@ module.exports = async (client, reaction, user) => {
         
         const roleToAdd = guild.roles.cache.find(x => x.id === autorole.roleID);
         if(autorole.toggleGroup != "0"){ // es toggleable D:
-            const sameGroup = await AutoRole.find({serverID: guild.id, toggleGroup: autorole.toggleGroup});
+            const sameGroup = await AutoRoles.find({serverID: guild.id, toggleGroup: autorole.toggleGroup});
             
             if(sameGroup.length > 1){
                 // hay varios toggles.
@@ -213,12 +211,12 @@ module.exports = async (client, reaction, user) => {
         yes.on("collect", async r => {
           msg.reactions.removeAll();
 
-          let user_author = await User.findOne({ // buscar al que paga el premio
+          let user_author = await Users.findOne({ // buscar al que paga el premio
             user_id: user.id,
             guild: guild.id
           });
 
-          let user_reciever = await User.findOne({ // buscar el que recibe el premio
+          let user_reciever = await Users.findOne({ // buscar el que recibe el premio
             user_id: user.id,
             guild_id: guild.id
           });
@@ -240,7 +238,7 @@ module.exports = async (client, reaction, user) => {
             }
 
             if (!user_reciever) {
-              const newUser = new User({
+              const newUser = new Users({
                 user_id: message.author.id,
                 guild: guild.id,
                 economy: {
@@ -313,7 +311,7 @@ module.exports = async (client, reaction, user) => {
     }
 
     // ENCUESTAS
-    GlobalData.findOne({
+    GlobalDatas.findOne({
       "info.type": "temporalPoll",
       "info.guild_id": guild.id,
       "info.message_id": message.id

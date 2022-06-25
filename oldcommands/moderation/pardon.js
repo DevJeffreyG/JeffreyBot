@@ -3,12 +3,7 @@ const Colores = require("../../src/resources/colores.json");
 const Discord = require("discord.js");
 
 const { Initialize, TutorialEmbed, Confirmation } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const User = require("../../modelos/User.model.js");
-
-/* ##### MONGOOSE ######## */
+const { Users } = require("mongoose").models;
 
 const commandInfo = {
     name: "pardon",
@@ -42,7 +37,7 @@ module.exports = {
 
         // Comando
         let idsNow = []; // ids en uso actualmente para el tipo de infraccion a quitar
-        let users = await User.find();
+        let users = await Users.find();
 
         if(!isSoftwarn){ // buscar la id de los warns
             for (let i = 0; i < users.length; i++) {
@@ -77,7 +72,7 @@ module.exports = {
         if(!idFound) return message.channel.send({embeds: [notFound]});
 
         // si hay una id, proseguir
-        let user = await User.findOne({
+        let user = await Users.findOne({
             user_id: idFound.user_id,
             guild_id: idFound.guild_id
         });

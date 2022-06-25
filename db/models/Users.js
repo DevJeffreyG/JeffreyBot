@@ -1,8 +1,6 @@
-const { User } = require('discord.js')
 const mongoose = require('mongoose')
 
 const Schema = mongoose.Schema
-
 
 const UserSchema = new Schema({
     guild_id: { type: String, required: true },
@@ -107,4 +105,14 @@ const UserSchema = new Schema({
     }
 })
 
-module.exports = mongoose.model('User', UserSchema)
+UserSchema.static("getOrCreate", async function({user_id, guild_id}) {
+    return this.findOne({
+        user_id: user_id,
+        guild_id: guild_id
+    }) ?? new this({
+        user_id: user_id,
+        guild_id: guild_id
+    }).save();
+})
+
+module.exports = mongoose.model('Users', UserSchema)

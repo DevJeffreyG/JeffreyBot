@@ -1,18 +1,13 @@
-const User = require("../modelos/User.model.js");
 const Config = require("../src/resources/base.json");
-
+const { Users } = require("mongoose").models;
 const { jeffrosExpCooldown } = require("../index.js");
 
 module.exports = async (client, message) => {
     const author = message.author;
 
-    if (jeffrosExpCooldown.has(author.id)) {
-      let q = await User.findOne({
-        user_id: author.id,
-        guild_id: message.guild.id
-      });
-  
-      if(!q) return;
+    let q = await Users.getOrCreate({user_id: author.id, guild_id: message.guild.id});
+
+    if (q.data.cooldowns.jeffros_exp) {
       if(message.channel.id != Config.mainChannel) return; // arreglar esto ############################################
   
       let global = q.economy.global

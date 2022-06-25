@@ -1,12 +1,10 @@
 const ms = require("ms");
 const moment = require("moment");
 
-const { Command, HumanMs, Embed } = require("../../src/utils");
+const { Command, HumanMs, Embed, RandomCumplido } = require("../../src/utils");
 
-const { Config, Emojis, Responses, Cumplidos } = require("../../src/resources/");
+const { Config, Emojis, Responses } = require("../../src/resources/");
 const { multiplier } = Config;
-
-const User = require("../../modelos/User.model.js");
 
 const command = new Command({
     name: "coins",
@@ -14,11 +12,11 @@ const command = new Command({
     category: "ECONOMY"
 });
 
-command.execute = async (interaction, params, client) => {
+command.execute = async (interaction, models, params, client) => {
+    const { Users } = models
     let coinsCooldown = ms("10m");
 
     await interaction.deferReply();
-    var randomCumplidos = Cumplidos.c[Math.floor(Math.random() * Cumplidos.c.length)];
 
     const guild = client.guilds.cache.find(x => x.id === interaction.guildId);
     const author = client.users.cache.find(x => x.id === interaction.user.id);
@@ -51,10 +49,10 @@ command.execute = async (interaction, params, client) => {
     }
 
     // buscar usuario
-    const user = await User.findOne({
+    const user = await Users.findOne({
         user_id: author.id,
         guild_id: guild.id
-    }) ?? await new User({
+    }) ?? await new Users({
         user_id: author.id,
         guild_id: guild.id
     }).save();
@@ -109,7 +107,7 @@ command.execute = async (interaction, params, client) => {
 
         if(moment().isAfter(toCheck)) user.data.cooldowns.coins = null;
         else
-        return interaction.editReply(`Usa este comando en ${left}, ${randomCumplidos}`);
+        return interaction.editReply(`Usa este comando en ${left}, ${RandomCumplido()}.`);
     }
 
     user.data.cooldowns.coins = new Date();

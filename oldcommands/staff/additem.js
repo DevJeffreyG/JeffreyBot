@@ -2,13 +2,7 @@ const Emojis = require("../../src/resources/emojis.json");
 
 const { HumanMs } = require("../../src/utils/");
 const { Initialize, TutorialEmbed, CollectMessage, Confirmation, ValidateParam, DarkShopWork, FindNewId } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const Shop = require("../../modelos/Shop.model.js");
-const DarkShop = require("../../modelos/DarkShop.model.js");
-
-/* ##### MONGOOSE ######## */
+const { Shops, DarkShops } = require("mongoose").models;
 
 const commandInfo = {
     name: "additem",
@@ -265,11 +259,11 @@ module.exports = {
 
         if(!confirmation) return;
         
-        let tienda = isDarkShop ? await DarkShop.findOne({guild_id: guild.id}) : await Shop.findOne({guild_id: guild.id});
-        if(!tienda) tienda = isDarkShop ? await DarkShopWork(client, guild.id) : await new Shop({guild_id: guild.id}).save();
+        let tienda = isDarkShop ? await DarkShops.findOne({guild_id: guild.id}) : await Shops.findOne({guild_id: guild.id});
+        if(!tienda) tienda = isDarkShop ? await DarkShopWork(client, guild.id) : await new Shops({guild_id: guild.id}).save();
 
         // id
-        let tiendas = isDarkShop ? await DarkShop.find() : await Shop.find();
+        let tiendas = isDarkShop ? await DarkShops.find() : await Shops.find();
         let newId = await FindNewId(tiendas, "items", "id");
 
         tienda.items.push({

@@ -1,10 +1,5 @@
 const { Initialize, TutorialEmbed } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const User = require("../../modelos/User.model.js");
-
-/* ##### MONGOOSE ######## */
+const { Users } = require("mongoose").models;
 
 const commandInfo = {
     name: "dbuser",
@@ -35,7 +30,7 @@ module.exports = {
         const miembro = await response.find(x => x.param === "miembro").data;
         let q = await response.find(x => x.param === "query").data;
 
-        let query = await User.findOne({
+        let query = await Users.findOne({
             user_id: miembro.id,
             guild_id: guild.id
         });

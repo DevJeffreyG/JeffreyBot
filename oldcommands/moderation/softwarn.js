@@ -4,12 +4,7 @@ const Discord = require("discord.js");
 const reglas = require("../../src/resources/reglas.json");
 
 const { Initialize, TutorialEmbed, Confirmation, AfterInfraction, FindNewId } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const User = require("../../modelos/User.model.js");
-
-/* ##### MONGOOSE ######## */
+const { Users } = require("mongoose").models;
 
 const commandInfo = {
     name: "softwarn",
@@ -66,7 +61,7 @@ module.exports = {
 
             await collected.deferUpdate();
 
-            const user = await User.findOne({
+            const user = await Users.findOne({
                 user_id: member.id,
                 guild_id: member.guild.id
             });
@@ -104,7 +99,7 @@ module.exports = {
             if(hasSoft) return confirmation.edit({embeds: [alreadyWarned]});
 
             // como no tiene el soft, agregarlo
-            let users = await User.find();
+            let users = await Users.find();
             let newId = await FindNewId(users, "softwarns", "id");
 
             softwarns.push({rule_id: rule, proof: proof.url, id: newId});

@@ -5,13 +5,7 @@ const Discord = require("discord.js");
 const ms = require("ms");
 
 const { Initialize, TutorialEmbed, DarkShopWork, ValidateDarkShop } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const User = require("../../modelos/User.model.js");
-const DarkShop = require("../../modelos/DarkShop.model.js");
-
-/* ##### MONGOOSE ######## */
+const { Users, DarkShops } = require("mongoose").models;
 
 const commandInfo = {
     name: "dschange",
@@ -40,10 +34,10 @@ module.exports = {
         // Comando
         const maxDaysForDarkJeffros = Config.daysDarkJeffros;
 
-        const user = await User.findOne({
+        const user = await Users.findOne({
             user_id: author.id,
             guild_id: guild.id
-        }) ?? await new User({
+        }) ?? await new Users({
             user_id: author.id,
             guild_id: guild.id
         }).save();
@@ -55,7 +49,7 @@ module.exports = {
         let jeffros = user.economy.global.jeffros;
 
         // analizando inflación ¿a cuanto equivale un darkjeffro?
-        const dark = await DarkShop.findOne({guild_id: guild.id}) ?? await DarkShopWork(client, guild.id);
+        const dark = await DarkShops.findOne({guild_id: guild.id}) ?? await DarkShopWork(client, guild.id);
 
         const inflation = dark.inflation.value;
         const darkjeffro = 200*inflation

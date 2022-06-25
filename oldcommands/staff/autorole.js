@@ -3,13 +3,7 @@ const Colores = require("../../src/resources/colores.json");
 const Discord = require("discord.js");
 
 const { Initialize, TutorialEmbed } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const AutoRole = require("../../modelos/autorole.js");
-const ToggleGroup = require("../../modelos/toggleGroup.js");
-
-/* ##### MONGOOSE ######## */
+const { ToggleGroups, AutoRoles } = require("mongoose").models;
 
 const commandInfo = {
   name: "autorole",
@@ -76,17 +70,17 @@ module.exports = {
     
   
     // AutoRoles
-    AutoRole.findOne({
+    AutoRoles.findOne({
         serverID: guild.id
     }, async (err, roles) => {
         if (err) throw err;
         if (action === "add") {
           let newID;
   
-          AutoRole.countDocuments({}, function(err, c) {
+          AutoRoles.countDocuments({}, function(err, c) {
             let lastid = c + 1;
   
-            AutoRole.findOne({
+            AutoRoles.findOne({
                 id: lastid
             }, (err, found) => {
                 if (err) throw err;
@@ -98,7 +92,7 @@ module.exports = {
                     console.log("equal id");
                   }
                 }
-                AutoRole.findOne(
+                AutoRoles.findOne(
                   {
                     serverID: guild.id,
                     roleID: arRole.id,
@@ -137,7 +131,7 @@ module.exports = {
                         });
                       }
   
-                      const newARole = new AutoRole({
+                      const newARole = new AutoRoles({
                         serverID: guild.id,
                         roleID: arRole.id,
                         emoji: arEmoji,
@@ -160,7 +154,7 @@ module.exports = {
             );
           });
         } else if (action === "remove") {
-          AutoRole.findOne(
+          AutoRoles.findOne(
             {
               serverID: guild.id,
               id: selectedAutoroleID
@@ -184,7 +178,7 @@ module.exports = {
                     await toRemove.users.remove(client.user.id); // quitar la reacción del cliente
                   });
                 }
-                AutoRole.deleteOne({ serverID: guild.id, id: selectedAutoroleID })
+                AutoRoles.deleteOne({ serverID: guild.id, id: selectedAutoroleID })
                 .then(() => {
                   message.react("✅");
                 })
@@ -195,7 +189,7 @@ module.exports = {
             }
           );
         } else if (action === "list"){
-          AutoRole.find({
+          AutoRoles.find({
             serverID: guild.id
           }, async (err, aroles) => {
             if(err) throw err;
@@ -240,8 +234,8 @@ module.exports = {
               return message.channel.send({embeds: [embed]})
           }
   
-        let toggleGroupQuery = await ToggleGroup.findOne({guild_id: message.guild.id, "info.group_id": toggleGroup});
-        let autoroleQuery = await AutoRole.findOne({serverID: message.guild.id, id: autoroleID});
+        let toggleGroupQuery = await ToggleGroups.findOne({guild_id: message.guild.id, "info.group_id": toggleGroup});
+        let autoroleQuery = await AutoRoles.findOne({serverID: message.guild.id, id: autoroleID});
         
         if(!autoroleQuery) {
             embed.setAuthor(`Error: autorole id`, Config.errorPng)
@@ -249,7 +243,7 @@ module.exports = {
         }
         
         if(!toggleGroupQuery && toggleGroup != 0){
-            const newGroup = new ToggleGroup({
+            const newGroup = new ToggleGroups({
                 guild_id: message.guild.id,
                 info: {
                     group_name: `Grupo ${toggleGroup}`,
@@ -258,7 +252,7 @@ module.exports = {
             });
   
             await newGroup.save();
-            toggleGroupQuery = await ToggleGroup.findOne({guild_id: message.guild.id, "info.group_id": toggleGroup});
+            toggleGroupQuery = await ToggleGroups.findOne({guild_id: message.guild.id, "info.group_id": toggleGroup});
         }
   
         let changedGroup = new Discord.MessageEmbed();
@@ -269,7 +263,7 @@ module.exports = {
           changedGroup.setDescription(`▸ Se ha agregado el autorole con id \`${autoroleID}\` al grupo ${toggleGroup}, "${toggleGroupQuery.info.group_name}".
           ▸ Cambia el nombre del grupo con: \`${prefix}autorole toggle edit <grupo id>\`.`);
         } else {
-          let oldGroup = await ToggleGroup.findOne({guild_id: message.guild.id, "info.group_id": autoroleQuery.toggleGroup});
+          let oldGroup = await ToggleGroups.findOne({guild_id: message.guild.id, "info.group_id": autoroleQuery.toggleGroup});
           changedGroup.setAuthor(`Listo`, Config.bienPng)
           changedGroup.setColor(Colores.rojo)
           changedGroup.setDescription(`▸ Se ha eliminado el autorole con id \`${autoroleID}\` del grupo ${autoroleQuery.toggleGroup}, "${oldGroup.info.group_name}".
@@ -294,7 +288,7 @@ module.exports = {
           let grouptoedit = Number(args[1]);
           let newname = args.join(" ").slice(args[0].length + args[1].length + 2);
 
-          let groupQuery = await ToggleGroup.findOne({guild_id: message.guild.id, "info.group_id": grouptoedit})
+          let groupQuery = await ToggleGroups.findOne({guild_id: message.guild.id, "info.group_id": grouptoedit})
 
           if(groupQuery){
               let changedGroup = new Discord.MessageEmbed()
@@ -313,7 +307,7 @@ module.exports = {
               return message.channel.send({embeds: [embed]})
           }
         } else if(action === "sync"){
-          let syncQuery = await AutoRole.find({serverID: message.guild.id});
+          let syncQuery = await AutoRoles.find({serverID: message.guild.id});
           if(!syncQuery || syncQuery.length == 0) return message.reply(`lo siento, no he encontrado autoroles en este servidor.`);
   
           for (let i = 0; i < syncQuery.length; i++) {

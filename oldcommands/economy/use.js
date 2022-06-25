@@ -9,14 +9,7 @@ var chance = new Chance();
 const reglas = require("../../src/resources/reglas.json");
 
 const { Initialize, TutorialEmbed, FindNewId, LimitedTime, WillBenefit } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const User = require("../../modelos/User.model.js");
-const Shop = require("../../modelos/Shop.model.js");
-const DarkShop = require("../../modelos/DarkShop.model.js");
-
-/* ##### MONGOOSE ######## */
+const { Users, Shops, DarkShops } = require("mongoose").models;
 
 const commandInfo = {
     name: "use",
@@ -50,12 +43,12 @@ module.exports = {
         // Comando
         const dsChannel = client.user.id === Config.testingJBID ? client.channels.cache.find(x => x.id === "790431676970041356") : client.channels.cache.find(x => x.id === Config.dsChannel);
 
-        let user = await User.findOne({
+        let user = await Users.findOne({
             user_id: author.id,
             guild_id: guild.id
         });
 
-        let victim = await User.findOne({
+        let victim = await Users.findOne({
             user_id: member.id,
             guild_id: guild.id
         });
@@ -78,7 +71,7 @@ module.exports = {
         const itemOnInventoryIndex = user.data.inventory.findIndex(inventoryFilter);
 
         // leer el uso y qué hace el item
-        const shop = isDarkShop ? await DarkShop.findOne({guild_id: guild.id}) : await Shop.findOne({guild_id: guild.id});
+        const shop = isDarkShop ? await DarkShops.findOne({guild_id: guild.id}) : await Shops.findOne({guild_id: guild.id});
         const item = shop.items.find(x => x.id === itemOnInventory.item_id);
 
         if(member === message.member && isDarkShop && item.use_info.effect === "negativo"){
@@ -111,7 +104,7 @@ module.exports = {
             let warns = victim.warns;
 
             if(action === "add"){ // agrega warns
-                const users = await User.find();
+                const users = await Users.find();
                 let newId = await FindNewId(users, "warns", "id");
 
                 for (let i = 0; i < Number(given); i++) {

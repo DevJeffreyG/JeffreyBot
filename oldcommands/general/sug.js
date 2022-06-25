@@ -5,12 +5,7 @@ const Discord = require("discord.js");
 const ms = require("ms");
 
 const { Initialize, TutorialEmbed, Confirmation, isBannedFrom, FindNewId, DataWork } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const Guild = require("../../modelos/Guild.model.js");
-
-/* ##### MONGOOSE ######## */
+const { Guilds } = require("mongoose").models;
 
 const commandInfo = {
     name: "sug",
@@ -42,9 +37,9 @@ module.exports = {
 
         let logChannel = await DataWork(message, "STAFF_LOGS_CHANNEL");
 
-        const docGuild = await Guild.findOne({guild_id: guild.id});
+        const docGuild = await Guilds.findOne({guild_id: guild.id});
 
-        const newId = await FindNewId(await Guild.find(), "data.suggestions", "id"); // crear la nueva id para el ticket
+        const newId = await FindNewId(await Guilds.find(), "data.suggestions", "id"); // crear la nueva id para el ticket
 
         const row = new Discord.MessageActionRow()
         .addComponents(

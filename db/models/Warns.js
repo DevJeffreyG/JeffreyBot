@@ -5,4 +5,4 @@ const warnSchema = mongoose.Schema({
     warns: Number
 });
 
-module.exports = mongoose.model("Warn", warnSchema);
+module.exports = mongoose.model("Warns", warnSchema);

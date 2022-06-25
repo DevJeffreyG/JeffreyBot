@@ -5,4 +5,4 @@ const purchasedSchema = mongoose.Schema({
     itemID: String // id en ITEMS.JS
 });
 
-module.exports = mongoose.model("purchases", purchasedSchema);
+module.exports = mongoose.model("Purchases", purchasedSchema);

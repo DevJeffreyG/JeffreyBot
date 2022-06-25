@@ -5,4 +5,4 @@ const swarnSchema = mongoose.Schema({
     warns: Array
 });
 
-module.exports = mongoose.model("SoftWarn", swarnSchema);
+module.exports = mongoose.model("SoftWarns", swarnSchema);

@@ -19,7 +19,7 @@ class HumanMs {
             if(conv[key] != 0) this.prep.push({key, value: conv[key]});
         }
 
-        this._leftworker();
+        this.#toHuman();
 
         return this.returnable.join(" ");
     }
@@ -29,7 +29,7 @@ class HumanMs {
         return this.#convert(left);
     }
     
-    _leftworker(){
+    #toHuman(){
         this.returnable = [];
         this.prep.forEach(r => {
             if(r.value < 0) r.value += 60;

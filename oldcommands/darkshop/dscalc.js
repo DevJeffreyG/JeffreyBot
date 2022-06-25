@@ -5,13 +5,7 @@ const Discord = require("discord.js");
 const ms = require("ms");
 
 const { Initialize, TutorialEmbed, DarkShopWork, ValidateDarkShop } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const User = require("../../modelos/User.model.js");
-const DarkShop = require("../../modelos/DarkShop.model.js");
-
-/* ##### MONGOOSE ######## */
+const { Users, DarkShops } = require("mongoose").models;
 
 const commandInfo = {
     name: "dscalc",
@@ -36,10 +30,10 @@ module.exports = {
 
         if(response[0] === "ERROR") return console.log(response); // si hay algún error
 
-        const user = await User.findOne({user_id: author.id, guild_id: guild.id}) ?? await new User({user_id: author.id, guild_id: guild.id}).save();
+        const user = await Users.findOne({user_id: author.id, guild_id: guild.id}) ?? await new Users({user_id: author.id, guild_id: guild.id}).save();
         const toCalc = response.find(x => x.param === "darkjeffros").data || (user.economy.dark.darkjeffros ?? 0);
 
-        const dark = await DarkShop.findOne({guild_id: guild.id}) ?? await DarkShopWork(client, guild.id);
+        const dark = await DarkShops.findOne({guild_id: guild.id}) ?? await DarkShopWork(client, guild.id);
 
         // en caso de que no sea nivel 5 o superior
         let validation = await ValidateDarkShop(user, author);

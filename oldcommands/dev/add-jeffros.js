@@ -3,12 +3,7 @@ const Emojis = require("../../src/resources/emojis.json");
 const Discord = require("discord.js");
 
 const { Initialize, TutorialEmbed } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const User = require("../../modelos/User.model.js");
-
-/* ##### MONGOOSE ######## */
+const { Users } = require("mongoose").models;
 
 const commandInfo = {
   name: "add-jeffros",
@@ -44,10 +39,10 @@ module.exports = {
     const jeffrosToAdd = response.find(x => x.param === "a añadir").data;
     const isDark = response.find(x => x.param === "darkjeffros?").data;
   
-    const user = await User.findOne({
+    const user = await Users.findOne({
       user_id: member.id,
       guild_id: guild.id
-    }) ?? await new User({
+    }) ?? await new Users({
         user_id: member.id,
         guild_id: guild.id
     }).save();

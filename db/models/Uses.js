@@ -14,4 +14,4 @@ const useSchema = mongoose.Schema({
 
 })
 
-module.exports = mongoose.model("uses", useSchema);
+module.exports = mongoose.model("Uses", useSchema);

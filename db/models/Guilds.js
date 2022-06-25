@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const { prefix } = require("../src/resources/base.json");
 
 const Schema = mongoose.Schema;
 
@@ -31,13 +30,13 @@ const GuildSchema = new Schema({
         ]
     },
     settings: {
-        prefix: { type: String, required: true, default: prefix }
+        
     },
     roles: { // id de roles
-        admin: { type: String },
-        staff: { type: String },
-        users: { type: String },
-        bots: { type: String }
+        admins: { type: Array },
+        staffs: { type: Array },
+        users: { type: Array },
+        bots: { type: Array }
     },
     channels: {
         general_logs: { type: String },
@@ -46,4 +45,8 @@ const GuildSchema = new Schema({
     }
 });
 
-module.exports = mongoose.model('Guild', GuildSchema);
+GuildSchema.static("getById", function(id){
+    return this.findOne({guild_id: id})
+});
+
+module.exports = mongoose.model('Guilds', GuildSchema);

@@ -7,4 +7,4 @@ const purchasedSchema = mongoose.Schema({
     isDarkShop: Boolean
 });
 
-module.exports = mongoose.model("totalPurchases", purchasedSchema);
+module.exports = mongoose.model("TotalPurchases", purchasedSchema);

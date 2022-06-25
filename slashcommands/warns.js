@@ -4,10 +4,7 @@ const Config = require("./../src/resources/base.json");
 const Colores = require("./../src/resources/colores.json");
 const reglas = require("./../src/resources/reglas.json");
 
-const User = require("../modelos/User.model.js");
-
-const Warn = require("../modelos/warn.js");
-const SoftWarn = require("../modelos/softwarn.js");
+const { Users } = require("mongoose").models;
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -51,7 +48,7 @@ module.exports = {
         .setAuthor(`${member.user.tag}`, member.user.displayAvatarURL())
         .setDescription(`Este usuario no tiene warns de ningún tipo.`);
         
-        const user = await User.findOne({
+        const user = await Users.findOne({
             user_id: member.id,
             guild_id: guild.id
         });

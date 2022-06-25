@@ -5,13 +5,7 @@ const Discord = require("discord.js");
 const ms = require("ms");
 
 const { Initialize, TutorialEmbed, InteractivePages } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const User = require("../../modelos/User.model.js");
-const DarkShop = require("../../modelos/DarkShop.model.js");
-
-/* ##### MONGOOSE ######## */
+const { Users, DarkShops } = require("mongoose").models;
 
 const commandInfo = {
     name: "top",
@@ -66,7 +60,7 @@ module.exports = {
 
             
             if(type === "jeffros"){
-                const users = await User.find({guild_id: guild.id});
+                const users = await Users.find({guild_id: guild.id});
                 const _res = await getJeffrosAndDJ(guild, users);
                 const res = _res[0];
 
@@ -116,7 +110,7 @@ module.exports = {
             }
 
             if(type === "exp"){
-                const users = await User.find({guild_id: guild.id}).sort([["economy.global.exp", "descending"]]);
+                const users = await Users.find({guild_id: guild.id}).sort([["economy.global.exp", "descending"]]);
 
                 const yourRank = await getRank(users, author.id);
 
@@ -164,7 +158,7 @@ module.exports = {
             }
 
             if(type === "rep"){
-                const users = await User.find({guild_id: guild.id}).sort([["economy.global.reputation", "descending"]]);
+                const users = await Users.find({guild_id: guild.id}).sort([["economy.global.reputation", "descending"]]);
 
                 const yourRank = await getRank(users, author.id);
 
@@ -218,7 +212,7 @@ module.exports = {
         async function getJeffrosAndDJ(guild, users, id){
             id = id ?? author.id
             // DARKJEFFROS
-            let globalq = await DarkShop.findOne({
+            let globalq = await DarkShops.findOne({
                 guild_id: guild.id
             });
       

@@ -5,13 +5,7 @@ const Discord = require("discord.js");
 const ms = require("ms");
 
 const { Initialize, TutorialEmbed, FindNewId, Confirmation } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const User = require("../../modelos/User.model.js");
-const Vault = require("../../modelos/Vault.model.js");
-
-/* ##### MONGOOSE ######## */
+const { Vaults } = require("mongoose").models;
 
 const commandInfo = {
     name: "adminvault",
@@ -56,7 +50,7 @@ module.exports = {
 
         const action = response.find(x => x.param === "action").data;
         // Comando
-        const vault = await Vault.findOne({guild_id: guild.id}) ?? await new Vault({guild_id: guild.id}).save();
+        const vault = await Vaults.findOne({guild_id: guild.id}) ?? await new Vaults({guild_id: guild.id}).save();
 
         if(action === "add"){
             const toadmin = response.find(x => x.param === "toadmin").data;
@@ -84,7 +78,7 @@ module.exports = {
                 return message.react("✅");
             } else if(toadmin === "code") {
                 const newCode = response.find(x => x.param === "codigo final").data.toUpperCase();
-                const newId = await FindNewId(await Vault.find(), "codes", "id");
+                const newId = await FindNewId(await Vaults.find(), "codes", "id");
 
                 if(vault.codes.find(x => x.code === newCode)) return message.reply("Ya existe un código igual en este vault.");
 

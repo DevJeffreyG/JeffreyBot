@@ -11,4 +11,4 @@ const ToggleSchema = new Schema({
     }
 })
 
-module.exports = mongoose.model('ToggleGroup', ToggleSchema)
+module.exports = mongoose.model('ToggleGroups', ToggleSchema)

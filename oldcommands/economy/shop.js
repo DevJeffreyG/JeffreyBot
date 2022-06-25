@@ -5,13 +5,7 @@ const Discord = require("discord.js");
 const ms = require("ms");
 
 const { Initialize, TutorialEmbed, GeneratePages, InteractivePages } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const User = require("../../modelos/User.model.js");
-const Shop = require("../../modelos/Shop.model.js");
-
-/* ##### MONGOOSE ######## */
+const { Users, Shops } = require("mongoose").models;
 
 const commandInfo = {
     name: "shop",
@@ -32,12 +26,12 @@ module.exports = {
         if(response[0] === "ERROR") return console.log(response); // si hay algún error
 
         // Comando
-        const user = await User.findOne({
+        const user = await Users.findOne({
             user_id: author.id,
             guild_id: guild.id
         });
 
-        const shop = await Shop.findOne({
+        const shop = await Shops.findOne({
             guild_id: guild.id
         });
 

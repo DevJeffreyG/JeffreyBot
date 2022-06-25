@@ -6,25 +6,8 @@ var Chance = require("chance");
 var chance = new Chance();
 const ms = require("ms");
 const prefix = Config.prefix;
-const functions = require("../../src/utils/");
-
-const { Initialize, TutorialEmbed } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const User = require("../../modelos/User.model.js");
-
-const Jeffros = require("../../modelos/jeffros.js");
-const Exp = require("../../modelos/exp.js");
-const Warn = require("../../modelos/warn.js");
-
-const Stats = require("../../modelos/darkstats.js");
-const Items = require("../../modelos/darkitems.js");
-const DarkUse = require("../../modelos/darkUse.js");
-const GlobalData = require("../../modelos/globalData.js");
-const All = require("../../modelos/allpurchases.js");
-
-/* ##### MONGOOSE ######## */
+const { AddWarns, Interest, LimitedTime } = require("../../src/utils/");
+const { Jeffros, Exps, Stats, Items, DarkUse, GlobalDatas, TotalPurchases } = require("mongoose").models;
 
 const commandInfo = {
     name: "odarkshop",
@@ -72,12 +55,12 @@ module.exports = {
                 userID: author.id
             }, (err, jeffros) => {
         
-            GlobalData.findOne({
+            GlobalDatas.findOne({
                 "info.type": "dsInflation"
             }, (err, dark) => {
                     if (err) throw err;
                 
-                    Exp.findOne({
+                    Exps.findOne({
                         serverID: guild.id,
                         userID: author.id
                     }, (err, exp) => {
@@ -120,7 +103,7 @@ module.exports = {
                                             tienda.setFooter(`| DarkShop - Página 1 de 1 | Alias: ${prefix}ds`, guild.iconURL());
                                         
                                             for(let i = 0; i < items.length; i++){
-                                                All.findOne({
+                                                TotalPurchases.findOne({
                                                     userID: author.id,
                                                     itemID: items[i].id,
                                                     isDarkShop: true
@@ -253,7 +236,7 @@ module.exports = {
         
                                                                 for (let i = inicio; i <= fin; i++) {
                                                                     if(!items[i]) return msg.edit({embeds: [embed]});
-                                                                    let all = await All.findOne({
+                                                                    let all = await TotalPurchases.findOne({
                                                                         userID: author.id,
                                                                         itemID: items[i].id,
                                                                         isDarkShop: true
@@ -320,7 +303,7 @@ module.exports = {
                                                                 );
         
                                                                 for (let i = inicio; i <= fin; i++) {
-                                                                    let all = await All.findOne({
+                                                                    let all = await TotalPurchases.findOne({
                                                                         userID: author.id,
                                                                         itemID: items[i].id,
                                                                         isDarkShop: true
@@ -413,7 +396,7 @@ module.exports = {
                                     .setDescription(`**—** Parece que no se ha generado ninguna fecha de expiración... intenta cambiando algunos Jeffros por DarkJeffros...`)
                                     .setFooter("▸ Si crees que se trata de un error, contacta al Staff.");
         
-                                    GlobalData.findOne({
+                                    GlobalDatas.findOne({
                                         "info.type": "dsDJDuration",
                                         "info.userID": author.id
                                     }, (err, authorData) => {
@@ -494,7 +477,7 @@ module.exports = {
                                         if(err) throw err;
         
                                         // agregar una nueva data global: "duracion de darkjeffros"
-                                        GlobalData.findOne({
+                                        GlobalDatas.findOne({
                                             "info.type": "dsDJDuration",
                                             "info.userID": author.id
                                         }, (err, djDuration) => {
@@ -504,7 +487,7 @@ module.exports = {
                                             duration = Math.ceil(dark.info.duration) + Math.floor(Math.random() * maxDaysForDarkJeffros); // duración máxima de darkjeffros & minima de la duracion de la inflacion actual.
         
                                             if(!djDuration){ // si no existe ninguna data global de tipo dsDJDuration, simplemente crear una nueva para este usuario
-                                                const newData = new GlobalData({
+                                                const newData = new GlobalDatas({
                                                     info: {
                                                         type: "dsDJDuration", // duracion de darkjeffros en la ds
                                                         userID: author.id,
@@ -1170,7 +1153,7 @@ module.exports = {
                                                                                     if(!victim.roles.cache.find(x => x.id === dsRole.id)){
                                                                                         return dsChannel.send({embeds: [fail2]});
                                                                                     } else {
-                                                                                        functions.Warns(victim, cantidad);
+                                                                                        AddWarns(victim, cantidad);
         
                                                                                         dsChannel.send({embeds: [success2]});
                 
@@ -1178,20 +1161,20 @@ module.exports = {
                                                                                         stats.items.splice(index, 1);
         
                                                                                         // revisar si se ignora el interes o no
-                                                                                        functions.Interest(author, idUse);
+                                                                                        Interest(author, idUse);
         
                                                                                         return stats.save();
                                                                                     }
                                                                                 } else {
                                                                                     if(victimStats.items.length === 0){ // tiene cuenta pero no items, proseguir
-                                                                                        functions.Warns(victim, cantidad);                                                                                
+                                                                                        AddWarns(victim, cantidad);                                                                                
                                                                                         dsChannel.send({embeds: [success2]});
         
                                                                                         //eliminar item del autor
                                                                                         stats.items.splice(index, 1);
                                                                                         
                                                                                         // revisar si se ignora el interes o no
-                                                                                        functions.Interest(author, idUse);
+                                                                                        Interest(author, idUse);
                                                                                         
                                                                                         return stats.save();
                                                                                     }
@@ -1205,14 +1188,14 @@ module.exports = {
                                                                                             let skip2 = chance.bool({likelihood: accu2});
         
                                                                                             if(skip2 === true){ // skip firewall
-                                                                                                functions.Warns(victim, cantidad);                                                                                
+                                                                                                AddWarns(victim, cantidad);                                                                                
                                                                                                 dsChannel.send({embeds: [skipped2]});
         
                                                                                                 //eliminar item del autor
                                                                                                 stats.items.splice(index, 1);
         
                                                                                                 // revisar si se ignora el interes o no
-                                                                                                functions.Interest(author, idUse);
+                                                                                                Interest(author, idUse);
                                                                                                 
                                                                                                 return stats.save();
                                                                                             } else {
@@ -1226,31 +1209,31 @@ module.exports = {
                                                                                                 stats.items.splice(index, 1);
         
                                                                                                 // revisar si se ignora el interes o no
-                                                                                                functions.Interest(author, idUse);
+                                                                                                Interest(author, idUse);
                                                                                                 
                                                                                                 return stats.save();
                                                                                             }
                                                                                         } else {
-                                                                                            functions.Warns(victim, cantidad);                                                                                
+                                                                                            AddWarns(victim, cantidad);                                                                                
                                                                                             dsChannel.send({embeds: [success2]});
         
                                                                                             //eliminar item del autor
                                                                                             stats.items.splice(index, 1);
         
                                                                                             // revisar si se ignora el interes o no
-                                                                                            functions.Interest(author, idUse);
+                                                                                            Interest(author, idUse);
                                                                                             
                                                                                             return stats.save();
                                                                                         }
                                                                                     } else { // no tienen ningun item con nombre firewall
-                                                                                        functions.Warns(victim, cantidad);                                                                                
+                                                                                        AddWarns(victim, cantidad);                                                                                
                                                                                         dsChannel.send({embeds: [success2]});
         
                                                                                         //eliminar item del autor
                                                                                         stats.items.splice(index, 1);
         
                                                                                         // revisar si se ignora el interes o no
-                                                                                        functions.Interest(author, idUse);
+                                                                                        Interest(author, idUse);
                                                                                         
                                                                                         return stats.save();
                                                                                     }
@@ -1258,14 +1241,14 @@ module.exports = {
                                                                             })
                                                                         } else {
                                                                             // no es negativo agregar warns
-                                                                            functions.Warns();
+                                                                            AddWarns();
                                                                             dsChannel.send({embeds: [success2]});
         
                                                                             //eliminar item del autor
                                                                             stats.items.splice(index, 1);
                                                                             
                                                                             // revisar si se ignora el interes o no
-                                                                            functions.Interest(author, idUse);
+                                                                            Interest(author, idUse);
                                                                             
                                                                             return stats.save();
                                                                         }
@@ -1333,11 +1316,11 @@ module.exports = {
                                                                                         stats.save();
         
                                                                                         // revisar si se ignora el interes o no
-                                                                                        functions.Interest(author, idUse);
+                                                                                        Interest(author, idUse);
                                                                                         
         
                                                                                         // tiene una duración?
-                                                                                        return functions.LimitedTime(guild, role.id, victim, duracion);
+                                                                                        return LimitedTime(guild, role.id, victim, duracion);
                                                                                     }
                                                                                 } else {
                                                                                     if(victimStats.items.length === 0){ // tiene cuenta pero no items, proseguir
@@ -1352,10 +1335,10 @@ module.exports = {
                                                                                         stats.save();
         
                                                                                         // revisar si se ignora el interes o no
-                                                                                        functions.Interest(author, idUse);
+                                                                                        Interest(author, idUse);
                                                                                         
                                                                                         // tiene una duración?
-                                                                                        return functions.LimitedTime(guild, role.id, victim, duracion);
+                                                                                        return LimitedTime(guild, role.id, victim, duracion);
                                                                                     }
         
                                                                                     if(victimStats.items.find(x => x.name === "Firewall")){ // si encuentra un item con nombre "Firewall", revisar si está activo
@@ -1375,11 +1358,11 @@ module.exports = {
                                                                                                 stats.save();
         
                                                                                                 // revisar si se ignora el interes o no
-                                                                                                functions.Interest(author, idUse);
+                                                                                                Interest(author, idUse);
                                                                                                 
         
                                                                                                 // tiene una duración?
-                                                                                                return functions.LimitedTime(guild, role.id, victim, duracion);
+                                                                                                return LimitedTime(guild, role.id, victim, duracion);
                                                                                             } else {
                                                                                                 dsChannel.send({embeds: [fail3]});
         
@@ -1391,7 +1374,7 @@ module.exports = {
                                                                                                 stats.items.splice(index, 1);
         
                                                                                                 // revisar si se ignora el interes o no
-                                                                                                functions.Interest(author, idUse);
+                                                                                                Interest(author, idUse);
                                                                                                 
                                                                                                 return stats.save();
                                                                                             }
@@ -1407,11 +1390,11 @@ module.exports = {
                                                                                             stats.save();
         
                                                                                             // revisar si se ignora el interes o no
-                                                                                            functions.Interest(author, idUse);
+                                                                                            Interest(author, idUse);
                                                                                             
         
                                                                                             // tiene una duración?
-                                                                                            return functions.LimitedTime(guild, role.id, victim, duracion);
+                                                                                            return LimitedTime(guild, role.id, victim, duracion);
                                                                                         }
                                                                                     } else { // no tienen ningun item con nombre firewall
         
@@ -1426,11 +1409,11 @@ module.exports = {
                                                                                         stats.save();
         
                                                                                         // revisar si se ignora el interes o no
-                                                                                        functions.Interest(author, idUse);
+                                                                                        Interest(author, idUse);
                                                                                         
         
                                                                                         // tiene una duración?
-                                                                                        return functions.LimitedTime(guild, role.id, victim, duracion);
+                                                                                        return LimitedTime(guild, role.id, victim, duracion);
                                                                                     }
                                                                                 }
                                                                             })
@@ -1454,11 +1437,11 @@ module.exports = {
                                                                             stats.save();
         
                                                                             // revisar si se ignora el interes o no
-                                                                            functions.Interest(author, idUse);
+                                                                            Interest(author, idUse);
                                                                             
         
                                                                             // tiene una duración?
-                                                                            return functions.LimitedTime(guild, role.id, victim, duracion);
+                                                                            return LimitedTime(guild, role.id, victim, duracion);
                                                                             
                                                                         }
                                                                     }
@@ -1474,7 +1457,7 @@ module.exports = {
                                                                         let finalAc = Number(stats.accuracy += randomPercentage).toFixed(1);
         
                                                                         // revisar si se ignora el interes o no
-                                                                        functions.Interest(author, idUse);
+                                                                        Interest(author, idUse);
         
                                                                         stats.accuracy = finalAc;
                                                                         if(finalAc > 90) stats.accuracy = 90;
@@ -1497,7 +1480,7 @@ module.exports = {
                                                                         .catch(err => console.log(err));
         
                                                                         // revisar si se ignora el interes o no
-                                                                        functions.Interest(author, idUse);
+                                                                        Interest(author, idUse);
                                                                         
         
                                                                         let activated = new Discord.MessageEmbed()
@@ -1507,7 +1490,7 @@ module.exports = {
                                                                         return message.channel.send({embeds: [activated]})
                                                                     } else {
                                                                         // revisar si se ignora el interes o no
-                                                                        functions.Interest(author, idUse);
+                                                                        Interest(author, idUse);
                                                                         
                                                                         return message.reply("este item ya está activo en tu cuenta.")
                                                                     }
@@ -1558,7 +1541,7 @@ module.exports = {
                                                         return message.channel.send(`[003] Ups, ¡<@${Config.jeffreygID}>! Una ayudita por aquí...\n${author}, espera un momento a que Jeffrey arregle algo para que puedas comprar tu item :)`);
                                                     }
         
-                                                    All.findOne({
+                                                    TotalPurchases.findOne({
                                                         userID: author.id,
                                                         itemID: item.id,
                                                         isDarkShop: true

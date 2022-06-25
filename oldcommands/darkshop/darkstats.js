@@ -5,12 +5,7 @@ const Discord = require("discord.js");
 const moment = require("moment");
 
 const { Initialize, TutorialEmbed, DaysUntilToday, ValidateDarkShop } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const User = require("../../modelos/User.model.js");
-
-/* ##### MONGOOSE ######## */
+const { Users } = require("mongoose").models;
 
 const commandInfo = {
     name: "darkstats",
@@ -37,7 +32,7 @@ module.exports = {
         const member = response.find(x => x.param === "miembro").data || message.member;
 
         // Comando
-        const user = await User.findOne({
+        const user = await Users.findOne({
             user_id: member.id,
             guild_id: guild.id
         });

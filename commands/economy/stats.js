@@ -1,9 +1,6 @@
 const { Command, Embed } = require("../../src/utils")
 const { Config, Colores, Emojis } = require("../../src/resources");
 
-const User = require("../../modelos/User.model.js");
-
-
 const command = new Command({
     name: "stats",
     desc: "¡Revisa tu EXP, nivel y Jeffros actuales, o de otro usuario!",
@@ -17,22 +14,17 @@ command.addOption({
     desc: "El usuario a revisar sus estadísticas"
 })
 
-command.execute = async (interaction, params, client) => {
+command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
+    const { Users } = models
     const { usuario } = params;
     
     const guild = client.guilds.cache.find(x => x.id === interaction.guildId);
     
     // codigo
-    const member = usuario.member ?? interaction.member;
+    const member = usuario ? usuario.member : interaction.member;
 
-    let user = await User.findOne({
-        user_id: member.id,
-        guild_id: guild.id
-    }) ?? new User({
-        user_id: member.id,
-        guild_id: guild.id
-    }).save();
+    let user = await Users.getOrCreate({user_id: member.id, guild_id: guild.id});
 
     let actualJeffros = user ? user.economy.global.jeffros.toLocaleString('es-CO') : 0;
     let curExp = user ? user.economy.global.exp.toLocaleString('es-CO') : 0;

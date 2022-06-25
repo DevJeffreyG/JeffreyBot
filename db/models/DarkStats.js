@@ -9,4 +9,4 @@ const dStatsSchema = mongoose.Schema({
 
 })
 
-module.exports = mongoose.model("darkstats", dStatsSchema);
+module.exports = mongoose.model("DarkStats", dStatsSchema);

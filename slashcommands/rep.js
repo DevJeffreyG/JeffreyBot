@@ -3,7 +3,7 @@ const ms = require("ms");
 const moment = require("moment");
 
 const { HumanMs } = require("../src/utils/");
-const User = require("../modelos/User.model.js");
+const { Users } = require("mongoose").models;
 
 const repCooldown = ms("1d");
 
@@ -21,18 +21,18 @@ module.exports = {
 
         const member = guild.members.cache.find(x => x.id === interaction.options.getUser("usuario").id);
 
-        const user = await User.findOne({
+        const user = await Users.findOne({
             guild_id: guild.id,
             user_id: member.id
-        }) ?? await new User({
+        }) ?? await new Users({
             guild_id: guild.id,
             user_id: member.id
         });
 
-        const user_author = await User.findOne({
+        const user_author = await Users.findOne({
             guild_id: guild.id,
             user_id: author.id
-        }) ?? await new User({
+        }) ?? await new Users({
             guild_id: guild.id,
             user_id: author.id
         });

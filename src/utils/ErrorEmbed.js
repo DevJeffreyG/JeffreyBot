@@ -38,6 +38,11 @@ class ErrorEmbed extends Embed {
 ${data.error}
 \`\`\``)
                 break;
+
+            case "selfRep":
+                this.#errorAuthor(4);
+                this.defDesc(`**▸ No puedes darte un punto de reputación a ti mismo** ▸ ${data}`)
+                break;
         }
     }
 

@@ -3,12 +3,7 @@ const Discord = require("discord.js");
 const ms = require("ms");
 
 const { Initialize, TutorialEmbed, Confirmation } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const User = require("../../modelos/User.model.js");
-
-/* ##### MONGOOSE ######## */
+const { Users } = require("mongoose").models;
 
 const commandInfo = {
     name: "bd",
@@ -63,10 +58,10 @@ module.exports = {
         let dateString;
 
 
-        const user = await User.findOne({
+        const user = await Users.findOne({
             user_id: author.id,
             guild_id: guild.id
-        }) ?? await new User({
+        }) ?? await new Users({
             user_id: author.id,
             guild_id: guild.id
         }).save();

@@ -8,4 +8,4 @@ const vaultSchema = mongoose.Schema({
 
 })
 
-module.exports = mongoose.model("vaultCodes", vaultSchema);
+module.exports = mongoose.model("VaultCodes", vaultSchema);

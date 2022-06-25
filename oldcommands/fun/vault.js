@@ -6,13 +6,7 @@ const ms = require("ms");
 const chance = require("chance");
 
 const { Initialize, TutorialEmbed, VaultWork } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const User = require("../../modelos/User.model.js");
-const Vault = require("../../modelos/Vault.model.js");
-
-/* ##### MONGOOSE ######## */
+const { Users, Vaults } = require("mongoose").models;
 
 const commandInfo = {
     name: "vault",
@@ -40,11 +34,11 @@ module.exports = {
         const code = response.find(x => x.param === "codigo").data || null;
 
         // Comando
-        const vault = await Vault.findOne({guild_id: guild.id}) ?? await new Vault({guild_id: guild.id}).save();
-        const user = await User.findOne({
+        const vault = await Vaults.findOne({guild_id: guild.id}) ?? await new Vaults({guild_id: guild.id}).save();
+        const user = await Users.findOne({
             user_id: author.id,
             guild_id: guild.id
-        }) ?? await new User({
+        }) ?? await new Users({
             user_id: author.id,
             guild_id: guild.id
         }).save();

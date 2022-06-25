@@ -10,4 +10,4 @@ const ditemsSchema = mongoose.Schema({
 
 })
 
-module.exports = mongoose.model("darkitems", ditemsSchema);
+module.exports = mongoose.model("DarkItems", ditemsSchema);

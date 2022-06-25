@@ -8,7 +8,7 @@ const { Initialize, TutorialEmbed } = require("../src/utils/");
 
 /* ##### MONGOOSE ######## */
 
-const User = require("../modelos/User.model.js");
+const { Users } = require("mongoose").models;
 
 /* ##### MONGOOSE ######## */
 

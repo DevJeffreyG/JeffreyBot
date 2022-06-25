@@ -3,8 +3,7 @@ const Discord = require("discord.js");
 const Config = require("../src/resources/base.json");
 const { disableAwards, jeffreygID } = Config;
 
-const User = require("../modelos/User.model.js");
-const AutoRole = require("../modelos/autorole.js");
+const { AutoRoles } = require("mongoose").models;;
 
 module.exports = async (client, reaction, user) => {
     if (user.bot) return;
@@ -15,7 +14,7 @@ module.exports = async (client, reaction, user) => {
     const message = reaction.message;
     const member = guild.members.cache.get(user.id);
   
-    AutoRole.findOne({
+    AutoRoles.findOne({
         serverID: guild.id,
         channelID: channel.id,
         messageID: message.id,

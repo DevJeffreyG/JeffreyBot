@@ -1,41 +1,9 @@
-const Config = require("../../src/resources/base.json");
-const Colores = require("../../src/resources/colores.json");
-const Emojis = require("../../src/resources/emojis.json");
-const Discord = require("discord.js");
-const fs = require("fs");
-const ms = require("ms");
-const mongoose = require("mongoose");
-const prefix = Config.prefix;
-const jeffreygID = Config.jeffreygID;
-const jgServer = Config.jgServer;
-const offtopicChannel = Config.offtopicChannel;
-const mainChannel = Config.mainChannel;
-const botsChannel = Config.botsChannel;
-const logChannel = Config.logChannel;
-const changes = Config.changes;
-const reglas = require("../../src/resources/reglas.json");
-
 const { Initialize, TutorialEmbed, FindNewId} = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const User = require("../../modelos/User.model.js");
-
-const All = require("../../modelos/allpurchases.js");
-const DarkStats = require("../../modelos/darkstats.js");
-const Exp = require("../../modelos/exp.js");
-const Jeffros = require("../../modelos/jeffros.js");
-const Purchases = require("../../modelos/purchased.js");
-const SoftWarn = require("../../modelos/softwarn.js");
-const Warn = require("../../modelos/warn.js");
-const WinVault = require("../../modelos/winVault.js");
-const GlobalData = require("../../modelos/globalData.js");
-
-/* ##### MONGOOSE ######## */
+const { Users, TotalPurchases, DarkStats, Exps, Jeffros, Purchases, SoftWarns, Warns, WinVault, GlobalDatas } = require("mongoose").models;
 
 const commandInfo = {
     name: "syncusers",
-    info: "Sincroniza los datos obsoletos con los nuevos en el nuevo modelo User",
+    info: "Sincroniza los datos obsoletos con los nuevos en el nuevo modelo Users",
     userlevel: "DEVELOPER",
     category: "DEVELOPER"
 }
@@ -59,20 +27,20 @@ module.exports = {
         members.forEach(async (member) => {
           let user_id = member.user.id;
       
-          let totalpurchases = await All.find({userID: user_id}); // interés
+          let totalpurchases = await TotalPurchases.find({userID: user_id}); // interés
           let darkstats = await DarkStats.findOne({userID: user_id}); // estadisiticas de darkshop & items de darkshop
-          let exp = await Exp.findOne({userID: user_id, serverID: guildToSearch});
+          let exp = await Exps.findOne({userID: user_id, serverID: guildToSearch});
           let jeffros = await Jeffros.findOne({userID: user_id, serverID: guildToSearch});
           let purchases = await Purchases.find({userID: user_id}); // inventario de tienda normal
-          let softwarns = await SoftWarn.findOne({userID: user_id});
-          let warns = await Warn.findOne({userID: user_id});
+          let softwarns = await SoftWarns.findOne({userID: user_id});
+          let warns = await Warns.findOne({userID: user_id});
           let vaults = await WinVault.find({userID: user_id});
           
-          let firstq = await User.findOneAndDelete({guild_id: message.guild.id, user_id: user_id});
+          let firstq = await Users.findOneAndDelete({guild_id: message.guild.id, user_id: user_id});
 
             console.log(member.user.tag);
 
-            const newUser = new User({
+            const newUser = new Users({
               guild_id: message.guild.id,
               user_id: user_id,
             });
@@ -86,7 +54,7 @@ module.exports = {
                 let toPush = [];
                 for (let i = 0; i < warnstotal; i++) {
                   // buscar la nueva id
-                  let users = await User.find();
+                  let users = await Users.find();
                   //console.log("NUMERO DE USUARIOS EN TOTAL", users.length)
                   let newID = 1;
           
@@ -136,7 +104,7 @@ module.exports = {
                   let oldNote = softwarns.warns[i].note;
       
                   // buscar la nueva id
-                  let users = await User.find();
+                  let users = await Users.find();
                   //console.log("NUMERO DE USUARIOS EN TOTAL", users.length)
                   let newID = 1;
           
@@ -198,7 +166,7 @@ module.exports = {
               if(purchases){ // inventario tienda normal
                 let toPush = [];
 
-                let usos = await User.find(); 
+                let usos = await Users.find(); 
                 let newUseId = await FindNewId(usos, "data.inventory", "use_id");
 
                 for (let i = 0; i < purchases.length; i++) {
@@ -260,7 +228,7 @@ module.exports = {
       
               // GLOBALDATAS
               // ultimos jeffros y exp
-              let last = await GlobalData.findOne({
+              let last = await GlobalDatas.findOne({
                 "info.type": "lastExpJeffros",
                 "info.userID": user_id
               });
@@ -271,7 +239,7 @@ module.exports = {
               }
               
               // cumpleaños
-              let bd = await GlobalData.findOne({
+              let bd = await GlobalDatas.findOne({
                 "info.type": "birthdayData",
                 "info.userID": user_id
               });
@@ -284,7 +252,7 @@ module.exports = {
               }
       
               // duracion de dj
-              let djDuration = await GlobalData.findOne({
+              let djDuration = await GlobalDatas.findOne({
                 "info.type": "dsDJDuration",
                 "info.userID": user_id
               });
@@ -295,7 +263,7 @@ module.exports = {
               }
       
               // roles
-              let tempRoles = await GlobalData.find({
+              let tempRoles = await GlobalDatas.find({
                 "info.type": "roleDuration",
                 "info.userID": user_id
               });
@@ -325,7 +293,7 @@ module.exports = {
                 }
       
                 // subs
-                let subs = await GlobalData.find({
+                let subs = await GlobalDatas.find({
                   "info.type": "jeffrosSubscription",
                   "info.userID": user_id
                 });

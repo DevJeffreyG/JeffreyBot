@@ -8,4 +8,4 @@ const ToggleSchema = new Schema({
     since: { type: Date, default: () => new Date() }
 })
 
-module.exports = mongoose.model('ToggledCommand', ToggleSchema)
+module.exports = mongoose.model('ToggledCommands', ToggleSchema)

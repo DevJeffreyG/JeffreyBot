@@ -5,12 +5,7 @@ const Discord = require("discord.js");
 const ms = require("ms");
 
 const { Initialize, TutorialEmbed } = require("../../src/utils/");
-
-/* ##### MONGOOSE ######## */
-
-const User = require("../../modelos/User.model.js");
-
-/* ##### MONGOOSE ######## */
+const { Users } = require("mongoose").models;
 
 const commandInfo = {
     name: "unmute",
@@ -39,7 +34,7 @@ module.exports = {
         // Comando
         const muteRole = client.user.id === Config.testingJBID ? guild.roles.cache.find(x => x.id === "544691532104728597") : guild.roles.cache.find(x => x.id === Config.muteRole);
         
-        const user = await User.findOne({
+        const user = await Users.findOne({
             user_id: member.id,
             guild_id: member.guild.id
         });
