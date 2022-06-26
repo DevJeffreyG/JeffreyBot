@@ -6,7 +6,7 @@ const Colores = require("../src/resources/colores.json");
 module.exports = async (client, oldchannel, channel) => {
     const guild = channel.guild;
 
-    const logs = await FetchAuditLogs(client, guild, ["CHANNEL_UPDATE", "CHANNEL_OVERWRITE_UPDATE"]);
+    const logs = await FetchAuditLogs(client, guild, ["ChannelUpdate", "ChannelOverwriteUpdate"]);
 
     let type;
     switch(channel.type){

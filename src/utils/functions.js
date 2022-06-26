@@ -57,20 +57,19 @@ const GetChangesAndCreateFields = async function(logsFetched){
     let extra = log.extra;
     let extraType = extra ? extra.user ? "member" : "role" : null;
 
+    console.log("♾️ Array de cambios", changesArray)
+    let resetedPerms = resetWork(log)
+
     changesLoop:
     for (let i = 0; i < changesArray.length; i++) {
       const change = changesArray[i];
-      let resetQuery = changesArray.slice(0);
-      resetQuery.splice(i, 1);
 
-      console.log(resetQuery, "reset query")
-
-      console.log("key:", change.key, "nuevo:", change.new, "viejo:", change.old)
-  
       let cambio;
       let ahora = change.new;
       let antes = change.old;
       let nuevosPermisos, viejosPermisos, diff;
+
+      console.log(extra.name, extra.id)
       
       switch(change.key){
         case "topic":
@@ -85,7 +84,7 @@ const GetChangesAndCreateFields = async function(logsFetched){
           nuevosPermisos = new Discord.Permissions(change.new);
           viejosPermisos = new Discord.Permissions(change.old);
 
-          let permissionOverwrite = target.permissionOverwrites.cache.find(x => x.deny.bitfield === nuevosPermisos.bitfield && x.type === extraType);
+          let permissionOverwrite = target.permissionOverwrites.cache.find(x => x.deny.bitfield === nuevosPermisos.bitfield && x.type === extraType && x.id === extra.id);
           let changed = permissionOverwrite.type === "role" ? permissionOverwrite.channel.guild.roles.cache.find(x => x.id === permissionOverwrite.id) : permissionOverwrite.channel.guild.members.cache.find(x => x.id === permissionOverwrite.id);
 
           cambio = `${permissionOverwrite.type === "role" ? "Role" : "Usuario"} ${permissionOverwrite.type === "role" ? changed.name : changed.displayName}`;
@@ -99,11 +98,10 @@ const GetChangesAndCreateFields = async function(logsFetched){
           });
 
           // se está reseteando?
-          if(nuevosPermisos.bitfield === 0n){
-            if(resetQuery.find(x => x.key === "allow" && new Discord.Permissions(x.new).has(viejosPermisos))) continue changesLoop;
-            
+          const isReseted = resetedPerms.toArray().length != 0
+          if(isReseted){
             antes = "";
-            viejosPermisos.toArray().forEach(permiso => {
+            resetedPerms.toArray().forEach(permiso => {
               antes += `${Emojis.Neutral} ${permiso}\n`;
             });
             
@@ -112,7 +110,7 @@ const GetChangesAndCreateFields = async function(logsFetched){
               value: `**Reseteados**\n${antes}`
             });
 
-          } else
+          }
 
           if(ahora.length != 0) fields.push({
             name: `${separator} ` + cambio,
@@ -125,7 +123,7 @@ const GetChangesAndCreateFields = async function(logsFetched){
           nuevosPermisos = new Discord.Permissions(change.new);
           viejosPermisos = new Discord.Permissions(change.old);
 
-          let permissionOverwrite = target.permissionOverwrites.cache.find(x => x.allow.bitfield === nuevosPermisos.bitfield && x.type === extraType);
+          let permissionOverwrite = target.permissionOverwrites.cache.find(x => x.allow.bitfield === nuevosPermisos.bitfield && x.type === extraType && x.id === extra.id);
           let changed = permissionOverwrite.type === "role" ? permissionOverwrite.channel.guild.roles.cache.find(x => x.id === permissionOverwrite.id) : permissionOverwrite.channel.guild.members.cache.find(x => x.id === permissionOverwrite.id);
 
           cambio = `${permissionOverwrite.type === "role" ? "Role" : "Usuario"} ${permissionOverwrite.type === "role" ? changed.name : changed.displayName}`;
@@ -139,11 +137,12 @@ const GetChangesAndCreateFields = async function(logsFetched){
           });
 
           // se está reseteando?
-          if(nuevosPermisos.bitfield === 0n){
-            if(resetQuery.find(x => x.key === "deny" && new Discord.Permissions(x.new).has(viejosPermisos))) continue changesLoop;
-            
+          const isReseted = resetedPerms.toArray().length != 0
+          if(isReseted){
+            /* if(resetQuery.find(x => x.key === "deny" && new Discord.Permissions(x.new).has(viejosPermisos))) continue changesLoop;
+             */
             antes = "";
-            viejosPermisos.toArray().forEach(permiso => {
+            resetedPerms.toArray().forEach(permiso => {
               antes += `${Emojis.Neutral} ${permiso}\n`;
             });
 
@@ -152,7 +151,7 @@ const GetChangesAndCreateFields = async function(logsFetched){
               value: `**Reseteados**\n${antes}`
             });
 
-          } else
+          }
 
           if(ahora.length != 0) fields.push({
             name: `${separator} ` + cambio,
@@ -173,12 +172,7 @@ const GetChangesAndCreateFields = async function(logsFetched){
     }
   })
 
-  console.log("FIELDS BASE", fields);
-
-  /* let fieldMap = fields.map(function(item) { return item.name });
-  let isDuplicate = fieldMap.some(function(item, idx){ 
-    return fieldMap.indexOf(item) != idx 
-  }); */
+  //console.log("FIELDS BASE", fields);
 
   let repeatedQuery = new Map();
 
@@ -190,13 +184,52 @@ const GetChangesAndCreateFields = async function(logsFetched){
     fields.splice(index, 1);
   })
 
-  console.log("FIELDS ACTUALIZADOS", fields);
-
+  //console.log("FIELDS ACTUALIZADOS", fields);
   console.log("----------------")
   
 
   if(fields.length > 0) return fields;
   else null;
+}
+
+let resetWork = (log) => {
+  console.log("⚪ Inicializando trabajo de detectar permisos reseteados");
+
+  const cambios = log.changes;
+  let reseted = new Discord.Permissions();
+
+  cambios.forEach(change => {
+    console.log(`================= 🕰️ CHANGE INFO 🕰️ =================\nChange key: ${change.key}\nNuevo: ${change.new}\nViejo: ${change.old}\n=================`)
+
+    const oldperms = new Discord.Permissions(change.old);
+    const newperms = new Discord.Permissions(change.new);
+
+    const permsChanged = newperms.missing(oldperms);
+    const rolePerms = log.target.permissionOverwrites.resolve(log.extra.id);
+
+    console.log("Permisos que cambiaron:", permsChanged);
+    if(permsChanged.length === 0) {
+      console.log("🟥 No pasó a neutral."); // pasa de neutral a algo más
+    } else
+
+    permsChanged.forEach(permiso => {
+      const discordPermiso = new Discord.Permissions(permiso);
+      if(change.key === "deny") { // el permiso pasó hacia la derecha, o reset o allow
+        const isAllowed = rolePerms.allow.has(discordPermiso);
+        
+        if(isAllowed) return console.log("🟥 No pasó a neutral.");
+        else reseted.add(discordPermiso);
+      } else {
+        const isDenied = rolePerms.deny.has(discordPermiso);
+        
+        if(isDenied) console.log("🟥 No pasó a neutral.");
+        else reseted.add(discordPermiso);
+      }
+    })
+  });
+  console.log("=====================================================================================")
+  console.log(`🟢 PERMISOS RESETEADOS:`, reseted, "Es decir ➡️", reseted.toArray());
+  return reseted;
 }
 
 const oldGetChanges = function(entryChanges) {
@@ -282,6 +315,11 @@ const FetchAuditLogs = async function(client, guild, types){
       const fetchedLogs = await guild.fetchAuditLogs({limit: 1, type});
   
       const fetched = fetchedLogs.entries.first();
+
+      if(fetched === undefined){
+        console.error("⚠️ No se encontró ningún log con el tipo", type);
+        break;
+      }
 
       // revisar si ya se habia enviado al log
       if(client.logsFetched[fetched.id]) continue;

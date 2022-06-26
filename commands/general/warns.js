@@ -53,7 +53,7 @@ command.execute = async (interaction, models, params, client) => {
         let regla = reglas[warn.rule_id] ? reglas[warn.rule_id].regla : "Víctima de la DARKSHOP";
 
         if(id && warn.id != id) return;
-        warnsE.defField({up: `— ${regla} : Regla N°${warn.rule_id}`, down: `**— [Pruebas](${warn.proof})\n— ID: ${warn.id}**`})
+        warnsE.defField(`— ${regla} : Regla N°${warn.rule_id}`, `**— [Pruebas](${warn.proof})\n— ID: ${warn.id}**`)
     });
 
     softwarns.forEach(softwarn => {
@@ -61,7 +61,7 @@ command.execute = async (interaction, models, params, client) => {
         let regla = reglas[softwarn.rule_id].regla;
 
         if(id && softwarn.id != id) return;
-        softwarnsE.defField({up: `— ${regla} : Regla N°${softwarn.rule_id}`, down: `**— [Pruebas](${softwarn.proof})\n— ID: ${softwarn.id}**`})
+        softwarnsE.defField(`— ${regla} : Regla N°${softwarn.rule_id}`, `**— [Pruebas](${softwarn.proof})\n— ID: ${softwarn.id}**`)
     });
 
     return interaction.editReply({embeds: [warnsE, softwarnsE], ephemeral: true});
