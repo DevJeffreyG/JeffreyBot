@@ -54,6 +54,7 @@ module.exports = async (client, interaction) => {
         params["subgroup"] = interaction.options.getSubcommandGroup(false); // guarda el grupo de subcomandos
 
         params[name] = undefined;
+
         subcommandFix(o.options, (x => {
             params[name] = x
         }));
@@ -61,12 +62,12 @@ module.exports = async (client, interaction) => {
         function subcommandFix(options, callback){
             let x = {};
 
-            options.forEach((option, i) => {
-                ({ name } = option);
-                x[name] = interaction.options.get(name);
+            options.forEach(option => {
+                let n = option.name;
+                x[n] = interaction.options.get(n);
 
-                if(!x[name]) subcgroupFix(option, (y => {
-                    x[name] = y;
+                if(!x[n]) subcgroupFix(option, (y => {
+                    x = y;
                 }))
             })
 
@@ -75,9 +76,9 @@ module.exports = async (client, interaction) => {
 
         function subcgroupFix(options, callback) {
             if(options.options){
-                subcommandFix(options.options, z => {
-                    callback(z)
-                });
+              subcommandFix(options.options, z => {
+                callback(z)
+              });
             }
         }
     }

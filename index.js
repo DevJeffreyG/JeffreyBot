@@ -12,10 +12,10 @@ const client = new Discord.Client({ allowedMentions: { parse: ['users', 'roles']
 
 const { connection } = require('./db')
 
-console.log("🦊 INICIALIZANDO ...")
+console.log(`🦊 INICIALIZANDO ${require("./package.json").name} v${require("./package.json").version} ...`)
 
 connection.then(async (c) => {
-  console.log(`🔄 Conectado a la base de datos ${c.connection.name} 🖥️`)
+  console.log(`🟢 Conectado a la base de datos ${c.connection.name} 🖥️`)
   const Commands = require("./Commands");
 
   // events

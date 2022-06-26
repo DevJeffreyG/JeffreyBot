@@ -106,7 +106,7 @@ command.execute = async (interaction, models, params, client) => {
                 staffDesc += toAdd;
                 break;
                 
-            case "DEVELOPER":
+            case "DEV":
                 devDesc += toAdd;
                 break;
 

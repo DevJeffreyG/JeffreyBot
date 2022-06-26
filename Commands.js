@@ -64,7 +64,7 @@ class Commands {
     async #register() {
         console.log("============ REGISTRANDO COMANDOS ============");
         try {
-            console.log("Actualizando los slash commands para la ruta:", route)
+            console.log("⚪ Actualizando los slash commands para la ruta:", route)
             console.log("MODO DE INICIACIÓN EN DEVELOPER:", process.env.DEV);
 
             if(process.env.DEV == "TRUE"){
@@ -95,7 +95,7 @@ class Commands {
             console.log(error);
         }
 
-        console.log("🟢 Se han actualizado los slash commands❗")
+        console.log("🟢 Se han actualizado los slash commands")
         console.log("============================================================");
         
         return;

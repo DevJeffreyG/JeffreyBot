@@ -4,8 +4,8 @@
   "description": "A Discord.JS multi-function Bot",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon ."
+    "start": "cls & node index.js",
+    "dev": "nodemon -x \"cls && node\" index.js"
   },
   "repository": {
     "type": "git",

@@ -55,6 +55,7 @@ module.exports = async (client) => {
     await functions.findLvls5(client, guild)
 
     console.log("🔄 Ciclo de Global Datas iniciado por primera vez")
+    console.log("=================== LOGS =======================")
     functions.intervalGlobalDatas(client);
 
     /* ############ GLOBAL DATAS ############ */
