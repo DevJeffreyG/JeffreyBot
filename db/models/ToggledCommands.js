@@ -8,4 +8,10 @@ const ToggleSchema = new Schema({
     since: { type: Date, default: () => new Date() }
 })
 
+ToggleSchema.static("getToggle", async function(command) {
+    return await this.findOne({
+        command
+    })
+})
+
 module.exports = mongoose.model('ToggledCommands', ToggleSchema)

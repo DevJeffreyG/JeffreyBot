@@ -31,9 +31,7 @@ module.exports = async (client, interaction) => {
 
     if(mantenimiento && author.id != jeffreygID) return interaction.reply({content: "Todos las funciones de Jeffrey Bot se encuentran en mantenimiento, lo siento", ephemeral: true});
 
-    let toggledQuery = await ToggledCommands.findOne({
-      command: commandName
-    });
+    let toggledQuery = await ToggledCommands.getToggle(commandName);
 
     if(toggledQuery /* && author.id != jeffreygID */){
       let since = time(toggledQuery.since);
