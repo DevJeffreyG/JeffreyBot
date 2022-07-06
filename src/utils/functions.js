@@ -1,9 +1,11 @@
 const Discord = require("discord.js");
 
-const Config = require("../../src/resources/base.json");
+const Config = require("../resources/base.json");
 const Colores = require("../resources/colores.json");
 const Emojis = require("../resources/emojis.json");
 const Cumplidos = require("../resources/cumplidos.json");
+
+const ErrorEmbed = require("../utils/ErrorEmbed");
 
 const HumanMs = require("./HumanMs");
 
@@ -68,8 +70,6 @@ const GetChangesAndCreateFields = async function(logsFetched){
       let ahora = change.new;
       let antes = change.old;
       let nuevosPermisos, viejosPermisos, diff;
-
-      console.log(extra.name, extra.id)
       
       switch(change.key){
         case "topic":
@@ -85,6 +85,7 @@ const GetChangesAndCreateFields = async function(logsFetched){
           viejosPermisos = new Discord.Permissions(change.old);
 
           let permissionOverwrite = target.permissionOverwrites.cache.find(x => x.deny.bitfield === nuevosPermisos.bitfield && x.type === extraType && x.id === extra.id);
+          if(!permissionOverwrite) return;
           let changed = permissionOverwrite.type === "role" ? permissionOverwrite.channel.guild.roles.cache.find(x => x.id === permissionOverwrite.id) : permissionOverwrite.channel.guild.members.cache.find(x => x.id === permissionOverwrite.id);
 
           cambio = `${permissionOverwrite.type === "role" ? "Role" : "Usuario"} ${permissionOverwrite.type === "role" ? changed.name : changed.displayName}`;
@@ -110,6 +111,7 @@ const GetChangesAndCreateFields = async function(logsFetched){
               value: `**Reseteados**\n${antes}`
             });
 
+            resetedPerms = new Discord.Permissions(); // quitar los permisos guardados para evitar que se repitan
           }
 
           if(ahora.length != 0) fields.push({
@@ -124,6 +126,7 @@ const GetChangesAndCreateFields = async function(logsFetched){
           viejosPermisos = new Discord.Permissions(change.old);
 
           let permissionOverwrite = target.permissionOverwrites.cache.find(x => x.allow.bitfield === nuevosPermisos.bitfield && x.type === extraType && x.id === extra.id);
+          if(!permissionOverwrite) return;
           let changed = permissionOverwrite.type === "role" ? permissionOverwrite.channel.guild.roles.cache.find(x => x.id === permissionOverwrite.id) : permissionOverwrite.channel.guild.members.cache.find(x => x.id === permissionOverwrite.id);
 
           cambio = `${permissionOverwrite.type === "role" ? "Role" : "Usuario"} ${permissionOverwrite.type === "role" ? changed.name : changed.displayName}`;
@@ -151,6 +154,7 @@ const GetChangesAndCreateFields = async function(logsFetched){
               value: `**Reseteados**\n${antes}`
             });
 
+            resetedPerms = new Discord.Permissions(); // quitar los permisos guardados para evitar que se repitan
           }
 
           if(ahora.length != 0) fields.push({
@@ -159,15 +163,28 @@ const GetChangesAndCreateFields = async function(logsFetched){
           });
           continue changesLoop;
         }
+
+        case "id":
+          cambio = "Con ID"
+          break;
+
+        case "type":
+          cambio = "Permisos nuevos"
+          ahora = ahora === 0 ? "Para role" : "Para usuario"
+          break;
   
         default:
-          console.log(change.key);
           cambio = "Cambios";
       }
 
+      if(!ahora) return;
+
+      ahora = `\n**Ahora**\n${ahora}`;
+      antes = antes != undefined ? `\n\n**Antes**\n${antes}` : "_ _";
+
       fields.push({
         name: `${separator} ` + cambio,
-        value: `**Ahora**\n${ahora}\n\n**Antes**\n${antes}`
+        value: `${ahora}${antes}`
       });
     }
   })
@@ -198,8 +215,14 @@ let resetWork = (log) => {
   const cambios = log.changes;
   let reseted = new Discord.Permissions();
 
+
   cambios.forEach(change => {
     console.log(`================= 🕰️ CHANGE INFO 🕰️ =================\nChange key: ${change.key}\nNuevo: ${change.new}\nViejo: ${change.old}\n=================`)
+
+    if(change.key != "allow" || change.key != "deny") return console.log("KEY INVÁLIDA, ABORTANDO.")
+    console.log(change)
+    change.old ?? 0;
+    change.new ?? 0;
 
     const oldperms = new Discord.Permissions(change.old);
     const newperms = new Discord.Permissions(change.new);
@@ -1320,22 +1343,19 @@ const TutorialEmbed = async function(commandTree, executionInfo, args){
 
 /**
  * 
- * @param {*} message The Discord.JS Message that triggers the command
+ * @param {*} interaction The Discord.JS Interaction that triggers the command
  * @param {String} dataSearch The Data to search in the setup of this Guill
  * - STAFF_LOGS_CHANNEL
  * @returns 
  */
-const DataWork = async function(message, dataSearch){
+const DataWork = async function(interaction, dataSearch){
 
-  const guild = message.guild;
+  const guild = interaction.guild;
 
   const docGuild = await Guilds.findOne({guild_id: guild.id}) ?? await new Guilds({guild_id: guild.id});
 
-  const insuficientSetup = new Discord.MessageEmbed()
-  .setAuthor("Error", Config.errorPng)
-  .setDescription(`**—** No se puede usar este comando sin antes configurar el bot "\`${dataSearch.toUpperCase()}\`". Un administrador del servidor tiene que usar el comando \`/setup\` primero.`)
-  .setColor(Colores.rojo);
-
+  const insuficientSetup = new ErrorEmbed({type: "insuficientSetup", data: {dataSearch}})
+  
   let response;
 
   switch(dataSearch.toUpperCase()){
@@ -1349,19 +1369,19 @@ const DataWork = async function(message, dataSearch){
       response = null;
   }
 
-  if(!response) message.channel.send({embeds: [insuficientSetup]});
+  if(!response) interaction.editReply({embeds: [insuficientSetup]});
   return response;
 
 }
 
 /**
  * 
- * @param {*} message The Discord.JS Message that triggers the command
+ * @param {*} interaction The Discord.JS Interaction that triggers the command
  * @param {String} query The Banning to search to this user in the Guild
  * @returns 
  */
-const isBannedFrom = async function(message, query){
-  const user = await Users.findOne({user_id: message.author.id, guild_id: message.guild.id}) ?? await new Users({user_id: message.author.id, guild_id: message.guild.id}).save();
+const isBannedFrom = async function(interaction, query){
+  const user = await Users.getOrCreate({user_id: interaction.user.id, guild_id: interaction.guild.id});
 
   let response = false;
 

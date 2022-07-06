@@ -43,6 +43,12 @@ ${data.error}
                 this.#errorAuthor(4);
                 this.defDesc(`**▸ No puedes darte un punto de reputación a ti mismo** ▸ ${data}`)
                 break;
+
+            case "insuficientSetup":
+                this.#errorAuthor(5);
+                this.defDesc(`**▸ No se puede usar este comando sin antes configurar el bot** ▸ \`${data.dataSearch.toUpperCase()}\`.\nUn administrador del servidor tiene que usar el comando \`/setup\` primero.`)
+                this.defFooter({text: `Si aún no lo han hecho, muéstrales este mensaje.`});
+                break;
         }
     }
 
