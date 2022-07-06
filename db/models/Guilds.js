@@ -49,4 +49,20 @@ GuildSchema.static("getById", function(id){
     return this.findOne({guild_id: id})
 });
 
+GuildSchema.method("getAdmins", function(){
+    return this.roles.admins
+});
+
+GuildSchema.method("getStaffs", function(){
+    return this.roles.staffs
+});
+
+GuildSchema.method("getUsers", function(){
+    return this.roles.users
+});
+
+GuildSchema.method("getBots", function(){
+    return this.roles.bots
+});
+
 module.exports = mongoose.model('Guilds', GuildSchema);
