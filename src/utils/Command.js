@@ -142,6 +142,12 @@ class Command {
                 .setMinValue(data.min)
         }
 
+        if(data.choices) {
+            data.choices.forEach(choice => {
+                option.addChoices({name: choice, value: choice.toLowerCase()})
+            });
+        }
+
         return option;
     }
 

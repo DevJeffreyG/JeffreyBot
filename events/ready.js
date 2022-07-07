@@ -4,12 +4,14 @@ const { prefix } = Config;
 let functions = require("../src/utils/");
 
 const ms = require("ms");
+const { Collection } = require("discord.js");
 const CronJob = require("cron").CronJob;
 
 
 module.exports = async (client) => {
     client.invites = [];
     client.logsFetched = {};
+    client.activeCollectors = [];
 
     // para cada guild fetchear(?
     let guilds = await client.guilds.fetch();

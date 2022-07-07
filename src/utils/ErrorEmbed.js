@@ -49,6 +49,14 @@ ${data.error}
                 this.defDesc(`**▸ No se puede usar este comando sin antes configurar el bot** ▸ \`${data.dataSearch.toUpperCase()}\`.\nUn administrador del servidor tiene que usar el comando \`/setup\` primero.`)
                 this.defFooter({text: `Si aún no lo han hecho, muéstrales este mensaje.`});
                 break;
+
+            case "commandError":
+                this.#errorAuthor(6);
+                this.defDesc(`**▸ Podrías usar este comando, pero Jeffrey es tonto** ▸ \`${data.key.id}\`.
+**▸ También dile que...**
+\`\`\`json
+{ FATAL ERROR, KEY ${key.id}, UKNOWN REWARD TYPE "${reward.type}" }
+\`\`\``)
         }
     }
 

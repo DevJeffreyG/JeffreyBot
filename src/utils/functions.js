@@ -6,6 +6,8 @@ const Emojis = require("../resources/emojis.json");
 const Cumplidos = require("../resources/cumplidos.json");
 
 const ErrorEmbed = require("../utils/ErrorEmbed");
+const Embed = require("../utils/Embed");
+const InteractivePages = require("../utils/InteractivePages");
 
 const HumanMs = require("./HumanMs");
 
@@ -751,80 +753,32 @@ const Subscription = function(guild, roleID, victimMember, intervalTime, jeffros
     }
 }
 
-const VaultWork = function(vault, user, message, notCodeEmbed){ // mostrar y buscar un codigo no descifrado aún por el usuario
-  if(user.data.unlockedVaults.length === vault.codes.length) return message.channel.send({content: `${message.member}`, embeds: [notCodeEmbed]}).then(m => {
-    setTimeout(() => {
-    m.delete();
-    message.delete();
-    }, ms("10s"));
-  });
+const VaultWork = function(vault, user, interaction, notCodeEmbed, client){ // mostrar y buscar un codigo no descifrado aún por el usuario
+  if(user.data.unlockedVaults.length === vault.codes.length) return interaction.editReply({embeds: [notCodeEmbed.defFooter({text: "Tienes todos los códigos en tus manos, impresionante..."})]})
 
   const unlocked = user.data.unlockedVaults;
 
   let code = vault.codes[Math.floor(Math.random() * vault.codes.length)];
+
   
   while(unlocked.find(x => x === code.id)){
     code = vault.codes[Math.floor(Math.random() * vault.codes.length)];
   }
 
-  const totalhints = code.hints.length;
-  let pistan = 1;
+  let itemMap = new Map();
+  code.hints.forEach((hint, index) => {
+    itemMap.set(index, {
+      hint
+    })
+  })
 
-  const embed = new Discord.MessageEmbed()
-  .setColor(Colores.verde)
-  .setFooter(`Pista ${pistan} de ${totalhints} | /vault [codigo] para decifrar.`)
-  .setDescription(code.hints[pistan - 1]);
+  const interactive = new InteractivePages({
+    color: Colores.verde,
+    addon: `{hint}`,
+    footer: `Pista {ACTUAL} de {TOTAL} | /vault [codigo] para descifrar`
+  }, itemMap, 1);
 
-  return message.reply({embeds: [embed]}).then(msg => {
-    msg.react("⏪").then(r => {
-      msg.react("⏩");
-
-      const backwardsFilter = (reaction, user) => reaction.emoji.name === "⏪" && user.id === message.author.id;
-      const forwardsFilter = (reaction, user) => reaction.emoji.name === "⏩" && user.id === message.author.id;
-      const collectorFilter = (reaction, user) => (reaction.emoji.name === "⏪" || reaction.emoji.name === "⏩") && user.id === message.author.id;
-
-      const backwards = msg.createReactionCollector({ filter:backwardsFilter, time: 60000 });
-      const forwards = msg.createReactionCollector({ filter:forwardsFilter, time: 60000 });
-      const collector = msg.createReactionCollector({ filter:collectorFilter, time: 60000 });
-
-      collector.on("end", r => {
-        return msg.reactions.removeAll()
-        .then(() => {
-          msg.react("795090708478033950");
-        });
-      });
-
-      backwards.on("collect", async (r, user) => {
-        let reactions = r.message.reactions.cache.find(x => x.emoji.name === "⏪");
-
-        if (pistan === 1) return reactions.users.remove(user.id);;
-        pistan--;
-        embed.setFooter(
-          `Pista ${pistan} de ${totalhints} | /vault [codigo] para decifrar.`
-        );
-        embed.setDescription(code.hints[pistan - 1]);
-        await msg.edit({embeds: [embed]});
-
-        reactions.users.remove(user.id);;
-      });
-
-      forwards.on("collect", async (r, user) => {
-        let reactions = r.message.reactions.cache.find(x => x.emoji.name === "⏩");
-
-        if (pistan === code.hints.length) return reactions.users.remove(user.id);;
-        pistan++;
-        embed.setFooter(
-          `Pista ${pistan} de ${totalhints} | /vault [codigo] para decifrar.`
-        );
-        embed.setDescription(code.hints[pistan - 1]);
-
-        await msg.edit({embeds: [embed]});
-        
-        reactions.users.remove(user.id);;
-      });
-    });
-  });
-
+  return interactive.init(interaction, client);
 }
 
 const handleUploads = async function(client){
@@ -1064,9 +1018,14 @@ const handleUploads = async function(client){
         }
 
         async function isStreaming(username) {
-          const user = await apiClient.users.getUserByName(username);
-          if (!user) return false;
-          return await user.getStream() !== null;
+          try {
+            const user = await apiClient.users.getUserByName(username);
+
+            if (!user) return false;
+            return await user.getStream() !== null;
+          } catch (err) {
+            console.log(err)
+          }
         }
 
         async function getStream(username){
@@ -1085,6 +1044,7 @@ const handleUploads = async function(client){
 
 /**
  * Initialize the base variables used on the commands.
+ * @deprecated No longer using MessageCreate Commands
  * @param {*} client - The Discord.JS Client | Guild ID
  * @param {*} message - The Discord.JS Message that triggers the command
  * @returns Object including the [guild, author, prefix, jeffrey_role, admin_role, mod_role, staff_role, executionInfo] variables
@@ -1129,6 +1089,7 @@ const Initialize = async function(client, message){
 
 /**
  * Creation of the principal help embed of a command, or the verification of the parameters given by the user.
+ * @deprecated No longer using MessageCreate Commands
  * @param {Object[]} commandTree - The configuration for the command, including the parameters if it has.
  * @param {Object[]} executionInfo The information of the execution of the command.
  * - guild
@@ -1404,26 +1365,24 @@ const isBannedFrom = async function(interaction, query){
  * 
  * @param {String} toConfirm What is trying to be confirmed
  * @param {Array} dataToConfirm The text that will apear on the embed separated by "▸"
- * @param {*} msg The Discord.JS Message that triggers the command
- * @param {Boolean} [isEphemeral=false] The Confirmation is used in an Discord.JS Interaction and it's ephemeral?
+ * @param {*} interaction The Discord.JS Interaction that triggers the command
  * @returns {Promise} Discord.JS Message if the confirmation is positive, if not, returns false
  */
-const Confirmation = async function(toConfirm, dataToConfirm, msg, isEphemeral){
-  isEphemeral ?? false;
+const Confirmation = async function(toConfirm, dataToConfirm, interaction){
   let DescriptionString = "";
 
   dataToConfirm.forEach(data => {
     DescriptionString += `\`▸\` ${data}\n`;
   });
 
-  let confirmation = new Discord.MessageEmbed()
-  .setAuthor(`${toConfirm}?`, msg.guild.iconURL())
-  .setDescription(DescriptionString)
-  .setColor(Colores.rojo);
+  let confirmation = new Embed()
+  .defAuthor({text: `${toConfirm}?`, icon: interaction.guild.iconURL()})
+  .defDesc(DescriptionString)
+  .defColor(Colores.rojo);
 
-  let cancelEmbed = new Discord.MessageEmbed()
-  .setDescription(`Cancelado.`)
-  .setColor(Colores.nocolor);
+  let cancelEmbed = new Embed()
+  .defDesc(`Cancelado.`)
+  .defColor(Colores.negro);
 
   // componentes
   const row = new Discord.MessageActionRow()
@@ -1440,33 +1399,35 @@ const Confirmation = async function(toConfirm, dataToConfirm, msg, isEphemeral){
             .setEmoji(Config.cancelEmojiId)
     )
 
-  let confirmationMessage = !isEphemeral ? await msg.channel.send({content: null, embeds: [confirmation], components: [row]}) : await msg.editReply({content: null, embeds: [confirmation], components: [row]}); // enviar mensaje de confirmación
+  await interaction.editReply({content: null, embeds: [confirmation], components: [row]}); // enviar mensaje de confirmación
 
   return new Promise (async (resolve, reject) => {
-    const filter = !isEphemeral ? i => i.user.id === msg.author.id : i => i.user.id === msg.user.id;
+    const filter = i => i.user.id === interaction.user.id;
 
-    const collector = confirmationMessage.channel.createMessageComponentCollector({ filter, time: ms("1m"), max: 1});
+    const collector = interaction.channel.createMessageComponentCollector({ filter, time: ms("1m"), max: 1});
 
     collector.on("collect", async i => {
       await i.deferUpdate();
 
       if(i.customId === "confirmAction"){
         confirmation
-        .setColor(Colores.verde)
-        .setAuthor(`${toConfirm}, continuando...`, Config.loadingGif);
+        .defColor(Colores.verde)
+        .defAuthor({text: `${toConfirm}, continuando...`, icon: Config.loadingGif});
 
         i.editReply({embeds: [confirmation], components: []});
 
-        return resolve(confirmationMessage);
+        return resolve(interaction);
       } else {
         i.editReply({embeds: [cancelEmbed], components: []});
 
-        if(!isEphemeral) setTimeout(() => {
-          msg.delete();
-          confirmationMessage.delete();
-        }, ms("10s"));
-
         return resolve(false);
+      }
+    })
+
+    collector.on("end", async i => {
+      if(i.size == 0){
+        interaction.editReply({embeds: [cancelEmbed], components: []})
+        return resolve(false)
       }
     })
   })
@@ -1691,65 +1652,6 @@ const GeneratePages = async function(guildId, message, itemsPerPage, isDarkShop)
   pags.push(actualpage);
 
   return pags || null;
-}
-
-const InteractivePages = async function(message, msg, pages, base){
-  if(pages.length === 1) return null;
-  let pagn = 0;
-  await msg.react("⏪");
-  await msg.react("⏩");
-
-  let totalitems = 0;
-  pages.forEach(arr => {
-    totalitems += arr.length;
-  });
-
-  const backwardsFilter = (reaction, user) => reaction.emoji.name === "⏪" && user.id === message.author.id;
-  const forwardsFilter = (reaction, user) =>reaction.emoji.name === "⏩" && user.id === message.author.id;
-  const collectorFilterMainPage = (reaction, user) => (reaction.emoji.name === "⏩" || reaction.emoji.name === "⏪") && user.id === message.author.id;
-
-  const backwards = msg.createReactionCollector({ filter: backwardsFilter, time: 60000 });
-  const forwards = msg.createReactionCollector({ filter: forwardsFilter, time: 60000 });
-  const collectorMainPage = msg.createReactionCollector({ filter: collectorFilterMainPage, time: 60000 });
-
-  collectorMainPage.on("end", r => {
-    return msg.reactions.removeAll()
-    .then(() => {
-        msg.react("795090708478033950");
-    });
-  })
-
-  backwards.on("collect", async(r, user) => {
-    let reactions = r.message.reactions.cache.find(x => x.emoji.name === "⏪");
-
-    if (pagn === 0) return reactions.users.remove(user.id);;
-    pagn--;
-
-    embed = new Discord.MessageEmbed()
-    .setAuthor(base.title, base.icon)
-    .setColor(base.color ?? Colores.verde)
-    .setDescription(`${base.description ? base.description + "\n\n" : ""}${pages[pagn].join(" ")}`)
-    .setFooter(base.footer.replace(new RegExp("{ACTUAL}", "g"), `${pagn+1}`).replace(new RegExp("{TOTAL}", "g"), `${pages.length}`), base.icon_footer);
-
-    await msg.edit({embeds: [embed]});
-    return reactions.users.remove(user.id);
-  });
-
-  forwards.on("collect", async(r, user) => {
-    let reactions = r.message.reactions.cache.find(x => x.emoji.name === "⏩");
-
-    if (pagn === pages.length - 1) return reactions.users.remove(user.id);;
-    pagn++;
-
-    embed = new Discord.MessageEmbed()
-    .setAuthor(base.title, base.icon)
-    .setColor(base.color ?? Colores.verde)
-    .setDescription(`${base.description ? base.description + "\n\n" : ""}${pages[pagn].join(" ")}`)
-    .setFooter(base.footer.replace(new RegExp("{ACTUAL}", "g"), `${pagn+1}`).replace(new RegExp("{TOTAL}", "g"), `${pages.length}`), base.icon_footer);
-
-    await msg.edit({embeds: [embed]});
-    return reactions.users.remove(user.id);
-  });
 }
 
 /**

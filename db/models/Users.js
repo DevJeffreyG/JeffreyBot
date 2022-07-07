@@ -60,7 +60,7 @@ const UserSchema = new Schema({
         unlockedVaults: { type: Array },
         birthday: {
             day: { type: Number, default: null },
-            month: { type: Number, default: null },
+            month: { type: String, default: null },
             locked: { type: Boolean, default: false },
             locked_since: { type: Date, default: null }
         },
