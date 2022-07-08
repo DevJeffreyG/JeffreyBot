@@ -6,8 +6,8 @@ class Embed extends Discord.MessageEmbed {
      * En caso de que Discord.JS se ponga chistoso y cambie por decimocuarta vez la forma de hacer embeds.
      */
     constructor(options){
-        super()
-
+        if(options instanceof Discord.MessageEmbed) super(options)
+        else super()
         if(options) this.#setup(options)
     }
 

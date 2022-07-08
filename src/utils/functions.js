@@ -576,8 +576,7 @@ const intervalGlobalDatas = async function(client, justTempRoles){
             resolve(count);
           })
 
-          let imageEmbed = new Discord.MessageEmbed(msg.embeds[0]);
-          let textEmbed = new Discord.MessageEmbed(msg.embeds[1]);
+          let textEmbed = new Embed(msg.embeds[1]);
 
           await msg.reactions.removeAll();
 
@@ -585,6 +584,7 @@ const intervalGlobalDatas = async function(client, justTempRoles){
           let yes = reactionsInPoll.yes.filter(x => !reactionsInPoll.no.includes(x))
           let no = reactionsInPoll.no.filter(x => !reactionsInPoll.yes.includes(x))
 
+          textEmbed.defAuthor({text: "La encuesta del STAFF terminó", title: true})
           textEmbed.setFooter({text: "TERMINÓ"});
           textEmbed.setDescription(textEmbed.description + `\n\n**RESULTADOS:**`)
           textEmbed.addField(`✅ SÍ:`, `${yes.length}`, true)
@@ -592,7 +592,7 @@ const intervalGlobalDatas = async function(client, justTempRoles){
 
           if(no.length === 0 && yes.length === 0) textEmbed.setFooter({text: "TERMINÓ...! y... no... ¿votó nadie...? :("});
 
-          await msg.edit({embeds: [imageEmbed, textEmbed]});
+          await msg.reply({embeds: [textEmbed]});
 
           polls[i].remove();
         }

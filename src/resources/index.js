@@ -4,6 +4,7 @@ const Responses = require("./coinsresponses.json");
 const Cumplidos = require("./cumplidos.json");
 const Reglas = require("./reglas.json");
 const Emojis = require("./emojis.json");
+const EmbedImages = require("./embeds.json");
 
 module.exports = {
     Config,
@@ -11,5 +12,6 @@ module.exports = {
     Responses,
     Cumplidos,
     Reglas,
-    Emojis
+    Emojis,
+    EmbedImages
 }
