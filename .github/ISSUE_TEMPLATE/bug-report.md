@@ -20,6 +20,9 @@ Pasos para reproducir el bug:
 **Lo que debe pasar**
 Descripción de lo que esperas que pase.
 
+**Lo que está pasando**
+Descripción de lo que en realidad pasa
+
 **Screenshots**
 Si es necesario, puedes agregar screenshots para explicar el problema.
 
