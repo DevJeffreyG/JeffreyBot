@@ -16,10 +16,21 @@
 Jeffrey Bot es un bot de Discord **multipropósitos** programado por y para el servidor de Discord de [@JeffreyG](https://github.com/DevJeffreyG).
 
 ### Funciones
-- Moderación: Warn, Hackban, Ban, etc.
+- Moderación
+  - Warns, Softwarns
+  - Hackban, Ban
+  - Tickets, encuestas
+  - Etc.
+- Administración
+  - Sugerencias para el servidor
+- Diversión
+  - Llaves para canjear
+  - Adivinanzas con recompensas
+- Social
 - Sistema económico basado en inflación
   - Tiendas
   - Monedas
+  - Sistema de boosts
 - _Siempre en work in progress_.
 
 # Créditos
