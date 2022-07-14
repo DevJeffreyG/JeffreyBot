@@ -110,3 +110,4 @@ dist
 # Dev
 commands/layout.txt
 package-lock.json
+admin.bat
