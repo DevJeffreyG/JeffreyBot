@@ -27,6 +27,9 @@ Jeffrey Bot es un bot de Discord **multipropósitos** programado por y para el s
   - Llaves para canjear
   - Adivinanzas con recompensas
 - Social
+  - Jeffrey Bot x YouTube
+  - Jeffrey Bot x Twitter
+  - Jeffrey Bot x Twitch
 - Sistema económico basado en inflación
   - Tiendas
   - Monedas
