@@ -4,7 +4,6 @@ const Schema = mongoose.Schema
 
 
 const KeysSchema = new Schema({
-    guild_id: { type: String, required: true },
     config: {
         maxuses: { type: Number, required: true, default: 1 },
         used: { type: Number, required: true, default: 0 },

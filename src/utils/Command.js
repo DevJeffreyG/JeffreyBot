@@ -5,9 +5,9 @@ const Embed = require("./Embed");
 const Colores = require("../resources/colores.json");
 
 class Command {
-    constructor(data = {name: "foo", desc: "bar", helpdesc: null, category: "0"}){
-        if(!(data.name && data.desc && data.category)) return console.error("No están todos los datos para crear un comando:", data)
-        
+    constructor(data = { name: "foo", desc: "bar", helpdesc: null, category: "0" }) {
+        if (!(data.name && data.desc && data.category)) return console.error("No están todos los datos para crear un comando:", data)
+
         this.data = new SlashCommandBuilder()
             .setName(data.name.toLowerCase())
             .setDescription(data.desc)
@@ -23,21 +23,21 @@ class Command {
         this.getHelp = async (interaction) => {
             let embed = this.#getHelpEmbed(interaction);
 
-            return interaction.editReply({content: null, embeds: [embed]});
+            return interaction.editReply({ content: null, embeds: [embed] });
         }
     }
 
-    #toAddWorker(data){
+    #toAddWorker(data) {
         let tofind = data.sub ? data.sub.split(".") : null;
 
-        if(!tofind) return this.data;
+        if (!tofind) return this.data;
 
         let returnable = this.data.options;
 
         tofind.forEach(find => {
             const f = x => x.name === find;
 
-            if(!returnable || returnable instanceof SlashCommandSubcommandGroupBuilder) console.error("⚠️ Hay algo mal con las opciones actuales del comando, ten cuidado con los Subcommands y sus grupos", this.data, returnable);
+            if (!returnable || returnable instanceof SlashCommandSubcommandGroupBuilder) console.error("⚠️ Hay algo mal con las opciones actuales del comando, ten cuidado con los Subcommands y sus grupos", this.data, returnable);
             returnable = returnable.find(f).options.length != 0
                 && returnable.find(f).options[0] instanceof SlashCommandSubcommandBuilder
                 ? returnable.find(f).options
@@ -47,13 +47,26 @@ class Command {
         return returnable;
     }
 
-    async addOption(data = {type, name: "foo", desc: "bar", req: false, sub: null}) {
-        if(!(data.type && data.name && data.desc)) return console.error("No están todos los datos para crear una opción:", this.data, data)
-        
+    async addEach(data = { type: "string", name: "foo", desc: "bar", req: false }) {
+        this.data.options.forEach(option => {
+            if (option instanceof SlashCommandSubcommandGroupBuilder) {
+                option.options.forEach(subcommand => {
+                    data.sub = `${option.name}.${subcommand.name}`;
+                    this.addOption(data)
+                })
+            } else {
+                this.addOption(data);
+            }
+        })
+    }
+
+    async addOption(data = { type: "string", name: "foo", desc: "bar", req: false, sub: null }) {
+        if (!(data.type && data.name && data.desc)) return console.error("No están todos los datos para crear una opción:", this.data, data)
+
         let toAdd = this.#toAddWorker(data)
 
         const x = option => this.#optionWork(option, data);
-        switch(data.type) {
+        switch (data.type) {
             case "string":
                 toAdd.addStringOption(x);
                 break;
@@ -61,7 +74,7 @@ class Command {
             case "integer":
                 toAdd.addIntegerOption(x)
                 break;
-            
+
             case "boolean":
                 toAdd.addBooleanOption(x);
                 break;
@@ -69,7 +82,7 @@ class Command {
             case "user":
                 toAdd.addUserOption(x);
                 break;
-            
+
             case "channel":
                 toAdd.addChannelOption(x);
                 break;
@@ -77,7 +90,7 @@ class Command {
             case "role":
                 toAdd.addRoleOption(x);
                 break;
-            
+
             case "mentionable":
                 toAdd.addMentionableOption(x);
                 break;
@@ -96,28 +109,28 @@ class Command {
         }
     }
 
-    async addSubcommand(data = {name: "foo", desc: "bar", group: null}) {
-        if(!(data.name && data.desc)) return console.error("No están todos los datos para crear un subcommand:", this.data, data)
+    async addSubcommand(data = { name: "foo", desc: "bar", group: null }) {
+        if (!(data.name && data.desc)) return console.error("No están todos los datos para crear un subcommand:", this.data, data)
 
-        if(data.group) {
+        if (data.group) {
             let sub = this.data.options.find(x => x.name === data.group);
 
-            sub.addSubcommand(sub => 
+            sub.addSubcommand(sub =>
                 sub
                     .setName(data.name)
                     .setDescription(data.desc)
             )
         } else
 
-        this.data.addSubcommand(sub => 
-            sub
-                .setName(data.name)
-                .setDescription(data.desc)
-        )
+            this.data.addSubcommand(sub =>
+                sub
+                    .setName(data.name)
+                    .setDescription(data.desc)
+            )
     }
 
-    async addSubcommandGroup(data = {name: "foo", desc: "bar"}){
-        if(!(data.name && data.desc)) return console.error("No están todos los datos para crear un subcommandgroup:", this.data, data)
+    async addSubcommandGroup(data = { name: "foo", desc: "bar" }) {
+        if (!(data.name && data.desc)) return console.error("No están todos los datos para crear un subcommandgroup:", this.data, data)
 
         this.data.addSubcommandGroup(sub =>
             sub
@@ -127,24 +140,24 @@ class Command {
     }
 
     async #setPerms() {
-        if(this.category == "STAFF" || this.category == "MODERATION" || this.category == "ADMIN") this.data.setDefaultMemberPermissions(PermissionFlagsBits.Administrator | PermissionFlagsBits.ManageMessages);
-        if(this.category == "DEV") this.dev = true;
+        if (this.category == "STAFF" || this.category == "MODERATION" || this.category == "ADMIN") this.data.setDefaultMemberPermissions(PermissionFlagsBits.Administrator | PermissionFlagsBits.ManageMessages);
+        if (this.category == "DEV") this.dev = true;
     }
 
     #optionWork(option, data) {
         option
-        .setName(data.name)
-        .setDescription(data.desc)
-        .setRequired(data.req ?? false)
+            .setName(data.name)
+            .setDescription(data.desc)
+            .setRequired(data.req ?? false)
 
-        if(data.type === "integer" && data.min){
+        if ((data.type === "integer" || data.type === "number") && data.min) {
             option
                 .setMinValue(data.min)
         }
 
-        if(data.choices) {
+        if (data.choices) {
             data.choices.forEach(choice => {
-                option.addChoices({name: choice, value: choice.toLowerCase()})
+                option.addChoices({ name: choice, value: choice.toLowerCase() })
             });
         }
 
@@ -153,14 +166,14 @@ class Command {
 
     #getHelpEmbed(interaction) {
         let embed = new Embed()
-        .defAuthor({text: `Ayuda: /${this.name}`, icon: interaction.guild.iconURL(), title: true})
-        .defDesc(`▸ ${this.info}`)
-        .setColor(Colores.verde)
-        .defThumbnail(interaction.client.user.avatarURL())
+            .defAuthor({ text: `Ayuda: /${this.name}`, icon: interaction.guild.iconURL(), title: true })
+            .defDesc(`▸ ${this.info}`)
+            .setColor(Colores.verde)
+            .defThumbnail(interaction.client.user.avatarURL())
 
         return embed;
     }
-    
+
 }
 
 module.exports = Command;
