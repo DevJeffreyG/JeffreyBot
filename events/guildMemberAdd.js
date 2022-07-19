@@ -1,6 +1,6 @@
 const Discord = require("discord.js");
 
-const { time } = require("@discordjs/builders");
+const { time } = Discord;
 const { GenerateLog, DaysUntilToday, Initialize } = require("../src/utils/");
 const Config = require("../src/resources/base.json");
 const Colores = require("../src/resources/colores.json");
@@ -42,7 +42,7 @@ module.exports = async (client, member) => {
       fBienv = `Hola **${tag}**. Bienvenido, otra vez.`;
     }
   
-    let embed = new Discord.MessageEmbed()
+    let embed = new Discord.EmbedBuilder()
       .setDescription(fBienv)
       .setFooter(`* Para poder hablar en el chat debes aceptar las reglas`, guild.iconURL())
       .setColor(Colores.verde);

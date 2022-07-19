@@ -7,7 +7,7 @@ const search = require("yt-search");
 module.exports.run = async (client, message, args, active) => {
   if (!message.content.startsWith(prefix)) return;
 
-  let sadface = new Discord.MessageEmbed()
+  let sadface = new Discord.EmbedBuilder()
   .setAuthor(`| Error`, Config.errorPng)
   .setColor(Colores.rojo)
   .setDescription(`Los comandos de música de Jeffrey Bot están desactivados debido a problemas con el host.\n[▸ Anuncio](https://discordapp.com/channels/447797737216278528/485191462422577182/733704080714629160)`)
@@ -19,9 +19,9 @@ module.exports.run = async (client, message, args, active) => {
 
   console.log(author.tag);
 
-  let searchEmbed = new Discord.MessageEmbed().setColor(Colores.verde);
+  let searchEmbed = new Discord.EmbedBuilder().setColor(Colores.verde);
   
-    let errorE1 = new Discord.MessageEmbed()
+    let errorE1 = new Discord.EmbedBuilder()
     .setAuthor(`| Error: 1`, Config.errorPng)
     .setDescription(`Algo ha salido mal, no he encontrado resultados. Prueba otra vez o llama a Jeffrey.`)
     .setColor(Colores.rojo);

@@ -1,6 +1,4 @@
-const Discord = require("discord.js");
-
-const { time } = require("@discordjs/builders");
+const { time } = require("discord.js");
 const { GenerateLog } = require("../src/utils/");
 const Colores = require("../src/resources/colores.json");
 

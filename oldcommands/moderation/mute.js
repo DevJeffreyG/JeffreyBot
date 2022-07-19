@@ -39,7 +39,7 @@ module.exports = {
         const muteRole = client.user.id === Config.testingJBID ? guild.roles.cache.find(x => x.id === "544691532104728597") : guild.roles.cache.find(x => x.id === Config.muteRole);
         const channel = client.user.id === Config.testingJBID ? guild.channels.cache.find(x => x.id === "483108734604804107") : guild.channels.cache.find(x => x.id === Config.logChannel);
         
-        let mEmbed = new Discord.MessageEmbed()
+        let mEmbed = new Discord.EmbedBuilder()
         .setAuthor(`${tiempo ? "Temp Mute" : "Mute"}`, author.displayAvatarURL())
         .setDescription(`**—** Usuario muteado: ${member}
 **—** Tiempo de mute: ${tiempo ? new HumanMs(tiempo).human : "Permanente"}

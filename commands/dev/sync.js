@@ -1,7 +1,7 @@
 const { Command, Embed, FindNewId } = require("../../src/utils")
 const { Emojis } = require("../../src/resources")
 
-const { Permissions } = require("discord.js");
+const { PermissionsBitField } = require("discord.js");
 
 const command = new Command({
     name: "sync",
@@ -37,9 +37,9 @@ command.execute = async (interaction, models, params, client) => {
             const role = interaction.guild.roles.cache.find(x => x.id === params[subcommand].id.value);
             
             const perms = {
-                [Permissions.FLAGS.VIEW_CHANNEL]: false,
-                [Permissions.FLAGS.SEND_MESSAGES]: false,
-                [Permissions.FLAGS.ADD_REACTIONS]: false
+                [PermissionsBitField.Flags.ViewChannel]: false,
+                [PermissionsBitField.Flags.SendMessages]: false,
+                [PermissionsBitField.Flags.AddReactions]: false
             }
 
             await interaction.editReply({content: `${Emojis.Loading} Obteniendo todos los canales...`})

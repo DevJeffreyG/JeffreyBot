@@ -30,7 +30,7 @@ module.exports = {
         var size = Object.keys(reglas).length;
             
         //errores
-        let rulesEmbed = new Discord.MessageEmbed()
+        let rulesEmbed = new Discord.EmbedBuilder()
         .setAuthor(`Reglas`, Config.jeffreyguildIcon)
         .setColor(Colores.verde)
         .setDescription(`▸ Las reglas enumeradas que son usadas en comandos como \`${prefix}softwarn\` y \`${prefix}warn\`.`)

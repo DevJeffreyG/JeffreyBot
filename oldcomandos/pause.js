@@ -15,22 +15,22 @@ module.exports.run = async (client, message, args, active) => {
   // embeds
   let fetched = active.get(guild.id);
   
-  let errorE1 = new Discord.MessageEmbed()
+  let errorE1 = new Discord.EmbedBuilder()
   .setAuthor(`| Error: 1`, Config.errorPng)
   .setDescription(`Por favor, conéctate a un canal de voz.`)
   .setColor(Colores.rojo);
   
-  let errorE2 = new Discord.MessageEmbed()
+  let errorE2 = new Discord.EmbedBuilder()
   .setAuthor(`| Error: 2`, Config.errorPng)
   .setDescription(`Lo siento, no estoy en ningún canal de voz.`)
   .setColor(Colores.rojo);
   
-  let errorE3 = new Discord.MessageEmbed()
+  let errorE3 = new Discord.EmbedBuilder()
   .setAuthor(`| Error: 3`, Config.errorPng)
   .setDescription(`Lo siento, no estás en el mismo chat de voz con el bot.`)
   .setColor(Colores.rojo);
   
-  let errorE4 = new Discord.MessageEmbed()
+  let errorE4 = new Discord.EmbedBuilder()
   .setAuthor(`| Error: 4`, Config.errorPng)
   .setDescription(`La música ya está pausada.`)
   .setColor(Colores.rojo);  
@@ -49,7 +49,7 @@ module.exports.run = async (client, message, args, active) => {
   fetched.dispatcher.pause();
   
   //output
-  let embed = new Discord.MessageEmbed()
+  let embed = new Discord.EmbedBuilder()
   .setDescription(`**⏸️ | Pausado \`${fetched.queue[0].songTitle}\` con éxito.**`)
   .setColor(Colores.verde);
   

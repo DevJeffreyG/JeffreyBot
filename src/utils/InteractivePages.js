@@ -1,5 +1,6 @@
 const Discord = require("discord.js");
-const { time } = require('@discordjs/builders');
+const { ButtonStyle } = require("discord-api-types/v10");
+const { time } = Discord;
 const ms = require("ms");
 const Embed = require("./Embed");
 
@@ -99,17 +100,17 @@ class InteractivePages {
     }
 
     async init(interaction, client){
-        const row = new Discord.MessageActionRow()
+        const row = new Discord.ActionRowBuilder()
         .addComponents(
-            new Discord.MessageButton()
+            new Discord.ButtonBuilder()
                 .setCustomId("back")
                 .setEmoji("⬅️")
-                .setStyle("PRIMARY")
+                .setStyle(ButtonStyle.Primary)
                 .setDisabled(true),
-            new Discord.MessageButton()
+            new Discord.ButtonBuilder()
                 .setCustomId("next")
                 .setEmoji("➡️")
-                .setStyle("PRIMARY"),
+                .setStyle(ButtonStyle.Primary),
         )
 
         if(this.pages.size === 1) row.components.forEach(c => c.setDisabled()); // no tiene más de una pagina
@@ -141,7 +142,7 @@ class InteractivePages {
             if(pagn === this.pages.size - 1) row.components[1].setDisabled();
                 else row.components[1].setDisabled(false);
 
-            let embed = new Discord.MessageEmbed()
+            let embed = new Discord.EmbedBuilder()
             .setAuthor({name: this.base.title, iconURL: this.base.icon})
             .setColor(this.base.color)
             .setDescription(`${this.base.description}\n\n${this.pages.get(pagn+1).join(" ")}`)

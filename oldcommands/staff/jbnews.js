@@ -33,7 +33,7 @@ module.exports = {
         // Comando
         if(!anuncio && message.attachments.size === 0) return message.reply("Si no hay anuncio, adjunta una imagen.");
       
-        let nEmbed = new Discord.MessageEmbed()
+        let nEmbed = new Discord.EmbedBuilder()
         .setColor(Colores.verde)
         .setDescription(anuncio)
         .setFooter(`Noticia por ${author.tag}`, client.user.displayAvatarURL())

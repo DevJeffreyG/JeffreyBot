@@ -142,7 +142,7 @@ module.exports = async (client, message) => {
       // mencionan a Jeffrey
       let contentMsg = message.content.toLowerCase();
     
-      let embed = new Discord.MessageEmbed()
+      let embed = new Discord.EmbedBuilder()
       .setAuthor(`${author.tag}`, author.displayAvatarURL())
       .setDescription(`**__${author.username}__** dice: "\`${message.content}\`".`)
       .setFooter(`Mencionaron a Jeffrey.`, message.guild.iconURL())

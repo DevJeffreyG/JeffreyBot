@@ -56,14 +56,14 @@ module.exports = {
 
         const totalJeffros = Math.floor(darkjeffro * wanted);
 
-        let embed = new Discord.MessageEmbed()
+        let embed = new Discord.EmbedBuilder()
         .setAuthor(`Éxito`, Config.darkLogoPng)
         .setDescription(`**—** Se han restado **${Emojis.Jeffros}${totalJeffros.toLocaleString('es-CO')}**.
 **—** Se añadieron **${Emojis.Dark}${wanted.toLocaleString("es-CO")}** a tu cuenta.`)
         .setFooter(`Para ver la duración de tus DarkJeffros usa '${prefix}darkstats'.`)
         .setColor(Colores.negro);
 
-        let nope = new Discord.MessageEmbed()
+        let nope = new Discord.EmbedBuilder()
         .setAuthor(`Error`, Config.darkLogoPng)
         .setDescription(`**—** No tienes suficientes Jeffros para cambiar.
 **—** Inflación: **${Emojis.Dark}1** = **${Emojis.Jeffros}${darkjeffro.toLocaleString('es-CO')}**

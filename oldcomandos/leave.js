@@ -19,22 +19,22 @@ module.exports.run = async (client, message, args) => {
     
   // embeds
   
-  let errorE1 = new Discord.MessageEmbed()
+  let errorE1 = new Discord.EmbedBuilder()
   .setAuthor(`| Error: 1`, Config.errorPng)
   .setDescription(`Por favor, conéctate a un canal de voz.`)
   .setColor(Colores.rojo);
   
-  let errorE2 = new Discord.MessageEmbed()
+  let errorE2 = new Discord.EmbedBuilder()
   .setAuthor(`| Error: 2`, Config.errorPng)
   .setDescription(`Lo siento, no estoy en ningún canal de voz.`)
   .setColor(Colores.rojo);
   
-  let errorE3 = new Discord.MessageEmbed()
+  let errorE3 = new Discord.EmbedBuilder()
   .setAuthor(`| Error: 3`, Config.errorPng)
   .setDescription(`Lo siento, no estás en el mismo chat de voz con el bot.`)
   .setColor(Colores.rojo);
   
-  let errorE4 = new Discord.MessageEmbed()
+  let errorE4 = new Discord.EmbedBuilder()
   .setAuthor(`| Error: 4`, Config.errorPng)
   .setDescription(`No puedes usar este comando si hay más personas en el canal ni tampoco eres Staff del servidor.`)
   .setColor(Colores.rojo);  
@@ -50,7 +50,7 @@ module.exports.run = async (client, message, args) => {
   
   let userCount = message.member.voice.channel.members.size;
   if(userCount === 2 || message.member.roles.cache.find(x => x.id === staffRole.id)){
-    let embed = new Discord.MessageEmbed()
+    let embed = new Discord.EmbedBuilder()
     .setDescription(`🔌 | **Saliendo...**`)
     .setColor(Colores.verde);
 

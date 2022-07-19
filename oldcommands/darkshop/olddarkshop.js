@@ -70,7 +70,7 @@ module.exports = {
         
                             // si no hay args, muestra la página principal
                             if(!args[0]){
-                                let tienda = new Discord.MessageEmbed()
+                                let tienda = new Discord.EmbedBuilder()
                                 .setAuthor(`| DarkShop`, Config.darkLogoPng)
                                 .setColor(Colores.negro)
                                 .setDescription(`**—** Bienvenid@ a la DarkShop. \`${prefix}darkshop help\` para ver todos los comandos disponibles.
@@ -206,7 +206,7 @@ module.exports = {
         
                                                             pagn--;
         
-                                                            let embed = new Discord.MessageEmbed()
+                                                            let embed = new Discord.EmbedBuilder()
                                                             .setAuthor(`| DarkShop`, Config.darkLogoPng)
                                                             .setColor(Colores.negro)
                                                             .setDescription(`**—** Bienvenid@ a la DarkShop. \`${prefix}darkshop <ID del item>\`.
@@ -276,7 +276,7 @@ module.exports = {
                                                             if(pagn === totalpags) return reactions.users.remove(user.id);
                                                             pagn++;
         
-                                                            let embed = new Discord.MessageEmbed()
+                                                            let embed = new Discord.EmbedBuilder()
                                                             .setAuthor(`| DarkShop`, Config.darkLogoPng)
                                                             .setColor(Colores.negro)
                                                             .setDescription(`**—** Bienvenid@ a la DarkShop. \`${prefix}darkshop <ID del item>\`.
@@ -349,7 +349,7 @@ module.exports = {
                                     // listo
                                 case "help":
                                 case "ayuda":
-                                    let embedAyuda = new Discord.MessageEmbed()
+                                    let embedAyuda = new Discord.EmbedBuilder()
                                     .setAuthor(`| Comandos`, Config.darkLogoPng)
                                     .setDescription(`**—** \`${prefix}ds\`: Comando principal, donde puedes ver todos los items de la DarkShop.
                     **—** \`${prefix}ds bal\`: Mira tus estadísticas.
@@ -375,7 +375,7 @@ module.exports = {
                                         stonks = "📉";
                                     }
         
-                                    let stonksEmbed = new Discord.MessageEmbed()
+                                    let stonksEmbed = new Discord.EmbedBuilder()
                                     .setAuthor(`| Estado`, Config.darkLogoPng)
                                     .setDescription(`${stonks} **—** La inflación actual de los DarkJeffros es de un **${dark.info.inflation}%**.
             **— ${Emojis.Dark}1 = ${Emojis.Jeffros}${Math.floor(200*dark.info.inflation).toLocaleString('es-CO')}**.
@@ -390,7 +390,7 @@ module.exports = {
                                 case "dur":
                                 case "d":
         
-                                    let error1 = new Discord.MessageEmbed()
+                                    let error1 = new Discord.EmbedBuilder()
                                     .setAuthor(`| Error`, Config.darkLogoPng)
                                     .setColor(Colores.negro)
                                     .setDescription(`**—** Parece que no se ha generado ninguna fecha de expiración... intenta cambiando algunos Jeffros por DarkJeffros...`)
@@ -413,7 +413,7 @@ module.exports = {
                                             let diference1 = newDate.getTime() - oldDate.getTime();
                                             let pastDays = Math.floor(diference1 / (1000 * 3600 * 24)); // dias transcurridos
         
-                                            let embed = new Discord.MessageEmbed()
+                                            let embed = new Discord.EmbedBuilder()
                                             .setAuthor(`| Información del usuario N°${author.id}`, author.displayAvatarURL())
                                             .setDescription(`**— Duración total**: \`${authorData.info.duration}\` días.
                                             **— Desde la fecha**: \`${authorData.info.since}\`.
@@ -435,7 +435,7 @@ module.exports = {
                                 case "cambio":
                                 case "change":
                                     const maxDaysForDarkJeffros = Config.daysDarkJeffros;
-                                    let instructions = new Discord.MessageEmbed()
+                                    let instructions = new Discord.EmbedBuilder()
                                     .setAuthor(`| Error`, Config.darkLogoPng)
                                     .setColor(Colores.negro)
                                     .setDescription(`▸ El uso correcto es: /darkshop change <DarkJeffros>
@@ -453,14 +453,14 @@ module.exports = {
         
                                     totalJeffros = Math.floor(darkjeffro * wanted);
         
-                                    let embed = new Discord.MessageEmbed()
+                                    let embed = new Discord.EmbedBuilder()
                                     .setAuthor(`| Éxito`, Config.darkLogoPng)
                                     .setDescription(`**—** Se han restado **${Emojis.Jeffros}${totalJeffros.toLocaleString('es-CO')}**.
                                     **—** Se añadieron **${Emojis.Dark}${wanted}** a tu cuenta.`)
                                     .setFooter(`Por favor, usa '${prefix}ds duration' para saber el tiempo que tienes para poder vender cambiar tus DarkJeffros.`)
                                     .setColor(Colores.negro);
         
-                                    let nope = new Discord.MessageEmbed()
+                                    let nope = new Discord.EmbedBuilder()
                                     .setAuthor(`| Error`, Config.darkLogoPng)
                                     .setDescription(`**—** No tienes suficientes Jeffros para cambiar.
                                     **—** Inflación: **${Emojis.Dark}1** = **${Emojis.Jeffros}${darkjeffro.toLocaleString('es-CO')}**
@@ -531,7 +531,7 @@ module.exports = {
                                 case "with":
                                 case "withdraw":
                                 case "retirar":
-                                    let instructions2 = new Discord.MessageEmbed()
+                                    let instructions2 = new Discord.EmbedBuilder()
                                     .setAuthor(`| Error`, Config.darkLogoPng)
                                     .setColor(Colores.negro)
                                     .setDescription(`▸ El uso correcto es: /darkshop withdraw <DarkJeffros>
@@ -555,13 +555,13 @@ module.exports = {
                                         if(err) throw err;
                                             
                                         let have = stats.djeffros || 0;
-                                        let embed = new Discord.MessageEmbed()
+                                        let embed = new Discord.EmbedBuilder()
                                         .setAuthor(`| Éxito`, Config.darkLogoPng)
                                         .setDescription(`**—** Se han restado **${Emojis.Dark}${changing}** de tu cuenta.
 **—** Se añadieron **${Emojis.Jeffros}${totalJeffros.toLocaleString('es-CO')}**.`)
                                         .setColor(Colores.negro);
         
-                                        let nope = new Discord.MessageEmbed()
+                                        let nope = new Discord.EmbedBuilder()
                                         .setAuthor(`| Error`, Config.darkLogoPng)
                                         .setDescription(`**—** No tienes tantos DarkJeffros para cambiar.
 **—** Quieres cambiar: **${Emojis.Dark}${changing.toLocaleString('es-CO')}**.
@@ -604,7 +604,7 @@ module.exports = {
         
                                         if(!args[1]){
                                             if(!stats){
-                                                let stonksEmbed = new Discord.MessageEmbed()
+                                                let stonksEmbed = new Discord.EmbedBuilder()
                                                 .setAuthor(`| Cálculo`, Config.darkLogoPng)
                                                 .setDescription(`${stonks} **— ${dark.info.inflation}%**.
 **— ${Emojis.Dark}? = ${Emojis.Jeffros}?**.`)
@@ -613,7 +613,7 @@ module.exports = {
                                                 return message.channel.send({embeds: [stonksEmbed]});
                                             } else {
         
-                                                let stonksEmbed = new Discord.MessageEmbed()
+                                                let stonksEmbed = new Discord.EmbedBuilder()
                                                 .setAuthor(`| Cálculo`, Config.darkLogoPng)
                                                 .setDescription(`${stonks} **— ${dark.info.inflation}%**.
 **— ${Emojis.Dark}${stats.djeffros.toLocaleString('es-CO')} = ${Emojis.Jeffros}${Math.floor(stats.djeffros*200*dark.info.inflation).toLocaleString('es-CO')}**.`)
@@ -622,7 +622,7 @@ module.exports = {
                                                 message.channel.send({embeds: [stonksEmbed]});
                                             }
                                         } else if(!isNaN(args[1])){
-                                            let stonksEmbed = new Discord.MessageEmbed()
+                                            let stonksEmbed = new Discord.EmbedBuilder()
                                                 .setAuthor(`| Cálculo`, Config.darkLogoPng)
                                                 .setDescription(`${stonks} **— ${dark.info.inflation}%**.
 **— ${Emojis.Dark}${args[1].toLocaleString('es-CO')} = ${Emojis.Jeffros}${Math.floor(args[1]*200*dark.info.inflation).toLocaleString('es-CO')}**.`)
@@ -630,7 +630,7 @@ module.exports = {
         
                                                 message.channel.send({embeds: [stonksEmbed]});
                                         } else {
-                                            let stonksEmbed = new Discord.MessageEmbed()
+                                            let stonksEmbed = new Discord.EmbedBuilder()
                                             .setAuthor(`| Cálculo`, Config.darkLogoPng)
                                             .setDescription(`${stonks} **— ${dark.info.inflation}%**.
 **— ${Emojis.Dark}${stats.djeffros.toLocaleString('es-CO')} = ${Emojis.Jeffros}${Math.floor(stats.djeffros*200*dark.info.inflation).toLocaleString('es-CO')}**.`)
@@ -657,7 +657,7 @@ module.exports = {
                                         let aDJ = stats ? stats.djeffros : "?";
                                         let aAcu = stats ? stats.accuracy : "?";
         
-                                        let statsEmbed = new Discord.MessageEmbed()
+                                        let statsEmbed = new Discord.EmbedBuilder()
                                         .setAuthor(`| Estadísiticas del usuario N°${author.id}`, author.displayAvatarURL())
                                         .setDescription(`**— DarkJeffros**: ${Emojis.Dark}${aDJ}.
                     **— Precisión**: ${aAcu}%
@@ -693,7 +693,7 @@ module.exports = {
                                             // /shop add nombre precio
                                             // /shop  0    1      2
         
-                                            let errorEmbed = new Discord.MessageEmbed()
+                                            let errorEmbed = new Discord.EmbedBuilder()
                                             .setAuthor(`| Error`, Config.errorPng)
                                             .setDescription(
                                                 `▸ El uso correcto es: /darkshop add <nombre> <precio> (ignoreInterest).`
@@ -719,7 +719,7 @@ module.exports = {
                                             });
         
                                             newItem.save();
-                                            let goodEmbed = new Discord.MessageEmbed()
+                                            let goodEmbed = new Discord.EmbedBuilder()
                                             .setAuthor(`| Listo`, Config.bienPng)
                                             .setDescription(`**—** Para personalizar la información del item usa \`${prefix}darkshop edit <id> <nombre, precio, etc...> <nuevo>\`.
         
@@ -742,7 +742,7 @@ module.exports = {
                                     // /shop remove id
                                     // /shop    0    1
         
-                                    let errorEmbed = new Discord.MessageEmbed()
+                                    let errorEmbed = new Discord.EmbedBuilder()
                                         .setAuthor(`| Error`, Config.errorPng)
                                         .setDescription(`▸ El uso correcto es: /darkshop remove <id del item>`)
                                         .setColor(Colores.nocolor);
@@ -766,7 +766,7 @@ module.exports = {
                                     break;
         
                                 case "info":
-                                    let errorEmbed2 = new Discord.MessageEmbed()
+                                    let errorEmbed2 = new Discord.EmbedBuilder()
                                     .setAuthor(`| Error`, Config.errorPng)
                                     .setDescription(`▸ El uso correcto es: ${prefix}darkshop info <id del item>`);
         
@@ -792,7 +792,7 @@ module.exports = {
         
                                                 givenrole = givenrole ? givenrole : "Ninguno";
         
-                                                let embed = new Discord.MessageEmbed()
+                                                let embed = new Discord.EmbedBuilder()
                                                 .setAuthor(`| Item ${data.id}`, Config.darkLogoPng)
                                                 .setDescription(`**—** Nombre: \`${data.itemName}\`.
                     **—** Precio base: ${Emojis.Dark}${data.itemPrice}.
@@ -815,7 +815,7 @@ module.exports = {
                                 case "edit":
                                     // editar un darkitem
                                     if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
-                                    let errorEmbed3 = new Discord.MessageEmbed()
+                                    let errorEmbed3 = new Discord.EmbedBuilder()
                                     .setAuthor(`| Error`, Config.errorPng)
                                     .setDescription(
                                         `▸ El uso correcto es: ${prefix}darkshop edit <id> <nombre, precio, etc> <nuevo>`
@@ -839,7 +839,7 @@ module.exports = {
                                         if (!data) {
                                         return message.reply(`no he encontrado este item.`);
                                         } else {
-                                        let embed = new Discord.MessageEmbed()
+                                        let embed = new Discord.EmbedBuilder()
                                             .setAuthor(`| Listo`, Config.bienPng)
                                             .setColor(Colores.verde);
                             
@@ -905,7 +905,7 @@ module.exports = {
                                 case "adduse":
                                     if (!message.member.roles.cache.find(x => x.id === staffRole.id)) return;
                                 
-                                    let useEmbedError = new Discord.MessageEmbed()
+                                    let useEmbedError = new Discord.EmbedBuilder()
                                     .setDescription(`▸ El uso correcto es: ${prefix}darkshop adduse \`itemID\` \`add || remove\` \`item | jeffros | warns | role\`
         
                                     **— Item —**
@@ -1035,21 +1035,21 @@ module.exports = {
         
                                 case "items":
                                     // embeds
-                                    let noItems = new Discord.MessageEmbed()
+                                    let noItems = new Discord.EmbedBuilder()
                                     .setAuthor(`| Error`, Config.darkLogoPng)
                                     .setDescription(
                                     `**—** No encontré ningún item asociado a esta cuenta...`
                                     )
                                     .setColor(Colores.negro);
         
-                                    let noItem = new Discord.MessageEmbed()
+                                    let noItem = new Discord.EmbedBuilder()
                                     .setAuthor(`| Error`, Config.darkLogoPng)
                                     .setDescription(
                                     `**—** No encontré ese item en esta cuenta...`
                                     )
                                     .setColor(Colores.negro);
         
-                                    let noStats = new Discord.MessageEmbed()
+                                    let noStats = new Discord.EmbedBuilder()
                                     .setAuthor(`| Error`, Config.darkLogoPng)
                                     .setDescription(
                                     `**—** No he podido encontrar una cuenta con tu ID. Intenta cambiando unos cuántos Jeffros por DarkJeffros.`
@@ -1075,7 +1075,7 @@ module.exports = {
                                                     if(stats.items.length === 0) return message.channel.send({embeds: [noItems]});
         
                                                     if(!args[1]){
-                                                        let itemsEmbed = new Discord.MessageEmbed()
+                                                        let itemsEmbed = new Discord.EmbedBuilder()
                                                         .setAuthor(`| Items del usuario N°${author.id}`, author.displayAvatarURL())
                                                         .setThumbnail(Config.darkLogoPng)
                                                         .setFooter(`${prefix}ds items {ID} para usar un item.`)
@@ -1120,21 +1120,21 @@ module.exports = {
                                                                     } else {
                                                                         victim = message.mentions.users.first() ? guild.members.cache.get(message.mentions.users.first().id) : null;
         
-                                                                        let skipped2 = new Discord.MessageEmbed()
+                                                                        let skipped2 = new Discord.EmbedBuilder()
                                                                         .setAuthor(`| Interacción`, Config.darkLogoPng)
                                                                         .setDescription(`**—** ¡**${author.tag}** se ha volado la Firewall \`(${stats.accuracy}%)\` y ha usado el item \`${stats.items[index].name}\` en **${victim.user.tag}**!`)
                                                                         .setColor(Colores.negro)
                                                                         .setFooter(`${stats.items[index].name} para ${victim.user.tag}`)
                                                                         .setTimestamp();
         
-                                                                        let success2 = new Discord.MessageEmbed()
+                                                                        let success2 = new Discord.EmbedBuilder()
                                                                         .setAuthor(`| Interacción`, Config.darkLogoPng)
                                                                         .setDescription(`**—** ¡**${author.tag}** ha usado el item \`${stats.items[index].name}\` en **${victim.user.tag}**!`)
                                                                         .setColor(Colores.negro)
                                                                         .setFooter(`${stats.items[index].name} para ${victim.user.tag}`)
                                                                         .setTimestamp();
         
-                                                                        let fail2 = new Discord.MessageEmbed()
+                                                                        let fail2 = new Discord.EmbedBuilder()
                                                                         .setAuthor(`| Amenaza`, Config.darkLogoPng)
                                                                         .setDescription(`**—** ¡**${author.tag}** ha querido usar el item \`${stats.items[index].name}\` en **${victim.user.tag}** pero NO HA FUNCIONADO!`)
                                                                         .setColor(Colores.negro)
@@ -1264,28 +1264,28 @@ module.exports = {
                                                                     } else {
                                                                         victim = message.mentions.users.first() ? guild.members.cache.get(message.mentions.users.first().id) : null;
         
-                                                                        let skipped3 = new Discord.MessageEmbed()
+                                                                        let skipped3 = new Discord.EmbedBuilder()
                                                                         .setAuthor(`| Interacción`, Config.darkLogoPng)
                                                                         .setDescription(`**—** ¡**${author.tag}** se ha volado la Firewall \`(${stats.accuracy}%)\` y ha usado el item \`${stats.items[index].name}\` en **${victim.user.tag}**!`)
                                                                         .setColor(Colores.negro)
                                                                         .setFooter(`${stats.items[index].name} para ${victim.user.tag}`)
                                                                         .setTimestamp();
         
-                                                                        let success3 = new Discord.MessageEmbed()
+                                                                        let success3 = new Discord.EmbedBuilder()
                                                                         .setAuthor(`| Interacción`, Config.darkLogoPng)
                                                                         .setDescription(`**—** ¡**${author.tag}** ha usado el item \`${stats.items[index].name}\` en **${victim.user.tag}**!`)
                                                                         .setColor(Colores.negro)
                                                                         .setFooter(`${stats.items[index].name} para ${victim.user.tag}`)
                                                                         .setTimestamp();
         
-                                                                        let fail3 = new Discord.MessageEmbed()
+                                                                        let fail3 = new Discord.EmbedBuilder()
                                                                         .setAuthor(`| Amenaza`, Config.darkLogoPng)
                                                                         .setDescription(`**—** ¡**${author.tag}** ha querido usar el item \`${stats.items[index].name}\` en **${victim.user.tag}** pero NO HA FUNCIONADO!`)
                                                                         .setColor(Colores.negro)
                                                                         .setFooter(`${stats.items[index].name} para ${victim.user.tag}`)
                                                                         .setTimestamp();
         
-                                                                        let failhasRole = new Discord.MessageEmbed()
+                                                                        let failhasRole = new Discord.EmbedBuilder()
                                                                         .setAuthor(`| Amenaza`, Config.darkLogoPng)
                                                                         .setDescription(`**—** ¡**${author.tag}** ha querido usar el item \`${stats.items[index].name}\` en **${victim.user.tag}** pero YA ESTÁ AFECTADO POR EL ITEM!`)
                                                                         .setColor(Colores.negro)
@@ -1418,7 +1418,7 @@ module.exports = {
                                                                                 }
                                                                             })
                                                                         } else {
-                                                                            let failhasRole = new Discord.MessageEmbed()
+                                                                            let failhasRole = new Discord.EmbedBuilder()
                                                                             .setAuthor(`| Interacción`, Config.darkLogoPng)
                                                                             .setDescription(`**—** ¡**${author.tag}** ha querido usar el item \`${stats.items[index].name}\` en **${victim.user.tag}** pero YA ESTÁ AFECTADO POR EL ITEM!`)
                                                                             .setColor(Colores.negro)
@@ -1463,7 +1463,7 @@ module.exports = {
                                                                         if(finalAc > 90) stats.accuracy = 90;
                                                                         stats.save();
         
-                                                                        let activated2 = new Discord.MessageEmbed()
+                                                                        let activated2 = new Discord.EmbedBuilder()
                                                                         .setAuthor(`| Listo`, Config.darkLogoPng)
                                                                         .setDescription(`**—** Se ha usado el item **${item.name}**.`)
                                                                         .setColor(Colores.negro);
@@ -1483,7 +1483,7 @@ module.exports = {
                                                                         Interest(author, idUse);
                                                                         
         
-                                                                        let activated = new Discord.MessageEmbed()
+                                                                        let activated = new Discord.EmbedBuilder()
                                                                         .setAuthor(`| Listo`, Config.darkLogoPng)
                                                                         .setDescription(`**—** Se ha activado el item **${stats.items[index].name}**.`)
                                                                         .setColor(Colores.negro);
@@ -1507,7 +1507,7 @@ module.exports = {
                                     break;
                                 default:
         
-                                    let error = new Discord.MessageEmbed()
+                                    let error = new Discord.EmbedBuilder()
                                     .setAuthor(`| Error`, Config.darkLogoPng)
                                     .setDescription(
                                     `**—** No encontré ningún item para comprar con esa id...`
@@ -1549,14 +1549,14 @@ module.exports = {
                                                         let precio = all ? Number(item.itemPrice) + interest * all.quantity : Number(item.itemPrice);
         
                                                     
-                                                        let doesntHaveEnough = new Discord.MessageEmbed()
+                                                        let doesntHaveEnough = new Discord.EmbedBuilder()
                                                         .setAuthor(`| Error`, Config.darkLogoPng)
                                                         .setDescription(
                                                         `**—** Necesitas **${Emojis.Dark}${precio}** para comprar \`${item.itemName}\`. Tienes **${Emojis.Dark}${stats.djeffros}**.`
                                                         )
                                                         .setColor(Colores.negro);
         
-                                                        let hasThisItem = new Discord.MessageEmbed()
+                                                        let hasThisItem = new Discord.EmbedBuilder()
                                                         .setAuthor(`| Error`, Config.darkLogoPng)
                                                         .setDescription(
                                                         `**—** Ya tienes \`${item.itemName}\`, úsalo con \`${prefix}ds items ${item.id}\`.`
@@ -1578,7 +1578,7 @@ module.exports = {
                                                             // si no tiene ese item
                                                             x = stats.items.length;
                                                             // confirmar pago
-                                                            let buyEmbed = new Discord.MessageEmbed()
+                                                            let buyEmbed = new Discord.EmbedBuilder()
                                                             .setAuthor(`| Compra`, Config.darkLogoPng)
                                                             .setColor(Colores.blanco)
                                                             .setDescription(
@@ -1598,7 +1598,7 @@ module.exports = {
                                                                 msg.react(":denegar:558084461686947891");
                                                                 });
         
-                                                            let cancelEmbed = new Discord.MessageEmbed()
+                                                            let cancelEmbed = new Discord.EmbedBuilder()
                                                                 .setDescription(`Cancelado.`)
                                                                 .setColor(Colores.nocolor);
         
@@ -1633,7 +1633,7 @@ module.exports = {
                                                                 stats.djeffros -= precio;
                                                                 stats.save();
         
-                                                                let useEmbed = new Discord.MessageEmbed()
+                                                                let useEmbed = new Discord.EmbedBuilder()
                                                                 .setAuthor(`| Listo!`, Config.darkLogoPng)
                                                                 .setDescription(
                                                                     `
@@ -1682,7 +1682,7 @@ module.exports = {
                                 `**${author.tag}**`
                             );
         
-                            let notReady = new Discord.MessageEmbed()
+                            let notReady = new Discord.EmbedBuilder()
                             .setColor(Colores.rojo)
                             .setDescription(desc)
                             .setFooter("▸ Vuelve cuando seas nivel 5.");

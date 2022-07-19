@@ -1,6 +1,6 @@
 const moment = require("moment");
 const Discord = require("discord.js");
-const { time } = require('@discordjs/builders');
+const { time } = Discord;
 const ms = require("ms");
 
 const models = require("mongoose").models;
@@ -8,6 +8,7 @@ const { ToggledCommands, Users, Guilds } = models
 
 const { Ticket, ErrorEmbed, FindNewId, Confirmation, intervalGlobalDatas, } = require("../src/utils");
 const { Config, Colores, Reglas } = require("../src/resources");
+const { InteractionType } = require("discord-api-types/v10");
 const { jeffreygID, mantenimiento } = Config;
 
 const activeCreatingTicket = new Map();
@@ -25,7 +26,7 @@ module.exports = async (client, interaction) => {
 
   const user = await Users.findOne({ guild_id: guild.id, user_id: author.id }) ?? await new Users({ guild_id: guild.id, user_id: author.id }).save();
 
-  if (interaction.isCommand()) { // SLASH COMMANDS
+  if (interaction.type === InteractionType.ApplicationCommand) { // SLASH COMMANDS
     const commandName = interaction.commandName;
     const slashCommand = client.slash.get(commandName);
 
@@ -100,8 +101,8 @@ module.exports = async (client, interaction) => {
         }
       }
     }
-  } else if (interaction.isButton()) { // BOTONES
-    //console.log(interaction);
+  } else if (interaction.type === InteractionType.MessageComponent) { // Componentes
+    
     const { userId, type } = getTicketInfo(interaction.message);
     let channel, message, ticket, confirmation, actualEmbeds;
 
@@ -129,7 +130,7 @@ module.exports = async (client, interaction) => {
 
         let r = interaction.guild.id === Config.testingServer ? interaction.guild.roles.cache.find(x => x.id === "983832210966732840") : interaction.guild.roles.cache.find(x => x.id === Config.suggestorRole);
 
-        let acceptedEmbed = new Discord.MessageEmbed()
+        let acceptedEmbed = new Discord.EmbedBuilder()
           .setAuthor({ name: "¡Se ha aceptado una sugerencia tuya!", iconURL: Config.bienPng })
           .setDescription(`**—** ¡Gracias por ayudarnos a mejorar!
 **—** Se ha aceptado tu sugerencia:
@@ -174,7 +175,7 @@ ${suggestion.suggestion}
 
         let r = interaction.guild.id === Config.testingServer ? interaction.guild.roles.cache.find(x => x.id === "983832210966732840") : interaction.guild.roles.cache.find(x => x.id === Config.suggestorRole);
 
-        let acceptedEmbed = new Discord.MessageEmbed()
+        let acceptedEmbed = new Discord.EmbedBuilder()
           .setAuthor({ name: "¡Gracias por el interés!", iconURL: Config.errorPng })
           .setDescription(`**—** Hemos denegado tu sugerencia:
 \`\`\`
@@ -217,7 +218,7 @@ ${suggestion.suggestion}
 
         let r = interaction.guild.id === Config.testingServer ? interaction.guild.roles.cache.find(x => x.id === "983832210966732840") : interaction.guild.roles.cache.find(x => x.id === Config.suggestorRole);
 
-        let acceptedEmbed = new Discord.MessageEmbed()
+        let acceptedEmbed = new Discord.EmbedBuilder()
           .setAuthor({ name: "¡Gracias por el interés!", iconURL: Config.errorPng })
           .setDescription(`**—** Hemos determinado que tu sugerencia es inválida:
 \`\`\`

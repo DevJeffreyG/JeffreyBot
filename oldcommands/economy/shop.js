@@ -48,7 +48,7 @@ module.exports = {
             icon_footer: guild.iconURL()
         }
 
-        let embed = new Discord.MessageEmbed()
+        let embed = new Discord.EmbedBuilder()
         .setAuthor(base.title, base.icon)
         .setColor(Colores.verde)
         .setDescription(`${base.description}\n\n${pages[0].join(" ")}`)

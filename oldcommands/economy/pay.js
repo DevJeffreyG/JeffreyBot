@@ -60,7 +60,7 @@ module.exports = {
 
         if(!confirmation) return;
 
-        let notEnough = new Discord.MessageEmbed()
+        let notEnough = new Discord.EmbedBuilder()
         .setAuthor(`Pagar Jeffros: Error`, Config.errorPng)
         .setDescription(`**—** ¡No tienes tantos Jeffros!
 **—** Tienes: **${Emojis.Jeffros}${author_user.economy.global.jeffros.toLocaleString('es-CO') || 0}**.`)
@@ -88,7 +88,7 @@ module.exports = {
 
         let description = possibleDescriptions[Math.floor(Math.random() * possibleDescriptions.length)];
 
-        let doneEmbed = new Discord.MessageEmbed()
+        let doneEmbed = new Discord.EmbedBuilder()
         .setAuthor(`Hecho`, Config.bienPng)
         .setDescription(description)
         .setColor(Colores.verde);

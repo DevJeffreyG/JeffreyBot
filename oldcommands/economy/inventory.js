@@ -47,12 +47,12 @@ module.exports = {
             guild_id: guild.id
         });
 
-        let noItems = new Discord.MessageEmbed()
+        let noItems = new Discord.EmbedBuilder()
         .setAuthor(`Error`, isDarkShop ? Config.darkLogoPng : Config.errorPng)
         .setDescription(`**—** No encontré ningún item asociado a esta cuenta...`)
         .setColor(isDarkShop ? Colores.negro : Colores.rojo);
 
-        let itemsEmbed = new Discord.MessageEmbed()
+        let itemsEmbed = new Discord.EmbedBuilder()
         .setAuthor(`Items del usuario N°${author.id}`, author.displayAvatarURL())
         .setThumbnail(isDarkShop ? Config.darkLogoPng : Config.jeffreyguildIcon)
         .setFooter(`${prefix}use {ID} para usar un item.`)

@@ -1,12 +1,12 @@
 const Discord = require("discord.js");
 const Colores = require("../resources/colores.json");
 
-class Embed extends Discord.MessageEmbed {
+class Embed extends Discord.EmbedBuilder {
     /**
      * En caso de que Discord.JS se ponga chistoso y cambie por decimocuarta vez la forma de hacer embeds.
      */
     constructor(options){
-        if(options instanceof Discord.MessageEmbed) super(options)
+        if(options instanceof Discord.EmbedBuilder) super(options)
         else super()
         if(options) this.#setup(options)
     }
@@ -20,7 +20,9 @@ class Embed extends Discord.MessageEmbed {
     }
 
     defDesc(desc = " ") {
+        if(!desc >= 1) return console.error("🔴 NO SE CAMBIÓ LA DESCRIPCIÓN, ESTÁ VACÍA")
         this.setDescription(desc)
+        this.description = desc;
         return this
     }
 
@@ -30,17 +32,31 @@ class Embed extends Discord.MessageEmbed {
     }
 
     defField(up, down, inline = false) {
-        this.addField(up, down, inline);
+        this.addFields([
+            {name: up, value: down, inline}
+        ]);
         return this
     }
 
-    defFooter({text, icon = null, timestamp = null}){
-        this.setFooter({text, iconURL: icon})
+    defFields(fields = [up, down, inline]){
+        if(fields.length == 0) return console.error("⚠️ BAD ARRAY OF FIELDS");
+        
+        fields.forEach(field => {
+            this.defField(field.up, field.down, field.inline);
+        });
+    }
 
+    defFooter({text, icon = null, timestamp = null}){
         if (timestamp){
-            if(timestamp instanceof Boolean) this.setTimestamp()
-            else
-            this.setTimestamp(timestamp)
+            try {
+                this.setTimestamp(timestamp)
+            } catch(e) {
+                this.setTimestamp()
+            }
+        }
+        
+        if(text){
+            this.setFooter({text, iconURL: icon})
         }
         return this
     }

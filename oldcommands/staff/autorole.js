@@ -196,7 +196,7 @@ module.exports = {
   
             if(!aroles || aroles.length === 0) return message.reply("Aún no hay autoroles en este servidor.");
             
-            let listEmbed = new Discord.MessageEmbed()
+            let listEmbed = new Discord.EmbedBuilder()
             .setDescription(`*** Lista de todos los AutoRoles en este servidor.**`)
             .setColor(Colores.verde);
             
@@ -255,7 +255,7 @@ module.exports = {
             toggleGroupQuery = await ToggleGroups.findOne({guild_id: message.guild.id, "info.group_id": toggleGroup});
         }
   
-        let changedGroup = new Discord.MessageEmbed();
+        let changedGroup = new Discord.EmbedBuilder();
   
         if(toggleGroup != 0){
           changedGroup.setAuthor(`Listo`, Config.bienPng)
@@ -291,7 +291,7 @@ module.exports = {
           let groupQuery = await ToggleGroups.findOne({guild_id: message.guild.id, "info.group_id": grouptoedit})
 
           if(groupQuery){
-              let changedGroup = new Discord.MessageEmbed()
+              let changedGroup = new Discord.EmbedBuilder()
               .setAuthor(`Listo`, Config.bienPng)
               .setColor(Colores.verde)
               .setDescription(`▸ Se ha cambiado el nombre del grupo \`${grouptoedit}\`.

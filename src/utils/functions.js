@@ -1,4 +1,5 @@
-const Discord = require("discord.js");
+const { PermissionsBitField, ActionRowBuilder, MessageAttachment, ButtonBuilder, EmbedBuilder } = require("discord.js");
+const { ButtonStyle } = require("discord-api-types/v10");
 
 const Config = require("../resources/base.json");
 const Colores = require("../resources/colores.json");
@@ -83,8 +84,8 @@ const GetChangesAndCreateFields = async function(logsFetched){
           break;
 
         case "deny": {
-          nuevosPermisos = new Discord.Permissions(change.new);
-          viejosPermisos = new Discord.Permissions(change.old);
+          nuevosPermisos = new PermissionsBitField(change.new);
+          viejosPermisos = new PermissionsBitField(change.old);
 
           let permissionOverwrite = target.permissionOverwrites.cache.find(x => x.deny.bitfield === nuevosPermisos.bitfield && x.type === extraType && x.id === extra.id);
           if(!permissionOverwrite) return;
@@ -113,7 +114,7 @@ const GetChangesAndCreateFields = async function(logsFetched){
               value: `**Reseteados**\n${antes}`
             });
 
-            resetedPerms = new Discord.Permissions(); // quitar los permisos guardados para evitar que se repitan
+            resetedPerms = new PermissionsBitField(); // quitar los permisos guardados para evitar que se repitan
           }
 
           if(ahora.length != 0) fields.push({
@@ -124,8 +125,8 @@ const GetChangesAndCreateFields = async function(logsFetched){
         }
 
         case "allow": {
-          nuevosPermisos = new Discord.Permissions(change.new);
-          viejosPermisos = new Discord.Permissions(change.old);
+          nuevosPermisos = new PermissionsBitField(change.new);
+          viejosPermisos = new PermissionsBitField(change.old);
 
           let permissionOverwrite = target.permissionOverwrites.cache.find(x => x.allow.bitfield === nuevosPermisos.bitfield && x.type === extraType && x.id === extra.id);
           if(!permissionOverwrite) return;
@@ -144,7 +145,7 @@ const GetChangesAndCreateFields = async function(logsFetched){
           // se está reseteando?
           const isReseted = resetedPerms.toArray().length != 0
           if(isReseted){
-            /* if(resetQuery.find(x => x.key === "deny" && new Discord.Permissions(x.new).has(viejosPermisos))) continue changesLoop;
+            /* if(resetQuery.find(x => x.key === "deny" && new PermissionsBitField(x.new).has(viejosPermisos))) continue changesLoop;
              */
             antes = "";
             resetedPerms.toArray().forEach(permiso => {
@@ -156,7 +157,7 @@ const GetChangesAndCreateFields = async function(logsFetched){
               value: `**Reseteados**\n${antes}`
             });
 
-            resetedPerms = new Discord.Permissions(); // quitar los permisos guardados para evitar que se repitan
+            resetedPerms = new PermissionsBitField(); // quitar los permisos guardados para evitar que se repitan
           }
 
           if(ahora.length != 0) fields.push({
@@ -215,7 +216,7 @@ let resetWork = (log) => {
   console.log("⚪ Inicializando trabajo de detectar permisos reseteados");
 
   const cambios = log.changes;
-  let reseted = new Discord.Permissions();
+  let reseted = new PermissionsBitField();
 
 
   cambios.forEach(change => {
@@ -226,8 +227,8 @@ let resetWork = (log) => {
     change.old ?? 0;
     change.new ?? 0;
 
-    const oldperms = new Discord.Permissions(change.old);
-    const newperms = new Discord.Permissions(change.new);
+    const oldperms = new PermissionsBitField(change.old);
+    const newperms = new PermissionsBitField(change.new);
 
     const permsChanged = newperms.missing(oldperms);
     const rolePerms = log.target.permissionOverwrites.resolve(log.extra.id);
@@ -238,7 +239,7 @@ let resetWork = (log) => {
     } else
 
     permsChanged.forEach(permiso => {
-      const discordPermiso = new Discord.Permissions(permiso);
+      const discordPermiso = new PermissionsBitField(permiso);
       if(change.key === "deny") { // el permiso pasó hacia la derecha, o reset o allow
         const isAllowed = rolePerms.allow.has(discordPermiso);
         
@@ -428,7 +429,7 @@ const intervalGlobalDatas = async function(client, justTempRoles){
             let subName = temprole.sub_info.name;
             let isCancelled = temprole.sub_info.isCancelled;
 
-            let notEnough = new Discord.MessageEmbed()
+            let notEnough = new EmbedBuilder()
             .setAuthor(`Error`, Config.errorPng)
             .setDescription(`**—** No tienes suficientes Jeffros **(${Emojis.Jeffros}${price.toLocaleString('es-CO')})** para pagar la suscripción a \`${subName}\`.
 **—** Tu saldo ha quedado en **alerta roja**.`)
@@ -444,7 +445,7 @@ const intervalGlobalDatas = async function(client, justTempRoles){
               // cobrar jeffros
               let jeffros = dbUser.economy.global;
 
-              let paidEmbed = new Discord.MessageEmbed()
+              let paidEmbed = new EmbedBuilder()
               .setAuthor(`Pagado`, Config.bienPng)
               .setDescription(`**—** Has pagado **${Emojis.Jeffros}${price.toLocaleString('es-CO')}** para pagar la suscripción a \`${subName}\`.
               **—** Tu saldo ha quedado en **${Emojis.Jeffros}${(jeffros.jeffros - price).toLocaleString('es-CO')}**.`)
@@ -524,7 +525,7 @@ const intervalGlobalDatas = async function(client, justTempRoles){
           }
           tempBans[i].remove();
 
-          let unBEmbed = new Discord.MessageEmbed()
+          let unBEmbed = new EmbedBuilder()
           .setAuthor(`Unban`, guild.iconURL())
           .setDescription(`
         **—** Usuario desbaneado: **${userID}**.
@@ -1285,12 +1286,12 @@ const TutorialEmbed = async function(commandTree, executionInfo, args){
   } else { // si hay un error de permisos O no se puede determinar si tiene los permisos necesarios
     const docGuild = await Guilds.findOne({guild_id: message.guild.id}) ?? await new Guilds({guild_id: message.guild.id}).save();
 
-    let notDetermined = new Discord.MessageEmbed()
+    let notDetermined = new EmbedBuilder()
     .setAuthor("Error", Config.errorPng)
     .setDescription(`**—** No se pudo determinar si puedes usar este comando, un administrador del servidor tiene que usar el comando \`/setup\` primero.`)
     .setColor(Colores.rojo);
 
-    let notDeterminedUseSetup = new Discord.MessageEmbed()
+    let notDeterminedUseSetup = new EmbedBuilder()
     .setAuthor("Error", Config.errorPng)
     .setDescription(`**—** Sólo un usuario con permisos de administrador puede usar este comando.`)
     .setColor(Colores.rojo);
@@ -1385,17 +1386,17 @@ const Confirmation = async function(toConfirm, dataToConfirm, interaction){
   .defColor(Colores.negro);
 
   // componentes
-  const row = new Discord.MessageActionRow()
+  const row = new ActionRowBuilder()
     .addComponents(
-        new Discord.MessageButton()
+        new ButtonBuilder()
             .setCustomId("confirmAction")
             .setLabel("Aceptar")
-            .setStyle("SUCCESS")
+            .setStyle(ButtonStyle.Success)
             .setEmoji(Config.confirmEmojiId),
-        new Discord.MessageButton()
+        new ButtonBuilder()
             .setCustomId("cancelAction")
             .setLabel("Cancelar")
-            .setStyle("DANGER")
+            .setStyle(ButtonStyle.Danger)
             .setEmoji(Config.cancelEmojiId)
     )
 
@@ -1453,7 +1454,7 @@ const AfterInfraction = async function(user, data, isSoftwarn){
     // acciones de automod
     let arrayEmbeds = [];
     
-    let warnedEmbed = new Discord.MessageEmbed()
+    let warnedEmbed = new EmbedBuilder()
     .setAuthor(`Warn`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
     .setDescription(`
 **—** Has sido __warneado__ por el STAFF.
@@ -1468,7 +1469,7 @@ const AfterInfraction = async function(user, data, isSoftwarn){
     let banMember = false;
 
     if(totalWarns >= 4){
-      let autoMod = new Discord.MessageEmbed()
+      let autoMod = new EmbedBuilder()
       .setAuthor(`Ban PERMANENTE.`, "https://cdn.discordapp.com/emojis/537804262600867860.png")
       .setDescription(`**—** PERMABAN.
 **—** Warns actuales: **${totalWarns}**.
@@ -1481,7 +1482,7 @@ const AfterInfraction = async function(user, data, isSoftwarn){
     } else
 
     if(totalWarns >= 3){
-      let autoMod = new Discord.MessageEmbed()
+      let autoMod = new EmbedBuilder()
       .setAuthor(`TempBan`, "https://cdn.discordapp.com/emojis/537792425129672704.png")
       .setDescription(`**—** Ban (24h).
 **—** Warns actuales: **${totalWarns}**.
@@ -1529,7 +1530,7 @@ const AfterInfraction = async function(user, data, isSoftwarn){
     } else
 
     if(totalWarns >= 2){
-      let infoEmbed = new Discord.MessageEmbed()
+      let infoEmbed = new EmbedBuilder()
       .setAuthor(`Información`, "https://cdn.discordapp.com/emojis/494267320097570837.png?v=1")
     .setDescription(`**—** ${member.user.tag}, este es tu **warn número ❛ \`2\` ❜**
 *— ¿Qué impacto tendrá este warn?*
@@ -1554,7 +1555,7 @@ const AfterInfraction = async function(user, data, isSoftwarn){
   } else {
     const { member, rule, proof } = data;
 
-    let warnedEmbed = new Discord.MessageEmbed()
+    let warnedEmbed = new EmbedBuilder()
     .setAuthor(`¡Cuidado! (Softwarn)`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
     .setDescription(`
 **—** Esto es sólo un llamado de atención.
@@ -1889,7 +1890,7 @@ const DarkShopWork = async function(client, guildId){
 
     switch(actualEvent){
       case 1:
-        let embed = new Discord.MessageEmbed()
+        let embed = new EmbedBuilder()
         .setAuthor(`Evento`, Config.darkLogoPng)
         .setDescription(rSube)
         .setColor(Colores.negro)
@@ -1900,7 +1901,7 @@ const DarkShopWork = async function(client, guildId){
         break;
 
       case 0:
-        let embed2 = new Discord.MessageEmbed()
+        let embed2 = new EmbedBuilder()
         .setAuthor(`Evento`, Config.darkLogoPng)
         .setDescription(rBaja)
         .setColor(Colores.negro)
@@ -1911,7 +1912,7 @@ const DarkShopWork = async function(client, guildId){
         break;
 
       case 2:
-        let embed3 = new Discord.MessageEmbed()
+        let embed3 = new EmbedBuilder()
         .setAuthor(`Evento`, Config.darkLogoPng)
         .setDescription(rIgual)
         .setColor(Colores.negro)
@@ -1958,7 +1959,7 @@ const DarkShopWork = async function(client, guildId){
       let memberDJ = guild.members.cache.find(x => x.id === darkuser.user_id);
       
       if(darkdata.darkjeffros === 0){
-        let log = new Discord.MessageEmbed()
+        let log = new EmbedBuilder()
         .setColor(Colores.verde)
         .setDescription(`**—** Se ha eliminado la Duración de DarkJeffros de ${memberDJ.user.tag}.
 **—** Desde: \`${darkdata.dj_since}\`.
@@ -1974,7 +1975,7 @@ const DarkShopWork = async function(client, guildId){
         console.log("Se ha eliminado la duración de DJ de", memberDJ.user.tag)
         logchannel.send({embeds: [log]});
       } else {
-        let log = new Discord.MessageEmbed()
+        let log = new EmbedBuilder()
         .setColor(Colores.verde)
         .setDescription(`**—** Se han eliminado los DarkJeffros de **${memberDJ.user.tag}**.
 **—** Desde: \`${darkdata.dj_since}\`.
@@ -1983,7 +1984,7 @@ const DarkShopWork = async function(client, guildId){
         .setFooter("Mensaje enviado a la vez que al usuario")
         .setTimestamp();
 
-        let embed = new Discord.MessageEmbed()
+        let embed = new EmbedBuilder()
         .setAuthor(`...`, Config.darkLogoPng)
         .setColor(Colores.negro)
         .setDescription(`**—** Parece que no has vendido todos tus DarkJeffros. Han sido eliminados de tu cuenta tras haber concluido los días estipulados. (\`${darkdata.duration} días.\`)`)
@@ -2076,7 +2077,7 @@ const ValidateDarkShop = async function(user, author){
       `**${author.tag}**`
   );
 
-  const notReady = new Discord.MessageEmbed()
+  const notReady = new EmbedBuilder()
   .setColor(Colores.rojo)
   .setDescription(desc)
   .setFooter("▸ Vuelve cuando seas nivel 5.");
@@ -2112,7 +2113,7 @@ const ComprarItem = async function(message, user, item, isDarkShop){
   const actualJeffros = isDarkShop ? user.economy.dark.darkjeffros : user.economy.global.jeffros;
 
   // si NaN actualJeffros...
-  let doesntDS = new Discord.MessageEmbed()
+  let doesntDS = new EmbedBuilder()
   .setAuthor(`Error`, Config.errorPng)
   .setDescription(`**—** Aún no tienes una cuenta, cambia unos cuantos Jeffros por DarkJeffros antes de venir a comprar.\n▸ \`${prefix}dschange\`.`)
   .setColor(Colores.rojo);
@@ -2125,17 +2126,17 @@ const ComprarItem = async function(message, user, item, isDarkShop){
   const toPay = await DeterminePrice(user, item, false, isDarkShop);
   const nombre = item.name;
   
-  let doesntHaveRole = new Discord.MessageEmbed()
+  let doesntHaveRole = new EmbedBuilder()
   .setAuthor(`Error`, Config.errorPng)
   .setDescription(`**—** Necesitas el role "<@&${item.req_role}>" para comprar \`${nombre}\`.`)
   .setColor(Colores.rojo);
 
-  let doesntHaveEnough = new Discord.MessageEmbed()
+  let doesntHaveEnough = new EmbedBuilder()
   .setAuthor(`Error`, Config.errorPng)
   .setDescription(`**—** Necesitas **${isDarkShop ? Emojis.Dark : Emojis.Jeffros}${toPay.toLocaleString("es-CO")}** para comprar \`${nombre}\`. Tienes **${isDarkShop ? Emojis.Dark : Emojis.Jeffros}${actualJeffros}**.`)
   .setColor(Colores.rojo);
 
-  let hasRoleToGive = new Discord.MessageEmbed()
+  let hasRoleToGive = new EmbedBuilder()
   .setAuthor(`Error`, Config.errorPng)
   .setDescription(`**—** Ya tienes el role que te da este item, no puedes comprar \`${nombre}\` otra vez.`)
   .setColor(Colores.rojo);
@@ -2150,7 +2151,7 @@ const ComprarItem = async function(message, user, item, isDarkShop){
   const inventoryFilter = x => x.isDarkShop === isDarkShop && x.item_id === item.id;
   if(user.data.inventory.find(inventoryFilter)){
 
-    let hasThisItem = new Discord.MessageEmbed()
+    let hasThisItem = new EmbedBuilder()
     .setAuthor(`Error`, Config.errorPng)
     .setDescription(`**—** Ya tienes \`${nombre}\`, úsalo con \`${prefix}use ${user.data.inventory.find(inventoryFilter).use_id}\`.`)
     .setColor(Colores.rojo);
@@ -2183,7 +2184,7 @@ const ComprarItem = async function(message, user, item, isDarkShop){
   // guardar y success
   await user.save();
 
-  let success = new Discord.MessageEmbed()
+  let success = new EmbedBuilder()
   .setAuthor(`Listo!`, Config.bienPng)
   .setDescription(`\`▸\` Pago realizado con éxito.
 \`▸\` Compraste: \`${nombre}\` por **${isDarkShop ? Emojis.Dark : Emojis.Jeffros}${toPay.toLocaleString("es-CO")}**.
@@ -2338,7 +2339,7 @@ const WillBenefit = async function(member, objetivesToCheck){
 }
 
 const importImage = function(filename){
-  let file = new Discord.MessageAttachment(`./src/resources/imgs/${filename.toUpperCase()}.png`, `${filename.toLowerCase()}.png`);
+  let file = new MessageAttachment(`./src/resources/imgs/${filename.toUpperCase()}.png`, `${filename.toLowerCase()}.png`);
   return {
     attachment: `attachment://${filename.toLowerCase()}.png`,
     file: file
@@ -2364,11 +2365,10 @@ const GenerateLog = async function(guild, header, footer, description, headerPng
   logType = logType ?? "GENERAL";
   fields = fields ?? null;
   
-  const embed = new Discord.MessageEmbed()
-  .setAuthor({name: header, iconURL: headerPng ?? null})
-  .setTimestamp()
-  .setFooter({text: footer, iconURL: footerPng ?? null})
-  .setColor(color);
+  const embed = new Embed()
+  .defAuthor({text: header, icon: headerPng ?? null})
+  .defFooter({text: footer, icon: footerPng ?? null, timestamp: true})
+  .defColor(color);
 
   let desc = "";
 
@@ -2378,11 +2378,11 @@ const GenerateLog = async function(guild, header, footer, description, headerPng
     desc += "**—** " + item + "\n";
   }
 
-  embed.setDescription(desc);
+  embed.defDesc(desc);
 
   if(fields){
     fields.forEach(field => {
-      embed.addField(field.name, field.value);
+      embed.defField(field.name, field.value);
     })
   }
 
@@ -2423,7 +2423,7 @@ async function createEmbedWithParams(commandTree, guild, params, already){
   const docGuild = await Guilds.findOne({guild_id: guild.id}) ?? await new Guilds({guild_id: guild.id}).save();
   already = already ?? "";
 
-  let Embed = new Discord.MessageEmbed()
+  let Embed = new EmbedBuilder()
   .setAuthor(`▸ /${commandTree.name}`, guild.iconURL())
   .setColor(Colores.nocolor)
   .setFooter("<> Obligatorio () Opcional");

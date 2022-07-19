@@ -74,7 +74,7 @@ module.exports = async (client, reaction, user) => {
     let price;
     let gift;
     let isAward = true;
-    const hallOfFameEmbed = new Discord.MessageEmbed();
+    const hallOfFameEmbed = new Discord.EmbedBuilder();
   
     if (message.attachments.size !== 0) {
       // Attachments are present.
@@ -112,7 +112,7 @@ module.exports = async (client, reaction, user) => {
       hallOfFameEmbed.setDescription(`[★](${message.url}) ${message.content}`);
     }
   
-    let paid = new Discord.MessageEmbed()
+    let paid = new Discord.EmbedBuilder()
     .setDescription("Pagado.")
     .setColor(Colores.nocolor);
   
@@ -159,7 +159,7 @@ module.exports = async (client, reaction, user) => {
       return bots.send(`${user}, los awards actualmente están en mantenimiento, por favor intenta más tarde. :D`);
     } else if(isAward){
   
-      let confirmation = new Discord.MessageEmbed()
+      let confirmation = new Discord.EmbedBuilder()
       .setAuthor(`Confirmación`, Config.jeffreyguildIcon)
       .setDescription(`**—** ${user.tag}, ¿Estás seguro de darle a este usuario el premio de **__${award}__**?
 **—**( **${Emojis.Jeffros}${price.toLocaleString('es-CO')}** )
@@ -172,7 +172,7 @@ module.exports = async (client, reaction, user) => {
           msg.react(":denegar:558084461686947891");
         });
 
-        let cancelEmbed = new Discord.MessageEmbed()
+        let cancelEmbed = new Discord.EmbedBuilder()
         .setDescription(`Cancelado.`)
         .setColor(Colores.nocolor);
 

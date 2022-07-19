@@ -54,13 +54,13 @@ module.exports = {
         const has = user.economy.dark.darkjeffros ?? 0;
         const totalJeffros = Math.floor(darkjeffro * changing);
 
-        let embed = new Discord.MessageEmbed()
+        let embed = new Discord.EmbedBuilder()
         .setAuthor(`Éxito`, Config.darkLogoPng)
         .setDescription(`**—** Se han restado **${Emojis.Dark}${changing}** de tu cuenta.
 **—** Se añadieron **${Emojis.Jeffros}${totalJeffros.toLocaleString('es-CO')}**.`)
         .setColor(Colores.negro);
 
-        let nope = new Discord.MessageEmbed()
+        let nope = new Discord.EmbedBuilder()
         .setAuthor(`Error`, Config.darkLogoPng)
         .setDescription(`**—** No tienes tantos DarkJeffros para cambiar.
 **—** Quieres cambiar: **${Emojis.Dark}${changing.toLocaleString('es-CO')}**.

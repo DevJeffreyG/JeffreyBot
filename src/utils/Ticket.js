@@ -1,4 +1,5 @@
-const { MessageActionRow, MessageSelectMenu, MessageButton, Permissions } = require("discord.js");
+const { ActionRowBuilder, SelectMenuBuilder, ButtonBuilder, PermissionsBitField } = require("discord.js");
+const { ButtonStyle } = require("discord-api-types/v10");
 
 const Embed = require("./Embed");
 const { Confirmation, FindNewId } = require("./functions");
@@ -28,11 +29,11 @@ class Ticket {
         this.permissions = [
             {
                 id: this.guild.roles.cache.find(x => x.name === "@everyone").id,
-                deny: ["VIEW_CHANNEL", "SEND_MESSAGES"]
+                deny: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages]
             },
             {
                 id: this.userId,
-                allow: ["VIEW_CHANNEL", "SEND_MESSAGES", "EMBED_LINKS", "ATTACH_FILES"]
+                allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.EmbedLinks, PermissionsBitField.Flags.AttachFiles]
             }
         ];
 
@@ -75,7 +76,7 @@ class Ticket {
           activeCreatingTicket.delete(interaction.user.id)
         }, ticketCooldown)
 
-        let selectMenuTopic = new MessageSelectMenu()
+        let selectMenuTopic = new SelectMenuBuilder()
         .setCustomId("selectTopic")
         .setPlaceholder("¿Qué necesitas hablar con el STAFF?")
             .addOptions(
@@ -89,7 +90,7 @@ class Ticket {
                 {label: "Cancelar", value: "cancel", emoji: "❌"}
             );
 
-        let selectingTopic = new MessageActionRow().addComponents([selectMenuTopic]);
+        let selectingTopic = new ActionRowBuilder().addComponents([selectMenuTopic]);
 
         await interaction.editReply({content: "¿Qué necesitas?", components: [selectingTopic]});
 
@@ -145,7 +146,7 @@ class Ticket {
             filter = (i) => i.isSelectMenu() && i.customId === "selectWarn" && i.user.id === interaction.user.id; // cambiar el filtro de la customId
 
             // mostrar los WARNS
-            let selectMenuWarn = new MessageSelectMenu()
+            let selectMenuWarn = new SelectMenuBuilder()
             .setCustomId("selectWarn")
             .setPlaceholder("Selecciona el WARN por el que quieres crear un ticket");
 
@@ -158,7 +159,7 @@ class Ticket {
             }
             selectMenuWarn.addOptions({label: "Cancelar", value: "cancel", emoji: "❌"});
 
-            let selectingWarn = new MessageActionRow().addComponents([selectMenuWarn]);
+            let selectingWarn = new ActionRowBuilder().addComponents([selectMenuWarn]);
 
             await topicCollector.editReply({content: "¿Cuál es el warn por el cuál quieres hacer el ticket?", components: [selectingWarn]});
 
@@ -184,7 +185,7 @@ class Ticket {
             filter = (i) => i.isSelectMenu() && i.customId === "selectSoftWarn" && i.user.id === interaction.user.id; // cambiar el filtro de la customId
 
             // mostrar los WARNS
-            let selectMenuSoftWarn = new MessageSelectMenu()
+            let selectMenuSoftWarn = new SelectMenuBuilder()
             .setCustomId("selectSoftWarn")
             .setPlaceholder("Selecciona el SOFTWARN por el que quieres crear un ticket");
 
@@ -197,7 +198,7 @@ class Ticket {
             }
             selectMenuSoftWarn.addOptions({label: "Cancelar", value: "cancel", emoji: "❌"});
 
-            let selectingWarn = new MessageActionRow().addComponents([selectMenuSoftWarn]);
+            let selectingWarn = new ActionRowBuilder().addComponents([selectMenuSoftWarn]);
 
             await topicCollector.editReply({content: "¿Cuál es el softwarn por el cuál quieres hacer el ticket?", components: [selectingWarn]});
 
@@ -233,12 +234,13 @@ class Ticket {
         let confirmation = await Confirmation("Nuevo ticket", toConfirm, interaction);
         if(!confirmation) return;
 
-        // CREAR CANAL
-        let channel = await category.createChannel(channelName, {
+        // CREAR CANAL  
+        let channel = await category.children.create({
+            name: channelName,
             topic: `**—** Ticket creado por **${interaction.user.tag}** (${moment().tz("America/Bogota").format("DD [de] MMM [a las] hh:mm:ss A")} GMT-5)`,
             permissionOverwrites: this.permissions
         });
-        
+
         const toPin = await channel.send({content: "El STAFF te ayudará en cuanto pueda.", embeds: [general, timestatus], components: [this.initial]})
         await toPin.pin();
 
@@ -298,8 +300,8 @@ class Ticket {
 
         // eliminar al autor del ticket del canal
         await channel.permissionOverwrites.edit(ticket.created_by, {
-            "VIEW_CHANNEL": false,
-            "SEND_MESSAGES": false
+            "ViewChannel": false,
+            "SendMessages": false
         });
 
         return interaction.editReply({content: "✅ Se cerró el Ticket.", embeds: [], components: []});
@@ -344,8 +346,8 @@ class Ticket {
 
         // eliminar al autor del ticket del canal
         return channel.permissionOverwrites.edit(ticket.created_by, {
-          "VIEW_CHANNEL": false,
-          "SEND_MESSAGES": false
+          "ViewChannel": false,
+          "SendMessages": false
         });
     }
 
@@ -383,8 +385,8 @@ class Ticket {
 
         // agregar al creador original al canal otra vez
         await channel.permissionOverwrites.edit(ticket.created_by, {
-          "VIEW_CHANNEL": true,
-          "SEND_MESSAGES": true
+          "ViewChannel": true,
+          "SendMessages": true
         });
 
         let originalCreator = this.guild.members.cache.find(x => x.id === ticket.created_by);
@@ -396,24 +398,24 @@ class Ticket {
     }
 
     #setRows() {
-        this.reopen = new MessageActionRow()
+        this.reopen = new ActionRowBuilder()
         .addComponents(
-            new MessageButton()
+            new ButtonBuilder()
                 .setCustomId("reopenTicket")
                 .setLabel("Volver a abrir el ticket")
-                .setStyle("SECONDARY")
+                .setStyle(ButtonStyle.Secondary)
         );
 
-        this.initial = new MessageActionRow()
+        this.initial = new ActionRowBuilder()
         .addComponents(
-            new MessageButton()
+            new ButtonBuilder()
                 .setCustomId("resolveTicket")
                 .setLabel("Marcar como resuelto")
-                .setStyle("PRIMARY"),
-            new MessageButton()
+                .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
                 .setCustomId("closeTicket")
                 .setLabel("Cerrar ticket")
-                .setStyle("DANGER")
+                .setStyle(ButtonStyle.Danger)
         )
     }
 
@@ -425,7 +427,7 @@ class Ticket {
             staffs.forEach(id => {
                 this.permissions.push({
                     id,
-                    allow: [Permissions.ALL]
+                    allow: [PermissionsBitField.All]
                 })
             })
         });

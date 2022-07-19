@@ -1,6 +1,7 @@
 const Discord = require("discord.js");
 const { Command, Embed, importImage } = require("../../src/utils");
 const { Colores, Config, Emojis, EmbedImages } = require("../../src/resources");
+const { ButtonStyle } = require("discord-api-types/v10");
 
 const command = new Command({
     name: "embeds",
@@ -583,12 +584,12 @@ Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para c
     .defDesc("¿Necesitas ayuda? ¿Alguna duda? ¿Warn/Softwarn injusto?\nPulsa el botón de aquí abajo para crear un ticket para hablar directamente con el STAFF.")
     .defColor(Colores.verdeclaro);
 
-    let ticketRow = new Discord.MessageActionRow()
+    let ticketRow = new Discord.ActionRowBuilder()
     .addComponents(
-        new Discord.MessageButton()
+        new Discord.ButtonBuilder()
             .setCustomId("createTicket")
             .setLabel("CREAR TICKET")
-            .setStyle("SUCCESS")
+            .setStyle(ButtonStyle.Success)
             .setEmoji("🎫")
     );
 

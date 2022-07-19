@@ -6,7 +6,7 @@ const prefix = Config.prefix;
 module.exports.run = async (client, message, args, active) => {
   if (!message.content.startsWith(prefix)) return;
 
-  let sadface = new Discord.MessageEmbed()
+  let sadface = new Discord.EmbedBuilder()
   .setAuthor(`| Error`, Config.errorPng)
   .setColor(Colores.rojo)
   .setDescription(`Los comandos de música de Jeffrey Bot están desactivados debido a problemas con el host.\n[▸ Anuncio](https://discordapp.com/channels/447797737216278528/485191462422577182/733704080714629160)`)
@@ -23,12 +23,12 @@ module.exports.run = async (client, message, args, active) => {
   let fetched = active.get(guild.id);
   
   // embeds  
-  let errorE1 = new Discord.MessageEmbed()
+  let errorE1 = new Discord.EmbedBuilder()
     .setAuthor(`| Error: 1`, Config.errorPng)
     .setDescription(`¡No hay ninguna canción sonando ahora!`)
     .setColor(Colores.rojo);
   
-  let errorE2 = new Discord.MessageEmbed()
+  let errorE2 = new Discord.EmbedBuilder()
   .setAuthor(`| Error: 2`, Config.errorPng)
   .setDescription(`Lo siento, no estás en el mismo chat de voz con el bot.`)
   .setColor(Colores.rojo);
@@ -48,7 +48,7 @@ module.exports.run = async (client, message, args, active) => {
   
   // revisar si alguien ya ha votado
   
-  let errorE3 = new Discord.MessageEmbed()
+  let errorE3 = new Discord.EmbedBuilder()
   .setAuthor(`| Error: 3`, Config.errorPng)
   .setDescription(`Lo siento, tú ya votaste para saltar.
 \`${fetched.queue[0].voteSkips.length}\`/\`${required}\` requeridos.`)
@@ -65,7 +65,7 @@ module.exports.run = async (client, message, args, active) => {
   // revisar si hay votos suficientes
   if(fetched.queue[0].voteSkips.length >= required || message.member.roles.cache.find(x => x.id === staffRole.id)){
     //output
-    let embed = new Discord.MessageEmbed()
+    let embed = new Discord.EmbedBuilder()
     .setDescription(`¡Se ha saltado la canción!`)
     .setColor(Colores.verde);
     message.channel.send({embeds: [embed]});
@@ -75,7 +75,7 @@ module.exports.run = async (client, message, args, active) => {
   }
   
   // y sino, decir que se registró el voto
-  let addedVoteE = new Discord.MessageEmbed()
+  let addedVoteE = new Discord.EmbedBuilder()
   .setDescription(`Se ha registrado tu voto para saltar.
 \`${fetched.queue[0].voteSkips.length}\`/\`${required}\` requeridos.`)
   message.channel.send({embeds: [addedVoteE]});

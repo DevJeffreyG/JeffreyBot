@@ -49,7 +49,7 @@ module.exports.run = async (client, message, args, active) => {
 
     player.on(AudioPlayerStatus.Playing, (oldState, newState) => {
         // reproduciendo algo
-        let reproduciendoEmbed = new Discord.MessageEmbed()
+        let reproduciendoEmbed = new Discord.EmbedBuilder()
         .setDescription(
             `🎶 | **Reproduciendo: \`${info.videoDetails.title}\`, pedido por: ${message.author.tag}**`
         )

@@ -27,7 +27,7 @@ module.exports = async (client, member) => {
     if (member.user.bot) return;
 
     const fBye = despedidas[Math.floor(Math.random() * despedidas.length)];
-    let embed = new Discord.MessageEmbed()
+    let embed = new Discord.EmbedBuilder()
     .setDescription(fBye)
     .setColor("#66a0ff");
 

@@ -42,7 +42,7 @@ module.exports = {
         // Comando
         const stonks = dark.inflation.old <= dark.inflation.value ? "📈" : "📉";
         
-        let stonksEmbed = new Discord.MessageEmbed()
+        let stonksEmbed = new Discord.EmbedBuilder()
         .setAuthor(`Cálculo`, Config.darkLogoPng)
         .setDescription(`${stonks} **— ${dark.inflation.value}%**.
 **— ${Emojis.Dark}${toCalc.toLocaleString('es-CO')} = ${Emojis.Jeffros}${Math.floor(toCalc*200*dark.inflation.value).toLocaleString('es-CO')}**.`)

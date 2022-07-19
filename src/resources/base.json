@@ -42,6 +42,11 @@
         },
         {
             "type": "updated",
+            "desc": "Discord.JS v14",
+            "extended": "Jeffrey Bot ahora usará la nueva versión de Discord.JS y la API v10 de Discord."
+        },
+        {
+            "type": "updated",
             "desc": "Se ha actualizado el comando `{ PREFIX }top`",
             "extended": "Ahora podrás ver más páginas además de los primeros 5."
         },

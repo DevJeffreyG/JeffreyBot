@@ -49,7 +49,7 @@ module.exports = {
 
         const dj_since = moment(user.economy.dark.dj_since).tz("America/Bogota").format("DD/MM/YY hh:mmA");
 
-        let statsEmbed = new Discord.MessageEmbed()
+        let statsEmbed = new Discord.EmbedBuilder()
         .setAuthor(`Estadísiticas del usuario N°${member.id}`, member.user.displayAvatarURL())
         .setDescription(`**— DarkJeffros**: ${Emojis.Dark}${darkjeffros}.
 **— Precisión**: ${accuracy}%

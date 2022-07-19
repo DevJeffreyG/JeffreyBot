@@ -8,7 +8,7 @@ const ytdl = require("ytdl-core");
 module.exports.run = async (client, message, args, active) => {
   if (!message.content.startsWith(prefix)) return;
 
-  let sadface = new Discord.MessageEmbed()
+  let sadface = new Discord.EmbedBuilder()
   .setAuthor(`| Error`, Config.errorPng)
   .setColor(Colores.rojo)
   .setDescription(`Los comandos de música de Jeffrey Bot están desactivados debido a problemas con el host.\n[▸ Anuncio](https://discordapp.com/channels/447797737216278528/485191462422577182/733704080714629160)`)
@@ -20,22 +20,22 @@ module.exports.run = async (client, message, args, active) => {
 
   // embeds
 
-  let errorE1 = new Discord.MessageEmbed()
+  let errorE1 = new Discord.EmbedBuilder()
     .setAuthor(`| Error: 1`, Config.errorPng)
     .setDescription(`Por favor, conéctate a un canal de voz.`)
     .setColor(Colores.rojo);
 
-  let errorE2 = new Discord.MessageEmbed()
+  let errorE2 = new Discord.EmbedBuilder()
     .setAuthor(`| Error: 2`, Config.errorPng)
     .setDescription(`Lo siento, ya estoy conectado al canal de voz.`)
     .setColor(Colores.rojo);
 
-  let errorE3 = new Discord.MessageEmbed()
+  let errorE3 = new Discord.EmbedBuilder()
     .setAuthor(`| Error: 3`, Config.errorPng)
     .setDescription(`Por favor usa una url seguida del comando.`)
     .setColor(Colores.rojo);
 
-  let errorE4 = new Discord.MessageEmbed()
+  let errorE4 = new Discord.EmbedBuilder()
     .setAuthor(`| Error: 4`, Config.errorPng)
     .setDescription(`Por favor, usa un url **válida** seguida del comando.`)
     .setColor(Colores.rojo);
@@ -87,7 +87,7 @@ module.exports.run = async (client, message, args, active) => {
   if (!data.dispatcher) play(client, active, data);
   else {
     // pero, si ya existe
-    let addQueue = new Discord.MessageEmbed()
+    let addQueue = new Discord.EmbedBuilder()
       .setDescription(
         `***️⃣ | Añadido a la cola: \`${info.videoDetails.title}\`, pedido por: ${author.tag}**`
       )
@@ -100,7 +100,7 @@ module.exports.run = async (client, message, args, active) => {
   active.set(guild.id, data);
 
   async function play(client, active, data) {
-    let reproduciendoEmbed = new Discord.MessageEmbed()
+    let reproduciendoEmbed = new Discord.EmbedBuilder()
       .setDescription(
         `🎶 | **Reproduciendo: \`${data.queue[0].songTitle}\`, pedido por: ${data.queue[0].requester}**`
       )
@@ -139,7 +139,7 @@ module.exports.run = async (client, message, args, active) => {
         active.delete(dispatcher.guildID);
         let vc = client.guilds.cache.get(dispatcher.guildID).me.voice.channel;
 
-        let finEmbed = new Discord.MessageEmbed()
+        let finEmbed = new Discord.EmbedBuilder()
           .setDescription(
             `Se ha acabado la cola. ¡Gracias por el show, saliendo del chat de voz...!`
           )

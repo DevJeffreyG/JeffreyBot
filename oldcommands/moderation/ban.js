@@ -39,7 +39,7 @@ module.exports = {
         // Si el usuario a banear tiene el permiso de banear también
         if(bMember.roles.cache.find(x => x.id === staff_role.id)) return console.log("NO.");
     
-        let bEmbed = new Discord.MessageEmbed()
+        let bEmbed = new Discord.EmbedBuilder()
       .setAuthor(`Ban`, author.displayAvatarURL())
         .setDescription(`**—** Usuario baneado: **${bMember}**.
 **—** Mod: **${message.author.username}**.`)

@@ -36,7 +36,7 @@ module.exports = {
         const proof = response.find(x => x.param === "prueba").data;
         
         // Comando
-        let selectMenu = new Discord.MessageSelectMenu()
+        let selectMenu = new Discord.SelectMenuBuilder()
         .setCustomId("selectRule")
         .setPlaceholder("Selecciona la regla infringida");
 
@@ -48,7 +48,7 @@ module.exports = {
 
         selectMenu.addOptions({label: "Cancelar", value: "cancel", emoji: "❌"});
 
-        let row = new Discord.MessageActionRow().addComponents([selectMenu]);
+        let row = new Discord.ActionRowBuilder().addComponents([selectMenu]);
 
         let selectRuleMsg = await message.reply({content: "**¿Qué regla infringió?**", components: [row]})
 
@@ -90,7 +90,7 @@ module.exports = {
                 }
             })
 
-            let alreadyWarned = new Discord.MessageEmbed()
+            let alreadyWarned = new Discord.EmbedBuilder()
             .setAuthor(`Agregar softwarn: Error`, guild.iconURL())
             .setColor(Colores.rojo)
             .setDescription(`**—** **${member.user.tag}** ya ha sido softwarneado por infringir la regla N°${rule}: \`${ruleTxt}\`.
@@ -115,14 +115,14 @@ module.exports = {
 
             await AfterInfraction(user, data, true);
 
-            let log = new Discord.MessageEmbed()
+            let log = new Discord.EmbedBuilder()
             .setAuthor(`Softwarn`, Config.bienPng)
             .setDescription(`**—** Softwarneado: **${member}**.
 **—** Softwarns actuales: **${user.softwarns.length}**.
 **—** Por infringir la regla: **${ruleTxt}**.`)
             .setColor(Colores.rojo);
 
-            let proofE = new Discord.MessageEmbed()
+            let proofE = new Discord.EmbedBuilder()
             .setTitle("Pruebas")
             .setDescription(proof.url)
             .setImage(proof.url)

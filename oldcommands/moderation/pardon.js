@@ -63,7 +63,7 @@ module.exports = {
 
         let idFound = idsNow.find(x => x.id === id);
 
-        let notFound = new Discord.MessageEmbed()
+        let notFound = new Discord.EmbedBuilder()
         .setAuthor(`Pardon ${textInfraction}: Error`, Config.errorPng)
         .setDescription(`**—** No existe el ${textInfraction} con id "**${id}**".`)
         .setFooter(`Verifica que estés usando el ID correcto, en warns o en softwarns.`, guild.iconURL())
@@ -80,7 +80,7 @@ module.exports = {
         const guild_member = client.guilds.cache.find(x => x.id === user.guild_id);
         const member = guild_member ? guild_member.members.cache.find(x => x.id === user.user_id) : null;
 
-        let memberNotFound = new Discord.MessageEmbed()
+        let memberNotFound = new Discord.EmbedBuilder()
         .setAuthor(`Pardon ${textInfraction}: Error`, Config.errorPng)
         .setDescription(`**—** No pude encontrar al miembro "${idFound.user_id}" en este servidor.`)
         .setColor(Colores.rojo);
@@ -103,7 +103,7 @@ module.exports = {
         infractions.splice(index, 1); // eliminar la infraccion
         await user.save();
 
-        let pardon = new Discord.MessageEmbed()
+        let pardon = new Discord.EmbedBuilder()
         .setAuthor(`Pardon ${textInfraction}`, Config.bienPng)
         .setDescription(`**—** Miembro: ${member}
 **—** ${textInfraction+"s"} actuales: **${infractions.length}**.`)
@@ -111,7 +111,7 @@ module.exports = {
 
         confirmation.edit({embeds: [pardon]});
 
-        let memberEmbed = new Discord.MessageEmbed()
+        let memberEmbed = new Discord.EmbedBuilder()
         .setAuthor(`Pardon`, "https://cdn.discordapp.com/emojis/537004318667177996.png")
         .setDescription(`**—** Se ha eliminado el ${textInfraction} con ID "**${id}**".
 **—** ${textInfraction+"s"} actuales: **${infractions.length}**.`)

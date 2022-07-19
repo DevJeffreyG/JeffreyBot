@@ -42,7 +42,7 @@ module.exports = {
 
         const pages = await generateTop(guild, top);
 
-        let embed = new Discord.MessageEmbed()
+        let embed = new Discord.EmbedBuilder()
         .setAuthor(base.title, base.icon)
         .setColor(Colores.verde)
         .setDescription(`${pages[0].join(" ")}`)

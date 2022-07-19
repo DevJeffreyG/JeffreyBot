@@ -37,7 +37,7 @@ module.exports = {
         
         // Comando
 
-        let selectMenu = new Discord.MessageSelectMenu()
+        let selectMenu = new Discord.SelectMenuBuilder()
         .setCustomId("selectRule")
         .setPlaceholder("Selecciona la regla infringida");
 
@@ -49,7 +49,7 @@ module.exports = {
 
         selectMenu.addOptions({label: "Cancelar", value: "cancel", emoji: "❌"});
 
-        let row = new Discord.MessageActionRow().addComponents([selectMenu]);
+        let row = new Discord.ActionRowBuilder().addComponents([selectMenu]);
 
         let selectRuleMsg = await message.reply({content: "**¿Qué regla infringió?**", components: [row]})
 
@@ -130,7 +130,7 @@ module.exports = {
             
             await AfterInfraction(user, data); // enviar mensaje con la informacion del warn al usuario
 
-            let log = new Discord.MessageEmbed()
+            let log = new Discord.EmbedBuilder()
             .setAuthor(`Warn`, Config.bienPng)
             .setDescription(`**—** Warneado: **${member}**.
 **—** Warns actuales: **${user.warns.length}**.
@@ -138,7 +138,7 @@ module.exports = {
 **—** ID: \`${newId}\`.`)
             .setColor(Colores.rojo);
 
-            let proofE = new Discord.MessageEmbed()
+            let proofE = new Discord.EmbedBuilder()
             .setTitle("Pruebas")
             .setDescription(proof.url)
             .setImage(proof.url)

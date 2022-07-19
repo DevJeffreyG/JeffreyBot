@@ -1,6 +1,7 @@
 const Discord = require("discord.js");
 const { Command, isBannedFrom, FindNewId, DataWork, Embed } = require("../../src/utils");
 const { Colores } = require("../../src/resources");
+const { ButtonStyle } = require("discord-api-types/v10");
 
 const command = new Command({
     name: "sug",
@@ -30,21 +31,21 @@ command.execute = async (interaction, models, params, client) => {
 
     const newId = await FindNewId(await Guilds.find(), "data.suggestions", "id"); // crear la nueva id para el ticket
 
-    const row = new Discord.MessageActionRow()
+    const row = new Discord.ActionRowBuilder()
     .addComponents(
-        new Discord.MessageButton()
+        new Discord.ButtonBuilder()
             .setCustomId("acceptSuggestion")
             .setLabel("Aceptar")
-            .setStyle("PRIMARY"),
-        new Discord.MessageButton()
+            .setStyle(ButtonStyle.Primary),
+        new Discord.ButtonBuilder()
             .setCustomId("denySuggestion")
             .setLabel("Denegar")
-            .setStyle("SECONDARY"),
+            .setStyle(ButtonStyle.Secondary),
 
-        new Discord.MessageButton()
+        new Discord.ButtonBuilder()
             .setCustomId("invalidateSuggestion")
             .setLabel("Invalidar")
-            .setStyle("DANGER")
+            .setStyle(ButtonStyle.Danger)
     )
 
     let embed = new Embed()

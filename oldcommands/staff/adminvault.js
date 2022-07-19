@@ -85,7 +85,7 @@ module.exports = {
                 vault.codes.push({code: newCode, id: newId});
                 await vault.save()
 
-                let e = new Discord.MessageEmbed()
+                let e = new Discord.EmbedBuilder()
                 .setAuthor(`Nuevos textos`, Config.bienPng)
                 .setDescription(`**—** Código: \`${newCode}\`
     **—** Recompensa: **${Emojis.Jeffros}100**

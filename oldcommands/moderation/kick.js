@@ -38,7 +38,7 @@ module.exports = {
         // Si el usuario a kickear tiene el permiso de kickear también
         if(member.roles.cache.find(x => x.id === staff_role.id)) return console.log("NO.");
     
-        let bEmbed = new Discord.MessageEmbed()
+        let bEmbed = new Discord.EmbedBuilder()
       .setAuthor(`Kick`, author.displayAvatarURL())
         .setDescription(`**—** Usuario kickeado: **${member}**.
 **—** Mod: **${message.author.username}**.`)

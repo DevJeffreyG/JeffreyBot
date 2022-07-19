@@ -35,7 +35,7 @@ module.exports = {
         let logC = client.user.id === Config.testingJBID ? message.guild.channels.cache.find(x => x.id === "483108734604804107") : message.guild.channels.cache.find(x => x.id === Config.logChannel);
 
         // Comando
-        let bEmbed = new Discord.MessageEmbed()
+        let bEmbed = new Discord.EmbedBuilder()
         .setAuthor(`HackBan`, author.displayAvatarURL())
           .setDescription(`**—** Usuario baneado { ID }: **${user}**.
 **—** Usuario baneado { @ }: <@${user}>

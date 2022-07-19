@@ -53,7 +53,7 @@ module.exports = {
             guild_id: guild.id
         });
 
-        let noId = new Discord.MessageEmbed()
+        let noId = new Discord.EmbedBuilder()
         .setAuthor(`Error`, Config.errorPng)
         .setDescription(`**—** No encontré un item con id de uso \`${id}\` en tu inventario.`)
         .setColor(Colores.rojo);
@@ -92,7 +92,7 @@ module.exports = {
         const action = info.action;
         const given = info.given;
 
-        let responseEmbed = new Discord.MessageEmbed()
+        let responseEmbed = new Discord.EmbedBuilder()
         .setAuthor("Listo", Config.bienPng)
         .setColor(isDarkShop ? Colores.negro : Colores.verde)
         .setDescription(`\`▸\` ${item.reply}`)
@@ -243,21 +243,21 @@ module.exports = {
             const author = guild.members.cache.find(x => x.id === user.user_id);
             const victim = guild.members.cache.find(x => x.id === victimStats.user_id);
 
-            let skipped = new Discord.MessageEmbed()
+            let skipped = new Discord.EmbedBuilder()
             .setAuthor(`Interacción`, Config.darkLogoPng)
             .setDescription(`**—** ¡**${author.user.tag}** se ha volado la Firewall \`(${user.economy.dark.accuracy}%)\` y ha usado el item \`${item.name}\` en **${victim.user.tag}**!`)
             .setColor(Colores.negro)
             .setFooter(`${item.name} para ${victim.user.tag}`)
             .setTimestamp();
 
-            let success = new Discord.MessageEmbed()
+            let success = new Discord.EmbedBuilder()
             .setAuthor(`Interacción`, Config.darkLogoPng)
             .setDescription(`**—** ¡**${author.user.tag}** ha usado el item \`${item.name}\` en **${victim.user.tag}**!`)
             .setColor(Colores.negro)
             .setFooter(`${item.name} para ${victim.user.tag}`)
             .setTimestamp();
 
-            let fail = new Discord.MessageEmbed()
+            let fail = new Discord.EmbedBuilder()
             .setAuthor(`Amenaza`, Config.darkLogoPng)
             .setDescription(`**—** ¡**${author.user.tag}** ha querido usar el item \`${item.name}\` en **${victim.user.tag}** pero NO HA FUNCIONADO!`)
             .setColor(Colores.negro)
