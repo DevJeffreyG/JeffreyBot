@@ -80,6 +80,7 @@ class Commands {
                 this.#removeGuildCommands(false)
             }
 
+            console.log("⚪ ACTUALIZANDO SLASH COMMANDS")
             await rest.put(route, {body: this.commands})
 
             if(this.guildcommands.length != 0) {
@@ -95,14 +96,14 @@ class Commands {
             console.log(error);
         }
 
-        console.log("🟢 Se han actualizado los slash commands")
+        console.log("🟢 SLASH COMMANDS ACTUALIZADOS")
         console.log("============================================================");
         
         return;
     }
 
     async #removeGuildCommands(dev){
-        console.log("============ BUSCANDO POSIBLES GUILDCOMMANDS ============");
+        console.log("⚪ BUSCANDO POSIBLES GUILDCOMMANDS")
         let guild_commands = await GlobalDatas.GetGuildCommands();
 
         guild_commands.forEach(async q => {
@@ -127,7 +128,7 @@ class Commands {
             }
         })
 
-        console.log("🟢 PROCESO TERMINADO")
+        console.log("🟢 POSIBLES GUILDCOMMANDS HANDLED")
         return;
     }
 
