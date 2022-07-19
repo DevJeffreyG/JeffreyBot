@@ -47,8 +47,9 @@ class Command {
         return returnable;
     }
 
-    async addEach(data = { type: "string", name: "foo", desc: "bar", req: false }) {
-        this.data.options.forEach(option => {
+    async addEach(data = { filter: null, type: "string", name: "foo", desc: "bar", req: false }) {
+        const options = data.filter ? this.data.options.filter(x => x.name === data.filter && x instanceof SlashCommandSubcommandGroupBuilder) : this.data.options;
+        options.forEach(option => {
             if (option instanceof SlashCommandSubcommandGroupBuilder) {
                 option.options.forEach(subcommand => {
                     data.sub = `${option.name}.${subcommand.name}`;

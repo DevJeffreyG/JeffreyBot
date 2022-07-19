@@ -57,6 +57,12 @@ ${data.error}
 \`\`\`json
 { FATAL ERROR, KEY ${key.id}, UKNOWN REWARD TYPE "${reward.type}" }
 \`\`\``)
+                break;
+
+            case "notSent":
+                this.#errorAuthor(7);
+                this.defDesc(`**▸ No pude enviar el mensaje al usuario por privado** ▸ ${data.tag}\n${data.error}`)
+                break;
         }
     }
 

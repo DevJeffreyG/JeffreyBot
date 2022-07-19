@@ -1,4 +1,4 @@
-const { Command, Embed, importImage, FindNewId } = require("../../src/utils")
+const { Command, Embed, ErrorEmbed, importImage, FindNewId } = require("../../src/utils")
 const { Config, Colores } = require("../../src/resources")
 
 const ms = require("ms");
@@ -80,8 +80,24 @@ command.data
 
             )
     )
+    .addSubcommandGroup(group => group
+        .setName("user")
+        .setDescription("Administración de tipo usuarios")
+        .addSubcommand(sub => sub
+            .setName("dm")
+            .setDescription("Enviar un mensaje directo al usuario como STAFF")
+            .addUserOption(option => option
+                .setName("usuario")
+                .setDescription("Usuario al que se le va a enviar el mensaje")
+                .setRequired(true))
+            .addStringOption(option => option
+                .setName("mensaje")
+                .setDescription("Mensaje a enviar. Usa {yo} para poner tu nombre, {user} para poner el tag de 'usuario'")
+                .setRequired(true))
+        )
+    )
 
-command.addEach({ type: "integer", name: "usos", desc: "Los usos máximos permitidos en global para esta key", min: 1 });
+command.addEach({ filter: "add", type: "integer", name: "usos", desc: "Los usos máximos permitidos en global para esta key", min: 1 });
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
@@ -89,6 +105,10 @@ command.execute = async (interaction, models, params, client) => {
         case "add":
             //console.log(params);
             await command.addExec(interaction, models, params, client);
+            break;
+
+        case "user":
+            await command.userExec(interaction, models, params, client);
             break;
     }
 }
@@ -169,6 +189,36 @@ command.addExec = async (interaction, models, params, client) => {
         .setColor(Colores.verde)
 
     return interaction.editReply({ embeds: [added] });
+}
+
+command.userExec = async (interaction, models, params, client) => {
+    const { subcommand, user} = params;
+    const { usuario, mensaje } = user;
+    console.log(params)
+
+    switch(subcommand){
+        case "dm":
+            if(usuario.user.bot) return interaction.editReply({content: "No le voy a enviar un mensaje a un bot, perdona."})
+
+            let yoStr = mensaje.value.replace(new RegExp('{yo}', "g"), `**${interaction.user.tag}**`);
+            let final = yoStr.replace(new RegExp('{user}', "g"), `**${usuario.user.tag}**`)
+
+            console.log(final);
+
+            let embed = new Embed()
+            .defAuthor({text: "Hola:", icon: "https://i.pinimg.com/originals/85/7f/d7/857fd79dfd7bd025e4cbb2169cd46e03.png"})
+            .defDesc(final)
+            .defFooter({text: "Este es un mensaje directamente del staff del servidor."})
+            .defColor(Colores.verde);
+
+            try {
+                await usuario.member.send({embeds: [embed]})
+                interaction.editReply({content: "✅ Listo!"})
+            } catch (e) {
+                interaction.editReply({embeds: [new ErrorEmbed({type: "notSent", data: {tag: usuario.user.tag, error: e}})]})
+            }
+            break;
+    }
 }
 
 function generateCode() {
