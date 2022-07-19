@@ -54,7 +54,7 @@ module.exports = async (client, interaction) => {
         params[name] = undefined;
 
         let toFix = o.options.find(x => x.name === params["subcommand"]);
-        subcommandFix(toFix, (x => {
+        if(toFix) subcommandFix(toFix, (x => {
           params[name] = x
         }));
 
