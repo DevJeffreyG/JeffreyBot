@@ -63,6 +63,11 @@ ${data.error}
                 this.#errorAuthor(7);
                 this.defDesc(`**▸ No pude enviar el mensaje al usuario por privado** ▸ ${data.tag}\n${data.error}`)
                 break;
+                
+            case "badParams":
+                this.#errorAuthor(8)
+                this.defDesc(`**▸ No puedes ejecutar ese comando así** ▸ ${data.help}`);
+                break;
         }
     }
 

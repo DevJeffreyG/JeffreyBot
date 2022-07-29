@@ -1373,6 +1373,9 @@ const Confirmation = async function(toConfirm, dataToConfirm, interaction){
   let DescriptionString = "";
 
   dataToConfirm.forEach(data => {
+    if(data instanceof Embed){
+      egEmbed = data;
+    } else
     DescriptionString += `\`▸\` ${data}\n`;
   });
 
@@ -1380,6 +1383,9 @@ const Confirmation = async function(toConfirm, dataToConfirm, interaction){
   .defAuthor({text: `${toConfirm}?`, icon: interaction.guild.iconURL()})
   .defDesc(DescriptionString)
   .defColor(Colores.rojo);
+
+  let embeds = [confirmation];
+  if(egEmbed) embeds.push(egEmbed);
 
   let cancelEmbed = new Embed()
   .defDesc(`Cancelado.`)
@@ -1400,7 +1406,7 @@ const Confirmation = async function(toConfirm, dataToConfirm, interaction){
             .setEmoji(Config.cancelEmojiId)
     )
 
-  await interaction.editReply({content: null, embeds: [confirmation], components: [row]}); // enviar mensaje de confirmación
+  await interaction.editReply({content: null, embeds, components: [row]}); // enviar mensaje de confirmación
 
   return new Promise (async (resolve, reject) => {
     const filter = i => i.user.id === interaction.user.id;
@@ -1415,7 +1421,7 @@ const Confirmation = async function(toConfirm, dataToConfirm, interaction){
         .defColor(Colores.verde)
         .defAuthor({text: `${toConfirm}, continuando...`, icon: Config.loadingGif});
 
-        i.editReply({embeds: [confirmation], components: []});
+        await i.editReply({embeds: [confirmation], components: []});
 
         return resolve(interaction);
       } else {
