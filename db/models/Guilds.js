@@ -41,9 +41,17 @@ const GuildSchema = new Schema({
     channels: {
         general_logs: { type: String },
         moderation_logs: { type: String },
-        staff_logs: { type: String },
+        opinion_logs: { type: String },
     }
 });
+
+GuildSchema.static("getOrCreate", function(id){
+    return this.findOne({
+        guild_id: id
+    }) ?? new this({
+        guild_id: id
+    }).save();
+})
 
 GuildSchema.static("getById", function(id){
     return this.findOne({guild_id: id})

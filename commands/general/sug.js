@@ -24,10 +24,10 @@ command.execute = async (interaction, models, params, client) => {
 
     if(await isBannedFrom(interaction, "SUGGESTIONS")) return;
 
-    let logChannel = await DataWork(interaction, "STAFF_LOGS_CHANNEL");
+    let logChannel = await DataWork(interaction, "OPINION_LOGS_CHANNEL");
     if(!logChannel) return;
 
-    const docGuild = await Guilds.findOne({guild_id: interaction.guild.id});
+    const docGuild = await Guilds.getOrCreate({guild_id: interaction.guild.id});
 
     const newId = await FindNewId(await Guilds.find(), "data.suggestions", "id"); // crear la nueva id para el ticket
 

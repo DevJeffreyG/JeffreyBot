@@ -1306,8 +1306,8 @@ const TutorialEmbed = async function(commandTree, executionInfo, args){
 /**
  * 
  * @param {*} interaction The Discord.JS Interaction that triggers the command
- * @param {String} dataSearch The Data to search in the setup of this Guill
- * - STAFF_LOGS_CHANNEL
+ * @param {String} dataSearch The Data to search in the setup of this Guild
+ * - OPINION_LOGS_CHANNEL
  * @returns 
  */
 const DataWork = async function(interaction, dataSearch){
@@ -1321,9 +1321,9 @@ const DataWork = async function(interaction, dataSearch){
   let response;
 
   switch(dataSearch.toUpperCase()){
-    case "STAFF_LOGS_CHANNEL":
-      if(docGuild.channels.staff_logs){
-        response = guild.channels.cache.find(x => x.id === docGuild.channels.staff_logs);
+    case "OPINION_LOGS_CHANNEL":
+      if(docGuild.channels.opinion_logs){
+        response = guild.channels.cache.find(x => x.id === docGuild.channels.opinion_logs);
       }
       break;
 
@@ -1662,20 +1662,20 @@ const GeneratePages = async function(guildId, message, itemsPerPage, isDarkShop)
 }
 
 /**
- * 
- * @param {*} message The Discord.JS executer Message
+ * @deprecated
+ * @param {*} interaction The Discord.JS Interaction
  * @param {*} own_message The Discord.JS client Message
  * @param {Array} custom_filter Needs to be one of the elements of the Array
  * @returns 
  */
-const CollectMessage = async function(message, own_message, custom_filter){
+const CollectMessage = async function(interaction, own_message, custom_filter){
   custom_filter = custom_filter || null;
 
   if(custom_filter) custom_filter.push("cancel");
 
   return new Promise(async(resolve, reject) => {
-    const filter = custom_filter ? m => m.author.id === message.author.id && custom_filter.find(x => x.toLowerCase() === m.content.toLowerCase()) : m => m.author.id === message.author.id;
-    const channel = message.channel;
+    const filter = custom_filter ? m => m.author.id === interaction.user.id && custom_filter.find(x => x.toLowerCase() === m.content.toLowerCase()) : m => m.author.id === interaction.user.id;
+    const channel = interaction.channel;
     const collector = channel.createMessageCollector({ filter, time: ms("1m"), max: 1});
 
     collector.on("collect", async collected => {
@@ -1691,6 +1691,12 @@ const CollectMessage = async function(message, own_message, custom_filter){
   })
 }
 
+/**
+ * @deprecated
+ * @param {*} type 
+ * @param {*} message 
+ * @returns 
+ */
 const ValidateParam = async function(type, message){
   const arg = message.content;
   let toReturn;
