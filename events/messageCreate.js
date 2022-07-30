@@ -4,6 +4,7 @@ const ms = require("ms");
 const moment = require('moment-timezone');
 
 const { Config } = require("../src/resources/");
+const { Embed } = require("../src/utils");
 const { deleteLateMedia, disableEXPs, jeffreygID, multiplier, mantenimiento } = Config;
 
 const jeffreyMentions = {
@@ -142,12 +143,11 @@ module.exports = async (client, message) => {
       // mencionan a Jeffrey
       let contentMsg = message.content.toLowerCase();
     
-      let embed = new Discord.EmbedBuilder()
-      .setAuthor(`${author.tag}`, author.displayAvatarURL())
-      .setDescription(`**__${author.username}__** dice: "\`${message.content}\`".`)
-      .setFooter(`Mencionaron a Jeffrey.`, message.guild.iconURL())
-      .setColor(Colores.verde)
-      .setTimestamp();
+      let embed = new Embed()
+      .defAuthor({text: `${author.tag}`, icon: author.displayAvatarURL()})
+      .defDesc(`**__${author.username}__** dice: "\`${message.content}\`".`)
+      .defFooter({text: `Mencionaron a Jeffrey.`, icon: message.guild.iconURL(), timestamp: true})
+      .defColor(Colores.verde)
     
       for (let i = 0; i < jeffreyMentions.real.length; i++) {
         const mention = jeffreyMentions.real[i];
