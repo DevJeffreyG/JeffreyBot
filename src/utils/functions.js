@@ -1371,6 +1371,7 @@ const isBannedFrom = async function(interaction, query){
  */
 const Confirmation = async function(toConfirm, dataToConfirm, interaction){
   let DescriptionString = "";
+  let egEmbed = null;
 
   dataToConfirm.forEach(data => {
     if(data instanceof Embed){

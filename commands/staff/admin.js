@@ -1,4 +1,4 @@
-const { Command, Embed, ErrorEmbed, importImage, FindNewId, Confirmation } = require("../../src/utils")
+const { Command, Embed, ErrorEmbed, WillBenefit, LimitedTime, FindNewId, Confirmation } = require("../../src/utils")
 const { Config, Colores } = require("../../src/resources")
 
 const ms = require("ms");
@@ -12,6 +12,66 @@ const command = new Command({
 
 //demasiado complejo como para usar las funciones mias :sob:
 command.data
+    .addSubcommandGroup(group =>
+        group
+            .setName("temp")
+            .setDescription("Role o boost temporales...?")
+            .addSubcommand(sub => sub
+                .setName("role")
+                .setDescription("Agrega un role temporal a un usuario")
+                .addUserOption(option => option
+                    .setName("usuario")
+                    .setDescription("El usuario al que se le agregará el rol")
+                    .setRequired(true))
+                .addRoleOption(option => option
+                    .setName("role")
+                    .setDescription("El role a agregar")
+                    .setRequired(true))
+                .addStringOption(option => option
+                    .setName("tiempo")
+                    .setDescription("El tiempo que tiene que pasar para eliminar el role: 1d, 20m, 10s, 1y...")
+                    .setRequired(true))
+            )
+            .addSubcommand(sub => sub
+                .setName("boost")
+                .setDescription("Agrega un boost a un usuario")
+                .addUserOption(option => option
+                    .setName("usuario")
+                    .setDescription("El usuario al que se le agregará el rol")
+                    .setRequired(true))
+                .addRoleOption(option => option
+                    .setName("role")
+                    .setDescription("El role a agregar con el boost")
+                    .setRequired(true))
+                .addStringOption(option => option
+                    .setName("tipo")
+                    .setDescription("El tipo de boost")
+                    .addChoices(
+                        { name: "Multiplicador", value: "boostMultiplier" },
+                        { name: "Probabilidad Boost", value: "boostProbabilities" }
+                    )
+                    .setRequired(true)
+                )
+                .addStringOption(option => option
+                    .setName("objetivo")
+                    .setDescription("Lo que va a modificar")
+                    .addChoices(
+                        { name: "Jeffros", value: "jeffros" },
+                        { name: "EXP", value: "exp" },
+                        { name: "Todo", value: "all" },
+                    )
+                    .setRequired(true))
+                .addNumberOption(option => option
+                    .setName("valor")
+                    .setDescription("Valor del boost")
+                    .setMinValue(1.1)
+                    .setRequired(true))
+                .addStringOption(option => option
+                    .setName("tiempo")
+                    .setDescription("El tiempo que tiene que pasar para eliminar el boost: 1d, 20m, 10s, 1y...")
+                    .setRequired(true))
+            )
+    )
     .addSubcommandGroup(group =>
         group
             .setName("add")
@@ -119,6 +179,10 @@ command.addEach({ filter: "add", type: "integer", name: "usos", desc: "Los usos 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     switch (params.subgroup) {
+        case "temp":
+            await command.tempExec(interaction, models, params);
+            break;
+
         case "add":
             //console.log(params);
             await command.addExec(interaction, models, params);
@@ -131,6 +195,47 @@ command.execute = async (interaction, models, params, client) => {
         case "announce":
             await command.announceExec(interaction, models, params, client);
             break;
+    }
+}
+
+command.tempExec = async (interaction, models, params) => {
+    console.log(params)
+    const { Users } = models;
+    const { subcommand, temp } = params
+    const { usuario, role, tiempo, tipo, objetivo, valor } = temp;
+
+    const duration = ms(tiempo.value) || Infinity;
+
+    let user = await Users.getOrCreate({user_id: usuario.value, guild_id: interaction.guild.id});
+
+    switch(subcommand){
+        case "role":
+            // llamar la funcion para hacer globaldata
+            await LimitedTime(interaction.guild, role.role.id, usuario.member, user, duration);
+            return interaction.editReply({content: `✅ Agregado el temp role a ${usuario.user.tag} por ${tiempo.value}`});
+
+        case "boost":
+            let btype = tipo.value;
+            let bobj = objetivo.value;
+            let multi = valor.value;
+
+            let toConfirm = [
+                `**${usuario.user.tag}** será BENEFICIADO AÚN MÁS si aplica este boost`,
+                `¿Estás segur@ de proseguir aún así?`
+            ];
+
+            const willBenefit = await WillBenefit(usuario.member)
+            let confirmation = true;
+            
+            if(willBenefit) {
+                confirmation = await Confirmation("Continuar", toConfirm, interaction);
+            }
+
+            if(!confirmation) return;
+            
+            // llamar la funcion para hacer un globaldata y dar el role con boost
+            await LimitedTime(interaction.guild, role.role.id, usuario.member, user, duration, btype, bobj, multi);
+            return interaction.editReply({content: `✅ Agregado el boost a ${usuario.user.tag} por ${tiempo.value}`, embeds: []});
     }
 }
 
