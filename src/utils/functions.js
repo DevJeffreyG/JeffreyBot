@@ -1,4 +1,4 @@
-const { PermissionsBitField, ActionRowBuilder, MessageAttachment, ButtonBuilder, EmbedBuilder } = require("discord.js");
+const { PermissionsBitField, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, EmbedBuilder } = require("discord.js");
 const { ButtonStyle } = require("discord-api-types/v10");
 
 const Config = require("../resources/base.json");
@@ -2352,7 +2352,7 @@ const WillBenefit = async function(member, objetivesToCheck){
 }
 
 const importImage = function(filename){
-  let file = new MessageAttachment(`./src/resources/imgs/${filename.toUpperCase()}.png`, `${filename.toLowerCase()}.png`);
+  let file = new AttachmentBuilder(`./src/resources/imgs/${filename.toUpperCase()}.png`, {name: `${filename.toLowerCase()}.png`});
   return {
     attachment: `attachment://${filename.toLowerCase()}.png`,
     file: file
