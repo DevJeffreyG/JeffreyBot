@@ -52,10 +52,10 @@ ${data.error}
 
             case "commandError":
                 this.#errorAuthor(6);
-                this.defDesc(`**▸ Podrías usar este comando, pero Jeffrey es tonto** ▸ \`${data.key.id}\`.
+                this.defDesc(`**▸ Podrías usar este comando, pero Jeffrey es tonto** ▸ \`${data.id}\`.
 **▸ También dile que...**
 \`\`\`json
-{ FATAL ERROR, KEY ${key.id}, UKNOWN REWARD TYPE "${reward.type}" }
+{ FATAL ERROR, ID ${data.id}, UNKNOWN "${data.unknown}" }
 \`\`\``)
                 break;
 

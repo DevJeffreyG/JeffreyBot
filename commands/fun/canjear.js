@@ -82,7 +82,7 @@ command.execute = async (interaction, models, params, client) => {
                         break;
 
                     default:
-                        return interaction.editReply({embeds: [new ErrorEmbed({type: "commandError", data: {key, reward}})]})
+                        return interaction.editReply({embeds: [new ErrorEmbed({type: "commandError", data: {id: key.id, unknown: reward.type}})]})
                 }
 
                 // loggear que fue usado porque aún existe (lol)
