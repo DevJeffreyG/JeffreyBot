@@ -110,7 +110,9 @@ command.data
                 .setDescription("La imagen a poner en el embed"))
             .addStringOption(option => option
                 .setName("titulo")
-                .setDescription("El título que saldrá en el embed"))))
+                .setDescription("El título que saldrá en el embed"))
+        )
+    )
 
 command.addEach({ filter: "add", type: "integer", name: "usos", desc: "Los usos máximos permitidos en global para esta key", min: 1 });
 
@@ -243,30 +245,30 @@ command.announceExec = async (interaction, models, params, client) => {
     const { subcommand, announce } = params;
     const { titulo, anuncio, imagen } = announce;
 
-    switch(subcommand){
+    switch (subcommand) {
         case "jbnews":
             let jbNRole = client.user.id === Config.testingJBID ? interaction.guild.roles.cache.find(x => x.id === '790393911519870986') : guild.roles.cache.find(x => x.id === Config.jbnews);
             let ch = client.user.id === Config.testingJBID ? interaction.guild.channels.cache.find(x => x.id === "483007967239602196") : message.guild.channels.cache.find(x => x.id === Config.announceChannel);
 
-            if(!anuncio && !imagen) return interaction.editReply({embeds: [new ErrorEmbed({type: "badParams", data: {help: "Si no hay 'anuncio' debe haber una imagen."}})]});
-            if(titulo) title = titulo.value;
+            if (!anuncio && !imagen) return interaction.editReply({ embeds: [new ErrorEmbed({ type: "badParams", data: { help: "Si no hay 'anuncio' debe haber una imagen." } })] });
+            if (titulo) title = titulo.value;
             else title = "¡Novedades de Jeffrey Bot!"
 
             let embed = new Embed()
-            .defColor(Colores.verde)
-            .defFooter({text: `Noticia por ${interaction.user.tag}`, icon: client.user.displayAvatarURL(), timestamp: true})
+                .defColor(Colores.verde)
+                .defFooter({ text: `Noticia por ${interaction.user.tag}`, icon: client.user.displayAvatarURL(), timestamp: true })
 
-            if(imagen) embed.setImage(imagen.attachment.url);
-            if(anuncio) embed.defDesc(anuncio.value)
+            if (imagen) embed.setImage(imagen.attachment.url);
+            if (anuncio) embed.defDesc(anuncio.value)
             else embed.defDesc(" ")
 
-            if(!anuncio && embed.image) {
-                embed.defAuthor({text: title, icon: guild.iconURL()})
-            } else if(anuncio && imagen) {
-                embed.defAuthor({text: title, title: true});
+            if (!anuncio && embed.image) {
+                embed.defAuthor({ text: title, icon: guild.iconURL() })
+            } else if (anuncio && imagen) {
+                embed.defAuthor({ text: title, title: true });
                 embed.defThumbnail(client.user.displayAvatarURL());
             } else {
-                embed.defAuthor({text: title, title: true});
+                embed.defAuthor({ text: title, title: true });
             }
 
             let toConfirm = [
@@ -274,10 +276,10 @@ command.announceExec = async (interaction, models, params, client) => {
                 embed
             ]
             let confirmation = await Confirmation("Enviar anuncio", toConfirm, interaction)
-            if(!confirmation) return;
+            if (!confirmation) return;
 
-            ch.send({content: `${jbNRole}`, embeds: [embed]});
-            return confirmation.editReply({content: `✅ Anuncio enviado a ${ch}!`, embeds: []});
+            ch.send({ content: `${jbNRole}`, embeds: [embed] });
+            return confirmation.editReply({ content: `✅ Anuncio enviado a ${ch}!`, embeds: [] });
     }
 }
 
