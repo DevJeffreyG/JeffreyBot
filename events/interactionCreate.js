@@ -58,6 +58,13 @@ module.exports = async (client, interaction) => {
         if(toFix) subcommandFix(toFix, (x => {
           params[name] = x
         }));
+        else {
+          if(o.name != params["subcommand"]) return;
+          params[name] = {};
+          o.options.forEach(op => {
+            params[name][op.name] = interaction.options.get(op.name);
+          });
+        }
 
         function subcommandFix(sub, callback) {
           let x = {};
