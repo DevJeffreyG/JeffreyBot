@@ -68,6 +68,16 @@ ${data.error}
                 this.#errorAuthor(8)
                 this.defDesc(`**▸ No puedes ejecutar ese comando así** ▸ ${data.help}`);
                 break;
+            
+            case "alreadyExists":
+                this.#errorAuthor(9)
+                this.defDesc(`**▸ No se pudo completar la acción** ▸ ${data.action}.\n${data.existing} ya existe en este medio.`);
+                break;
+
+            case "doesntExist":
+                this.#errorAuthor(10)
+                this.defDesc(`**▸ No se pudo completar la acción** ▸ ${data.action}.\n${data.missing} no existe en este medio.`);
+                break;
         }
     }
 
