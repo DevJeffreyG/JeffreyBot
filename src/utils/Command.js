@@ -25,6 +25,7 @@ class Command {
 
             return interaction.editReply({ content: null, embeds: [embed] });
         }
+        this.methodsCount = 0;
     }
 
     #toAddWorker(data) {
@@ -62,6 +63,7 @@ class Command {
     }
 
     async addOption(data = { type: "string", name: "foo", desc: "bar", req: false, sub: null }) {
+        this.#warning();
         if (!(data.type && data.name && data.desc)) return console.error("No están todos los datos para crear una opción:", this.data, data)
 
         let toAdd = this.#toAddWorker(data)
@@ -111,6 +113,7 @@ class Command {
     }
 
     async addSubcommand(data = { name: "foo", desc: "bar", group: null }) {
+        this.#warning();
         if (!(data.name && data.desc)) return console.error("No están todos los datos para crear un subcommand:", this.data, data)
 
         if (data.group) {
@@ -131,6 +134,7 @@ class Command {
     }
 
     async addSubcommandGroup(data = { name: "foo", desc: "bar" }) {
+        this.#warning();
         if (!(data.name && data.desc)) return console.error("No están todos los datos para crear un subcommandgroup:", this.data, data)
 
         this.data.addSubcommandGroup(sub =>
@@ -173,6 +177,11 @@ class Command {
             .defThumbnail(interaction.client.user.avatarURL())
 
         return embed;
+    }
+
+    #warning(){
+        this.methodsCount++
+        if(this.methodsCount > 5) return console.log(`⚠️ Hay muchos constructores custom (${this.methodsCount}), considera creando el slash command manualmente ➡️ ${this.name}`)
     }
 
 }
