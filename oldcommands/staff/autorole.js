@@ -42,7 +42,16 @@ const commandInfo = {
 module.exports = {
   data: commandInfo,
   async execute(client, message, args){
-    const { guild, author, prefix, executionInfo } = await Initialize(client, message);
+    const guild = message.guild;
+    const prefix = "/";
+    const executionInfo = {
+      client,
+      guild,
+      author: message.author,
+      message,
+      member: message.member,
+      prefix: prefix
+    }
 
     let response = await TutorialEmbed(commandInfo, executionInfo, args);
     let embed = await TutorialEmbed(commandInfo, executionInfo);
@@ -278,10 +287,10 @@ module.exports = {
         } else if(action === "edittoggle"){
           embed.setDescription(`▸ ${prefix}autorole edit <\`grupo de toggle\`> <\`nuevo nombre\`>`)
           if(!args[1] || isNaN(args[1])) {
-              embed.setAuthor(`Error: grupo de toggle`, Config.errorPng)
+              embed.defAuthor({text: `Error: grupo de toggle`, icon: Config.errorPng})
               return message.channel.send({embeds: [embed]})
           } else if (!args[2]) {
-              embed.setAuthor(`Error: nuevo nombre`, Config.errorPng)
+              embed.defAuthor({text: `Error: nuevo nombre`, icon: Config.errorPng})
               return message.channel.send({embeds: [embed]})
           }
 

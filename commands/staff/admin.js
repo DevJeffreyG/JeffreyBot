@@ -1,5 +1,6 @@
 const { Command, Embed, ErrorEmbed, WillBenefit, LimitedTime, FindNewId, Confirmation } = require("../../src/utils")
 const { Config, Colores } = require("../../src/resources")
+const { SnowflakeUtil } = require("discord.js")
 
 const ms = require("ms");
 const moment = require("moment");
@@ -12,8 +13,8 @@ const command = new Command({
 
 //demasiado complejo como para usar las funciones mias :sob:
 command.data
-    .addSubcommandGroup(group =>
-        group
+    .addSubcommandGroup(temp =>
+        temp
             .setName("temp")
             .setDescription("Role o boost temporales...?")
             .addSubcommand(sub => sub
@@ -72,8 +73,8 @@ command.data
                     .setRequired(true))
             )
     )
-    .addSubcommandGroup(group =>
-        group
+    .addSubcommandGroup(add =>
+        add
             .setName("add")
             .setDescription("Añadir...")
             .addSubcommand(sub => sub
@@ -140,38 +141,76 @@ command.data
 
             )
     )
-    .addSubcommandGroup(group => group
-        .setName("user")
-        .setDescription("Administración de tipo usuarios")
-        .addSubcommand(sub => sub
-            .setName("dm")
-            .setDescription("Enviar un mensaje directo al usuario como STAFF")
-            .addUserOption(option => option
-                .setName("usuario")
-                .setDescription("Usuario al que se le va a enviar el mensaje")
-                .setRequired(true))
-            .addStringOption(option => option
-                .setName("mensaje")
-                .setDescription("Mensaje a enviar. Usa {yo} para poner tu nombre, {user} para poner el tag de 'usuario'")
-                .setRequired(true))
-        )
+    .addSubcommandGroup(user =>
+        user
+            .setName("user")
+            .setDescription("Administración de tipo usuarios")
+            .addSubcommand(sub => sub
+                .setName("dm")
+                .setDescription("Enviar un mensaje directo al usuario como STAFF")
+                .addUserOption(option => option
+                    .setName("usuario")
+                    .setDescription("Usuario al que se le va a enviar el mensaje")
+                    .setRequired(true))
+                .addStringOption(option => option
+                    .setName("mensaje")
+                    .setDescription("Mensaje a enviar. Usa {yo} para poner tu nombre, {user} para poner el tag de 'usuario'")
+                    .setRequired(true))
+            )
     )
-    .addSubcommandGroup(group => group
-        .setName("announce")
-        .setDescription("Comandos para los anuncios")
-        .addSubcommand(sub => sub
-            .setName("jbnews")
-            .setDescription("Se crea un anuncio mencionando al rol de JB News")
-            .addStringOption(option => option
-                .setName("anuncio")
-                .setDescription("El anuncio a enviar"))
-            .addAttachmentOption(option => option
-                .setName("imagen")
-                .setDescription("La imagen a poner en el embed"))
-            .addStringOption(option => option
-                .setName("titulo")
-                .setDescription("El título que saldrá en el embed"))
-        )
+    .addSubcommandGroup(annouce =>
+        annouce
+            .setName("announce")
+            .setDescription("Comandos para los anuncios")
+            .addSubcommand(sub => sub
+                .setName("jbnews")
+                .setDescription("Se crea un anuncio mencionando al rol de JB News")
+                .addStringOption(option => option
+                    .setName("anuncio")
+                    .setDescription("El anuncio a enviar"))
+                .addAttachmentOption(option => option
+                    .setName("imagen")
+                    .setDescription("La imagen a poner en el embed"))
+                .addStringOption(option => option
+                    .setName("titulo")
+                    .setDescription("El título que saldrá en el embed"))
+            )
+    )
+    .addSubcommandGroup(autoroles =>
+        autoroles
+            .setName("autoroles")
+            .setDescription("Administración de los AutoRoles")
+            .addSubcommand(add =>
+                add
+                    .setName("add")
+                    .setDescription("Agrega un nuevo autorole al mensaje con la config actual")
+                    .addStringOption(emoji =>
+                        emoji
+                        .setName("emoji")
+                        .setDescription("El emoji con el que se va a reacionar al mensaje")
+                        .setRequired(true)
+                    )
+                    .addRoleOption(role => 
+                        role
+                        .setName("role")
+                        .setDescription("El role que se va a dar/quitar al reaccionar con el mensaje")
+                        .setRequired(true)
+                    )
+            )
+            .addSubcommand(config =>
+                config
+                    .setName("config")
+                    .setDescription("La configuración del canal y el mensaje a donde se administrarán los autoroles")
+                    .addChannelOption(o =>
+                        o
+                            .setName("canal")
+                            .setDescription("El canal donde se encuentra el mensaje")
+                    )
+                    .addStringOption(o =>
+                        o
+                            .setName("mensaje")
+                            .setDescription("La id del mensaje donde se creará el autorole")
+                    ))
     )
 
 command.addEach({ filter: "add", type: "integer", name: "usos", desc: "Los usos máximos permitidos en global para esta key", min: 1 });
@@ -189,30 +228,128 @@ command.execute = async (interaction, models, params, client) => {
             break;
 
         case "user":
-            await command.userExec(interaction, models, params);
+            await command.userExec(interaction, params);
             break;
 
         case "announce":
-            await command.announceExec(interaction, models, params, client);
+            await command.announceExec(interaction, params, client);
+            break;
+
+        case "autoroles":
+            await command.autorolesExec(interaction, models, params);
             break;
     }
 }
 
+command.autorolesExec = async (interaction, models, params) => {
+    const { Guilds } = models
+    const { subcommand, autoroles } = params;
+    const { canal, mensaje, emoji, role } = autoroles;
+
+    const doc = await Guilds.getOrCreate(interaction.guild.id);
+    let config = await getConfig();
+
+    switch(subcommand){
+        case "config":
+            let ch, msg;
+
+            if(!canal && !mensaje){
+                let e = new Embed()
+                .defAuthor({text: `Configuración actual`, title: true})
+                .defDesc(`**— ${config.ch ?? "Sin definir"}\n— [Mensaje](${config.msg.url ?? "https://www.youtube.com/watch?v=iik25wqIuFo"})**`)
+                .defColor(Colores.verde);
+
+                return interaction.editReply({embeds: [e]});
+            }
+
+            const noch = new ErrorEmbed(interaction, {
+                type: "errorFetch",
+                data: {
+                    type: "CHANNEL",
+                    guide: `¡No está el canal definido! Asígnalo con este mismo comando.`
+                }
+            })
+
+            if(canal) ch = canal.channel;
+            else ch = interaction.guild.channels.cache.find(x => x.id === doc.settings.autoroles.channel_id);
+            
+            if(!ch) return noch.send();
+            
+            const nomsg = new ErrorEmbed(interaction, {
+                type: "errorFetch",
+                data: {
+                    type: "MESSAGE ID",
+                    guide: `El mensaje con ID \`${mensaje.value}\` NO existe en el canal ${ch}!`
+                }
+            })
+
+            if(mensaje){
+                await ch.messages.fetch();
+                msg = ch.messages.cache.find(x => x.id === mensaje.value);
+                if(!msg) return nomsg.send();
+            }
+
+            let confirm = [];
+            if(ch) confirm.push(`Cambiar el canal a ${ch}.`)
+            if(msg) confirm.push(`Cambiar el mensaje a [este](${msg.url}).`)
+
+            let confirmation = await Confirmation("Cambiar configuración", confirm, interaction);
+            if(!confirmation) return;
+
+            doc.settings.autoroles.channel_id = ch.id;
+            doc.settings.autoroles.message_id = msg.id;
+            await doc.save();
+
+            return interaction.editReply({content: "✅ Listo!", embeds: [], components: []});
+            
+        case "add":
+            let emote = emoji.value;
+            let id = emote.match(/\d/g);
+            let newId = await FindNewId(await Guilds.find(), "data.autoroles", "id");
+            
+            if(id && id.length > SnowflakeUtil.generate().length - 5) emote = id;
+
+            let q = await doc.addAutorole(emote, role.value, newId);
+                
+            const notadded = new ErrorEmbed(interaction, {
+                type: "badParams",
+                data: {
+                    help: "No se pueden repetir emotes o roles por mensaje"
+                }
+            })
+
+            if(!q) return notadded.send();
+
+            await config.msg.react(emote);
+
+            return interaction.editReply({content: "✅ Listo!", embeds: [], components: []});
+    }
+
+    async function getConfig(){
+        let ch = interaction.guild.channels.cache.find(x => x.id === doc.settings.autoroles.channel_id);
+        if(!ch) return { ch: null, msg: null }
+        
+        await ch.messages.fetch();
+        let msg = ch.messages.cache.find(x => x.id === doc.settings.autoroles.message_id);
+
+        return {ch, msg};
+    }
+}
+
 command.tempExec = async (interaction, models, params) => {
-    console.log(params)
     const { Users } = models;
     const { subcommand, temp } = params
     const { usuario, role, tiempo, tipo, objetivo, valor } = temp;
 
     const duration = ms(tiempo.value) || Infinity;
 
-    let user = await Users.getOrCreate({user_id: usuario.value, guild_id: interaction.guild.id});
+    let user = await Users.getOrCreate({ user_id: usuario.value, guild_id: interaction.guild.id });
 
-    switch(subcommand){
+    switch (subcommand) {
         case "role":
             // llamar la funcion para hacer globaldata
             await LimitedTime(interaction.guild, role.role.id, usuario.member, user, duration);
-            return interaction.editReply({content: `✅ Agregado el temp role a ${usuario.user.tag} por ${tiempo.value}`});
+            return interaction.editReply({ content: `✅ Agregado el temp role a ${usuario.user.tag} por ${tiempo.value}` });
 
         case "boost":
             let btype = tipo.value;
@@ -226,16 +363,16 @@ command.tempExec = async (interaction, models, params) => {
 
             const willBenefit = await WillBenefit(usuario.member)
             let confirmation = true;
-            
-            if(willBenefit) {
+
+            if (willBenefit) {
                 confirmation = await Confirmation("Continuar", toConfirm, interaction);
             }
 
-            if(!confirmation) return;
-            
+            if (!confirmation) return;
+
             // llamar la funcion para hacer un globaldata y dar el role con boost
             await LimitedTime(interaction.guild, role.role.id, usuario.member, user, duration, btype, bobj, multi);
-            return interaction.editReply({content: `✅ Agregado el boost a ${usuario.user.tag} por ${tiempo.value}`, embeds: []});
+            return interaction.editReply({ content: `✅ Agregado el boost a ${usuario.user.tag} por ${tiempo.value}`, embeds: [] });
     }
 }
 
@@ -317,7 +454,7 @@ command.addExec = async (interaction, models, params) => {
     return interaction.editReply({ embeds: [added] });
 }
 
-command.userExec = async (interaction, models, params) => {
+command.userExec = async (interaction, params) => {
     const { subcommand, user } = params;
     const { usuario, mensaje } = user;
 
@@ -346,7 +483,7 @@ command.userExec = async (interaction, models, params) => {
     }
 }
 
-command.announceExec = async (interaction, models, params, client) => {
+command.announceExec = async (interaction, params, client) => {
     const { subcommand, announce } = params;
     const { titulo, anuncio, imagen } = announce;
 
