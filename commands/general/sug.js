@@ -27,7 +27,7 @@ command.execute = async (interaction, models, params, client) => {
     let logChannel = await DataWork(interaction, "OPINION_LOGS_CHANNEL");
     if(!logChannel) return;
 
-    const docGuild = await Guilds.getOrCreate({guild_id: interaction.guild.id});
+    const docGuild = await Guilds.getOrCreate(interaction.guild.id);
 
     const newId = await FindNewId(await Guilds.find(), "data.suggestions", "id"); // crear la nueva id para el ticket
 

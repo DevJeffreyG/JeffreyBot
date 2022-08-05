@@ -4,6 +4,7 @@ const { jeffrosExpCooldown } = require("../index.js");
 
 module.exports = async (client, message) => {
     const author = message.author;
+    if(!author) return console.log("⚠️ Message Author is not defined ?!");
 
     let q = await Users.getOrCreate({user_id: author.id, guild_id: message.guild.id});
 

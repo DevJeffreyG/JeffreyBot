@@ -1112,7 +1112,7 @@ const TutorialEmbed = async function(commandTree, executionInfo, args){
   
   // Revisar permisos
   const { jeffrey_role, admin_role, staff_role } = await Initialize(client, message);
-  let permissions_role_id; // id del rol a revisar
+  /* let permissions_role_id; // id del rol a revisar
   switch(userlevel){
     case "DEVELOPER":
       permissions_role_id = jeffrey_role.id;
@@ -1138,7 +1138,7 @@ const TutorialEmbed = async function(commandTree, executionInfo, args){
   if(permissions_role_id === "notdetermined" && name != "setup") response = ["ERROR", `NOT CONFIGURED YET 'admin: ${admin_role}, staff: ${staff_role}'`];
   else if(permissions_role_id === "notdetermined" && name === "setup" && !member.permissions.has("ADMINISTRATOR")) response = ["ERROR", "CAN'T USE /SETUP"]
   else if(permissions_role_id && permissions_role_id != "notdetermined" && !member.roles.cache.find(x => x.id === permissions_role_id) && !member.roles.cache.find(x => x.id === jeffrey_role.id)) response = ["ERROR", `INSUFFICIENT PERMISSIONS '${userlevel}'`];
-
+ */
   if(!params) return response;
 
   let Embed = await createEmbedWithParams(commandTree, guild, params)
@@ -1276,28 +1276,17 @@ const TutorialEmbed = async function(commandTree, executionInfo, args){
     if(response[0] === "ERROR") {
       const docGuild = await Guilds.findOne({guild_id: message.guild.id}) ?? await new Guilds({guild_id: message.guild.id}).save();
 
-      Embed.setAuthor(`Error ▸ /${commandTree.name}: ${params[response[2]].name}, invalid "${response[3]}"`, guild.iconURL())
-      Embed.setColor(Colores.rojo);
+      Embed.defAuthor({text: `Error ▸ /${commandTree.name}: ${params[response[2]].name}, invalid "${response[3]}"`, icon: guild.iconURL()})
+      Embed.defColor(Colores.rojo);
       message.channel.send({embeds: [Embed]}); // Si la response está mal, enviar embed (wip)
       return response;
     } else { // no hay ningún parámetro mal
       return response;
     }
   } else { // si hay un error de permisos O no se puede determinar si tiene los permisos necesarios
-    const docGuild = await Guilds.findOne({guild_id: message.guild.id}) ?? await new Guilds({guild_id: message.guild.id}).save();
+    let q = await DataWork(message, "ADMIN_USER")
+    if(!q) return;
 
-    let notDetermined = new EmbedBuilder()
-    .setAuthor("Error", Config.errorPng)
-    .setDescription(`**—** No se pudo determinar si puedes usar este comando, un administrador del servidor tiene que usar el comando \`/setup\` primero.`)
-    .setColor(Colores.rojo);
-
-    let notDeterminedUseSetup = new EmbedBuilder()
-    .setAuthor("Error", Config.errorPng)
-    .setDescription(`**—** Sólo un usuario con permisos de administrador puede usar este comando.`)
-    .setColor(Colores.rojo);
-
-    if(permissions_role_id === "notdetermined" && name != "setup") message.channel.send({embeds: [notDetermined]});
-    else if(permissions_role_id === "notdetermined" && name === "setup" && !message.member.permissions.has("ADMINISTRATOR")) message.channel.send({embeds: [notDeterminedUseSetup]});
     return response;
   }
   
@@ -1314,7 +1303,7 @@ const DataWork = async function(interaction, dataSearch){
 
   const guild = interaction.guild;
 
-  const docGuild = await Guilds.findOne({guild_id: guild.id}) ?? await new Guilds({guild_id: guild.id});
+  const docGuild = await Guilds.getOrCreate(guild.id);
 
   const insuficientSetup = new ErrorEmbed({type: "insuficientSetup", data: {dataSearch}})
   
@@ -1325,6 +1314,15 @@ const DataWork = async function(interaction, dataSearch){
       if(docGuild.channels.opinion_logs){
         response = guild.channels.cache.find(x => x.id === docGuild.channels.opinion_logs);
       }
+      break;
+
+    case "ADMIN_USER":
+      let admins = docGuild.getAdmins();
+
+      interaction.member.roles.cache.some(role => {
+        console.log(admins)
+        if(admins.includes(role.id)) response = role
+      })
       break;
 
     default:
@@ -1903,34 +1901,31 @@ const DarkShopWork = async function(client, guildId){
 
     switch(actualEvent){
       case 1:
-        let embed = new EmbedBuilder()
-        .setAuthor(`Evento`, Config.darkLogoPng)
-        .setDescription(rSube)
-        .setColor(Colores.negro)
-        .setFooter(`La inflación SUBE.`)
-        .setTimestamp();
+        let embed = new Embed()
+        .defAuthor({text: `Evento`, icon: Config.darkLogoPng})
+        .defDesc(rSube)
+        .defColor(Colores.negro)
+        .defFooter({text: `La inflación SUBE.`, timestamp: true});
 
         dsChannel.send({content: `${dsNews}`, embeds: [embed]});
         break;
 
       case 0:
-        let embed2 = new EmbedBuilder()
-        .setAuthor(`Evento`, Config.darkLogoPng)
-        .setDescription(rBaja)
-        .setColor(Colores.negro)
-        .setFooter(`La inflación BAJA.`)
-        .setTimestamp();
+        let embed2 = new Embed()
+        .defAuthor({text: `Evento`, icon: Config.darkLogoPng})
+        .defDesc(rBaja)
+        .defColor(Colores.negro)
+        .defFooter({text: `La inflación BAJA.`, timestamp: true});
 
         dsChannel.send({content: `${dsNews}`, embeds: [embed2]});
         break;
 
       case 2:
         let embed3 = new EmbedBuilder()
-        .setAuthor(`Evento`, Config.darkLogoPng)
-        .setDescription(rIgual)
-        .setColor(Colores.negro)
-        .setFooter(`La inflación se MANTIENE.`)
-        .setTimestamp();
+        .defAuthor({text: `Evento`, icon: Config.darkLogoPng})
+        .defDesc(rIgual)
+        .defColor(Colores.negro)
+        .defFooter({text: `La inflación se MANTIENE.`, timestamp: true});
 
         dsChannel.send({content: `${dsNews}`, embeds: [embed3]});
         break;
@@ -1970,38 +1965,42 @@ const DarkShopWork = async function(client, guildId){
 
     if(pastDaysDJ >= darkdata.duration){ // ya pasaron los días para cambiar los darkjeffros.
       let memberDJ = guild.members.cache.find(x => x.id === darkuser.user_id);
+
+      if(!memberDJ) {
+        console.log("No se encontró al usuario %s. Pero se eliminaron sus DarkJeffros", darkuser.user_id)
+      }
+
+      let deletedTag = memberDJ ? memberDJ.user.tag : `<AUSENTE> (${darkuser.user_id})`
       
       if(darkdata.darkjeffros === 0){
-        let log = new EmbedBuilder()
-        .setColor(Colores.verde)
-        .setDescription(`**—** Se ha eliminado la Duración de DarkJeffros de ${memberDJ.user.tag}.
+        let log = new Embed()
+        .defColor(Colores.verde)
+        .defDesc(`**—** Se ha eliminado la Duración de DarkJeffros de ${deletedTag}.
 **—** Desde: \`${darkdata.dj_since}\`.
 **—** Duración: \`${darkdata.duration}\`.`)
-        .setFooter("No se ha enviado mensaje al usuario porque sus darkjeffros eran 0.")
-        .setTimestamp();
+        .defFooter({text: "No se ha enviado mensaje al usuario porque sus darkjeffros eran 0.", timestamp: true});
         
         darkdata.dj_since = null;
         darkdata.duration = null;
 
         await darkuser.save();
 
-        console.log("Se ha eliminado la duración de DJ de", memberDJ.user.tag)
+        console.log("Se ha eliminado la duración de DJ de", deletedTag)
         logchannel.send({embeds: [log]});
       } else {
-        let log = new EmbedBuilder()
-        .setColor(Colores.verde)
-        .setDescription(`**—** Se han eliminado los DarkJeffros de **${memberDJ.user.tag}**.
+        let log = new Embed()
+        .defColor(Colores.verde)
+        .defDesc(`**—** Se han eliminado los DarkJeffros de **${deletedTag}**.
 **—** Desde: \`${darkdata.dj_since}\`.
 **—** Duración: \`${darkdata.duration}\`.
 **—** Tenía: **${Emojis.Dark}${darkdata.darkjeffros}**`)
-        .setFooter("Mensaje enviado a la vez que al usuario")
-        .setTimestamp();
+        .defFooter({text: "Mensaje enviado a la vez que al usuario", timestamp: true})
 
-        let embed = new EmbedBuilder()
-        .setAuthor(`...`, Config.darkLogoPng)
-        .setColor(Colores.negro)
-        .setDescription(`**—** Parece que no has vendido todos tus DarkJeffros. Han sido eliminados de tu cuenta tras haber concluido los días estipulados. (\`${darkdata.duration} días.\`)`)
-        .setFooter("▸ Si crees que se trata de un error, contacta al Staff.");
+        let embed = new Embed()
+        .defAuthor({text: `...`, icon: Config.darkLogoPng})
+        .defColor(Colores.negro)
+        .defDesc(`**—** Parece que no has vendido todos tus DarkJeffros. Han sido eliminados de tu cuenta tras haber concluido los días estipulados. (\`${darkdata.duration} días.\`)`)
+        .defFooter("▸ Si crees que se trata de un error, contacta al Staff.");
 
         darkdata.darkjeffros = 0;
         darkdata.dj_since = null;
@@ -2009,12 +2008,12 @@ const DarkShopWork = async function(client, guildId){
         
         await darkuser.save();
         
-        console.log("Se ha eliminado la duración de DJ de", memberDJ.user.tag)
+        console.log("Se ha eliminado la duración de DJ de", deletedTag)
 
         // intentar enviar un mensaje al MD.
         memberDJ.send({embeds: [embed]})
         .catch(err => {
-          logchannel.send(`**${memberDJ.user.tag} no recibió MD de DarkJeffros eliminados.**\n\`\`\`javascript\n${err}\`\`\``)
+          logchannel.send(`**${deletedTag} no recibió MD de DarkJeffros eliminados.**\n\`\`\`javascript\n${err}\`\`\``)
         });
 
         logchannel.send({embeds: [log]});
@@ -2268,6 +2267,19 @@ const DeterminePrice = async function(user, item, returnString, isDarkShop){
   }
 }
 
+/**
+ * 
+ * @param {*} generalQuery Mongoose documents
+ * @param {String} specificQuery The data inside that document 
+ * @param {String} toCheck The parameter to check inside the specific query
+ * @example
+ * ```javascript
+ * let query = await Model.find();
+ * const id = await query(query, "data.example", "id");
+ * const generalid = await query(query, "", "id");
+ * ```
+ * @returns 
+ */
 const FindNewId = async function(generalQuery, specificQuery, toCheck){
   // id
   let idsNow = []; // ids en uso actualmente
@@ -2436,10 +2448,10 @@ async function createEmbedWithParams(commandTree, guild, params, already){
   const docGuild = await Guilds.findOne({guild_id: guild.id}) ?? await new Guilds({guild_id: guild.id}).save();
   already = already ?? "";
 
-  let Embed = new EmbedBuilder()
-  .setAuthor(`▸ /${commandTree.name}`, guild.iconURL())
-  .setColor(Colores.nocolor)
-  .setFooter("<> Obligatorio () Opcional");
+  let embed = new Embed()
+  .defAuthor({text: `▸ /${commandTree.name}`, icon: guild.iconURL()})
+  .defColor(Colores.nocolor)
+  .defFooter({text: "<> Obligatorio () Opcional"});
 
   let DescriptionString = `▸ El uso correcto es: /${commandTree.name} ${already}`;
   for (let i = already.split(" ").length - 1; i < params.length; i++) {
@@ -2452,9 +2464,9 @@ async function createEmbedWithParams(commandTree, guild, params, already){
     }
   }
 
-  Embed.setDescription(DescriptionString);
+  embed.defDesc(DescriptionString);
 
-  return Embed;
+  return embed;
 }
 
 async function switchParams(param, arg, args, message, guild, member, client, i){ // EL QUE SE USA EN LOS COMANDOS

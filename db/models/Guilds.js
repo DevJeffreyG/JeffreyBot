@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const GuildSchema = new Schema({
-    guild_id: { type: String, required: true },
+    guild_id: { type: String, required: true, unique: true },
     data: {
         tickets: [
             {
@@ -27,10 +27,26 @@ const GuildSchema = new Schema({
                 accepted: { type: Boolean, default: null },
                 id: { type: Number, sparse: true }
             }
+        ],
+        autoroles: [
+            {
+                channel_id: { type: String, required: true },
+                message_id: { type: String, required: true },
+                emote: { type: String, required: true },
+                role_id: { type: String, required: true },
+                toggle_group: { type: String, default: null },
+                id: { type: Number, sparse: true }
+            }
         ]
     },
     settings: {
-        
+        active_modules: {
+
+        },
+        autoroles: {
+            channel_id: { type: String },
+            message_id: { type: String }
+        }
     },
     roles: { // id de roles
         admins: { type: Array },
@@ -45,31 +61,62 @@ const GuildSchema = new Schema({
     }
 });
 
-GuildSchema.static("getOrCreate", function(id){
-    return this.findOne({
+GuildSchema.static("getOrCreate", async function (id) {
+    return await this.findOne({
         guild_id: id
-    }) ?? new this({
+    }) ?? await new this({
         guild_id: id
     }).save();
 })
 
-GuildSchema.static("getById", function(id){
-    return this.findOne({guild_id: id})
+GuildSchema.static("getById", function (id) {
+    return this.findOne({ guild_id: id })
 });
 
-GuildSchema.method("getAdmins", function(){
+GuildSchema.method("addAutorole", async function(emote, role_id, id){
+    let channel_id = this.settings.autoroles.channel_id;
+    let message_id = this.settings.autoroles.message_id;
+
+    let creatable = true;
+    this.data.autoroles.forEach(auto => {
+        let sameEmote = auto.emote === emote ? true : false;
+        let sameRole = auto.role_id === role_id ? true : false;
+        let sameMsg = auto.message_id === message_id ? true : false;
+
+        creatable = sameMsg ? 
+                sameEmote || sameRole ? false : true
+            : true;
+
+        if(!creatable) return false;
+    })
+
+    console.log(creatable);
+
+    if(!creatable) return null;
+
+    this.data.autoroles.push({
+        channel_id,
+        message_id,
+        emote,
+        role_id,
+        id
+    });
+    return await this.save();
+})
+
+GuildSchema.method("getAdmins", function () {
     return this.roles.admins
 });
 
-GuildSchema.method("getStaffs", function(){
+GuildSchema.method("getStaffs", function () {
     return this.roles.staffs
 });
 
-GuildSchema.method("getUsers", function(){
+GuildSchema.method("getUsers", function () {
     return this.roles.users
 });
 
-GuildSchema.method("getBots", function(){
+GuildSchema.method("getBots", function () {
     return this.roles.bots
 });
 
