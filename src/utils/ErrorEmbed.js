@@ -78,12 +78,12 @@ ${data.error}
             
             case "alreadyExists":
                 this.#errorAuthor(9)
-                this.#errorDesc("No se pudo completar la acción", data.action, [`${data.existing} ya existe en este medio.`])
+                this.#errorDesc("No se pudo completar la acción", data.action, [`${data.existing} ya existe en ${data.context ?? "este medio"}.`])
                 break;
 
             case "doesntExist":
                 this.#errorAuthor(10)
-                this.#errorDesc("No se pudo completar la acción", data.action, [`${data.missing} no existe en este medio.`])
+                this.#errorDesc("No se pudo completar la acción", data.action, [`${data.missing} no existe en ${data.context ?? "este medio"}.`])
                 break;
 
             case "errorFetch":

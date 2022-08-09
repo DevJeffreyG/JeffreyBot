@@ -21,7 +21,7 @@ command.addSubcommand({
 
 command.addSubcommand({
     name: "autoroles",
-    desc: "Sincroniza los AutoRoles viejos con la nueva forma de Jeffrey Bot 2.x.x"
+    desc: "Sincroniza los AutoRoles viejos y re-agregar las reacciones en caso de que se necesite"
 })
 
 command.addOption({
@@ -88,6 +88,21 @@ command.execute = async (interaction, models, params, client) => {
                 })
 
                 await doc.save();
+            }
+
+            let q = await Guilds.getOrCreate(interaction.guild.id)
+            all = q.data.autoroles; // actualizar a lo nuevo que está en la db
+            for(let i = 0; i < all.length; i++){
+                const autorole = all[i];
+
+                let channel = await interaction.guild.channels.cache.find(x => x.id === autorole.channel_id);
+
+                if(!channel) return console.log(`🔴 No se encontró canal para el autorole ${autorole}`);
+                await channel.messages.fetch();
+                let fetched = await channel.messages.cache.find(x => x.id === autorole.message_id);
+                let emote = autorole.emote;
+
+                await fetched.react(emote);
             }
 
             return interaction.editReply({ content: `✅ Sincronizados.` })

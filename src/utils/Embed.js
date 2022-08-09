@@ -1,4 +1,5 @@
 const Discord = require("discord.js");
+const { Config } = require("../resources");
 const Colores = require("../resources/colores.json");
 
 class Embed extends Discord.EmbedBuilder {
@@ -74,6 +75,25 @@ class Embed extends Discord.EmbedBuilder {
                 this.defAuthor({text: `¿Sabías que...`, title: true});
                 this.defDesc(`...${data}?`)
                 this.defColor(Colores.verdeclaro)
+                break;
+
+            case "success":
+                this.defAuthor({text: `${data.title ?? "¡Listo!"}`, icon: Config.bienPng});
+                this.defColor(Colores.verdejeffrey)
+
+                if(data.desc) {
+                    const desc = data.desc;
+
+                    if(typeof desc == "string") this.defDesc(`▸ ${desc}.`)
+                    else {
+                        let t = ""
+                        desc.forEach(item => {
+                            t += `▸ ${item}.\n`
+                        })
+
+                        this.defDesc(t);
+                    }
+                }
                 break;
         }
     }

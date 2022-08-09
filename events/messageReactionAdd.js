@@ -4,63 +4,22 @@ const ms = require("ms");
 const Config = require("../src/resources/base.json");
 const Colores = require("../src/resources/colores.json");
 const Emojis = require("../src/resources/emojis.json");
+const { Embed } = require("../src/utils");
 const { disableAwards, jeffreygID } = Config;
 
-const { Users, GlobalDatas, AutoRoles } = require("mongoose").models;
+const { Users, GlobalDatas, Guilds } = require("mongoose").models;
 
 module.exports = async (client, reaction, user) => {
     if (user.bot) return;
 
     const guild = reaction.message.guild;
     const channel = reaction.message.channel;
-    const message = reaction.message;
+    const message = await channel.messages.fetch(reaction.message.id);
     const member = guild.members.cache.get(user.id);
 
     // AUTOROLES
-    AutoRoles.findOne({
-        serverID: guild.id,
-        channelID: channel.id,
-        messageID: message.id,
-        emoji: reaction.emoji.id || reaction.emoji.name
-    }, async (err, autorole) => {
-        if (err) throw err;
-
-        if(!autorole) return;
-        const isCorrect = ((autorole.custom === 1 && reaction.emoji.id === autorole.emoji) || (autorole.custom === 0 && reaction.emoji.name === autorole.emoji)) ?? false;
-    
-        if(!isCorrect) return;
-        
-        const roleToAdd = guild.roles.cache.find(x => x.id === autorole.roleID);
-        if(autorole.toggleGroup != "0"){ // es toggleable D:
-            const sameGroup = await AutoRoles.find({serverID: guild.id, toggleGroup: autorole.toggleGroup});
-            
-            if(sameGroup.length > 1){
-                // hay varios toggles.
-                // revisar si ha reaccionado con algún otro autorole con ese toggle.
-    
-                oldReaction:
-                for (let k = 0; k < sameGroup.length; k++) {
-                    const toggledAutorole = sameGroup[k];
-    
-                    let shouldNotHave = guild.roles.cache.find(x => x.id === toggledAutorole.roleID);
-                    let oldReaction = toggledAutorole.emoji;
-    
-                    if(member.roles.cache.find(x => x.id === shouldNotHave.id)) {
-                        await member.roles.remove(shouldNotHave); // eliminar el role
-                        let oldC = guild.channels.cache.find(x => x.id === toggledAutorole.channelID);
-                        let oldM = await oldC.messages.fetch(toggledAutorole.messageID);
-    
-                        let reactions = toggledAutorole.custom === 1 ? await oldM.reactions.cache.find(x => x.emoji.id === oldReaction) : await oldM.reactions.cache.find(x => x.emoji.name === oldReaction);
-                        await reactions.users.remove(user.id);
-    
-                        break oldReaction;
-                    }
-                }
-            }   
-        }
-
-        await member.roles.add(roleToAdd);
-    });
+    const doc = await Guilds.getOrCreate(guild.id);
+    doc.workerAddAutoRole(message, reaction, user)
 
     // AWARDS
     let silver = client.user.id === Config.testingJBID ? "880602500414201866" : Config.silverAward;
@@ -74,15 +33,15 @@ module.exports = async (client, reaction, user) => {
     let price;
     let gift;
     let isAward = true;
-    const hallOfFameEmbed = new Discord.EmbedBuilder();
+    const hallOfFameEmbed = new Embed();
   
     if (message.attachments.size !== 0) {
       // Attachments are present.
       const firstAttachment = message.attachments.first();
   
-      hallOfFameEmbed.setAuthor(message.author.tag, message.author.displayAvatarURL());
+      hallOfFameEmbed.defAuthor({text: message.author.tag, icon: message.author.displayAvatarURL()});
       hallOfFameEmbed.setImage(firstAttachment.url);
-      hallOfFameEmbed.setDescription(`[★](${message.url}) ${message.content} [(archivo)](${firstAttachment.url})`);
+      hallOfFameEmbed.defDesc(`[★](${message.url}) ${message.content} [(archivo)](${firstAttachment.url})`);
     } else if (message.embeds.length != 0) {
       let firstEmbed = message.embeds[0];
       let msgEmbed;
@@ -105,42 +64,39 @@ module.exports = async (client, reaction, user) => {
         msgEmbed = firstEmbed.description ?? incaseofField;
       }
   
-      hallOfFameEmbed.setAuthor(message.author.tag, message.author.displayAvatarURL());
+      hallOfFameEmbed.defAuthor({text: message.author.tag, icon: message.author.displayAvatarURL()});
       hallOfFameEmbed.setDescription(`[★](${message.url}) ${msgEmbed}`);
     } else {
-      hallOfFameEmbed.setAuthor(message.author.tag, message.author.displayAvatarURL());
-      hallOfFameEmbed.setDescription(`[★](${message.url}) ${message.content}`);
+      hallOfFameEmbed.defAuthor({text: message.author.tag, icon: message.author.displayAvatarURL()});
+      hallOfFameEmbed.defDesc(`[★](${message.url}) ${message.content}`);
     }
   
-    let paid = new Discord.EmbedBuilder()
-    .setDescription("Pagado.")
-    .setColor(Colores.nocolor);
+    let paid = new Embed()
+    .defDesc("Pagado.")
+    .defColor(Colores.nocolor);
   
     switch (reaction.emoji.id) {
       case silver: // ################### PLATA ###########################
         award = "plata";
         price = 100;
-        hallOfFameEmbed.setColor("#8f8f8f");
-        hallOfFameEmbed.setFooter(`▸ Premio de plata por ${user.tag}`);
-        hallOfFameEmbed.setTimestamp();
+        hallOfFameEmbed.defColor("#8f8f8f");
+        hallOfFameEmbed.defFooter({text: `▸ Premio de plata por ${user.tag}`, timestamp: true});
         break;
   
       case gold:
         award = "oro";
         price = 500;
         gift = 100;
-        hallOfFameEmbed.setColor("#FFD700");
-        hallOfFameEmbed.setFooter(`▸ Premio de oro por ${user.tag}`);
-        hallOfFameEmbed.setTimestamp();
+        hallOfFameEmbed.defColor("#FFD700");
+        hallOfFameEmbed.defFooter({text: `▸ Premio de oro por ${user.tag}`, timestamp: true});
         break;
   
       case platinium:
         award = "platino";
         price = 1800;
         gift = 700;
-        hallOfFameEmbed.setColor("#21ffe5");
-        hallOfFameEmbed.setFooter(`▸ Premio de platino por ${user.tag}`);
-        hallOfFameEmbed.setTimestamp();
+        hallOfFameEmbed.defColor("#21ffe5");
+        hallOfFameEmbed.defFooter({text: `▸ Premio de platino por ${user.tag}`, timestamp: true});
         break;
   
       default:
@@ -148,13 +104,9 @@ module.exports = async (client, reaction, user) => {
     }
   
     if(isAward && disableAwards === true && user.id != jeffreygID) {
-      message.channel.messages.fetch(message.id).then(m => {
-        let react = m.reactions.cache.get(
-          reaction.emoji.name + ":" + reaction.emoji.id
-        );
-  
-        react.remove(user.id);
-      });
+      let react = message.reactions.cache.get(reaction.emoji.name + ":" + reaction.emoji.id);
+
+      react.remove(user.id);
   
       return bots.send(`${user}, los awards actualmente están en mantenimiento, por favor intenta más tarde. :D`);
     } else if(isAward){
