@@ -65,7 +65,16 @@ command.execute = async (interaction, models, params, client) => {
         }
     }).save();
 
-    await interaction.editReply("✅ Listo")
+    await interaction.editReply({
+        embeds: [
+            new Embed({
+                type: "success",
+                data: {
+                    desc: "Se creó la encuesta"
+                }
+            })
+        ]
+    })
 
     await msg.react("✅");
     await msg.react("❌");

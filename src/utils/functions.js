@@ -1440,7 +1440,7 @@ const Confirmation = async function(toConfirm, dataToConfirm, interaction){
 }
 
 /**
- * 
+ * @deprecated Uses old Initialize method
  * @param {*} user Mongoose User Query with one document
  * @param {Array} data Needed member, rule string, and proof object used for the infraction
  * @param {Boolean} [isSoftwarn=false] The infraction is a softwarn?
@@ -2111,7 +2111,7 @@ const DaysUntilToday = async function(date){
 }
 
 /**
- * 
+ * @deprecrated Uses old Initialize method
  * @param {*} message The Discord.JS Message
  * @param {*} user The buyer's document inside the database
  * @param {Object} item The object of the item being purchased

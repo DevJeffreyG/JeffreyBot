@@ -1,4 +1,4 @@
-const { Command, Confirmation } = require("../../src/utils");
+const { Command, Confirmation, Embed} = require("../../src/utils");
 const ms = require("ms")
 
 const command = new Command({
@@ -82,7 +82,14 @@ command.lock = async (interaction, models, user, client) => {
     userBD.locked_since = hoy;
     user.save();
 
-    confirmation.editReply({content: "Locked ✅", embeds: []});
+    confirmation.editReply({content: null, embeds: [
+        new Embed({
+            type: "success",
+            data: {
+                title: "Locked"
+            }
+        })
+    ]});
 }
 
 command.execEdit = async (interaction, models, data, client) => {
@@ -101,13 +108,17 @@ command.execEdit = async (interaction, models, data, client) => {
         await user.save();
     }
 
-    if(userBD.locked) return interaction.editReply({content: "Locked"});
+    if(userBD.locked) return interaction.editReply({content: "Locked ❌"});
 
     userBD.day = data.dia;
     userBD.month = data.mes.charAt(0).toUpperCase() + data.mes.slice(1);
 
     await data.user.save();
-    return interaction.editReply({content: "Listo ✅"});
+    return interaction.editReply({content: null, embeds: [
+        new Embed({
+            type: "sucess"
+        })
+    ]});
 }
 
 module.exports = command;

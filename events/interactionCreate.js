@@ -89,6 +89,10 @@ module.exports = async (client, interaction) => {
           }
         }
       }
+
+      for(const prop in params){
+        if(typeof params[prop] === 'undefined') params[prop] = {}
+      }
     })
 
     await intervalGlobalDatas(client);

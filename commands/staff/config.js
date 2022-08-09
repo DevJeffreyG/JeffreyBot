@@ -1,8 +1,4 @@
 const { Command, ErrorEmbed } = require("../../src/utils")
-const { Config, Colores } = require("../../src/resources")
-
-const ms = require("ms");
-const moment = require("moment");
 
 const command = new Command({
     name: "config",

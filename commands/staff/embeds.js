@@ -684,7 +684,11 @@ Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para c
             break;
     }
 
-    return interaction.editReply({content: "Listo! ✅"});
+    return interaction.editReply({content: null, embeds: [
+        new Embed({
+            type: "sucess"
+        })
+    ]});
 
     async function lastMsgsByMe(channel){
         let msgs = await channel.messages.fetch({limit: 2});

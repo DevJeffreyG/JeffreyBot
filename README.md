@@ -13,30 +13,41 @@
 </div>
 
 # Acerca de
-Jeffrey Bot es un bot de Discord **multipropósitos** programado por y para el servidor de Discord de [@JeffreyG](https://github.com/DevJeffreyG).
+Jeffrey Bot es un bot de Discord **multipropósitos** programado por y para el servidor de Discord de [@DevJeffreyG](https://github.com/DevJeffreyG).
 
 ### Funciones
+- Comandos básicos
+  - 8ball
+  - Avatar
+  - Información del servidor
 - Moderación
   - Warns, Softwarns
   - Hackban, Ban
   - Tickets, encuestas
+  - Lockdown
   - Etc.
 - Administración
   - Sugerencias para el servidor
+  - Encuestas del STAFF
+  - AutoRoles
+  - Mensajes anónimos a los usuarios por privado
 - Diversión
   - Llaves para canjear
   - Adivinanzas con recompensas
+  - Decirle al bot qué decir
 - Social
   - Jeffrey Bot x YouTube
   - Jeffrey Bot x Twitter
   - Jeffrey Bot x Twitch
-- Sistema económico basado en inflación
+  - Sistema de reputación
+  - Sistema de cumpleaños
+- Dos sistemas económicos por chat & basado en inflación
   - Tiendas
   - Monedas
   - Sistema de boosts
 - _Siempre en work in progress_.
 
 # Créditos
-- [Discord.JS](https://github.com/discordjs/discord.js)
+- [Discord.JS](https://github.com/discordjs/discord.js).
 - [MongoDB (mongoose)](https://www.mongodb.com) para el backend.
-- [@Jleguim](https://github.com/Jleguim/) en algunas de las funciones
+- [@Jleguim](https://github.com/Jleguim/) en algunas de las funciones.
