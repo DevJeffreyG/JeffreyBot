@@ -43,6 +43,16 @@ const GuildSchema = new Schema({
                 group_name: { type: String, required: true },
                 id: { type: Number, sparse: true }
             }
+        ],
+        vault_codes: [
+            {
+                code: { type: String, required: true },
+                reward: { type: Number, required: true, default: 100 },
+                hints: [
+                    { type: String, required: true }
+                ],
+                id: { type: Number, required: true, sparse: true }
+            }
         ]
     },
     settings: {
@@ -78,6 +88,14 @@ GuildSchema.static("getOrCreate", async function (id) {
 GuildSchema.static("getById", function (id) {
     return this.findOne({ guild_id: id })
 });
+
+GuildSchema.method("getVaultCode", function(code){
+    return this.data.vault_codes.find(x => x.code === code);
+})
+
+GuildSchema.method("getVaultCodeById", function(id){
+    return this.data.vault_codes.find(x => x.id === id);
+})
 
 GuildSchema.method("getAutoRole", function(id){
     return this.data.autoroles.find(x => x.id === id);

@@ -82,13 +82,14 @@ class Embed extends Discord.EmbedBuilder {
                 this.defColor(Colores.verdejeffrey)
 
                 if(data.desc) {
+                    const sep = data.separator ?? "▸"
                     const desc = data.desc;
 
-                    if(typeof desc == "string") this.defDesc(`▸ ${desc}.`)
+                    if(typeof desc == "string") this.defDesc(`${sep} ${desc}.`)
                     else {
                         let t = ""
                         desc.forEach(item => {
-                            t += `▸ ${item}.\n`
+                            t += `${sep} ${item}.\n`
                         })
 
                         this.defDesc(t);

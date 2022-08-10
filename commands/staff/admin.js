@@ -1,5 +1,5 @@
 const { Command, Embed, ErrorEmbed, WillBenefit, LimitedTime, FindNewId, Confirmation } = require("../../src/utils")
-const { Config, Colores } = require("../../src/resources")
+const { Config, Colores, Emojis } = require("../../src/resources")
 
 const ms = require("ms");
 
@@ -75,7 +75,7 @@ command.data
         add
             .setName("add")
             .setDescription("Añadir...")
-            .addSubcommand(sub => sub
+            .addSubcommand(jeffrosk => jeffrosk
                 .setName("jeffroskey")
                 .setDescription("Añadir una nueva llave para canjear con recompensas de Jeffros")
                 .addIntegerOption(option => option
@@ -84,7 +84,7 @@ command.data
                     .setMinValue(1)
                     .setRequired(true))
             )
-            .addSubcommand(sub => sub
+            .addSubcommand(expk => expk
                 .setName("expkey")
                 .setDescription("Añadir una nueva llave para canjear con recompensas de Jeffros")
                 .addIntegerOption(option => option
@@ -93,7 +93,7 @@ command.data
                     .setMinValue(1)
                     .setRequired(true))
             )
-            .addSubcommand(sub => sub
+            .addSubcommand(rolek => rolek
                 .setName("rolekey")
                 .setDescription("Añadir una nueva llave para canjear con recompensa de Role")
                 .addRoleOption(option => option
@@ -104,7 +104,7 @@ command.data
                     .setName("duracion")
                     .setDescription("Duración del role asignado: 1d, 20m, 10s, 1y"))
             )
-            .addSubcommand(sub => sub
+            .addSubcommand(boostk => boostk
                 .setName("boostkey")
                 .setDescription("Añadir una nueva llave para canjear con recompensa de Boost")
                 .addRoleOption(option => option
@@ -174,6 +174,59 @@ command.data
                     .setDescription("El título que saldrá en el embed"))
             )
     )
+    .addSubcommandGroup(vault =>
+        vault
+            .setName("vault")
+            .setDescription("Administración del Vault")
+            .addSubcommand(add =>
+                add
+                    .setName("add")
+                    .setDescription("Agregar un nuevo código al Vault")
+                    .addStringOption(o =>
+                        o
+                            .setName("codigo")
+                            .setDescription("El código que se escribirá para recibir la recompensa")
+                            .setRequired(true)
+                    )
+            )
+            .addSubcommand(remove =>
+                remove
+                    .setName("remove")
+                    .setDescription("Elimina un código del Vault")
+                    .addIntegerOption(o =>
+                        o
+                            .setName("codigo")
+                            .setDescription("La ID del código a eliminar")
+                            .setRequired(true)
+                    )
+            )
+            .addSubcommand(config =>
+                config
+                    .setName("config")
+                    .setDescription("Configura/administra algún código ya creado")
+                    .addIntegerOption(o =>
+                        o
+                            .setName("codigo")
+                            .setDescription("La ID del código a configurar")
+                            .setRequired(true)
+                    )
+                    .addStringOption(o =>
+                        o
+                            .setName("pista")
+                            .setDescription("Una pista nueva a agregar")
+                    )
+                    .addIntegerOption(o =>
+                        o
+                            .setName("recompensa")
+                            .setDescription("La nueva cantidad de Jeffros a dar como recompensa")
+                    )
+            )
+            .addSubcommand(list =>
+                list
+                    .setName("list")
+                    .setDescription("Obtén una lista de todos los códigos dentro del servidor")
+            )
+    )
 
 command.addEach({ filter: "add", type: "integer", name: "usos", desc: "Los usos máximos permitidos en global para esta key", min: 1 });
 
@@ -195,6 +248,9 @@ command.execute = async (interaction, models, params, client) => {
         case "announce":
             await command.announceExec(interaction, params, client);
             break;
+
+        case "vault":
+            await command.vaultExec(interaction, models, params, client)
     }
 }
 
@@ -390,6 +446,142 @@ command.announceExec = async (interaction, params, client) => {
 
             ch.send({ content: `${jbNRole}`, embeds: [embed] });
             return confirmation.editReply({ content: `✅ Anuncio enviado a ${ch}!`, embeds: [] });
+    }
+}
+
+command.vaultExec = async (interaction, models, params, client) => {
+    const { Guilds } = models;
+    const { subcommand, vault } = params;
+    const { codigo, pista, recompensa } = vault;
+
+    const doc = await Guilds.getOrCreate(interaction.guild.id)
+
+    console.log(params, codigo)
+
+    switch (subcommand) {
+        case "add": {
+            const id = await FindNewId(await Guilds.find(), "data.vault_codes", "id");
+            const code = codigo.value.toUpperCase();
+
+            let exists = new ErrorEmbed(interaction, {
+                type: "alreadyExists",
+                data: {
+                    action: "add code",
+                    existing: code,
+                    context: "el Vault de este servidor"
+                }
+            })
+            if (doc.getVaultCode(code)) return exists.send();
+
+            doc.data.vault_codes.push({
+                code,
+                id
+            });
+            await doc.save();
+
+            let e = new Embed({
+                type: "success",
+                data: {
+                    //separator: "**—**",
+                    title: "Nuevos textos",
+                    desc: [
+                        `Código: \`${code}\``,
+                        `Recompensa: **${Emojis.Jeffros}100**`,
+                        `ID de Código: \`${id}\``
+                    ]
+                }
+            })
+            return interaction.editReply({ content: null, embeds: [e] })
+        }
+
+        case "remove": {
+            const id = codigo.value;
+            const vaultCode = doc.getVaultCodeById(id);
+
+            let notexists = new ErrorEmbed(interaction, {
+                type: "doesntExist",
+                data: {
+                    action: "remove code",
+                    missing: `El código con ID \`${id}\``,
+                    context: "el Vault de este servidor"
+                }
+            })
+            if (!vaultCode) return notexists.send();
+
+            let confirm = [
+                `Código con ID \`${vaultCode.id}\` : "**${vaultCode.code}**".`,
+                `Tiene \`${vaultCode.hints.length}\` pistas adjuntas.`,
+                `Da de recompensa **${Emojis.Jeffros}${vaultCode.reward.toLocaleString("es-CO")}**`,
+                `Esto no se puede deshacer.`
+            ]
+
+            let confirmation = await Confirmation("Eliminar código", confirm, interaction)
+            if (!confirmation) return;
+
+            let index = doc.data.vault_codes.indexOf(vaultCode);
+            doc.data.vault_codes.splice(index, 1);
+            await doc.save();
+
+            return interaction.editReply({
+                embeds: [
+                    new Embed({
+                        type: "success",
+                        data: {
+                            desc: "Se ha eliminado el código del Vault"
+                        }
+                    })
+                ], components: []
+            });
+        }
+
+        case "config": {
+            const vaultCode = doc.getVaultCodeById(codigo.value);
+
+            if (!pista && !recompensa) { // config del codigo actual
+                let e = new Embed()
+                .defAuthor({text: `Configuración de ${vaultCode.code}`, title: true})
+                .defDesc(`**—** Recompensa de **${Emojis.Jeffros}${vaultCode.reward.toLocaleString("es-CO")}**
+**—** Tiene \`${vaultCode.hints.length}\` pistas en total.
+**—** ID: \`${vaultCode.id}\`.`)
+                .defColor(Colores.verde);
+
+                return interaction.editReply({embeds: [e]})
+            }
+
+            if (pista) {
+                const hint = pista.value;
+
+                let toConfirm = [
+                    `¿Deseas agregar la pista N°${vaultCode.hints.length + 1}?`,
+                    `\`${hint}\`.`,
+                    `Para el código "${vaultCode.code}" con ID \`${vaultCode.id}\``
+                ]
+
+                let confirmation = await Confirmation("Nueva pista", toConfirm, interaction);
+                if (!confirmation) return;
+
+                vaultCode.hints.push(hint);
+            }
+
+            if (recompensa) {
+                const reward = recompensa.value;
+
+                vaultCode.reward = reward;
+            }
+
+            await doc.save();
+
+            return interaction.editReply({
+                embeds: [
+                    new Embed({
+                        type: "success",
+                        data: {
+                            desc: "Se ha actualizado el código"
+                        }
+                    })
+                ]
+            })
+        }
     }
 }
 
