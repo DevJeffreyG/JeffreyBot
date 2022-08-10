@@ -12,23 +12,24 @@ command.addOption({
     type: "string",
     name: "codigo",
     desc: "¿Crees tener la respuesta?",
-    req: false   
+    req: false
 })
 
 command.execute = async (interaction, models, params, client) => {
-    await interaction.deferReply({ephemeral: true});
-    const { Vaults, Users } = models;
+    await interaction.deferReply({ ephemeral: true });
+    const { Guilds, Users } = models;
 
     const code = params.codigo ? params.codigo.value : null;
-   
-    const vault = await Vaults.findOne({guild_id: interaction.guild.id}) ?? await new Vaults({guild_id: interaction.guild.id}).save();
+
+    let doc = await Guilds.getOrCreate(interaction.guild.id)
+    const vault = doc.data.vault_codes;
     const user = await Users.getOrCreate({
         user_id: interaction.user.id,
         guild_id: interaction.guild.id
     });
 
-    if(!code){ // quiere pistas
-        const isACode = true || new chance().bool({likelihood: 80});
+    if (!code) { // quiere pistas
+        const isACode = true || new chance().bool({ likelihood: 80 });
 
         let respRelleno = [
             "Jeffrey sube vídeo",
@@ -44,10 +45,10 @@ command.execute = async (interaction, models, params, client) => {
         let relleno = respRelleno[Math.floor(Math.random() * respRelleno.length)];
 
         let notCodeEmbed = new Embed()
-        .defDesc(relleno)
-        .defColor(Colores.blanco);
+            .defDesc(relleno)
+            .defColor(Colores.blanco);
 
-        if(!isACode) return interaction.editReply({embeds: [notCodeEmbed]});
+        if (!isACode) return interaction.editReply({ embeds: [notCodeEmbed] });
         return VaultWork(vault, user, interaction, notCodeEmbed, client);
     }
 
@@ -77,8 +78,8 @@ command.execute = async (interaction, models, params, client) => {
     let reply = nope[Math.floor(Math.random() * nope.length)];
 
     reply = new Embed()
-    .defColor(Colores.negro)
-    .defDesc(reply.replace(new RegExp("{{ CODE }}", "g"), code));
+        .defColor(Colores.negro)
+        .defDesc(reply.replace(new RegExp("{{ CODE }}", "g"), code));
 
     let gg = [
         "Toma tus { JEFFROS } y vete de mi bóveda.",
@@ -86,30 +87,30 @@ command.execute = async (interaction, models, params, client) => {
         "{ JEFFROS }. ¿Ya puedes dejarme solo?",
         "¿QUÉ? ¿DÓNDE ESTÁN MIS { JEFFROS }?",
         "Tuviste suerte, pero la próxima no será tan fácil conseguir { JEFFROS }."
-      ];
+    ];
 
     let finale = gg[Math.floor(Math.random() * gg.length)];
 
     const f = x => x.code === code.toUpperCase();
 
-    const codeInVault = vault.codes.find(f);
-    if(!codeInVault) return interaction.editReply({embeds: [reply]});
-    
+    const codeInVault = vault.find(f);
+    if (!codeInVault) return interaction.editReply({ embeds: [reply] });
+
     // revisar que no tenga ya el code
-    if(user.data.unlockedVaults.find(x => x === codeInVault.id)) return message.channel.send({content: `${message.member}`, embeds: [reply]}); // lo tiene
+    if (user.data.unlockedVaults.find(x => x === codeInVault.id)) return message.channel.send({ content: `${message.member}`, embeds: [reply] }); // lo tiene
 
     // no lo tiene...
     user.economy.global.jeffros += codeInVault.reward;
 
     let ggEmbed = new Embed()
-    .defAuthor({text: `Desencriptado.`, icon: Config.bienPng})
-    .defColor(Colores.verde)
-    .defDesc(finale.replace(new RegExp("{ JEFFROS }", "g"), `**${Emojis.Jeffros}${codeInVault.reward.toLocaleString('es-CO')}**`));
+        .defAuthor({ text: `Desencriptado.`, icon: Config.bienPng })
+        .defColor(Colores.verde)
+        .defDesc(finale.replace(new RegExp("{ JEFFROS }", "g"), `**${Emojis.Jeffros}${codeInVault.reward.toLocaleString('es-CO')}**`));
 
     user.data.unlockedVaults.push(codeInVault.id);
     await user.save();
 
-    return interaction.editReply({embeds: [ggEmbed]});
+    return interaction.editReply({ embeds: [ggEmbed] });
 }
 
 module.exports = command;

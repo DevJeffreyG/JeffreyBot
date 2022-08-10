@@ -90,6 +90,9 @@ ${data.error}
                 this.#errorAuthor(11)
                 this.#errorDesc("No se pudo obtener la información", data.type, [data.guide])
                 break;
+
+            default:
+                console.error("⚠️🔴 No existe %s como tipo de Error ❗❗", type);
         }
     }
 
