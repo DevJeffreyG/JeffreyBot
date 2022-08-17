@@ -2,7 +2,7 @@
 
   <!---[![LastUpdate](https://media.discordapp.net/attachments/485191462422577182/870102754004189194/itsdark.png)](https://discord.gg/fJvVgkN)--->
   
-  <a href=https://discord.gg/fJvVgkN><img src="src/resources/imgs/icon.png" width=500 height=500></a>
+  <a href=https://discord.gg/fJvVgkN><img src="src/resources/imgs/icon.png" width=300 height=300></a>
   
   [![JeffreyGServer](https://img.shields.io/discord/447797737216278528.svg?label=Discord&logo=Discord&color=%235865F2&style=for-the-badge)](https://discord.gg/fJvVgkN)
   [![DiscordJS](https://img.shields.io/github/package-json/dependency-version/devjeffreyg/jeffreybot/discord.js?style=for-the-badge&color=%235865F2)](https://npmjs.com/package/discord.js)
