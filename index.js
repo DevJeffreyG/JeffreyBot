@@ -25,6 +25,7 @@ const client = new Client({ allowedMentions: { parse: ['users', 'roles'], replie
 
 const { connection } = require('./db')
 
+console.log("==============================================")
 console.log(`🦊 INICIALIZANDO ${require("./package.json").name} v${require("./package.json").version} ...`)
 
 connection.then(async (c) => {

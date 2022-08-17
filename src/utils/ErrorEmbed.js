@@ -91,6 +91,11 @@ ${data.error}
                 this.#errorDesc("No se pudo obtener la información", data.type, [data.guide])
                 break;
 
+            case "discordLimitation":
+                this.#errorAuthor(12)
+                this.#errorDesc("Discord no me deja hacer eso", data.action, [data.help])
+                break;
+
             default:
                 console.error("⚠️🔴 No existe %s como tipo de Error ❗❗", type);
         }

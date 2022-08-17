@@ -6,7 +6,7 @@ const ms = require("ms");
 const command = new Command({
     name: "admin",
     desc: "Comandos que administran diferentes secciones dentro de un servidor",
-    category: "STAFF"
+    category: "ADMIN"
 })
 
 //demasiado complejo como para usar las funciones mias :sob:

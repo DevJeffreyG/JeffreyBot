@@ -3,7 +3,7 @@ const { Command, ErrorEmbed } = require("../../src/utils")
 const command = new Command({
     name: "config",
     desc: "Todo lo relacionado con el comportamiento de Jeffrey Bot en el servidor",
-    category: "STAFF"
+    category: "ADMIN"
 })
 // CANALES
 command.addSubcommand({

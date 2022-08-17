@@ -144,8 +144,9 @@ class Command {
         )
     }
 
-    async #setPerms() {
-        if (this.category == "STAFF" || this.category == "MODERATION" || this.category == "ADMIN") this.data.setDefaultMemberPermissions(PermissionFlagsBits.Administrator | PermissionFlagsBits.ManageMessages);
+    #setPerms() {
+        if (this.category == "ADMIN") this.data.setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages);
+        if (this.category == "STAFF" || this.category == "MODERATION") this.data.setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
         if (this.category == "DEV") this.dev = true;
     }
 

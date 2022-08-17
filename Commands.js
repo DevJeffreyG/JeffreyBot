@@ -104,7 +104,7 @@ class Commands {
 
     async #removeGuildCommands(dev){
         console.log("⚪ BUSCANDO POSIBLES GUILDCOMMANDS")
-        let guild_commands = await GlobalDatas.GetGuildCommands();
+        let guild_commands = await GlobalDatas.getGuildCommands();
 
         guild_commands.forEach(async q => {
             let data = q.info;
@@ -114,7 +114,7 @@ class Commands {
 
                 if(!this.routes.find(x => x === data.route)){
                     console.log(data.route)
-                    GlobalDatas.RemoveGuildCommands(data.route);
+                    GlobalDatas.removeGuildCommands(data.route);
                     await rest.put(data.route, { body: [] })
                 }
             }
@@ -124,7 +124,7 @@ class Commands {
                 await rest.put(data.route, { body: [] })
 
                 // eliminar globaldata
-                GlobalDatas.RemoveGuildCommands(data.route);
+                GlobalDatas.removeGuildCommands(data.route);
             }
         })
 

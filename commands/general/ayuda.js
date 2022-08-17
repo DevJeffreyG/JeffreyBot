@@ -30,10 +30,12 @@ command.execute = async (interaction, models, params, client) => {
     // roles
     let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
     let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
+    let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
 
     if(client.user.id === Config.testingJBID){
         jeffreyRole = guild.roles.cache.find(x => x.id === "482992290550382592");
         staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
+        adminRole = guild.roles.cache.find(x => x.id === "483105079285776384");
     }
 
     // codigo
@@ -66,11 +68,15 @@ command.execute = async (interaction, models, params, client) => {
     .defAuthor({text: `Comandos de STAFF`, icon: helpEmojiURL})
     .defColor(Colores.rojo);
 
+    let admin = new Embed()
+    .defAuthor({text: `Comandos de Administrador`, icon: helpEmojiURL})
+    .defColor(Colores.rojo);
+
     let dev = new Embed()
     .defAuthor({text: `Comandos de desarrollador`, icon: helpEmojiURL})
     .defColor(Colores.nocolor);
 
-    let [generalDesc, funDesc, musicDesc, economyDesc, darkshopDesc, moderationDesc, staffDesc, devDesc] = ["", "", "", "", "", "", "", ""];
+    let [generalDesc, funDesc, musicDesc, economyDesc, darkshopDesc, moderationDesc, staffDesc, adminDesc, devDesc] = ["", "", "", "", "", "", "", "", ""];
 
     for (let i = 0; i < commands.length; i++) {
         const helpCommand = commands[i];
@@ -105,6 +111,10 @@ command.execute = async (interaction, models, params, client) => {
             case "STAFF":
                 staffDesc += toAdd;
                 break;
+
+            case "ADMIN":
+                adminDesc += toAdd;
+                break;
                 
             case "DEV":
                 devDesc += toAdd;
@@ -123,10 +133,12 @@ command.execute = async (interaction, models, params, client) => {
     darkshop.defDesc(darkshopDesc);
     moderation.defDesc(moderationDesc);
     staff.defDesc(staffDesc);
+    admin.defDesc(adminDesc);
     dev.defDesc(devDesc);
 
-    let isStaff = member.roles.cache.find(x => x.id === staffRole.id) ? true : false;
-    let isJeffrey = member.roles.cache.find(x => x.id === jeffreyRole.id) ? true : false;
+    let isStaff = member.roles.cache.find(x => x === staffRole) ? true : false;
+    let isAdmin = member.roles.cache.find(x => x === adminRole) ? true : false;
+    let isJeffrey = member.roles.cache.find(x => x === jeffreyRole) ? true : false;
     
     let arrayEmbeds = [];
 
@@ -139,10 +151,12 @@ command.execute = async (interaction, models, params, client) => {
     if(isJeffrey){
         if(moderation.description) arrayEmbeds.push(moderation);
         if(staff.description) arrayEmbeds.push(staff);
+        if(admin.description) arrayEmbeds.push(admin);
         if(dev.description) arrayEmbeds.push(dev);
     } else if(isStaff){
         if(moderation.description) arrayEmbeds.push(moderation);
         if(staff.description) arrayEmbeds.push(staff);
+        if(isAdmin && admin.description) arrayEmbeds.push(admin);
     }
 
     if(new Chance().bool({likelihood: 20})) {

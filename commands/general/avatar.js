@@ -20,7 +20,7 @@ command.execute = async (interaction, models, params, client) => {
 
     let embed = new Embed()
     .defAuthor({text: member.user.tag, icon: member.user.displayAvatarURL()})
-    .setImage(member.user.displayAvatarURL({format: 'png', dynamic: true, size: 1024 }))
+    .setImage(member.displayAvatarURL({extension: "png", dynamic: true, size: 1024 }))
     .defColor(Colores.verde);
 
     return interaction.reply({embeds: [embed]});
