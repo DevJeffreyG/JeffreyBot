@@ -24,13 +24,21 @@ Schema.static("newGuildCommands", async function({route, dev = false}){
     }).save();
 })
 
-Schema.static("GetGuildCommands", function(){
+Schema.static("getGuildCommands", function(){
     return this.find({
         "info.type": "guildcommands"
     });
 })
 
-Schema.static("RemoveGuildCommands", function(route){
+Schema.static("getTempGuildBans", function(guild, user){
+    return this.findOne({
+        "info.type": "temporalGuildBan",
+        "info.guild_id": guild.id,
+        "info.userID": user
+    });
+})
+
+Schema.static("removeGuildCommands", function(route){
     return this.findOneAndDelete({
         "info.type": "guildcommands",
         "info.route": route
