@@ -2,7 +2,7 @@
 
   <!---[![LastUpdate](https://media.discordapp.net/attachments/485191462422577182/870102754004189194/itsdark.png)](https://discord.gg/fJvVgkN)--->
   
-  [![JeffreyBot](https://cdn.discordapp.com/avatars/523199905964097536/ee1c3c19b16259f8c2ba5820803c34a1.webp?size=300)](https://discord.gg/fJvVgkN)
+  <a href=https://discord.gg/fJvVgkN><img src="src/resources/imgs/icon.png" width=500 height=500></a>
   
   [![JeffreyGServer](https://img.shields.io/discord/447797737216278528.svg?label=Discord&logo=Discord&color=%235865F2&style=for-the-badge)](https://discord.gg/fJvVgkN)
   [![DiscordJS](https://img.shields.io/github/package-json/dependency-version/devjeffreyg/jeffreybot/discord.js?style=for-the-badge&color=%235865F2)](https://npmjs.com/package/discord.js)
@@ -22,10 +22,10 @@ Jeffrey Bot es un bot de Discord **multipropósitos** programado por y para el s
   - Información del servidor
 - Moderación
   - Warns, Softwarns
-  - Hackban, Ban
+  - Clear (+100 Mensajes)
+  - HackBan, unban
   - Tickets, encuestas
   - Lockdown
-  - Etc.
 - Administración
   - Sugerencias para el servidor
   - Encuestas del STAFF
