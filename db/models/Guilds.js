@@ -53,6 +53,15 @@ const GuildSchema = new Schema({
                 ],
                 id: { type: Number, required: true, sparse: true }
             }
+        ],
+        rules: [
+            {
+                name: {type: String, required: true},
+                desc: {type: String},
+                expl: {type: String, required: true},
+                position: {type: Number},
+                id: {type: Number, sparse: true}
+            }
         ]
     },
     settings: {
@@ -85,8 +94,8 @@ GuildSchema.static("getOrCreate", async function (id) {
     }).save();
 })
 
-GuildSchema.static("getById", function (id) {
-    return this.findOne({ guild_id: id })
+GuildSchema.static("getById", async function (id) {
+    return await this.findOne({ guild_id: id })
 });
 
 GuildSchema.method("getVaultCode", function(code){
