@@ -57,6 +57,7 @@ class Command {
                     this.addOption(data)
                 })
             } else {
+                console.log(this)
                 this.addOption(data);
             }
         })
@@ -145,8 +146,8 @@ class Command {
     }
 
     #setPerms() {
-        if (this.category == "ADMIN") this.data.setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages);
-        if (this.category == "STAFF" || this.category == "MODERATION") this.data.setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
+        if (this.category == "ADMIN") this.data.setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
+        if (this.category == "STAFF" || this.category == "MODERATION") this.data.setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages);
         if (this.category == "DEV") this.dev = true;
     }
 

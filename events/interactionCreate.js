@@ -7,7 +7,7 @@ const models = require("mongoose").models;
 const { ToggledCommands, Users, Guilds } = models
 
 const { Ticket, ErrorEmbed, FindNewId, Confirmation, intervalGlobalDatas, } = require("../src/utils");
-const { Config, Colores, Reglas } = require("../src/resources");
+const { Config, Colores } = require("../src/resources");
 const { InteractionType } = require("discord-api-types/v10");
 const { jeffreygID, mantenimiento } = Config;
 
@@ -104,11 +104,11 @@ module.exports = async (client, interaction) => {
         await slashCommand.execute(interaction, models, params, client);
       } catch (error) {
         console.error(error);
-        let help = new ErrorEmbed({ type: "badCommand", data: { commandName, error } });
+        let help = new ErrorEmbed(interaction, { type: "badCommand", data: { commandName, error } });
         try {
           await interaction.reply({ content: null, embeds: [help], ephemeral: true });
         } catch (er) {
-          await interaction.editReply({ content: null, embeds: [help], ephemeral: true });
+          await help.send();
         }
       }
     }

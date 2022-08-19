@@ -5,8 +5,23 @@ const { CommandInteraction } = require("discord.js");
 
 class ErrorEmbed extends Embed {
     /**
-     * 
+     * @param {CommandInteraction} inter - La interacción principal dada
      * @param {Object} options La configuración de este ErrorEmbed {type, data}
+     * @param {string} options.type ### El tipo de ErrorEmbed que va a ser
+     * - commandNotFound
+     * - toggledCommand
+     * - badCommands
+     * - selfRep
+     * - insuficientSetup
+     * - commandError
+     * - notSent
+     * - badParams
+     * - alreadyExists
+     * - doesntExist
+     * - errorFetch
+     * - discordLimitation
+     * @param {string} options.data - La información que tiene este tipo
+     * @description Creación de un ErrorEmbed
      */
     constructor(inter = null, options) {
         super()
@@ -41,7 +56,7 @@ class ErrorEmbed extends Embed {
 
             case "badCommand":
                 this.#errorAuthor(3);
-                this.#errorDesc("Jeffrey es tonto, y por eso hubo un error ejecutando este comando", `(\`/${data.commandName}\`)`, ["Por fa, avísale de su grado de inservibilidad.", `**También dile que...**
+                this.#errorDesc("Jeffrey es tonto, y por eso hubo un error ejecutando este comando", `(\`/${data.commandName}\`)`, ["Por favor, avísale de su grado de inservibilidad.", `**Y también dile que...**
 \`\`\`js
 ${data.error}
 \`\`\``])
