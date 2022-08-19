@@ -1412,7 +1412,11 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
     const collector = interaction.channel.createMessageComponentCollector({ filter, time: ms("1m"), max: 1 });
 
     collector.on("collect", async i => {
-      await i.deferUpdate();
+      try {
+        await i.deferUpdate();
+      } catch(err) {
+        console.log("⚠️ %s", err);
+      }
 
       if (i.customId === "confirmAction") {
         confirmation
@@ -1439,15 +1443,12 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
 }
 
 /**
- * @deprecated Uses old Initialize method
  * @param {*} user Mongoose User Query with one document
  * @param {Array} data Needed member, rule string, and proof object used for the infraction
  * @param {Boolean} [isSoftwarn=false] The infraction is a softwarn?
  */
-const AfterInfraction = async function (user, data, isSoftwarn) {
-  isSoftwarn = isSoftwarn || false;
-  const { member, rule, proof, message, id } = data;
-  const { prefix } = await Initialize(member.guild.id);
+const AfterInfraction = async function (user, data, isSoftwarn = false) {
+  const { member, rule, proof, id, interaction } = data;
 
   if (!isSoftwarn) { // es un warn normal
     const warns = user.warns;
@@ -1458,41 +1459,41 @@ const AfterInfraction = async function (user, data, isSoftwarn) {
     // acciones de automod
     let arrayEmbeds = [];
 
-    let warnedEmbed = new EmbedBuilder()
-      .setAuthor(`Warn`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
-      .setDescription(`
+    let warnedEmbed = new Embed()
+      .defAuthor({text: `Warn`, icon: "https://cdn.discordapp.com/emojis/494267320097570837.png"})
+      .defDesc(`
 **—** Has sido __warneado__ por el STAFF.
 **—** Warns actuales: **${totalWarns}**.
 **—** Por infringir la regla: **${rule}**.
 **—** **[Pruebas](${proof.url})**.
 **—** ID de Warn: \`${id}\`.`)
-      .setColor(Colores.rojo)
-      .setFooter(`Ten más cuidado la próxima vez!`, 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png');
+      .defColor(Colores.rojo)
+      .defFooter({text: `Ten más cuidado la próxima vez!`, icon: 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png'});
 
     arrayEmbeds.push(warnedEmbed);
     let banMember = false;
 
     if (totalWarns >= 4) {
-      let autoMod = new EmbedBuilder()
-        .setAuthor(`Ban PERMANENTE.`, "https://cdn.discordapp.com/emojis/537804262600867860.png")
-        .setDescription(`**—** PERMABAN.
+      let autoMod = new Embed()
+        .defAuthor({text: `Ban PERMANENTE.`, icon: "https://cdn.discordapp.com/emojis/537804262600867860.png"})
+        .defDesc(`**—** PERMABAN.
 **—** Warns actuales: **${totalWarns}**.
 **—** Razón de ban (AutoMod): Muchos warns.
 **—** Último warn por infringir la regla: **${rule}**.`)
-        .setColor(Colores.rojo);
+        .defColor(Colores.rojo);
 
       arrayEmbeds.push(autoMod);
       banMember = true;
     } else
 
       if (totalWarns >= 3) {
-        let autoMod = new EmbedBuilder()
-          .setAuthor(`TempBan`, "https://cdn.discordapp.com/emojis/537792425129672704.png")
-          .setDescription(`**—** Ban (24h).
+        let autoMod = new Embed()
+          .defAuthor({text: `TempBan`, icon: "https://cdn.discordapp.com/emojis/537792425129672704.png"})
+          .defDesc(`**—** Ban (24h).
 **—** Warns actuales: **${totalWarns}**.
 **—** Razón de ban (AutoMod): 3 warns acumulados.
 **—** Último warn por infringir la regla: **${rule}**.`)
-          .setColor(Colores.rojo);
+          .defColor(Colores.rojo);
 
         arrayEmbeds.push(autoMod);
         banMember = true
@@ -1534,13 +1535,13 @@ const AfterInfraction = async function (user, data, isSoftwarn) {
       } else
 
         if (totalWarns >= 2) {
-          let infoEmbed = new EmbedBuilder()
-            .setAuthor(`Información`, "https://cdn.discordapp.com/emojis/494267320097570837.png?v=1")
-            .setDescription(`**—** ${member.user.tag}, este es tu **warn número ❛ \`2\` ❜**
+          let infoEmbed = new Embed()
+            .defAuthor({text: `Información`, icon: "https://cdn.discordapp.com/emojis/494267320097570837.png?v=1"})
+            .defDesc(`**—** ${member.user.tag}, este es tu **warn número ❛ \`2\` ❜**
 *— ¿Qué impacto tendrá este warn?*
 **—** Tranquil@. Este warn no afectará en nada tu estadía en el servidor, sin embargo; el siguiente warn será un **ban de un día**.
-**—** Te sugiero comprar un **-1 Warn** en la tienda del servidor. *( \`${prefix}shop\` para más info de precios, etc. )*`)
-            .setColor(Colores.rojo);
+**—** Te sugiero comprar un **-1 Warn** en la tienda del servidor. *( \`/shop\` para más info de precios, etc. )*`)
+            .defColor(Colores.rojo);
 
           arrayEmbeds.push(infoEmbed);
         }
@@ -1548,32 +1549,33 @@ const AfterInfraction = async function (user, data, isSoftwarn) {
     // mensaje de warn normal
     // embed que se le envía al usuario por el warn
 
+    let res = true
+
     await member.send({ embeds: arrayEmbeds })
       .catch(e => {
-        console.log(e);
-        message.react("494267320097570837");
-        message.channel.send("¡Usuario con MDs desactivados // Usuario no encontrado! **¡No sabe cuántos WARNS tiene!**");
+        res = false
+        interaction.editReply({ embeds: [new ErrorEmbed({ type: "notSent", data: { tag: member.user.tag, error: e } })] })
       });
 
     if (banMember) console.log("Te baneo");//member.ban({reason: `AutoMod. (Infringir "${rule}")`});
-  } else {
+    return true
+  }/*  else {
     const { member, rule, proof } = data;
 
-    let warnedEmbed = new EmbedBuilder()
-      .setAuthor(`¡Cuidado! (Softwarn)`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
-      .setDescription(`
+    let warnedEmbed = new Embed()
+      .defAuthor(`¡Cuidado! (Softwarn)`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
+      .defDesc(`
 **—** Esto es sólo un llamado de atención.
 **—** Por infringir la regla: **${rule}**.
 **—** [Pruebas](${proof.url})`)
-      .setColor(Colores.rojo)
-      .setFooter(`Si vuelves a cometer esta misma falla serás warneado, ten cuidado.`, 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png');
+      .defColor(Colores.rojo)
+      .defFooter({text: `Si vuelves a cometer esta misma falla serás warneado, ten cuidado.`, icon: 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png'});
 
     member.send({ embeds: [warnedEmbed] })
       .catch(e => {
-        message.react("494267320097570837");
-        message.channel.send("¡Usuario con MDs desactivados // Usuario no encontrado! **¡No sabe cuántos WARNS tiene!**");
+        interaction.editReply({ embeds: [new ErrorEmbed({ type: "notSent", data: { tag: member.user.tag, error: e } })] })
       });
-  }
+  } */
 }
 
 /**
