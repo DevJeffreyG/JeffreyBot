@@ -581,7 +581,7 @@ Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para c
 
     let ticketEmbed = new Embed()
     .defAuthor({text: "NUEVO TICKET", title: true})
-    .defDesc("¿Necesitas ayuda? ¿Alguna duda? ¿Warn/Softwarn injusto?\nPulsa el botón de aquí abajo para crear un ticket para hablar directamente con el STAFF.")
+    .defDesc("¿Necesitas ayuda? ¿Alguna duda? ¿Warn injusto?\nPulsa el botón de aquí abajo para crear un ticket para hablar directamente con el STAFF.")
     .defColor(Colores.verdeclaro);
 
     let ticketRow = new Discord.ActionRowBuilder()
@@ -686,7 +686,7 @@ Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para c
 
     return interaction.editReply({content: null, embeds: [
         new Embed({
-            type: "sucess"
+            type: "success"
         })
     ]});
 

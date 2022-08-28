@@ -577,6 +577,7 @@ const intervalGlobalDatas = async function (client, justTempRoles) {
           })
 
           let textEmbed = new Embed(msg.embeds[1]);
+          console.log(textEmbed)
 
           await msg.reactions.removeAll();
 
@@ -585,10 +586,10 @@ const intervalGlobalDatas = async function (client, justTempRoles) {
           let no = reactionsInPoll.no.filter(x => !reactionsInPoll.yes.includes(x))
 
           textEmbed.defAuthor({ text: "La encuesta del STAFF terminó", title: true })
-          textEmbed.setFooter({ text: "TERMINÓ" });
-          textEmbed.setDescription(textEmbed.description + `\n\n**RESULTADOS:**`)
-          textEmbed.addField(`✅ SÍ:`, `${yes.length}`, true)
-          textEmbed.addField(`❌ NO:`, `${no.length}`, true)
+          textEmbed.defFooter({ text: "TERMINÓ" });
+          textEmbed.defDesc(textEmbed.description + `\n\n**RESULTADOS:**`)
+          textEmbed.defField(`✅ SÍ:`, `${yes.length}`, true)
+          textEmbed.defField(`❌ NO:`, `${no.length}`, true)
 
           if (no.length === 0 && yes.length === 0) textEmbed.setFooter({ text: "TERMINÓ...! y... no... ¿votó nadie...? :(" });
 
@@ -1579,7 +1580,7 @@ const AfterInfraction = async function (user, data, isSoftwarn = false) {
 }
 
 /**
- * 
+ * @deprecated InteractivePages built-in
  * @param {String} guildId The Guild#id
  * @param {Object} message The Discord.JS Message
  * @param {Number} [itemsPerPage = 3] The number of items that will be per page
@@ -2440,6 +2441,13 @@ const GenerateLog = async function (guild, header, footer, description, headerPn
   return sendLog(channel, embed);
 }
 
+/**
+ * 
+ * @param {Number} ms MS of sleep
+ * @returns {Promise<void>}
+ */
+const Sleep = ms => new Promise(r => setTimeout(r, ms));
+
 async function sendLog(logChannel, embed) {
   let msg = await logChannel.send({ embeds: [embed], content: null, components: [] });
   return msg;
@@ -2646,5 +2654,6 @@ module.exports = {
   importImage,
   GenerateLog,
   isOnMobible,
-  RandomCumplido
+  RandomCumplido,
+  Sleep
 }

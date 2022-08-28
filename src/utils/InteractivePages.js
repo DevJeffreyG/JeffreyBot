@@ -3,7 +3,11 @@ const { ButtonStyle } = require("discord-api-types/v10");
 const { time } = Discord;
 const ms = require("ms");
 const Embed = require("./Embed");
+const { Colores } = require("../resources");
 
+/**
+ * Taken from [tutmonda](https://github.com/Jleguim/tutmonda-project) 💜
+*/
 class InteractivePages {
     /**
      * 
@@ -28,12 +32,12 @@ class InteractivePages {
     }
 
     #prepareBase(){
-        this.base.title = this.base.title ?? "";
-        this.base.author_icon = this.base.author_icon ?? "";
-        this.base.color = this.base.color ?? "WHITE";
+        this.base.title = this.base.title ?? null;
+        this.base.author_icon = this.base.author_icon ?? null;
+        this.base.color = this.base.color ?? Colores.nocolor;
         this.base.description = this.base.description ?? "";
-        this.base.footer = this.base.footer ?? "";
-        this.base.footer_icon = this.base.footer_icon ?? "";
+        this.base.footer = this.base.footer ?? null;
+        this.base.footer_icon = this.base.footer_icon ?? null;
     }
 
     #generatePages(){
@@ -93,7 +97,7 @@ class InteractivePages {
         .defAuthor({text: this.base.title, icon: this.base.author_icon})
         .defColor(this.base.color)
         .defDesc(`${this.base.description}\n\n${this.pages.get(1).join(" ")}`)
-        .defFooter({text: this.base.footer.replace(new RegExp("{ACTUAL}", "g"), `1`).replace(new RegExp("{TOTAL}", "g"), `${this.pages.size}`), iconURL: this.base.icon_footer});
+        .defFooter({text: this.base.footer.replace(new RegExp("{ACTUAL}", "g"), `1`).replace(new RegExp("{TOTAL}", "g"), `${this.pages.size}`), icon: this.base.icon_footer});
 
         this.firstEmbed = embed;
         return embed;
@@ -143,7 +147,7 @@ class InteractivePages {
                 else row.components[1].setDisabled(false);
 
             let embed = new Discord.EmbedBuilder()
-            .setAuthor({name: this.base.title, iconURL: this.base.icon})
+            .setAuthor({name: this.base.title, iconURL: this.base.author_icon})
             .setColor(this.base.color)
             .setDescription(`${this.base.description}\n\n${this.pages.get(pagn+1).join(" ")}`)
             .setFooter({text: this.base.footer.replace(new RegExp("{ACTUAL}", "g"), `${pagn + 1}`).replace(new RegExp("{TOTAL}", "g"), `${this.pages.size}`), iconURL: this.base.icon_footer});

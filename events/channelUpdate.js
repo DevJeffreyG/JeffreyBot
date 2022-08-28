@@ -2,11 +2,12 @@ const Discord = require("discord.js");
 
 const { GenerateLog, FetchAuditLogs, GetChangesAndCreateFields } = require("../src/utils/");
 const Colores = require("../src/resources/colores.json");
+const { AuditLogEvent } = require("discord-api-types/v10");
 
 module.exports = async (client, oldchannel, channel) => {
     const guild = channel.guild;
 
-    const logs = await FetchAuditLogs(client, guild, ["ChannelUpdate", "ChannelOverwriteUpdate"]);
+    const logs = await FetchAuditLogs(client, guild, [AuditLogEvent.ChannelUpdate, AuditLogEvent.ChannelOverwriteUpdate]);
 
     let type;
     switch(channel.type){

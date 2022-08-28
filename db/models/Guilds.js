@@ -160,6 +160,8 @@ GuildSchema.method("workerAddAutoRole", async function (message, reaction, user)
         if (autoroles.find(x => x.message_id === message.id)) {
             return reactions.find(x => x.emoji === reaction.emoji).remove(reactor);
         }
+
+        return;
     }
 
     const role = guild.roles.cache.find(x => x.id === autorole.role_id);

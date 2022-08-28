@@ -7,7 +7,7 @@ class Embed extends Discord.EmbedBuilder {
      * En caso de que Discord.JS se ponga chistoso y cambie por decimocuarta vez la forma de hacer embeds.
      */
     constructor(options){
-        if(options instanceof Discord.EmbedBuilder) super(options)
+        if(options instanceof Discord.Embed) super(options.data)
         else super()
         if(options) this.#setup(options)
     }
@@ -78,11 +78,11 @@ class Embed extends Discord.EmbedBuilder {
                 break;
 
             case "success":
-                this.defAuthor({text: `${data.title ?? "¡Listo!"}`, icon: Config.bienPng});
+                this.defAuthor({text: `${data?.title ?? "¡Listo!"}`, icon: Config.bienPng});
                 this.defColor(Colores.verdejeffrey)
 
-                if(data.desc) {
-                    const sep = data.separator ?? "▸"
+                if(data?.desc) {
+                    const sep = data?.separator ?? "▸"
                     const desc = data.desc;
 
                     if(typeof desc == "string") this.defDesc(`${sep} ${desc}.`)
@@ -96,6 +96,10 @@ class Embed extends Discord.EmbedBuilder {
                     }
                 }
                 break;
+        }
+
+        if(this.data){
+            this.description = this.data.description;
         }
     }
 }

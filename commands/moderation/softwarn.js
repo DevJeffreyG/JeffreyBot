@@ -68,6 +68,7 @@ command.execute = async (interaction, models, params, client) => {
 
     collector.on("collect", async(collected) => {
         const rule = Number(collected.values[0]) ?? collected.values[0];
+        const ruleNo = doc.data.rules.find(x => x.id === rule).position;
         const member = usuario.member;
 
         await collected.deferUpdate();
@@ -84,7 +85,7 @@ command.execute = async (interaction, models, params, client) => {
 
         let toConfirm = [
             `¿Estás segur@ de softwarnear a **${member.user.tag}**?`,
-            `Llamado de atención: Incumplimiento de la regla N°${rule} (${ruleTxt})`,
+            `Llamado de atención: Incumplimiento de la regla N°${ruleNo} (${ruleTxt})`,
             `[Pruebas](${prueba.attachment.url})`
         ];
         let confirmation = await Confirmation("Agregar softwarn", toConfirm, interaction);
@@ -106,7 +107,7 @@ command.execute = async (interaction, models, params, client) => {
             type: "alreadyExists",
             data: {
                 action: "add softwarn",
-                existing: `El softwarn para la regla N°${rule}`,
+                existing: `El softwarn para la regla N°${ruleNo}`,
                 context: "los softwarns del usuario, **procede con `/warn`**"
             }
         })

@@ -51,7 +51,7 @@ command.execute = async (interaction, models, params, client) => {
         selectMenu.addOptions(
             {
                 label: regla.name,
-                value: regla.position.toString(),
+                value: regla.id.toString(),
                 description: desc
             }
         );
@@ -68,6 +68,7 @@ command.execute = async (interaction, models, params, client) => {
 
     collector.on("collect", async(collected) => {
         const rule = Number(collected.values[0]) ?? collected.values[0];
+        const ruleNo = doc.data.rules.find(x => x.id === rule).position;
         const member = usuario.member;
 
         await collected.deferUpdate();
@@ -84,7 +85,7 @@ command.execute = async (interaction, models, params, client) => {
 
         let toConfirm = [
             `¿Estás segur@ de warnear a **${member.user.tag}**?`,
-            `Razón: Infringir la regla N°${rule} (${ruleTxt})`,
+            `Razón: Infringir la regla N°${ruleNo} (${ruleTxt})`,
             `[Pruebas](${prueba.attachment.url})`
         ];
         let confirmation = await Confirmation("Agregar warn", toConfirm, interaction);
@@ -107,7 +108,7 @@ command.execute = async (interaction, models, params, client) => {
             let skipConfirmation = [
                 `**${member.user.tag}** __NO__ tiene el **softwarn** de la regla "${ruleTxt}"`,
                 `¿Estás segur@ de warnear a **${member.user.tag}**?`,
-                `Razón: Infringir la regla N°${rule} (${ruleTxt})`,
+                `Razón: Infringir la regla N°${ruleNo} (${ruleTxt})`,
                 `[Pruebas](${prueba.attachment.url})`
             ];
             confirmation = await Confirmation("Continuar", skipConfirmation, interaction);
@@ -121,6 +122,8 @@ command.execute = async (interaction, models, params, client) => {
 
         warns.push({rule_id: rule, proof: prueba.attachment.url, id: newId});
         if(hasSoft) softwarns.splice(indexOfSoftwarn, 1);
+
+        user.data.counts.warns += 1;
         await user.save();
 
         const data = {
