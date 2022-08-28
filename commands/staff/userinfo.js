@@ -1,7 +1,7 @@
 const { ActionRowBuilder, ButtonBuilder, time } = require("discord.js")
 const { ButtonStyle, PermissionFlagsBits } = require("discord-api-types/v10");
 
-const { Command, Embed, InteractivePages } = require("../../src/utils")
+const { Command, Embed } = require("../../src/utils")
 const { Colores, Config } = require("../../src/resources")
 
 const ms = require("ms");
@@ -49,7 +49,7 @@ command.execute = async (interaction, models, params, client) => {
 **— Discord**
 **Creación en**: ${time(member.user.createdAt)}.
 **Tag**: ${member.user.tag}`)
-        .defThumbnail(member.user.displayAvatarURL())
+        .defThumbnail(member.displayAvatarURL())
         .defColor(Colores.verde)
 
     const server = new Embed()

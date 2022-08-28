@@ -52,7 +52,7 @@ command.execute = async (interaction, models, params, client) => {
 **— Jeffros**: ${Emojis.Jeffros}${actualJeffros}
 **— Puntos de reputación**: ${rep}
 ${bdString}`)
-    .defThumbnail(member.user.displayAvatarURL())
+    .defThumbnail(member.displayAvatarURL())
     .defColor(member.displayHexColor);
 
     return interaction.editReply({embeds: [meEmbed]});

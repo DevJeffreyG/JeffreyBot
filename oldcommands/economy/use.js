@@ -6,7 +6,7 @@ const ms = require("ms");
 var Chance = require("chance");
 var chance = new Chance();
 
-const reglas = require("../../src/resources/reglas.json");
+//const reglas = require("../../src/resources/reglas.json");
 
 const { Initialize, TutorialEmbed, FindNewId, LimitedTime, WillBenefit } = require("../../src/utils/");
 const { Users, Shops, DarkShops } = require("mongoose").models;
@@ -129,7 +129,7 @@ module.exports = {
                 else return dsChannel.send({embeds: [interaction[1]]});
             }
 
-            responseEmbed.setFooter(`Ahora ${member.id === author.id ? "tienes" : `${member.user.tag} tiene`} ${victim.warns.length} ${victim.warns.length > 1 ? "warns" : "warn"}`, member.user.displayAvatarURL());
+            responseEmbed.setFooter(`Ahora ${member.id === author.id ? "tienes" : `${member.user.tag} tiene`} ${victim.warns.length} ${victim.warns.length > 1 ? "warns" : "warn"}`, member.displayAvatarURL());
 
             //eliminar item del autor
             user.data.inventory.splice(itemOnInventoryIndex, 1);

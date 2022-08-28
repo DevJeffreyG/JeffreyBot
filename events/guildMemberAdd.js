@@ -82,7 +82,7 @@ module.exports = async (client, member) => {
           `Usando la invitación **discord.gg/${invite.code}**, con **${invite.uses}** usos.`,
           `Su cuenta tiene **${Math.floor(await DaysUntilToday(member.user.createdAt))}** días de edad (${time(member.user.createdAt)}).`,
           `¡Ahora somos **${member.guild.memberCount}** miembros en el servidor!`
-        ], member.user.displayAvatarURL(), member.guild.iconURL(), Colores.verde);
+        ], member.displayAvatarURL(), member.guild.iconURL(), Colores.verde);
         }
       })
     })
