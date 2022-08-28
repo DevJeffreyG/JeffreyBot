@@ -326,7 +326,7 @@ module.exports = async (client, message) => {
   
         // agregar jeffros y exp
         if(!lastAuthor){
-          user.economy.global.jeffros += jeffrosToAdd;
+          await user.addJeffros(jeffrosToAdd)
           user.economy.global.exp += expToAdd;
   
           user.data.lastExpJeffros.jeffros = jeffrosToAdd;

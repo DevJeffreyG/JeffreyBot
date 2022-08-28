@@ -1,8 +1,7 @@
 const mongoose = require('mongoose')
+const { Emojis } = require('../../src/resources')
 
-const Schema = mongoose.Schema
-
-const UserSchema = new Schema({
+const Schema = new mongoose.Schema({
     guild_id: { type: String, required: true },
     user_id: { type: String, required: true },
     warns: [
@@ -45,7 +44,7 @@ const UserSchema = new Schema({
         ],
         inventory: [ // items comprados que no se han usado
             {
-                isDarkShop: { type: Boolean, required: true, default: false},
+                isDarkShop: { type: Boolean, required: true, default: false },
                 item_id: { type: Number, required: true },
                 use_id: { type: Number, required: true, sparse: true },
                 active: { type: Boolean, required: true, default: false },
@@ -67,7 +66,7 @@ const UserSchema = new Schema({
         backup_roles: { type: Array },
         temp_roles: [
             {
-                role_id : { type: String, required: true },
+                role_id: { type: String, required: true },
                 active_since: { type: Date, required: true },
                 duration: { type: Number, required: true },
                 special: {
@@ -87,12 +86,32 @@ const UserSchema = new Schema({
             coins: { type: Date, default: null },
             jeffros_exp: { type: Date, default: null },
             rep: { type: Date, default: null }
+        },
+        counts: { // all time
+            reps: {
+                type: Number, default: function () {
+                    if (this.economy.global.reputation) return this.economy.global.reputation
+                    return 0
+                }
+            },
+            jeffros: {
+                type: Number, default: function () {
+                    if (this.economy.global.jeffros) return this.economy.global.jeffros
+                    return 0
+                }
+            },
+            warns: {
+                type: Number, default: function () {
+                    if (this.warns) return this.warns.length
+                    return 0
+                }
+            }
         }
     },
     economy: {
         global: {
             exp: { type: Number, required: true, default: 0 },
-            level: { type: Number, required: true, default: 0},
+            level: { type: Number, required: true, default: 0 },
             reputation: { type: Number, required: true, default: 0 },
             jeffros: { type: Number, required: true, default: 0 }
         },
@@ -105,7 +124,7 @@ const UserSchema = new Schema({
     }
 })
 
-UserSchema.static("getOrCreate", async function({user_id, guild_id}) {
+Schema.static("getOrCreate", async function ({ user_id, guild_id }) {
     return this.findOne({
         user_id: user_id,
         guild_id: guild_id
@@ -115,4 +134,34 @@ UserSchema.static("getOrCreate", async function({user_id, guild_id}) {
     }).save();
 })
 
-module.exports = mongoose.model('Users', UserSchema)
+Schema.method("addJeffros", async function (count) {
+    this.economy.global.jeffros += count;
+    this.data.counts.jeffros += count;
+    return await this.save();
+})
+
+Schema.method("addRep", async function (count) {
+    this.economy.global.reputation += count;
+    this.data.counts.reps += count;
+    return await this.save();
+})
+
+
+Schema.method("hasItem", function (itemId) {
+    let x = false;
+    this.data.inventory.forEach(item => {
+        if (item.item_id === itemId) x = true;
+    });
+
+    return x
+})
+
+Schema.method("canBuy", function (price) {
+    return this.economy.global.jeffros >= price
+})
+
+Schema.method("parseJeffros", function () {
+    return `**${Emojis.Jeffros}${this.economy.global.jeffros.toLocaleString("es-CO")}**`;
+})
+
+module.exports = mongoose.model('Users', Schema)

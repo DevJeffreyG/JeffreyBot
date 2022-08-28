@@ -97,10 +97,10 @@ command.execute = async (interaction, models, params, client) => {
     if (!codeInVault) return interaction.editReply({ embeds: [reply] });
 
     // revisar que no tenga ya el code
-    if (user.data.unlockedVaults.find(x => x === codeInVault.id)) return message.channel.send({ content: `${message.member}`, embeds: [reply] }); // lo tiene
+    if (user.data.unlockedVaults.find(x => x === codeInVault.id)) return interaction.editReply({ embeds: [reply] }); // lo tiene
 
     // no lo tiene...
-    user.economy.global.jeffros += codeInVault.reward;
+    await user.addJeffros(codeInVault.reward);
 
     let ggEmbed = new Embed()
         .defAuthor({ text: `Desencriptado.`, icon: Config.bienPng })

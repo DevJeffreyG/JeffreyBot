@@ -86,8 +86,7 @@ command.execJeffros = async (interaction, models, params, client) => {
 
     const user = await Users.getOrCreate({user_id: usuario.value, guild_id: usuario.member.guild.id})
 
-    user.economy.global.jeffros += cantidad.value;
-    await user.save();
+    await user.addJeffros(cantidad.value)
 
     let embed = new Embed()
     .defAuthor({text: `¡Jeffros para ti, ${usuario.member.user.tag}!`, icon: usuario.member.guild.iconURL()})

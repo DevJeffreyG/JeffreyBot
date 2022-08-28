@@ -45,11 +45,10 @@ command.execute = async (interaction, models, params, client) => {
         return interaction.reply(`Usa este comando en ${left}, ${RandomCumplido()}.`);
     }
 
-    user.economy.global.reputation += 1;
-    user.save();
-
     user_author.data.cooldowns.rep = new Date();
-    user_author.save();
+
+    await user.addRep(1)
+    await user_author.save();
 
     return interaction.reply({content: `${author} ➡️ ${member} ✨`, embeds: [
         new Embed()

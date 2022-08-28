@@ -41,6 +41,7 @@ command.execute = async (interaction, models, params, client) => {
                 switch(reward.type){
                     case "jeffros":
                         user.economy.global.jeffros += Number(reward.value);
+                        user.data.counts.jeffros += Number(reward.value);
                         reply = `Se han agregado ${Emojis.Jeffros}${Number(reward.value).toLocaleString("es-CO")} a tu cuenta.`
                         break;
 

@@ -95,7 +95,7 @@ command.execute = async (interaction, models, params, client) => {
     } else {
         let rAuthor = guild.members.cache.find(x => x.id === index.author);
         let suggestor = rAuthor ? rAuthor.user.tag : "un usuario";
-        let img = rAuthor ? rAuthor.user.displayAvatarURL() : guild.iconURL();
+        let img = rAuthor ? rAuthor.displayAvatarURL() : guild.iconURL();
         embed.defFooter({text: `• Respuesta sugerida por ${suggestor}`, icon: img})
     }
 
@@ -111,8 +111,8 @@ command.execute = async (interaction, models, params, client) => {
     }
 
     user.data.cooldowns.coins = new Date();
-    user.economy.global.jeffros += money;
-    await user.save();
+
+    await user.addJeffros(money);
     
     return interaction.editReply({embeds: [embed]});
 }
