@@ -39,4 +39,27 @@ const DarkShopsSchema = new Schema({
     }
 });
 
+DarkShopsSchema.static("getOrCreate", async function (id) {
+    return await this.findOne({
+        guild_id: id
+    }) ?? await new this({
+        guild_id: id
+    }).save();
+})
+
+DarkShopsSchema.method("findItem", function (itemId, strict = true) {
+    return strict ?
+        this.items.find(x => x.id === itemId && !x.disabled && x.use_info.action) :
+        this.items.find(x => x.id === itemId);
+})
+
+DarkShopsSchema.method("findItemIndex", function (itemId) {
+    let x = this.items.findIndex(x => x.id === itemId);
+    return x < 0 ? null : x;
+})
+
+DarkShopsSchema.method("isUsable", function (item) {
+    return item.after_use.action !== null && !item.disabled;
+})
+
 module.exports = mongoose.model('DarkShops', DarkShopsSchema)

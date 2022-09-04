@@ -8,7 +8,7 @@ const Schema = new mongoose.Schema({
         {
             rule_id: { type: Number },
             madeTicket: { type: Boolean, default: false },
-            proof: { type: String, default: "na" },
+            proof: { type: String, default: null },
             id: { type: Number, sparse: true }
         }
     ],
