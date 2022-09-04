@@ -1,6 +1,8 @@
 const Embed = require("./Embed");
 const Colores = require("../resources/colores.json");
 const Config = require("../resources/base.json");
+const Emojis = require("../resources/emojis.json");
+
 const { CommandInteraction } = require("discord.js");
 
 class ErrorEmbed extends Embed {
@@ -20,6 +22,7 @@ class ErrorEmbed extends Embed {
      * - doesntExist
      * - errorFetch
      * - discordLimitation
+     * - economyError
      * @param {string} options.data - La información que tiene este tipo
      * @description Creación de un ErrorEmbed
      */
@@ -109,6 +112,11 @@ ${data.error}
             case "discordLimitation":
                 this.#errorAuthor(12)
                 this.#errorDesc("Discord no me deja hacer eso", data.action, [data.help])
+                break;
+
+            case "economyError":
+                this.#errorAuthor(13)
+                this.#errorDesc("Error en la transacción", data.action, [data.error, `Tienes: **${Emojis.Jeffros}${data.money.toLocaleString('es-CO')}**`])
                 break;
 
             default:
