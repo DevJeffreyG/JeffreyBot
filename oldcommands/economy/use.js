@@ -194,7 +194,7 @@ module.exports = {
 
                 await victim.save();
                 await user.save();
-            } else if(isDarkShop && item.id === 5){
+            } else if(isDarkShop && item.id === 5){ // reset
                 deleteItem = true;
                 args[1] = "yo";
 
