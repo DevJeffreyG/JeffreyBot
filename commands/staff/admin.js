@@ -1,4 +1,4 @@
-const { Command, Embed, ErrorEmbed, WillBenefit, LimitedTime, FindNewId, Confirmation } = require("../../src/utils")
+const { Command, Embed, ErrorEmbed, WillBenefit, LimitedTime, FindNewId, Confirmation, Shop } = require("../../src/utils")
 const { Config, Colores, Emojis } = require("../../src/resources")
 
 const ms = require("ms");
@@ -9,7 +9,7 @@ const command = new Command({
     category: "ADMIN"
 })
 
-//demasiado complejo como para usar las funciones mias :sob:
+// gracias, discord
 command.data
     .addSubcommandGroup(temp =>
         temp
@@ -227,6 +227,28 @@ command.data
                     .setDescription("Obtén una lista de todos los códigos dentro del servidor")
             )
     )
+    .addSubcommandGroup(shop =>
+        shop
+            .setName("shop")
+            .setDescription("Administración de la tienda del servidor")
+            .addSubcommand(adddiscount =>
+                adddiscount
+                    .setName("add-discount")
+                    .setDescription("Agrega un nuevo descuento para usuarios por nivel")
+                    .addIntegerOption(o =>
+                        o
+                            .setName("nivel")
+                            .setDescription("El nivel al cual se aplicará el descuento")
+                            .setRequired(true)
+                    )
+                    .addIntegerOption(o =>
+                        o
+                            .setName("descuento")
+                            .setDescription("El descuento aplicado (en porcentaje, ej: 10, 15, 50)")
+                            .setRequired(true)
+                    )
+            )
+    )
 
 command.addEach({ filter: "add", type: "integer", name: "usos", desc: "Los usos máximos permitidos en global para esta key", min: 1 });
 
@@ -251,6 +273,10 @@ command.execute = async (interaction, models, params, client) => {
 
         case "vault":
             await command.vaultExec(interaction, models, params, client)
+            break;
+
+        case "shop":
+            await command.shopExec(interaction, models, params, client)
     }
 }
 
@@ -539,13 +565,13 @@ command.vaultExec = async (interaction, models, params, client) => {
 
             if (!pista && !recompensa) { // config del codigo actual
                 let e = new Embed()
-                .defAuthor({text: `Configuración de ${vaultCode.code}`, title: true})
-                .defDesc(`**—** Recompensa de **${Emojis.Jeffros}${vaultCode.reward.toLocaleString("es-CO")}**
+                    .defAuthor({ text: `Configuración de ${vaultCode.code}`, title: true })
+                    .defDesc(`**—** Recompensa de **${Emojis.Jeffros}${vaultCode.reward.toLocaleString("es-CO")}**
 **—** Tiene \`${vaultCode.hints.length}\` pistas en total.
 **—** ID: \`${vaultCode.id}\`.`)
-                .defColor(Colores.verde);
+                    .defColor(Colores.verde);
 
-                return interaction.editReply({embeds: [e]})
+                return interaction.editReply({ embeds: [e] })
             }
 
             if (pista) {
@@ -583,6 +609,21 @@ command.vaultExec = async (interaction, models, params, client) => {
             })
         }
     }
+}
+
+command.shopExec = async (interaction, models, params, client) => {
+    const { Shops } = models;
+    const { subcommand, shop } = params;
+    const { nivel, descuento } = shop;
+
+    const doc = await Shops.getOrCreate(interaction.guild.id);
+    const _shop = new Shop(doc, interaction);
+
+    switch(subcommand){
+        case "add-discount":
+            return _shop.addDiscount(nivel.value, descuento.value);
+    }
+
 }
 
 function generateCode() {
