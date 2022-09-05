@@ -1,14 +1,14 @@
 const moment = require("moment")
 const ms = require("ms")
 
-const { Command, ErrorEmbed, Embed, HumanMs, RandomCumplido } = require("../../src/utils")
+const { Command, Categories, ErrorEmbed, Embed, HumanMs, RandomCumplido } = require("../../src/utils")
 const { Colores } = require("../../src/resources");
 
 const command = new Command({
     name: "rep",
     desc: "Cada 24h puedes darle un punto de reputación a un usuario!",
     helpdesc: "Da un punto de reputación a un usuario cada 24 horas",
-    category: "GENERAL"
+    category: Categories.General
 })
 
 command.addOption({

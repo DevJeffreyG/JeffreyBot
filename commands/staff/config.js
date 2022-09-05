@@ -1,9 +1,9 @@
-const { Command, ErrorEmbed, Confirmation, FindNewId, Embed } = require("../../src/utils")
+const { Command, Categories, ErrorEmbed, Confirmation, FindNewId, Embed } = require("../../src/utils")
 
 const command = new Command({
     name: "config",
     desc: "Todo lo relacionado con el comportamiento de Jeffrey Bot en el servidor",
-    category: "ADMIN"
+    category: Categories.Administration
 })
 
 command.data

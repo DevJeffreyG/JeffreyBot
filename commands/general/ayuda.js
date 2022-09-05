@@ -1,4 +1,4 @@
-const { Command, ErrorEmbed, Embed } = require("../../src/utils");
+const { Command, Categories, ErrorEmbed, Embed } = require("../../src/utils");
 const { Config, Colores } = require("../../src/resources/");
 const Chance = require("chance");
 
@@ -6,7 +6,7 @@ const command = new Command({
     name: "ayuda",
     desc: "Una lista de todos los comandos en el bot",
     helpdesc: "¡Este comando!",
-    category: "GENERAL"
+    category: Categories.General
 });
 
 command.addOption({
@@ -84,39 +84,39 @@ command.execute = async (interaction, models, params, client) => {
         const toAdd = `▸ \`/${helpCommand.name}\`: ${helpCommand.info}${helpCommand.info.endsWith("!") || helpCommand.info.endsWith("?") ? "" : "."}\n`;
 
         switch(helpCommand.category){
-            case "GENERAL":
+            case Categories.General:
                 generalDesc += toAdd;
                 break;
             
-            case "FUN":
+            case Categories.Fun:
                 funDesc += toAdd;
                 break;
 
-            case "MUSIC":
+            case Categories.Music:
                 musicDesc += toAdd;
                 break;
 
-            case "ECONOMY":
+            case Categories.Economy:
                 economyDesc += toAdd;
                 break;
 
-            case "DARKSHOP":
+            case Categories.DarkShop:
                 darkshopDesc += toAdd;
                 break;
             
-            case "MODERATION":
+            case Categories.Moderation:
                 moderationDesc += toAdd;
                 break;
 
-            case "STAFF":
+            case Categories.Staff:
                 staffDesc += toAdd;
                 break;
 
-            case "ADMIN":
+            case Categories.Administration:
                 adminDesc += toAdd;
                 break;
                 
-            case "DEV":
+            case Categories.Developer:
                 devDesc += toAdd;
                 break;
 

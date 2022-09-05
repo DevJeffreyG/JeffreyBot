@@ -1,10 +1,10 @@
-const { Command, Embed } = require("../../src/utils");
+const { Command, Categories, Embed } = require("../../src/utils");
 const { Colores } = require("../../src/resources");
 
 const command = new Command({
     name: "encuesta",
     desc: "Crea una encuesta para que la gente en el chat vote",
-    category: "FUN"
+    category: Categories.Fun
 })
 
 command.addOption({

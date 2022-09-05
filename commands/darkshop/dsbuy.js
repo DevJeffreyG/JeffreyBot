@@ -1,9 +1,9 @@
 const { Command, Categories, Shop } = require("../../src/utils")
 
 const command = new Command({
-    name: "buy",
-    desc: "Compra items de la tienda",
-    category: Categories.Economy
+    name: "dsbuy",
+    desc: "Compra items de la DarkShop",
+    category: Categories.DarkShop
 })
 
 command.addOption({
@@ -16,12 +16,12 @@ command.addOption({
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
-    const { Shops } = models
+    const { DarkShops } = models
     const { id } = params
 
     // codigo
-    const doc = await Shops.getOrCreate(interaction.guild.id);
-    const shop = new Shop(doc, interaction);
+    const doc = await DarkShops.getOrCreate(interaction.guild.id);
+    const shop = new Shop(doc, interaction, true);
 
     return shop.buy(id.value)
 }

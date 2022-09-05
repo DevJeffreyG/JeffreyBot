@@ -1,11 +1,11 @@
-const { Command, Embed} = require("../../src/utils");
+const { Command, Categories, Embed} = require("../../src/utils");
 const { Colores } = require("../../src/resources");
 const { time } = require("discord.js");
 
 const command = new Command({
     name: "serverinfo",
     desc: "Obtén información (casi) útil del servidor",
-    category: "GENERAL"
+    category: Categories.General
 })
 
 command.execute = async (interaction, models, params, client) => {

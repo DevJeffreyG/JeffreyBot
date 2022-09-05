@@ -1,10 +1,10 @@
-const { Command, Embed } = require("../../src/utils")
+const { Command, Categories, Embed } = require("../../src/utils")
 const { Colores, Config, Emojis } = require("../../src/resources")
 
 const command = new Command({
     name: "inflacion",
     desc: "Te muestra la inflación actual de los DarkJeffros",
-    category: "DARKSHOP"
+    category: Categories.DarkShop
 })
 
 command.execute = async (interaction, models, params, client) => {

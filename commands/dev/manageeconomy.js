@@ -1,10 +1,10 @@
-const { Command, Embed } = require("../../src/utils")
+const { Command, Categories, Embed } = require("../../src/utils")
 const { Emojis, Colores } = require("../../src/resources")
 
 const command = new Command({
     name: "manageeconomy",
     desc: "Administra Jeffros o DarkJeffros de un usuario",
-    category: "DEV"
+    category: Categories.Developer
 });
 
 command.addSubcommandGroup({

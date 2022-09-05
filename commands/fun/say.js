@@ -1,9 +1,9 @@
-const { Command } = require("../../src/utils");
+const { Command, Categories } = require("../../src/utils");
 
 const command = new Command({
     name: "say",
     desc: "Repito lo que me digas",
-    category: "FUN"
+    category: Categories.Fun
 })
 
 command.addOption({

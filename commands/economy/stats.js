@@ -1,11 +1,11 @@
-const { Command, Embed } = require("../../src/utils")
-const { Config, Colores, Emojis } = require("../../src/resources");
+const { Command, Categories, Embed } = require("../../src/utils")
+const { Config, Emojis } = require("../../src/resources");
 
 const command = new Command({
     name: "stats",
     desc: "¡Revisa tu EXP, nivel y Jeffros actuales, o de otro usuario!",
     helpdesc: "Revisa tu EXP, nivel y Jeffros actuales, o de otro usuario",
-    category: "ECONOMY"
+    category: Categories.Economy
 })
 
 command.addOption({

@@ -1,4 +1,4 @@
-const { Command, Embed, ErrorEmbed, WillBenefit, LimitedTime, FindNewId, Confirmation, Shop } = require("../../src/utils")
+const { Command, Categories, Embed, ErrorEmbed, WillBenefit, LimitedTime, FindNewId, Confirmation, Shop } = require("../../src/utils")
 const { Config, Colores, Emojis } = require("../../src/resources")
 
 const ms = require("ms");
@@ -6,7 +6,7 @@ const ms = require("ms");
 const command = new Command({
     name: "admin",
     desc: "Comandos que administran diferentes secciones dentro de un servidor",
-    category: "ADMIN"
+    category: Categories.Administration
 })
 
 // gracias, discord

@@ -7,8 +7,8 @@ const Ticket = require("./Ticket");
 const Shop = require("./Shop");
 const Top = require("./Top");
 const Item = require("./Item");
+const Enums = require("./Enums");
 
-const Enums = require("./enums");
 const Functions = require("./functions");
 
 module.exports = {

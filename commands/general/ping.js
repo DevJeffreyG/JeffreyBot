@@ -1,10 +1,10 @@
-const { Command, Embed } = require("../../src/utils")
+const { Command, Categories, Embed } = require("../../src/utils")
 const { Colores } = require("../../src/resources/");
 
 const command = new Command({
     name: "ping",
     desc: "Revisa la latencia del bot con los servers de Discord",
-    category: "GENERAL"
+    category: Categories.General
 });
 command.execute = async (interaction, models, params, client) => {
     let start = Date.now();

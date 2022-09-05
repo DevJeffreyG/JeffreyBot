@@ -1,4 +1,4 @@
-const { Command, Embed, isOnMobible } = require("../../src/utils");
+const { Command, Categories, Embed, isOnMobible } = require("../../src/utils");
 const { Config, Colores } = require("../../src/resources");
 const changes = Config.changes;
 
@@ -17,7 +17,7 @@ let updateCounter = 0;
 const command = new Command({
     name: "changelog",
     desc: "Las últimas modificaciones hechas en la versión actual del bot",
-    category: "GENERAL"
+    category: Categories.General
 })
 
 command.addOption({ type: "boolean", name: "extended", desc: "Mostrar los detalles más extendidos? (Para usuarios de móvil)" })

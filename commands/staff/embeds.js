@@ -1,12 +1,12 @@
 const Discord = require("discord.js");
-const { Command, Embed, importImage } = require("../../src/utils");
+const { Command, Categories, Embed, importImage } = require("../../src/utils");
 const { Colores, Config, Emojis, EmbedImages } = require("../../src/resources");
 const { ButtonStyle } = require("discord-api-types/v10");
 
 const command = new Command({
     name: "embeds",
     desc: "Enviar embeds defaults para el servidor",
-    category: "STAFF"
+    category: Categories.Staff
 })
 
 command.addOption({

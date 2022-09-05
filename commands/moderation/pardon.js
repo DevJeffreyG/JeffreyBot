@@ -1,9 +1,9 @@
-const { Command, Embed, ErrorEmbed, Confirmation } = require("../../src/utils")
+const { Command, Categories, Embed, ErrorEmbed, Confirmation } = require("../../src/utils")
 const { Colores } = require("../../src/resources");
 const command = new Command({
     name: "pardon",
     desc: "Eliminar un softwarn o un warn por su id",
-    category: "MODERATION"
+    category: Categories.Moderation
 })
 
 command.addSubcommand({

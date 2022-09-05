@@ -1,4 +1,4 @@
-const { Command, Confirmation, FindNewId } = require("../../src/utils")
+const { Command, Categories, Confirmation, FindNewId } = require("../../src/utils")
 const { Emojis } = require("../../src/resources")
 
 const { PermissionsBitField } = require("discord.js");
@@ -6,7 +6,7 @@ const { PermissionsBitField } = require("discord.js");
 const command = new Command({
     name: "sync",
     desc: "Comandos para sincronizar algo dentro del guild o la base de datos",
-    category: "DEV"
+    category: Categories.Developer
 });
 
 command.addSubcommand({

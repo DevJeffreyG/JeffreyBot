@@ -1,11 +1,11 @@
-const { Command, Embed, VaultWork } = require("../../src/utils");
+const { Command, Categories, Embed, VaultWork } = require("../../src/utils");
 const { Colores, Emojis, Config } = require("../../src/resources");
 const chance = require("chance");
 
 const command = new Command({
     name: "vault",
     desc: "Si logras abrir la bóveda con unos acertijos, ganarás premios",
-    category: "FUN"
+    category: Categories.Fun
 })
 
 command.addOption({

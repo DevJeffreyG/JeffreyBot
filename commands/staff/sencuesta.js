@@ -1,4 +1,4 @@
-const { Command, Embed, importImage, FindNewId } = require("../../src/utils")
+const { Command, Categories, Embed, importImage, FindNewId } = require("../../src/utils")
 const { Config, Colores } = require("../../src/resources")
 
 const ms = require("ms");
@@ -7,7 +7,7 @@ const moment = require("moment");
 const command = new Command({
     name: "sencuesta",
     desc: "Encuesta que se pone fuera de las encuestas hechas por la comunidad en el canal de anuncios",
-    category: "STAFF"
+    category: Categories.Staff
 })
 
 command.addOption({

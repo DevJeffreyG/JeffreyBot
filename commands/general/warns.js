@@ -1,10 +1,10 @@
-const { Command, Embed } = require("../../src/utils")
+const { Command, Categories, Embed } = require("../../src/utils")
 const { Colores } = require("../../src/resources");
 
 const command = new Command({
     name: "warns",
     desc: "Revisa toda la información de tus warns",
-    category: "GENERAL"
+    category: Categories.General
 })
 
 command.addOption({

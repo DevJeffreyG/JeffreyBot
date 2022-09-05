@@ -1,10 +1,10 @@
-const { Command, Confirmation, Embed} = require("../../src/utils");
+const { Command, Categories, Confirmation, Embed} = require("../../src/utils");
 const ms = require("ms")
 
 const command = new Command({
     name: "cumple",
     desc: "Especificas tu fecha de cumpleaños dentro del servidor",
-    category: "FUN"
+    category: Categories.Fun
 })
 
 command.addSubcommand({

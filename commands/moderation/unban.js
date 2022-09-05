@@ -1,10 +1,10 @@
-const { Command, Embed} = require("../../src/utils")
+const { Command, Categories, Embed } = require("../../src/utils")
 const { Config, Colores } = require("../../src/resources")
 
 const command = new Command({
     name: "unban",
     desc: "Desbanear a un usuario por su ID",
-    category: "MODERATION"
+    category: Categories.Moderation
 });
 
 command.addOption({

@@ -1,10 +1,10 @@
-const { Command, Embed } = require("../../src/utils")
+const { Command, Categories, Embed } = require("../../src/utils")
 const { Colores } = require("../../src/resources")
 
 const command = new Command({
     name: "find",
     desc: "Buscar el ID por nombre",
-    category: "DEV"
+    category: Categories.Developer
 });
 
 command.addSubcommand({

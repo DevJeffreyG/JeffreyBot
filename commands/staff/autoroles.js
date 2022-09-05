@@ -1,11 +1,11 @@
-const { Command, Embed, ErrorEmbed, FindNewId, Confirmation } = require("../../src/utils")
+const { Command, Categories, Embed, ErrorEmbed, FindNewId, Confirmation } = require("../../src/utils")
 const { Colores } = require("../../src/resources")
 const { SnowflakeUtil } = require("discord.js")
 
 const command = new Command({
     name: "autoroles",
     desc: "Todo lo que tenga que ver con AutoRoles está aquí",
-    category: "STAFF"
+    category: Categories.Staff
 })
 
 command.data

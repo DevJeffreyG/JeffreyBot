@@ -1,12 +1,12 @@
 const ms = require("ms");
 
-const { Command, Embed, intervalGlobalDatas } = require("../../src/utils")
+const { Command, Categories, Embed, intervalGlobalDatas } = require("../../src/utils")
 const { Colores } = require("../../src/resources")
 
 const command = new Command({
     name: "globaldata",
     desc: "Obtener información de globaldatas",
-    category: "DEV"
+    category: Categories.Developer
 })
 
 command.addOption({

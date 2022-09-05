@@ -1,10 +1,10 @@
-const { Command, Confirmation, ErrorEmbed, Embed, Sleep } = require("../../src/utils")
+const { Command, Categories, Confirmation, ErrorEmbed, Embed, Sleep } = require("../../src/utils")
 const { Config, Colores, Emojis } = require("../../src/resources");
 
 const command = new Command({
     name: "pay",
     desc: "Le das de tus Jeffros a otro usuario",
-    category: "ECONOMY"
+    category: Categories.Economy
 })
 
 command.addOption({

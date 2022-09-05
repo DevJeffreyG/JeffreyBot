@@ -1,10 +1,10 @@
-const { Command, ErrorEmbed, Embed } = require("../../src/utils")
+const { Command, Categories, ErrorEmbed, Embed } = require("../../src/utils")
 const { Config, Colores } = require("../../src/resources");
 
 const command = new Command({
     name: "inventory",
     desc: "Te muestra los items actualmente en tu inventario",
-    category: "ECONOMY"
+    category: Categories.Economy
 })
 
 command.execute = async (interaction, models, params, client) => {

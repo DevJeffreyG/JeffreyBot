@@ -1,10 +1,10 @@
-const { Command, Embed } = require("../../src/utils")
+const { Command, Categories, Embed } = require("../../src/utils")
 const { Config, Colores } = require("../../src/resources")
 
 const command = new Command({
     name: "actividad",
     desc: "Cambia la actividad del bot (temporalmente)",
-    category: "DEV"
+    category: Categories.Developer
 })
 
 command.addOption({

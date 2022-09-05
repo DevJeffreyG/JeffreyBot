@@ -1,10 +1,10 @@
-const { Command, Embed } = require("../../src/utils");
+const { Command, Categories, Embed } = require("../../src/utils");
 const { Colores } = require("../../src/resources");
 
 const command = new Command({
     name: "avatar",
     desc: "Muestra tu avatar o el de otro en el server",
-    category: "GENERAL"
+    category: Categories.General
 })
 
 command.addOption({

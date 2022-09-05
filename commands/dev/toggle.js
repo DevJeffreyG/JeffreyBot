@@ -1,10 +1,10 @@
 const { Config, Colores } = require("../../src/resources");
-const { Command, Embed } = require("../../src/utils");
+const { Command, Categories, Embed } = require("../../src/utils");
 
 const command = new Command({
     name: "toggle",
     desc: "Habilita o deshabilita un comando del bot",
-    category: "DEV"
+    category: Categories.Developer
 });
 
 command.addOption({

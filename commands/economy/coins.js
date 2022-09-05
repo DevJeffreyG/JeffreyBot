@@ -1,7 +1,7 @@
 const ms = require("ms");
 const moment = require("moment");
 
-const { Command, HumanMs, Embed, RandomCumplido } = require("../../src/utils");
+const { Command, Categories, HumanMs, Embed, RandomCumplido } = require("../../src/utils");
 
 const { Config, Emojis, Responses } = require("../../src/resources/");
 const { multiplier } = Config;
@@ -9,7 +9,7 @@ const { multiplier } = Config;
 const command = new Command({
     name: "coins",
     desc: "Gana Jeffros extras en un intervalo de 10 minutos (o menos)",
-    category: "ECONOMY"
+    category: Categories.Economy
 });
 
 command.execute = async (interaction, models, params, client) => {

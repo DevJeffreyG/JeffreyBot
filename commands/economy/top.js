@@ -1,9 +1,9 @@
-const { Command, Top } = require("../../src/utils")
+const { Command, Categories, Top } = require("../../src/utils")
 
 const command = new Command({
     name: "top",
     desc: "Revisa los tops del servidor",
-    category: "ECONOMY"
+    category: Categories.Economy
 })
 
 command.addSubcommand({

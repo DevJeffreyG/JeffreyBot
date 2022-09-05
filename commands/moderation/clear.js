@@ -1,11 +1,10 @@
-const { Command, Embed, ErrorEmbed} = require("../../src/utils")
-const { Config, Colores } = require("../../src/resources");
+const { Command, Categories, Embed, ErrorEmbed} = require("../../src/utils")
 const moment = require("moment");
 
 const command = new Command({
     name: "clear",
     desc: "Elimina mensajes del chat",
-    category: "MODERATION"
+    category: Categories.Moderation
 });
 
 command.addOption({

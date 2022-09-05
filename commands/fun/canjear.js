@@ -1,10 +1,10 @@
-const { Command, LimitedTime, WillBenefit, HumanMs, ErrorEmbed } = require("../../src/utils");
-const { Colores, Emojis } = require("../../src/resources");
+const { Command, Categories, LimitedTime, WillBenefit, HumanMs, ErrorEmbed } = require("../../src/utils");
+const { Emojis } = require("../../src/resources");
 
 const command = new Command({
     name: "canjear",
     desc: "Canjeas alguna clave para recompensas dentro del servidor",
-    category: "FUN"
+    category: Categories.Fun
 })
 
 command.addOption({

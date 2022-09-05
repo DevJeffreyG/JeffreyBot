@@ -1,9 +1,9 @@
-const { Command, Item, ErrorEmbed } = require("../../src/utils")
+const { Command, Categories, Item, ErrorEmbed } = require("../../src/utils")
 
 const command = new Command({
     name: "use",
     desc: "Usa items en tu inventario",
-    category: "ECONOMY"
+    category: Categories.Economy
 })
 
 command.addOption({

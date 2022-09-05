@@ -1,10 +1,9 @@
-const { Command, Shop } = require("../../src/utils")
-const { Config, Colores } = require("../../src/resources");
+const { Command, Categories, Shop } = require("../../src/utils")
 
 const command = new Command({
     name: "shop",
     desc: "Visita la tienda del servidor",
-    category: "ECONOMY"
+    category: Categories.Economy
 })
 
 command.execute = async (interaction, models, params, client) => {

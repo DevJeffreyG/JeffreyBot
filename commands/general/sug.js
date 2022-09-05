@@ -1,12 +1,12 @@
 const Discord = require("discord.js");
-const { Command, isBannedFrom, FindNewId, DataWork, Embed } = require("../../src/utils");
+const { Command, Categories, isBannedFrom, FindNewId, DataWork, Embed } = require("../../src/utils");
 const { Colores } = require("../../src/resources");
 const { ButtonStyle } = require("discord-api-types/v10");
 
 const command = new Command({
     name: "sug",
     desc: "¡Envía una sugerencia directamente al STAFF para mejorar el servidor!",
-    category: "GENERAL"
+    category: Categories.General
 })
 
 command.addOption({

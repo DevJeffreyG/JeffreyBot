@@ -1,7 +1,7 @@
 const { ActionRowBuilder, ButtonBuilder, time } = require("discord.js")
 const { ButtonStyle, PermissionFlagsBits } = require("discord-api-types/v10");
 
-const { Command, Embed } = require("../../src/utils")
+const { Command, Categories, Embed } = require("../../src/utils")
 const { Colores, Config } = require("../../src/resources")
 
 const ms = require("ms");
@@ -9,7 +9,7 @@ const ms = require("ms");
 const command = new Command({
     name: "userinfo",
     desc: "Obtén información de un usuario",
-    category: "STAFF"
+    category: Categories.Staff
 })
 
 command.addOption({

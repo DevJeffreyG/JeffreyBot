@@ -1,10 +1,11 @@
-const { Command, Embed, ErrorEmbed, Confirmation, FindNewId, AfterInfraction } = require("../../src/utils")
+const { Command, Categories, Embed, ErrorEmbed, Confirmation, FindNewId, AfterInfraction } = require("../../src/utils")
 const { Colores } = require("../../src/resources/");
 const { SelectMenuBuilder, ActionRowBuilder } = require("discord.js")
+
 const command = new Command({
     name: "warn",
     desc: "Agregar una infracción a un usuario",
-    category: "MODERATION"
+    category: Categories.Moderation
 })
 
 command.addOption({

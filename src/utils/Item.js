@@ -1,7 +1,7 @@
 const { GuildMember } = require("discord.js")
 const Embed = require("./Embed");
 const ErrorEmbed = require("./ErrorEmbed");
-const ItemTypes = require("./enums/ItemTypes");
+const { ItemTypes } = require("./Enums");
 
 const { FindNewId, LimitedTime } = require("./functions");
 

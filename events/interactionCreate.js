@@ -6,7 +6,7 @@ const ms = require("ms");
 const models = require("mongoose").models;
 const { ToggledCommands, Users, Guilds } = models
 
-const { Ticket, ErrorEmbed, FindNewId, Confirmation, intervalGlobalDatas, } = require("../src/utils");
+const { Ticket, ErrorEmbed, intervalGlobalDatas, Categories, ValidateDarkShop } = require("../src/utils");
 const { Config, Colores } = require("../src/resources");
 const { InteractionType } = require("discord-api-types/v10");
 const { jeffreygID, mantenimiento } = Config;
@@ -21,10 +21,8 @@ module.exports = async (client, interaction) => {
   const customId = interaction.customId;
 
   const docGuild = await Guilds.findOne({ guild_id: guild.id }) ?? await new Guilds({ guild_id: guild.id }).save();
-  const prefix = "/";
-  const staff_role = guild.roles.cache.find(x => x.id === docGuild.roles.staffs[0]);
 
-  const user = await Users.findOne({ guild_id: guild.id, user_id: author.id }) ?? await new Users({ guild_id: guild.id, user_id: author.id }).save();
+  const user = await Users.getOrCreate({ user_id: author.id, guild_id: guild.id });
 
   if (interaction.type === InteractionType.ApplicationCommand) { // SLASH COMMANDS
     const commandName = interaction.commandName;
@@ -100,7 +98,11 @@ module.exports = async (client, interaction) => {
 
     async function executeSlash(interaction, models, params, client) {
       try {
-        //console.log(slashCommand)
+        if(slashCommand.category === Categories.DarkShop){
+          // filtro de nivel 5
+          let validation = await ValidateDarkShop(user, interaction.user);
+          if(!validation.valid) return interaction.reply({embeds: [validation.embed]})
+        }
         await slashCommand.execute(interaction, models, params, client);
       } catch (error) {
         console.error(error);
