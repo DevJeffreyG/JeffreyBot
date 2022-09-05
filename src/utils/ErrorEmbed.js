@@ -116,7 +116,7 @@ ${data.error}
 
             case "economyError":
                 this.#errorAuthor(13)
-                this.#errorDesc("Error en la transacción", data.action, [data.error, `Tienes: **${Emojis.Jeffros}${data.money.toLocaleString('es-CO')}**`])
+                this.#errorDesc("Error en la transacción", data.action, [data.error, `Tienes: **${data.darkshop ? Emojis.Dark : Emojis.Jeffros}${data.money.toLocaleString('es-CO')}**`])
                 break;
 
             default:

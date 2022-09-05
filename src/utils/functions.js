@@ -1415,7 +1415,7 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
     collector.on("collect", async i => {
       try {
         await i.deferUpdate();
-      } catch(err) {
+      } catch (err) {
         console.log("⚠️ %s", err);
       }
 
@@ -1461,7 +1461,7 @@ const AfterInfraction = async function (user, data, isSoftwarn = false) {
     let arrayEmbeds = [];
 
     let warnedEmbed = new Embed()
-      .defAuthor({text: `Warn`, icon: "https://cdn.discordapp.com/emojis/494267320097570837.png"})
+      .defAuthor({ text: `Warn`, icon: "https://cdn.discordapp.com/emojis/494267320097570837.png" })
       .defDesc(`
 **—** Has sido __warneado__ por el STAFF.
 **—** Warns actuales: **${totalWarns}**.
@@ -1469,14 +1469,14 @@ const AfterInfraction = async function (user, data, isSoftwarn = false) {
 **—** **[Pruebas](${proof.url})**.
 **—** ID de Warn: \`${id}\`.`)
       .defColor(Colores.rojo)
-      .defFooter({text: `Ten más cuidado la próxima vez!`, icon: 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png'});
+      .defFooter({ text: `Ten más cuidado la próxima vez!`, icon: 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png' });
 
     arrayEmbeds.push(warnedEmbed);
     let banMember = false;
 
     if (totalWarns >= 4) {
       let autoMod = new Embed()
-        .defAuthor({text: `Ban PERMANENTE.`, icon: "https://cdn.discordapp.com/emojis/537804262600867860.png"})
+        .defAuthor({ text: `Ban PERMANENTE.`, icon: "https://cdn.discordapp.com/emojis/537804262600867860.png" })
         .defDesc(`**—** PERMABAN.
 **—** Warns actuales: **${totalWarns}**.
 **—** Razón de ban (AutoMod): Muchos warns.
@@ -1489,7 +1489,7 @@ const AfterInfraction = async function (user, data, isSoftwarn = false) {
 
       if (totalWarns >= 3) {
         let autoMod = new Embed()
-          .defAuthor({text: `TempBan`, icon: "https://cdn.discordapp.com/emojis/537792425129672704.png"})
+          .defAuthor({ text: `TempBan`, icon: "https://cdn.discordapp.com/emojis/537792425129672704.png" })
           .defDesc(`**—** Ban (24h).
 **—** Warns actuales: **${totalWarns}**.
 **—** Razón de ban (AutoMod): 3 warns acumulados.
@@ -1537,7 +1537,7 @@ const AfterInfraction = async function (user, data, isSoftwarn = false) {
 
         if (totalWarns >= 2) {
           let infoEmbed = new Embed()
-            .defAuthor({text: `Información`, icon: "https://cdn.discordapp.com/emojis/494267320097570837.png?v=1"})
+            .defAuthor({ text: `Información`, icon: "https://cdn.discordapp.com/emojis/494267320097570837.png?v=1" })
             .defDesc(`**—** ${member.user.tag}, este es tu **warn número ❛ \`2\` ❜**
 *— ¿Qué impacto tendrá este warn?*
 **—** Tranquil@. Este warn no afectará en nada tu estadía en el servidor, sin embargo; el siguiente warn será un **ban de un día**.
@@ -2081,7 +2081,10 @@ const ValidateDarkShop = async function (user, author) {
   const r = [
     "{you}... No estás listo.",
     "No tienes el valor para hacerlo.",
-    "Esto no va a terminar bien para ti, {you}."
+    "Esto no va a terminar bien para ti, {you}.",
+    "No eres digno.",
+    "Olvídalo, {you}.",
+    "Aún no, {you}."
   ];
 
   let res = r[Math.floor(Math.random() * r.length)];
@@ -2091,13 +2094,13 @@ const ValidateDarkShop = async function (user, author) {
     `**${author.tag}**`
   );
 
-  const notReady = new EmbedBuilder()
-    .setColor(Colores.rojo)
-    .setDescription(desc)
-    .setFooter("▸ Vuelve cuando seas nivel 5.");
+  const notReady = new Embed()
+    .defColor(Colores.rojo)
+    .defDesc(desc)
+    .defFooter({ text: "▸ Vuelve cuando seas nivel 5." });
 
-  if (user.economy.global.level < 5) return [false, notReady];
-  else return [true];
+  if (user.economy.global.level < 5) return { valid: false, embed: notReady }
+  else return { valid: true, embed: null };
 }
 
 const DaysUntilToday = async function (date) {

@@ -10,9 +10,8 @@ const DarkShopsSchema = new Schema({
             price: { type: Number, required: true },
             description: { type: String, required: true },
             reply: { type: String, default: "Item usado con éxito", required: true },
-            req_role: { type: String },
+            req_role: { type: String, default: null },
             interest: { type: Number, default: 0, required: true },
-            id: { type: Number, required: true, sparse: true },
             use_info: {
                 effect: { type: String, default: null }, // en caso de ser de la darkshop
                 action: { type: String, required: true }, // add | remove
@@ -24,6 +23,9 @@ const DarkShopsSchema = new Schema({
                 boost_type: { type: String, default: null },
                 boost_value: { type: Number, default: null }
             },
+            disabled: { type: Boolean, default: false },
+            disabled_until: { type: Date, default: null },
+            id: { type: Number, required: true, sparse: true }
         }
     ],
     inflation: {

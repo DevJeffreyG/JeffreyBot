@@ -26,11 +26,11 @@ class Shop {
 
         this.items = new Map();
         this.base = {
-            title: `${this.interaction.guild.name} Shop`,
+            title: `${this.interaction.guild.name} ${isDarkShop ? "DarkShop" : "Shop"}`,
             author_icon: this.interaction.guild.iconURL({ dynamic: true }) ?? this.interaction.member.displayAvatarURL(),
-            color: Colores.verdejeffrey,
+            color: isDarkShop ? Colores.negro : Colores.verdejeffrey,
             description: ``,
-            addon: `**\`{item_id}\` — {item_name}**\n▸ {item_desc}\n▸ **${Emojis.Jeffros}{item_price}**\n\n`,
+            addon: `**\`{item_id}\` — {item_name}**\n▸ {item_desc}\n▸ **${this.isDarkShop ? Emojis.Dark : Emojis.Jeffros}{item_price}**\n\n`,
             footer: `Página {ACTUAL} de {TOTAL}`,
             icon_footer: this.interaction.guild.iconURL()
         }
@@ -41,7 +41,10 @@ class Shop {
 
     async setup() {
         this.user = await Users.getOrCreate({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id });
-        this.base.description = `**—** ¡Bienvenid@ a la tienda! para comprar items usa \`/buy #\`.\n**—** Tienes **${Emojis.Jeffros}${this.user.economy.global.jeffros.toLocaleString("es-CO")}**`;
+        if(this.isDarkShop)
+            this.base.description = `**—** Bienvenid@ a la DarkShop. Para comprar items usa \`/dsbuy #\`.\n**—** Tienes **${Emojis.Dark}${this.user.economy.dark.darkjeffros.toLocaleString("es-CO")}**`;
+        else
+            this.base.description = `**—** ¡Bienvenid@ a la tienda! para comprar items usa \`/buy #\`.\n**—** Tienes **${Emojis.Jeffros}${this.user.economy.global.jeffros.toLocaleString("es-CO")}**`;
 
         this.shop.items.forEach((item, index) => {
             var price = this.determinePrice(this.user, item, true);
@@ -75,11 +78,11 @@ class Shop {
 
         let toConfirm = [
             `¿Deseas comprar el item \`${itemName}\`?`,
-            `Pagarás **${Emojis.Jeffros}${itemPrice}**.`,
+            `Pagarás **${this.isDarkShop ? Emojis.Dark : Emojis.Jeffros}${itemPrice}**.`,
             `Esta compra no se puede devolver.`
         ]
 
-        if (item.interest > 0) toConfirm.push(`Al comprar el item, su precio subirá (**+${Emojis.Jeffros}${item.interest.toLocaleString("es-CO")}**)`)
+        if (item.interest > 0) toConfirm.push(`Al comprar el item, su precio subirá (**+${this.isDarkShop ? Emojis.Dark : Emojis.Jeffros}${item.interest.toLocaleString("es-CO")}**)`)
 
         let confirmation = await Confirmation("Comprar item", toConfirm, this.interaction);
         if (!confirmation) return;
@@ -90,8 +93,9 @@ class Shop {
             type: "economyError",
             data: {
                 action: "buy",
-                error: "No tienes suficientes Jeffros",
-                money: user.economy.global.jeffros
+                error: `No tienes suficientes ${this.isDarkShop ? "DarkJeffros" : "DarkJeffros"}`,
+                money: this.isDarkShop ? user.economy.dark.darkjeffros : user.economy.global.jeffros,
+                darkshop: this.isDarkShop
             }
         })
 
@@ -128,8 +132,8 @@ class Shop {
         // buscar si ya tiene el role que se da
         if (item.use_info.action === "add" && item.use_info.objetive === "role" && member.roles.cache.find(x => x.id === item.use_info.given)) return hasRoleToGive.send();
 
-        if (!user.canBuy(price)) return noMoney.send();
-        if (user.hasItem(itemId)) return hasItem.send();
+        if (!user.canBuy(price, this.isDarkShop)) return noMoney.send();
+        if (user.hasItem(itemId, this.isDarkShop)) return hasItem.send();
 
         const newUseId = await FindNewId(await Users.find(), "data.inventory", "use_id");
 
@@ -142,8 +146,9 @@ class Shop {
             }
         }
 
-        user.economy.global.jeffros -= price;
-        user.data.inventory.push({ item_id: item.id, use_id: newUseId })
+        if(this.isDarkShop) user.economy.dark.darkjeffros -= price;
+        else user.economy.global.jeffros -= price;
+        user.data.inventory.push({ isDarkShop: this.isDarkShop, item_id: item.id, use_id: newUseId })
 
         await user.save();
 
@@ -152,7 +157,7 @@ class Shop {
             data: {
                 desc: [
                     "Pago realizado con éxito",
-                    `Compraste: \`${itemName}\` por ${itemPrice}`,
+                    `Compraste: \`${itemName}\` por **${this.isDarkShop ? Emojis.Dark : Emojis.Jeffros}${itemPrice}**`,
                     `Úsalo con \`/use ${newUseId}\``,
                     `Ahora tienes: ${user.parseJeffros()}`
                 ]
@@ -261,14 +266,8 @@ class Shop {
 
     async #prepareInit() {
         const interactive = new InteractivePages(this.base, this.items)
-        this.pages = interactive.pages;/* 
+        this.pages = interactive.pages;
 
-        let embed = new Discord.MessageEmbed()
-        .setAuthor({name: this.base.title, iconURL: this.base.icon})
-        .setColor(this.interaction.member.displayHexColor)
-        .setDescription(`${this.base.description}\n\n${this.pages.get(1).join(" ")}`)
-        .setFooter({text: this.base.footer.replace(new RegExp("{ACTUAL}", "g"), `1`).replace(new RegExp("{TOTAL}", "g"), `${this.pages.size}`), iconURL: this.base.icon_footer});
- */
         await interactive.init(this.interaction, this.client);
     }
 
@@ -286,6 +285,8 @@ class Shop {
         const inital_price = precio;
         const user_level = user.economy.global.level;
         const discounts = this.shop.discounts;
+
+        if(!discounts || this.isDarkShop) return;
 
         // descuentos
         let query = discounts?.filter(x => user_level >= x.level)
@@ -314,21 +315,21 @@ class Shop {
         }
     }
 
-    determinePrice(user, item, toString) {
+    determinePrice(user, item, toString = false) {
         const originalPrice = item.price;
 
         // nuevo precio a partir de interés
         const interest = item.interest;
         const searchInterest = x => (x.isDarkShop === this.isDarkShop) && (x.item_id === item.id);
-        const totalpurchases = user.data.purchases.find(searchInterest) ? user.data.purchases.find(searchInterest).quantity : 0;
+        const totalpurchases = user.data.purchases.find(searchInterest)?.quantity ?? 0;
 
         const interestPrice = originalPrice + (totalpurchases * interest);
         let precio = interestPrice;
 
         let work = this.#discountsWork(user, precio);
 
-        if (toString) return work.stringPrecio;
-        return work.precio;
+        if (toString) return work?.stringPrecio ?? precio.toLocaleString("es-CO");
+        return work?.precio ?? precio;
     }
 }
 

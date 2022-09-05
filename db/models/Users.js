@@ -116,10 +116,10 @@ const Schema = new mongoose.Schema({
             jeffros: { type: Number, required: true, default: 0 }
         },
         dark: {
-            darkjeffros: { type: Number },
-            accuracy: { type: Number },
-            duration: { type: Number },
-            dj_since: { type: Date }
+            darkjeffros: { type: Number, default: 0 },
+            accuracy: { type: Number, default: null },
+            duration: { type: Number, default: null },
+            dj_since: { type: Date, default: null}
         }
     }
 })
@@ -147,21 +147,23 @@ Schema.method("addRep", async function (count) {
 })
 
 
-Schema.method("hasItem", function (itemId) {
+Schema.method("hasItem", function (itemId, darkshop = false) {
     let x = false;
     this.data.inventory.forEach(item => {
-        if (item.item_id === itemId) x = true;
+        if (item.item_id === itemId && item.isDarkShop === darkshop) x = true;
     });
 
     return x
 })
 
-Schema.method("canBuy", function (price) {
-    return this.economy.global.jeffros >= price
+Schema.method("canBuy", function (price, darkshop = false) {
+    if(!darkshop) return this.economy.global.jeffros >= price
+    return this.economy.dark.darkjeffros >= price
 })
 
-Schema.method("parseJeffros", function () {
-    return `**${Emojis.Jeffros}${this.economy.global.jeffros.toLocaleString("es-CO")}**`;
+Schema.method("parseJeffros", function (darkshop = false) {
+    if(!darkshop) return `**${Emojis.Jeffros}${this.economy.global.jeffros.toLocaleString("es-CO")}**`;
+    return `**${Emojis.Dark}${this.economy.dark.darkjeffros.toLocaleString("es-CO")}**`;
 })
 
 module.exports = mongoose.model('Users', Schema)
