@@ -10,6 +10,9 @@ const command = new Command({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { Users, Shops} = models
+    const { darkshop } = params;
+
+    const isDarkShop = darkshop?.value ?? false;
     
     // codigo
     const user = await Users.getOrCreate({
@@ -35,10 +38,10 @@ command.execute = async (interaction, models, params, client) => {
 
     user.data.inventory.forEach(item => {
         const real_item = shop.items.length > 0 ? shop.items.find(x => x.id === item.item_id) : null;
-        if(real_item && !item.isDarkShop) itemsEmbed.defField(`— ${real_item.name}`, `**— Activo**: \`${item.active ? "sí" : "no"}\`.\n**— ID**: \`${item.use_id}\`.`)
+        if(real_item && item.isDarkShop === isDarkShop) itemsEmbed.defField(`— ${real_item.name}`, `**— Activo**: \`${item.active ? "sí" : "no"}\`.\n**— ID**: \`${item.use_id}\`.`)
     });
 
-    if(user.data.inventory.filter(x => !x.isDarkShop).length === 0) return noItems.send();
+    if(user.data.inventory.filter(x => x.isDarkShop === isDarkShop).length === 0) return noItems.send();
 
     return interaction.editReply({embeds: [itemsEmbed]});
 }
