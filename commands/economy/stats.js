@@ -22,7 +22,7 @@ command.execute = async (interaction, models, params, client) => {
     const guild = client.guilds.cache.find(x => x.id === interaction.guildId);
     
     // codigo
-    const member = usuario ? usuario.member : interaction.member;
+    const member = usuario?.member ?? interaction.member;
 
     let user = await Users.getOrCreate({user_id: member.id, guild_id: guild.id});
 

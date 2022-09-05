@@ -1,7 +1,7 @@
 //packages
 const Discord = require("discord.js");
 const ms = require("ms");
-const moment = require('moment-timezone');
+const moment = require('moment');
 
 const { Config } = require("../src/resources/");
 const { Embed } = require("../src/utils");

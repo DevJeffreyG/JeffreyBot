@@ -37,8 +37,6 @@ command.execute = async (interaction, models, params, client) => {
 
     bdgText = bdgText.slice(0, -2); // eliminar coma y espacio final
 
-    console.log(member.premiumSince)
-
     const user = new Embed()
         .defAuthor({ text: member.user.username, icon: member.displayAvatarURL() })
         .defDesc(`**— General**

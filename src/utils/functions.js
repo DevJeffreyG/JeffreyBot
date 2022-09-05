@@ -2104,6 +2104,8 @@ const ValidateDarkShop = async function (user, author) {
 }
 
 const DaysUntilToday = async function (date) {
+  if(!date) return "?";
+  
   let hoy = new Date();
   let oldDate = new Date(date); // fecha del dia inicial
 
