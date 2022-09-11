@@ -23,6 +23,7 @@ class ErrorEmbed extends Embed {
      * - errorFetch
      * - discordLimitation
      * - economyError
+     * - execError
      * @param {string} options.data - La información que tiene este tipo
      * @description Creación de un ErrorEmbed
      */
@@ -42,6 +43,8 @@ class ErrorEmbed extends Embed {
 
     #setup(options){
         this.defColor(Colores.rojo)
+
+        if(!options) return this.#customError();
 
         const { type, data } = options;
 
@@ -119,9 +122,18 @@ ${data.error}
                 this.#errorDesc("Error en la transacción", data.action, [data.error, `Tienes: **${data.darkshop ? Emojis.Dark : Emojis.Jeffros}${data.money.toLocaleString('es-CO')}**`])
                 break;
 
+            case "execError":
+                this.#errorAuthor(14)
+                this.#errorDesc("Error al ejecutar el comando", data.command, [data.guide])
+                break;
+
             default:
                 console.error("⚠️🔴 No existe %s como tipo de Error ❗❗", type);
         }
+    }
+
+    #customError(){
+        this.defAuthor({text: "Error", icon: Config.errorPng});
     }
 
     #errorAuthor(errorNumber){
@@ -143,7 +155,12 @@ ${data.error}
     send(){
         if(!this.interaction) return console.error("🔴 NO EXISTE this.interaction !!")
         else
-        return this.interaction.editReply({content: null, embeds: [this], components: []});
+        try {
+            return this.interaction.editReply({content: null, embeds: [this], components: []});
+        } catch (err) {
+            console.log("🔴 NO se envió el ErrorEmbed!")
+            console.log(err);
+        }
     }
 }
 
