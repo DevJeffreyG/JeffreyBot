@@ -13,15 +13,19 @@ const DarkShopsSchema = new Schema({
             req_role: { type: String, default: null },
             interest: { type: Number, default: 0, required: true },
             use_info: {
-                effect: { type: String, default: null }, // en caso de ser de la darkshop
-                action: { type: String, required: true }, // add | remove
-                objetive: { type: String, required: true }, // warns, role, boost
-                given: { type: String, required: true }, // puede ser un INT, o un ROLE, lo que se da
-                isSub: { type: Boolean, required: true, default: false }, // es una sub?
-                isTemp: { type: Boolean, required: true, default: false }, // es un temprole?
-                duration: { type: Number, default: null }, // la duracion si es un sub, temprole o boost
-                boost_type: { type: String, default: null },
-                boost_value: { type: Number, default: null }
+                effect: { type: Number, default: null },
+                action: { type: Number, default: null }, // add | remove
+                given: { type: String, default: null }, // puede ser un INT, o un ROLE, lo que se da
+                objetive: { type: Number, default: null }, // warns, role, boost, item
+                item_info: {
+                    type: { type: Number, default: null },
+                    duration: {type: Number, default: null }
+                },
+                boost_info: {
+                    type: { type: Number, default: null },
+                    value: { type: Number, default: null },
+                    objetive: { type: Number, default: null }
+                },
             },
             disabled: { type: Boolean, default: false },
             disabled_until: { type: Date, default: null },
@@ -62,6 +66,10 @@ DarkShopsSchema.method("findItemIndex", function (itemId) {
 
 DarkShopsSchema.method("isUsable", function (item) {
     return item.after_use.action !== null && !item.disabled;
+})
+
+DarkShopsSchema.method("getItemType", function (item) {
+    return item.use_info.item_info.type;
 })
 
 module.exports = mongoose.model('DarkShops', DarkShopsSchema)

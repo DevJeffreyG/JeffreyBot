@@ -1,7 +1,7 @@
 //packages
 const Discord = require("discord.js");
 const ms = require("ms");
-const moment = require('moment');
+const moment = require('moment-timezone');
 
 const { Config } = require("../src/resources/");
 const { Embed } = require("../src/utils");
@@ -32,7 +32,7 @@ module.exports = async (client, message) => {
     if (message.author.bot) return;
     if (message.channel.type == "DM") return;
     
-    const docGuild = await Guilds.findOne({guild_id: message.guild.id}) ?? await new Guilds({guild_id: message.guild.id}).save();
+    const docGuild = await Guilds.getOrCreate(message.guild.id);
     const prefix = "/";
     const messageArray = message.content.split(" ");
     const cmd = messageArray[0].toLowerCase();
@@ -46,13 +46,10 @@ module.exports = async (client, message) => {
     await intervalGlobalDatas(client, true); // verificar si existen BOOSTS.
 
     // buscar usuario
-    const user = await Users.findOne({
+    const user = await Users.getOrCreate({
       user_id: author.id,
       guild_id: guild.id
-    }) ?? await new Users({
-      user_id: author.id,
-      guild_id: guild.id
-    }).save();
+    });
 
     // eliminar multimedia en las noches
     let ahora = moment().tz("America/Bogota");

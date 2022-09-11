@@ -9,7 +9,6 @@ class Top {
         this.type = type;
         this.users = users;
         this.interaction = interaction;
-        this.client = this.interaction.client;
 
         this.base = {
             author_icon: this.interaction.guild.iconURL({ dynamic: true }) ?? this.interaction.member.displayAvatarURL(),
@@ -45,7 +44,7 @@ class Top {
 
         //interactive pages
         const interactive = new InteractivePages(this.base, this.top, 5);
-        return interactive.init(this.interaction, this.client);
+        return interactive.init(this.interaction);
     }
 
     async #jeffrosTop() {

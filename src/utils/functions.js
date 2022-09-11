@@ -1,4 +1,4 @@
-const { PermissionsBitField, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, EmbedBuilder } = require("discord.js");
+const { PermissionsBitField, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, EmbedBuilder, Guild, GuildMember, CommandInteraction } = require("discord.js");
 const { ButtonStyle } = require("discord-api-types/v10");
 
 const Config = require("../resources/base.json");
@@ -397,13 +397,13 @@ const intervalGlobalDatas = async function (client, justTempRoles) {
   let members = guild.members.cache;
   // buscar roles temporales & cumpleaños
   members.forEach(async (member) => {
-    let dbUser = await Users.findOne({
+    let dbUser = await Users.getOrCreate({
       user_id: member.id,
       guild_id: guild.id
     });
 
-    let roles = (dbUser && dbUser.data.temp_roles) ?? false;
-    let birthday = (dbUser && dbUser.data.birthday.locked) ?? false;
+    let roles = dbUser.data.temp_roles;
+    let birthday = dbUser.data.birthday.locked;
 
     if (roles) {
       for (let i = 0; i < dbUser.data.temp_roles.length; i++) {
@@ -417,7 +417,7 @@ const intervalGlobalDatas = async function (client, justTempRoles) {
 
           if (!temprole.isSub) {
             // sacarle el role
-            console.log("TEMPROLE, Ha pasado el tiempo 0001")
+            console.log("🟢 Ha pasado el tiempo del temprole %s", temprole);
             member.roles.remove(role);
 
             // eliminar el temprole de la db
@@ -428,11 +428,9 @@ const intervalGlobalDatas = async function (client, justTempRoles) {
             let subName = temprole.sub_info.name;
             let isCancelled = temprole.sub_info.isCancelled;
 
-            let notEnough = new EmbedBuilder()
-              .setAuthor(`Error`, Config.errorPng)
-              .setDescription(`**—** No tienes suficientes Jeffros **(${Emojis.Jeffros}${price.toLocaleString('es-CO')})** para pagar la suscripción a \`${subName}\`.
-**—** Tu saldo ha quedado en **alerta roja**.`)
-              .setColor(Colores.rojo);
+            let notEnough = new ErrorEmbed(interaction)
+              .defDesc(`**—** No tienes suficientes Jeffros **(${Emojis.Jeffros}${price.toLocaleString('es-CO')})** para pagar la suscripción a \`${subName}\`.
+**—** Tu saldo ha quedado en **alerta roja**.`);
 
             if (isCancelled) {
               member.roles.remove(role);
@@ -444,11 +442,16 @@ const intervalGlobalDatas = async function (client, justTempRoles) {
               // cobrar jeffros
               let jeffros = dbUser.economy.global;
 
-              let paidEmbed = new EmbedBuilder()
-                .setAuthor(`Pagado`, Config.bienPng)
-                .setDescription(`**—** Has pagado **${Emojis.Jeffros}${price.toLocaleString('es-CO')}** para pagar la suscripción a \`${subName}\`.
-              **—** Tu saldo ha quedado en **${Emojis.Jeffros}${(jeffros.jeffros - price).toLocaleString('es-CO')}**.`)
-                .setColor(Colores.verde);
+              let paidEmbed = new Embed({
+                type: "success",
+                data: {
+                  title: "Pagado",
+                  desc: [
+                    `Se han restado **${Emojis.Jeffros}${price.toLocaleString('es-CO')}** para pagar la suscripción a \`${subName}\`.`,
+                    `Tu saldo ha quedado en **${Emojis.Jeffros}${(jeffros.jeffros - price).toLocaleString('es-CO')}**.`
+                  ]
+                }
+              })
 
               if (!jeffros || jeffros.jeffros < price) {
                 // quitarle los jeffros, y dejarlo en negativo
@@ -663,28 +666,18 @@ const Interest = function (author, idUse) {
 
 /**
  * Adds a temporary role into the database ands adds the role to the user.
- * @param {Object[]} guild - The Discord.JS Guild
+ * @param {GuildMember} victimMember - The Discord.JS Member
  * @param {string} roleID - The ID of the temporary role
- * @param {Object[]} victimMember - The Discord.JS Member
- * @param {Object[]} user - The mongoose Users.Model
  * @param {(number | string)} duration The duration of the temporary role in ms.
  * - "permanent" for not being an temporary role.
- * @param {string} [specialType=false] The special type of this temporary role.
- * - boostMultiplier
- * - boostProbabilities
- * @param {string} [specialObjective=false] The objetive for this special type of temporary role.
- * - exp
- * - jeffros
- * - all
+ * @param {Number} [specialType=false] The special type of this temporary role.
+ * @param {Number} [specialObjective=false] The objetive for this special type of temporary role.
  * @param {number} [specialValue=false] The value for the objetive of this special temporary role.
  * @returns void
  */
-const LimitedTime = async function (guild, roleID, victimMember, user, duration, specialType, specialObjective, specialValue) {
-  specialType = specialType || null;
-  specialObjective = specialObjective || null;
-  specialValue = specialValue || null;
-
-  let role = guild.roles.cache.find(x => x.id === roleID);
+const LimitedTime = async function (victimMember, roleID, duration, specialType = null, specialObjective = null, specialValue = null) {
+  let role = victimMember.guild.roles.cache.find(x => x.id === roleID);
+  let user = await Users.getOrCreate({ user_id: victimMember.id, guild_id: victimMember.guild.id });
 
   if (duration === Infinity) return victimMember.roles.add(role); // es un role permanente???
 
@@ -718,40 +711,33 @@ const LimitedTime = async function (guild, roleID, victimMember, user, duration,
 
 /**
  * Adds a new subscription to the database and adds the role to the user.
- * @param {object[]} guild The Discord.JS Guild
+ * @param {GuildMember} victimMember The Discord.JS GuildMember
  * @param {string} roleID The ID for the role given by the suscription
- * @param {object[]} victimMember The Discord.JS GuildMember
- * @param {string} intervalTime The interval of time in which the user will pay
- * - "1d", "30d", "10m"
- * @param {string} jeffrosPerInterval The price the user will pay every interval
+ * @param {Number} interval The interval of time in which the user will pay (ms)
+ * @param {Number} jeffrosPerInterval The price the user will pay every interval
  * @param {string} subscriptionName The name of the suscription
- * @returns 
+ * @returns void
  */
-const Subscription = function (guild, roleID, victimMember, intervalTime, jeffrosPerInterval, subscriptionName) {
-  let role = guild.roles.cache.find(x => x.id === roleID);
+const Subscription = async function (victimMember, roleID, interval, jeffrosPerInterval, subscriptionName) {
+  let role = victimMember.guild.roles.cache.find(x => x.id === roleID);
+  let user = await Users.getOrCreate({ user_id: victimMember.id, guild_id: victimMember.guild.id });
 
-  if (intervalTime === "permanent" || intervalTime === "na") {
-    // no es una sub
-    return console.error("Using Subscription() with erroneous interval.");
-  } else {
-    let hoy = new Date();
-
-    const newData = new GlobalDatas({
-      info: {
-        type: "jeffrosSubscription",
-        roleID: roleID,
-        userID: victimMember.id,
-        since: hoy,
-        interval: ms(intervalTime),
-        price: jeffrosPerInterval,
-        subName: subscriptionName,
-        isCancelled: false
-      }
-    })
-
-    victimMember.roles.add(role);
-    newData.save();
+  let toPush = {
+    role_id: role.id,
+    active_since: new Date(),
+    duration: interval,
+    isSub: true,
+    sub_info: {
+      price: jeffrosPerInterval,
+      name: subscriptionName,
+      isCancelled: false
+    }
   }
+
+  await victimMember.roles.add(role);
+  user.data.temp_roles.push(toPush);
+
+  await user.save();
 }
 
 const VaultWork = function (vault, user, interaction, notCodeEmbed, client) { // mostrar y buscar un codigo no descifrado aún por el usuario
@@ -779,7 +765,7 @@ const VaultWork = function (vault, user, interaction, notCodeEmbed, client) { //
     footer: `Pista {ACTUAL} de {TOTAL} | /vault [codigo] para descifrar`
   }, itemMap, 1);
 
-  return interactive.init(interaction, client);
+  return interactive.init(interaction);
 }
 
 const handleUploads = async function (client) {
@@ -1364,10 +1350,12 @@ const isBannedFrom = async function (interaction, query) {
  * 
  * @param {String} toConfirm What is trying to be confirmed
  * @param {Array} dataToConfirm The text that will apear on the embed separated by "▸"
- * @param {*} interaction The Discord.JS Interaction that triggers the command
+ * @param {CommandInteraction} interaction The Discord.JS Interaction that triggers the command
  * @returns {Promise} Discord.JS Message if the confirmation is positive, if not, returns false
  */
 const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
+  const client = interaction.client;
+
   let DescriptionString = "";
   let egEmbed = null;
 
@@ -1412,6 +1400,10 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
 
     const collector = interaction.channel.createMessageComponentCollector({ filter, time: ms("1m"), max: 1 });
 
+    const active = client.activeCollectors.find(x => x.channelId === collector.channelId && x.interactionType === collector.interactionType);
+    if (active) active.stop();
+    client.activeCollectors.push(collector)
+
     collector.on("collect", async i => {
       try {
         await i.deferUpdate();
@@ -1435,6 +1427,9 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
     })
 
     collector.on("end", async i => {
+      let index = client.activeCollectors.indexOf(collector);
+      if (index > -1) client.activeCollectors.splice(index, 1);
+
       if (i.size == 0) {
         interaction.editReply({ embeds: [cancelEmbed], components: [] })
         return resolve(false)
@@ -2026,7 +2021,8 @@ const DarkShopWork = async function (client, guildId) {
   return darkshop;
 
   async function generateNewEventInflation(event) { // nuevo evento de inflacion en caso de necesitarse
-    const oldinflation = darkshop ? darkshop.inflation.value : inflation; // tomar la inflación actual o la que se generó si no existe
+    let ds = await DarkShops.findOne({ guild_id: guildId }) ?? null
+    const oldinflation = ds?.inflation.value ?? inflation; // tomar la inflación actual o la que se generó si no existe
 
     console.log("Se está creando un nuevo evento a futuro");
 
@@ -2104,8 +2100,8 @@ const ValidateDarkShop = async function (user, author) {
 }
 
 const DaysUntilToday = async function (date) {
-  if(!date) return "?";
-  
+  if (!date) return "?";
+
   let hoy = new Date();
   let oldDate = new Date(date); // fecha del dia inicial
 

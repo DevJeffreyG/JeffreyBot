@@ -16,6 +16,16 @@ const activeCreatingTicket = new Map();
 const ticketCooldown = ms("1m");
 
 module.exports = async (client, interaction) => {
+  if(!client.fetchedGuilds.find(x => x === interaction.guild.id)){
+    await client.guilds.fetch(interaction.guild.id);
+    await interaction.guild.channels.fetch();
+    await interaction.guild.roles.fetch();
+    await interaction.guild.members.fetch();
+
+    client.fetchedGuilds.push(interaction.guild.id)
+    console.log("💚 %s fetched!", interaction.guild.name)
+  }
+
   const author = interaction.user;
   const guild = interaction.guild;
   const customId = interaction.customId;
@@ -23,6 +33,8 @@ module.exports = async (client, interaction) => {
   const docGuild = await Guilds.findOne({ guild_id: guild.id }) ?? await new Guilds({ guild_id: guild.id }).save();
 
   const user = await Users.getOrCreate({ user_id: author.id, guild_id: guild.id });
+
+  
 
   if (interaction.type === InteractionType.ApplicationCommand) { // SLASH COMMANDS
     const commandName = interaction.commandName;

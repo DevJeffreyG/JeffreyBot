@@ -58,7 +58,7 @@ command.execute = async (interaction, models, params, client) => {
                             return interaction.editReply(`${interaction.user}, no puedes usar esta key porque ya tienes el rol que da :(`)
                         }
 
-                        if(isTemp) await LimitedTime(interaction.guild, reward.value, interaction.member, user, reward.duration);
+                        if(isTemp) await LimitedTime(interaction.member, reward.value, reward.duration);
                         else interaction.member.roles.add(role);
 
                         reply = `Se ha agregado el role \`${role.name}\` ${isTemp ? `por ${new HumanMs(reward.duration).human}` : "permanentemente"}.`
@@ -77,7 +77,7 @@ command.execute = async (interaction, models, params, client) => {
                         }
 
                         // llamar la funcion para hacer un globaldata y dar el role con boost
-                        await LimitedTime(interaction.guild, brole.id, interaction.member, user, reward.duration, reward.boost_type, reward.boost_objetive, reward.boost_value);
+                        await LimitedTime(interaction.member, brole.id, reward.duration, reward.boost_type, reward.boost_objetive, reward.boost_value);
                         
                         reply = `Se ha activado el boost ${reward.boost_type === "boostMultiplier" ? "multiplicador" : "de probabilidad"} x${reward.boost_value} por ${new HumanMs(reward.duration).human}.`
                         break;

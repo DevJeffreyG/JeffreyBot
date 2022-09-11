@@ -12,6 +12,7 @@ module.exports = async (client) => {
     client.invites = [];
     client.logsFetched = {};
     client.activeCollectors = [];
+    client.fetchedGuilds = [];
 
     // para cada guild fetchear(?
     let guilds = await client.guilds.fetch();

@@ -49,7 +49,7 @@ command.execute = async (interaction, models, params, client) => {
             .defColor(Colores.blanco);
 
         if (!isACode) return interaction.editReply({ embeds: [notCodeEmbed] });
-        return VaultWork(vault, user, interaction, notCodeEmbed, client);
+        return VaultWork(vault, user, interaction, notCodeEmbed);
     }
 
     let nope = [

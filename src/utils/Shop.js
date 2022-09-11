@@ -1,11 +1,17 @@
 const Discord = require("discord.js");
+const moment = require("moment");
+const ms = require("ms");
+
 const models = require('mongoose').models
+
 const { Users, Shops } = models;
 const { FindNewId, Confirmation } = require("./functions")
 const InteractivePages = require("./InteractivePages");
 const { Colores, Emojis } = require("../resources");
 const ErrorEmbed = require("./ErrorEmbed");
 const Embed = require("./Embed");
+const { ItemObjetives, ItemTypes } = require("./Enums");
+const HumanMs = require("./HumanMs");
 
 /**
  * Taken from [tutmonda](https://github.com/Jleguim/tutmonda-project) 💜
@@ -22,7 +28,6 @@ class Shop {
         this.shop.items = this.shop.items.sort((a, b) => a.id - b.id);
 
         this.interaction = inter;
-        this.client = this.interaction.client;
 
         this.items = new Map();
         this.base = {
@@ -37,11 +42,26 @@ class Shop {
 
         this.pages;
         this.user;
+
+        this.updated = new Embed({
+            type: "success",
+            data: {
+                desc: "Se ha actualizado el item"
+            }
+        })
+
+        this.noitem = new ErrorEmbed(this.interaction, {
+            type: "errorFetch",
+            data: {
+                type: "item",
+                guide: `No encontré el item con esa Id en la ${this.isDarkShop ? "DarkShop" : "tienda"}`
+            }
+        })
     }
 
     async setup() {
         this.user = await Users.getOrCreate({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id });
-        if(this.isDarkShop)
+        if (this.isDarkShop)
             this.base.description = `**—** Bienvenid@ a la DarkShop. Para comprar items usa \`/dsbuy #\`.\n**—** Tienes **${Emojis.Dark}${this.user.economy.dark.darkjeffros.toLocaleString("es-CO")}**`;
         else
             this.base.description = `**—** ¡Bienvenid@ a la tienda! para comprar items usa \`/buy #\`.\n**—** Tienes **${Emojis.Jeffros}${this.user.economy.global.jeffros.toLocaleString("es-CO")}**`;
@@ -71,7 +91,15 @@ class Shop {
         });
         const item = this.shop.findItem(itemId);
 
-        if (!item) return this.interaction.editReply("literalmente no existe, matate");
+        let noitem = new ErrorEmbed(this.interaction, {
+            type: "execError",
+            data: {
+                command: this.interaction.commandName,
+                guide: `El item con la ID \`${itemId}\` NO existe.`
+            }
+        })
+
+        if (!item) return noitem.send();
 
         const itemPrice = this.determinePrice(user, item, true);
         const itemName = item.name;
@@ -146,7 +174,7 @@ class Shop {
             }
         }
 
-        if(this.isDarkShop) user.economy.dark.darkjeffros -= price;
+        if (this.isDarkShop) user.economy.dark.darkjeffros -= price;
         else user.economy.global.jeffros -= price;
         user.data.inventory.push({ isDarkShop: this.isDarkShop, item_id: item.id, use_id: newUseId })
 
@@ -159,7 +187,7 @@ class Shop {
                     "Pago realizado con éxito",
                     `Compraste: \`${itemName}\` por **${this.isDarkShop ? Emojis.Dark : Emojis.Jeffros}${itemPrice}**`,
                     `Úsalo con \`/use ${newUseId}\``,
-                    `Ahora tienes: ${user.parseJeffros()}`
+                    `Ahora tienes: ${user.parseJeffros(this.isDarkShop)}`
                 ]
             }
         })
@@ -168,15 +196,40 @@ class Shop {
 
     async removeItem(itemId) {
         const index = this.shop.findItemIndex(itemId);
-        if (!index) return this.interaction.editReply("Ese item no existe ❌")
+        if (!index) return this.noitem.send();
+
+        console.log("🗑️ Eliminando %s de la tienda e inventarios del Guild %s", this.shop.findItem(itemId), this.interaction.guild.id)
 
         this.shop.items.splice(index, 1);
         await this.shop.save();
-        return this.interaction.editReply("Eliminado ✅")
+
+        // eliminar de los inventarios
+        const users = await Users.find({guild_id: this.interaction.guild.id});
+        for await(const user of users){
+            let i = user.data.inventory.findIndex(x => x.item_id === itemId && x.isDarkShop === this.isDarkShop)
+
+            if(i != -1) {
+                console.log("🗑️ Eliminando del inventario de %s", user.user_id)
+                user.data.inventory.splice(i, 1);
+                await user.save();
+            }
+        }
+        return this.interaction.editReply({ embeds: [new Embed({type: "success", data: { title: "¡Eliminado!"}})] });
     }
 
     async addItem(params) {
         const newId = await FindNewId(this.shop.items, "", "id");
+
+        let success = new Embed({
+            type: "success",
+            data: {
+                desc: [
+                    "Se ha agregado el item",
+                    `No será visible hasta que se agregue el uso: \`/admin items use-info\``,
+                    `ID: \`${newId}\``
+                ]
+            }
+        })
 
         this.shop.items.push(
             {
@@ -188,29 +241,33 @@ class Shop {
         )
 
         await this.shop.save();
-        return this.interaction.editReply("✅")
+        return this.interaction.editReply({ embeds: [success] });
     }
 
     async editUse(params) {
         const item = this.shop.findItem(params.id.value, false);
-        if (!item) return this.interaction.editReply(`No existe un item con id \`${params.id.value}\` ❌`)
+        if (!item) return this.noitem.send();
 
-        const use = item.after_use;
+        const use = item.use_info;
 
         use.action = params.accion.value;
-        use.target = params.objetivo.value;
-        use.given = use.target == "role" ? params.role.value : params.cantidad.value;
-        use.reply = params.reply.value ?? use.reply;
+        use.objetive = Number(params.objetivo.value);
+        use.given = (
+            use.objetive == ItemObjetives.Role ||
+            use.objetive == ItemObjetives.Boost
+        ) ? params.role?.value : params.cantidad?.value;
+        use.reply = params.reply?.value ?? use.reply;
+        use.item_info.type = params.especial?.value ?? use.item_info.type;
 
         await this.shop.save();
-        return this.interaction.editReply("Se ha actualizado el item ✅");
+        return this.interaction.editReply({ embeds: [this.updated] });
     }
 
     async editItem(params, subcommand) {
 
 
         const item = this.shop.findItem(params.id.value, false);
-        if (!item) return this.interaction.editReply(`No existe un item con id \`${params.id.value}\` ❌`)
+        if (!item) return this.noitem.send();
 
         switch (subcommand) {
             case "name":
@@ -219,14 +276,22 @@ class Shop {
             case "desc":
                 await this.#editDesc(item, params.descripcion.value);
                 break;
+
+            case "price":
+                await this.#editPrice(item, params.precio.value);
+                break;
         }
 
-        return this.interaction.editReply("Se ha actualizado el item ✅")
+        return this.interaction.editReply({ embeds: [this.updated] })
     }
 
     async showAllItems() {
-        this.user = await Users.getByUid(this.interaction.user.id);
-        this.base.description = `**—** [NOT READY]: Falta el uso (\`/admin items action\`)\n**—** [HIDDEN]: Item desactivado (\`/admin items toggle\`)\n**—** [✅]: El item es visible y usable para cualquiera.`;
+        this.user = await Users.getOrCreate({
+            user_id: this.interaction.user.id,
+            guild_id: this.interaction.guild.id
+        });
+
+        this.base.description = `**—** [NOT READY]: Falta el uso (\`/admin items use-info\`)\n**—** [HIDDEN]: Item desactivado (\`/admin items toggle\`)\n**—** [✅]: El item es visible y usable para cualquiera.`;
         this.base.addon = this.base.addon.substring(0, 2) + "{publicInfo} — ID: " + this.base.addon.substr(2)
 
         this.shop.items.forEach((item, index) => {
@@ -247,7 +312,7 @@ class Shop {
             })
         });
 
-        return this._prepareInit();
+        return this.#prepareInit();
     }
 
     async addDiscount(level, discount) {
@@ -264,11 +329,27 @@ class Shop {
         return this.interaction.editReply({ embeds: [new Embed({ type: "success" })] });
     }
 
+    async toggleItem(itemId, duration) {
+        let item = this.shop.findItem(itemId, false)
+
+        if (item.disabled) {
+            item.disabled = false
+            item.disabled_until = null
+        } else {
+            item.disabled = true
+            item.disabled_until = moment().add(ms(duration), "ms");
+        }
+
+        await this.shop.save();
+
+        return this.interaction.editReply({ embeds: [this.updated] });
+    }
+
     async #prepareInit() {
         const interactive = new InteractivePages(this.base, this.items)
         this.pages = interactive.pages;
 
-        await interactive.init(this.interaction, this.client);
+        await interactive.init(this.interaction);
     }
 
     async #editName(item, value) {
@@ -281,12 +362,17 @@ class Shop {
         return this.shop.save();
     }
 
+    async #editPrice(item, value) {
+        item.price = value;
+        return this.shop.save();
+    }
+
     #discountsWork(user, precio) {
         const inital_price = precio;
         const user_level = user.economy.global.level;
         const discounts = this.shop.discounts;
 
-        if(!discounts || this.isDarkShop) return;
+        if (!discounts || this.isDarkShop) return;
 
         // descuentos
         let query = discounts?.filter(x => user_level >= x.level)
@@ -328,7 +414,13 @@ class Shop {
 
         let work = this.#discountsWork(user, precio);
 
-        if (toString) return work?.stringPrecio ?? precio.toLocaleString("es-CO");
+        if (toString) {
+            if (item.use_info.item_info?.type === ItemTypes.Subscription) {
+                let sub = ` / ${new HumanMs(item.use_info.item_info?.duration).human}`;
+                return work ? work.stringPrecio + sub : precio.toLocaleString("es-CO") + sub
+            }
+            return work?.stringPrecio ?? precio.toLocaleString("es-CO");
+        }
         return work?.precio ?? precio;
     }
 }
