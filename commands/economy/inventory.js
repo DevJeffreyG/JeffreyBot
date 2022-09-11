@@ -1,3 +1,4 @@
+const { time } = require("discord.js")
 const { Command, Categories, ErrorEmbed, Embed } = require("../../src/utils")
 const { Config, Colores } = require("../../src/resources");
 
@@ -9,7 +10,7 @@ const command = new Command({
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
-    const { Users, Shops} = models
+    const { Users, Shops, DarkShops } = models
     const { darkshop } = params;
 
     const isDarkShop = darkshop?.value ?? false;
@@ -20,7 +21,9 @@ command.execute = async (interaction, models, params, client) => {
         guild_id: interaction.guild.id
     });
 
-    const shop = await Shops.getOrCreate(interaction.guild.id);
+    const shop = isDarkShop ?
+        await DarkShops.getOrCreate(interaction.guild.id) : 
+        await Shops.getOrCreate(interaction.guild.id);
 
     let noItems = new ErrorEmbed(interaction, {
         type: "errorFetch",
@@ -32,13 +35,14 @@ command.execute = async (interaction, models, params, client) => {
 
     let itemsEmbed = new Embed()
     .defAuthor({text: `Tu inventario`, icon: interaction.member.displayAvatarURL()})
-    .setThumbnail(Config.jeffreyguildIcon)
+    .setThumbnail(isDarkShop ? Config.darkLogoPng : Config.jeffreyguildIcon)
     .defFooter({text: `/use ID para usar un item.`})
-    .setColor(Colores.verde);
+    .setColor(isDarkShop ? Colores.negro : Colores.verde);
 
     user.data.inventory.forEach(item => {
         const real_item = shop.items.length > 0 ? shop.items.find(x => x.id === item.item_id) : null;
-        if(real_item && item.isDarkShop === isDarkShop) itemsEmbed.defField(`— ${real_item.name}`, `**— Activo**: \`${item.active ? "sí" : "no"}\`.\n**— ID**: \`${item.use_id}\`.`)
+        const f = real_item && item.isDarkShop === isDarkShop && (real_item.use_info.action !== null && !real_item.disabled)
+        if(f) itemsEmbed.defField(`— ${real_item.name}`, `**▸ Activo**: ${item.active ? `Sí, desde ${time(item.active_since)}` : "No"}.\n**▸ ID**: \`${item.use_id}\`.`)
     });
 
     if(user.data.inventory.filter(x => x.isDarkShop === isDarkShop).length === 0) return noItems.send();

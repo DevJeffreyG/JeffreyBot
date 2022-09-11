@@ -14,9 +14,16 @@ command.addOption({
     req: true
 })
 
+command.addOption({
+    type: "user",
+    name: "usuario",
+    desc: "El usuario con el que vas a afectar el item (DarkShop)",
+    req: false
+})
+
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
-    const { id } = params
+    const { id, usuario } = params
     const { Users } = models
 
     // codigo
@@ -38,7 +45,7 @@ command.execute = async (interaction, models, params, client) => {
     if(!inv_item) return noItem.send();
 
     const item = await new Item(interaction, inv_item.item_id, inv_item.isDarkShop).build();
-    return item.use(id.value)
+    return item.use(id.value, usuario?.value)
 }
 
 module.exports = command;
