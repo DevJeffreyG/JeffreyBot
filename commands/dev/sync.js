@@ -1,4 +1,4 @@
-const { Command, Categories, Confirmation, FindNewId } = require("../../src/utils")
+const { Command, Categories, Confirmation, FindNewId, ItemActions, ItemObjetives, Item, BoostTypes, BoostObjetives, ItemTypes, ItemEffects, DarkShopWork } = require("../../src/utils")
 const { Emojis } = require("../../src/resources")
 
 const { PermissionsBitField } = require("discord.js");
@@ -17,6 +17,11 @@ command.addSubcommand({
 command.addSubcommand({
     name: "users",
     desc: "Sincronizar los usuarios viejos con la nueva forma de Jeffrey Bot 2.x.x"
+})
+
+command.addSubcommand({
+    name: "shops",
+    desc: "Sincronizar las viejas tiendas (Normal & DarkShop) con la nueva forma de Jeffrey Bot 2.x.x"
 })
 
 command.addSubcommand({
@@ -63,15 +68,15 @@ command.execute = async (interaction, models, params, client) => {
 
         case "autoroles": {
             let all = await AutoRoles.find();
-            await interaction.editReply({content: `${Emojis.Loading} Sincronizando los autoroles...`});
+            await interaction.editReply({ content: `${Emojis.Loading} Sincronizando los autoroles...` });
 
-            for await(const arole of all){
+            for await (const arole of all) {
                 const doc = await Guilds.getOrCreate(arole.serverID);
                 const general = await Guilds.find();
 
                 const newId = await FindNewId(general, "data.autoroles", "id")
 
-                if(doc.data.autoroles.find(x => 
+                if (doc.data.autoroles.find(x =>
                     x.channel_id === arole.channelID &&
                     x.message_id === arole.messageID &&
                     x.emote === arole.emoji &&
@@ -92,12 +97,12 @@ command.execute = async (interaction, models, params, client) => {
 
             let q = await Guilds.getOrCreate(interaction.guild.id)
             all = q.data.autoroles; // actualizar a lo nuevo que está en la db
-            for(let i = 0; i < all.length; i++){
+            for (let i = 0; i < all.length; i++) {
                 const autorole = all[i];
 
                 let channel = await interaction.guild.channels.cache.find(x => x.id === autorole.channel_id);
 
-                if(!channel) return console.log(`🔴 No se encontró canal para el autorole ${autorole}`);
+                if (!channel) return console.log(`🔴 No se encontró canal para el autorole ${autorole}`);
                 await channel.messages.fetch();
                 let fetched = await channel.messages.cache.find(x => x.id === autorole.message_id);
                 let emote = autorole.emote;
@@ -108,20 +113,32 @@ command.execute = async (interaction, models, params, client) => {
             return interaction.editReply({ content: `✅ Sincronizados.` })
         }
 
-        case "users":
+        case "users": {
             let confirmation = await Confirmation("Continuar", [
                 "Cuando se inicie el proceso se sobreescribirán los datos existentes.",
                 "Este proceso no se puede cancelar ni deshacer, haz una copia de seguridad antes."
             ], interaction)
-            if(!confirmation) return;
-            
+            if (!confirmation) return;
+
             command.execUsers(confirmation, models, params, client);
             break;
+        }
+
+        case "shops": {
+            let confirmation = await Confirmation("Continuar", [
+                "Cuando se inicie el proceso se sobreescribirán los datos existentes.",
+                "Este proceso no se puede cancelar ni deshacer, haz una copia de seguridad antes."
+            ], interaction)
+            if (!confirmation) return;
+
+            command.execShops(confirmation, models, params, client);
+            break;
+        }
     }
 }
 
 command.execUsers = async (interaction, models, params, client) => {
-    await interaction.editReply({ content: `${Emojis.Loading} Sincronizando...` })
+    await interaction.editReply({ embeds: [], content: `${Emojis.Loading} Sincronizando...` })
 
     const { Users, TotalPurchases, DarkStats, Exps, Jeffros, Purchases, WonCodes, GlobalDatas } = models;
 
@@ -340,6 +357,131 @@ command.execUsers = async (interaction, models, params, client) => {
 
     });
 
+    return interaction.editReply({ content: `✅ Sincronizado.`, allowedMentions: { parse: [] } })
+}
+
+command.execShops = async (interaction, models, params, client) => {
+    await interaction.editReply({ embeds: [], content: `${Emojis.Loading} Sincronizando...` })
+
+    const { Shops, DarkShops, Items, DarkItems, Uses, DarkUses } = models
+
+    const guildToSearch = "447797737216278528"; // interaction.guild.id
+
+    const normalItems = await Items.find({ serverID: guildToSearch });
+    const darkItems = await DarkItems.find();
+    const normalUses = await Uses.find({ serverID: guildToSearch });
+    const darkUses = await DarkUses.find();
+
+    //console.log("normal items", normalItems, "dark items", darkItems, "normal uses", normalUses, "darkuses", darkUses)
+
+    await Shops.findOneAndDelete({ guild_id: interaction.guild.id }).then(q => {
+        if (q) console.log("🔴 Se ha eliminado:", q);
+    });
+
+    await DarkShops.findOneAndDelete({ guild_id: interaction.guild.id }).then(q => {
+        if (q) console.log("🔴 Se ha eliminado:", q);
+    });
+
+    await DarkShopWork(client, interaction.guild.id);
+
+    const shop = await Shops.getOrCreate(interaction.guild.id);
+    const darkshop = await DarkShops.getOrCreate(interaction.guild.id);
+
+    // normal items
+    console.log("========================")
+    console.log("💚 NORMAL ITEMS")
+    for (const item of normalItems) {
+        const use = normalUses.find(x => x.itemID === item.id.toString());
+
+        console.log("🌟 Item: %s", item)
+        console.log("🌠 Use: %s", use)
+
+        const objetive = use.thing === "warns" ? ItemObjetives.Warns :
+            use.thing === "role" && use.special?.type ? ItemObjetives.Boost :
+                use.thing === "role" ? ItemObjetives.Role : ItemObjetives.Item
+
+        const item_info = {
+            type: use.isSub ? ItemTypes.Subscription :
+                objetive === ItemObjetives.Boost ? ItemTypes.Temporal :
+                    null,
+            duration: use.duration ?? null
+        };
+        const boost_info = {
+            type: use.special?.type ?
+                use.special?.type === "boostMultiplier" ? BoostTypes.Multiplier : BoostTypes.Probabilities :
+                null,
+            value: use.special?.type ? use.special?.specialValue : null,
+            objetive: use.special?.type ?
+                use.special?.specialObjective === "exp" ? BoostObjetives.Exp :
+                    use.special?.specialObjective === "jeffros" ? BoostObjetives.Jeffros : BoostObjetives.All :
+                null
+        }
+        shop.items.push({
+            name: item.itemName,
+            price: item.itemPrice,
+            description: item.itemDescription,
+            reply: item.replyMessage,
+            req_role: item.roleRequired === "na" ? null : item.roleRequired,
+            interest: item.ignoreInterest ? 0 : item.interest,
+            use_info: {
+                action: use.action === "delete" || use.action === "remove" ? ItemActions.Remove : ItemActions.Add,
+                given: use.thingID === "na" ? "1" : use.thingID,
+                objetive,
+                item_info,
+                boost_info
+            },
+            id: item.id
+        })
+
+        await shop.save();
+    }
+
+    interaction.editReply({ content: `${Emojis.Loading} Tienda normal sincronizada.`, allowedMentions: { parse: [] } })
+
+    console.log("================")
+    console.log("🖤 DARKSHOP ITEMS")
+    for (const item of darkItems) {
+        const use = darkUses.find(x => x.itemID === item.id.toString());
+
+        console.log("🌟 Item: %s", item)
+        console.log("🌠 Use: %s", use)
+
+        const objetive = use.info.thing === "warns" ? ItemObjetives.Warns :
+            use.info.thing === "role" ? ItemObjetives.Role :
+                ItemObjetives.Item
+
+        const effect = use.info.extra.effect === "negative" ?
+            ItemEffects.Negative : ItemEffects.Positive
+
+        darkshop.items.push({
+            name: item.itemName,
+            price: item.itemPrice,
+            description: item.itemDescription,
+            interest: item.ignoreInterest ? 0 : 5,
+            use_info: {
+                effect,
+                action: use.info.action === "add" ? ItemActions.Add : ItemActions.Remove,
+                given: use.info.thingID === "na" && use.info.extra.quantity != 0 ?
+                    use.info.extra.quantity : use.info.thingID != "na" ?
+                        use.info.thingID : "1",
+                objetive,
+                item_info: {
+                    type: item.itemName === "Firewall" ? ItemTypes.Firewall :
+                        item.itemName === "Stack Overflow" ? ItemTypes.StackOverflow :
+                            item.itemName === "Reset" ? ItemTypes.ResetInterest :
+                                use.info.extra.duration != "na" ? ItemTypes.Temporal :
+                                    null,
+                    duration: use.info.extra.duration === "na" ? null : use.info.extra.duration
+                },
+            },
+            id: item.id
+        })
+
+        await darkshop.save();
+    }
+
+    console.log("✅ SINCRONIZADOS")
+    console.log("========================")
     return interaction.editReply({ content: `✅ Sincronizado.`, allowedMentions: { parse: [] } })
 }
 
