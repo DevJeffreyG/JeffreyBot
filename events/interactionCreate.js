@@ -1,4 +1,3 @@
-const moment = require("moment");
 const Discord = require("discord.js");
 const { time } = Discord;
 const ms = require("ms");
@@ -11,12 +10,10 @@ const { Config, Colores } = require("../src/resources");
 const { InteractionType } = require("discord-api-types/v10");
 const { jeffreygID, mantenimiento } = Config;
 
-const activeCreatingTicket = new Map();
-
 const ticketCooldown = ms("1m");
 
 module.exports = async (client, interaction) => {
-  if(!client.fetchedGuilds.find(x => x === interaction.guild.id)){
+  if (!client.fetchedGuilds.find(x => x === interaction.guild.id)) {
     await client.guilds.fetch(interaction.guild.id);
     await interaction.guild.channels.fetch();
     await interaction.guild.roles.fetch();
@@ -34,8 +31,6 @@ module.exports = async (client, interaction) => {
 
   const user = await Users.getOrCreate({ user_id: author.id, guild_id: guild.id });
 
-  
-
   if (interaction.type === InteractionType.ApplicationCommand) { // SLASH COMMANDS
     const commandName = interaction.commandName;
     const slashCommand = client.slash.get(commandName);
@@ -52,68 +47,72 @@ module.exports = async (client, interaction) => {
     // params
     const params = {};
 
-    slashCommand.data.options.forEach(o => {
-      //console.log(interaction)
-      let { name } = o;
-      params[name] = interaction.options.get(name)
+    params["subcommand"] = interaction.options.getSubcommand(false); // guarda el subcomando que se está ejecutando
+    params["subgroup"] = interaction.options.getSubcommandGroup(false); // guarda el grupo de subcomandos
 
-      // subcommands & groups
-      if (!params[name] && o.options) {
-        params["subcommand"] = interaction.options.getSubcommand(false); // guarda el subcomando que se está ejecutando
-        params["subgroup"] = interaction.options.getSubcommandGroup(false); // guarda el grupo de subcomandos
+    //console.log("Slash Command options:", slashCommand.data.options)
 
-        params[name] = undefined;
+    //console.log("🟢 Params:", params)
 
-        let toFix = o.options.find(x => x.name === params["subcommand"]);
-        if(toFix) subcommandFix(toFix, (x => {
-          params[name] = x
-        }));
-        else {
-          if(o.name != params["subcommand"]) return;
-          params[name] = {};
-          o.options.forEach(op => {
-            params[name][op.name] = interaction.options.get(op.name);
-          });
-        }
+    // empezar los params que sí serán usados
+    const sub = params["subcommand"];
+    const group = params["subgroup"];
 
-        function subcommandFix(sub, callback) {
-          let x = {};
+    if (sub) params[sub] = {}
+    if (group) {
+      delete params[sub]
+      params[group] = {}
+    }
 
-          sub.options.forEach(option => {
-            let n = option.name;
-            x[n] = interaction.options.get(n);
+    const needFix = sub || group
 
-            if (!x[n]) subcgroupFix(option, (y => {
-              x = y;
-            }))
-
-            callback(x)
-          })
-
-          function subcgroupFix(options, callback) {
-            if (options.options) {
-              subcommandFix(options.options, z => {
-                callback(z)
-              });
-            }
-          }
-        }
+    // opciones normales
+    if (!needFix) {
+      //console.log("🟢 Params ANTES de opciones normales:", params)
+      for (const option of slashCommand.data.options) {
+        //console.log(option)
+        let { name } = option
+        params[name] = interaction.options.get(name) // si no tiene opciones dentro (sería un subcommand)
       }
 
-      for(const prop in params){
-        if(typeof params[prop] === 'undefined') params[prop] = {}
+      //console.log("🟢 Params después de opciones normales:", params)
+    } else { // opciones subcommands & groups
+      let prop = sub; // donde se van a meter los params
+      //console.log("🟢 Params ANTES de opciones subcommands:", params)
+
+      // sacar el subcommand que se va a usar
+      let using = slashCommand.data.options.find(x => x.name === sub);
+
+      if (!using) { // está dentro de un subgroup
+        let _group = slashCommand.data.options.find(x => x.name === group)
+        using = _group.options.find(x => x.name === sub)
+
+        prop = group // cambiar la prop donde se guardan los params
       }
-    })
+
+      //console.log("Using:", using)
+      for (const option of using.options) {
+        //console.log("option:", option)
+        params[prop][option.name] = interaction.options.get(option.name);
+      }
+
+      //console.log("🟢 Params DESPUES de opciones subcommands:", params)
+
+    }
+
+    for (const prop in params) {
+      if (typeof params[prop] === 'undefined') params[prop] = {}
+    }
 
     await intervalGlobalDatas(client);
     executeSlash(interaction, models, params, client)
 
     async function executeSlash(interaction, models, params, client) {
       try {
-        if(slashCommand.category === Categories.DarkShop){
+        if (slashCommand.category === Categories.DarkShop) {
           // filtro de nivel 5
           let validation = await ValidateDarkShop(user, interaction.user);
-          if(!validation.valid) return interaction.reply({embeds: [validation.embed]})
+          if (!validation.valid) return interaction.reply({ embeds: [validation.embed] })
         }
         await slashCommand.execute(interaction, models, params, client);
       } catch (error) {
@@ -127,7 +126,7 @@ module.exports = async (client, interaction) => {
       }
     }
   } else if (interaction.type === InteractionType.MessageComponent) { // Componentes
-    
+
     const { userId, type } = getTicketInfo(interaction.message);
     let channel, message, ticket, confirmation, actualEmbeds;
 
