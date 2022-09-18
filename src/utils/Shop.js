@@ -204,17 +204,17 @@ class Shop {
         await this.shop.save();
 
         // eliminar de los inventarios
-        const users = await Users.find({guild_id: this.interaction.guild.id});
-        for await(const user of users){
+        const users = await Users.find({ guild_id: this.interaction.guild.id });
+        for await (const user of users) {
             let i = user.data.inventory.findIndex(x => x.item_id === itemId && x.isDarkShop === this.isDarkShop)
 
-            if(i != -1) {
+            if (i != -1) {
                 console.log("🗑️ Eliminando del inventario de %s", user.user_id)
                 user.data.inventory.splice(i, 1);
                 await user.save();
             }
         }
-        return this.interaction.editReply({ embeds: [new Embed({type: "success", data: { title: "¡Eliminado!"}})] });
+        return this.interaction.editReply({ embeds: [new Embed({ type: "success", data: { title: "¡Eliminado!" } })] });
     }
 
     async addItem(params) {
@@ -245,6 +245,21 @@ class Shop {
     }
 
     async editUse(params) {
+        let roleError = new ErrorEmbed(this.interaction, {
+            type: "execError",
+            data: {
+                command: this.interaction.commandName,
+                guide: `Si se usa un tipo role, **debe tener**: \`role\` y \`duracion\`.`
+            }
+        })
+
+        let boostError = new ErrorEmbed(this.interaction, {
+            type: "execError",
+            data: {
+                command: this.interaction.commandName,
+                guide: `Si se usa un tipo boost, **debe tener**: \`role\`, \`boostobj\`, \`boosttype\`, \`boostval\` y \`duracion\`.`
+            }
+        })
         const item = this.shop.findItem(params.id.value, false);
         if (!item) return this.noitem.send();
 
@@ -258,6 +273,27 @@ class Shop {
         ) ? params.role?.value : params.cantidad?.value;
         use.reply = params.reply?.value ?? use.reply;
         use.item_info.type = params.especial?.value ?? use.item_info.type;
+        use.item_info.duration = use.objetive == ItemObjetives.Role ||
+            use.objetive == ItemObjetives.Boost ? ms(params.duracion?.value) : null
+
+        use.boost_info.type = ItemObjetives.Boost ? params.boosttype?.value : null
+        use.boost_info.value = ItemObjetives.Boost ? params.boostval?.value : null
+        use.boost_info.objetive = ItemObjetives.Boost ? params.boosttype?.value : null
+
+        // boost verification
+        if (use.objetive === ItemObjetives.Boost) {
+            if (!use.given) return boostError.send();
+            if (!use.boost_info.type) return boostError.send();
+            if (!use.boost_info.value) return boostError.send();
+            if (!use.boost_info.objetive) return boostError.send();
+            if (!use.item_info.duration) return boostError.send();
+        }
+
+        // role verification
+        if (use.objetive === ItemObjetives.Boost) {
+            if (!use.given) return roleError.send();
+            if (!use.item_info.duration) return roleError.send();
+        }
 
         await this.shop.save();
         return this.interaction.editReply({ embeds: [this.updated] });

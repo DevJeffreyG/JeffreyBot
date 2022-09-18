@@ -1,14 +1,16 @@
 const { GuildMember, SelectMenuBuilder, ActionRowBuilder } = require("discord.js")
 const moment = require("moment");
 const ms = require("ms")
+const Chance = require("chance");
 
+const Config = require("../resources/base.json");
 const Colores = require("../resources/colores.json");
 
 const Embed = require("./Embed");
 const ErrorEmbed = require("./ErrorEmbed");
-const { ItemTypes, ItemObjetives, ItemActions } = require("./Enums");
+const { ItemTypes, ItemObjetives, ItemActions, ItemEffects } = require("./Enums");
 
-const { FindNewId, LimitedTime, Subscription } = require("./functions");
+const { FindNewId, LimitedTime, Subscription, WillBenefit } = require("./functions");
 
 const models = require("mongoose").models;
 const { Shops, DarkShops, Users, Guilds } = models;
@@ -39,6 +41,15 @@ class Item {
             data: {
                 action: "add role",
                 existing: "El role que te da este item",
+                context: "tu perfil"
+            }
+        })
+
+        this.hasboost = new ErrorEmbed(interaction, {
+            type: "alreadyExists",
+            data: {
+                action: "add boost",
+                existing: "El boost que te da este item (te beneficia aún más)",
                 context: "tu perfil"
             }
         })
@@ -83,7 +94,7 @@ class Item {
     #itemInfo() {
         // leer el uso y qué hace el item
         this.info = this.item.use_info;
-        
+
         const {
             item_info, boost_info, effect, action, given, objetive
         } = this.info
@@ -102,8 +113,13 @@ class Item {
 
         this.isTemp = this.shop.getItemType(this.item) === ItemTypes.Temporal;
         this.isSub = this.shop.getItemType(this.item) === ItemTypes.Subscription;
+        this.disabled = this.item.disabled;
 
         this.duration = duration;
+
+        this.boost_type = boost_info.type;
+        this.boost_value = boost_info.value;
+        this.boost_objetive = boost_info.objetive;
     }
 
     /**
@@ -114,6 +130,12 @@ class Item {
      */
     async use(id, victim = null) {
         if (!this.#verify()) return;
+
+        this.victim = victim?.id != this.user.user_id ? // la victima NO puede ser el mismo usuario
+            await Users.getOrCreate({ user_id: victim?.id, guild_id: this.interaction.guild.id }) :
+            null;
+
+        this.victimMember = this.victim ? victim : null; // this.victim es el doc de mongoose
 
         console.log("🟢 %s está usando el item %s!", this.interaction.user.tag, this.item.name)
 
@@ -143,7 +165,7 @@ class Item {
     async #useWork() {
         const action = this.action;
         const objetive = this.objetive;
-        
+
         return new Promise(async (res) => {
             console.log("🗯️ Info del item: %s", this.info);
 
@@ -178,12 +200,14 @@ class Item {
 
     // WARNS
     async #addWarns() { // solo darkshop
+        if (!await this.#darkshopWork()) return false;
         console.log("🗨️ Agregando %s warn(s)", this.given);
 
         const warns = this.victim.warns;
 
         for (let i = 0; i < this.given; i++) {
             const id = await FindNewId(await Users.find(), "warns", "id");
+            this.victim.data.counts.warns += 1;
             warns.push({ rule_id: 0, id });
 
             await this.victim.save()
@@ -225,8 +249,8 @@ class Item {
             return false;
         }
 
-        if (this.isTemp) await LimitedTime(this.member, this.given, this.duration);
-        if (this.isSub) await Subscription(this.member, this.given, this.duration, this.price, this.name)
+        if (this.isTemp) this.user = await LimitedTime(this.member, this.given, this.duration);
+        if (this.isSub) this.user = await Subscription(this.member, this.given, this.duration, this.price, this.name)
         else this.member.roles.add(role);
 
         this.#removeItemFromInv()
@@ -234,6 +258,7 @@ class Item {
     }
 
     async #removeRole() {
+        if (!await this.#darkshopWork()) return false;
         const role = this.interaction.guild.roles.cache.find(x => x.id === this.given);
         console.log("🗨️ Eliminando el role %s a %s", role.name, this.interaction.user.tag);
 
@@ -331,15 +356,113 @@ class Item {
     }
 
     async #removeItem() {
+        if (!await this.#darkshopWork()) return false;
 
     }
 
     async #addBoost() {
+        const role = this.interaction.guild.roles.cache.find(x => x.id === this.given);
+        console.log("🗨️ Agregando el role como Boost %s a %s", role.name, this.interaction.user.tag);
 
+        if (this.member.roles.cache.find(x => x === role)) {
+            console.log("🔴 Ya tiene el role que da el item. (BOOST)")
+            this.hasrole.send();
+            return false;
+        }
+
+        const willBenefit = await WillBenefit(this.member, [this.boost_objetive, "any"])
+        if (willBenefit) {
+            console.log("🔴 Se beneficiaría aún más")
+            this.hasboost.send();
+            return false
+        }
+
+        // llamar la funcion para hacer un globaldata y dar el role con boost
+        this.user = await LimitedTime(this.interaction.member, role.id, this.duration, this.boost_type, this.boost_objetive, this.boost_value);
+
+        this.#removeItemFromInv()
+        return true;
     }
 
     async #removeBoost() {
+        if (!await this.#darkshopWork()) return false;
 
+    }
+
+    async #darkshopWork() {
+        if (this.item.use_info.effect === ItemEffects.Positive) return true
+
+        let noVictim = new ErrorEmbed(this.interaction, {
+            type: "execError",
+            data: {
+                command: this.interaction.commandName,
+                guide: `¡Para poder usar este item **DEBE** aplicarse en __otro__ usuario!`
+            }
+        })
+
+        if (!this.victim) {
+            noVictim.send()
+            return false;
+        }
+
+        const dsChannel = this.interaction.client.user.id === Config.testingJBID ?
+            this.interaction.guild.channels.cache.find(x => x.id === "790431676970041356") :
+            this.interaction.guild.channels.cache.find(x => x.id === Config.dsChannel);
+
+        let skipped = new Embed()
+            .defAuthor({ text: `Interacción`, icon: Config.darkLogoPng })
+            .defDesc(`**—** ¡**${this.interaction.user.tag}** se ha volado la Firewall \`(${this.user.economy.dark.accuracy}%)\` y ha usado el item \`${this.item.name}\` en **${this.victimMember.user.tag}**!`)
+            .defColor(Colores.negro)
+            .defFooter({ text: `${this.item.name} para ${this.victimMember.user.tag}`, timestamp: true });
+
+        let success = new Embed()
+            .defAuthor({ text: `Interacción`, icon: Config.darkLogoPng })
+            .defDesc(`**—** ¡**${this.interaction.user.tag}** ha usado el item \`${this.item.name}\` en **${this.victimMember.user.tag}**!`)
+            .defColor(Colores.negro)
+            .defFooter({ text: `${this.item.name} para ${this.victimMember.user.tag}`, timestamp: true });
+
+        let fail = new Embed()
+            .defAuthor({ text: `Interacción`, icon: Config.darkLogoPng })
+            .defDesc(`**—** ¡**${this.interaction.user.tag}** ha querido usar el item \`${this.item.name}\` en **${this.victimMember.user.tag}** pero NO HA FUNCIONADO!`)
+            .defColor(Colores.negro)
+            .defFooter({ text: `${this.item.name} para ${this.victimMember.user.tag}`, timestamp: true });
+
+        // como el efecto es negativo, hay que revisar la firewall
+        const firewallItem = this.shop.items.find(x => x.use_info.item_info.type === ItemTypes.Firewall)
+        const f = x => x.isDarkShop && x.item_id === firewallItem.id && x.active; // filtro
+
+        const firewall = this.victim.data.inventory.find(f);
+        const firewallIndex = this.victim.data.inventory.findIndex(f);
+
+        if (firewall) { // tiene una firewall activa
+            // ¿se la salta?
+            let skip = new Chance().bool({ likelihood: this.user.economy.dark.accuracy });
+
+            if (!skip) { // borrar la firewall, no se la salta
+                // eliminar firewall
+                this.victim.data.inventory.splice(firewallIndex, 1);
+                await this.victim.save();
+
+                // enviar embed
+                dsChannel.send({ embeds: [fail] })
+
+                await this.#removeItemFromInv() // como es fallido, no llega al codigo base para que se elimine el item
+                this.interaction.deleteReply()
+                return false;
+            } else { // se salta la firewall
+                dsChannel.send({ embeds: [skipped] })
+                return true
+            }
+        } else { // no tiene firewall
+            if (this.victim.economy.global.level >= 5) {
+                dsChannel.send({ embeds: [success] })
+                return true
+            } else { // ni siquiera es parte de la red de la darkshop
+                dsChannel.send({ embeds: [fail] })
+                this.interaction.deleteReply()
+                return false // para que no se elimine el item
+            }
+        }
     }
 
     async #activateItem() {
@@ -372,7 +495,7 @@ class Item {
             return false;
         }
 
-        if(!this.action){
+        if (!this.action || this.disabled) {
             let noUse = new ErrorEmbed(this.interaction, {
                 type: "execError",
                 data: {
