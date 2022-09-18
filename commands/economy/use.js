@@ -45,7 +45,7 @@ command.execute = async (interaction, models, params, client) => {
     if(!inv_item) return noItem.send();
 
     const item = await new Item(interaction, inv_item.item_id, inv_item.isDarkShop).build();
-    return item.use(id.value, usuario?.value)
+    return item.use(id.value, usuario?.member)
 }
 
 module.exports = command;

@@ -45,7 +45,7 @@ command.execute = async (interaction, models, params, client) => {
         if(f) itemsEmbed.defField(`— ${real_item.name}`, `**▸ Activo**: ${item.active ? `Sí, desde ${time(item.active_since)}` : "No"}.\n**▸ ID**: \`${item.use_id}\`.`)
     });
 
-    if(user.data.inventory.filter(x => x.isDarkShop === isDarkShop).length === 0) return noItems.send();
+    if(user.data.inventory.filter(x => x.isDarkShop === isDarkShop).length === 0 || !itemsEmbed.data.fields) return noItems.send();
 
     return interaction.editReply({embeds: [itemsEmbed]});
 }

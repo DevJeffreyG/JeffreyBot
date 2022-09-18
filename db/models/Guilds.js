@@ -56,11 +56,30 @@ const GuildSchema = new Schema({
         ],
         rules: [
             {
-                name: {type: String, required: true},
-                desc: {type: String},
-                expl: {type: String, required: true},
-                position: {type: Number},
-                id: {type: Number, sparse: true}
+                name: { type: String, required: true },
+                desc: { type: String },
+                expl: { type: String, required: true },
+                position: { type: Number },
+                id: { type: Number, sparse: true }
+            }
+        ],
+        keys: [
+            {
+                config: {
+                    maxuses: { type: Number, required: true, default: 1 },
+                    used: { type: Number, required: true, default: 0 },
+                    usedBy: { type: Array }
+                },
+                reward: {
+                    type: { type: String, required: true },
+                    boost_type: { type: String, default: null },
+                    boost_value: { type: Number, default: null },
+                    boost_objetive: { type: String, default: null },
+                    value: { type: String, required: true },
+                    duration: { type: Number }
+                },
+                code: { type: String, required: true, unique: true },
+                id: { type: Number, required: true, sparse: true }
             }
         ]
     },
@@ -98,20 +117,20 @@ GuildSchema.static("getById", async function (id) {
     return await this.findOne({ guild_id: id })
 });
 
-GuildSchema.method("getVaultCode", function(code){
+GuildSchema.method("getVaultCode", function (code) {
     return this.data.vault_codes.find(x => x.code === code);
 })
 
-GuildSchema.method("getVaultCodeById", function(id){
+GuildSchema.method("getVaultCodeById", function (id) {
     return this.data.vault_codes.find(x => x.id === id);
 })
 
-GuildSchema.method("getAutoRole", function(id){
+GuildSchema.method("getAutoRole", function (id) {
     return this.data.autoroles.find(x => x.id === id);
 })
 
-GuildSchema.method("getOrCreateToggleGroup", function(id){
-    let q = this.data.togglegroups.find(x => x.id === id) ?? this.data.togglegroups.push({group_name: `Grupo ${id}`, id});
+GuildSchema.method("getOrCreateToggleGroup", function (id) {
+    let q = this.data.togglegroups.find(x => x.id === id) ?? this.data.togglegroups.push({ group_name: `Grupo ${id}`, id });
     return q;
 })
 
@@ -211,10 +230,10 @@ GuildSchema.method("workerRemoveAutoRole", async function (message, reaction, us
         x.message_id === message.id
     )
 
-    if(!autorole) return;
+    if (!autorole) return;
 
     const role = guild.roles.cache.find(x => x.id === autorole.role_id);
-    if(reactions.find(x => x.emoji === reaction.emoji)) {
+    if (reactions.find(x => x.emoji === reaction.emoji)) {
         await reactor.roles.remove(role)
         console.log(`💬 Se eliminó por AUTOROLES ${role.name} a ${reactor.user.tag}`)
     }

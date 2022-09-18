@@ -25,6 +25,7 @@ const { google } = require("googleapis");
 const Twitter = require("twitter");
 const { ApiClient } = require("@twurple/api");
 const { ClientCredentialsAuthProvider } = require("@twurple/auth");
+const { BoostObjetives } = require("./Enums");
 
 /* ##### MONGOOSE ######## */
 const RandomCumplido = function (force = null) {
@@ -673,7 +674,7 @@ const Interest = function (author, idUse) {
  * @param {Number} [specialType=false] The special type of this temporary role.
  * @param {Number} [specialObjective=false] The objetive for this special type of temporary role.
  * @param {number} [specialValue=false] The value for the objetive of this special temporary role.
- * @returns void
+ * @returns Mongoose User document
  */
 const LimitedTime = async function (victimMember, roleID, duration, specialType = null, specialObjective = null, specialValue = null) {
   let role = victimMember.guild.roles.cache.find(x => x.id === roleID);
@@ -707,6 +708,8 @@ const LimitedTime = async function (victimMember, roleID, duration, specialType 
     user.data.temp_roles.splice(lastAddedIndex, 1);
     user.save()
   }, duration);
+
+  return user
 }
 
 /**
@@ -738,6 +741,8 @@ const Subscription = async function (victimMember, roleID, interval, jeffrosPerI
   user.data.temp_roles.push(toPush);
 
   await user.save();
+
+  return user
 }
 
 const VaultWork = function (vault, user, interaction, notCodeEmbed, client) { // mostrar y buscar un codigo no descifrado aún por el usuario
@@ -2320,7 +2325,7 @@ const FindNewId = async function (generalQuery, specificQuery, toCheck) {
 
 /**
  * 
- * @param {*} member The Discord.JS Member to check for benefit
+ * @param {GuildMember} member The Discord.JS Member to check for benefit
  * @param {Array} [objetivesToCheck=["any"]] The objetive of boost to check.
  * - jeffros
  * - exp
@@ -2345,14 +2350,16 @@ const WillBenefit = async function (member, objetivesToCheck) {
     if (special) {
       objetivesToCheck.forEach(objetiveToCheck => {
         switch (objetiveToCheck) {
-          case "jeffros":
-          case "exp":
-          case "all":
+          case BoostObjetives.Jeffros:
+          case BoostObjetives.Exp:
+          case BoostObjetives.All:
             if (special.objetive === objetiveToCheck) hasBoost = true;
             break;
 
           case "any":
-            if (special.objetive === "jeffros" || special.objetive === "exp" || special.objetive === "all") hasBoost = true;
+            if (special.objetive === BoostObjetives.Jeffros ||
+              special.objetive === BoostObjetives.Exp ||
+              special.objetive === BoostObjetives.All) hasBoost = true;
             break;
 
           default:

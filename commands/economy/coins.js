@@ -1,7 +1,7 @@
 const ms = require("ms");
 const moment = require("moment");
 
-const { Command, Categories, HumanMs, Embed, RandomCumplido } = require("../../src/utils");
+const { Command, Categories, HumanMs, Embed, RandomCumplido, BoostTypes, BoostObjetives } = require("../../src/utils");
 
 const { Config, Emojis, Responses } = require("../../src/resources/");
 const { multiplier } = Config;
@@ -49,21 +49,18 @@ command.execute = async (interaction, models, params, client) => {
     }
 
     // buscar usuario
-    const user = await Users.findOne({
+    const user = await Users.getOrCreate({
         user_id: author.id,
         guild_id: guild.id
-    }) ?? await new Users({
-        user_id: author.id,
-        guild_id: guild.id
-    }).save();
+    })
     
     // buscar si tiene boost
     for (let i = 0; i < user.data.temp_roles.length; i++) {
         const temprole = user.data.temp_roles[i];
         const specialInfo = temprole.special;
         
-        if(specialInfo.type === "boostMultiplier"){
-            if(specialInfo.objetive === "jeffros" || specialInfo.objetive === "all"){
+        if(specialInfo.type === BoostTypes.Multiplier){
+            if(specialInfo.objetive === BoostObjetives.Jeffros || specialInfo.objetive === BoostObjetives.All){
                 money = money * Number(specialInfo.value);
                 tmoney = `**${Emojis.Jeffros}${money.toLocaleString('es-CO')}📈**`;
                 console.log(author.tag, "Boost de JEFFROS.")

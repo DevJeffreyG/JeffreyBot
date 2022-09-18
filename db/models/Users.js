@@ -70,8 +70,8 @@ const Schema = new mongoose.Schema({
                 active_since: { type: Date, required: true },
                 duration: { type: Number, required: true },
                 special: {
-                    type: { type: String, default: null },
-                    objetive: { type: String, default: null },
+                    type: { type: Number, default: null },
+                    objetive: { type: Number, default: null },
                     value: { type: Number, default: null }
                 },
                 isSub: { type: Boolean, required: true, default: false },
