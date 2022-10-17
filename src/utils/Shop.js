@@ -28,6 +28,9 @@ class Shop {
         this.shop.items = this.shop.items.sort((a, b) => a.id - b.id);
 
         this.interaction = inter;
+        this.client = this.interaction.client;
+
+        this.Emojis = this.client.Emojis;
 
         this.items = new Map();
         this.base = {
@@ -35,7 +38,7 @@ class Shop {
             author_icon: this.interaction.guild.iconURL({ dynamic: true }) ?? this.interaction.member.displayAvatarURL(),
             color: isDarkShop ? Colores.negro : Colores.verdejeffrey,
             description: ``,
-            addon: `**\`{item_id}\` — {item_name}**\n▸ {item_desc}\n▸ **${this.isDarkShop ? Emojis.Dark : Emojis.Jeffros}{item_price}**\n\n`,
+            addon: `**\`{item_id}\` — {item_name}**\n▸ {item_desc}\n▸ **${this.isDarkShop ? this.Emojis.DarkJeffros : this.Emojis.Jeffros}{item_price}**\n\n`,
             footer: `Página {ACTUAL} de {TOTAL}`,
             icon_footer: this.interaction.guild.iconURL()
         }
@@ -62,9 +65,9 @@ class Shop {
     async setup() {
         this.user = await Users.getOrCreate({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id });
         if (this.isDarkShop)
-            this.base.description = `**—** Bienvenid@ a la DarkShop. Para comprar items usa \`/dsbuy #\`.\n**—** Tienes **${Emojis.Dark}${this.user.economy.dark.darkjeffros.toLocaleString("es-CO")}**`;
+            this.base.description = `**—** Bienvenid@ a la DarkShop. Para comprar items usa \`/dsbuy #\`.\n**—** Tienes **${this.Emojis.DarkJeffros}${this.user.economy.dark.darkjeffros.toLocaleString("es-CO")}**`;
         else
-            this.base.description = `**—** ¡Bienvenid@ a la tienda! para comprar items usa \`/buy #\`.\n**—** Tienes **${Emojis.Jeffros}${this.user.economy.global.jeffros.toLocaleString("es-CO")}**`;
+            this.base.description = `**—** ¡Bienvenid@ a la tienda! para comprar items usa \`/buy #\`.\n**—** Tienes **${this.Emojis.Jeffros}${this.user.economy.global.jeffros.toLocaleString("es-CO")}**`;
 
         this.shop.items.forEach((item, index) => {
             var price = this.determinePrice(this.user, item, true);
@@ -106,11 +109,11 @@ class Shop {
 
         let toConfirm = [
             `¿Deseas comprar el item \`${itemName}\`?`,
-            `Pagarás **${this.isDarkShop ? Emojis.Dark : Emojis.Jeffros}${itemPrice}**.`,
+            `Pagarás **${this.isDarkShop ? this.Emojis.DarkJeffros : this.Emojis.Jeffros}${itemPrice}**.`,
             `Esta compra no se puede devolver.`
         ]
 
-        if (item.interest > 0) toConfirm.push(`Al comprar el item, su precio subirá (**+${this.isDarkShop ? Emojis.Dark : Emojis.Jeffros}${item.interest.toLocaleString("es-CO")}**)`)
+        if (item.interest > 0) toConfirm.push(`Al comprar el item, su precio subirá (**+${this.isDarkShop ? this.Emojis.DarkJeffros : this.Emojis.Jeffros}${item.interest.toLocaleString("es-CO")}**)`)
 
         let confirmation = await Confirmation("Comprar item", toConfirm, this.interaction);
         if (!confirmation) return;
@@ -178,19 +181,19 @@ class Shop {
         else user.economy.global.jeffros -= price;
         user.data.inventory.push({ isDarkShop: this.isDarkShop, item_id: item.id, use_id: newUseId })
 
-        await user.save();
-
         let embed = new Embed({
             type: "success",
             data: {
                 desc: [
                     "Pago realizado con éxito",
-                    `Compraste: \`${itemName}\` por **${this.isDarkShop ? Emojis.Dark : Emojis.Jeffros}${itemPrice}**`,
+                    `Compraste: \`${itemName}\` por **${this.isDarkShop ? this.Emojis.DarkJeffros : this.Emojis.Jeffros}${itemPrice}**`,
                     `Úsalo con \`/use ${newUseId}\``,
-                    `Ahora tienes: ${user.parseJeffros(this.isDarkShop)}`
+                    `Ahora tienes: ${user.parseJeffros(this.Emojis, this.isDarkShop)}`
                 ]
             }
         })
+
+        await user.save();
         return this.interaction.editReply({ embeds: [embed] });
     }
 
@@ -257,42 +260,62 @@ class Shop {
             type: "execError",
             data: {
                 command: this.interaction.commandName,
-                guide: `Si se usa un tipo boost, **debe tener**: \`role\`, \`boostobj\`, \`boosttype\`, \`boostval\` y \`duracion\`.`
+                guide: `Si se usa un tipo boost, **debe tener**: \`role\`, \`boostobj\`, \`boosttype\`, \`boostval\` y \`duracion\`.
+Si es para la DarkShop, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
+            }
+        })
+
+        let dsError = new ErrorEmbed(this.interaction, {
+            type: "execError",
+            data: {
+                command: this.interaction.commandName,
+                guide: `Si el item es de la DarkShop, **debe tener**: \`efecto\`.`
             }
         })
         const item = this.shop.findItem(params.id.value, false);
         if (!item) return this.noitem.send();
 
+        item.reply = params.reply?.value ?? item.reply;
+
         const use = item.use_info;
 
         use.action = params.accion.value;
         use.objetive = Number(params.objetivo.value);
+
         use.given = (
             use.objetive == ItemObjetives.Role ||
             use.objetive == ItemObjetives.Boost
         ) ? params.role?.value : params.cantidad?.value;
-        use.reply = params.reply?.value ?? use.reply;
+
+        use.effect = this.isDarkShop ? params.efecto?.value : null;
+
         use.item_info.type = params.especial?.value ?? use.item_info.type;
         use.item_info.duration = use.objetive == ItemObjetives.Role ||
-            use.objetive == ItemObjetives.Boost ? ms(params.duracion?.value) : null
+            use.objetive == ItemObjetives.Boost && params.duracion?.value ? ms(params.duracion?.value) : null
 
         use.boost_info.type = ItemObjetives.Boost ? params.boosttype?.value : null
         use.boost_info.value = ItemObjetives.Boost ? params.boostval?.value : null
-        use.boost_info.objetive = ItemObjetives.Boost ? params.boosttype?.value : null
+        use.boost_info.objetive = ItemObjetives.Boost ? params.boostobj?.value : null
 
         // boost verification
         if (use.objetive === ItemObjetives.Boost) {
-            if (!use.given) return boostError.send();
-            if (!use.boost_info.type) return boostError.send();
-            if (!use.boost_info.value) return boostError.send();
+            if (!use.given && !this.isDarkShop) return boostError.send();
+            if (!use.boost_info.type && !this.isDarkShop) return boostError.send();
+            if (!use.boost_info.value && !this.isDarkShop) return boostError.send();
             if (!use.boost_info.objetive) return boostError.send();
             if (!use.item_info.duration) return boostError.send();
         }
 
         // role verification
-        if (use.objetive === ItemObjetives.Boost) {
+        if (use.objetive === ItemObjetives.Role) {
             if (!use.given) return roleError.send();
             if (!use.item_info.duration) return roleError.send();
+        }
+
+        // ds verification
+
+        if (this.isDarkShop) {
+            if (!use.effect) return dsError.send();
         }
 
         await this.shop.save();

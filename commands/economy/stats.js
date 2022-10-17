@@ -1,5 +1,4 @@
 const { Command, Categories, Embed } = require("../../src/utils")
-const { Config, Emojis } = require("../../src/resources");
 
 const command = new Command({
     name: "stats",
@@ -18,7 +17,8 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { Users } = models
     const { usuario } = params;
-    
+    const { Emojis } = client;
+
     const guild = client.guilds.cache.find(x => x.id === interaction.guildId);
     
     // codigo
@@ -46,7 +46,7 @@ command.execute = async (interaction, models, params, client) => {
     }
 
     let meEmbed = new Embed()
-    .defAuthor({text: `Estadísticas de ${member.user.tag}`, icon: Config.jeffreyguildIcon})
+    .defAuthor({text: `Estadísticas de ${member.user.tag}`, icon: guild.iconURL({dynamic: true})})
     .defDesc(`**— Nivel**: ${curLvl}
 **— EXP**: ${curExp} / ${nxtLvlExp}
 **— Jeffros**: ${Emojis.Jeffros}${actualJeffros}

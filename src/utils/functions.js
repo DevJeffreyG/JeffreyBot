@@ -1,5 +1,5 @@
 const { PermissionsBitField, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, EmbedBuilder, Guild, GuildMember, CommandInteraction } = require("discord.js");
-const { ButtonStyle } = require("discord-api-types/v10");
+const { ButtonStyle, OverwriteType } = require("discord-api-types/v10");
 
 const Config = require("../resources/base.json");
 const Colores = require("../resources/colores.json");
@@ -52,17 +52,25 @@ const findLvls5 = async function (client, guild) {
 }
 
 const GetChangesAndCreateFields = async function (logsFetched) {
+
+
   let fields = [];
   let separator = "**—**";
 
   logsFetched.forEach(log => {
+    console.log("🟩 Fields actuales:", fields)
+
+    const { client } = log;
+    const { Emojis } = client;
+
     let changesArray = log.changes;
+
+    console.log("♾️ Array de cambios", changesArray)
 
     let target = log.target;
     let extra = log.extra;
-    let extraType = extra ? extra.user ? "member" : "role" : null;
+    let extraType = extra ? extra.user ? OverwriteType.Member : OverwriteType.Role : null;
 
-    console.log("♾️ Array de cambios", changesArray)
     let resetedPerms = resetWork(log)
 
     changesLoop:
@@ -89,9 +97,9 @@ const GetChangesAndCreateFields = async function (logsFetched) {
 
           let permissionOverwrite = target.permissionOverwrites.cache.find(x => x.deny.bitfield === nuevosPermisos.bitfield && x.type === extraType && x.id === extra.id);
           if (!permissionOverwrite) return;
-          let changed = permissionOverwrite.type === "role" ? permissionOverwrite.channel.guild.roles.cache.find(x => x.id === permissionOverwrite.id) : permissionOverwrite.channel.guild.members.cache.find(x => x.id === permissionOverwrite.id);
+          let changed = permissionOverwrite.type === OverwriteType.Role ? permissionOverwrite.channel.guild.roles.cache.find(x => x.id === permissionOverwrite.id) : permissionOverwrite.channel.guild.members.cache.find(x => x.id === permissionOverwrite.id);
 
-          cambio = `${permissionOverwrite.type === "role" ? "Role" : "Usuario"} ${permissionOverwrite.type === "role" ? changed.name : changed.displayName}`;
+          cambio = `${permissionOverwrite.type === OverwriteType.Role ? "Role" : "Usuario"} ${permissionOverwrite.type === OverwriteType.Role ? changed.name : changed.displayName}`;
 
           ahora = "";
 
@@ -130,9 +138,9 @@ const GetChangesAndCreateFields = async function (logsFetched) {
 
           let permissionOverwrite = target.permissionOverwrites.cache.find(x => x.allow.bitfield === nuevosPermisos.bitfield && x.type === extraType && x.id === extra.id);
           if (!permissionOverwrite) return;
-          let changed = permissionOverwrite.type === "role" ? permissionOverwrite.channel.guild.roles.cache.find(x => x.id === permissionOverwrite.id) : permissionOverwrite.channel.guild.members.cache.find(x => x.id === permissionOverwrite.id);
+          let changed = permissionOverwrite.type === OverwriteType.Role ? permissionOverwrite.channel.guild.roles.cache.find(x => x.id === permissionOverwrite.id) : permissionOverwrite.channel.guild.members.cache.find(x => x.id === permissionOverwrite.id);
 
-          cambio = `${permissionOverwrite.type === "role" ? "Role" : "Usuario"} ${permissionOverwrite.type === "role" ? changed.name : changed.displayName}`;
+          cambio = `${permissionOverwrite.type === OverwriteType.Role ? "Role" : "Usuario"} ${permissionOverwrite.type === OverwriteType.Role ? changed.name : changed.displayName}`;
 
           ahora = "";
 
@@ -172,9 +180,7 @@ const GetChangesAndCreateFields = async function (logsFetched) {
           break;
 
         case "type":
-          cambio = "Permisos nuevos"
-          ahora = ahora === 0 ? "Para role" : "Para usuario"
-          break;
+          continue changesLoop;
 
         default:
           cambio = "Cambios";
@@ -182,10 +188,10 @@ const GetChangesAndCreateFields = async function (logsFetched) {
 
       if (!ahora) return;
 
-      ahora = `\n**Ahora**\n${ahora}`;
-      antes = antes != undefined ? `\n\n**Antes**\n${antes}` : "_ _";
+      ahora = isNaN(ahora) ? `\n**Ahora**\n${ahora}` : null;
+      antes = antes != undefined ? `\n\n**Antes**\n${antes}` : null;
 
-      fields.push({
+      if (ahora && antes) fields.push({
         name: `${separator} ` + cambio,
         value: `${ahora}${antes}`
       });
@@ -209,7 +215,7 @@ const GetChangesAndCreateFields = async function (logsFetched) {
 
 
   if (fields.length > 0) return fields;
-  else null;
+  else return null;
 }
 
 let resetWork = (log) => {
@@ -220,10 +226,9 @@ let resetWork = (log) => {
 
 
   cambios.forEach(change => {
-    console.log(`================= 🕰️ CHANGE INFO 🕰️ =================\nChange key: ${change.key}\nNuevo: ${change.new}\nViejo: ${change.old}\n=================`)
-
-    if (change.key != "allow" || change.key != "deny") return console.log("KEY INVÁLIDA, ABORTANDO.")
-    console.log(change)
+    if (change.key != "allow" && change.key != "deny") return console.log("⚪ KEY '%s' INVÁLIDA, ABORTANDO.", change.key)
+    console.log(`⚪ ================= 🕰️ CHANGE INFO 🕰️ =================\n⚪ Change key: ${change.key}\n⚪ Nuevo: ${change.new}\n⚪ Viejo: ${change.old}\n⚪ =================`)
+    console.log("⚪ " + change)
     change.old ?? 0;
     change.new ?? 0;
 
@@ -233,7 +238,7 @@ let resetWork = (log) => {
     const permsChanged = newperms.missing(oldperms);
     const rolePerms = log.target.permissionOverwrites.resolve(log.extra.id);
 
-    console.log("Permisos que cambiaron:", permsChanged);
+    console.log("⚪ Permisos que cambiaron:", permsChanged);
     if (permsChanged.length === 0) {
       console.log("🟥 No pasó a neutral."); // pasa de neutral a algo más
     } else
@@ -253,7 +258,7 @@ let resetWork = (log) => {
         }
       })
   });
-  console.log("=====================================================================================")
+  console.log("⚪ =====================================================================================")
   console.log(`🟢 PERMISOS RESETEADOS:`, reseted, "Es decir ➡️", reseted.toArray());
   return reseted;
 }
@@ -356,6 +361,7 @@ const FetchAuditLogs = async function (client, guild, types) {
       const { executor, target, changes, extra } = fetched;
 
       toReturn.push({
+        client,
         changes,
         executor,
         target,
@@ -374,6 +380,7 @@ const FetchAuditLogs = async function (client, guild, types) {
  */
 const intervalGlobalDatas = async function (client, justTempRoles) {
   justTempRoles = justTempRoles || false;
+  const { Emojis } = client;
 
   let guild;
   let bdRole;
@@ -405,6 +412,7 @@ const intervalGlobalDatas = async function (client, justTempRoles) {
 
     let roles = dbUser.data.temp_roles;
     let birthday = dbUser.data.birthday.locked;
+    let temproledeletions = await GlobalDatas.getTempRoleDeletions(member.id);
 
     if (roles) {
       for (let i = 0; i < dbUser.data.temp_roles.length; i++) {
@@ -495,6 +503,15 @@ const intervalGlobalDatas = async function (client, justTempRoles) {
       } else {
         // revisar si tiene el rol de cumpleaños, entonces quitarselo
         if (member.roles.cache.find(x => x.id === bdRole.id)) member.roles.remove(bdRole);
+      }
+    }
+
+    if (temproledeletions) { // hay roles eliminados de manera temporal
+      for (const deletion of temproledeletions) {
+        if (moment().isAfter(deletion.until)) {
+          member.roles.add(deletion.role_id)
+          deletion.remove();
+        }
       }
     }
   })
@@ -1035,255 +1052,6 @@ const handleUploads = async function (client) {
 }
 
 /**
- * Initialize the base variables used on the commands.
- * @deprecated No longer using MessageCreate Commands
- * @param {*} client - The Discord.JS Client | Guild ID
- * @param {*} message - The Discord.JS Message that triggers the command
- * @returns Object including the [guild, author, prefix, jeffrey_role, admin_role, mod_role, staff_role, executionInfo] variables
- * - Or the prefix if message is not defined
- */
-const Initialize = async function (client, message) {
-  if (!message) {
-    const docGuild = await Guilds.findOne({ guild_id: client }) ?? await new Guilds({ guild_id: client }).save();
-  }
-  const docGuild = await Guilds.findOne({ guild_id: message.guild.id }) ?? await new Guilds({ guild_id: message.guild.id }).save();
-
-  // Variables
-  const prefix = "/";
-  const guild = message.guild;
-  const author = message.author;
-  const member = message.member;
-
-  let jeffreyRole = client.user.id === Config.testingJBID ? guild.roles.cache.find(x => x.id === "482992290550382592") : guild.roles.cache.find(x => x.id === Config.jeffreyRole);
-  const adminRole = guild.roles.cache.find(x => x.id === docGuild.roles.admin) ?? null;
-  const staffRole = guild.roles.cache.find(x => x.id === docGuild.roles.staff) ?? null;
-
-  const executionInfo = {
-    client: client,
-    guild: guild,
-    author: author,
-    message: message,
-    member: message.member,
-    prefix: prefix,
-  }
-
-  return {
-    guild: guild,
-    author: author,
-    member: member,
-    prefix: prefix,
-    jeffrey_role: jeffreyRole,
-    admin_role: adminRole,
-    staff_role: staffRole,
-    executionInfo: executionInfo
-  };
-}
-
-/**
- * Creation of the principal help embed of a command, or the verification of the parameters given by the user.
- * @deprecated No longer using MessageCreate Commands
- * @param {Object[]} commandTree - The configuration for the command, including the parameters if it has.
- * @param {Object[]} executionInfo The information of the execution of the command.
- * - guild
- * - author
- * - member
- * - message
- * @param {Array} [args=null] - The arguments of the user by using the command
- * @returns Embed, or an error if any required parameter is missing
- */
-const TutorialEmbed = async function (commandTree, executionInfo, args) {
-  args = args || null;
-
-  const { client, guild, message, member, prefix } = executionInfo;
-  let { userlevel, params, name } = commandTree;
-
-  let originalParams = params;
-
-  let response = [];
-
-  // Revisar permisos
-  const { jeffrey_role, admin_role, staff_role } = await Initialize(client, message);
-  /* let permissions_role_id; // id del rol a revisar
-  switch(userlevel){
-    case "DEVELOPER":
-      permissions_role_id = jeffrey_role.id;
-      break;
-
-    case "ADMIN":
-      if(!admin_role) permissions_role_id = "notdetermined";
-      else
-      permissions_role_id = admin_role.id;
-      break;
-
-    case "STAFF":
-      if(!staff_role) permissions_role_id = "notdetermined";
-      else
-      permissions_role_id = staff_role.id;
-      break;
-
-    default:
-      permissions_role_id = null;
-      break;
-  }
-
-  if(permissions_role_id === "notdetermined" && name != "setup") response = ["ERROR", `NOT CONFIGURED YET 'admin: ${admin_role}, staff: ${staff_role}'`];
-  else if(permissions_role_id === "notdetermined" && name === "setup" && !member.permissions.has("ADMINISTRATOR")) response = ["ERROR", "CAN'T USE /SETUP"]
-  else if(permissions_role_id && permissions_role_id != "notdetermined" && !member.roles.cache.find(x => x.id === permissions_role_id) && !member.roles.cache.find(x => x.id === jeffrey_role.id)) response = ["ERROR", `INSUFFICIENT PERMISSIONS '${userlevel}'`];
- */
-  if (!params) return response;
-
-  let Embed = await createEmbedWithParams(commandTree, guild, params)
-
-  if (!args) { // no se dan args, se creó el embed
-    return Embed;
-  } else if (args && response.length === 0) { // si hay args llamando con la función, y no hay error de permisos
-
-    // cargar nuevos parametros en caso de ser necesario
-    let newParams = [];
-    paramsLoop:
-    for (let i = 0; i < originalParams.length; i++) {
-      const param = originalParams[i];
-
-      newParams.push(param)
-
-      if (param.type === "Options") {
-        break paramsLoop;
-      }
-    }
-
-    // definir los parámetros que ya fueron escogidos
-    let alreadyPassed = "";
-
-    for (let i = 0; i < newParams.length; i++) {
-      alreadyPassed += `${args[i]} `;
-    }
-
-    let futureParams = false;
-
-    // agregar los nuevos parámetros en caso de tener active_on de lo que ya se pasó antes
-    let index = originalParams.findIndex(element => element.type === "Options");
-    originalParams.forEach(async p => {
-      if (p.active_on && p.active_on.param === originalParams[index].name && p.active_on.is === args[index]) {
-        // revisar que no esté repetido
-
-        futureParams = true;
-
-        newParams.push(p);
-
-        params = newParams;
-      }
-    })
-
-    if (!futureParams) {
-      originalParams.forEach(p => {
-        let isOnParams = newParams.find(x => x.name === p.name) ? true : false;
-        if (!p.active_on && !isOnParams) newParams.push(p);
-      });
-
-      params = newParams;
-
-      Embed = await createEmbedWithParams(commandTree, guild, params);
-    } else {
-      Embed = await createEmbedWithParams(commandTree, guild, params, alreadyPassed);
-    }
-
-    verificationLoop:
-    for (let i = 0; i < params.length; i++) {
-      let param = params[i];
-      const arg = args[i] ? args[i] : null;
-
-      let toReturn;
-      if (!arg && param.type != "Attachment") { // null, revisar que sea opcional
-        if (param && !param.optional) { // no es opcional, regresar error
-          response = ["ERROR", `in ${i} - REQUIRED PARAMETER NOT DEFINED`, i, " "];
-          break verificationLoop;
-        } else {
-          toReturn = null;
-        }
-      } else {
-        // validar el tipo de parámetro dado
-
-        toReturn = await switchParams(param, arg, args, message, guild, member, client, i);
-
-        let joinStringExists = params.find(x => x.type === "JoinString");
-
-        let nothingElseAfterJoinString = params[params.findIndex(x => x === joinStringExists) + 2] ? false : true;
-        if (!nothingElseAfterJoinString && joinStringExists) toReturn = "FATAL JOINSTRING";
-
-        if (params[params.findIndex(x => x === joinStringExists) + 1] && nothingElseAfterJoinString) { // esto para cuando haya una solo cosa después de JoinString
-          if (joinStringExists && param.type === "JoinString") {
-            let indexOfJoinString = params.findIndex(x => x === joinStringExists); // el index del param del JoinString
-
-            let indexFTR = indexOfJoinString + 1 - params.length + args.length; // el index del primer elemento que se SUPONE va justo después del JoinString
-
-            let isValid = await validateAnArg(params[params.findIndex(x => x === joinStringExists) + 1], args[indexFTR], args, message, guild, member, client, i);
-
-            let afterArgs = args.slice(indexFTR, args.length); // el array de lo que está después del JoinString
-
-            // cambiar el "args"
-            args = args.slice(0, indexFTR - 1); // actualizar el args, para que no sobren args, el arg que queda en la posicion del JoinString NO son los args juntados.
-
-            if (isValid) { // el arg después de JoinString es valido de acuerdo a los que están en los params.
-              afterArgs.forEach(after => {
-                toReturn = toReturn.replace(after, "").trimEnd(); // eliminar del toReturn del JoinString cada elemento de afterArgs
-                args.push(after); // push al args actualizado
-              })
-            }
-          }
-        }
-
-
-        if (!toReturn) {
-          const limit = 30;
-          let given = arg;
-          if (arg && arg.length > limit) {
-            given = arg.slice(0, limit + 1) + "..."
-          } else {
-            given = " ";
-          }
-          response = ["ERROR", `in ${i} - INVALID PARAMETER GIVEN`, i, given];
-          break verificationLoop;
-        } else if (toReturn === "FATAL") {
-          response = ["ERROR", `in ${i} - INVALID PARAMETER TYPE`, `UNKOWN ${param.type}`, "FATAL ERROR"];
-          break verificationLoop;
-        } else if (toReturn === "FATAL JOINSTRING") {
-          response = ["ERROR", `in ${i} - INVALID PARAMETERS WRITTEN`, `ONLY ONE PARAM AFTER JOINSTRING`, "FATAL ERROR"];
-          break verificationLoop;
-        }
-      }
-
-      response.push({
-        "param": param.name,
-        "data": toReturn
-      });
-
-    }
-
-    if (response[3] === "FATAL ERROR") {
-      message.channel.send(`¡${jeffrey_role}, ayuda por aquí!\n\n${member} espera un momento que Jeffrey es un poco lento en las computadoras y tiene que revisar algo para que todo funcione bien.\n\`\`\`json\n${response}\`\`\``);
-      return response;
-    } else
-
-      if (response[0] === "ERROR") {
-        const docGuild = await Guilds.findOne({ guild_id: message.guild.id }) ?? await new Guilds({ guild_id: message.guild.id }).save();
-
-        Embed.defAuthor({ text: `Error ▸ /${commandTree.name}: ${params[response[2]].name}, invalid "${response[3]}"`, icon: guild.iconURL() })
-        Embed.defColor(Colores.rojo);
-        message.channel.send({ embeds: [Embed] }); // Si la response está mal, enviar embed (wip)
-        return response;
-      } else { // no hay ningún parámetro mal
-        return response;
-      }
-  } else { // si hay un error de permisos O no se puede determinar si tiene los permisos necesarios
-    let q = await DataWork(message, "ADMIN_USER")
-    if (!q) return;
-
-    return response;
-  }
-
-}
-
-/**
  * 
  * @param {*} interaction The Discord.JS Interaction that triggers the command
  * @param {String} dataSearch The Data to search in the setup of this Guild
@@ -1390,12 +1158,12 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
         .setCustomId("confirmAction")
         .setLabel("Aceptar")
         .setStyle(ButtonStyle.Success)
-        .setEmoji(Config.confirmEmojiId),
+        .setEmoji(client.EmojisObject.Allow.id),
       new ButtonBuilder()
         .setCustomId("cancelAction")
         .setLabel("Cancelar")
         .setStyle(ButtonStyle.Danger)
-        .setEmoji(Config.cancelEmojiId)
+        .setEmoji(client.EmojisObject.Deny.id)
     )
 
   await interaction.editReply({ content: null, embeds, components: [row] }); // enviar mensaje de confirmación
@@ -1580,219 +1348,13 @@ const AfterInfraction = async function (user, data, isSoftwarn = false) {
 }
 
 /**
- * @deprecated InteractivePages built-in
- * @param {String} guildId The Guild#id
- * @param {Object} message The Discord.JS Message
- * @param {Number} [itemsPerPage = 3] The number of items that will be per page
- * @param {Boolean} isDarkShop If the pages to generate are from the darkshop or not
- * @returns {Array|null} Each element of the array will be the description of the page or null if items do not exist
- */
-const GeneratePages = async function (guildId, message, itemsPerPage, isDarkShop) {
-  itemsPerPage = itemsPerPage || 3;
-  isDarkShop = isDarkShop || false;
-
-  const user = await Users.findOne({
-    user_id: message.author.id,
-    guild_id: guildId
-  });
-
-  const interest_txt = "Al comprar este item, su precio subirá";
-  const viewExtension = "ꜝ";
-
-  const shop = isDarkShop ? await DarkShops.findOne({ guild_id: guildId }) : await Shops.findOne({ guild_id: guildId });
-  const emote = isDarkShop ? Emojis.Dark : Emojis.Jeffros;
-
-  if (!shop || shop.items.length === 0) return null;
-
-  const items = shop.items;
-
-  let pag_actual = 1;
-  let totalpags = shop.items.length / itemsPerPage;
-
-  let inicio = itemsPerPage * pag_actual - itemsPerPage; // el index del primer item a mostrar
-  let fin = itemsPerPage * pag_actual - 1; // el index del ultimo item a mostrar
-
-  if (items.length <= fin) {
-    fin = items.length - 1;
-  }
-
-  let pags = [];
-  let actualpage = [];
-
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i];
-
-    if (i > fin) { // ayuda no se como hace varias paginas
-      pags.push(actualpage);
-
-      actualpage = [];
-      pag_actual++;
-      fin = itemsPerPage * pag_actual - 1;
-
-      if (items.length <= fin) {
-        fin = items.length - 1;
-      }
-    }
-
-    const userIsOnMobible = await isOnMobible(message);
-
-    const precio = await DeterminePrice(user, item, true, isDarkShop);
-    const nombre = item.name;
-    const desc = item.description;
-    const id = item.id;
-    const interest = item.interest.toLocaleString("es-CO");
-    const hasInterest = item.interest != 0 ? true : false;
-    const isSub = item.use_info.isSub;
-
-    if (isSub) {
-      actualpage.push(`**— { ${id} } ${nombre}**\n\`▸\` ${desc}\n▸ ${emote}${precio} **/${new HumanMs(item.use_info.duration).human}**\n\n`);
-    } else {
-      if (userIsOnMobible && hasInterest) {
-        actualpage.push(`**— { ${id} } ${nombre}**\n\`▸\` ${desc}\n▸ ${emote}${precio}\n\`▸\` ${interest_txt} (+${interest})\n\n`);
-      } else if (!userIsOnMobible && hasInterest) { // esta en pc, y el item tiene interés
-        actualpage.push(`**— { ${id} } ${nombre}**\n\`▸\` ${desc}\n▸ ${emote}${precio} [${viewExtension}](${message.url} '${interest_txt} (+${interest})')\n\n`);
-      } else { // no tiene interés
-        actualpage.push(`**— { ${id} } ${nombre}**\n\`▸\` ${desc}\n▸ ${emote}${precio}\n\n`);
-      }
-    }
-  }
-
-  pags.push(actualpage);
-
-  return pags || null;
-}
-
-/**
- * @deprecated
- * @param {*} interaction The Discord.JS Interaction
- * @param {*} own_message The Discord.JS client Message
- * @param {Array} custom_filter Needs to be one of the elements of the Array
- * @returns 
- */
-const CollectMessage = async function (interaction, own_message, custom_filter) {
-  custom_filter = custom_filter || null;
-
-  if (custom_filter) custom_filter.push("cancel");
-
-  return new Promise(async (resolve, reject) => {
-    const filter = custom_filter ? m => m.author.id === interaction.user.id && custom_filter.find(x => x.toLowerCase() === m.content.toLowerCase()) : m => m.author.id === interaction.user.id;
-    const channel = interaction.channel;
-    const collector = channel.createMessageCollector({ filter, time: ms("1m"), max: 1 });
-
-    collector.on("collect", async collected => {
-      await collected.delete();
-    })
-
-    collector.on("end", async collected => {
-      let resolvable = collected.size > 0 && collected.first().content.toLowerCase() != "cancel" ? true : false;
-      resolve(resolvable ? collected.first() : null);
-
-      if (!resolvable) own_message.edit("Cancelado.");
-    });
-  })
-}
-
-/**
- * @deprecated
- * @param {*} type 
- * @param {*} message 
- * @returns 
- */
-const ValidateParam = async function (type, message) {
-  const arg = message.content;
-  let toReturn;
-
-  switch (type) {
-    case "Member":
-      // buscar por mención, o id
-      toReturn = message.mentions.members.first() ? message.mentions.members.first() : message.guild.members.cache.find(x => x.id === arg);
-
-      if (!toReturn && (arg.toLowerCase() === "yo" || arg.toLowerCase() === "me")) {
-        toReturn = message.member;
-      }
-
-      break;
-
-    case "NotSelfMember":
-      // no puede ser el mismo usuario que ejecuta el comando
-      let possibleReturn = message.mentions.members.first() ? message.mentions.members.first() : message.guild.members.cache.find(x => x.id === arg);
-      toReturn = possibleReturn.id != message.member.id ? possibleReturn : null;
-      break;
-
-    case "Role":
-      // buscar por mención, o id
-      toReturn = message.mentions.roles.first() ? message.mentions.roles.first() : message.guild.roles.cache.find(x => x.id === arg);
-      break;
-
-    case "Emoji":
-      let isCustom = arg.length > 5 ? true : false;
-
-      if (isCustom) {
-        let emote = arg.match(/\d/g); // sacando los números del emoji
-        emote = emote.join("");
-        toReturn = message.guild.emojis.cache.find(x => x.id === emote);
-      } else {
-        toReturn = arg;
-      }
-      break;
-
-    case "Channel":
-      toReturn = message.mentions.channels.first() ? message.mentions.channels.first() : message.guild.channels.cache.find(x => x.id === arg);
-      break;
-
-    case "Message":
-      toReturn = await message.channel.messages.fetch(arg);
-      break;
-
-    case "MessageLink":
-      const linkArray = arg.split("/");
-      const numbers = linkArray.filter(element => !isNaN(element) && element.length > 0);
-
-      const actualguild = message.guild;
-      const actualchannel = actualguild.channels.cache.find(x => x.id === numbers[1]);
-      const actualmessage = await actualchannel.messages.fetch(numbers[2]).catch(err => console.log());
-
-      toReturn = actualmessage;
-      break;
-
-    case "Number":
-      if (Number(arg)) toReturn = Number(arg);
-      break;
-
-    case "NaturalNumberDiff0":
-      if (Math.floor(arg) > 0) {
-        toReturn = Math.floor(arg)
-      }
-      break;
-
-    case "NaturalNumber":
-      if (Math.floor(arg) >= 0) {
-        toReturn = Math.floor(arg)
-      }
-      break;
-
-    case "Time":
-      toReturn = ms(arg);
-      break;
-
-    case "Boolean":
-      if (arg === "1" || arg === "true" || arg === "si" || arg === "sí" || arg === "yes" || arg === "y" || arg === "s") toReturn = true;
-      else if (arg === "0" || arg === "false" || arg === "no" || arg === "no" || arg === "n") toReturn = false;
-      break;
-
-    default:
-      toReturn = null;
-  }
-
-  return toReturn;
-}
-
-/**
  * 
  * @param {*} client The Discord.JS Client
  * @param {String} guildId The Sting of the Guild#id where the commands is executed
  */
 const DarkShopWork = async function (client, guildId) {
+  const { Emojis } = client;
+
   const maxDaysNormalInflation = Config.daysNormalInflation;
   const maxDaysEventInflation = Config.daysEventInflation;
   const guild = client.guilds.cache.find(x => x.id === guildId);
@@ -1995,7 +1557,7 @@ const DarkShopWork = async function (client, guildId) {
           .defDesc(`**—** Se han eliminado los DarkJeffros de **${deletedTag}**.
 **—** Desde: \`${darkdata.dj_since}\`.
 **—** Duración: \`${darkdata.duration}\`.
-**—** Tenía: **${Emojis.Dark}${darkdata.darkjeffros}**`)
+**—** Tenía: **${Emojis.DarkJeffros}${darkdata.darkjeffros}**`)
           .defFooter({ text: "Mensaje enviado a la vez que al usuario", timestamp: true })
 
         let embed = new Embed()
@@ -2116,103 +1678,6 @@ const DaysUntilToday = async function (date) {
 
   if (isNaN(response)) return "?";
   else return Number(response.toFixed(1));
-}
-
-/**
- * @deprecrated Uses old Initialize method
- * @param {*} message The Discord.JS Message
- * @param {*} user The buyer's document inside the database
- * @param {Object} item The object of the item being purchased
- * @param {Boolean} [isDarkShop=false]
- * @returns {Array} Returns [0] true on success, returns [0] false on any error. [1] Is Embed
- */
-const ComprarItem = async function (message, user, item, isDarkShop) {
-  isDarkShop = isDarkShop || false;
-  const { prefix } = await Initialize(message.guild.id);
-
-  const actualJeffros = isDarkShop ? user.economy.dark.darkjeffros : user.economy.global.jeffros;
-
-  // si NaN actualJeffros...
-  let doesntDS = new EmbedBuilder()
-    .setAuthor(`Error`, Config.errorPng)
-    .setDescription(`**—** Aún no tienes una cuenta, cambia unos cuantos Jeffros por DarkJeffros antes de venir a comprar.\n▸ \`${prefix}dschange\`.`)
-    .setColor(Colores.rojo);
-
-  if (isNaN(actualJeffros)) return [false, doesntDS];
-
-  const member = message.member;
-
-  // determinar datos generales
-  const toPay = await DeterminePrice(user, item, false, isDarkShop);
-  const nombre = item.name;
-
-  let doesntHaveRole = new EmbedBuilder()
-    .setAuthor(`Error`, Config.errorPng)
-    .setDescription(`**—** Necesitas el role "<@&${item.req_role}>" para comprar \`${nombre}\`.`)
-    .setColor(Colores.rojo);
-
-  let doesntHaveEnough = new EmbedBuilder()
-    .setAuthor(`Error`, Config.errorPng)
-    .setDescription(`**—** Necesitas **${isDarkShop ? Emojis.Dark : Emojis.Jeffros}${toPay.toLocaleString("es-CO")}** para comprar \`${nombre}\`. Tienes **${isDarkShop ? Emojis.Dark : Emojis.Jeffros}${actualJeffros}**.`)
-    .setColor(Colores.rojo);
-
-  let hasRoleToGive = new EmbedBuilder()
-    .setAuthor(`Error`, Config.errorPng)
-    .setDescription(`**—** Ya tienes el role que te da este item, no puedes comprar \`${nombre}\` otra vez.`)
-    .setColor(Colores.rojo);
-
-  // role requerido
-  if (item.req_role != "0" && !member.roles.cache.find(x => x.id === item.req_role)) return [false, doesntHaveRole];
-
-  // buscar si ya tiene el role que se da
-  if (item.use_info.action === "add" && item.use_info.objetive === "role" && member.roles.cache.find(x => x.id === item.use_info.given)) return [false, hasRoleToGive];
-
-  // buscar el item en el inventario
-  const inventoryFilter = x => x.isDarkShop === isDarkShop && x.item_id === item.id;
-  if (user.data.inventory.find(inventoryFilter)) {
-
-    let hasThisItem = new EmbedBuilder()
-      .setAuthor(`Error`, Config.errorPng)
-      .setDescription(`**—** Ya tienes \`${nombre}\`, úsalo con \`${prefix}use ${user.data.inventory.find(inventoryFilter).use_id}\`.`)
-      .setColor(Colores.rojo);
-
-    return [false, hasThisItem];
-  }
-
-  // cobrar
-  if (actualJeffros < toPay) return [false, doesntHaveEnough];;
-
-  if (isDarkShop) user.economy.dark.darkjeffros -= toPay;
-  else user.economy.global.jeffros -= toPay
-
-  // id
-  let usos = await Users.find();
-  let newId = await FindNewId(usos, "data.inventory", "use_id");
-
-  // agregarlo al inventario (Array)
-  await user.data.inventory.push({ isDarkShop: isDarkShop, item_id: item.id, use_id: newId });
-
-  // revisar si debe agregarse interés
-  if (item.interest > 0) {
-    const interestFilter = x => x.isDarkShop === isDarkShop && x.item_id === item.id;
-    if (!user.data.purchases.find(interestFilter)) user.data.purchases.push({ isDarkShop: isDarkShop, item_id: item.id, quantity: 1 });
-    else {
-      user.data.purchases.find(interestFilter).quantity++;
-    }
-  }
-
-  // guardar y success
-  await user.save();
-
-  let success = new EmbedBuilder()
-    .setAuthor(`Listo!`, Config.bienPng)
-    .setDescription(`\`▸\` Pago realizado con éxito.
-\`▸\` Compraste: \`${nombre}\` por **${isDarkShop ? Emojis.Dark : Emojis.Jeffros}${toPay.toLocaleString("es-CO")}**.
-\`▸\` **Úsalo con \`${prefix}use ${newId}\`**.
-\`▸\` Ahora tienes: **${isDarkShop ? Emojis.Dark : Emojis.Jeffros}${isDarkShop ? user.economy.dark.darkjeffros.toLocaleString("es-CO") : user.economy.global.jeffros.toLocaleString("es-CO")}**.`)
-    .setColor(isDarkShop ? Colores.negro : Colores.verde);
-
-  return [true, success];
 }
 
 /**
@@ -2642,19 +2107,13 @@ module.exports = {
   LimitedTime,
   Subscription,
   handleUploads,
-  Initialize,
-  TutorialEmbed,
   DataWork,
   isBannedFrom,
   Confirmation,
   AfterInfraction,
-  GeneratePages,
-  CollectMessage,
-  ValidateParam,
   InteractivePages,
   DarkShopWork,
   ValidateDarkShop,
-  ComprarItem,
   DeterminePrice,
   FindNewId,
   DaysUntilToday,

@@ -1,5 +1,4 @@
 const { Command, Categories, LimitedTime, WillBenefit, HumanMs, ErrorEmbed } = require("../../src/utils");
-const { Emojis } = require("../../src/resources");
 
 const command = new Command({
     name: "canjear",
@@ -17,6 +16,7 @@ command.addOption({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ ephemeral: true });
     const { Guilds, Users } = models;
+    const { Emojis } = client;
     const _key = params.llave.value;
 
     const doc = await Guilds.getOrCreate(interaction.guild.id);

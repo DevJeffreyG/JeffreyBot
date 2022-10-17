@@ -3,7 +3,7 @@ const moment = require("moment");
 
 const { Command, Categories, HumanMs, Embed, RandomCumplido, BoostTypes, BoostObjetives } = require("../../src/utils");
 
-const { Config, Emojis, Responses } = require("../../src/resources/");
+const { Config, Responses } = require("../../src/resources/");
 const { multiplier } = Config;
 
 const command = new Command({
@@ -14,6 +14,8 @@ const command = new Command({
 
 command.execute = async (interaction, models, params, client) => {
     const { Users } = models
+    const { Emojis } = client;
+    
     let coinsCooldown = ms("10m");
 
     await interaction.deferReply();
@@ -60,7 +62,7 @@ command.execute = async (interaction, models, params, client) => {
         const specialInfo = temprole.special;
         
         if(specialInfo.type === BoostTypes.Multiplier){
-            if(specialInfo.objetive === BoostObjetives.Jeffros || specialInfo.objetive === BoostObjetives.All){
+            if((specialInfo.objetive === BoostObjetives.Jeffros || specialInfo.objetive === BoostObjetives.All) && !specialInfo.disabled){
                 money = money * Number(specialInfo.value);
                 tmoney = `**${Emojis.Jeffros}${money.toLocaleString('es-CO')}📈**`;
                 console.log(author.tag, "Boost de JEFFROS.")

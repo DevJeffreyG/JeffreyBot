@@ -1,4 +1,4 @@
-const { Command, Categories, Embed, ErrorEmbed, FindNewId, Confirmation, Shop, ItemTypes, ItemObjetives, ItemActions, BoostTypes, BoostObjetives } = require("../../src/utils")
+const { Command, Categories, Embed, ErrorEmbed, FindNewId, Confirmation, Shop, ItemTypes, ItemObjetives, ItemActions, BoostTypes, BoostObjetives, ItemEffects } = require("../../src/utils")
 const { Colores, Emojis } = require("../../src/resources")
 
 const ms = require("ms");
@@ -289,6 +289,14 @@ command.data
                                 { name: "Reset Interest [DS]", value: String(ItemTypes.ResetInterest) },
                             )
                     )
+                    .addStringOption(option =>
+                        option.setName("efecto")
+                            .setDescription("Si el efecto es positivo o negativo al usarse [DS]")
+                            .addChoices(
+                                { name: "Positivo", value: String(ItemEffects.Positive) },
+                                { name: "Negativo", value: String(ItemEffects.Negative) }
+                            )
+                    )
             )
             .addSubcommand(toggle =>
                 toggle
@@ -496,6 +504,7 @@ command.vaultExec = async (interaction, models, params, client) => {
     const { Guilds } = models;
     const { subcommand, vault } = params;
     const { codigo, pista, recompensa } = vault;
+    const { Emojis } = client;
 
     const doc = await Guilds.getOrCreate(interaction.guild.id)
 

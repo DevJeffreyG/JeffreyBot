@@ -47,4 +47,5 @@ Schema.static("removeGuildCommands", function(route){
     })
 })
 
+    return this.find({
 module.exports = mongoose.model("GlobalDatas", Schema);

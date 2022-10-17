@@ -72,14 +72,6 @@
             "desc": "Se han eliminado todos los comandos normales, y se han convertido en Slash Commands"
         }
     ],
-    "bienPng": "http://i.imgur.com/M6hqbcc.png",
-    "errorPng": "https://i.imgur.com/obwiHcn.png",
-    "confirmEmojiId": "558084462232076312",
-    "cancelEmojiId": "558084461686947891",
-    "loadingGif": "https://cdn.discordapp.com/emojis/664205203163054084.gif?size=1024",
-    "jeffreyguildIcon": "https://drive.google.com/uc?export=download&id=1y6qiuloX3jYbSVVELxpmTw630_5v-7sB",
-    "votePollImage": "https://drive.google.com/uc?export=download&id=1PXAn2X_53ShzF8yU4aOAAqVuV292uFdD",
-    "darkLogoPng": "https://cdn.discordapp.com/emojis/739625446961840129.png",
     "jeffreygID": "437668432604037142",
     "jgServer": "447797737216278528",
     "testingServer": "482989052136652800",
@@ -160,12 +152,5 @@
     "lessred": "462015116636979223",
     "cake": "462016547196764160",
     "gold": "461983036657893386",
-    "lessblue": "462014825808003092",
-    "__comment": "Auto Role - Roles",
-    "gdpszone": "503645681156751391",
-    "teamcampanita": "460242238555815946",
-    "jbnews": "573308631018110986",
-    "dsnews": "779783625398812673",
-    "__comment": "Auto Role - Emojis",
-    "emojiGDPSZone": "572597912815796235"
+    "lessblue": "462014825808003092"
 }

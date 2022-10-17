@@ -13,6 +13,8 @@ command.execute = async (interaction, models, params, client) => {
     const { Users, Shops, DarkShops } = models
     const { darkshop } = params;
 
+    const { EmojisObject } = client;
+    
     const isDarkShop = darkshop?.value ?? false;
     
     // codigo
@@ -35,7 +37,7 @@ command.execute = async (interaction, models, params, client) => {
 
     let itemsEmbed = new Embed()
     .defAuthor({text: `Tu inventario`, icon: interaction.member.displayAvatarURL()})
-    .setThumbnail(isDarkShop ? Config.darkLogoPng : Config.jeffreyguildIcon)
+    .setThumbnail(isDarkShop ? EmojisObject.Dark.url : interaction.guild.iconURL({dynamic: true}))
     .defFooter({text: `/use ID para usar un item.`})
     .setColor(isDarkShop ? Colores.negro : Colores.verde);
 

@@ -1,4 +1,3 @@
-const { Emojis, Config } = require("../../src/resources");
 const { Command, Categories, ErrorEmbed, Embed } = require("../../src/utils")
 const Chance = require("chance");
 
@@ -20,6 +19,7 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { Users, DarkShops } = models;
     const { cantidad } = params
+    const { Emojis } = client;
 
     // codigo
     const quantity = cantidad.value;
@@ -38,7 +38,7 @@ command.execute = async (interaction, models, params, client) => {
         data: {
             action: "change",
             error: `No tienes tantos DarkJeffros para cambiar.
-**▸** Quieres cambiar: **${Emojis.Dark}${quantity.toLocaleString("es-CO")}*`,
+**▸** Quieres cambiar: **${Emojis.DarkJeffros}${quantity.toLocaleString("es-CO")}*`,
             money: darkjeffros,
             darkshop: true
         }
@@ -50,7 +50,7 @@ command.execute = async (interaction, models, params, client) => {
         type: "success",
         data: {
             desc: [
-                `Se han restado **${Emojis.Dark}${quantity.toLocaleString('es-CO')}**`,
+                `Se han restado **${Emojis.DarkJeffros}${quantity.toLocaleString('es-CO')}**`,
                 `Se añadieron **${Emojis.Jeffros}${totalJeffros.toLocaleString("es-CO")}** a tu cuenta`
             ]
         }

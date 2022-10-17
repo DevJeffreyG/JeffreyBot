@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const { Emojis } = require('../../src/resources')
 
 const Schema = new mongoose.Schema({
     guild_id: { type: String, required: true },
@@ -72,7 +71,8 @@ const Schema = new mongoose.Schema({
                 special: {
                     type: { type: Number, default: null },
                     objetive: { type: Number, default: null },
-                    value: { type: Number, default: null }
+                    value: { type: Number, default: null },
+                    disabled: { type: Boolean, default: false }
                 },
                 isSub: { type: Boolean, required: true, default: false },
                 sub_info: {
@@ -146,7 +146,6 @@ Schema.method("addRep", async function (count) {
     return await this.save();
 })
 
-
 Schema.method("hasItem", function (itemId, darkshop = false) {
     let x = false;
     this.data.inventory.forEach(item => {
@@ -161,9 +160,9 @@ Schema.method("canBuy", function (price, darkshop = false) {
     return this.economy.dark.darkjeffros >= price
 })
 
-Schema.method("parseJeffros", function (darkshop = false) {
+Schema.method("parseJeffros", function (Emojis, darkshop = false) {
     if(!darkshop) return `**${Emojis.Jeffros}${this.economy.global.jeffros.toLocaleString("es-CO")}**`;
-    return `**${Emojis.Dark}${this.economy.dark.darkjeffros.toLocaleString("es-CO")}**`;
+    return `**${Emojis.DarkJeffros}${this.economy.dark.darkjeffros.toLocaleString("es-CO")}**`;
 })
 
 module.exports = mongoose.model('Users', Schema)

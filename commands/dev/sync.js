@@ -1,5 +1,4 @@
 const { Command, Categories, Confirmation, FindNewId, ItemActions, ItemObjetives, Item, BoostTypes, BoostObjetives, ItemTypes, ItemEffects, DarkShopWork } = require("../../src/utils")
-const { Emojis } = require("../../src/resources")
 
 const { PermissionsBitField } = require("discord.js");
 
@@ -41,6 +40,7 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { subcommand } = params
     const { AutoRoles, Guilds } = models;
+    const { Emojis } = client;
 
     switch (subcommand) {
         case "mute": {

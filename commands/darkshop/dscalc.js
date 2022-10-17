@@ -1,5 +1,5 @@
 const { Command, Categories, Embed } = require("../../src/utils");
-const { Emojis, Config, Colores } = require("../../src/resources")
+const { Config, Colores } = require("../../src/resources")
 
 const command = new Command({
     name: "dscalc",
@@ -20,6 +20,8 @@ command.execute = async (interaction, models, params, client) => {
     const { DarkShops, Users } = models;
     const { darkjeffros } = params;
 
+    const { Emojis, EmojisObject } = client;
+    
     const user = await Users.getOrCreate({user_id: interaction.user.id, guild_id: interaction.guild.id});
     const darkshop = await DarkShops.getOrCreate(interaction.guild.id);
     const toCalc = darkjeffros?.value ?? user.economy.dark.darkjeffros;
@@ -30,9 +32,9 @@ command.execute = async (interaction, models, params, client) => {
     const embeds = [];
 
     let stonksEmbed = new Embed()
-    .defAuthor({text: `Cálculo`, icon: Config.darkLogoPng})
+    .defAuthor({text: `Cálculo`, icon: EmojisObject.Dark.url})
     .defDesc(`${emote} **— ${darkshop.inflation.value}%**.
-**— ${Emojis.Dark}${toCalc.toLocaleString('es-CO')} = ${Emojis.Jeffros}${Math.floor(toCalc*200*inflation).toLocaleString('es-CO')}**.`)
+**— ${Emojis.DarkJeffros}${toCalc.toLocaleString('es-CO')} = ${Emojis.Jeffros}${Math.floor(toCalc*200*inflation).toLocaleString('es-CO')}**.`)
     .setColor(Colores.negro);
 
     embeds.push(stonksEmbed)
@@ -41,7 +43,7 @@ command.execute = async (interaction, models, params, client) => {
 
     let allConversion = new Embed()
     .defAuthor({text: "Puedes convertir...", title: true})
-    .defDesc(`**${Emojis.Jeffros}${user.economy.global.jeffros.toLocaleString("es-CO")}** ➡️ **${Emojis.Dark}${total.toLocaleString("es-CO")}**`)
+    .defDesc(`**${Emojis.Jeffros}${user.economy.global.jeffros.toLocaleString("es-CO")}** ➡️ **${Emojis.DarkJeffros}${total.toLocaleString("es-CO")}**`)
     .defColor(Colores.verdejeffrey)
 
     if(!darkjeffros && total != 0) embeds.push(allConversion)

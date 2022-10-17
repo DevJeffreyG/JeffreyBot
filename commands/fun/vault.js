@@ -1,5 +1,5 @@
 const { Command, Categories, Embed, VaultWork } = require("../../src/utils");
-const { Colores, Emojis, Config } = require("../../src/resources");
+const { Colores, Config } = require("../../src/resources");
 const chance = require("chance");
 
 const command = new Command({
@@ -18,6 +18,7 @@ command.addOption({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ ephemeral: true });
     const { Guilds, Users } = models;
+    const { Emojis } = client;
 
     const code = params.codigo ? params.codigo.value : null;
 

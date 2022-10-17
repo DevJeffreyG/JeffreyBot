@@ -1,5 +1,5 @@
 const { Command, Categories, Embed } = require("../../src/utils")
-const { Colores, Config, Emojis } = require("../../src/resources")
+const { Colores } = require("../../src/resources")
 
 const command = new Command({
     name: "inflacion",
@@ -9,6 +9,8 @@ const command = new Command({
 
 command.execute = async (interaction, models, params, client) => {
     const { DarkShops } = models;
+    const { Emojis, EmojisObject } = client;
+    
     const guild = client.guilds.cache.find(x => x.id === interaction.guildId);
 
     // codigo
@@ -24,9 +26,9 @@ command.execute = async (interaction, models, params, client) => {
     }
 
     let stonksEmbed = new Embed()
-    .defAuthor({text: `DarkShop: Inflación`, icon: Config.darkLogoPng})
+    .defAuthor({text: `DarkShop: Inflación`, icon: EmojisObject.Dark.url})
     .defDesc(`${stonks} **—** La inflación actual de los DarkJeffros es de un **${dark.inflation.value}%**.
-**— ${Emojis.Dark}1 = ${Emojis.Jeffros}${Math.floor(200*dark.inflation.value).toLocaleString('es-CO')}**.
+**— ${Emojis.DarkJeffros}1 = ${Emojis.Jeffros}${Math.floor(200*dark.inflation.value).toLocaleString('es-CO')}**.
 **—** Antes era de un \`${dark.inflation.old}%\`.`)
     .defColor(Colores.negro);
 

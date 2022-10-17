@@ -7,8 +7,9 @@ const Ticket = require("./Ticket");
 const Shop = require("./Shop");
 const Top = require("./Top");
 const Item = require("./Item");
-const Enums = require("./Enums");
+const Managers = require("./Managers");
 
+const Enums = require("./Enums");
 const Functions = require("./functions");
 
 module.exports = {
@@ -21,6 +22,7 @@ module.exports = {
     Shop,
     Top,
     Item,
+    Managers,
 
     ...Enums,
     ...Functions

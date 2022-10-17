@@ -44,6 +44,7 @@ class ErrorEmbed extends Embed {
     #setup(options){
         this.defColor(Colores.rojo)
 
+        if(this.interaction) this.client = this.interaction.client;
         if(!options) return this.#customError();
 
         const { type, data } = options;
@@ -119,7 +120,7 @@ ${data.error}
 
             case "economyError":
                 this.#errorAuthor(13)
-                this.#errorDesc("Error en la transacción", data.action, [data.error, `Tienes: **${data.darkshop ? Emojis.Dark : Emojis.Jeffros}${data.money.toLocaleString('es-CO')}**`])
+                this.#errorDesc("Error en la transacción", data.action, [data.error, `Tienes: **${data.darkshop ? this.client.Emojis.DarkJeffros : this.client.Emojis.Jeffros}${data.money.toLocaleString('es-CO')}**`])
                 break;
 
             case "execError":

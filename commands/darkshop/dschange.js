@@ -1,4 +1,4 @@
-const { Emojis, Config } = require("../../src/resources");
+const { Config } = require("../../src/resources");
 const { Command, Categories, ErrorEmbed, Embed } = require("../../src/utils")
 const { daysDarkJeffros } = Config;
 const Chance = require("chance");
@@ -21,6 +21,7 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { Users, DarkShops } = models;
     const { cantidad } = params
+    const { Emojis } = client;
 
     // codigo
     const quantity = cantidad.value;
@@ -40,7 +41,7 @@ command.execute = async (interaction, models, params, client) => {
         data: {
             action: "change",
             error: `No tienes tantos Jeffros para cambiar.
-**▸** Inflación: **${Emojis.Dark}1** = **${Emojis.Jeffros}${darkjeffroValue.toLocaleString("es-CO")}**
+**▸** Inflación: **${Emojis.DarkJeffros}1** = **${Emojis.Jeffros}${darkjeffroValue.toLocaleString("es-CO")}**
 **▸** Necesitas: **${Emojis.Jeffros}${totalJeffros.toLocaleString("es-CO")}**`,
             money: jeffros
         }
@@ -53,7 +54,7 @@ command.execute = async (interaction, models, params, client) => {
         data: {
             desc: [
                 `Se han restado **${Emojis.Jeffros}${totalJeffros.toLocaleString('es-CO')}**`,
-                `Se añadieron **${Emojis.Dark}${quantity.toLocaleString("es-CO")}** a tu cuenta`
+                `Se añadieron **${Emojis.DarkJeffros}${quantity.toLocaleString("es-CO")}** a tu cuenta`
             ]
         }
     })

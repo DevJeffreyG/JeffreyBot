@@ -1,5 +1,5 @@
 const { Command, Categories, Embed, DaysUntilToday } = require("../../src/utils")
-const { Config, Emojis, Colores } = require("../../src/resources");
+const { Config, Colores } = require("../../src/resources");
 const { time } = require("discord.js")
 
 const command = new Command({
@@ -19,6 +19,7 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { Users } = models
     const { usuario } = params;
+    const { Emojis } = client;
 
     const guild = client.guilds.cache.find(x => x.id === interaction.guildId);
 
@@ -39,7 +40,7 @@ command.execute = async (interaction, models, params, client) => {
 
     let meEmbed = new Embed()
         .defAuthor({ text: `Estadísiticas del usuario N°${member.id}`, icon: member.displayAvatarURL({dynamic: true}) })
-        .defDesc(`**— DarkJeffros**: **${Emojis.Dark}${darkjeffros}**.
+        .defDesc(`**— DarkJeffros**: **${Emojis.DarkJeffros}${darkjeffros}**.
 **— Precisión**: ${accuracy}%
 **— Duración de DarkJeffros**: \`${pastDays}\` de \`${total}\` días.
 **— Desde**: ${dj_since ?? "?"}. 

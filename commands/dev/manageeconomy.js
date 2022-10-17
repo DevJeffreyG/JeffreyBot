@@ -1,5 +1,5 @@
 const { Command, Categories, Embed } = require("../../src/utils")
-const { Emojis, Colores } = require("../../src/resources")
+const { Colores } = require("../../src/resources")
 
 const command = new Command({
     name: "manageeconomy",
@@ -83,6 +83,7 @@ command.execJeffros = async (interaction, models, params, client) => {
     const { subcommand, jeffros } = params;
     const { usuario, cantidad } = jeffros
     const { Users } = models
+    const { Emojis } = client;
 
     const user = await Users.getOrCreate({user_id: usuario.value, guild_id: usuario.member.guild.id})
 
@@ -110,8 +111,8 @@ command.execDarkJeffros = async (interaction, models, params, client) => {
 
     let embed = new Embed()
     .defAuthor({text: `¡DarkJeffros para ti, ${usuario.member.user.tag}!`, icon: usuario.member.guild.iconURL()})
-    .defDesc(`**+${Emojis.Dark}${cantidad.value.toLocaleString('es-CO')}
-— ${Emojis.Dark}${user.economy.dark.darkjeffros.toLocaleString('es-CO')}**`)
+    .defDesc(`**+${Emojis.DarkJeffros}${cantidad.value.toLocaleString('es-CO')}
+— ${Emojis.DarkJeffros}${user.economy.dark.darkjeffros.toLocaleString('es-CO')}**`)
     .defColor(Colores.verde)
     .defThumbnail(usuario.member.displayAvatarURL());
 

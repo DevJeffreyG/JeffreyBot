@@ -10,6 +10,8 @@ class Top {
         this.users = users;
         this.interaction = interaction;
 
+        this.Emojis = this.interaction.client.emojis;
+
         this.base = {
             author_icon: this.interaction.guild.iconURL({ dynamic: true }) ?? this.interaction.member.displayAvatarURL(),
             color: Colores.verdejeffrey,
@@ -82,10 +84,10 @@ class Top {
         // determinar el texto a agregar
         for await (const user of this.#res) {
             let darkshopMoney;
-            if (user.darkjeffros != 0) darkshopMoney = ` (${Emojis.Dark}${user.darkjeffros.toLocaleString('es-CO')}➟**${Emojis.Jeffros}${user.darkjeffrosValue.toLocaleString('es-CO')}**)`
+            if (user.darkjeffros != 0) darkshopMoney = ` (${this.Emojis.DarkJeffros}${user.darkjeffros.toLocaleString('es-CO')}➟**${this.Emojis.Jeffros}${user.darkjeffrosValue.toLocaleString('es-CO')}**)`
             else darkshopMoney = "";
 
-            const txt = this.#getTxt(user, [`${Emojis.Jeffros}${user.total.toLocaleString('es-CO')}${darkshopMoney}`])
+            const txt = this.#getTxt(user, [`${this.Emojis.Jeffros}${user.total.toLocaleString('es-CO')}${darkshopMoney}`])
 
             this.top.set(user.user_id, {
                 txt

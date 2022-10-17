@@ -1,5 +1,5 @@
 const { Command, Categories, Confirmation, ErrorEmbed, Embed, Sleep } = require("../../src/utils")
-const { Config, Colores, Emojis } = require("../../src/resources");
+const { Config, Colores } = require("../../src/resources");
 
 const command = new Command({
     name: "pay",
@@ -26,6 +26,7 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { Users } = models
     const { usuario, cantidad } = params;
+    const { Emojis } = client;
 
     const author = interaction.user;
     const member = usuario.member;
