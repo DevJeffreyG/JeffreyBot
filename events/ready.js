@@ -1,12 +1,11 @@
 const Config = require("../src/resources/base.json");
 const { prefix } = Config;
 
-let functions = require("../src/utils/");
+const Managers = require("../src/utils/Managers");
+const dbManager = require("../db/")
+let functions = require("../src/utils/functions");
 
-const ms = require("ms");
-const { Collection } = require("discord.js");
 const CronJob = require("cron").CronJob;
-
 
 module.exports = async (client) => {
     client.invites = [];
@@ -14,13 +13,18 @@ module.exports = async (client) => {
     client.activeCollectors = [];
     client.fetchedGuilds = [];
 
+    // default emojis
+    let managers = await new Managers(client).prepare();
+    client.EmojisObject = managers.emojis;
+    client.Emojis = await managers.emojis_mentionable();
+
     // para cada guild fetchear(?
     let guilds = await client.guilds.fetch();
     let guild = client.guilds.cache.find(x => x.id === Config.jgServer);
 
     // conteo
     let totalMembers = 0;
-    for(const key of guilds.keys()){
+    for (const key of guilds.keys()) {
         let actualGuild = client.guilds.cache.find(x => x.id === key);
         actualGuild.members.fetch();
 
@@ -36,14 +40,14 @@ module.exports = async (client) => {
 
     client.user.setActivity(`${prefix}ayuda - ${totalMembers} usuarios🔎`);
 
-    
+    console.log("============================================================");
     console.log(`❗❗❗ 💚 ${client.user.username} ONLINE 💚 ❗❗❗`);
 
     let channel = client.channels.cache.get(Config.logChannel);
     let dsChannel = client.channels.cache.find(x => x.id === Config.dsChannel);
     let dsNews;
 
-    if(client.user.id === Config.testingJBID){
+    if (client.user.id === Config.testingJBID) {
         channel = client.channels.cache.get("483108734604804107");
         guild = client.guilds.cache.find(x => x.id === "482989052136652800");
         dsNews = guild.roles.cache.find(x => x.id === "790431614378704906");
@@ -62,7 +66,7 @@ module.exports = async (client) => {
     functions.intervalGlobalDatas(client);
 
     /* ############ GLOBAL DATAS ############ */
-    new CronJob("1 * * * * *", async function(){
+    new CronJob("1 * * * * *", async function () {
         functions.intervalGlobalDatas(client);
     }, null, true, "America/Bogota");
 

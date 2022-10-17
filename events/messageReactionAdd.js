@@ -3,7 +3,6 @@ const ms = require("ms");
 
 const Config = require("../src/resources/base.json");
 const Colores = require("../src/resources/colores.json");
-const Emojis = require("../src/resources/emojis.json");
 const { Embed } = require("../src/utils");
 const { disableAwards, jeffreygID } = Config;
 
@@ -11,6 +10,7 @@ const { Users, GlobalDatas, Guilds } = require("mongoose").models;
 
 module.exports = async (client, reaction, user) => {
     if (user.bot) return;
+    const { Emojis } = client;
 
     const guild = reaction.message.guild;
     const channel = reaction.message.channel;
@@ -112,7 +112,7 @@ module.exports = async (client, reaction, user) => {
     } else if(isAward){
   
       let confirmation = new Discord.EmbedBuilder()
-      .setAuthor(`Confirmación`, Config.jeffreyguildIcon)
+      .setAuthor(`Confirmación`, guild.iconURL({dynamic: true}))
       .setDescription(`**—** ${user.tag}, ¿Estás seguro de darle a este usuario el premio de **__${award}__**?
 **—**( **${Emojis.Jeffros}${price.toLocaleString('es-CO')}** )
 
