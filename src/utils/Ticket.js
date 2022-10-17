@@ -2,7 +2,9 @@ const { ActionRowBuilder, SelectMenuBuilder, ButtonBuilder, PermissionsBitField 
 const { ButtonStyle } = require("discord-api-types/v10");
 
 const Embed = require("./Embed");
-const { Confirmation, FindNewId } = require("./functions");
+const ErrorEmbed = require("./ErrorEmbed");
+
+const { Confirmation, FindNewId, isBannedFrom } = require("./functions");
 
 const Config = require("../resources/base.json");
 const Colores = require("../resources/colores.json");
@@ -68,6 +70,9 @@ class Ticket {
     async #createTicket() {
         const interaction = this.interaction;
         const doc = await Guilds.getOrCreate(interaction.guild.id);
+
+        // baneado de crear tickets
+        if(await isBannedFrom(interaction, "TICKETS")) return new ErrorEmbed(interaction, { type: "banned" }).send();
 
         // tiene cooldown
         if (activeCreatingTicket.has(interaction.user.id)) return interaction.editReply(`Alto ahí velocista, por favor espera ${ms((ticketCooldown) - (new Date().getTime() - activeCreatingTicket.get(interaction.user.id)))} antes de volver a darle al botón.`);

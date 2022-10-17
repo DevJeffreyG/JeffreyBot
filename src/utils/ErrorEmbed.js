@@ -1,12 +1,10 @@
 const Embed = require("./Embed");
 const Colores = require("../resources/colores.json");
-const Config = require("../resources/base.json");
-
-const { CommandInteraction } = require("discord.js");
+const { BaseInteraction } = require("discord.js");
 
 class ErrorEmbed extends Embed {
     /**
-     * @param {CommandInteraction} inter - La interacción principal dada
+     * @param {BaseInteraction} inter - La interacción principal dada
      * @param {Object} options La configuración de este ErrorEmbed {type, data}
      * @param {string} options.type ### El tipo de ErrorEmbed que va a ser
      * - commandNotFound
@@ -28,13 +26,13 @@ class ErrorEmbed extends Embed {
      */
     constructor(inter = null, options) {
         super()
-        if(inter && inter instanceof CommandInteraction === false) {
+        if(inter && inter instanceof BaseInteraction === false) {
             options = inter;
             inter = null;
         }
         
         if(inter) this.interaction = inter;
-        else console.log("❗ Considera usando ErrorEmbed.send()")
+        else console.log("❗ Considera usando ErrorEmbed.send()", options)
 
         this.options = options;
         this.#setup(options)
@@ -127,17 +125,22 @@ ${data.error}
                 this.#errorDesc("Error al ejecutar el comando", data.command, [data.guide])
                 break;
 
+            case "banned":
+                this.#errorAuthor(15)
+                this.#errorDesc("Has sido limitado por los administradores", "No puedes usar este comando/funcionalidad")
+                break;
+
             default:
                 console.error("⚠️🔴 No existe %s como tipo de Error ❗❗", type);
         }
     }
 
     #customError(){
-        this.defAuthor({text: "Error", icon: Config.errorPng});
+        this.defAuthor({text: "Error", icon: this.client.EmojisObject.Error.url});
     }
 
     #errorAuthor(errorNumber){
-        this.defAuthor({text: `Error ${errorNumber} — ${this.options.type}`, icon: Config.errorPng})
+        this.defAuthor({text: `Error ${errorNumber} — ${this.options.type}`, icon: this.client.EmojisObject.Error.url})
         return this;
     }
 

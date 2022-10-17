@@ -9,8 +9,6 @@ const ErrorEmbed = require("../utils/ErrorEmbed");
 const Embed = require("../utils/Embed");
 const InteractivePages = require("../utils/InteractivePages");
 
-const HumanMs = require("./HumanMs");
-
 const ms = require("ms");
 
 const moment = require('moment');
@@ -1063,7 +1061,7 @@ const DataWork = async function (interaction, dataSearch) {
 
   const docGuild = await Guilds.getOrCreate(guild.id);
 
-  const insuficientSetup = new ErrorEmbed({ type: "insuficientSetup", data: { dataSearch } })
+  const insuficientSetup = new ErrorEmbed(interaction, { type: "insuficientSetup", data: { dataSearch } })
 
   let response;
 
@@ -1087,7 +1085,7 @@ const DataWork = async function (interaction, dataSearch) {
       response = null;
   }
 
-  if (!response) interaction.editReply({ embeds: [insuficientSetup] });
+  if (!response) insuficientSetup.send();
   return response;
 
 }
@@ -1106,7 +1104,11 @@ const isBannedFrom = async function (interaction, query) {
   switch (query.toUpperCase()) {
     case "SUGGESTIONS":
     case "SUGGEST":
-      if (user.data.isBanned.suggestions) response = true;
+      response = user.isBannedFrom("suggestions");
+      break;
+
+    case "TICKETS":
+      response = user.isBannedFrom("tickets");
       break;
 
     default:

@@ -1,5 +1,5 @@
 const Discord = require("discord.js");
-const { Command, Categories, isBannedFrom, FindNewId, DataWork, Embed } = require("../../src/utils");
+const { Command, Categories, isBannedFrom, FindNewId, DataWork, Embed, ErrorEmbed } = require("../../src/utils");
 const { Colores } = require("../../src/resources");
 const { ButtonStyle } = require("discord-api-types/v10");
 
@@ -22,7 +22,7 @@ command.execute = async (interaction, models, params, client) => {
     const { Guilds } = models;
     const sugerencia = params.sugerencia.value;
 
-    if(await isBannedFrom(interaction, "SUGGESTIONS")) return;
+    if(await isBannedFrom(interaction, "SUGGESTIONS")) return new ErrorEmbed(interaction, { type: "banned" }).send();
 
     let logChannel = await DataWork(interaction, "OPINION_LOGS_CHANNEL");
     if(!logChannel) return;

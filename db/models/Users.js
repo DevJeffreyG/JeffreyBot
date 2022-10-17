@@ -165,4 +165,19 @@ Schema.method("parseJeffros", function (Emojis, darkshop = false) {
     return `**${Emojis.DarkJeffros}${this.economy.dark.darkjeffros.toLocaleString("es-CO")}**`;
 })
 
+Schema.method("isBannedFrom", function(module){
+    return this.data.isBanned[module];
+})
+
+Schema.method("toggleBan", async function(module){
+    let info = this.data.isBanned[module]
+
+    if(info) this.data.isBanned[module] = false
+    else this.data.isBanned[module] = true;
+
+    await this.save();
+
+    return this.data.isBanned[module];
+})
+
 module.exports = mongoose.model('Users', Schema)

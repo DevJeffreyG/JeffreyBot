@@ -62,3 +62,5 @@ connection.then(async (c) => {
   // error handling
   Errors(client);
 })
+
+module.exports = client;
