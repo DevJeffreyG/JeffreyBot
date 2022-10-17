@@ -1,12 +1,12 @@
 const Discord = require("discord.js");
 const { Command, Categories, Embed, importImage } = require("../../src/utils");
-const { Colores, Config, Emojis, EmbedImages } = require("../../src/resources");
+const { Colores, Config, EmbedImages } = require("../../src/resources");
 const { ButtonStyle } = require("discord-api-types/v10");
 
 const command = new Command({
     name: "embeds",
-    desc: "Enviar embeds defaults para el servidor",
-    category: Categories.Staff
+    desc: "Enviar embeds defaults para el servidor de JeffreyG",
+    category: Categories.Developer
 })
 
 command.addOption({
@@ -19,6 +19,7 @@ command.addOption({
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ephemeral: true});
+    const { Emojis } = client;
     const embed = params.embed.value;
     const shrug = "¯\\_(ツ)_/¯";
     const prefix = "/";
@@ -86,7 +87,7 @@ command.execute = async (interaction, models, params, client) => {
 \`SV.Q3\` **— ¿Cuánta EXP y Jeffros gano por mensaje? ¿Hay cooldown?**
 > Es aleatorio, pero en base, sin ningún tipo de multiplicador, o boost; ¡puedes ganar hasta **35 de EXP** y **15 Jeffros** por mensaje! Y sí, hay un cooldown base de 1 minuto.
 
-\`SV.Q4\` **— ¿Qué significan los ${Emojis.Dark} en el comando \`${prefix}top\`?**
+\`SV.Q4\` **— ¿Qué significan los ${Emojis.DarkJeffros} en el comando \`${prefix}top\`?**
 > Aquellos usuarios que tengan DarkJeffros, se mostrará la parte de los Jeffros que estos representan, haciendo la conversión dependiendo de la inflación actual. Esto para que se mantengan las posiciones de los usuarios equilibrados aunque se tengan algunos Jeffros invertidos en la **DarkShop**; los Jeffros que salen de primero son los totales que tiene el usuario, se incluyen los que están en la DarkShop.
 
 \`SV.Q5\` **— ¿Cuál es la invitación al server?**
@@ -315,7 +316,7 @@ Cooldown para conseguir Jeffros y EXP reducido a la octava parte. (\`7.5s\`).
 **—** ¿Cómo gasto mis Jeffros?
 ➟ Los Jeffros se usarán para comprar items en la tienda del servidor (\`${prefix}shop\`) y usar los **Awards**.
 
-**—** No confundir con los __Dark${Emojis.Dark}effros__:
+**—** No confundir con los __Dark${Emojis.DarkJeffros}effros__:
 ➟ Los DarkJeffros se desbloquearán cuando un usuario consiga el nivel 5. Podrán ser usados en la DarkShop.
 
 **—** ¿Como consigo DarkJeffros?
@@ -414,7 +415,7 @@ ${adminRole} • ${modRole}.
     .defDesc(`Esta nueva tienda tiene items principalmente que afectan a otros usuarios, **temporalmente, claro**.
 Y así como tú mismo puedes ser quien lo origine, también puedes ser perjudicado. Esto puede ser evitado, y es comprando el **Item #1, el __Firewall__**.
 Con este item, cualquier otro item que tenga un **efecto negativo** sobre quien se use, __será anulado__. **A no ser...**
-Cuando cambias tus primeros ${Emojis.Jeffros}Jeffros por ${Emojis.Dark}DarkJeffros, se creará aleatoriamente un porcentaje (1% - ~15%) llamado **Precisión**.
+Cuando cambias tus primeros ${Emojis.Jeffros}Jeffros por ${Emojis.DarkJeffros}DarkJeffros, se creará aleatoriamente un porcentaje (1% - ~15%) llamado **Precisión**.
 
 **— ¿Qué significa el porcentaje de la Precisión?**
 El porcentaje que se le da a un usuario al cambiar sus primeros Jeffros por DarkJeffros... larga historia corta, es la probabilidad que tiene alguien de saltarse el **Firewall** de un usuario y así afectarlo con un item.`)
@@ -423,7 +424,7 @@ El porcentaje que se le da a un usuario al cambiar sus primeros Jeffros por Dark
     let darkshopInformation3 = new Embed()
     .defAuthor({text: `¿Cómo funciona la inflación?`, icon: Config.darkLogoPng})
     .defDesc(`Lo mágico de la DarkShop es la inflación. Esta es global, la misma para todos los usuarios, y esta va del 0.01% al 10%.
-La forma de determinar el precio actual de **${Emojis.Dark}1** es: **${Emojis.Jeffros}200 x <inflación>**, haciendo así que **${Emojis.Dark}1** pueda costar **${Emojis.Jeffros}2** hasta **${Emojis.Jeffros}2.000**.
+La forma de determinar el precio actual de **${Emojis.DarkJeffros}1** es: **${Emojis.Jeffros}200 x <inflación>**, haciendo así que **${Emojis.DarkJeffros}1** pueda costar **${Emojis.Jeffros}2** hasta **${Emojis.Jeffros}2.000**.
 La inflación dura un plazo máximo de **${Config.daysNormalInflation} días** y se genera de forma aleatoria. **SIN EMBARGO...**`)
     .defColor(Colores.negro);
 
@@ -436,11 +437,11 @@ Pero... ¿cómo que interesante? ... ¿por qué? Ahora se viene el plot twist.`)
 
     let darkshopInformation5 = new Embed()
     .defAuthor({text: `Inversiones:`, icon: Config.darkLogoPng})
-    .defDesc(`Ahhh, las inversiones. Debido a la inflación, puedes llegar incluso a comprar ${Emojis.Dark}100 por **${Emojis.Jeffros}200** que esos mismos ${Emojis.Dark}100 cuesten **${Emojis.Jeffros}200.000**.
+    .defDesc(`Ahhh, las inversiones. Debido a la inflación, puedes llegar incluso a comprar ${Emojis.DarkJeffros}100 por **${Emojis.Jeffros}200** que esos mismos ${Emojis.DarkJeffros}100 cuesten **${Emojis.Jeffros}200.000**.
 Bastante increíble, aunque este es sólo un escenario, que es muy poco probable, puede llegar a pasar. Así como puedes ganar, también puedes perder. Nunca olvides la duración de tus DarkJeffros.
 Ten cuidado, aquellos que tengan **${Emojis.Jeffros}20.000** o más; deberán pagar un interés, el cuál es detallado en <#${Config.infoChannel}>, así que ten eso en cuenta.
 
-**— La duración de los ${Emojis.Dark}DarkJeffros:**
+**— La duración de los ${Emojis.DarkJeffros}DarkJeffros:**
 Cuando un usuario cambia sus Jeffros por DarkJeffros, su cuenta en esta tienda se verá comprometida por las autoridades del servidor, por esto, la misma tienda se encargará que a un plazo aleatorio todos los DarkJeffros que tengas en tu cuenta sean borrados para evitar problemas.
 Este plazo será definido por: \`La duración oculta de la inflación actual + 1 a ${Config.daysDarkJeffros} días adicionales\`.
 Puedes ver este plazo con \`${prefix}ds duration\`. Si no cambias tus DarkJeffros a Jeffros antes de este plazo, los perderás.`)
@@ -543,7 +544,7 @@ Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para c
 .defColor(Colores.verde);
 
     let reglasFooterEmbed = new Embed()
-    .defFooter({text: `— ¡Gracias por leer! | Al hablar en el chat aseguras que has leído las reglas del servidor y que las cumplirás.`, icon: Config.jeffreyguildIcon})
+    .defFooter({text: `— ¡Gracias por leer! | Al hablar en el chat aseguras que has leído las reglas del servidor y que las cumplirás.`, icon: interaction.guild.iconURL({dynamic: true})})
     .defColor(Colores.verdeclaro);
 
     let autoroles = importImage("autoroles");
