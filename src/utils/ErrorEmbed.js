@@ -1,7 +1,6 @@
 const Embed = require("./Embed");
 const Colores = require("../resources/colores.json");
 const Config = require("../resources/base.json");
-const Emojis = require("../resources/emojis.json");
 
 const { CommandInteraction } = require("discord.js");
 
