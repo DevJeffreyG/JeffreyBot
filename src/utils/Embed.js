@@ -1,6 +1,6 @@
 const Discord = require("discord.js");
-const { Config } = require("../resources");
 const Colores = require("../resources/colores.json");
+const client = require("../../index");
 
 class Embed extends Discord.EmbedBuilder {
     /**
@@ -78,7 +78,7 @@ class Embed extends Discord.EmbedBuilder {
                 break;
 
             case "success":
-                this.defAuthor({text: `${data?.title ?? "¡Listo!"}`, icon: Config.bienPng});
+                this.defAuthor({text: `${data?.title ?? "¡Listo!"}`, icon: client.EmojisObject.Check.url});
                 this.defColor(Colores.verdejeffrey)
 
                 if(data?.desc) {

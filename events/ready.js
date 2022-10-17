@@ -2,7 +2,6 @@ const Config = require("../src/resources/base.json");
 const { prefix } = Config;
 
 const Managers = require("../src/utils/Managers");
-const dbManager = require("../db/")
 let functions = require("../src/utils/functions");
 
 const CronJob = require("cron").CronJob;

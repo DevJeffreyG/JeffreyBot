@@ -5,7 +5,7 @@ const ms = require("ms");
 const models = require("mongoose").models;
 const { ToggledCommands, Users, Guilds } = models
 
-const { Ticket, ErrorEmbed, intervalGlobalDatas, Categories, ValidateDarkShop } = require("../src/utils");
+const { Ticket, ErrorEmbed, intervalGlobalDatas, Categories, ValidateDarkShop, Embed } = require("../src/utils");
 const { Config, Colores } = require("../src/resources");
 const { InteractionType } = require("discord-api-types/v10");
 const { jeffreygID, mantenimiento } = Config;
@@ -127,8 +127,7 @@ module.exports = async (client, interaction) => {
     }
   } else if (interaction.type === InteractionType.MessageComponent) { // Componentes
 
-    const { userId, type } = getTicketInfo(interaction.message);
-    let channel, message, ticket, confirmation, actualEmbeds;
+    let message, ticket;
 
     if (customId.toUpperCase().includes("TICKET")) ticket = new Ticket(interaction, client);
 
@@ -149,22 +148,22 @@ module.exports = async (client, interaction) => {
         docGuild.save();
 
         message = interaction.message;
-        let newembed = message.embeds[0].setFooter({ text: `Aceptada por ${interaction.user.tag}`, iconURL: Config.bienPng }).setTimestamp();
+        let newembed = new Embed(message.embeds[0])
+        .defFooter({ text: `Aceptada por ${interaction.user.tag}`, icon: Config.bienPng, timestamp: true})
         message.edit({ embeds: [newembed], components: [] });
 
         let r = interaction.guild.id === Config.testingServer ? interaction.guild.roles.cache.find(x => x.id === "983832210966732840") : interaction.guild.roles.cache.find(x => x.id === Config.suggestorRole);
 
-        let acceptedEmbed = new Discord.EmbedBuilder()
-          .setAuthor({ name: "¡Se ha aceptado una sugerencia tuya!", iconURL: Config.bienPng })
+        let acceptedEmbed = new Embed()
+          .defAuthor({ text: "¡Se ha aceptado una sugerencia tuya!", icon: interaction.client.EmojisObject.Check.url })
           .setDescription(`**—** ¡Gracias por ayudarnos a mejorar!
 **—** Se ha aceptado tu sugerencia:
 \`\`\`
 ${suggestion.suggestion}
 \`\`\`
 **—** Nos tomamos la libertad de agregarte un role como forma de agradecimiento 😉`)
-          .setColor(Colores.verde)
-          .setFooter({ text: interaction.guild.name, iconURL: interaction.guild.iconURL() })
-          .setTimestamp();
+          .defColor(Colores.verde)
+          .defFooter({ text: interaction.guild.name, icon: interaction.guild.iconURL(), timestamp: true });
 
         let suggestor = interaction.guild.members.cache.find(x => x.id === suggestion.user_id);
 
@@ -190,25 +189,23 @@ ${suggestion.suggestion}
         docGuild.save();
 
         message = interaction.message;
-        let newembed = message.embeds[0]
-          .setFooter({ text: `Denegada por ${interaction.user.tag}`, iconURL: Config.errorPng })
-          .setColor(Colores.rojo)
-          .setTimestamp();
+        let newembed = new Embed(message.embeds[0])
+          .defFooter({ text: `Denegada por ${interaction.user.tag}`, icon: interaction.client.EmojisObject.Error.url, timestamp: true })
+          .defColor(Colores.rojo);
 
         message.edit({ embeds: [newembed], components: [] });
 
         let r = interaction.guild.id === Config.testingServer ? interaction.guild.roles.cache.find(x => x.id === "983832210966732840") : interaction.guild.roles.cache.find(x => x.id === Config.suggestorRole);
 
-        let acceptedEmbed = new Discord.EmbedBuilder()
-          .setAuthor({ name: "¡Gracias por el interés!", iconURL: Config.errorPng })
-          .setDescription(`**—** Hemos denegado tu sugerencia:
+        let acceptedEmbed = new Embed()
+          .defAuthor({ text: "¡Gracias por el interés!", icon: interaction.client.EmojisObject.Error.url })
+          .defDesc(`**—** Hemos denegado tu sugerencia:
 \`\`\`
 ${suggestion.suggestion}
 \`\`\`
 **—** ¡Gracias por ayudarnos a mejorar, siempre te tendremos en cuenta!`)
-          .setColor(Colores.rojo)
-          .setFooter({ text: interaction.guild.name, iconURL: interaction.guild.iconURL() })
-          .setTimestamp();
+          .defColor(Colores.rojo)
+          .defFooter({ text: interaction.guild.name, icon: interaction.guild.iconURL(), timestamp: true });
 
         let suggestor = interaction.guild.members.cache.find(x => x.id === suggestion.user_id);
 
@@ -233,26 +230,24 @@ ${suggestion.suggestion}
         docGuild.save();
 
         message = interaction.message;
-        let newembed = message.embeds[0]
-          .setFooter({ text: `Invalidada por ${interaction.user.tag}`, iconURL: Config.errorPng })
-          .setColor(Colores.rojo)
-          .setTimestamp();
+        let newembed = new Embed(message.embeds[0])
+          .defFooter({ text: `Invalidada por ${interaction.user.tag}`, icon: interaction.client.EmojisObject.Error.url, timestamp: true })
+          .defColor(Colores.rojo)
 
         message.edit({ embeds: [newembed], components: [] });
 
         let r = interaction.guild.id === Config.testingServer ? interaction.guild.roles.cache.find(x => x.id === "983832210966732840") : interaction.guild.roles.cache.find(x => x.id === Config.suggestorRole);
 
-        let acceptedEmbed = new Discord.EmbedBuilder()
-          .setAuthor({ name: "¡Gracias por el interés!", iconURL: Config.errorPng })
-          .setDescription(`**—** Hemos determinado que tu sugerencia es inválida:
+        let acceptedEmbed = new Embed()
+          .defAuthor({ text: "¡Gracias por el interés!", icon: interaction.client.EmojisObject.Error.url })
+          .defDesc(`**—** Hemos determinado que tu sugerencia es inválida:
 \`\`\`
 ${suggestion.suggestion}
 \`\`\`
 **—** Puede que esta haya sido una sugerencia repetida, o una ya denegada anteriormente.
 **—** ¡Gracias por ayudarnos a mejorar, siempre te tendremos en cuenta!`)
-          .setColor(Colores.rojo)
-          .setFooter({ text: interaction.guild.name, iconURL: interaction.guild.iconURL() })
-          .setTimestamp();
+          .defColor(Colores.rojo)
+          .defFooter({ text: interaction.guild.name, icon: interaction.guild.iconURL(), timestamp: true});
 
         let suggestor = interaction.guild.members.cache.find(x => x.id === suggestion.user_id);
 
@@ -271,23 +266,5 @@ ${suggestion.suggestion}
       default:
         console.log("No hay acciones para el botón con customId", customId);
     }
-  }
-
-  function getTicketInfo(message) {
-    let split = message.channel.name.split("-");
-
-    return {
-      type: split[1],
-      userId: split[2]
-    }
-  }
-
-  function resetCooldown(timeout, map) {
-    map.set(interaction.user.id, new Date());
-    clearTimeout(timeout);
-
-    timeout = setTimeout(() => {
-      map.delete(interaction.user.id)
-    }, ticketCooldown)
   }
 }
