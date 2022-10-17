@@ -1,8 +1,31 @@
 const mongoose = require("mongoose");
+const moment = require("moment");
+const ms = require("ms")
 
 const Schema = mongoose.Schema({
     info: Object
 });
+
+Schema.static("newTempRoleDeletion", async function(data) {
+    if(
+        await this.findOne({
+            "info.type": "temproledeletion",
+            "info.user_id": data.user_id,
+            "info.role_id": data.role_id
+        })
+    ) return null
+    else
+
+    return new this({
+        info: {
+            type: "temproledeletion",
+            user_id: data.user_id,
+            role_id: data.role_id,
+            until: moment().add(ms(data.duration), "ms").toDate(),
+            boost: data.boost ?? null
+        }
+    }).save();
+})
 
 Schema.static("newGuildCommands", async function({route, dev = false}){
     if(
@@ -47,5 +70,11 @@ Schema.static("removeGuildCommands", function(route){
     })
 })
 
+Schema.static("getTempRoleDeletions", function(user_id){
     return this.find({
+        "info.type": "temproledeletion",
+        "info.user_id": user_id
+    });
+})
+
 module.exports = mongoose.model("GlobalDatas", Schema);

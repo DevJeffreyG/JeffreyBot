@@ -13,7 +13,7 @@ const { ItemTypes, ItemObjetives, ItemActions, ItemEffects } = require("./Enums"
 const { FindNewId, LimitedTime, Subscription, WillBenefit } = require("./functions");
 
 const models = require("mongoose").models;
-const { Shops, DarkShops, Users, Guilds } = models;
+const { Shops, DarkShops, Users, Guilds, GlobalDatas } = models;
 
 class Item {
     constructor(interaction, id, isDarkShop = false) {
@@ -58,8 +58,8 @@ class Item {
             type: "doesntExist",
             data: {
                 action: "remove role",
-                existing: "El role que te quita este item",
-                context: "tu perfil"
+                missing: "El role que te quita este item",
+                context: "el perfil"
             }
         })
 
@@ -71,9 +71,13 @@ class Item {
             }
         })
 
-        this.canceled = new Embed()
-            .defAuthor({ text: "Cancelado.", title: true })
-            .defColor(Colores.nocolor);
+        this.roleDeleted = new ErrorEmbed(interaction, {
+            type: "execError",
+            data: {
+                command: this.interaction.commandName,
+                guide: "Ya se ha eliminado temporalmente este rol, para este usuario"
+            }
+        })
 
     }
 
@@ -260,15 +264,22 @@ class Item {
     async #removeRole() {
         if (!await this.#darkshopWork()) return false;
         const role = this.interaction.guild.roles.cache.find(x => x.id === this.given);
-        console.log("🗨️ Eliminando el role %s a %s", role.name, this.interaction.user.tag);
+        console.log("🗨️ Eliminando el role %s a %s por %s", role.name, this.victimMember.user.tag, this.duration);
 
-        if (this.member.roles.cache.find(x => x === role)) {
-            console.log("🔴 No tiene el role que te quita el item.")
+        if (!this.victimMember.roles.cache.find(x => x === role)) {
+            console.log("🔴 No tiene el role que te quita el item. %s", this.victimMember.roles.cache)
             this.norole.send();
             return false;
         }
 
-        else this.member.roles.remove(role);
+        // globaldata
+        let globaldata = await GlobalDatas.newTempRoleDeletion({ user_id: this.victimMember.id, role_id: role.id, duration: this.duration });
+        if (!globaldata) {
+            this.roleDeleted.send();
+            return false
+        }
+
+        this.victimMember.roles.remove(role);
 
         this.#removeItemFromInv()
         return true;
@@ -387,6 +398,47 @@ class Item {
     async #removeBoost() {
         if (!await this.#darkshopWork()) return false;
 
+        let filtered = this.victim.data.temp_roles.filter(x => x.special.objetive === this.boost_objetive);
+        const temprole = filtered[Math.floor(Math.random() * filtered.length)];
+
+        const role = this.interaction.guild.roles.cache.find(x => x.id === temprole.role_id);
+
+        console.log("🗨️ Eliminando el role %s a %s por %s", role.name, this.victimMember.user.tag, this.duration);
+
+        if (!this.victimMember.roles.cache.find(x => x === role)) {
+            console.log("🔴 No tiene el role que te quita el item. %s", this.victimMember.roles.cache)
+            this.norole.send();
+            return false;
+        }
+
+        // globaldata
+        let globaldata = await GlobalDatas.newTempRoleDeletion({
+            user_id: this.victimMember.id, role_id: role.id, duration: this.duration, boost: this.boost_objetive
+        });
+        if (!globaldata) {
+            this.roleDeleted.send();
+            return false
+        }
+
+        temprole.special.disabled = true;
+
+        await this.victim.save();
+        this.victimMember.roles.remove(role);
+
+        this.#removeItemFromInv()
+        return true;
+
+        /*
+        if(!member.roles.cache.find(x => x.id === role.id)) return message.reply(`No puedes usar este item porque ${member.id === author.id ? "no tienes" : `${member.user.tag} no tiene`} el boost que se quita boost.`);
+                
+                let temprole = victim.data.temp_roles.findIndex(x => x.special.type === boost_type && x.special.objetive === boost_objetive);
+                victim.data.temp_roles.splice(temprole, 1);
+
+                member.roles.remove(role);
+
+                if(interaction[0]) await victim.save();
+                else return dsChannel.send({embeds: [interaction[1]]});
+        */
     }
 
     async #darkshopWork() {

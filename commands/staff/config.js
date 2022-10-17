@@ -1,3 +1,4 @@
+const { Colores } = require("../../src/resources");
 const { Command, Categories, ErrorEmbed, Confirmation, FindNewId, Embed } = require("../../src/utils")
 
 const command = new Command({
@@ -6,21 +7,25 @@ const command = new Command({
     category: Categories.Administration
 })
 
+const maxValue = 1024; // api limit
+const descValue = 50; // menuselectorlimit (warns, tickets)
+const explLength = maxValue - 85 - descValue;
+
 command.data
-    .addSubcommand(canales => 
+    .addSubcommand(canales =>
         canales
             .setName("canales")
             .setDescription("Cambiar la configuración de canales")
-            .addStringOption(modulo => 
+            .addStringOption(modulo =>
                 modulo
                     .setName("modulo")
                     .setDescription("El módulo a cambiar")
                     .setRequired(true)
                     .addChoices(
-                            {name: "General logs", value: "general logs"},
-                            {name: "Moderation logs", value: "moderation logs"},
-                            {name: "Opinion logs", value: "opinion logs"},
-                        )
+                        { name: "General logs", value: "general logs" },
+                        { name: "Moderation logs", value: "moderation logs" },
+                        { name: "Opinion logs", value: "opinion logs" },
+                    )
             )
             .addChannelOption(nuevo =>
                 nuevo
@@ -43,10 +48,10 @@ command.data
                             .setDescription("El módulo a cambiar")
                             .setRequired(true)
                             .addChoices(
-                                {name: "Admin", value: "admin"},
-                                {name: "Staff", value: "staff"},
-                                {name: "Members", value: "members"},
-                                {name: "Bots", value: "bots"},
+                                { name: "Admin", value: "admin" },
+                                { name: "Staff", value: "staff" },
+                                { name: "Members", value: "members" },
+                                { name: "Bots", value: "bots" },
                             )
                     )
                     .addRoleOption(role =>
@@ -66,10 +71,10 @@ command.data
                             .setDescription("El módulo a cambiar")
                             .setRequired(true)
                             .addChoices(
-                                {name: "Admin", value: "admin"},
-                                {name: "Staff", value: "staff"},
-                                {name: "Members", value: "members"},
-                                {name: "Bots", value: "bots"},
+                                { name: "Admin", value: "admin" },
+                                { name: "Staff", value: "staff" },
+                                { name: "Members", value: "members" },
+                                { name: "Bots", value: "bots" },
                             )
                     )
                     .addRoleOption(role =>
@@ -92,12 +97,14 @@ command.data
                         resumen
                             .setName("resumen")
                             .setDescription("Lo que engloba toda la regla")
+                            .setMaxLength(50)
                             .setRequired(true)
                     )
                     .addStringOption(expl =>
                         expl
                             .setName("expl")
                             .setDescription("Explicación detallada de la regla")
+                            .setMaxLength(explLength)
                             .setRequired(true)
                     )
             )
@@ -126,8 +133,51 @@ command.data
                         pos
                             .setName("pos")
                             .setDescription("La nueva posición de la regla")
+                            .setMinValue(1)
+                            .setMaxValue(9999)
                             .setRequired(true)
                     )
+            )
+            .addSubcommand(desc =>
+                desc
+                    .setName("desc")
+                    .setDescription("Cambia la descripción de una regla (Resumen de la explicación completa)")
+                    .addIntegerOption(id =>
+                        id
+                            .setName("id")
+                            .setDescription("La id de la regla")
+                            .setRequired(true)
+                    )
+                    .addStringOption(desc =>
+                        desc
+                            .setName("desc")
+                            .setDescription("La nueva descripción de la regla")
+                            .setMaxLength(descValue)
+                            .setRequired(true)
+                    )
+            )
+            .addSubcommand(expl =>
+                expl
+                    .setName("expl")
+                    .setDescription("Cambia la explicación de una regla")
+                    .addIntegerOption(id =>
+                        id
+                            .setName("id")
+                            .setDescription("La id de la regla")
+                            .setRequired(true)
+                    )
+                    .addStringOption(expl =>
+                        expl
+                            .setName("expl")
+                            .setDescription("La nueva explicación de la regla")
+                            .setMaxLength(explLength)
+                            .setRequired(true)
+                    )
+            )
+            .addSubcommand(list =>
+                list
+                    .setName("list")
+                    .setDescription("Obtén la lista de las reglas en este servidor")
             )
     )
 
@@ -172,7 +222,7 @@ command.execChannel = async (interaction, doc, params) => {
             break
 
         default:
-            return interaction.editReply({ content: null, embeds: [new ErrorEmbed({ type: "commandError", data: { id, unknown: modulo.value } })] })
+            return new ErrorEmbed(interaction, { type: "commandError", data: { id, unknown: modulo.value } }).send()
     }
 
     await doc.save();
@@ -187,24 +237,16 @@ command.execRoles = async (interaction, doc, params) => {
     switch (subcommand) {
         case "add":
             if (!q.exists) q.arr.push(role.value) // si no existe, bien, agregarlo
-            else return interaction.editReply({
-                content: null, embeds: [
-                    new ErrorEmbed({
-                        type: "alreadyExists",
-                        data: { action: `add ${modulo.value}`, existing: role.role }
-                    })
-                ]
-            })
+            else return new ErrorEmbed(interaction, {
+                type: "alreadyExists",
+                data: { action: `add ${modulo.value}`, existing: role.role }
+            }).send();
             break;
         case "remove":
-            if (!q.exists) return interaction.editReply({
-                content: null, embeds: [
-                    new ErrorEmbed({
-                        type: "doesntExist",
-                        data: { action: `remove ${modulo.value}`, missing: role.role }
-                    })
-                ]
-            })
+            if (!q.exists) return new ErrorEmbed({
+                type: "doesntExist",
+                data: { action: `remove ${modulo.value}`, missing: role.role }
+            }).send();
 
             let index = q.arr.indexOf(role.value)
             q.arr.splice(index, 1);
@@ -246,8 +288,10 @@ command.execRoles = async (interaction, doc, params) => {
 
 command.execReglas = async (interaction, models, doc, params) => {
     const { subcommand, reglas } = params;
-    const { Guilds } = models;
-    const { resumen, expl, id, pos } = reglas;
+    const { Guilds, Users } = models;
+    const { resumen, expl, id, pos, desc } = reglas;
+
+    const regla = doc.data.rules.find(x => x.id === id?.value) ?? null;
 
     switch (subcommand) {
         case "add": {
@@ -262,7 +306,7 @@ ${expl.value}
             ]
 
             let confirmation = await Confirmation("Agregar regla", confirm, interaction);
-            if(!confirmation) return;
+            if (!confirmation) return;
 
             doc.data.rules.push({
                 name: resumen.value,
@@ -273,56 +317,167 @@ ${expl.value}
 
             await doc.save();
 
-            return confirmation.editReply({embeds: [
-                new Embed({
-                    type: "success",
-                    data: {
-                        desc: [
-                            "Se ha creado la nueva regla",
-                            `Resumen: **${resumen.value}**`,
-                            `Explicación: **'** ${expl.value} **'**`,
-                            `ID: \`${newId}\``
-                        ]
-                    }
-                })
-            ]})
-        }
-        case "remove": {
-            const regla = doc.data.rules.find(x => x.id === id.value);
-            if (!regla) return interaction.editReply({
-                content: null, embeds: [
-                    new ErrorEmbed({
-                        type: "doesntExist",
-                        data: { action: `remove regla`, missing: `Regla con ID ${id.value}` }
+            return confirmation.editReply({
+                embeds: [
+                    new Embed({
+                        type: "success",
+                        data: {
+                            desc: [
+                                "Se ha creado la nueva regla",
+                                `Resumen: **${resumen.value}**`,
+                                `Explicación: **'** ${expl.value} **'**`,
+                                `ID: \`${newId}\``
+                            ]
+                        }
                     })
                 ]
             })
+        }
+        case "remove": {
+            if (!regla) return new ErrorEmbed(interaction, {
+                type: "doesntExist",
+                data: { action: `remove regla`, missing: `Regla con ID ${id.value}` }
+            }).send();
 
             let confirm = [
                 `Regla con ID: \`${regla.id}\`.`,
                 `Resumen: **${regla.name}**.`,
                 `Explicación: **${regla.expl}**.`,
                 `Descripción simple: **${regla.desc ?? "Nada"}**.`,
-                `Posición: \`${regla.position}\`.`
+                `Posición: \`${regla.position}\`.`,
+                "Se eliminarán Warns & Softwarns por esta regla de los usuarios.",
+                "Esta acción **NO** se puede deshacer."
             ]
 
             let confirmation = await Confirmation("Eliminar regla", confirm, interaction);
-            if(!confirmation) return;
+            if (!confirmation) return;
 
             let index = doc.data.rules.indexOf(regla)
             doc.data.rules.splice(index, 1);
             await doc.save();
 
-            return confirmation.editReply({embeds: [
-                new Embed({
-                    type: "success",
-                    data: {
-                        desc: [
-                            "Se ha eliminado la regla"
-                        ]
-                    }
-                })
-            ]})
+            // eliminar de los usuarios
+            const users = await Users.find({ guild_id: interaction.guild.id });
+            let totalUsers = 0
+            for await (const user of users) {
+                let deleted = false;
+                let iWarns = user.warns.findIndex(x => x.rule_id === regla.id)
+                let iSoftWarns = user.softwarns.findIndex(x => x.rule_id === regla.id)
+
+                if (iWarns != -1) {
+                    console.log("🗑️ Eliminando de los Warns de %s", user.user_id)
+                    user.warns.splice(iWarns, 1);
+                    await user.save();
+                    deleted = true;
+                }
+
+                if (iSoftWarns != -1) {
+                    console.log("🗑️ Eliminando de los SoftWarns de %s", user.user_id)
+                    user.softwarns.splice(iSoftWarns, 1);
+                    await user.save();
+                    deleted = true;
+                }
+
+                if (deleted) totalUsers += 1
+            }
+
+            return confirmation.editReply({
+                embeds: [
+                    new Embed({
+                        type: "success",
+                        data: {
+                            desc: [
+                                "Se ha eliminado la regla",
+                                `Se han eliminado los Warns y Softwarns para esta regla de ${totalUsers} usuario(s)`
+                            ]
+                        }
+                    })
+                ]
+            })
+        }
+
+        case "pos": {
+            // revisar que no haya una regla con esa posicion
+            if (doc.data.rules.find(x => x.position === pos.value)) return new ErrorEmbed(interaction, {
+                type: "alreadyExists",
+                data: {
+                    action: "reglas pos",
+                    existing: "Una regla con esa posición",
+                    context: "este servidor"
+                }
+            }).send();
+
+            regla.position = pos.value;
+            await doc.save();
+
+            return interaction.editReply({
+                embeds: [
+                    new Embed({
+                        type: "success",
+                        data: {
+                            desc: `Se cambió la posición a la \`${pos.value}\``
+                        }
+                    })
+                ]
+            })
+
+        }
+
+        case "desc": {
+            regla.desc = desc.value;
+            await doc.save();
+
+            return interaction.editReply({
+                embeds: [
+                    new Embed({
+                        type: "success",
+                        data: {
+                            desc: `Se cambió la descripción`
+                        }
+                    })
+                ]
+            })
+        }
+
+        case "expl": {
+            const regla = doc.data.rules.find(x => x.id === id.value);
+
+            regla.expl = expl.value;
+            await doc.save();
+
+            return interaction.editReply({
+                embeds: [
+                    new Embed({
+                        type: "success",
+                        data: {
+                            desc: `Se cambió la explicación`
+                        }
+                    })
+                ]
+            })
+        }
+
+        case "list": {
+            let embed = new Embed()
+                .defAuthor({ text: "Lista de reglas", title: true })
+                .defFooter({ text: `Hay ${doc.data.rules.length} regla(s)`, icon: interaction.guild.iconURL({ dynamic: true }) })
+                .defDesc("Usa los comandos en `/config reglas` para administrar lo que ves aquí.")
+                .defColor(Colores.verde);
+
+            for (const rule of doc.data.rules) {
+                let name = rule.name;
+                let expl = rule.expl;
+                let desc = rule.desc ?? "No definida.";
+                let pos = rule.position;
+                let id = rule.id;
+
+                embed.defField(`— ${name}`, `**▸ Explicación**: \`${expl}\`
+**▸ Descripción**: \`${desc}\`
+**▸ Posición**: \`${pos}\`.
+**▸ ID**: \`${id}\`.`)
+            }
+
+            return interaction.editReply({ embeds: [embed] })
         }
     }
 }

@@ -82,7 +82,7 @@ command.execute = async (interaction, models, params, client) => {
         });
 
         // Definir cuál es la regla "rule"
-        let ruleTxt = doc.data.rules.find(x => x.position === rule).name;
+        let ruleTxt = doc.data.rules.find(x => x.id === rule).name;
 
         let toConfirm = [
             `¿Estás segur@ de warnear a **${member.user.tag}**?`,

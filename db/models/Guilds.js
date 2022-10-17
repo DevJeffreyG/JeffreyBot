@@ -96,12 +96,32 @@ const GuildSchema = new Schema({
         admins: { type: Array },
         staffs: { type: Array },
         users: { type: Array },
-        bots: { type: Array }
+        bots: { type: Array },
+        levels: [
+            {
+                level: { type: Number, required: true },
+                role_id: { type: String, required: true }
+            }
+        ],
     },
     channels: {
         general_logs: { type: String },
         moderation_logs: { type: String },
         opinion_logs: { type: String },
+        chat_rewards: [
+            {
+                channel_id: { type: String, required: true },
+                multiplier: { type: Number, default: 1 }
+            }
+        ],
+        twitter_notif: { type: String },
+        youtube_notif: { type: String },
+        twitch_notif: { type: String },
+        rules: { type: String },
+        information: { type: String },
+        faq: { type: String },
+        announcements: { type: String },
+        halloffame: { type: String }
     }
 });
 
