@@ -147,11 +147,11 @@ class InteractivePages {
             if (pagn === this.pages.size - 1) row.components[1].setDisabled();
             else row.components[1].setDisabled(false);
 
-            let embed = new Discord.EmbedBuilder()
-                .setAuthor({ name: this.base.title, iconURL: this.base.author_icon })
-                .setColor(this.base.color)
-                .setDescription(`${this.base.description}\n\n${this.pages.get(pagn + 1).join(" ")}`)
-                .setFooter({ text: this.base.footer.replace(new RegExp("{ACTUAL}", "g"), `${pagn + 1}`).replace(new RegExp("{TOTAL}", "g"), `${this.pages.size}`), iconURL: this.base.icon_footer });
+            let embed = new Embed()
+                .defAuthor({ text: this.base.title, icon: this.base.author_icon })
+                .defColor(this.base.color)
+                .defDesc(`${this.base.description}\n\n${this.pages.get(pagn + 1).join(" ")}`)
+                .defFooter({ text: this.base.footer.replace(new RegExp("{ACTUAL}", "g"), `${pagn + 1}`).replace(new RegExp("{TOTAL}", "g"), `${this.pages.size}`), icon: this.base.icon_footer });
 
             await interaction.editReply({ embeds: [embed], components: [row] });
 

@@ -96,9 +96,7 @@ class Commands {
             console.log(error);
         }
 
-        console.log("🟢 SLASH COMMANDS ACTUALIZADOS")
-        console.log("============================================================");
-        
+        console.log("🟢 SLASH COMMANDS ACTUALIZADOS")        
         return;
     }
 
