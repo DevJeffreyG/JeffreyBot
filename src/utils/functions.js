@@ -3,7 +3,6 @@ const { ButtonStyle, OverwriteType } = require("discord-api-types/v10");
 
 const Config = require("../resources/base.json");
 const Colores = require("../resources/colores.json");
-const Emojis = require("../resources/emojis.json");
 const Cumplidos = require("../resources/cumplidos.json");
 
 const ErrorEmbed = require("../utils/ErrorEmbed");
