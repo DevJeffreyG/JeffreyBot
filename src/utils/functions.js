@@ -260,79 +260,6 @@ let resetWork = (log) => {
   return reseted;
 }
 
-const oldGetChanges = function (entryChanges) {
-  switch (entryChanges.key) {
-    case "afk_timeout":
-      oldKey = `**${entryChanges.old / 60}** minutos`;
-      newKey = `**${entryChanges.new / 60}** minutos`;
-
-      break;
-
-    case "mfa_level":
-      oldKey = entryChanges.old ? "**Sí**" : "**No**";
-      newKey = entryChanges.new ? "**Sí**" : "**No**";
-      break;
-
-    case "verification_level":
-      oldKey = `Nivel **${entryChanges.old}**`;
-      newKey = `Nivel **${entryChanges.new}**`;
-      break;
-
-    case "explicit_content_filter":
-      oldKey = `Nivel **${entryChanges.old + 1}**`;
-      newKey = `Nivel **${entryChanges.new + 1}**`;
-      break;
-
-    case "default_message_notifications":
-      oldKey =
-        entryChanges.old === 1
-          ? `**Sólo menciones**`
-          : `**Todos los mensajes**`;
-      newKey =
-        entryChanges.new === 1
-          ? `**Sólo menciones**`
-          : `**Todos los mensajes**`;
-      break;
-
-    case "prune_delete_days":
-      oldKey = `**${entryChanges.old}** días`;
-      newKey = `**${entryChanges.new}** días`;
-      break;
-
-    case "afk_channel_id":
-      oldKey = guild.channels.cache.get(entryChanges.old)
-        ? `**${guild.channels.cache.get(entryChanges.old)}**`
-        : "**Nulo**";
-      newKey = guild.channels.cache.get(entryChanges.new)
-        ? `**${guild.channels.cache.get(entryChanges.new)}**`
-        : "**Nulo**";
-      break;
-
-    case "owner_id":
-      oldKey = guild.members.cache.get(entryChanges.old)
-        ? `**${guild.members.cache.get(entryChanges.old)}**`
-        : "**Nulo**";
-      newKey = guild.members.cache.get(entryChanges.new)
-        ? `**${guild.members.cache.get(entryChanges.new)}**`
-        : "**Nulo**";
-      break;
-
-    case "rate_limit_per_user":
-      oldKey = entryChanges.old
-        ? `**${entryChanges.old}** segundos`
-        : "**Nulo**";
-      newKey = entryChanges.new
-        ? `**${entryChanges.new}** segundos`
-        : "**Nulo**";
-      break;
-
-    default:
-      oldKey = "**" + entryChanges.old + "**" || "**Nulo**";
-      newKey = "**" + entryChanges.new + "**" || "**Nulo**";
-  }
-  return { old: oldKey, new: newKey };
-}
-
 const FetchAuditLogs = async function (client, guild, types) {
   return new Promise(async (resolve, reject) => {
     let toReturn = [];
@@ -346,6 +273,11 @@ const FetchAuditLogs = async function (client, guild, types) {
 
       if (fetched === undefined) {
         console.error("⚠️ No se encontró ningún log con el tipo", type);
+        break;
+      }
+
+      if(moment(fetched.createdAt).isBefore(moment().subtract(1, "minute"))) {
+        console.error("⚠️ Log hace más de un minuto", fetched);
         break;
       }
 
@@ -368,6 +300,75 @@ const FetchAuditLogs = async function (client, guild, types) {
 
     resolve(toReturn);
   })
+}
+
+
+/**
+ * 
+ * @param {*} guild The Discord.JS guild where this comes from
+ * @param {String} header The text that appears at the title of the embed
+ * @param {String} footer The text that appears at the footer of the embed
+ * @param {Array} description The items that are separated by "—"
+ * @param {String} headerPng The image (url) that appears at the left of the title
+ * @param {String} footerPng The image (url) that appears at the left of the footer
+ * @param {String} color The HEX color of the embed
+ * @param {String} [logType="GENERAL"] The type of the log
+ * - GENERAL
+ * - MODERATION
+ * - STAFF
+ * @returns {Promise} The Discord.JS Message sent
+ */
+ const GenerateLog = async function (guild, header, footer, description, headerPng, footerPng, color, logType, fields) {
+  logType = logType ?? "GENERAL";
+  fields = fields ?? null;
+
+  const embed = new Embed()
+    .defAuthor({ text: header, icon: headerPng ?? null })
+    .defFooter({ text: footer, icon: footerPng ?? null, timestamp: true })
+    .defColor(color);
+
+  let desc = "";
+
+  for (let i = 0; i < description.length; i++) {
+    const item = description[i];
+
+    desc += "**—** " + item + "\n";
+  }
+
+  embed.defDesc(desc);
+
+  if (fields) {
+    fields.forEach(field => {
+      embed.defField(field.name, field.value);
+    })
+  }
+
+  let docGuild = await Guilds.findOne({ guild_id: guild.id }) ?? null;
+
+  if (!docGuild) return console.error("No se ha configurado un logchannel en el servidor", guild.name);
+
+  let channel;
+
+  switch (logType.toUpperCase()) {
+    case "GENERAL":
+      if (!docGuild.channels.general_logs) return;
+      channel = guild.channels.cache.find(x => x.id === docGuild.channels.general_logs);
+      break;
+
+    case "MODERATION":
+      if (!docGuild.channels.moderation_logs) return;
+      channel = guild.channels.cache.find(x => x.id === docGuild.channels.moderation_logs);
+      break;
+
+    case "STAFF":
+      if (!docGuild.channels.staff_logs) return;
+      channel = guild.channels.cache.find(x => x.id === docGuild.channels.staff_logs);
+      break;
+  }
+
+  if (!channel) return console.error("No se ha configurado un logchannel en el servidor", guild.name, logType.toUpperCase());
+
+  return sendLog(channel, embed);
 }
 
 /**
@@ -1845,74 +1846,6 @@ const importImage = function (filename) {
     attachment: `attachment://${filename.toLowerCase()}.png`,
     file: file
   }
-}
-
-/**
- * 
- * @param {*} guild The Discord.JS guild where this comes from
- * @param {String} header The text that appears at the title of the embed
- * @param {String} footer The text that appears at the footer of the embed
- * @param {Array} description The items that are separated by "—"
- * @param {String} headerPng The image (url) that appears at the left of the title
- * @param {String} footerPng The image (url) that appears at the left of the footer
- * @param {String} color The HEX color of the embed
- * @param {String} [logType="GENERAL"] The type of the log
- * - GENERAL
- * - MODERATION
- * - STAFF
- * @returns {Promise} The Discord.JS Message sent
- */
-const GenerateLog = async function (guild, header, footer, description, headerPng, footerPng, color, logType, fields) {
-  logType = logType ?? "GENERAL";
-  fields = fields ?? null;
-
-  const embed = new Embed()
-    .defAuthor({ text: header, icon: headerPng ?? null })
-    .defFooter({ text: footer, icon: footerPng ?? null, timestamp: true })
-    .defColor(color);
-
-  let desc = "";
-
-  for (let i = 0; i < description.length; i++) {
-    const item = description[i];
-
-    desc += "**—** " + item + "\n";
-  }
-
-  embed.defDesc(desc);
-
-  if (fields) {
-    fields.forEach(field => {
-      embed.defField(field.name, field.value);
-    })
-  }
-
-  let docGuild = await Guilds.findOne({ guild_id: guild.id }) ?? null;
-
-  if (!docGuild) return console.error("No se ha configurado un logchannel en el servidor", guild.name);
-
-  let channel;
-
-  switch (logType.toUpperCase()) {
-    case "GENERAL":
-      if (!docGuild.channels.general_logs) return;
-      channel = guild.channels.cache.find(x => x.id === docGuild.channels.general_logs);
-      break;
-
-    case "MODERATION":
-      if (!docGuild.channels.moderation_logs) return;
-      channel = guild.channels.cache.find(x => x.id === docGuild.channels.moderation_logs);
-      break;
-
-    case "STAFF":
-      if (!docGuild.channels.staff_logs) return;
-      channel = guild.channels.cache.find(x => x.id === docGuild.channels.staff_logs);
-      break;
-  }
-
-  if (!channel) return console.error("No se ha configurado un logchannel en el servidor", guild.name, logType.toUpperCase());
-
-  return sendLog(channel, embed);
 }
 
 /**
