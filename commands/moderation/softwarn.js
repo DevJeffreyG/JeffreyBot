@@ -1,6 +1,6 @@
 const { Command, Categories, Embed, ErrorEmbed, Confirmation, FindNewId } = require("../../src/utils")
 const { Colores } = require("../../src/resources/");
-const { SelectMenuBuilder, ActionRowBuilder } = require("discord.js")
+const { SelectMenuBuilder, ActionRowBuilder, AttachmentBuilder } = require("discord.js")
 const command = new Command({
     name: "softwarn",
     desc: "Controla las advertencias hechas a un usuario",
@@ -16,7 +16,7 @@ command.addOption({
 
 command.addOption({
     type: "attachment",
-    name: "prueba",
+    name: "pruebas",
     desc: "La pruebas de que lo pasó es real",
     req: true
 })
@@ -24,7 +24,7 @@ command.addOption({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { Guilds, Users } = models;
-    const { usuario, prueba } = params;
+    const { usuario, pruebas } = params;
 
     // revisar que estén las reglas activadas
     const doc = await Guilds.getOrCreate(interaction.guild.id);
@@ -42,6 +42,17 @@ command.execute = async (interaction, models, params, client) => {
     })
 
     if(doc.data.rules?.length === 0) return norules.send();
+
+    const prueba = new AttachmentBuilder()
+    .setFile(pruebas.attachment)
+    .setName("prueba")
+    .setDescription("La prueba que el STAFF proporcionó para este warn");
+
+    console.log(prueba)
+
+    const pruebasEmbed = new Embed()
+    .setImage(prueba.attachment.url)
+    .defColor(Colores.verde);
 
     for(const regla of doc.data.rules){
         let desc = regla.desc ?? regla.expl;
@@ -68,7 +79,7 @@ command.execute = async (interaction, models, params, client) => {
 
     collector.on("collect", async(collected) => {
         const rule = Number(collected.values[0]) ?? collected.values[0];
-        const ruleNo = doc.data.rules.find(x => x.id === rule).position;
+        const ruleNo = doc.data.rules.find(x => x.id === rule)?.position;
         const member = usuario.member;
 
         await collected.deferUpdate();
@@ -86,7 +97,8 @@ command.execute = async (interaction, models, params, client) => {
         let toConfirm = [
             `¿Estás segur@ de softwarnear a **${member.user.tag}**?`,
             `Llamado de atención: Incumplimiento de la regla N°${ruleNo} (${ruleTxt})`,
-            `[Pruebas](${prueba.attachment.url})`
+            `Pruebas:`,
+            pruebasEmbed
         ];
         let confirmation = await Confirmation("Agregar softwarn", toConfirm, interaction);
         if(!confirmation) return interaction.deleteReply();
@@ -114,23 +126,16 @@ command.execute = async (interaction, models, params, client) => {
         
         if(hasSoft) return alreadyWarned.send();
 
+        // guardar el nuevo attachment para evitar que se pierda
+        let msg = await interaction.followUp({content: `⚠️ Este mensaje se usará para tener la imagen de las pruebas, si se elimina se perderá.`, files: [prueba.attachment]});
+
         // como no tiene el soft, agregarlo
         let users = await Users.find();
         let newId = await FindNewId(users, "softwarns", "id");
 
-        softwarns.push({rule_id: rule, proof: prueba.attachment.url, id: newId});
+        softwarns.push({rule_id: rule, proof: msg.attachments.first().url, id: newId});
         if(hasSoft) softwarns.splice(indexOfSoftwarn, 1);
         await user.save();
-
-        const data = {
-            member: member,
-            rule: ruleTxt,
-            proof: prueba.attachment,
-            interaction,
-            id: newId
-        }
-        
-        //await AfterInfraction(user, data, true); // enviar mensaje con la informacion del warn al usuario
 
         let log = new Embed({
             type: "success",
@@ -147,8 +152,8 @@ command.execute = async (interaction, models, params, client) => {
 
         let proofE = new Embed()
         .defAuthor({text: "Pruebas", title: true})
-        .defDesc(prueba.attachment.url)
-        .setImage(prueba.attachment.url)
+        .defDesc(msg.attachments.first().url)
+        .setImage(msg.attachments.first().url)
         .defColor(Colores.nocolor);
 
         return interaction.editReply({embeds: [log, proofE], components: []});

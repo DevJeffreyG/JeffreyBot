@@ -1189,7 +1189,7 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
       if (i.customId === "confirmAction") {
         confirmation
           .defColor(Colores.verde)
-          .defAuthor({ text: `${toConfirm}, continuando...`, icon: Config.loadingGif });
+          .defAuthor({ text: `${toConfirm}, continuando...`, icon: client.EmojisObject.Loading.url });
 
         await i.editReply({ embeds: [confirmation], components: [] });
 
@@ -1236,7 +1236,7 @@ const AfterInfraction = async function (user, data, isSoftwarn = false) {
 **—** Has sido __warneado__ por el STAFF.
 **—** Warns actuales: **${totalWarns}**.
 **—** Por infringir la regla: **${rule}**.
-**—** **[Pruebas](${proof.url})**.
+**—** **[Pruebas](${proof})**.
 **—** ID de Warn: \`${id}\`.`)
       .defColor(Colores.rojo)
       .defFooter({ text: `Ten más cuidado la próxima vez!`, icon: 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png' });
