@@ -17,6 +17,7 @@ command.addOption({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ephemeral: true});
 
+    const { EmojisObject } = client
     const { actividad } = params;
     const author = interaction.member;
 
@@ -36,7 +37,7 @@ command.execute = async (interaction, models, params, client) => {
 
     let setgamembed = new Embed()
     .defColor(Colores.verde)
-    .defAuthor({text: `Actividad actualizada`, icon: Config.bienPng})
+    .defAuthor({text: `Actividad actualizada`, icon: EmojisObject.Check.url})
     .defDesc(`${client.user.username} ahora juega \`${actividad.value}\`.`)
     .defFooter({text: `Puesto por ${author.user.tag}.`, icon: author.displayAvatarURL()});
 

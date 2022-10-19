@@ -108,6 +108,7 @@ module.exports = async (client, interaction) => {
     executeSlash(interaction, models, params, client)
 
     async function executeSlash(interaction, models, params, client) {
+      console.log(`-------- /${commandName} ----------`)
       try {
         if (slashCommand.category === Categories.DarkShop) {
           // filtro de nivel 5
@@ -149,7 +150,7 @@ module.exports = async (client, interaction) => {
 
         message = interaction.message;
         let newembed = new Embed(message.embeds[0])
-        .defFooter({ text: `Aceptada por ${interaction.user.tag}`, icon: Config.bienPng, timestamp: true})
+          .defFooter({ text: `Aceptada por ${interaction.user.tag}`, icon: interaction.client.EmojisObject.Check.url, timestamp: true })
         message.edit({ embeds: [newembed], components: [] });
 
         let r = interaction.guild.id === Config.testingServer ? interaction.guild.roles.cache.find(x => x.id === "983832210966732840") : interaction.guild.roles.cache.find(x => x.id === Config.suggestorRole);
@@ -247,7 +248,7 @@ ${suggestion.suggestion}
 **—** Puede que esta haya sido una sugerencia repetida, o una ya denegada anteriormente.
 **—** ¡Gracias por ayudarnos a mejorar, siempre te tendremos en cuenta!`)
           .defColor(Colores.rojo)
-          .defFooter({ text: interaction.guild.name, icon: interaction.guild.iconURL(), timestamp: true});
+          .defFooter({ text: interaction.guild.name, icon: interaction.guild.iconURL(), timestamp: true });
 
         let suggestor = interaction.guild.members.cache.find(x => x.id === suggestion.user_id);
 

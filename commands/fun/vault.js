@@ -18,7 +18,7 @@ command.addOption({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ ephemeral: true });
     const { Guilds, Users } = models;
-    const { Emojis } = client;
+    const { Emojis, EmojisObject } = client;
 
     const code = params.codigo ? params.codigo.value : null;
 
@@ -104,7 +104,7 @@ command.execute = async (interaction, models, params, client) => {
     await user.addJeffros(codeInVault.reward);
 
     let ggEmbed = new Embed()
-        .defAuthor({ text: `Desencriptado.`, icon: Config.bienPng })
+        .defAuthor({ text: `Desencriptado.`, icon: EmojisObject.Check.url })
         .defColor(Colores.verde)
         .defDesc(finale.replace(new RegExp("{ JEFFROS }", "g"), `**${Emojis.Jeffros}${codeInVault.reward.toLocaleString('es-CO')}**`));
 

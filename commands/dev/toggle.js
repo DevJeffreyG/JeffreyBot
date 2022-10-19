@@ -23,18 +23,19 @@ command.addOption({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     
+    const { EmojisObject } = client
     const { ToggledCommands } = models;
     const { comando } = params;
     const toggled = comando.value;
     const reason = params.razon ? params.razon.value : "Mantenimiento";
     
     let removed = new Embed()
-    .defAuthor({text: "Eliminado", icon: Config.bienPng})
+    .defAuthor({text: "Eliminado", icon: EmojisObject.Check.url})
     .defDesc(`**—** Se ha eliminado el comando \`/${toggled}\`.`)
     .defColor(Colores.verde);
     
     let added = new Embed()
-    .defAuthor({text: "Toggled", icon: Config.bienPng})
+    .defAuthor({text: "Toggled", icon: EmojisObject.Check.url})
     .defDesc(`**—** Se ha agregado el comando \`/${toggled}\`.`)
     .defColor(Colores.verde);
 
