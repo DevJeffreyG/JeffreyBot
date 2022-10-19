@@ -22,7 +22,7 @@ command.execute = async (interaction, models, params, client) => {
     const { Guilds } = models;
     const sugerencia = params.sugerencia.value;
 
-    if(await isBannedFrom(interaction, "SUGGESTIONS")) return new ErrorEmbed(interaction, { type: "banned" }).send();
+    if(await isBannedFrom(interaction, "SUGGESTIONS")) return new ErrorEmbed(interaction, { type: "moduleBanned" }).send();
 
     let logChannel = await DataWork(interaction, "OPINION_LOGS_CHANNEL");
     if(!logChannel) return;

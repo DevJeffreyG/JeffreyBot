@@ -125,7 +125,7 @@ ${data.error}
                 this.#errorDesc("Error al ejecutar el comando", data.command, [data.guide])
                 break;
 
-            case "banned":
+            case "moduleBanned":
                 this.#errorAuthor(15)
                 this.#errorDesc("Has sido limitado por los administradores", "No puedes usar este comando/funcionalidad")
                 break;
@@ -159,7 +159,7 @@ ${data.error}
         if(!this.interaction) return console.error("🔴 NO EXISTE this.interaction !!")
         else
         try {
-            return this.interaction.editReply({content: null, embeds: [this], components: []});
+            this.interaction.editReply({content: null, embeds: [this], components: []});
         } catch (err) {
             console.log("🔴 NO se envió el ErrorEmbed!")
             console.log(err);

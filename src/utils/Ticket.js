@@ -72,7 +72,7 @@ class Ticket {
         const doc = await Guilds.getOrCreate(interaction.guild.id);
 
         // baneado de crear tickets
-        if(await isBannedFrom(interaction, "TICKETS")) return new ErrorEmbed(interaction, { type: "banned" }).send();
+        if(await isBannedFrom(interaction, "TICKETS")) return new ErrorEmbed(interaction, { type: "moduleBanned" }).send();
 
         // tiene cooldown
         if (activeCreatingTicket.has(interaction.user.id)) return interaction.editReply(`Alto ahí velocista, por favor espera ${ms((ticketCooldown) - (new Date().getTime() - activeCreatingTicket.get(interaction.user.id)))} antes de volver a darle al botón.`);
