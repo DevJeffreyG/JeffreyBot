@@ -121,7 +121,7 @@ class InteractivePages {
 
         if (this.pages.size === 1) row.components.forEach(c => c.setDisabled()); // no tiene más de una pagina
 
-        await interaction.editReply({ components: [row], embeds: [this.firstEmbed] });
+        await interaction.editReply({ content: "", components: [row], embeds: [this.firstEmbed] });
 
         const filter = async i => {
             await i.deferUpdate();
