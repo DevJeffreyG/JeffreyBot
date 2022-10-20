@@ -1,4 +1,4 @@
-const { PermissionsBitField, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, EmbedBuilder, Guild, GuildMember, CommandInteraction } = require("discord.js");
+const { PermissionsBitField, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, EmbedBuilder, Guild, GuildMember, CommandInteraction, BaseInteraction } = require("discord.js");
 const { ButtonStyle, OverwriteType } = require("discord-api-types/v10");
 
 const Config = require("../resources/base.json");
@@ -1126,7 +1126,7 @@ const isBannedFrom = async function (interaction, query) {
  * @param {String} toConfirm What is trying to be confirmed
  * @param {Array} dataToConfirm The text that will apear on the embed separated by "▸"
  * @param {CommandInteraction} interaction The Discord.JS Interaction that triggers the command
- * @returns {Promise} Discord.JS Message if the confirmation is positive, if not, returns false
+ * @returns {Promise<BaseInteraction | false>} Discord.JS Message if the confirmation is positive, if not, returns false
  */
 const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
   const client = interaction.client;
