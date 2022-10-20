@@ -155,9 +155,13 @@ ${data.error}
         this.defDesc(d);
     }
 
-    send(){
+    send(ephemeral = false){
         if(!this.interaction) return console.error("🔴 NO EXISTE this.interaction !!")
         else
+
+        if(ephemeral) this.interaction.reply({content: null, embeds: [this], components: [], ephemeral: true})
+        else
+        
         try {
             this.interaction.editReply({content: null, embeds: [this], components: []});
         } catch (err) {

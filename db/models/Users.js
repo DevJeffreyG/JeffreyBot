@@ -1,4 +1,8 @@
 const mongoose = require('mongoose')
+const moment = require("moment")
+const ms = require("ms")
+
+const HumanMs = require("../../src/utils/HumanMs")
 
 const Schema = new mongoose.Schema({
     guild_id: { type: String, required: true },
@@ -85,15 +89,10 @@ const Schema = new mongoose.Schema({
         cooldowns: {
             coins: { type: Date, default: null },
             jeffros_exp: { type: Date, default: null },
-            rep: { type: Date, default: null }
+            rep: { type: Date, default: null },
+            claim_rep: { type: Date, default: null }
         },
         counts: { // all time
-            reps: {
-                type: Number, default: function () {
-                    if (this.economy.global.reputation) return this.economy.global.reputation
-                    return 0
-                }
-            },
             jeffros: {
                 type: Number, default: function () {
                     if (this.economy.global.jeffros) return this.economy.global.jeffros
@@ -119,7 +118,7 @@ const Schema = new mongoose.Schema({
             darkjeffros: { type: Number, default: 0 },
             accuracy: { type: Number, default: null },
             duration: { type: Number, default: null },
-            dj_since: { type: Date, default: null}
+            dj_since: { type: Date, default: null }
         }
     }
 })
@@ -142,7 +141,6 @@ Schema.method("addJeffros", async function (count) {
 
 Schema.method("addRep", async function (count) {
     this.economy.global.reputation += count;
-    this.data.counts.reps += count;
     return await this.save();
 })
 
@@ -156,28 +154,61 @@ Schema.method("hasItem", function (itemId, darkshop = false) {
 })
 
 Schema.method("canBuy", function (price, darkshop = false) {
-    if(!darkshop) return this.economy.global.jeffros >= price
+    if (!darkshop) return this.economy.global.jeffros >= price
     return this.economy.dark.darkjeffros >= price
 })
 
 Schema.method("parseJeffros", function (Emojis, darkshop = false) {
-    if(!darkshop) return `**${Emojis.Jeffros}${this.economy.global.jeffros.toLocaleString("es-CO")}**`;
+    if (!darkshop) return `**${Emojis.Jeffros}${this.economy.global.jeffros.toLocaleString("es-CO")}**`;
     return `**${Emojis.DarkJeffros}${this.economy.dark.darkjeffros.toLocaleString("es-CO")}**`;
 })
 
-Schema.method("isBannedFrom", function(module){
+Schema.method("isBannedFrom", function (module) {
     return this.data.isBanned[module];
 })
 
-Schema.method("toggleBan", async function(module){
+Schema.method("toggleBan", async function (module) {
     let info = this.data.isBanned[module]
 
-    if(info) this.data.isBanned[module] = false
+    if (info) this.data.isBanned[module] = false
     else this.data.isBanned[module] = true;
 
     await this.save();
 
     return this.data.isBanned[module];
+})
+
+Schema.method("cooldown", function (modulo, options = {cooldown: null, save: true}) {
+    let { cooldown, save } = options
+    if(!cooldown) switch (modulo) {
+        case "rep":
+            cooldown = ms("1d")
+            break;
+
+        case "claim_rep":
+            cooldown = ms("3h")
+            break;
+
+        default:
+            cooldown = ms("5m")
+            break;
+    }
+
+    console.log("⚠️ Se está usando el cooldown %s", new HumanMs(cooldown).human)
+
+    if (this.data.cooldowns[modulo]) {
+        let timer = this.data.cooldowns[modulo];
+        let toCheck = moment(timer).add(cooldown, "ms");
+        let left = new HumanMs(toCheck).left();
+        if (!moment().isAfter(toCheck))
+            return left
+    }
+
+    this.data.cooldowns[modulo] = new Date();
+    if(save) this.save();
+    else console.log("⚠️ NO se guardó el cooldown inmediatamente")
+
+    return null
 })
 
 module.exports = mongoose.model('Users', Schema)

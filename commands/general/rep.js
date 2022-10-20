@@ -18,7 +18,6 @@ command.addOption({
     req: true
 })
 
-const repCooldown = ms("1d");
 
 command.execute = async (interaction, models, params, client) => {
     const guild = client.guilds.cache.find(x => x.id === interaction.guildId);
@@ -29,26 +28,15 @@ command.execute = async (interaction, models, params, client) => {
 
     const member = usuario.member;
 
-    if (member.id === author.id) return interaction.reply({content: null, embeds: [
-        new ErrorEmbed({type: "selfRep", data: member})
-    ], ephemeral: true});
+    if (member.id === author.id) return new ErrorEmbed(interaction, {type: "selfRep", data: member}).send(true)
     
     const user = await Users.getOrCreate({user_id: member.id, guild_id: guild.id});
     const user_author = await Users.getOrCreate({user_id: author.id, guild_id: guild.id});
 
-    if (user_author.data.cooldowns.rep){
-        let timer = user_author.data.cooldowns.rep;
-        let toCheck = moment(timer).add(repCooldown, "ms");
-        let left = new HumanMs(toCheck).left();
-        if(moment().isAfter(toCheck)) user_author.data.cooldowns.rep = null;
-        else
-        return interaction.reply(`Usa este comando en ${left}, ${RandomCumplido()}.`);
-    }
+    let cool = user_author.cooldown("rep");
 
-    user_author.data.cooldowns.rep = new Date();
-
+    if(cool) return interaction.reply({content: `Usa este comando en ${cool}, ${RandomCumplido()}`});
     await user.addRep(1)
-    await user_author.save();
 
     return interaction.reply({content: `${author} ➡️ ${member} ✨`, embeds: [
         new Embed()

@@ -16,10 +16,10 @@ command.addSubcommand({
     desc: "Revisa el top de EXP y niveles"
 })
 
-command.addSubcommand({
+/* command.addSubcommand({
     name: "rep",
     desc: "Revisa el top de reputación de todos los tiempos"
-})
+}) */
 
 command.addSubcommand({
     name: "warns",

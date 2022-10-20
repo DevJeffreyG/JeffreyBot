@@ -35,9 +35,9 @@ class Top {
                 await this.#expTop();
                 break;
 
-            case "rep":
+            /* case "rep":
                 await this.#repTop();
-                break;
+                break; */
 
             case "warns":
                 await this.#warnsTop();
@@ -132,7 +132,7 @@ class Top {
         }
     }
 
-    async #repTop() {
+    /* async #repTop() {
         this.base.title = "Top de Reputaciones"
 
         this.users.forEach(user => {
@@ -158,14 +158,14 @@ class Top {
         // determinar el texto a agregar
         for await (const user of this.#res) {
             const txt = this.#getTxt(user, [
-                `Reputaciones: \`${user.total.toLocaleString("es-CO")}\``
+                `Reputaciones: \`${user.data.counts.reps.toLocaleString("es-CO")}\``
             ])
 
             this.top.set(user.user_id, {
                 txt
             })
         }
-    }
+    } */
 
     async #warnsTop() {
         this.base.title = "Top de Warns"

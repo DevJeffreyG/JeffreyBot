@@ -246,13 +246,8 @@ module.exports = async (client, message) => {
         if (message.member.roles.cache.find(x => x.id === Config.lvl90)) jexpCooldown /= 2;
       }
 
-      if (user.data.cooldowns.jeffros_exp){
-        let timer = user.data.cooldowns.jeffros_exp;
-        let toCheck = (jexpCooldown) - (new Date().getTime() - timer);
-        if(toCheck < 0) user.data.cooldowns.jeffros_exp = null;
-        else
-        return;
-      }
+      let cool = user.cooldown("jeffros_exp", {cooldown: jexpCooldown, save: false});
+      if(cool) return;
   
       let lessThan3 = messageArray.length < 3 ? true : false;
       let moreThan6 = messageArray.length > 6 ? true : false;

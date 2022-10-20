@@ -89,28 +89,15 @@ command.execute = async (interaction, models, params, client) => {
     .defColor(memberColor)
     .defDesc(`${text}.`);
 
-    if(index.author.toUpperCase() === "NONE"){
-        
-    } else {
+    if(index.author.toUpperCase() != "NONE"){
         let rAuthor = guild.members.cache.find(x => x.id === index.author);
         let suggestor = rAuthor ? rAuthor.user.tag : "un usuario";
         let img = rAuthor ? rAuthor.displayAvatarURL() : guild.iconURL();
         embed.defFooter({text: `• Respuesta sugerida por ${suggestor}`, icon: img})
     }
 
-    if (user.data.cooldowns.coins){
-        let timer = user.data.cooldowns.coins;
-        let toCheck = moment(timer).add(coinsCooldown, "ms");
-
-        let left = new HumanMs(moment(toCheck)).left();
-
-        if(moment().isAfter(toCheck)) user.data.cooldowns.coins = null;
-        else
-        return interaction.editReply(`Usa este comando en ${left}, ${RandomCumplido()}.`);
-    }
-
-    user.data.cooldowns.coins = new Date();
-
+    let cool = user.cooldown("jeffros_exp", {cooldown: coinsCooldown, save: false})
+    if(cool) return interaction.editReply({content: `Usa este comando en ${cool}, ${RandomCumplido()}`});
     await user.addJeffros(money);
     
     return interaction.editReply({embeds: [embed]});
