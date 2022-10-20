@@ -38,6 +38,7 @@
     "@twurple/auth": "^5.2.5",
     "@twurple/common": "^5.2.5",
     "chance": "^1.1.9",
+    "craiyon": "^1.0.0",
     "cron": "^2.1.0",
     "discord-api-types": "^0.37.14",
     "discord.js": "^14.6.0",

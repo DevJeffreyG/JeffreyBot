@@ -3,6 +3,7 @@ const Command = require("./Command");
 const Embed = require("./Embed");
 const ErrorEmbed = require("./ErrorEmbed");
 const InteractivePages = require("./InteractivePages");
+const FilePages = require("./FilePages");
 const Ticket = require("./Ticket");
 const Shop = require("./Shop");
 const Top = require("./Top");
@@ -18,6 +19,7 @@ module.exports = {
     Embed,
     ErrorEmbed,
     InteractivePages,
+    FilePages,
     Ticket,
     Shop,
     Top,
