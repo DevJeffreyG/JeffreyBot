@@ -77,4 +77,24 @@ Schema.static("getTempRoleDeletions", function(user_id){
     });
 })
 
+Schema.static("newRouletteItem", function(data){
+
+    const { target, value, prob, extra } = data;
+
+    return new this({
+        info: {
+            type: "rouletteItem",
+            target,
+            value,
+            prob,
+            extra
+        }
+    }).save();
+})
+
+Schema.static("getRouletteItems", async function(){
+    return await this.find({
+        "info.type": "rouletteItem"
+    });
+})
 module.exports = mongoose.model("GlobalDatas", Schema);
