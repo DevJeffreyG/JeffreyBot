@@ -40,7 +40,9 @@ const ItemObjetives = new Enum({
     Warns: 1,
     Role: 2,
     Item: 3,
-    Boost: 4
+    Boost: 4,
+    Jeffros: 5,
+    TempRole: 6
 })
 
 const BoostTypes = new Enum({
@@ -54,6 +56,10 @@ const BoostObjetives = new Enum({
     All: 3
 })
 
+const EndReasons = new Enum({
+    OldCollector: 1
+})
+
 module.exports = {
     Categories,
     ItemTypes,
@@ -61,5 +67,6 @@ module.exports = {
     ItemActions,
     ItemObjetives,
     BoostTypes,
-    BoostObjetives
+    BoostObjetives,
+    EndReasons
 }
