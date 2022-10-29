@@ -4,6 +4,7 @@ const { time } = Discord;
 const ms = require("ms");
 const Embed = require("./Embed");
 const { Colores } = require("../resources");
+const { EndReasons } = require("./Enums");
 
 /**
  * Taken from [tutmonda](https://github.com/Jleguim/tutmonda-project) 💜
@@ -15,8 +16,9 @@ class InteractivePages {
      * @param {Map<Id, values>} items Mapped by Id's, the {x.y} used on the 'addon', 'y' would be the values inside the key
      * @param {Number} itemsNum The number of items that will be in one page.
      */
-    constructor(structure, items, itemsNum = 3) {
+    constructor(structure, items, itemsNum = 3, options) {
         this.base = structure;
+        this.options = options;
         this.#prepareBase();
 
         if (!this.base.addon) throw "addon can not be undefined nor can be an empty string";
@@ -91,13 +93,17 @@ class InteractivePages {
     }
 
     #createFirstEmbed() {
-        this.pages = this.pages;
+        let { pag } = this.options;
+
+        if (pag > this.pages.size || pag < 1 || !pag) pag = 1;
+
+        this.pag = pag;
 
         let embed = new Embed()
             .defAuthor({ text: this.base.title, icon: this.base.author_icon })
             .defColor(this.base.color)
-            .defDesc(`${this.base.description}\n\n${this.pages.get(1).join(" ")}`)
-            .defFooter({ text: this.base.footer.replace(new RegExp("{ACTUAL}", "g"), `1`).replace(new RegExp("{TOTAL}", "g"), `${this.pages.size}`), icon: this.base.icon_footer });
+            .defDesc(`${this.base.description}\n\n${this.pages.get(this.pag).join(" ")}`)
+            .defFooter({ text: this.base.footer.replace(new RegExp("{ACTUAL}", "g"), this.pag).replace(new RegExp("{TOTAL}", "g"), `${this.pages.size}`), icon: this.base.icon_footer });
 
         this.firstEmbed = embed;
         return embed;
@@ -120,49 +126,68 @@ class InteractivePages {
             )
 
         if (this.pages.size === 1) row.components.forEach(c => c.setDisabled()); // no tiene más de una pagina
+        if (this.pag != 1) row.components[0].setDisabled(false)
+        if (this.pag === this.pages.size) row.components[1].setDisabled(true)
 
-        await interaction.editReply({ content: "", components: [row], embeds: [this.firstEmbed] });
+        let msg = await interaction.editReply({ content: "", components: [row], embeds: [this.firstEmbed] });
 
         const filter = async i => {
-            await i.deferUpdate();
+            try {
+                if (!i.deferred) await i.deferUpdate()
+            } catch (err) {
+                //console.log("⚠️ %s", err)
+            };
+
             return i.user.id === interaction.user.id &&
-                (i.customId === "back" || i.customId === "next");
+                (i.customId === "back" || i.customId === "next") &&
+                i.message.id === msg.id;
         }
 
-
         const collector = interaction.channel.createMessageComponentCollector({ filter, time: ms("1m") });
-        const active = client.activeCollectors.find(x => x.channelId === collector.channelId && x.interactionType === collector.interactionType);
-        if (active) active.stop();
 
-        client.activeCollectors.push(collector)
+        const active = client.activeCollectors.find(y => {
+            let x = y.collector;
+            return x.channelId === collector.channelId && x.interactionType === collector.interactionType && y.userid === interaction.user.id
+        });
 
-        let pagn = 0;
+        if (active) active.collector.stop(EndReasons.OldCollector);
+
+        client.activeCollectors.push({ collector, userid: interaction.user.id })
+
+        let pagn = this.pag;
+
         collector.on("collect", async i => {
             if (i.customId === "back") pagn--;
             else pagn++;
 
-            if (pagn === 0) row.components[0].setDisabled();
+            if (pagn === 1) row.components[0].setDisabled();
             else row.components[0].setDisabled(false);
 
-            if (pagn === this.pages.size - 1) row.components[1].setDisabled();
+            if (pagn === this.pages.size) row.components[1].setDisabled();
             else row.components[1].setDisabled(false);
+
+            console.log(pagn)
 
             let embed = new Embed()
                 .defAuthor({ text: this.base.title, icon: this.base.author_icon })
                 .defColor(this.base.color)
-                .defDesc(`${this.base.description}\n\n${this.pages.get(pagn + 1).join(" ")}`)
-                .defFooter({ text: this.base.footer.replace(new RegExp("{ACTUAL}", "g"), `${pagn + 1}`).replace(new RegExp("{TOTAL}", "g"), `${this.pages.size}`), icon: this.base.icon_footer });
+                .defDesc(`${this.base.description}\n\n${this.pages.get(pagn).join(" ")}`)
+                .defFooter({ text: this.base.footer.replace(new RegExp("{ACTUAL}", "g"), `${pagn}`).replace(new RegExp("{TOTAL}", "g"), `${this.pages.size}`), icon: this.base.icon_footer });
 
             await interaction.editReply({ embeds: [embed], components: [row] });
 
         });
 
-        collector.on("end", () => {
+        collector.on("end", (i, r) => {
             row.components.forEach(c => c.setDisabled());
             interaction.editReply({ components: [row] });
 
-            let index = client.activeCollectors.indexOf(collector);
-            if (index > -1) client.activeCollectors.splice(index, 1);
+            let index = client.activeCollectors.findIndex(x => x.collector === collector && x.userid === interaction.user.id);
+            if (!isNaN(index)){
+                client.activeCollectors.splice(index, 1);
+            } else console.log(`🟥 NO SE ELIMINÓ DE LOS ACTIVECOLLECTORS !! {INTERACTIVE PAGES}`)
+        
+            if(r === EndReasons.OldCollector) return interaction.deleteReply()
         })
     }
 }

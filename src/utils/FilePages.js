@@ -1,6 +1,7 @@
 const Discord = require("discord.js");
 const { ButtonStyle } = require("discord-api-types/v10");
 const ms = require("ms");
+const { EndReasons } = require("./Enums");
 
 class FilePages {
     /**
@@ -29,20 +30,29 @@ class FilePages {
 
         if (this.files.length === 1) row.components.forEach(c => c.setDisabled()); // no tiene más de una pagina
 
-        await interaction.editReply({ content: "", components: [row], files: [this.files[0]]});
+        let msg = await interaction.editReply({ content: "", components: [row], files: [this.files[0]]});
 
         const filter = async i => {
-            await i.deferUpdate();
+            try {
+                if (!i.deferred) await i.deferUpdate()
+            } catch (err) {
+                //console.log("⚠️ %s", err)
+            };
+
             return i.user.id === interaction.user.id &&
-                (i.customId === "back" || i.customId === "next");
+                (i.customId === "back" || i.customId === "next") &&
+                i.message.id === msg.id;
         }
 
 
         const collector = interaction.channel.createMessageComponentCollector({ filter, time: ms("1m") });
-        const active = client.activeCollectors.find(x => x.channelId === collector.channelId && x.interactionType === collector.interactionType);
-        if (active) active.stop();
+        const active = client.activeCollectors.find(y => {
+            let x = y.collector;
+            return x.channelId === collector.channelId && x.interactionType === collector.interactionType && y.userid === interaction.user.id
+        });
+        if (active) active.collector.stop(EndReasons.OldCollector);
 
-        client.activeCollectors.push(collector)
+        client.activeCollectors.push({ collector, userid: interaction.user.id })
 
         let pagn = 0;
         collector.on("collect", async i => {
@@ -59,12 +69,16 @@ class FilePages {
 
         });
 
-        collector.on("end", () => {
+        collector.on("end", (i, r) => {
             row.components.forEach(c => c.setDisabled());
             interaction.editReply({ components: [row] });
 
-            let index = client.activeCollectors.indexOf(collector);
-            if (index > -1) client.activeCollectors.splice(index, 1);
+            let index = client.activeCollectors.findIndex(x => x.collector === collector && x.userid === interaction.user.id);
+            if (!isNaN(index)){
+                client.activeCollectors.splice(index, 1);
+            } else console.log(`🟥 NO SE ELIMINÓ DE LOS ACTIVECOLLECTORS !! {FILE PAGES}`)
+
+            if(r === EndReasons.OldCollector) return interaction.deleteReply()
         })
     }
 }

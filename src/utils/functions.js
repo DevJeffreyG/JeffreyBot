@@ -22,7 +22,7 @@ const { google } = require("googleapis");
 const Twitter = require("twitter");
 const { ApiClient } = require("@twurple/api");
 const { ClientCredentialsAuthProvider } = require("@twurple/auth");
-const { BoostObjetives } = require("./Enums");
+const { BoostObjetives, EndReasons } = require("./Enums");
 
 /* ##### MONGOOSE ######## */
 const RandomCumplido = function (force = null) {
@@ -276,7 +276,7 @@ const FetchAuditLogs = async function (client, guild, types) {
         break;
       }
 
-      if(moment(fetched.createdAt).isBefore(moment().subtract(1, "minute"))) {
+      if (moment(fetched.createdAt).isBefore(moment().subtract(1, "minute"))) {
         console.error("⚠️ Log hace más de un minuto", fetched);
         break;
       }
@@ -318,7 +318,7 @@ const FetchAuditLogs = async function (client, guild, types) {
  * - STAFF
  * @returns {Promise} The Discord.JS Message sent
  */
- const GenerateLog = async function (guild, header, footer, description, headerPng, footerPng, color, logType, fields) {
+const GenerateLog = async function (guild, header, footer, description, headerPng, footerPng, color, logType, fields) {
   logType = logType ?? "GENERAL";
   fields = fields ?? null;
 
@@ -691,7 +691,7 @@ const Interest = function (author, idUse) {
  * @param {number} [specialValue=false] The value for the objetive of this special temporary role.
  * @returns Mongoose User document
  */
-const LimitedTime = async function (victimMember, roleID, duration, specialType = null, specialObjective = null, specialValue = null) {
+const LimitedTime = async function (victimMember, roleID = 0, duration, specialType = null, specialObjective = null, specialValue = null) {
   let role = victimMember.guild.roles.cache.find(x => x.id === roleID);
   let user = await Users.getOrCreate({ user_id: victimMember.id, guild_id: victimMember.guild.id });
 
@@ -714,11 +714,11 @@ const LimitedTime = async function (victimMember, roleID, duration, specialType 
   await user.save();
 
   let lastAddedIndex = user.data.temp_roles.length - 1;
-  victimMember.roles.add(role);
+  if (role) victimMember.roles.add(role);
 
   // timeout, por si pasa el tiempo antes de que el bot pueda reiniciarse
-  setTimeout(function () {
-    victimMember.roles.remove(role);
+  if (duration <= 2147483647) setTimeout(function () {
+    if (role) victimMember.roles.remove(role);
 
     user.data.temp_roles.splice(lastAddedIndex, 1);
     user.save()
@@ -1168,24 +1168,34 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
         .setEmoji(client.EmojisObject.Deny.id)
     )
 
-  await interaction.editReply({ content: null, embeds, components: [row] }); // enviar mensaje de confirmación
+  let msg = await interaction.editReply({ content: null, embeds, components: [row] }); // enviar mensaje de confirmación
 
   return new Promise(async (resolve, reject) => {
-    const filter = i => i.user.id === interaction.user.id;
+    const filter = async i => {
+      try {
+        if (!i.deferred) await i.deferUpdate()
+      } catch (err) {
+        //console.log("⚠️ %s", err)
+      };
+
+      console.log(i.user.id, interaction.user.id)
+      return i.user.id === interaction.user.id &&
+        (i.customId === "confirmAction" || i.customId === "cancelAction") &&
+        i.message.id === msg.id;
+    }
 
     const collector = interaction.channel.createMessageComponentCollector({ filter, time: ms("1m"), max: 1 });
 
-    const active = client.activeCollectors.find(x => x.channelId === collector.channelId && x.interactionType === collector.interactionType);
-    if (active) active.stop();
-    client.activeCollectors.push(collector)
+    const active = client.activeCollectors.find(y => {
+      let x = y.collector;
+      return x.channelId === collector.channelId && x.interactionType === collector.interactionType && y.userid === interaction.user.id
+    });
+
+    if (active) await active.collector.stop(EndReasons.OldCollector);
+
+    client.activeCollectors.push({ collector, userid: interaction.user.id })
 
     collector.on("collect", async i => {
-      try {
-        await i.deferUpdate();
-      } catch (err) {
-        console.log("⚠️ %s", err);
-      }
-
       if (i.customId === "confirmAction") {
         confirmation
           .defColor(Colores.verde)
@@ -1201,9 +1211,16 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
       }
     })
 
-    collector.on("end", async i => {
-      let index = client.activeCollectors.indexOf(collector);
-      if (index > -1) client.activeCollectors.splice(index, 1);
+    collector.on("end", async (i, r) => {
+      let index = client.activeCollectors.findIndex(x => x.collector === collector && x.userid === interaction.user.id);
+      if (!isNaN(index)) {
+        client.activeCollectors.splice(index, 1);
+      } else console.log(`🟥 NO SE ELIMINÓ DE LOS ACTIVECOLLECTORS !! {CONFIRMATION}`)
+
+      if(r === EndReasons.OldCollector){
+        interaction.deleteReply()
+        return resolve(false)
+      }
 
       if (i.size == 0) {
         interaction.editReply({ embeds: [cancelEmbed], components: [] })
@@ -1855,6 +1872,15 @@ const importImage = function (filename) {
  */
 const Sleep = ms => new Promise(r => setTimeout(r, ms));
 
+/**
+ * Obtén un item aleatorio de un Array
+ * @param {Array} array The Array of items to find
+ * @returns {any}
+ */
+const GetRandomItem = (array) => {
+  return array[Math.floor(Math.random() * array.length)];
+}
+
 async function sendLog(logChannel, embed) {
   let msg = await logChannel.send({ embeds: [embed], content: null, components: [] });
   return msg;
@@ -2056,5 +2082,6 @@ module.exports = {
   GenerateLog,
   isOnMobible,
   RandomCumplido,
-  Sleep
+  Sleep,
+  GetRandomItem
 }
