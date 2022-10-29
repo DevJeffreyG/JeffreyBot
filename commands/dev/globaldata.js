@@ -18,7 +18,7 @@ command.addOption({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { actualizar } = params;
-    let update = actualizar && actualizar.value ? actualizar.value : false;
+    let update = actualizar?.value;
 
     // Comando
     let embed = new Embed()
