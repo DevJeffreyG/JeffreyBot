@@ -1,5 +1,6 @@
 const Discord = require("discord.js");
 const Colores = require("../resources/colores.json");
+
 const client = require("../../index");
 
 class Embed extends Discord.EmbedBuilder {
@@ -52,6 +53,7 @@ class Embed extends Discord.EmbedBuilder {
             try {
                 this.setTimestamp(timestamp)
             } catch(e) {
+                console.log(`⚠️ El timestamp %s no fue válido`, timestamp)
                 this.setTimestamp()
             }
         }
@@ -68,6 +70,7 @@ class Embed extends Discord.EmbedBuilder {
     }
 
     #setup(options) {
+        const {RandomCumplido} = require("./functions");
         const { type, data } = options
 
         switch(type) {
@@ -95,6 +98,12 @@ class Embed extends Discord.EmbedBuilder {
                         this.defDesc(t);
                     }
                 }
+                break;
+
+            case "cooldown":
+                this.defAuthor({text: `Usa este comando ${data.cool.mention}, ${RandomCumplido()}.`, title: true})
+                this.defColor(Colores.rojooscuro)
+                this.defFooter({text: `Eso es en ${data.cool.text}`, timestamp: data.cool.timestamp});
                 break;
         }
 

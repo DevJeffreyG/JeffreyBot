@@ -1,7 +1,5 @@
 const ms = require("ms");
-const moment = require("moment");
-
-const { Command, Categories, HumanMs, Embed, RandomCumplido, BoostTypes, BoostObjetives } = require("../../src/utils");
+const { Command, Categories, HumanMs, Embed, BoostTypes, BoostObjetives } = require("../../src/utils");
 
 const { Config, Responses } = require("../../src/resources/");
 const { multiplier } = Config;
@@ -96,8 +94,11 @@ command.execute = async (interaction, models, params, client) => {
         embed.defFooter({text: `• Respuesta sugerida por ${suggestor}`, icon: img})
     }
 
-    let cool = user.cooldown("jeffros_exp", {cooldown: coinsCooldown, save: false})
-    if(cool) return interaction.editReply({content: `Usa este comando en ${cool}, ${RandomCumplido()}`});
+    let cool = user.cooldown("coins", {cooldown: coinsCooldown, save: false})
+    if(cool) return interaction.editReply({content: null, embeds: [
+        new Embed({type: "cooldown", data: {cool}})
+    ]});
+
     await user.addJeffros(money);
     
     return interaction.editReply({embeds: [embed]});

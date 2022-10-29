@@ -1,7 +1,4 @@
-const moment = require("moment")
-const ms = require("ms")
-
-const { Command, Categories, ErrorEmbed, Embed, HumanMs, RandomCumplido } = require("../../src/utils")
+const { Command, Categories, ErrorEmbed, Embed } = require("../../src/utils")
 const { Colores } = require("../../src/resources");
 
 const command = new Command({
@@ -35,7 +32,10 @@ command.execute = async (interaction, models, params, client) => {
 
     let cool = user_author.cooldown("rep");
 
-    if(cool) return interaction.reply({content: `Usa este comando en ${cool}, ${RandomCumplido()}`});
+    if(cool) return interaction.reply({content: null, embeds: [
+        new Embed({type: "cooldown", data: {cool}})
+    ]});
+
     await user.addRep(1)
 
     return interaction.reply({content: `${author} ➡️ ${member} ✨`, embeds: [

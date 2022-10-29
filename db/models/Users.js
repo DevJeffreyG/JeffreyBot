@@ -3,6 +3,7 @@ const moment = require("moment")
 const ms = require("ms")
 
 const HumanMs = require("../../src/utils/HumanMs")
+const { time } = require('discord.js')
 
 const Schema = new mongoose.Schema({
     guild_id: { type: String, required: true },
@@ -90,7 +91,8 @@ const Schema = new mongoose.Schema({
             coins: { type: Date, default: null },
             jeffros_exp: { type: Date, default: null },
             rep: { type: Date, default: null },
-            claim_rep: { type: Date, default: null }
+            claim_rep: { type: Date, default: null },
+            roulette: { type: Date, default: null }
         },
         counts: { // all time
             jeffros: {
@@ -178,8 +180,9 @@ Schema.method("toggleBan", async function (module) {
     return this.data.isBanned[module];
 })
 
-Schema.method("cooldown", function (modulo, options = {cooldown: null, save: true}) {
-    let { cooldown, save } = options
+Schema.method("cooldown", function (modulo, options = {cooldown: null, save: true, check: true}) {
+    let { cooldown, save, check } = options
+    if(check == undefined) check = true;
     if(!cooldown) switch (modulo) {
         case "rep":
             cooldown = ms("1d")
@@ -189,6 +192,10 @@ Schema.method("cooldown", function (modulo, options = {cooldown: null, save: tru
             cooldown = ms("3h")
             break;
 
+        case "roulette":
+            cooldown = ms("1d");
+            break;
+
         default:
             cooldown = ms("5m")
             break;
@@ -196,19 +203,30 @@ Schema.method("cooldown", function (modulo, options = {cooldown: null, save: tru
 
     console.log("⚠️ Se está usando el cooldown %s", new HumanMs(cooldown).human)
 
-    if (this.data.cooldowns[modulo]) {
+    if (this.data.cooldowns[modulo] && check) {
         let timer = this.data.cooldowns[modulo];
+        let text = new HumanMs(moment(timer)).left();
+
+        if(!moment().isAfter(moment(timer)))
+            return {mention: time(timer, "R"), timestamp: timer, text}
+        /* let timer = this.data.cooldowns[modulo];
         let toCheck = moment(timer).add(cooldown, "ms");
-        let left = new HumanMs(toCheck).left();
-        if (!moment().isAfter(toCheck))
-            return left
+        let text = new HumanMs(toCheck).left(); */
     }
 
-    this.data.cooldowns[modulo] = new Date();
+    this.data.cooldowns[modulo] = moment().add(cooldown, "ms").toDate();
     if(save) this.save();
     else console.log("⚠️ NO se guardó el cooldown inmediatamente")
 
     return null
+})
+
+Schema.method("delCooldown", function (modulo, options = { save: true}) {
+    let { save } = options
+
+    this.data.cooldowns[modulo] = null
+    if(save) this.save();
+    else console.log("⚠️ NO se guardó el cooldown inmediatamente")
 })
 
 module.exports = mongoose.model('Users', Schema)
