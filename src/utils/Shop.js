@@ -62,7 +62,7 @@ class Shop {
         })
     }
 
-    async setup() {
+    async setup(options) {
         this.user = await Users.getOrCreate({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id });
         if (this.isDarkShop)
             this.base.description = `**—** Bienvenid@ a la DarkShop. Para comprar items usa \`/dsbuy #\`.\n**—** Tienes **${this.Emojis.DarkJeffros}${this.user.economy.dark.darkjeffros.toLocaleString("es-CO")}**`;
@@ -82,7 +82,7 @@ class Shop {
             })
         });
 
-        return this.#prepareInit();
+        return this.#prepareInit(options);
     }
 
     async buy(itemId) {
@@ -404,8 +404,8 @@ Si es para la DarkShop, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
         return this.interaction.editReply({ embeds: [this.updated] });
     }
 
-    async #prepareInit() {
-        const interactive = new InteractivePages(this.base, this.items)
+    async #prepareInit(options = {}) {
+        const interactive = new InteractivePages(this.base, this.items, 3, options)
         this.pages = interactive.pages;
 
         await interactive.init(this.interaction);
