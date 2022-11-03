@@ -98,6 +98,8 @@ class Embed extends Discord.EmbedBuilder {
                         this.defDesc(t);
                     }
                 }
+
+                if(data?.footer) this.defFooter({text: data.footer, icon: data.footer_icon, timestamp: data.timestamp})
                 break;
 
             case "cooldown":

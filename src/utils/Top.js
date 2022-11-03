@@ -10,7 +10,7 @@ class Top {
         this.users = users;
         this.interaction = interaction;
 
-        this.Emojis = this.interaction.client.emojis;
+        this.Emojis = this.interaction.client.Emojis;
 
         this.base = {
             author_icon: this.interaction.guild.iconURL({ dynamic: true }) ?? this.interaction.member.displayAvatarURL(),
