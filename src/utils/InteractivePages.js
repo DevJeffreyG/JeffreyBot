@@ -93,7 +93,7 @@ class InteractivePages {
     }
 
     #createFirstEmbed() {
-        let { pag } = this.options;
+        let pag  = this.options?.pag;
 
         if (pag > this.pages.size || pag < 1 || !pag) pag = 1;
 

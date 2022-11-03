@@ -1,4 +1,4 @@
-const { Command, Categories, ItemObjetives, Embed, ItemTypes, BoostTypes, BoostObjetives, ErrorEmbed } = require("../../src/utils")
+const { Command, Categories, ItemObjetives, Embed, ItemTypes, BoostTypes, BoostObjetives, ErrorEmbed, Confirmation } = require("../../src/utils")
 
 const command = new Command({
     name: "add",
@@ -27,7 +27,7 @@ command.data
         )
         .addNumberOption(chance => chance
             .setName("chance")
-            .setDescription("La probabilidad de que este item salga")
+            .setDescription("La probabilidad de que este item salga en porcentaje (10 -> 10%)")
             .setMinValue(0.1)
             .setMaxValue(100)
             .setRequired(true)
@@ -36,13 +36,12 @@ command.data
             .setName("special")
             .setDescription("Algo especial de este item")
             .setChoices(
-                { name: "Es un boost", value: String(ItemObjetives.Boost) },
-                { name: "Es una sub", value: String(ItemTypes.Subscription) }
+                { name: "Es un boost", value: String(ItemObjetives.Boost) }
             )
         )
         .addStringOption(duration => duration
             .setName("duration")
-            .setDescription("Si es una sub o un boost ¿cuál es su duración/intervalo? (1d, 10m, etc)")
+            .setDescription("Si es un boost ¿cuál es su duración? (1d, 10m, etc)")
         )
         .addStringOption(option => option
             .setName("boosttype")
@@ -82,6 +81,12 @@ command.execute = async (interaction, models, params, client) => {
                 return new ErrorEmbed(interaction, { type: "badParams", data: { help: "Dios mío que uses +-*% por favor"} }).send();
             if (Number(target.value) === ItemObjetives.TempRole && !duration)
                 return new ErrorEmbed(interaction, { type: "badParams", data: { help: "Si es un TempRole, 'duration' debe existir" } }).send();
+
+            if(value.value.replace(/[0-9\.]/g, "") === "%") {
+                let confirmation = await Confirmation("Seguro", ["100% es la cantidad que ya se tiene", "Menos de 100% se resta", "Más de 100% se empieza a subir"], interaction);
+
+                if(!confirmation) return;
+            }
 
             let extra = {
                 special: Number(special?.value),

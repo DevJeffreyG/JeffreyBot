@@ -10,6 +10,12 @@ const command = new Command({
 })
 
 command.addOption({
+    type: "string",
+    name: "tipo",
+    desc: "Consulta los documentos con este tipo [ CONSOLA ]"
+})
+
+command.addOption({
     type: "boolean",
     name: "actualizar",
     desc: "Forzar intervalo de globaldatas?"
@@ -17,7 +23,8 @@ command.addOption({
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
-    const { actualizar } = params;
+    const { actualizar, tipo } = params;
+    const { GlobalDatas } = models;
     let update = actualizar?.value;
 
     // Comando
@@ -27,6 +34,17 @@ command.execute = async (interaction, models, params, client) => {
     .defField(`▸ temporalGuildBan`, `**—** Información de un TempBan en el servidor.`)
     .defField(`▸ temporalPoll`, `**—** Información de una encuesta en el servidor.`)
     .defField(`▸ guildcommands`, `**—** Información de dónde están los SlashCommands para los Guilds (toggle entre el modo developer).`)
+    .defField(`▸ rouletteItem`, `**—** Un item que puede salir en la ruleta`)
+
+    if(tipo?.value) {
+        let q = await GlobalDatas.find({
+            "info.type": tipo.value
+        });
+
+        interaction.editReply({embeds: [new Embed({type: "success", data: { title: "Revisa la consola" }})]})
+
+        return console.log(q)
+    }
     
     if(!update){
         return interaction.editReply({content: null, embeds: [embed]});
