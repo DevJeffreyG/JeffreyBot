@@ -1,8 +1,27 @@
-<div align="center">
+<style>
+  @import url("http://fonts.cdnfonts.com/css/alphakind");
+
+  .title {
+    font-family: "Alphakind", sans-serif;
+    font-size: 50px;
+    color: #fff;
+  }
+
+  .unselectable {
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+</style>
+
+<div align="center" class="unselectable">
 
   <!---[![LastUpdate](https://media.discordapp.net/attachments/485191462422577182/870102754004189194/itsdark.png)](https://discord.gg/fJvVgkN)--->
   
   <a href=https://discord.gg/fJvVgkN><img src="src/resources/imgs/icon.png" width=300 height=300></a>
+
+  <p class="title">Jeffrey Bot</p>
   
   [![JeffreyGServer](https://img.shields.io/discord/447797737216278528.svg?label=Discord&logo=Discord&color=%235865F2&style=for-the-badge)](https://discord.gg/fJvVgkN)
   [![DiscordJS](https://img.shields.io/github/package-json/dependency-version/devjeffreyg/jeffreybot/discord.js?style=for-the-badge&color=%235865F2)](https://npmjs.com/package/discord.js)
@@ -35,7 +54,7 @@ Jeffrey Bot es un bot de Discord **multipropósitos** programado por y para el s
   - Llaves para canjear
   - Adivinanzas con recompensas
   - Decirle al bot qué decir
-  - Ruleta al azar
+  - Ruleta con premios y castigos al azar
 - Social
   - Jeffrey Bot x YouTube
   - Jeffrey Bot x Twitter
@@ -50,5 +69,5 @@ Jeffrey Bot es un bot de Discord **multipropósitos** programado por y para el s
 
 # Créditos
 - [Discord.JS](https://github.com/discordjs/discord.js).
-- [MongoDB (mongoose)](https://www.mongodb.com) para el backend.
+- [MongoDB (mongoose)](https://www.mongodb.com) en el backend.
 - [@Jleguim](https://github.com/Jleguim/) en algunas de las funciones.
