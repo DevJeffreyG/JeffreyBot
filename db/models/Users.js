@@ -125,6 +125,14 @@ const Schema = new mongoose.Schema({
     }
 })
 
+Schema.pre("save", function() {
+    this.economy.global.jeffros = Math.ceil(this.economy.global.jeffros);
+    this.economy.global.exp = Math.ceil(this.economy.global.exp);
+    this.economy.global.level = Math.ceil(this.economy.global.level);
+
+    this.economy.dark.darkjeffros = Math.ceil(this.economy.dark.darkjeffros);
+})
+
 Schema.static("getOrCreate", async function ({ user_id, guild_id }) {
     return this.findOne({
         user_id: user_id,
