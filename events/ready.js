@@ -11,6 +11,7 @@ module.exports = async (client) => {
     client.logsFetched = {};
     client.activeCollectors = [];
     client.fetchedGuilds = [];
+    client.blackjackCards = [];
 
     // default emojis
     let managers = await new Managers(client).prepare();

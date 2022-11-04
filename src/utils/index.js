@@ -10,6 +10,7 @@ const Top = require("./Top");
 const Item = require("./Item");
 const RoulleteItem = require("./RouletteItem");
 const Managers = require("./Managers");
+const Blackjack = require("./Blackjack");
 
 const Enums = require("./Enums");
 const Functions = require("./functions");
@@ -27,6 +28,7 @@ module.exports = {
     Item,
     RoulleteItem,
     Managers,
+    Blackjack,
 
     ...Enums,
     ...Functions

@@ -60,6 +60,13 @@ const EndReasons = new Enum({
     OldCollector: 1
 })
 
+const CardType = new Enum({
+    Spade: 1,
+    Heart: 2,
+    Diamond: 3,
+    Clover: 4
+})
+
 module.exports = {
     Categories,
     ItemTypes,
@@ -68,5 +75,6 @@ module.exports = {
     ItemObjetives,
     BoostTypes,
     BoostObjetives,
-    EndReasons
+    EndReasons,
+    CardType
 }
