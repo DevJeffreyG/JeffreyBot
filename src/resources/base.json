@@ -41,6 +41,36 @@
             "desc": "Se han agregado los comandos `{ PREFIX }buy` y `{ PREFIX }dsbuy`"
         },
         {
+            "type": "added",
+            "desc": "Llaves canjeables para recompensas dentros del servidor 👀"
+        },
+        {
+            "type": "added",
+            "desc": "Ruleta con recompensas y castigos cada 24 horas"
+        },
+        {
+            "type": "added",
+            "desc": "Blackjack!",
+            "extended": "Gracias, UnbelievaBoat. ¡Blackjack pero con los Jeffros del servidor y no los del otro bot!"
+        },
+        {
+            "type": "added",
+            "desc": "La opción de conseguir Jeffros extras dependiendo de la reputación (`/rep`) que tengas"
+        },
+        {
+            "type": "added",
+            "desc": "Si te sales del servidor, y vuelves recibirás TODOS tu roles"
+        },
+        {
+            "type": "added",
+            "desc": "Se han agregado algunos tops extras y extravagantes",
+            "extended": "Gracias, difunto Kazama gracias por tanto, perdón por tan poco 🙌"
+        },
+        {
+            "type": "added",
+            "desc": "Y muchas cosas más que son tantas que no caben aquí, ¡mira todos los comandos con `/ayuda`!"
+        },
+        {
             "type": "updated",
             "desc": "Discord.JS v14",
             "extended": "Jeffrey Bot ahora usará la nueva versión de Discord.JS y la API v10 de Discord."
@@ -62,6 +92,11 @@
         {
             "type": "updated",
             "desc": "Se han cambiado ligeramente los colores de los embeds"
+        },
+        {
+            "type": "updated",
+            "desc": "Se han actualizado algunos Emojis",
+            "extended": "-Jeffros\n-DarkJeffros\n-Descripciones\n-Y más"
         },
         {
             "type": "updated",

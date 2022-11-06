@@ -31,21 +31,25 @@ Jeffrey Bot es un bot de Discord **multipropósitos** programado por y para el s
   - Encuestas del STAFF
   - AutoRoles
   - Mensajes anónimos a los usuarios por privado
+  - Guardar los roles de un usuario que sale del servidor
 - Diversión
   - Llaves para canjear
   - Adivinanzas con recompensas
   - Decirle al bot qué decir
   - Ruleta con premios y castigos al azar
+  - Juega a Blackjack contra el bot
 - Social
   - Jeffrey Bot x YouTube
   - Jeffrey Bot x Twitter
   - Jeffrey Bot x Twitch
   - Sistema de reputación
   - Sistema de cumpleaños
+  - Convierte la reputación en monedas
 - Dos sistemas económicos por chat & basado en inflación
   - Tiendas
   - Monedas
   - Sistema de boosts
+  - Convierte tu dinero en experiencia dentro del servidor
 - _Siempre en work in progress_.
 
 # Créditos
