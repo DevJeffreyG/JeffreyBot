@@ -6,8 +6,8 @@ const Schema = mongoose.Schema({
     info: Object
 });
 
-Schema.static("newTempRoleDeletion", async function(data) {
-    if(
+Schema.static("newTempRoleDeletion", async function (data) {
+    if (
         await this.findOne({
             "info.type": "temproledeletion",
             "info.user_id": data.user_id,
@@ -16,19 +16,19 @@ Schema.static("newTempRoleDeletion", async function(data) {
     ) return null
     else
 
-    return new this({
-        info: {
-            type: "temproledeletion",
-            user_id: data.user_id,
-            role_id: data.role_id,
-            until: moment().add(ms(data.duration), "ms").toDate(),
-            boost: data.boost ?? null
-        }
-    }).save();
+        return new this({
+            info: {
+                type: "temproledeletion",
+                user_id: data.user_id,
+                role_id: data.role_id,
+                until: moment().add(ms(data.duration), "ms").toDate(),
+                boost: data.boost ?? null
+            }
+        }).save();
 })
 
-Schema.static("newGuildCommands", async function({route, dev = false}){
-    if(
+Schema.static("newGuildCommands", async function ({ route, dev = false }) {
+    if (
         await this.findOne({
             "info.type": "guildcommands",
             "info.route": route,
@@ -37,7 +37,7 @@ Schema.static("newGuildCommands", async function({route, dev = false}){
     ) return console.log("Ya existe el GuildCommand, continuando...");
     else
 
-    console.log("Creando...!");
+        console.log("Creando...!");
     return new this({
         info: {
             type: "guildcommands",
@@ -47,13 +47,13 @@ Schema.static("newGuildCommands", async function({route, dev = false}){
     }).save();
 })
 
-Schema.static("getGuildCommands", function(){
+Schema.static("getGuildCommands", function () {
     return this.find({
         "info.type": "guildcommands"
     });
 })
 
-Schema.static("getTempGuildBans", function(guild, user){
+Schema.static("getTempGuildBans", function (guild, user) {
     return this.findOne({
         "info.type": "temporalGuildBan",
         "info.guild_id": guild.id,
@@ -61,7 +61,7 @@ Schema.static("getTempGuildBans", function(guild, user){
     });
 })
 
-Schema.static("removeGuildCommands", function(route){
+Schema.static("removeGuildCommands", function (route) {
     return this.findOneAndDelete({
         "info.type": "guildcommands",
         "info.route": route
@@ -70,14 +70,14 @@ Schema.static("removeGuildCommands", function(route){
     })
 })
 
-Schema.static("getTempRoleDeletions", function(user_id){
+Schema.static("getTempRoleDeletions", function (user_id) {
     return this.find({
         "info.type": "temproledeletion",
         "info.user_id": user_id
     });
 })
 
-Schema.static("newRouletteItem", function(data){
+Schema.static("newRouletteItem", function (data) {
 
     const { target, value, prob, extra } = data;
 
@@ -92,9 +92,31 @@ Schema.static("newRouletteItem", function(data){
     }).save();
 })
 
-Schema.static("getRouletteItems", async function(){
+Schema.static("getRouletteItems", async function () {
     return await this.find({
         "info.type": "rouletteItem"
     });
 })
+
+Schema.static("getLockedGuilds", async function () {
+    return await this.find({
+        "info.type": "lockedGuilds"
+    });
+})
+
+Schema.static("newLockedGuild", function (data) {
+
+    const { guild, originalFeatures, originalPerms, newChannel } = data;
+
+    return new this({
+        info: {
+            type: "lockedGuilds",
+            guild,
+            originalFeatures,
+            originalPerms,
+            newChannel
+        }
+    }).save();
+})
+
 module.exports = mongoose.model("GlobalDatas", Schema);

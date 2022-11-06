@@ -1,6 +1,8 @@
 const Config = require("../src/resources/base.json");
 const { prefix } = Config;
 
+const { GlobalDatas } = require("mongoose").models;
+
 const Managers = require("../src/utils/Managers");
 let functions = require("../src/utils/functions");
 
@@ -13,6 +15,7 @@ module.exports = async (client) => {
     client.fetchedGuilds = [];
     client.blackjackCards = [];
     client.wonBlackjack = [];
+    client.lockedGuilds = await GlobalDatas.getLockedGuilds();
 
     // default emojis
     let managers = await new Managers(client).prepare();
