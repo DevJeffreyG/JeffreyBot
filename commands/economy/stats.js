@@ -1,4 +1,7 @@
-const { Command, Categories, Embed } = require("../../src/utils")
+const { time } = require("discord.js");
+const moment = require("moment");
+
+const { Command, Categories, Embed, Enum, BoostObjetives } = require("../../src/utils")
 
 const command = new Command({
     name: "stats",
@@ -54,6 +57,22 @@ command.execute = async (interaction, models, params, client) => {
 ${bdString}`)
     .defThumbnail(member.displayAvatarURL())
     .defColor(member.displayHexColor);
+
+    let boosts = user.getBoosts();
+
+    if(boosts?.length > 0) {
+        for(const boost of boosts) {
+            const { type, objetive, value } = boost.special;
+
+            let boostobj = new Enum(BoostObjetives).translate(objetive);
+            if(boostobj === "All") boostobj = "Todo"
+            
+            meEmbed
+                .defField(`— 🚀 Boost de ${boostobj} x${value}`,
+                `▸ Hasta: ${time(moment(boost.active_since).add(boost.duration, "ms").toDate())}`, true);
+        }
+    }
+
 
     return interaction.editReply({embeds: [meEmbed]});
 }
