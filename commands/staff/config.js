@@ -41,7 +41,8 @@ command.data
             .setName("modulo")
             .setDescription("El módulo a configurar")
             .setChoices(
-                { name: "Blackjack Bet", value: "blackjack bet" }
+                { name: "Blackjack Bet", value: "blackjack bet" },
+                { name: "DarkShop level", value: "darkshop level" }
             )
             .setRequired(true)
         )
@@ -257,6 +258,10 @@ command.execMin = async (interaction, doc, params) => {
     switch (modulo.value) {
         case "blackjack bet":
             doc.settings.minimum.blackjack_bet = Math.ceil(cantidad.value);
+            break;
+
+        case "darkshop level":
+            doc.settings.minimum.darkshop_level = Math.ceil(cantidad.value);
             break;
 
         default:

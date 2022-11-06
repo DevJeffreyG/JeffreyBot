@@ -92,7 +92,8 @@ const GuildSchema = new Schema({
             message_id: { type: String }
         },
         minimum: {
-            blackjack_bet: { type: Number, default: 1000 }
+            blackjack_bet: { type: Number, default: 1000 },
+            darkshop_level: { type: Number, default: 5 }
         }
     },
     roles: { // id de roles

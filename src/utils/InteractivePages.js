@@ -178,7 +178,7 @@ class InteractivePages {
 
         });
 
-        collector.on("end", (i, r) => {
+        collector.on("end", async (i, r) => {
             row.components.forEach(c => c.setDisabled());
             interaction.editReply({ components: [row] });
 
@@ -187,7 +187,7 @@ class InteractivePages {
                 client.activeCollectors.splice(index, 1);
             } else console.log(`🟥 NO SE ELIMINÓ DE LOS ACTIVECOLLECTORS !! {INTERACTIVE PAGES}`)
         
-            if(r === EndReasons.OldCollector) return interaction.deleteReply()
+            if(r === EndReasons.OldCollector) return await interaction.deleteReply()
         })
     }
 }

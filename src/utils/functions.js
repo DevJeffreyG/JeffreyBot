@@ -277,7 +277,7 @@ const FetchAuditLogs = async function (client, guild, types) {
       }
 
       if (moment(fetched.createdAt).isBefore(moment().subtract(1, "minute"))) {
-        console.error("⚠️ Log hace más de un minuto", fetched);
+        //console.error("⚠️ Log hace más de un minuto", fetched);
         break;
       }
 
@@ -407,6 +407,8 @@ const intervalGlobalDatas = async function (client, justTempRoles) {
       user_id: member.id,
       guild_id: guild.id
     });
+
+    if(!dbUser) return
 
     let roles = dbUser.data.temp_roles;
     let birthday = dbUser.data.birthday.locked;
@@ -1178,7 +1180,6 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
         //console.log("⚠️ %s", err)
       };
 
-      console.log(i.user.id, interaction.user.id)
       return i.user.id === interaction.user.id &&
         (i.customId === "confirmAction" || i.customId === "cancelAction") &&
         i.message.id === msg.id;
@@ -1218,12 +1219,12 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
       } else console.log(`🟥 NO SE ELIMINÓ DE LOS ACTIVECOLLECTORS !! {CONFIRMATION}`)
 
       if(r === EndReasons.OldCollector){
-        interaction.deleteReply()
+        await interaction.deleteReply()
         return resolve(false)
       }
 
       if (i.size == 0) {
-        interaction.editReply({ embeds: [cancelEmbed], components: [] })
+        await interaction.editReply({ embeds: [cancelEmbed], components: [] })
         return resolve(false)
       }
     })
@@ -1504,7 +1505,7 @@ const DarkShopWork = async function (client, guildId) {
         break;
 
       case 2:
-        let embed3 = new EmbedBuilder()
+        let embed3 = new Embed()
           .defAuthor({ text: `Evento`, icon: Config.darkLogoPng })
           .defDesc(rIgual)
           .defColor(Colores.negro)
@@ -1660,6 +1661,8 @@ const DarkShopWork = async function (client, guildId) {
  * @returns 
  */
 const ValidateDarkShop = async function (user, author) {
+  let guild = await Guilds.getOrCreate(user.guild_id);
+
   const r = [
     "{you}... No estás listo.",
     "No tienes el valor para hacerlo.",
@@ -1679,9 +1682,9 @@ const ValidateDarkShop = async function (user, author) {
   const notReady = new Embed()
     .defColor(Colores.rojo)
     .defDesc(desc)
-    .defFooter({ text: "▸ Vuelve cuando seas nivel 5." });
+    .defFooter({ text: `▸ Vuelve cuando seas nivel ${guild.settings.minimum.darkshop_level}.`});
 
-  if (user.economy.global.level < 5) return { valid: false, embed: notReady }
+  if (user.economy.global.level < guild.settings.minimum.darkshop_level) return { valid: false, embed: notReady }
   else return { valid: true, embed: null };
 }
 
