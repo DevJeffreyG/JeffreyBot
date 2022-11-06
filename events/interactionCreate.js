@@ -6,7 +6,7 @@ const models = require("mongoose").models;
 const { ToggledCommands, Users, Guilds } = models
 
 const { Ticket, ErrorEmbed, intervalGlobalDatas, Categories, ValidateDarkShop, Embed } = require("../src/utils");
-const { Config, Colores } = require("../src/resources");
+const { Config, Colores, Bases } = require("../src/resources");
 const { InteractionType } = require("discord-api-types/v10");
 const { jeffreygID, mantenimiento } = Config;
 
@@ -114,6 +114,10 @@ module.exports = async (client, interaction) => {
           // filtro de nivel 5
           let validation = await ValidateDarkShop(user, interaction.user);
           if (!validation.valid) return interaction.reply({ embeds: [validation.embed] })
+        }
+
+        if(slashCommand.category === Categories.Developer){
+          if(!Bases.devIds.find(x => x === interaction.user.id)) return interaction.reply({ephemeral: true, content: "No puedes usar este comando porque no eres desarrollador de Jeffrey Bot"})
         }
         await slashCommand.execute(interaction, models, params, client);
       } catch (error) {
@@ -262,6 +266,35 @@ ${suggestion.suggestion}
 
         interaction.editReply({ content: "Se ha denegado la sugerencia, se ha enviado un mensaje al usuario informándole." });
         break;
+      }
+
+      case "bjHelp": {
+        let error = false;
+        try {
+          await interaction.deferReply({ ephemeral: true });
+        } catch(err) {error = true}
+
+        const Emojis = interaction.client.Emojis;
+
+        let e = new Embed()
+        .defAuthor({text: "¿Cómo se juega Blackjack?", title: true})
+        .defColor(Colores.verdejeffrey)
+        .defDesc(`**Objetivo**: Consigue vencer a Jeffrey Bot consiguiendo un valor a **21** o lo más cercano a él **SIN PASARTE**.`)
+        .defField("Pedir y Plantarse", `**—** Pedir: Pides una carta a Jeffrey Bot\n**—** Plantarse: No puedes volver a pedir cartas. Es el turno de Jeffrey Bot para jugar.`)
+        .defField("Doblar", `**—** Duplicas tu apuesta actual, pides una carta más y luego te plantas.`)
+        .defField("Dividir", `**—** Sólo se puede usar cuando tus dos primeras cartas tienen el mismo número o letra: las separas en dos manos con la misma apuesta y se agrega una más a cada una.`)
+        .defField("Rendirse", `**—** Sólo te puedes rendir si has jugado menos de 2 veces por partida. Pierdes **lo que se pueda** de la mitad de tu apuesta.`)
+        .defField("Valores de las cartas", `**—** Los ases (${Emojis["1C"]}${Emojis["1H"]}${Emojis["1S"]}${Emojis["1D"]}) pueden valer **1** u **11** dependiendo si este hace que la mano se pase de **21**.
+**—** Las cartas que tienen números tienen ese mismo valor.
+**—** ${Emojis.JC}${Emojis.QC}${Emojis.KC} y demás valen **10**.`)
+        .defField("El turno de Jeffrey Bot", `**—** Cuando sea el momento de jugar de Jeffrey Bot tomará una carta hasta que llegue a 17 o más.`)
+        .defField("Resultados", `**—** Si las primeras cartas que te tocan dan como resultado **21** ganas automáticamente, sin excepciones.
+**—** Si te pasas de **21** pierdes, sin excepciones.
+**—** Si el valor de la mano de Jeffrey Bot es la misma que la tuya se termina el juego como empate y no pierdes nada de lo apostado.
+**—** Si el valor de la mano de Jeffrey Bot es 21 o menor y mayor que la tuya, pierdes.`)
+        .defFooter({text: "Gracias UnbelievaBoat#1046, te quiero mucho por favor no me denuncien."})
+
+        return error ? interaction.followUp({embeds: [e], ephemeral: true}) : interaction.editReply({embeds: [e]})
       }
 
       default:

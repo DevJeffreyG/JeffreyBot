@@ -1,8 +1,10 @@
 class Enum {
     constructor (values) {
         this.values = values
-        
-        return values
+    }
+
+    translate(input){
+        return Object.keys(this.values).find(key => this.values[key] === input);
     }
 }
 
@@ -16,7 +18,7 @@ const Categories = new Enum({
     Moderation: "MODERATION",
     Developer: "DEV",
     Music: "MUSIC"
-})
+}).values
 
 const ItemTypes = new Enum({
     StackOverflow: 1,
@@ -24,17 +26,17 @@ const ItemTypes = new Enum({
     Firewall: 3,
     Subscription: 4,
     Temporal: 5
-})
+}).values
 
 const ItemEffects = new Enum({
     Positive: 1,
     Negative: 2
-})
+}).values
 
 const ItemActions = new Enum({
     Add: 1,
     Remove: 2
-})
+}).values
 
 const ItemObjetives = new Enum({
     Warns: 1,
@@ -43,31 +45,35 @@ const ItemObjetives = new Enum({
     Boost: 4,
     Jeffros: 5,
     TempRole: 6
-})
+}).values
 
 const BoostTypes = new Enum({
     Multiplier: 1,
     Probabilities: 2
-})
+}).values
 
 const BoostObjetives = new Enum({
     Jeffros: 1,
     Exp: 2,
     All: 3
-})
+}).values
 
 const EndReasons = new Enum({
-    OldCollector: 1
-})
+    OldCollector: 1,
+    Over21: 2,
+    GaveUp: 3,
+    Blackjack: 4
+}).values
 
 const CardType = new Enum({
     Spade: 1,
     Heart: 2,
     Diamond: 3,
     Clover: 4
-})
+}).values
 
 module.exports = {
+    Enum,
     Categories,
     ItemTypes,
     ItemEffects,

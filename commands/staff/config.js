@@ -34,6 +34,24 @@ command.data
                     .setRequired(true)
             )
     )
+    .addSubcommand(min => min
+        .setName("min")
+        .setDescription("Establece el mínimo de algún módulo")
+        .addStringOption(o => o
+            .setName("modulo")
+            .setDescription("El módulo a configurar")
+            .setChoices(
+                { name: "Blackjack Bet", value: "blackjack bet" }
+            )
+            .setRequired(true)
+        )
+        .addNumberOption(o => o
+            .setName("cantidad")
+            .setDescription("La cantidad mínima necesaria para que funcione")
+            .setMinValue(0.1)
+            .setRequired(true)
+        )
+    )
     .addSubcommandGroup(roles =>
         roles
             .setName("roles")
@@ -192,6 +210,10 @@ command.execute = async (interaction, models, params, client) => {
         case "canales":
             await command.execChannel(interaction, docGuild, params);
             break
+
+        case "min":
+            await command.execMin(interaction, docGuild, params);
+            break
     }
 
     switch (subgroup) {
@@ -227,6 +249,22 @@ command.execChannel = async (interaction, doc, params) => {
 
     await doc.save();
     return interaction.editReply({ content: `✅ Actualizado ➡️ ${nuevo.channel}` });
+}
+
+command.execMin = async (interaction, doc, params) => {
+    const { modulo, cantidad } = params.min
+
+    switch (modulo.value) {
+        case "blackjack bet":
+            doc.settings.minimum.blackjack_bet = Math.ceil(cantidad.value);
+            break;
+
+        default:
+            return new ErrorEmbed(interaction, { type: "commandError", data: { id, unknown: modulo.value } }).send()
+    }
+
+    await doc.save();
+    return interaction.editReply({ content: `✅ Actualizado ➡️ ${Math.ceil(cantidad.value)}` });
 }
 
 command.execRoles = async (interaction, doc, params) => {

@@ -95,6 +95,8 @@ const Schema = new mongoose.Schema({
             roulette: { type: Date, default: null }
         },
         counts: { // all time
+            roulette: { type: Number, default: 0 },
+            blackjack: { type: Number, default: 0 },
             jeffros: {
                 type: Number, default: function () {
                     if (this.economy.global.jeffros) return this.economy.global.jeffros
@@ -141,6 +143,11 @@ Schema.static("getOrCreate", async function ({ user_id, guild_id }) {
         user_id: user_id,
         guild_id: guild_id
     }).save();
+})
+
+Schema.method("addCount", async function(module, count = 1, save = true) {
+    this.data.counts[module] += count;
+    if(save) return await this.save();
 })
 
 Schema.method("addJeffros", async function (count) {
@@ -235,6 +242,10 @@ Schema.method("delCooldown", function (modulo, options = { save: true}) {
     this.data.cooldowns[modulo] = null
     if(save) this.save();
     else console.log("⚠️ NO se guardó el cooldown inmediatamente")
+})
+
+Schema.method("getBoosts", function() {
+    return this.data.temp_roles;
 })
 
 module.exports = mongoose.model('Users', Schema)

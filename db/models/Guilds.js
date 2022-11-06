@@ -90,6 +90,9 @@ const GuildSchema = new Schema({
         autoroles: {
             channel_id: { type: String },
             message_id: { type: String }
+        },
+        minimum: {
+            blackjack_bet: { type: Number, default: 1000 }
         }
     },
     roles: { // id de roles
