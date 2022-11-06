@@ -53,7 +53,7 @@ class Embed extends Discord.EmbedBuilder {
             try {
                 this.setTimestamp(timestamp)
             } catch(e) {
-                console.log(`⚠️ El timestamp %s no fue válido`, timestamp)
+                //console.log(`⚠️ El timestamp %s no fue válido`, timestamp)
                 this.setTimestamp()
             }
         }

@@ -271,8 +271,9 @@ const FetchAuditLogs = async function (client, guild, types) {
 
       const fetched = fetchedLogs.entries.first();
 
+      if(fetched?.reason.startsWith("[BULK]")) resolve(null);
       if (fetched === undefined) {
-        console.error("⚠️ No se encontró ningún log con el tipo", type);
+        //console.error("⚠️ No se encontró ningún log con el tipo", type);
         break;
       }
 

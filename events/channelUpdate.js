@@ -8,6 +8,7 @@ module.exports = async (client, oldchannel, channel) => {
     const guild = channel.guild;
 
     const logs = await FetchAuditLogs(client, guild, [AuditLogEvent.ChannelUpdate, AuditLogEvent.ChannelOverwriteUpdate]);
+    if(!logs) return;
 
     let type;
     switch(channel.type){
