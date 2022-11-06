@@ -2,7 +2,7 @@ const { Command, Categories, Confirmation, Embed } = require("../../src/utils")
 
 const command = new Command({
     name: "claimrep",
-    desc: "Cambia todos los puntos de reputación que tengas por Jeffros (1000/rep)",
+    desc: "Cambia todos los puntos de reputación que tengas por Jeffros (500/rep)",
     category: Categories.Economy
 })
 
@@ -19,7 +19,7 @@ command.execute = async (interaction, models, params, client) => {
         new Embed({type: "cooldown", data: {cool}})
     ]});
 
-    let value = user.economy.global.reputation * 1000;
+    let value = user.economy.global.reputation * 500;
 
     let toConfirm = [
         `Se añadirán **${Emojis.Jeffros}${value.toLocaleString("es-CO")}** a tu cuenta.`,
