@@ -108,7 +108,7 @@ module.exports = async (client, interaction) => {
     executeSlash(interaction, models, params, client)
 
     async function executeSlash(interaction, models, params, client) {
-      console.log(`-------- /${commandName} ----------`)
+      console.log(`-------- /${commandName} • por ${interaction.user.id} • en ${interaction.guild.name} (${interaction.guild.id}) ----------`)
       try {
         if (slashCommand.category === Categories.DarkShop) {
           // filtro de nivel 5

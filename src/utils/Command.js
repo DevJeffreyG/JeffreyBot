@@ -3,6 +3,7 @@ const { PermissionFlagsBits } = require('discord-api-types/v10');
 
 const Embed = require("./Embed");
 const Colores = require("../resources/colores.json");
+const { Categories } = require('./Enums');
 
 class Command {
     constructor(data = { name: "foo", desc: "bar", helpdesc: null, category: "0" }) {
@@ -146,9 +147,12 @@ class Command {
     }
 
     #setPerms() {
-        if (this.category == "ADMIN") this.data.setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
-        if (this.category == "STAFF" || this.category == "MODERATION") this.data.setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages);
-        if (this.category == "DEV") this.dev = true;
+        if (this.category == Categories.Administration) this.data.setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
+        if (this.category == Categories.Staff || this.category == Categories.Moderation) this.data.setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages);
+        if (this.category == Categories.Developer) {
+            this.data.setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
+            this.dev = true;
+        }
     }
 
     #optionWork(option, data) {

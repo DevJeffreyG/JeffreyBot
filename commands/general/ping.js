@@ -8,7 +8,7 @@ const command = new Command({
 });
 command.execute = async (interaction, models, params, client) => {
     let start = Date.now();
-    interaction.reply("Pong!").then(() => {
+    interaction.reply(`${client.Emojis.Loading} Pong!`).then(() => {
         let diff = (Date.now() - start);
         let API = (client.ws.ping).toFixed(2)
 

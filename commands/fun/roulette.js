@@ -20,11 +20,11 @@ command.execute = async (interaction, models, params, client) => {
         new Embed({type: "cooldown", data: {cool}})
     ]});
 
-    const roulleteItems = await GlobalDatas.getRouletteItems();
+    const rouletteItems = await GlobalDatas.getRouletteItems();
 
-    console.log("🟢 Items disponibles: %s", roulleteItems.length);
+    console.log("🟢 Items disponibles: %s", rouletteItems.length);
 
-    const randomItem = await getRandom(roulleteItems);
+    const randomItem = await getRandom(rouletteItems);
     if(randomItem === -1){
         user.delCooldown("roulette")
         return interaction.editReply({content: "No me la vas a creer, pero no pude encontrar un item indicado para ti :("})

@@ -14,7 +14,7 @@ command.addOption({
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
-    const { Users, Shops } = models
+    const { Shops } = models
 
     // codigo
     const doc = await Shops.getOrCreate(interaction.guild.id);

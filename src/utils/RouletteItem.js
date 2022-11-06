@@ -10,6 +10,7 @@ const { Users } = require("mongoose").models;
 
 class RouletteItem {
     constructor(interaction, globalinfo) {
+        console.log(globalinfo)
         this.interaction = interaction;
         this.item = globalinfo;
 
@@ -33,14 +34,14 @@ class RouletteItem {
         this.addedTemp = new Embed({
             type: "success", data: {
                 title: "Canjeado",
-                desc: `Se agregó el TempRole + ${roleMention(this.numbers)}`,
+                desc: `Se agregó un Boost`,
                 footer: `Había un ${this.item.prob}% de probabilidad de que esta fuera tu recompensa`
             }
         })
         this.removedTemp = new Embed({
             type: "success", data: {
                 title: "Canjeado",
-                desc: `Se eliminó el TempRole - ${roleMention(this.numbers)}`,
+                desc: `Se eliminó un Boost`,
                 footer: `Había un ${this.item.prob}% de probabilidad de que esta fuera tu recompensa`
             }
         })
@@ -68,7 +69,7 @@ class RouletteItem {
             guild_id: interaction.guild.id
         });
 
-        this.numbers = Number(this.item.value.match(/[0-9\.]/g).join(""));
+        this.numbers = this.item.value.match(/[0-9\.]/g).join("");
         this.nonumbers = this.item.value.replace(/[0-9\.]/g, "");
 
         switch (Number(this.item.target)) {
@@ -103,6 +104,9 @@ class RouletteItem {
         let save = true;
         let response = null;
         //let value = this.#valueWork();
+
+        console.log("🟢 Números:", this.numbers)
+        console.log("🟢 No-Números:", this.nonumbers)
 
         switch (this.target.constructor) {
             case GuildMemberRoleManager:
@@ -139,6 +143,8 @@ class RouletteItem {
                 break;
 
             case Number:
+                this.numbers = Number(this.numbers);
+
                 if (this.nonumbers === "-") this.user.economy.global.jeffros -= this.numbers;
                 else if (this.nonumbers === "+") {
                     this.user.addJeffros(this.numbers);
@@ -161,6 +167,7 @@ class RouletteItem {
         if (save) await this.user.save().catch(e => console.log(e));
 
         await this.interaction.editReply({ embeds: [response] })
+        await this.user.addCount("roulette");
 
         return this;
     }

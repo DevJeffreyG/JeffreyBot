@@ -29,34 +29,35 @@ command.execute = async (interaction, models, params, client) => {
 
     // Comando
     let embed = new Embed()
-    .defAuthor({text: `Ayuda: /globaldata`, title: true })
-    .defColor(Colores.verdeclaro)
-    .defField(`▸ temporalGuildBan`, `**—** Información de un TempBan en el servidor.`)
-    .defField(`▸ temporalPoll`, `**—** Información de una encuesta en el servidor.`)
-    .defField(`▸ guildcommands`, `**—** Información de dónde están los SlashCommands para los Guilds (toggle entre el modo developer).`)
-    .defField(`▸ rouletteItem`, `**—** Un item que puede salir en la ruleta`)
+        .defAuthor({ text: `Ayuda: /globaldata`, title: true })
+        .defColor(Colores.verdeclaro)
+        .defField(`▸ temporalGuildBan`, `**—** Información de un TempBan en el servidor.`)
+        .defField(`▸ temporalPoll`, `**—** Información de una encuesta en el servidor.`)
+        .defField(`▸ guildcommands`, `**—** Información de dónde están los SlashCommands para los Guilds (toggle entre el modo developer).`)
+        .defField(`▸ rouletteItem`, `**—** Un item que puede salir en la ruleta`)
 
-    if(tipo?.value) {
+    if (tipo?.value) {
         let q = await GlobalDatas.find({
             "info.type": tipo.value
         });
 
-        interaction.editReply({embeds: [new Embed({type: "success", data: { title: "Revisa la consola" }})]})
+        interaction.editReply({ embeds: [new Embed({ type: "success", data: { title: "Revisa la consola" } })] })
 
+        console.log("-- Consulta: '%s' --", tipo.value)
         return console.log(q)
     }
-    
-    if(!update){
-        return interaction.editReply({content: null, embeds: [embed]});
+
+    if (!update) {
+        return interaction.editReply({ content: null, embeds: [embed] });
     } else {
         await intervalGlobalDatas(client);
 
-        return interaction.editReply({content: "Interval de global datas ejecutado."})
-        .then(m => {
-            setTimeout(() => {
-                m.delete()
-            }, ms("10s"));
-        });
+        return interaction.editReply({ content: "Interval de global datas ejecutado." })
+            .then(m => {
+                setTimeout(() => {
+                    m.delete()
+                }, ms("10s"));
+            });
     }
 }
 
