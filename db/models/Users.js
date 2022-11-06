@@ -92,7 +92,8 @@ const Schema = new mongoose.Schema({
             jeffros_exp: { type: Date, default: null },
             rep: { type: Date, default: null },
             claim_rep: { type: Date, default: null },
-            roulette: { type: Date, default: null }
+            roulette: { type: Date, default: null },
+            blackjack: { type: Date, default: null },
         },
         counts: { // all time
             roulette: { type: Number, default: 0 },
@@ -127,7 +128,7 @@ const Schema = new mongoose.Schema({
     }
 })
 
-Schema.pre("save", function() {
+Schema.pre("save", function () {
     this.economy.global.jeffros = Math.ceil(this.economy.global.jeffros);
     this.economy.global.exp = Math.ceil(this.economy.global.exp);
     this.economy.global.level = Math.ceil(this.economy.global.level);
@@ -145,9 +146,9 @@ Schema.static("getOrCreate", async function ({ user_id, guild_id }) {
     }).save();
 })
 
-Schema.method("addCount", async function(module, count = 1, save = true) {
+Schema.method("addCount", async function (module, count = 1, save = true) {
     this.data.counts[module] += count;
-    if(save) return await this.save();
+    if (save) return await this.save();
 })
 
 Schema.method("addJeffros", async function (count) {
@@ -195,10 +196,13 @@ Schema.method("toggleBan", async function (module) {
     return this.data.isBanned[module];
 })
 
-Schema.method("cooldown", function (modulo, options = {cooldown: null, save: true, check: true}) {
-    let { cooldown, save, check } = options
-    if(check == undefined) check = true;
-    if(!cooldown) switch (modulo) {
+Schema.method("cooldown", function (modulo, options = { cooldown: null, save: true, check: true, info: false, instant: false }) {
+    let { cooldown, save, check, info, instant } = options
+
+    if (check == undefined) check = true;
+    if (save == undefined) save = true;
+
+    if (!cooldown) switch (modulo) {
         case "rep":
             cooldown = ms("1d")
             break;
@@ -209,6 +213,10 @@ Schema.method("cooldown", function (modulo, options = {cooldown: null, save: tru
 
         case "roulette":
             cooldown = ms("1d");
+            break;
+
+        case "blackjack":
+            cooldown = ms("5m");
             break;
 
         default:
@@ -222,29 +230,34 @@ Schema.method("cooldown", function (modulo, options = {cooldown: null, save: tru
         let timer = this.data.cooldowns[modulo];
         let text = new HumanMs(moment(timer)).left();
 
-        if(!moment().isAfter(moment(timer)))
-            return {mention: time(timer, "R"), timestamp: timer, text}
+        if (!moment().isAfter(moment(timer)))
+            return { mention: time(timer, "R"), timestamp: timer, text }
         /* let timer = this.data.cooldowns[modulo];
         let toCheck = moment(timer).add(cooldown, "ms");
         let text = new HumanMs(toCheck).left(); */
     }
 
-    this.data.cooldowns[modulo] = moment().add(cooldown, "ms").toDate();
-    if(save) this.save();
+    if (info) return;
+
+    let c = moment().add(cooldown, "ms").toDate()
+    let text = new HumanMs(moment(c)).left();
+
+    this.data.cooldowns[modulo] = c;
+    if (save) this.save();
     else console.log("⚠️ NO se guardó el cooldown inmediatamente")
 
-    return null
+    return instant ? { mention: time(c, "R"), timestamp: c, text } : null
 })
 
-Schema.method("delCooldown", function (modulo, options = { save: true}) {
+Schema.method("delCooldown", function (modulo, options = { save: true }) {
     let { save } = options
 
     this.data.cooldowns[modulo] = null
-    if(save) this.save();
+    if (save) this.save();
     else console.log("⚠️ NO se guardó el cooldown inmediatamente")
 })
 
-Schema.method("getBoosts", function() {
+Schema.method("getBoosts", function () {
     return this.data.temp_roles;
 })
 

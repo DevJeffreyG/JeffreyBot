@@ -1,4 +1,4 @@
-const { Command, Categories, Blackjack, ErrorEmbed } = require("../../src/utils")
+const { Command, Categories, Blackjack, ErrorEmbed, Embed } = require("../../src/utils")
 
 const command = new Command({
     name: "blackjack",
@@ -18,7 +18,7 @@ command.addOption({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
 
-    const { Users} = models;
+    const { Users } = models;
     const { apuesta } = params;
 
     let user = await Users.getOrCreate({
@@ -35,7 +35,18 @@ command.execute = async (interaction, models, params, client) => {
         }
     })
 
-    if(user.economy.global.jeffros < apuesta.value) return notEnough.send();
+    if (user.economy.global.jeffros < apuesta.value) return notEnough.send();
+    let winCounts = client.wonBlackjack.find(x => x.user === interaction.user.id && x.guild === interaction.guild.id)
+
+    //console.log("Ha ganado %s en esta sesión", winCounts)
+
+    let cool = user.cooldown("blackjack", { info: true })
+
+    if (winCounts?.count === 5) {
+        cool = user.cooldown("blackjack", { instant: true })
+        if (cool) return interaction.editReply({ embeds: [new Embed({ type: "cooldown", data: { cool } })] })
+        winCounts.count = 0;
+    } else if (cool) return interaction.editReply({ embeds: [new Embed({ type: "cooldown", data: { cool } })] })
 
     const bj = new Blackjack(interaction, 4);
     bj.start(apuesta.value);

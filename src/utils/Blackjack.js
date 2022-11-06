@@ -228,7 +228,12 @@ class Blackjack {
             let x = y.collector;
             return x.channelId === this.collector.channelId && x.interactionType === this.collector.interactionType && y.userid === interaction.user.id
         });
-        if (active) active.collector.stop(EndReasons.OldCollector);
+        if (active) {
+            this.interaction.followUp({ ephemeral: true, content: "Ya estás en un juego de Blackjack, terminalo antes de iniciar otro." });
+            this.collector.stop();
+            return this.interaction.deleteReply()
+            //active.collector.stop(EndReasons.OldCollector);
+        }
         client.activeCollectors.push({ collector: this.collector, userid: interaction.user.id })
 
         this.collector.on("collect", async (i) => {
@@ -320,19 +325,23 @@ class Blackjack {
 
             this.#getDeck(); // para rellenar, en caso de ser necesario
 
-            if (dealer_value < 17 || obj.soft) {
-                console.log("⚪ Es %s", dealer_value)
-                console.log("⚪ La siguiente carta vale %s", nextCard[0].value)
+            if (dealer_value === 21 && obj.soft && this.dealer_hand.length === 2) { // BLACKJACK!
+                hit = false;
+            } else
 
-                let card = this.#borrowCards(1);
+                if (dealer_value < 17 || obj.soft) {
+                    console.log("⚪ Es %s", dealer_value)
+                    console.log("⚪ La siguiente carta vale %s", nextCard[0].value)
 
-                // si se pasa, y pasa el 50/50 y se ha salvado menos de 5 veces tomarla, sino, que siga el loop
-                if (dealer_value + card[0].value <= 21) this.dealer_hand = this.dealer_hand.concat(card)
-                else if (dealer_value + card[0].value > 21 && new Chance().bool() || saved > 5)
-                    this.dealer_hand = this.dealer_hand.concat(card)
+                    let card = this.#borrowCards(1);
 
-                else saved++
-            }
+                    // si se pasa, y pasa el 50/50 y se ha salvado menos de 5 veces tomarla, sino, que siga el loop
+                    if (dealer_value + card[0].value <= 21) this.dealer_hand = this.dealer_hand.concat(card)
+                    else if (dealer_value + card[0].value > 21 && new Chance().bool() || saved > 5)
+                        this.dealer_hand = this.dealer_hand.concat(card)
+
+                    else saved++
+                }
 
             if (this.#checkValue(this.dealer_hand) >= 17 && !obj.soft) hit = false;
         }
@@ -343,6 +352,7 @@ class Blackjack {
         let playerVal = this.#checkValue();
 
         if (dealerVal > 21 && playerVal < 21) this.endgame(true)
+        else if (dealerVal > 21 && playerVal <= 21) this.endgame(true)
         else if (playerVal > dealerVal && dealerVal < 21) this.endgame(true)
         else if (playerVal === dealerVal) this.endgame(-1)
         else this.endgame(false);
@@ -399,7 +409,7 @@ class Blackjack {
         });
 
         this.doc = await Guilds.getOrCreate(this.interaction.guild.id);
-        if(this.bet < this.doc.settings.minimum.blackjack_bet){
+        if (this.bet < this.doc.settings.minimum.blackjack_bet) {
             return new ErrorEmbed(this.interaction, {
                 type: "execError",
                 data: {
@@ -446,7 +456,7 @@ class Blackjack {
         let save = true;
 
         console.log("🟢 Se terminó el juego con resultado %s", won)
-        await this.#generateEmbed(reason != EndReasons.Over21)
+        await this.#generateEmbed(reason != EndReasons.Over21 && reason != EndReasons.Blackjack)
 
         if (won === -1) {
             this.embed
@@ -478,6 +488,14 @@ class Blackjack {
                         .defDesc(`Ganaste **${this.client.Emojis.Jeffros}${this.bet.toLocaleString("es-CO")}** instantáneamente.`)
                         .defAuthor({ text: "BLACKJACK!", icon: this.client.EmojisObject.BackCard.url })
                 }
+
+                let countQ = this.client.wonBlackjack.find(x => x.user === this.interaction.user.id && x.guild === this.interaction.guild.id);
+                if (countQ) countQ.count++;
+                else this.client.wonBlackjack.push({
+                    user: this.interaction.user.id,
+                    guild: this.interaction.guild.id,
+                    count: 1
+                })
 
                 this.user.addJeffros(this.bet)
                 await this.user.addCount("blackjack", 1, false);
