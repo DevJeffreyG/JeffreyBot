@@ -94,6 +94,7 @@ const Schema = new mongoose.Schema({
             claim_rep: { type: Date, default: null },
             roulette: { type: Date, default: null },
             blackjack: { type: Date, default: null },
+            jeffros_to_exp: { type: Date, default: null }
         },
         counts: { // all time
             roulette: { type: Number, default: 0 },
@@ -217,6 +218,10 @@ Schema.method("cooldown", function (modulo, options = { cooldown: null, save: tr
 
         case "blackjack":
             cooldown = ms("5m");
+            break;
+
+        case "jeffros_to_exp":
+            cooldown = ms("1w");
             break;
 
         default:

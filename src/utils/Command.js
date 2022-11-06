@@ -161,9 +161,9 @@ class Command {
             .setDescription(data.desc)
             .setRequired(data.req ?? false)
 
-        if ((data.type === "integer" || data.type === "number") && data.min) {
-            option
-                .setMinValue(data.min)
+        if ((data.type === "integer" || data.type === "number")) {
+            if(data.min) option.setMinValue(data.min)
+            if(data.max) option.setMaxValue(data.max)
         }
 
         if (data.choices) {
