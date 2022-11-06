@@ -23,7 +23,7 @@ command.addOption({
 })
 
 command.execute = async (interaction, models, params, client) => {
-    await interaction.deferReply();
+    await interaction.deferReply({ephemeral: true});
     const { Users } = models
     const { usuario, cantidad } = params;
     const { Emojis } = client;
@@ -111,7 +111,7 @@ command.execute = async (interaction, models, params, client) => {
         }
     })
 
-    return interaction.editReply({content: `**${author.tag}** ➡️ **${member}**.`, embeds: [doneEmbed], allowedMentions: { parse: ["users"]}});
+    return interaction.followUp({content: `**${author.tag}** ➡️ **${member}**.`, embeds: [doneEmbed], allowedMentions: { parse: ["users"]}});
 }
 
 module.exports = command;
