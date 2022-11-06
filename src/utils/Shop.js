@@ -92,6 +92,9 @@ class Shop {
             user_id: this.interaction.user.id,
             guild_id: this.interaction.guild.id
         });
+
+        this.user = user;
+
         const item = this.shop.findItem(itemId);
 
         let noitem = new ErrorEmbed(this.interaction, {
@@ -124,7 +127,7 @@ class Shop {
             type: "economyError",
             data: {
                 action: "buy",
-                error: `No tienes suficientes ${this.isDarkShop ? "DarkJeffros" : "DarkJeffros"}`,
+                error: `No tienes suficientes ${this.isDarkShop ? "DarkJeffros" : "Jeffros"}`,
                 money: this.isDarkShop ? user.economy.dark.darkjeffros : user.economy.global.jeffros,
                 darkshop: this.isDarkShop
             }
@@ -359,7 +362,7 @@ Si es para la DarkShop, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
             else if (item.disabled) publicInfo = "[HIDDEN] ";
             else publicInfo = "[✅] ";
 
-            var price = this.determinePrice(this.user, item, true);
+            var price = this.determinePrice(this.user, item, true, false);
 
             this.items.set(item.id, {
                 item_name: item.name,
@@ -377,11 +380,18 @@ Si es para la DarkShop, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
     async addDiscount(level, discount) {
         const id = await FindNewId(await Shops.find(), "discounts", "id");
 
-        this.shop.discounts.push({
-            level,
-            discount,
-            id
-        })
+        let q = this.shop.discounts.find(x => x.level === level);
+        if (q) {
+            if (discount > 0) q.discount = discount
+            else
+                this.shop.discounts.splice(this.shop.discounts.findIndex(x => x.level === level), 1)
+        } else {
+            this.shop.discounts.push({
+                level,
+                discount,
+                id
+            })
+        }
 
         await this.shop.save();
 
@@ -460,7 +470,7 @@ Si es para la DarkShop, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
         }
     }
 
-    determinePrice(user, item, toString = false) {
+    determinePrice(user, item, toString = false, handleDifference = true) {
         const originalPrice = item.price;
 
         // nuevo precio a partir de interés
@@ -471,6 +481,22 @@ Si es para la DarkShop, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
         const interestPrice = originalPrice + (totalpurchases * interest);
         let precio = interestPrice;
 
+        // para calmar a los mr inversiones
+        let media = 0;
+        this.shop.items.forEach(i => media += i.price);
+        media /= this.shop.items.length;
+
+        let multidiff = Math.floor((this.isDarkShop ? this.user.economy.dark.darkjeffros : this.user.economy.global.jeffros) / media);
+
+        //console.log("🏳️ El promedio de precios es %s", media)
+        //console.log("🏳️ dinero/media = %s", multidiff)
+
+        if (multidiff > 100 && handleDifference) {
+            let fix = multidiff * 15;
+            console.log("🟩 Fixing %s with %s", precio, fix)
+            precio += fix;
+        }
+
         let work = this.#discountsWork(user, precio);
 
         if (toString) {
@@ -478,9 +504,9 @@ Si es para la DarkShop, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
                 let sub = ` / ${new HumanMs(item.use_info.item_info?.duration).human}`;
                 return work ? work.stringPrecio + sub : precio.toLocaleString("es-CO") + sub
             }
-            return work?.stringPrecio ?? precio.toLocaleString("es-CO");
+            return work?.stringPrecio ?? Math.floor(precio).toLocaleString("es-CO");
         }
-        return work?.precio ?? precio;
+        return Math.floor(work?.precio ?? precio);
     }
 }
 
