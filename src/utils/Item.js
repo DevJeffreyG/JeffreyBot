@@ -84,7 +84,7 @@ class Item {
     async build() {
         this.doc = await Guilds.getOrCreate(this.interaction.guild.id);
 
-        if (this.isDarkShop) this.shop = await DarkShops.getOrCreate(this.interaction.guild.id)
+        if (this.isDarkShop) this.shop = await DarkShops.getOrNull(this.interaction.guild.id)
         else this.shop = await Shops.getOrCreate(this.interaction.guild.id);
 
         this.item = this.shop.findItem(this.itemId, false);

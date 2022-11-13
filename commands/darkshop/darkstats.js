@@ -39,13 +39,13 @@ command.execute = async (interaction, models, params, client) => {
     const dj_since = !economy?.dj_since ? null : time(economy.dj_since);
 
     let meEmbed = new Embed()
-        .defAuthor({ text: `Estadísiticas del usuario N°${member.id}`, icon: member.displayAvatarURL({dynamic: true}) })
+        .defAuthor({ text: `Estadísiticas del usuario N°${member.id}`, icon: client.EmojisObject.Dark.url })
         .defDesc(`**— DarkJeffros**: **${Emojis.DarkJeffros}${darkjeffros}**.
 **— Precisión**: ${accuracy}%
 **— Duración de DarkJeffros**: \`${pastDays}\` de \`${total}\` días.
 **— Desde**: ${dj_since ?? "?"}. 
 **— Items**: Usa \`/dsinventory\`.`)
-        .defThumbnail(Config.darkLogoPng)
+        .defThumbnail(member.displayAvatarURL({dynamic: true}))
         .defColor(Colores.negro);
 
     return interaction.editReply({ embeds: [meEmbed] });

@@ -51,7 +51,7 @@ class Top {
 
     async #jeffrosTop() {
         this.base.title = "Top de Jeffros"
-        const darkshop = await DarkShops.getOrCreate(this.interaction.guild.id);
+        const darkshop = await DarkShops.getOrNull(this.interaction.guild.id);
         const inflation = darkshop.inflation.value;
 
         this.users.forEach(user => {

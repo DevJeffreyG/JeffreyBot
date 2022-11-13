@@ -11,7 +11,7 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { DarkShops } = models;
 
-    const doc = await DarkShops.getOrCreate(interaction.guild.id);
+    const doc = await DarkShops.getOrNull(interaction.guild.id);
     const ds = new Shop(doc, interaction, true);
 
     return ds.setup()

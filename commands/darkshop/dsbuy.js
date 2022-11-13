@@ -20,7 +20,7 @@ command.execute = async (interaction, models, params, client) => {
     const { id } = params
 
     // codigo
-    const doc = await DarkShops.getOrCreate(interaction.guild.id);
+    const doc = await DarkShops.getOrNull(interaction.guild.id);
     const shop = new Shop(doc, interaction, true);
 
     return shop.buy(id.value)

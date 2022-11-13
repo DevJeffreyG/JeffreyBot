@@ -385,7 +385,7 @@ command.execShops = async (interaction, models, params, client) => {
     await DarkShopWork(client, interaction.guild.id);
 
     const shop = await Shops.getOrCreate(interaction.guild.id);
-    const darkshop = await DarkShops.getOrCreate(interaction.guild.id);
+    const darkshop = await DarkShops.getOrNull(interaction.guild.id);
 
     // normal items
     console.log("========================")

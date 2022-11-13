@@ -23,7 +23,7 @@ command.execute = async (interaction, models, params, client) => {
     const { Emojis, EmojisObject } = client;
     
     const user = await Users.getOrCreate({user_id: interaction.user.id, guild_id: interaction.guild.id});
-    const darkshop = await DarkShops.getOrCreate(interaction.guild.id);
+    const darkshop = await DarkShops.getOrNull(interaction.guild.id);
     const toCalc = darkjeffros?.value ?? user.economy.dark.darkjeffros;
 
     // Comando

@@ -644,7 +644,7 @@ command.shopExec = async (interaction, models, params, client) => {
 
     const isDarkShop = darkshop?.value;
 
-    const doc = isDarkShop ? await DarkShops.getOrCreate(interaction.guild.id) : await Shops.getOrCreate(interaction.guild.id);
+    const doc = isDarkShop ? await DarkShops.getOrNull(interaction.guild.id) : await Shops.getOrCreate(interaction.guild.id);
     const _shop = new Shop(doc, interaction, isDarkShop);
 
     switch (subcommand) {
@@ -676,7 +676,7 @@ command.itemsExec = async (interaction, models, params, client) => {
 
     const isDarkShop = darkshop.value;
 
-    const doc = isDarkShop ? await DarkShops.getOrCreate(interaction.guild.id) : await Shops.getOrCreate(interaction.guild.id);
+    const doc = isDarkShop ? await DarkShops.getOrNull(interaction.guild.id) : await Shops.getOrCreate(interaction.guild.id);
     const _shop = new Shop(doc, interaction, isDarkShop);
 
     switch (subcommand) {

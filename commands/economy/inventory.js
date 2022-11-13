@@ -24,7 +24,7 @@ command.execute = async (interaction, models, params, client) => {
     });
 
     const shop = isDarkShop ?
-        await DarkShops.getOrCreate(interaction.guild.id) : 
+        await DarkShops.getOrNull(interaction.guild.id) : 
         await Shops.getOrCreate(interaction.guild.id);
 
     let noItems = new ErrorEmbed(interaction, {
