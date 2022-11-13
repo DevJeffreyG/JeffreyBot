@@ -1,4 +1,4 @@
-const { Command, Categories, ErrorEmbed, Embed } = require("../../src/utils")
+const { Command, Categories, ErrorEmbed, Embed, DarkShop } = require("../../src/utils")
 const Chance = require("chance");
 
 const command = new Command({
@@ -17,7 +17,7 @@ command.addOption({
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
-    const { Users, DarkShops } = models;
+    const { Users } = models;
     const { cantidad } = params
     const { Emojis } = client;
 
@@ -25,9 +25,9 @@ command.execute = async (interaction, models, params, client) => {
     const quantity = cantidad.value;
     const user = await Users.getOrCreate({user_id: interaction.user.id, guild_id: interaction.guild.id});
 
-    const darkshop = await DarkShops.getOrCreate(interaction.guild.id);
+    const darkshop = new DarkShop(interaction.guild);
+    const inflation = await darkshop.getInflation();
 
-    const inflation = darkshop.inflation.value;
     const darkjeffroValue = 200*inflation;
 
     const darkjeffros = user.economy.dark.darkjeffros;
@@ -69,7 +69,7 @@ command.execute = async (interaction, models, params, client) => {
     if(new Chance().bool({likelihood: 20})) {
         let sug = new Embed({
             type: "didYouKnow",
-            data: `Porque hayas cambiado todos tus DarkJeffros, aún debes estar al pendiente de la duración de estos`
+            data: `Si cambias DarkJeffros en la semana no los puedes recuperar`
         })
 
         embeds.push(sug);

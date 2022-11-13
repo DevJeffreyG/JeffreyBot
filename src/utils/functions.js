@@ -8,6 +8,7 @@ const Cumplidos = require("../resources/cumplidos.json");
 const ErrorEmbed = require("../utils/ErrorEmbed");
 const Embed = require("../utils/Embed");
 const InteractivePages = require("../utils/InteractivePages");
+const DarkShop = require("../utils/DarkShop");
 
 const ms = require("ms");
 
@@ -271,7 +272,7 @@ const FetchAuditLogs = async function (client, guild, types) {
 
       const fetched = fetchedLogs.entries.first();
 
-      if(fetched?.reason.startsWith("[BULK]")) resolve(null);
+      if (fetched?.reason?.startsWith("[BULK]")) resolve(null);
       if (fetched === undefined) {
         //console.error("⚠️ No se encontró ningún log con el tipo", type);
         break;
@@ -409,7 +410,7 @@ const intervalGlobalDatas = async function (client, justTempRoles) {
       guild_id: guild.id
     });
 
-    if(!dbUser) return
+    if (!dbUser) return
 
     let roles = dbUser.data.temp_roles;
     let birthday = dbUser.data.birthday.locked;
@@ -520,7 +521,8 @@ const intervalGlobalDatas = async function (client, justTempRoles) {
   if (justTempRoles === true) return;
 
   // ###### DARKSHOP ######
-  await DarkShopWork(client, guild.id);
+  await ManageDarkShops(client);
+  //await DarkShopWork(client, guild.id);
 
   // buscar temp bans
   GlobalDatas.find({
@@ -1219,7 +1221,7 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
         client.activeCollectors.splice(index, 1);
       } else console.log(`🟥 NO SE ELIMINÓ DE LOS ACTIVECOLLECTORS !! {CONFIRMATION}`)
 
-      if(r === EndReasons.OldCollector){
+      if (r === EndReasons.OldCollector) {
         await interaction.deleteReply()
         return resolve(false)
       }
@@ -1368,12 +1370,23 @@ const AfterInfraction = async function (user, data, isSoftwarn = false) {
   } */
 }
 
+const ManageDarkShops = async function (client) {
+  await client.guilds.fetch()
+
+  for await (const guild of client.guilds.cache.values()) {
+    const darkshop = new DarkShop(guild);
+
+    darkshop.inflationWork();
+  }
+}
+
 /**
- * 
+ * @deprecated
  * @param {*} client The Discord.JS Client
  * @param {String} guildId The Sting of the Guild#id where the commands is executed
  */
 const DarkShopWork = async function (client, guildId) {
+  return console.log("⚠️ DarkShopWork DEPRECATED! Usa ManageDarkShops !!");
   const { Emojis } = client;
 
   const maxDaysNormalInflation = Config.daysNormalInflation;
@@ -1683,7 +1696,7 @@ const ValidateDarkShop = async function (user, author) {
   const notReady = new Embed()
     .defColor(Colores.rojo)
     .defDesc(desc)
-    .defFooter({ text: `▸ Vuelve cuando seas nivel ${guild.settings.minimum.darkshop_level}.`});
+    .defFooter({ text: `▸ Vuelve cuando seas nivel ${guild.settings.minimum.darkshop_level}.` });
 
   if (user.economy.global.level < guild.settings.minimum.darkshop_level) return { valid: false, embed: notReady }
   else return { valid: true, embed: null };

@@ -123,7 +123,6 @@ const Schema = new mongoose.Schema({
         dark: {
             darkjeffros: { type: Number, default: 0 },
             accuracy: { type: Number, default: null },
-            duration: { type: Number, default: null },
             dj_since: { type: Date, default: null }
         }
     }

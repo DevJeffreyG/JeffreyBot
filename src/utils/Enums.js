@@ -6,6 +6,10 @@ class Enum {
     translate(input){
         return Object.keys(this.values).find(key => this.values[key] === input);
     }
+
+    array(){
+        return Object.keys(this.values);
+    }
 }
 
 const Categories = new Enum({
@@ -72,6 +76,13 @@ const CardType = new Enum({
     Clover: 4
 }).values
 
+const Tendencies = new Enum({
+    Random: 1,
+    Decreasing: 2,
+    LargeSpike: 3,
+    SmallSpike: 4
+}).values
+
 module.exports = {
     Enum,
     Categories,
@@ -82,5 +93,6 @@ module.exports = {
     BoostTypes,
     BoostObjetives,
     EndReasons,
-    CardType
+    CardType,
+    Tendencies
 }

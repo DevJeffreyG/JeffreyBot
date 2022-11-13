@@ -1,7 +1,7 @@
-const { Config } = require("../../src/resources");
-const { Command, Categories, ErrorEmbed, Embed } = require("../../src/utils")
-const { daysDarkJeffros } = Config;
+const { Command, Categories, ErrorEmbed, Embed, DarkShop } = require("../../src/utils")
+
 const Chance = require("chance");
+const moment = require("moment");
 
 const command = new Command({
     name: "dschange",
@@ -18,8 +18,11 @@ command.addOption({
 })
 
 command.execute = async (interaction, models, params, client) => {
+    if(moment().day() != 0){
+        return interaction.reply({ephemeral: true, content: `${client.Emojis.Error} NO puedes cambiar más DarkJeffros hasta que sea domingo.`})
+    }
     await interaction.deferReply();
-    const { Users, DarkShops } = models;
+    const { Users } = models;
     const { cantidad } = params
     const { Emojis } = client;
 
@@ -29,9 +32,9 @@ command.execute = async (interaction, models, params, client) => {
 
     let jeffros = user.economy.global.jeffros;
 
-    const darkshop = await DarkShops.getOrCreate(interaction.guild.id);
+    const darkshop = new DarkShop(interaction.guild);
+    const inflation = await darkshop.getInflation();
 
-    const inflation = darkshop.inflation.value;
     const darkjeffroValue = 200*inflation;
 
     const totalJeffros = Math.floor(darkjeffroValue * quantity);
@@ -58,20 +61,17 @@ command.execute = async (interaction, models, params, client) => {
             ]
         }
     })
-    .defFooter({text: `Para ver la duración de tus DarkJeffros usa '/darkstats'.`})
     embeds.push(success);
 
     if(totalJeffros > jeffros) return notEnough.send();
 
     const hoy = new Date();
-    const duration = Math.ceil(darkshop.inflation.duration) + Math.floor(Math.random() * daysDarkJeffros)
     const economy = user.economy.dark;
 
     economy.darkjeffros += quantity;
     user.economy.global.jeffros -= totalJeffros;
 
     economy.accuracy = economy.accuracy ?? Number((Math.random() * 15).toFixed(1));
-    economy.duration = economy.duration ?? Number(duration);
     economy.dj_since = economy.dj_since ?? hoy;
 
     await user.save();

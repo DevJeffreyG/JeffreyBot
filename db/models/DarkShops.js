@@ -33,10 +33,14 @@ const DarkShopsSchema = new Schema({
         }
     ],
     inflation: {
-        value: { type: Number, required: true },
-        old: { type: Number, required: true, default: 1 },
-        since: { type: Date, required: true },
-        duration: { type: Number, required: true },
+        values: { type: Object, required: true },
+        tendency_type: { type: Number, required: true },
+        initial_value: { type: Number, required: true },
+        last_value: { type: Number, required: true },
+        old_tendency: { type: Number, default: null },
+        since: { type: Date, required: true, default: () => {
+            return new Date();
+        } },
     },
     event: {
         newinflation: { type: Number },
@@ -45,12 +49,10 @@ const DarkShopsSchema = new Schema({
     }
 });
 
-DarkShopsSchema.static("getOrCreate", async function (id) {
+DarkShopsSchema.static("getOrNull", async function (id) {
     return await this.findOne({
         guild_id: id
-    }) ?? await new this({
-        guild_id: id
-    }).save();
+    }) ?? null
 })
 
 DarkShopsSchema.method("findItem", function (itemId, strict = true) {
@@ -70,6 +72,16 @@ DarkShopsSchema.method("isUsable", function (item) {
 
 DarkShopsSchema.method("getItemType", function (item) {
     return item.use_info.item_info.type;
+})
+
+DarkShopsSchema.pre("save", function() {
+    let inflation = this.inflation.toObject();
+
+    delete inflation.value
+    delete inflation.old
+    delete inflation.duration
+
+    this.inflation = inflation
 })
 
 module.exports = mongoose.model('DarkShops', DarkShopsSchema)

@@ -6,6 +6,7 @@ const InteractivePages = require("./InteractivePages");
 const FilePages = require("./FilePages");
 const Ticket = require("./Ticket");
 const Shop = require("./Shop");
+const DarkShop = require("./DarkShop");
 const Top = require("./Top");
 const Item = require("./Item");
 const RoulleteItem = require("./RouletteItem");
@@ -24,6 +25,7 @@ module.exports = {
     FilePages,
     Ticket,
     Shop,
+    DarkShop,
     Top,
     Item,
     RoulleteItem,
