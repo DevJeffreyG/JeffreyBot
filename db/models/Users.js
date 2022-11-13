@@ -94,7 +94,8 @@ const Schema = new mongoose.Schema({
             claim_rep: { type: Date, default: null },
             roulette: { type: Date, default: null },
             blackjack: { type: Date, default: null },
-            jeffros_to_exp: { type: Date, default: null }
+            jeffros_to_exp: { type: Date, default: null },
+            inflation_prediction: { type: Date, default: null }
         },
         counts: { // all time
             roulette: { type: Number, default: 0 },
@@ -196,11 +197,12 @@ Schema.method("toggleBan", async function (module) {
     return this.data.isBanned[module];
 })
 
-Schema.method("cooldown", function (modulo, options = { cooldown: null, save: true, check: true, info: false, instant: false }) {
-    let { cooldown, save, check, info, instant } = options
+Schema.method("cooldown", function (modulo, options = { cooldown: null, save: true, check: true, info: false, instant: false, precise: false }) {
+    let { cooldown, save, check, info, instant, precise } = options
 
     if (check == undefined) check = true;
     if (save == undefined) save = true;
+    if (precise == undefined) precise = false;
 
     if (!cooldown) switch (modulo) {
         case "rep":
@@ -228,7 +230,7 @@ Schema.method("cooldown", function (modulo, options = { cooldown: null, save: tr
             break;
     }
 
-    console.log("⚠️ Se está usando el cooldown %s", new HumanMs(cooldown).human)
+    console.log("⚠️ Se está usando el cooldown %s", precise ? cooldown : new HumanMs(cooldown).human)
 
     if (this.data.cooldowns[modulo] && check) {
         let timer = this.data.cooldowns[modulo];
@@ -243,7 +245,7 @@ Schema.method("cooldown", function (modulo, options = { cooldown: null, save: tr
 
     if (info) return;
 
-    let c = moment().add(cooldown, "ms").toDate()
+    let c = precise ? cooldown: moment().add(cooldown, "ms").toDate()
     let text = new HumanMs(moment(c)).left();
 
     this.data.cooldowns[modulo] = c;
