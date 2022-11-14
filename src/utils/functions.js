@@ -765,7 +765,7 @@ const Subscription = async function (victimMember, roleID, interval, jeffrosPerI
   return user
 }
 
-const VaultWork = function (vault, user, interaction, notCodeEmbed, client) { // mostrar y buscar un codigo no descifrado aún por el usuario
+const VaultWork = function (vault, user, interaction, notCodeEmbed) { // mostrar y buscar un codigo no descifrado aún por el usuario
   if (user.data.unlockedVaults.length === vault.length) return interaction.editReply({ embeds: [notCodeEmbed.defFooter({ text: "Tienes todos los códigos en tus manos, impresionante..." })] })
 
   const unlocked = user.data.unlockedVaults;
@@ -1055,14 +1055,14 @@ const handleUploads = async function (client) {
 }
 
 /**
- * 
+ * @deprecated Now using Log.js
  * @param {*} interaction The Discord.JS Interaction that triggers the command
  * @param {String} dataSearch The Data to search in the setup of this Guild
  * - OPINION_LOGS_CHANNEL
  * @returns 
  */
 const DataWork = async function (interaction, dataSearch) {
-
+  return console.log("🔴 Deprecated DataWork")
   const guild = interaction.guild;
 
   const docGuild = await Guilds.getOrCreate(guild.id);
@@ -1239,10 +1239,10 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
  * @param {Array} data Needed member, rule string, and proof object used for the infraction
  * @param {Boolean} [isSoftwarn=false] The infraction is a softwarn?
  */
-const AfterInfraction = async function (user, data, isSoftwarn = false) {
+const AfterInfraction = async function (user, data) {
   const { member, rule, proof, id, interaction } = data;
 
-  if (!isSoftwarn) { // es un warn normal
+  // es un warn normal
     const warns = user.warns;
     const totalWarns = warns.length;
 
@@ -1252,7 +1252,7 @@ const AfterInfraction = async function (user, data, isSoftwarn = false) {
     let arrayEmbeds = [];
 
     let warnedEmbed = new Embed()
-      .defAuthor({ text: `Warn`, icon: "https://cdn.discordapp.com/emojis/494267320097570837.png" })
+      .defAuthor({ text: `Warn`, icon: interaction.client.EmojisObject.Danger.url })
       .defDesc(`
 **—** Has sido __warneado__ por el STAFF.
 **—** Warns actuales: **${totalWarns}**.
@@ -1260,14 +1260,14 @@ const AfterInfraction = async function (user, data, isSoftwarn = false) {
 **—** **[Pruebas](${proof})**.
 **—** ID de Warn: \`${id}\`.`)
       .defColor(Colores.rojo)
-      .defFooter({ text: `Ten más cuidado la próxima vez!`, icon: 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png' });
+      .defFooter({ text: `Ten más cuidado la próxima vez!`, icon: interaction.guild.iconURL({dynamic: true}) });
 
     arrayEmbeds.push(warnedEmbed);
     let banMember = false;
 
     if (totalWarns >= 4) {
       let autoMod = new Embed()
-        .defAuthor({ text: `Ban PERMANENTE.`, icon: "https://cdn.discordapp.com/emojis/537804262600867860.png" })
+        .defAuthor({ text: `Ban PERMANENTE.`, icon: client.EmojisObject.Ban.url })
         .defDesc(`**—** PERMABAN.
 **—** Warns actuales: **${totalWarns}**.
 **—** Razón de ban (AutoMod): Muchos warns.
@@ -1280,7 +1280,7 @@ const AfterInfraction = async function (user, data, isSoftwarn = false) {
 
       if (totalWarns >= 3) {
         let autoMod = new Embed()
-          .defAuthor({ text: `TempBan`, icon: "https://cdn.discordapp.com/emojis/537792425129672704.png" })
+          .defAuthor({ text: `TempBan`, icon: client.EmojisObject.Kick.url })
           .defDesc(`**—** Ban (24h).
 **—** Warns actuales: **${totalWarns}**.
 **—** Razón de ban (AutoMod): 3 warns acumulados.
@@ -1328,7 +1328,7 @@ const AfterInfraction = async function (user, data, isSoftwarn = false) {
 
         if (totalWarns >= 2) {
           let infoEmbed = new Embed()
-            .defAuthor({ text: `Información`, icon: "https://cdn.discordapp.com/emojis/494267320097570837.png?v=1" })
+            .defAuthor({ text: `Información`, icon: client.EmojisObject.Danger.url })
             .defDesc(`**—** ${member.user.tag}, este es tu **warn número ❛ \`2\` ❜**
 *— ¿Qué impacto tendrá este warn?*
 **—** Tranquil@. Este warn no afectará en nada tu estadía en el servidor, sin embargo; el siguiente warn será un **ban de un día**.
@@ -1350,8 +1350,8 @@ const AfterInfraction = async function (user, data, isSoftwarn = false) {
       });
 
     if (banMember) console.log("Te baneo");//member.ban({reason: `AutoMod. (Infringir "${rule}")`});
-    return true
-  }/*  else {
+    return res
+    /*  else {
     const { member, rule, proof } = data;
 
     let warnedEmbed = new Embed()

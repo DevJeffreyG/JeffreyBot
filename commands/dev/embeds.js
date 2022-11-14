@@ -1,6 +1,6 @@
 const Discord = require("discord.js");
 const { Command, Categories, Embed, importImage } = require("../../src/utils");
-const { Colores, Config, EmbedImages } = require("../../src/resources");
+const { Colores, Config, EmbedImages, Bases } = require("../../src/resources");
 const { ButtonStyle } = require("discord-api-types/v10");
 
 const command = new Command({
@@ -59,7 +59,7 @@ command.execute = async (interaction, models, params, client) => {
 
     // DARKSHOP
     let faqEmbed2 = new Embed()
-    .defAuthor({text: "DarkShop", icon: "https://cdn.discordapp.com/attachments/494264018790514702/880595989713530980/emoji.png"})
+    .defAuthor({text: "DarkShop", icon: client.EmojisObject.Dark.url})
     .defDesc(`\`DS.Q1\` **— ¿Qué pasó con la DarkShop "DS"?**
 > La **DS** ya está disponible, revisa <#836397833531818004> para enterarte como funciona el sistema si ya eres nivel 5.
 
@@ -96,7 +96,7 @@ command.execute = async (interaction, models, params, client) => {
 
     // JEFFREY
     let faqEmbed4 = new Embed()
-    .defAuthor({text: "JeffreyG", icon: "https://cdn.discordapp.com/attachments/464810032081666048/886986232322740287/LOGO_29-08-2021.png"})
+    .defAuthor({text: "JeffreyG", icon: Bases.pngs.JeffreyIcon})
     .defDesc(`\`JG.Q1\` **— ¿Por qué [JeffreyG](https://youtube.com/JeffreyG) no sube videos?**
 > Por razones personales y por falta de ideas que tiene sobre el canal, además de que es tonto. Si tienes <@&529275759521431553> podrás ver los vídeos antes de tiempo, y a veces, algún adelanto. Mira <#485191307346837507>.
 

@@ -20,7 +20,7 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ephemeral: true});
     const guild = client.guilds.cache.find(x => x.id === interaction.guildId);
     const member = guild.members.cache.find(x => x.id === interaction.user.id);
-    const helpEmojiURL = "https://cdn.discordapp.com/emojis/494282181296914432.png";
+    const helpEmojiURL = client.EmojisObject.Faq.url
     
     // get all commands
     const commands = client.slash.map(slash => slash);

@@ -31,7 +31,7 @@ command.execute = async (interaction, models, params, client) => {
     let final = yoStr.replace(new RegExp('{user}', "g"), `**${usuario.user.tag}**`)
 
     let embed = new Embed()
-        .defAuthor({ text: "Hola:", icon: "https://i.pinimg.com/originals/85/7f/d7/857fd79dfd7bd025e4cbb2169cd46e03.png" })
+        .defAuthor({ text: "Hola:", icon: client.EmojisObject.Hola.url })
         .defDesc(final)
         .defFooter({ text: "Este es un mensaje directamente del staff del servidor." })
         .defColor(Colores.verde);
