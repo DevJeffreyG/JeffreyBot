@@ -8,10 +8,10 @@ module.exports = async (client, oldchannel, channel) => {
     const guild = channel.guild;
 
     const logs = await FetchAuditLogs(client, guild, [AuditLogEvent.ChannelUpdate, AuditLogEvent.ChannelOverwriteUpdate]);
-    if(!logs) return;
+    if (!logs) return;
 
     let type;
-    switch(channel.type){
+    switch (channel.type) {
         case "GUILD_TEXT":
             type = "un canal de texto";
             break;
@@ -30,8 +30,14 @@ module.exports = async (client, oldchannel, channel) => {
 
     let fields = await GetChangesAndCreateFields(logs);
 
-    GenerateLog(channel.guild, `Se ha actualizado ${type}`, "", [
-        `${channel}`,
-        `ID: \`${channel.id}\`.`
-    ], channel.guild.iconURL(), null, Colores.verdejeffrey, "GENERAL", fields);
+    GenerateLog(channel.guild, {
+        header: `Se ha actualizado ${type}`,
+        description: [
+            `${channel}`,
+            `ID: \`${channel.id}\`.`
+        ],
+        header_icon: channel.guild.iconURL(),
+        color: Colores.verdejeffrey,
+        fields
+    });
 }

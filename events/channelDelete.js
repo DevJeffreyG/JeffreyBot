@@ -3,7 +3,7 @@ const Colores = require("../src/resources/colores.json");
 
 module.exports = async (client, channel) => {
     let type;
-    switch(channel.type){
+    switch (channel.type) {
         case "GUILD_TEXT":
             type = "un canal de texto";
             break;
@@ -20,8 +20,13 @@ module.exports = async (client, channel) => {
             type = "un canal";
     }
 
-    GenerateLog(channel.guild, `Se ha eliminado ${type}`, "", [
-        `#${channel.name}`,
-        `ID: \`${channel.id}\`.`
-    ], channel.guild.iconURL(), null, Colores.verdejeffrey);
+    GenerateLog(channel.guild, {
+        header: `Se ha eliminado ${type}`,
+        description: [
+            `#${channel.name}`,
+            `ID: \`${channel.id}\`.`
+        ],
+        header_icon: channel.guild.iconURL(),
+        color: Colores.verdejeffrey
+    });
 }

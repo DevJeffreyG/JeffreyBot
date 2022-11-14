@@ -1,4 +1,4 @@
-const { PermissionsBitField, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, EmbedBuilder, Guild, GuildMember, CommandInteraction, BaseInteraction } = require("discord.js");
+const { PermissionsBitField, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, EmbedBuilder, Guild, GuildMember, CommandInteraction, BaseInteraction, Message } = require("discord.js");
 const { ButtonStyle, OverwriteType } = require("discord-api-types/v10");
 
 const Config = require("../resources/base.json");
@@ -23,7 +23,8 @@ const { google } = require("googleapis");
 const Twitter = require("twitter");
 const { ApiClient } = require("@twurple/api");
 const { ClientCredentialsAuthProvider } = require("@twurple/auth");
-const { BoostObjetives, EndReasons } = require("./Enums");
+const { BoostObjetives, EndReasons, ChannelModules } = require("./Enums");
+const Log = require("./Log");
 
 /* ##### MONGOOSE ######## */
 const RandomCumplido = function (force = null) {
@@ -304,29 +305,23 @@ const FetchAuditLogs = async function (client, guild, types) {
   })
 }
 
-
 /**
  * 
- * @param {*} guild The Discord.JS guild where this comes from
- * @param {String} header The text that appears at the title of the embed
- * @param {String} footer The text that appears at the footer of the embed
- * @param {Array} description The items that are separated by "—"
- * @param {String} headerPng The image (url) that appears at the left of the title
- * @param {String} footerPng The image (url) that appears at the left of the footer
- * @param {String} color The HEX color of the embed
- * @param {String} [logType="GENERAL"] The type of the log
- * - GENERAL
- * - MODERATION
- * - STAFF
- * @returns {Promise} The Discord.JS Message sent
+ * @param {Guild} guild 
+ * @param options 
+ * @returns {Promise<Message|null>}
  */
-const GenerateLog = async function (guild, header, footer, description, headerPng, footerPng, color, logType, fields) {
-  logType = logType ?? "GENERAL";
-  fields = fields ?? null;
+const GenerateLog = async function (guild, options = {
+  logType: ChannelModules.GuildLogs, header: "", footer: "", description: [], header_icon: "", footer_icon: "", color: "", fields: []}) {
+  let { logType, header, footer, description, header_icon, footer_icon, color, fields } = options;
+  
+  logType = logType ?? ChannelModules.GuildLogs;
+  footer = footer ?? "";
+  description = description ?? [];
 
   const embed = new Embed()
-    .defAuthor({ text: header, icon: headerPng ?? null })
-    .defFooter({ text: footer, icon: footerPng ?? null, timestamp: true })
+    .defAuthor({ text: header, icon: header_icon })
+    .defFooter({ text: footer, icon: footer_icon, timestamp: true })
     .defColor(color);
 
   let desc = "";
@@ -349,28 +344,10 @@ const GenerateLog = async function (guild, header, footer, description, headerPn
 
   if (!docGuild) return console.error("No se ha configurado un logchannel en el servidor", guild.name);
 
-  let channel;
-
-  switch (logType.toUpperCase()) {
-    case "GENERAL":
-      if (!docGuild.channels.general_logs) return;
-      channel = guild.channels.cache.find(x => x.id === docGuild.channels.general_logs);
-      break;
-
-    case "MODERATION":
-      if (!docGuild.channels.moderation_logs) return;
-      channel = guild.channels.cache.find(x => x.id === docGuild.channels.moderation_logs);
-      break;
-
-    case "STAFF":
-      if (!docGuild.channels.staff_logs) return;
-      channel = guild.channels.cache.find(x => x.id === docGuild.channels.staff_logs);
-      break;
-  }
-
-  if (!channel) return console.error("No se ha configurado un logchannel en el servidor", guild.name, logType.toUpperCase());
-
-  return sendLog(channel, embed);
+  return await new Log()
+    .setGuild(guild)
+    .setTarget(logType)
+    .send({embeds: [embed]})
 }
 
 /**
@@ -1896,11 +1873,6 @@ const Sleep = ms => new Promise(r => setTimeout(r, ms));
  */
 const GetRandomItem = (array) => {
   return array[Math.floor(Math.random() * array.length)];
-}
-
-async function sendLog(logChannel, embed) {
-  let msg = await logChannel.send({ embeds: [embed], content: null, components: [] });
-  return msg;
 }
 
 async function createEmbedWithParams(commandTree, guild, params, already) {

@@ -9,11 +9,18 @@ module.exports = async (client, message) => {
 
   let info = logs[0]
 
-  GenerateLog(message.guild, `Se ha eliminado un mensaje`, `Elminado por ${info?.executor.tag ?? "un usuario"}`, [
-    `${info?.target.tag ?? "Sin información del autor"}`,
-    `${message.content ?? message.embeds[0]?.description ?? "Sin información del mensaje"}`,
-    `ID: \`${message.id}\`.`
-  ], info?.target.displayAvatarURL({dynamic: true}) ?? message.guild.iconURL({dynamic: true}), info?.executor.displayAvatarURL({dynamic: true}), Colores.verdejeffrey, "GENERAL");
+  GenerateLog(message.guild, {
+    header: `Se ha eliminado un mensaje`,
+    footer: `Eliminado por ${info?.executor.tag ?? "un usuario"}`,
+    description: [
+      `${info?.target.tag ?? "Sin información del autor"}`,
+      `${message.content ?? message.embeds[0]?.description ?? "Sin información del mensaje"}`,
+      `ID: \`${message.id}\`.`
+    ],
+    header_icon: info?.target.displayAvatarURL({ dynamic: true }) ?? message.guild.iconURL({ dynamic: true }),
+    footer_icon: info?.executor.displayAvatarURL({ dynamic: true }),
+    color: Colores.verdejeffrey
+  })
 
   if (!author) return
 
