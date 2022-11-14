@@ -1,5 +1,5 @@
 const { Colores } = require("../../src/resources");
-const { Command, Categories, ErrorEmbed, Confirmation, FindNewId, Embed } = require("../../src/utils")
+const { Command, Categories, ErrorEmbed, Confirmation, FindNewId, Embed, Enum, ChannelModules } = require("../../src/utils")
 
 const command = new Command({
     name: "config",
@@ -22,9 +22,9 @@ command.data
                     .setDescription("El módulo a cambiar")
                     .setRequired(true)
                     .addChoices(
-                        { name: "General logs", value: "general logs" },
-                        { name: "Moderation logs", value: "moderation logs" },
-                        { name: "Opinion logs", value: "opinion logs" },
+                        { name: "Guild Logs [Audit Logs]", value: String(ChannelModules.GuildLogs) },
+                        { name: "Moderation logs [Warns, Softw, etc]", value: String(ChannelModules.ModerationLogs) },
+                        { name: "Staff logs [Tickets, Sug, Config]", value: String(ChannelModules.StaffLogs) },
                     )
             )
             .addChannelOption(nuevo =>
@@ -51,6 +51,67 @@ command.data
             .setDescription("La cantidad mínima necesaria para que funcione")
             .setMinValue(0.1)
             .setRequired(true)
+        )
+    )
+    .addSubcommandGroup(module => module
+        .setName("modules")
+        .setDescription("Activa/desactiva los módulos en el servidor")
+        .addSubcommand(glogs => glogs
+            .setName("guildlogs")
+            .setDescription("Todos los módulos que se pueden activar en relación con logs de audit logs.")
+            .addStringOption(o => o
+                .setName("modulo")
+                .setDescription("El módulo seleccionado")
+                .setChoices(
+                    { name: "Message Delete", value: "messageDelete" },
+                    { name: "Message Update", value: "messageUpdate" }
+                )
+                .setRequired(true)
+            )
+        )
+        .addSubcommand(mlogs => mlogs
+            .setName("modlogs")
+            .setDescription("Todos los módulos que se pueden activar en relación con logs de moderación.")
+            .addStringOption(o => o
+                .setName("modulo")
+                .setDescription("El módulo seleccionado")
+                .setChoices(
+                    { name: "Warns", value: "warns" },
+                    { name: "Softwarns", value: "softwarns" },
+                    { name: "Pardons", value: "pardons" },
+                    { name: "Bans", value: "bans" },
+                    { name: "Timeouts", value: "timeouts" },
+                )
+                .setRequired(true)
+            )
+        )
+        .addSubcommand(slogs => slogs
+            .setName("stafflogs")
+            .setDescription("Todos los módulos que se pueden activar en relación con logs de información para STAFF.")
+            .addStringOption(o => o
+                .setName("modulo")
+                .setDescription("El módulo seleccionado")
+                .setChoices(
+                    { name: "Tickets", value: "tickets" },
+                    { name: "Configuración", value: "settings" }
+                )
+                .setRequired(true)
+            )
+        )
+        .addSubcommand(functions => functions
+            .setName("funciones")
+            .setDescription("Todas las funciones que pueden activarse en el bot.")
+            .addStringOption(o => o
+                .setName("modulo")
+                .setDescription("El módulo seleccionado")
+                .setChoices(
+                    { name: "Sugerencias", value: "suggestions" },
+                    { name: "Tickets", value: "tickets" },
+                    { name: "Logs de mensajes", value: "message_logs" },
+
+                )
+                .setRequired(true)
+            )
         )
     )
     .addSubcommandGroup(roles =>
@@ -225,6 +286,10 @@ command.execute = async (interaction, models, params, client) => {
         case "reglas":
             await command.execReglas(interaction, models, docGuild, params);
             break;
+
+        case "modules":
+            await command.execModules(interaction, docGuild, params);
+            break;
     }
 }
 
@@ -233,20 +298,7 @@ command.execChannel = async (interaction, doc, params) => {
 
     const id = nuevo.value;
 
-    switch (modulo.value) {
-        case "general logs":
-            doc.channels.general_logs = id
-            break
-        case "moderation logs":
-            doc.channels.moderaction_logs = id
-            break
-        case "opinion logs":
-            doc.channels.opinion_logs = id
-            break
-
-        default:
-            return new ErrorEmbed(interaction, { type: "commandError", data: { id, unknown: modulo.value } }).send()
-    }
+    doc.channels[modulo.value] = id;
 
     await doc.save();
     return interaction.editReply({ content: `✅ Actualizado ➡️ ${nuevo.channel}` });
@@ -523,6 +575,47 @@ ${expl.value}
             return interaction.editReply({ embeds: [embed] })
         }
     }
+}
+
+command.execModules = async (interaction, doc, params) => {
+    console.log(params)
+    const { subcommand, modules } = params;
+    const { modulo } = modules;
+
+    let toggle = modulo.value;
+    let q;
+
+    switch (subcommand) {
+        case "guildlogs":
+            q = doc.settings.active_modules.logs.guild[toggle];
+
+            if (q) doc.settings.active_modules.logs.guild[toggle] = false
+            else doc.settings.active_modules.logs.guild[toggle] = true
+            break;
+        case "modlogs":
+            q = doc.settings.active_modules.logs.moderation[toggle];
+
+            if (q) doc.settings.active_modules.logs.moderation[toggle] = false
+            else doc.settings.active_modules.logs.moderation[toggle] = true
+            break;
+
+        case "stafflogs":
+            q = doc.settings.active_modules.logs.staff[toggle];
+
+            if (q) doc.settings.active_modules.logs.staff[toggle] = false
+            else doc.settings.active_modules.logs.staff[toggle] = true
+            break;
+
+        case "funciones":
+            q = doc.settings.active_modules.functions[toggle];
+
+            if (q) doc.settings.active_modules.functions[toggle] = false
+            else doc.settings.active_modules.functions[toggle] = true
+            break;
+    }
+
+    await doc.save()
+    return interaction.editReply({ content: `✅ Actualizado ▶️ ${toggle}` });
 }
 
 module.exports = command;

@@ -85,7 +85,30 @@ const GuildSchema = new Schema({
     },
     settings: {
         active_modules: {
-
+            functions: {
+                suggestions: { type: Boolean, default: false },
+                tickets: { type: Boolean, default: false },
+                message_logs: { type: Boolean, default: false }
+            },
+            logs: {
+                guild: {
+                    messageDelete: { type: Boolean, default: false },
+                    messageUpdate: { type: Boolean, default: false },
+                    // etc
+                },
+                moderation: {
+                    warns: { type: Boolean, default: true },
+                    softwarns: { type: Boolean, default: false },
+                    pardons: { type: Boolean, default: true },
+                    bans: { type: Boolean, default: true },
+                    timeouts: { type: Boolean, default: true },
+                    clears: { type: Boolean, default: true }
+                },
+                staff: {
+                    tickets: { type: Boolean, default: true },
+                    settings: { type: Boolean, default: true }
+                }
+            }
         },
         autoroles: {
             channel_id: { type: String },
@@ -109,9 +132,9 @@ const GuildSchema = new Schema({
         ],
     },
     channels: {
-        general_logs: { type: String },
+        guild_logs: { type: String },
         moderation_logs: { type: String },
-        opinion_logs: { type: String },
+        staff_logs: { type: String },
         chat_rewards: [
             {
                 channel_id: { type: String, required: true },
@@ -278,5 +301,24 @@ GuildSchema.method("getUsers", function () {
 GuildSchema.method("getBots", function () {
     return this.roles.bots
 });
+
+GuildSchema.method("getChannel", function(module) {
+    return this.channels[module] ?? null;
+})
+
+GuildSchema.method("moduleIsActive", function(query) {
+    let general = this.settings.active_modules;
+    const q = query.split(".");
+
+    if(q.length >= 1){
+        for (let i = 0; i < q.length; i++) {
+            const queryQ = q[i];
+            
+            general = general[queryQ]
+        }
+    }
+
+    return general;
+})
 
 module.exports = mongoose.model('Guilds', GuildSchema);

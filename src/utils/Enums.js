@@ -1,17 +1,53 @@
+/**
+ * Crea Enumeradores porque no sé como hacerlos en JavaScript.
+ */
 class Enum {
+    /**
+     * @param {Object} values Los valores del enumerador, pueden usarse los default para usar los métodos
+     */
     constructor (values) {
         this.values = values
     }
 
+    /**
+     * Busca el nombre del enumerador por su valor
+     * @param {String} input El valor a consultar
+     * @returns String
+     */
     translate(input){
         return Object.keys(this.values).find(key => this.values[key] === input);
     }
 
+    /**
+     * Convierte el objeto en un Array con los nombres de los enumeradores
+     * @returns Array
+     */
     array(){
         return Object.keys(this.values);
     }
+
+    /**
+     * Revisa si el valor existe en el Enum actual, es como translate sólo que devuelve un boolean
+     * @param {*} query El valor a consultar
+     * @returns Boolean
+     */
+    exists(query) {
+        let a = this.array();
+        return a.find(x => x === this.translate(query)) ? true : false;
+    }
 }
 
+/**
+ * - General
+ * - Fun
+ * - Economy
+ * - DarkShop
+ * - Staff
+ * - Administration
+ * - Moderation
+ * - Developer
+ * - Music
+ */
 const Categories = new Enum({
     General: "GENERAL",
     Fun: "FUN",
@@ -24,6 +60,13 @@ const Categories = new Enum({
     Music: "MUSIC"
 }).values
 
+/**
+ * - StackOverflow
+ * - ResetInterest
+ * - Firewall
+ * - Subscription
+ * - Temporal
+ */
 const ItemTypes = new Enum({
     StackOverflow: 1,
     ResetInterest: 2,
@@ -32,16 +75,32 @@ const ItemTypes = new Enum({
     Temporal: 5
 }).values
 
+/**
+ * - Positive
+ * - Negative
+ */
 const ItemEffects = new Enum({
     Positive: 1,
     Negative: 2
 }).values
 
+/**
+ * - Add
+ * - Remove
+ */
 const ItemActions = new Enum({
     Add: 1,
     Remove: 2
 }).values
 
+/**
+ * - Warns
+ * - Role
+ * - Item
+ * - Boost
+ * - Jeffros
+ * - TempRole
+ */
 const ItemObjetives = new Enum({
     Warns: 1,
     Role: 2,
@@ -51,17 +110,32 @@ const ItemObjetives = new Enum({
     TempRole: 6
 }).values
 
+/**
+ * - Multiplier
+ * - Probabilities
+ */
 const BoostTypes = new Enum({
     Multiplier: 1,
     Probabilities: 2
 }).values
 
+/**
+ * - Jeffros
+ * - Exp
+ * - All
+ */
 const BoostObjetives = new Enum({
     Jeffros: 1,
     Exp: 2,
     All: 3
 }).values
 
+/**
+ * - OldCollector
+ * - Over21
+ * - GaveUp
+ * - Blackjack
+ */
 const EndReasons = new Enum({
     OldCollector: 1,
     Over21: 2,
@@ -69,6 +143,12 @@ const EndReasons = new Enum({
     Blackjack: 4
 }).values
 
+/**
+ * - Spade
+ * - Heart
+ * - Diamond
+ * - Clover
+ */
 const CardType = new Enum({
     Spade: 1,
     Heart: 2,
@@ -76,11 +156,51 @@ const CardType = new Enum({
     Clover: 4
 }).values
 
+/**
+ * - Random
+ * - Decreasing
+ * - LargeSpike
+ * - SmallSpike
+ */
 const Tendencies = new Enum({
     Random: 1,
     Decreasing: 2,
     LargeSpike: 3,
     SmallSpike: 4
+}).values
+
+/**
+ * - GuildLogs - Logs para los eventos del servidor
+ * - ModerationLogs - Logs para los comandos de moderación
+ * - StaffLogs - Logs para las interacciones usuario-staff en el server (tickets, sugerencias, etc)
+ * - ClientLogs - Logs para Developer
+ */
+const ChannelModules = new Enum({
+    GuildLogs: "guild_logs",
+    ModerationLogs: "moderation_logs",
+    StaffLogs: "staff_logs",
+    ClientLogs: "client_logs"
+}).values
+
+/**
+ * - Ticket
+ * - Suggestion
+ * - Warn
+ * - SoftWarn
+ * - Pardon
+ * - Ban
+ * - TimeOut
+ * - MsgClear
+ */
+const LogReasons = new Enum({
+    Ticket: 1,
+    Suggestion: 2,
+    Warn: 3,
+    SoftWarn: 4,
+    Pardon: 5,
+    Ban: 6,
+    TimeOut: 7,
+    MsgClear: 8
 }).values
 
 module.exports = {
@@ -94,5 +214,7 @@ module.exports = {
     BoostObjetives,
     EndReasons,
     CardType,
-    Tendencies
+    Tendencies,
+    ChannelModules,
+    LogReasons
 }

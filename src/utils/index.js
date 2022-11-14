@@ -12,6 +12,7 @@ const Item = require("./Item");
 const RoulleteItem = require("./RouletteItem");
 const Managers = require("./Managers");
 const Blackjack = require("./Blackjack");
+const Log = require("./Log");
 
 const Enums = require("./Enums");
 const Functions = require("./functions");
@@ -31,6 +32,7 @@ module.exports = {
     RoulleteItem,
     Managers,
     Blackjack,
+    Log,
 
     ...Enums,
     ...Functions
