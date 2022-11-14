@@ -1,4 +1,4 @@
-const { CommandInteraction, GuildChannel } = require("discord.js");
+const { CommandInteraction, GuildChannel, Guild } = require("discord.js");
 const { ChannelModules, Enum, LogReasons } = require("./Enums");
 const ErrorEmbed = require("./ErrorEmbed");
 const { Guilds } = require("mongoose").models;
@@ -34,28 +34,28 @@ class Log {
             data: {
                 error: "INVALID LOG TARGET"
             }
-        })
+        }, true)
 
         this.#jeffreyMessageError = new ErrorEmbed(this.interaction, {
             type: "badCommand",
             data: {
                 error: "INVALID CONTENT & EMBED"
             }
-        })
+        }, true)
 
         this.#jeffreyMessageError = new ErrorEmbed(this.interaction, {
             type: "badCommand",
             data: {
                 error: "INVALID REASON"
             }
-        })
+        }, true)
 
         this.#configError = new ErrorEmbed(this.interaction, {
             type: "insuficientSetup",
             data: {
                 needed: new Enum(ChannelModules).translate(this.target)
             }
-        })
+        }, true)
 
     }
 
@@ -64,7 +64,7 @@ class Log {
         
         this.#embeds();
         // prepara lo necesario
-        this.#doc = await Guilds.getOrCreate(this.guild.id);
+        if(this.guild) this.#doc = await Guilds.getOrCreate(this.guild.id);
 
         if (!await this.#reasonWorker()) return;
         if (!this.target || !new Enum(ChannelModules).exists(this.target)) return this.#jeffreyError.send();
@@ -129,6 +129,15 @@ class Log {
      */
     setChannel(channel){
         this.channel = channel
+        return this;
+    }
+
+    /**
+     * Definir el servidor inmediatamente
+     * @param {Guild} guild 
+     */
+     setGuild(guild){
+        this.guild = guild
         return this;
     }
 

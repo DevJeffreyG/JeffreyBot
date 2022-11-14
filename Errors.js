@@ -22,20 +22,20 @@ module.exports = async (client) => {
     var title = `**⚠️ ¡JEFFREY BOT HA CRASHEADO!** ⚠️\n`
 
     function updateInteractionHandler() {
-        let guild = client.lastInteraction.guild;
-        let user = client.lastInteraction.user;
-        let channel = client.lastInteraction.channel;
+        let guild = client.lastInteraction?.guild;
+        let user = client.lastInteraction?.user;
+        let channel = client.lastInteraction?.channel;
 
         lastinter = `\n\nLa última interacción registrada fue:
-**—** En el servidor \`${guild.name}\` (\`${guild.id}\`)
-**—** Por \`${user.tag}\` (\`${user.id}\`)
-**—** En \`#${channel.name}\` (\`${channel.id}\`)
-**—** Tipo de interacción: \`${client.lastInteraction.type}\`
-**—** Nombre del comando: \`${client.lastInteraction.commandName}\`
-**—** Tipo de componente: \`${client.lastInteraction.componentType}\`
-**—** CustomId: \`${client.lastInteraction.customId}\`
-**—** ID: \`${client.lastInteraction.id}\`
-**—** ${time(client.lastInteraction.createdAt)}`
+**—** En el servidor \`${guild?.name}\` (\`${guild?.id}\`)
+**—** Por \`${user?.tag}\` (\`${user?.id}\`)
+**—** En \`#${channel?.name}\` (\`${channel?.id}\`)
+**—** Tipo de interacción: \`${client.lastInteraction?.type}\`
+**—** Nombre del comando: \`${client.lastInteraction?.commandName}\`
+**—** Tipo de componente: \`${client.lastInteraction?.componentType}\`
+**—** CustomId: \`${client.lastInteraction?.customId}\`
+**—** ID: \`${client.lastInteraction?.id}\`
+**—** ${time(client.lastInteraction?.createdAt)}`
     }
 
     process.on('uncaughtException', err => {

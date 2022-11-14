@@ -1,3 +1,5 @@
+const client = require("../../index");
+
 const Embed = require("./Embed");
 const Colores = require("../resources/colores.json");
 const { BaseInteraction } = require("discord.js");
@@ -26,7 +28,7 @@ class ErrorEmbed extends Embed {
      * @param {string} options.data - La información que tiene este tipo
      * @description Creación de un ErrorEmbed
      */
-    constructor(inter = null, options) {
+    constructor(inter = null, options, ignorewarnings = false) {
         super()
         if(inter && inter instanceof BaseInteraction === false) {
             options = inter;
@@ -34,7 +36,7 @@ class ErrorEmbed extends Embed {
         }
         
         if(inter) this.interaction = inter;
-        else console.log("❗ Considera usando ErrorEmbed.send()", options)
+        else if(!ignorewarnings) console.log("❗ Considera usando ErrorEmbed.send()", options)
 
         this.options = options;
         this.#setup(options)
@@ -44,6 +46,8 @@ class ErrorEmbed extends Embed {
         this.defColor(Colores.rojo)
 
         if(this.interaction) this.client = this.interaction.client;
+        else this.client = client;
+
         if(!options) return this.#customError();
 
         const { type, data } = options;
@@ -59,13 +63,13 @@ class ErrorEmbed extends Embed {
             case "toggledCommand":
                 this.#errorName("Comando deshabilitado")
                 this.#errorAuthor(2);
-                this.#errorDesc("Este comando está deshabilitado", `(\`/${data.commandName ?? this.interaction.commandName}\`)`, [`**${data.reason}** desde ${data.since}`])
+                this.#errorDesc("Este comando está deshabilitado", `(\`/${data.commandName ?? this.interaction?.commandName}\`)`, [`**${data.reason}** desde ${data.since}`])
                 break;
 
             case "badCommand":
                 this.#errorName("Error en el codigo")
                 this.#errorAuthor(3);
-                this.#errorDesc("Jeffrey es tonto, y por eso hubo un error ejecutando este comando", `(\`/${data.commandName ?? this.interaction.commandName}\`)`, ["Por favor, avísale de su grado de inservibilidad.", `**Y también dile que...**
+                this.#errorDesc("Jeffrey es tonto, y por eso hubo un error ejecutando este comando", `(\`/${data.commandName ?? this.interaction?.commandName}\`)`, ["Por favor, avísale de su grado de inservibilidad.", `**Y también dile que...**
 \`\`\`js
 ${data.error}
 \`\`\``])
@@ -137,7 +141,7 @@ ${data.error}
 
             case "execError":
                 this.#errorAuthor(14)
-                this.#errorDesc("Error al ejecutar el comando", data.command ?? this.interaction.commandName, [data.guide])
+                this.#errorDesc("Error al ejecutar el comando", data.command ?? this.interaction?.commandName, [data.guide])
                 break;
 
             case "moduleBanned":
