@@ -1,4 +1,4 @@
-const { ActionRowBuilder, SelectMenuBuilder, ButtonBuilder, PermissionsBitField } = require("discord.js");
+const { ActionRowBuilder, SelectMenuBuilder, ButtonBuilder, PermissionsBitField, time } = require("discord.js");
 const { ButtonStyle } = require("discord-api-types/v10");
 
 const Embed = require("./Embed");
@@ -12,16 +12,17 @@ const Colores = require("../resources/colores.json");
 const { Guilds, Users } = require("mongoose").models;
 
 const ms = require("ms");
-const moment = require("moment");
+const Log = require("./Log");
+const { ChannelModules } = require("./Enums");
 
 const ticketCooldown = ms("1m");
 const activeCreatingTicket = new Map();
 
 class Ticket {
-    constructor(interaction, client) {
+    constructor(interaction) {
         let info = this.#getTicketInfo(interaction)
-        this.client = client;
         this.interaction = interaction;
+        this.client = this.interaction.client;
         this.customId = interaction.customId;
         this.author = interaction.user;
         this.guild = interaction.guild;
@@ -45,7 +46,9 @@ class Ticket {
 
     async handle() {
         this.user = await Users.getOrCreate({ guild_id: this.guild.id, user_id: this.userId });
+        this.doc = await Guilds.getOrCreate(this.interaction.guild.id);
 
+        if(!this.doc.moduleIsActive("functions.tickets")) return new ErrorEmbed(this.interaction, {type: "moduleDisabled"}).send(true);
         if (!this.interaction.deferred) await this.interaction.deferReply({ ephemeral: true });
 
         switch (this.customId) {
@@ -69,10 +72,10 @@ class Ticket {
 
     async #createTicket() {
         const interaction = this.interaction;
-        const doc = await Guilds.getOrCreate(interaction.guild.id);
+        const doc = this.doc;
 
         // baneado de crear tickets
-        if(await isBannedFrom(interaction, "TICKETS")) return new ErrorEmbed(interaction, { type: "moduleBanned" }).send();
+        if (await isBannedFrom(interaction, "TICKETS")) return new ErrorEmbed(interaction, { type: "moduleBanned" }).send();
 
         // tiene cooldown
         if (activeCreatingTicket.has(interaction.user.id)) return interaction.editReply(`Alto ahí velocista, por favor espera ${ms((ticketCooldown) - (new Date().getTime() - activeCreatingTicket.get(interaction.user.id)))} antes de volver a darle al botón.`);
@@ -162,7 +165,7 @@ class Ticket {
 
                 const label = `ID: ${warn.id} — Por: ${regla.name}`
                 let desc = regla.desc ?? regla.expl;
-                if(desc.length > 100) {
+                if (desc.length > 100) {
                     desc = desc.slice(0, 95) + "..."
                 }
 
@@ -248,7 +251,7 @@ class Ticket {
         // CREAR CANAL  
         let channel = await category.children.create({
             name: channelName,
-            topic: `**—** Ticket creado por **${interaction.user.tag}** (${moment().tz("America/Bogota").format("DD [de] MMM [a las] hh:mm:ss A")} GMT-5)`,
+            topic: `**—** Ticket creado por **${interaction.user.tag}** (${time()})`,
             permissionOverwrites: this.permissions
         });
 
@@ -269,6 +272,11 @@ class Ticket {
         await this.user.save();
 
         await channel.send(`${this.author}, este será el canal donde el STAFF te podrá ayudar.\n${giveDetails}`)
+
+        await new Log(interaction)
+            .setTarget(ChannelModules.StaffLogs)
+            .send({ content: `- **${interaction.user.tag}** ha creado un nuevo ticket **(${ticketType})**: ${channel}` });
+
         return interaction.editReply({ content: `✅ Se ha creado el ticket: ${channel}`, embeds: [] });
     }
 
@@ -286,7 +294,7 @@ class Ticket {
 
         const message = await channel.messages.fetch(ticket.message_id);
 
-        if (ticket.end_reason) return interaction.editReply({ content: `⚠️ Ya se ha marcado el final del ticket como ${ticket.end_reason} el ${moment(ticket.end_date).tz("America/Bogota").format("DD [de] MMM [a las] hh[:]mm A")} (GMT-5).`, embeds: [], components: [] });
+        if (ticket.end_reason) return interaction.editReply({ content: `⚠️ Ya se ha marcado el final del ticket como ${ticket.end_reason}`, embeds: [], components: [] });
 
         let forcedEmbed = new Embed()
             .defFooter({ text: `El ticket fue cerrado` })
@@ -315,6 +323,10 @@ class Ticket {
             "SendMessages": false
         });
 
+        await new Log(interaction)
+            .setTarget(ChannelModules.StaffLogs)
+            .send({ content: `- **${interaction.user.tag}** ha forzado el cierre del ticket: ${channel}` });
+
         return interaction.editReply({ content: "✅ Se cerró el Ticket.", embeds: [], components: [] });
     }
 
@@ -323,7 +335,7 @@ class Ticket {
 
         if (this.ticketCreator != interaction.user.id) return interaction.editReply({ content: "Sólo el creador del ticket puede marcarlo como resuelto." });
 
-        let confirmation = await Confirmation("Marcar como resuelto", [`¿Estás segur@ de que quieres cerrar el ticket?`, `Sólo podría ser abrirto devuelta por un miembro del STAFF`], interaction);
+        let confirmation = await Confirmation("Marcar como resuelto", [`¿Estás segur@ de que quieres cerrar el ticket?`, `Sólo podría ser abierto  devuelta por un miembro del STAFF`], interaction);
         if (!confirmation) return;
 
         const ticket = this.docGuild.data.tickets.find(x => x.channel_id === interaction.channel.id);
@@ -331,7 +343,7 @@ class Ticket {
 
         const message = await channel.messages.fetch(ticket.message_id);
 
-        if (ticket.end_reason) return interaction.editReply({ content: `⚠️ Ya se ha marcado el final del ticket como ${ticket.end_reason} el ${moment(ticket.end_date).tz("America/Bogota").format("DD [de] MMM [a las] hh[:]mm A")} (GMT-5).`, embeds: [], components: [] });
+        if (ticket.end_reason) return interaction.editReply({ content: `⚠️ Ya se ha marcado el final del ticket como ${ticket.end_reason}`, embeds: [], components: [] });
 
         let closedEmbed = new Embed()
             .defFooter({ text: `El ticket se marcó como resuelto` })
@@ -354,6 +366,10 @@ class Ticket {
         this.docGuild.save();
 
         interaction.editReply({ content: "✅ El Ticket se marcó como resuelto.", embeds: [], components: [] });
+
+        await new Log(interaction)
+            .setTarget(ChannelModules.StaffLogs)
+            .send({ content: `- **${interaction.user.tag}** ha marcado como resuelto el ticket: ${channel}` });
 
         // eliminar al autor del ticket del canal
         return channel.permissionOverwrites.edit(ticket.created_by, {
@@ -404,8 +420,12 @@ class Ticket {
 
         interaction.editReply({ content: "✅ Se reabrió el ticket.", embeds: [], components: [] });
 
+        await new Log(interaction)
+            .setTarget(ChannelModules.StaffLogs)
+            .send({ content: `- **${interaction.user.tag}** ha reabierto el ticket: ${channel}` });
+
         // mencionar al creador original
-        channel.send(`¡${originalCreator}! El STAFF ha vuelto a abrir tu ticket.`);
+        return channel.send(`¡${originalCreator}! El STAFF ha vuelto a abrir tu ticket.`);
     }
 
     #setRows() {

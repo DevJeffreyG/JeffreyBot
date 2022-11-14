@@ -1,4 +1,4 @@
-const { Command, Categories, Embed, ErrorEmbed, Confirmation, FindNewId } = require("../../src/utils")
+const { Command, Categories, Embed, ErrorEmbed, Confirmation, FindNewId, Log, LogReasons, ChannelModules } = require("../../src/utils")
 const { Colores } = require("../../src/resources/");
 const { SelectMenuBuilder, ActionRowBuilder, AttachmentBuilder } = require("discord.js")
 const command = new Command({
@@ -30,8 +30,8 @@ command.execute = async (interaction, models, params, client) => {
     const doc = await Guilds.getOrCreate(interaction.guild.id);
 
     let selectMenu = new SelectMenuBuilder()
-    .setCustomId("selectRule")
-    .setPlaceholder("Selecciona la regla infringida");
+        .setCustomId("selectRule")
+        .setPlaceholder("Selecciona la regla infringida");
 
     let norules = new ErrorEmbed(interaction, {
         type: "errorFetch",
@@ -41,22 +41,20 @@ command.execute = async (interaction, models, params, client) => {
         }
     })
 
-    if(doc.data.rules?.length === 0) return norules.send();
+    if (doc.data.rules?.length === 0) return norules.send();
 
     const prueba = new AttachmentBuilder()
-    .setFile(pruebas.attachment)
-    .setName("prueba")
-    .setDescription("La prueba que el STAFF proporcionó para este warn");
-
-    console.log(prueba)
+        .setFile(pruebas.attachment)
+        .setName("prueba")
+        .setDescription("La prueba que el STAFF proporcionó para este warn");
 
     const pruebasEmbed = new Embed()
-    .setImage(prueba.attachment.url)
-    .defColor(Colores.verde);
+        .setImage(prueba.attachment.url)
+        .defColor(Colores.verde);
 
-    for(const regla of doc.data.rules){
+    for (const regla of doc.data.rules) {
         let desc = regla.desc ?? regla.expl;
-        if(desc.length > 100) {
+        if (desc.length > 100) {
             desc = desc.slice(0, 95) + "..."
         }
         selectMenu.addOptions(
@@ -68,24 +66,24 @@ command.execute = async (interaction, models, params, client) => {
         );
     }
 
-    selectMenu.addOptions({label: "Cancelar", value: "cancel", emoji: "❌"});
+    selectMenu.addOptions({ label: "Cancelar", value: "cancel", emoji: "❌" });
 
     let row = new ActionRowBuilder().addComponents([selectMenu]);
 
-    await interaction.editReply({content: "**¿Qué regla infringió?**", components: [row]})
+    await interaction.editReply({ content: "**¿Qué regla infringió?**", components: [row] })
 
     const filter = (inter) => inter.isSelectMenu() && inter.user.id === interaction.user.id;
-    const collector = interaction.channel.createMessageComponentCollector({filter, max: "1"});
+    const collector = interaction.channel.createMessageComponentCollector({ filter, max: "1" });
 
-    collector.on("collect", async(collected) => {
+    collector.on("collect", async (collected) => {
         const rule = Number(collected.values[0]) ?? collected.values[0];
         const ruleNo = doc.data.rules.find(x => x.id === rule)?.position;
         const member = usuario.member;
 
         await collected.deferUpdate();
 
-        if(!rule) return interaction.deleteReply();
-    
+        if (!rule) return interaction.deleteReply();
+
         const user = await Users.getOrCreate({
             user_id: member.id,
             guild_id: member.guild.id
@@ -101,7 +99,7 @@ command.execute = async (interaction, models, params, client) => {
             pruebasEmbed
         ];
         let confirmation = await Confirmation("Agregar softwarn", toConfirm, interaction);
-        if(!confirmation) return interaction.deleteReply();
+        if (!confirmation) return interaction.deleteReply();
 
         const softwarns = user.softwarns;
 
@@ -109,7 +107,7 @@ command.execute = async (interaction, models, params, client) => {
         let hasSoft = false;
         let indexOfSoftwarn;
         softwarns.forEach((soft) => {
-            if(soft.rule_id === rule){
+            if (soft.rule_id === rule) {
                 hasSoft = true;
                 indexOfSoftwarn = softwarns.indexOf(soft);
             }
@@ -123,18 +121,18 @@ command.execute = async (interaction, models, params, client) => {
                 context: "los softwarns del usuario, **procede con `/warn`**"
             }
         })
-        
-        if(hasSoft) return alreadyWarned.send();
+
+        if (hasSoft) return alreadyWarned.send();
 
         // guardar el nuevo attachment para evitar que se pierda
-        let msg = await interaction.followUp({content: `⚠️ Este mensaje se usará para tener la imagen de las pruebas, si se elimina se perderá.`, files: [prueba.attachment]});
+        let msg = await interaction.followUp({ content: `⚠️ Este mensaje se usará para tener la imagen de las pruebas, si se elimina se perderá.`, files: [prueba.attachment] });
 
         // como no tiene el soft, agregarlo
         let users = await Users.find();
         let newId = await FindNewId(users, "softwarns", "id");
 
-        softwarns.push({rule_id: rule, proof: msg.attachments.first().url, id: newId});
-        if(hasSoft) softwarns.splice(indexOfSoftwarn, 1);
+        softwarns.push({ rule_id: rule, proof: msg.attachments.first().url, id: newId });
+        if (hasSoft) softwarns.splice(indexOfSoftwarn, 1);
         await user.save();
 
         let log = new Embed({
@@ -142,7 +140,8 @@ command.execute = async (interaction, models, params, client) => {
             data: {
                 title: "Softwarn",
                 desc: [
-                    `Usuario: **${member}**`,
+                    `Usuario: **${member.user.tag}**`,
+                    `Moderador: **${interaction.user.tag}**`,
                     `Softwarns actuales: **${user.softwarns.length}**`,
                     `Por infringir la regla: **${ruleTxt}**`,
                     `ID de infracción: \`${newId}\``
@@ -151,12 +150,17 @@ command.execute = async (interaction, models, params, client) => {
         })
 
         let proofE = new Embed()
-        .defAuthor({text: "Pruebas", title: true})
-        .defDesc(msg.attachments.first().url)
-        .setImage(msg.attachments.first().url)
-        .defColor(Colores.nocolor);
+            .defAuthor({ text: "Pruebas", title: true })
+            .defDesc(msg.attachments.first().url)
+            .setImage(msg.attachments.first().url)
+            .defColor(Colores.nocolor);
 
-        return interaction.editReply({embeds: [log, proofE], components: []});
+        new Log(interaction)
+            .setReason(LogReasons.Pardon)
+            .setTarget(ChannelModules.ModerationLogs)
+            .send({ embeds: [log, proofE] })
+
+        return interaction.editReply({ embeds: [new Embed({type: "success"})], components: [] });
     })
 }
 

@@ -1,5 +1,5 @@
-const { Command, Categories, Embed} = require("../../src/utils")
-const { Config, Colores } = require("../../src/resources")
+const { Command, Categories, Embed, Log, LogReasons, ChannelModules} = require("../../src/utils")
+const { Colores } = require("../../src/resources")
 
 const command = new Command({
     name: "hackban",
@@ -28,7 +28,6 @@ command.execute = async (interaction, models, params, client) => {
 
     const user = usuario.value;
     const reason = razon ? razon.value : "HackBan";
-    let logC = client.user.id === Config.testingJBID ? interaction.guild.channels.cache.find(x => x.id === "483108734604804107") : interaction.guild.channels.cache.find(x => x.id === Config.logChannel);
 
     let bEmbed = new Embed()
     .defAuthor({text: `HackBan`, icon: interaction.guild.iconURL()})
@@ -38,7 +37,13 @@ command.execute = async (interaction, models, params, client) => {
     .defColor(Colores.verde);
     
     await interaction.guild.members.ban(user, {reason})
-    logC.send({embeds: [bEmbed]});
+
+    new Log(interaction)
+        .setReason(LogReasons.Ban)
+        .setTarget(ChannelModules.ModerationLogs)
+        .send({ embeds: [bEmbed] })
+
+
     return interaction.editReply({embeds: [
         new Embed({
             type: "success",

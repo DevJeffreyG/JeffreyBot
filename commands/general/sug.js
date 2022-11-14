@@ -1,5 +1,5 @@
 const Discord = require("discord.js");
-const { Command, Categories, isBannedFrom, FindNewId, DataWork, Embed, ErrorEmbed } = require("../../src/utils");
+const { Command, Categories, isBannedFrom, FindNewId, DataWork, Embed, ErrorEmbed, Log, ChannelModules, LogReasons } = require("../../src/utils");
 const { Colores } = require("../../src/resources");
 const { ButtonStyle } = require("discord-api-types/v10");
 
@@ -17,48 +17,50 @@ command.addOption({
 })
 
 command.execute = async (interaction, models, params, client) => {
-    await interaction.deferReply({ephemeral: true});
+
+    await interaction.deferReply({ ephemeral: true });
 
     const { Guilds } = models;
     const sugerencia = params.sugerencia.value;
 
-    if(await isBannedFrom(interaction, "SUGGESTIONS")) return new ErrorEmbed(interaction, { type: "moduleBanned" }).send();
-
-    let logChannel = await DataWork(interaction, "OPINION_LOGS_CHANNEL");
-    if(!logChannel) return;
+    if (await isBannedFrom(interaction, "SUGGESTIONS")) return new ErrorEmbed(interaction, { type: "moduleBanned" }).send();
 
     const docGuild = await Guilds.getOrCreate(interaction.guild.id);
+    if(!docGuild.moduleIsActive("functions.suggestions")) return new ErrorEmbed(interaction, {type: "moduleDisabled"}).send();
 
     const newId = await FindNewId(await Guilds.find(), "data.suggestions", "id"); // crear la nueva id para el ticket
 
     const row = new Discord.ActionRowBuilder()
-    .addComponents(
-        new Discord.ButtonBuilder()
-            .setCustomId("acceptSuggestion")
-            .setLabel("Aceptar")
-            .setStyle(ButtonStyle.Primary),
-        new Discord.ButtonBuilder()
-            .setCustomId("denySuggestion")
-            .setLabel("Denegar")
-            .setStyle(ButtonStyle.Secondary),
+        .addComponents(
+            new Discord.ButtonBuilder()
+                .setCustomId("acceptSuggestion")
+                .setLabel("Aceptar")
+                .setStyle(ButtonStyle.Primary),
+            new Discord.ButtonBuilder()
+                .setCustomId("denySuggestion")
+                .setLabel("Denegar")
+                .setStyle(ButtonStyle.Secondary),
 
-        new Discord.ButtonBuilder()
-            .setCustomId("invalidateSuggestion")
-            .setLabel("Invalidar")
-            .setStyle(ButtonStyle.Danger)
-    )
+            new Discord.ButtonBuilder()
+                .setCustomId("invalidateSuggestion")
+                .setLabel("Invalidar")
+                .setStyle(ButtonStyle.Danger)
+        )
 
     let embed = new Embed()
-    .defAuthor({text: "Nueva sugerencia", icon: interaction.member.displayAvatarURL()})
-    .defDesc(`**—** Por: ${interaction.member}
+        .defAuthor({ text: "Nueva sugerencia", icon: interaction.member.displayAvatarURL() })
+        .defDesc(`**—** Por: ${interaction.member}
 **—** Sugiere:
 \`\`\`
 ${sugerencia}
 \`\`\`
 **—** ID: \`${newId}\`.`)
-    .defColor(Colores.verdejeffrey);
+        .defColor(Colores.verdejeffrey);
 
-    let msg = await logChannel.send({embeds: [embed], components: [row]});
+    let msg = await new Log(interaction)
+        .setTarget(ChannelModules.StaffLogs)
+        .setReason(LogReasons.Suggestion)
+        .send({ embeds: [embed], components: [row] });
 
     docGuild.data.suggestions.push({
         user_id: interaction.user.id,
@@ -70,7 +72,8 @@ ${sugerencia}
 
     await docGuild.save();
 
-    return interaction.editReply({content: "✅ ¡Gracias!"});
+    return interaction.editReply({ content: "✅ ¡Gracias!" });
+
 }
 
 module.exports = command;

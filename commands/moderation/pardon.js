@@ -1,4 +1,4 @@
-const { Command, Categories, Embed, ErrorEmbed, Confirmation } = require("../../src/utils")
+const { Command, Categories, Embed, ErrorEmbed, Confirmation, Log, LogReasons, ChannelModules } = require("../../src/utils")
 const { Colores } = require("../../src/resources");
 const command = new Command({
     name: "pardon",
@@ -34,15 +34,12 @@ command.addOption({
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
-    const { Guilds, Users } = models;
+    const { Users } = models;
     const { subcommand } = params;
     const { id } = params[subcommand];
 
     const isSoftwarn = subcommand === "softwarn";
     const textInfraction = isSoftwarn ? "Softwarn" : "Warn";
-
-    // revisar que estén las reglas activadas
-    const doc = await Guilds.getOrCreate(interaction.guild.id);
 
     let notfound = new ErrorEmbed(interaction, {
         type: "errorFetch",
@@ -117,20 +114,26 @@ command.execute = async (interaction, models, params, client) => {
         data: {
             title: `Pardon ${textInfraction}`,
             desc: [
-                `Miembro: ${member}`,
+                `Miembro: **${member.user.tag}**`,
+                `Moderador: **${interaction.user.tag}**`,
                 `${textInfraction + "s"} actuales: **${infractions.length}**`
             ]
         }
     })
 
     let memberEmbed = new Embed()
-        .defAuthor({ text: `Pardon`, icon: "https://cdn.discordapp.com/emojis/537004318667177996.png" })
+        .defAuthor({ text: `Pardon`, icon: client.EmojisObject.Pardon.url })
         .defDesc(`**—** Se ha eliminado el ${textInfraction} con ID "**${id.value}**".
 **—** ${textInfraction + "s"} actuales: **${infractions.length}**.`)
         .defColor(Colores.verde)
-        .defFooter({ text: `Un abrazo, el Staff.`, icon: 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png' });
+        .defFooter({ text: `Un abrazo, el Staff.`, icon: interaction.guild.iconURL({dynamic: true}) });
 
-    await interaction.editReply({ embeds: [pardon] });
+    new Log(interaction)
+        .setReason(LogReasons.Pardon)
+        .setTarget(ChannelModules.ModerationLogs)
+        .send({ embeds: [pardon] })
+
+    await interaction.editReply({ embeds: [new Embed({type: "success"})] });
     if (!isSoftwarn) member.send({ embeds: [memberEmbed] })
         .catch(e => {
             interaction.editReply({ embeds: [pardon, new ErrorEmbed({ type: "notSent", data: { tag: member.user.tag, error: e } })] })
