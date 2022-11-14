@@ -36,8 +36,8 @@ command.execute = async (interaction, models, params, client) => {
             // despues del fetch, conseguir solo los que son menos a 14 dias
             let messagesAvailable = interaction.channel.messages.cache.filter(
                 x =>
-                    moment(x.createdAt).isAfter(moment().subtract(14, "days")) &&
-                    (x.content.length >= 1 || x.embeds.length >= 1)
+                    moment(x?.createdAt).isAfter(moment().subtract(14, "days")) &&
+                    (x.content?.length >= 1 || x.embeds?.length >= 1)
             )
 
             console.log("⚪ %s/%s mensajes son posibles de eliminar.", messagesAvailable.size, actualremoval)

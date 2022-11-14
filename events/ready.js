@@ -6,7 +6,7 @@ const Chance = require("chance");
 
 const Managers = require("../src/utils/Managers");
 let functions = require("../src/utils/functions");
-const { Tendencies, Enum, ChannelModules } = require("../src/utils/Enums");
+const { ChannelModules } = require("../src/utils/Enums");
 const Log = require("../src/utils/Log");
 
 const CronJob = require("cron").CronJob;

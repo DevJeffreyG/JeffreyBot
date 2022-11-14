@@ -1,13 +1,14 @@
 const { Client, time } = require("discord.js");
 const { Bases } = require("./src/resources");
 const { ChannelModules } = require("./src/utils/Enums");
-const Log = require("./src/utils/Log");
 
 /**
  * 
  * @param {Client} client 
  */
 module.exports = async (client) => {
+
+    const Log = require("./src/utils/Log")
 
     var devGuild = await client.guilds.fetch(Bases.dev.guild)
         .catch(err => console.log("⚠️ DEV GUILD NOT FOUND!", err))
