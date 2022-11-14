@@ -23,12 +23,13 @@ module.exports = async (client, interaction) => {
     console.log("💚 %s fetched!", interaction.guild.name)
   }
 
+  client.lastInteraction = interaction;
+  
   const author = interaction.user;
   const guild = interaction.guild;
   const customId = interaction.customId;
 
-  const docGuild = await Guilds.findOne({ guild_id: guild.id }) ?? await new Guilds({ guild_id: guild.id }).save();
-
+  const docGuild = await Guilds.getOrCreate(guild.id);
   const user = await Users.getOrCreate({ user_id: author.id, guild_id: guild.id });
 
   if (interaction.type === InteractionType.ApplicationCommand) { // SLASH COMMANDS
@@ -105,6 +106,7 @@ module.exports = async (client, interaction) => {
     }
 
     await intervalGlobalDatas(client);
+    
     executeSlash(interaction, models, params, client)
 
     async function executeSlash(interaction, models, params, client) {
@@ -134,7 +136,17 @@ module.exports = async (client, interaction) => {
 
     let message, ticket;
 
-    if (customId.toUpperCase().includes("TICKET")) ticket = new Ticket(interaction, client);
+    const suggestionNotFound = new ErrorEmbed(interaction, {
+      type: "errorFetch",
+      data: {
+        type: "suggestion",
+        guide: "Eso no debió pasar... no encontré esa sugerencia en la base de datos"
+      }
+    })
+
+    if (customId.toUpperCase().includes("TICKET")) ticket = new Ticket(interaction);
+    if(customId.toUpperCase().includes("SUGGESTION") && !docGuild.moduleIsActive("functions.suggestions"))
+      return new ErrorEmbed(interaction, {type: "moduleDisabled"}).send(true);
 
     if (ticket) {
       return ticket.handle();
@@ -148,6 +160,10 @@ module.exports = async (client, interaction) => {
         if (!interaction.deferred) await interaction.deferReply({ ephemeral: true });
 
         let suggestion = docGuild.data.suggestions.find(x => x.message_id === interaction.message.id);
+        if(!suggestion) {
+          interaction.message.edit({ components: []})
+          return suggestionNotFound.send()
+        }
 
         suggestion.accepted = true;
         docGuild.save();
@@ -189,6 +205,10 @@ ${suggestion.suggestion}
         if (!interaction.deferred) await interaction.deferReply({ ephemeral: true });
 
         let suggestion = docGuild.data.suggestions.find(x => x.message_id === interaction.message.id);
+        if(!suggestion) {
+          interaction.message.edit({ components: []})
+          return suggestionNotFound.send()
+        }
 
         suggestion.accepted = false;
         docGuild.save();
@@ -230,6 +250,10 @@ ${suggestion.suggestion}
         if (!interaction.deferred) await interaction.deferReply({ ephemeral: true });
 
         let suggestion = docGuild.data.suggestions.find(x => x.message_id === interaction.message.id);
+        if(!suggestion) {
+          interaction.message.edit({ components: []})
+          return suggestionNotFound.send()
+        }
 
         suggestion.accepted = false;
         docGuild.save();
