@@ -1,4 +1,4 @@
-const Config = require("../src/resources/base.json");
+const { Bases, Config } = require("../src/resources");
 const { prefix } = Config;
 
 const { GlobalDatas } = require("mongoose").models;
@@ -6,7 +6,8 @@ const Chance = require("chance");
 
 const Managers = require("../src/utils/Managers");
 let functions = require("../src/utils/functions");
-const { Tendencies, Enum } = require("../src/utils/Enums");
+const { Tendencies, Enum, ChannelModules } = require("../src/utils/Enums");
+const Log = require("../src/utils/Log");
 
 const CronJob = require("cron").CronJob;
 
@@ -18,6 +19,15 @@ module.exports = async (client) => {
     client.blackjackCards = [];
     client.wonBlackjack = [];
     client.lockedGuilds = await GlobalDatas.getLockedGuilds();
+
+    client.devGuild = await client.guilds.fetch(Bases.dev.guild)
+        .catch(err => console.log("⚠️ DEV GUILD NOT FOUND!", err))
+
+    var devChannels = await client.devGuild.channels.fetch()
+        .catch(err => console.log("⚠️ NOT POSSIBLE TO FETCH CHANNELS!", err));
+
+    client.crashChannel = await devChannels.get(Bases.dev.crashes);
+    client.logChannel = await devChannels.get(Bases.dev.logs);
 
     new Chance().mixin({
         "prob": function (array) {
@@ -67,12 +77,10 @@ module.exports = async (client) => {
     console.log("============================================================");
     console.log(`❗❗❗ 💚 ${client.user.username} ONLINE 💚 ❗❗❗`);
 
-    let channel = client.channels.cache.get(Config.logChannel);
     let dsChannel = client.channels.cache.find(x => x.id === Config.dsChannel);
     let dsNews;
 
     if (client.user.id === Config.testingJBID) {
-        channel = client.channels.cache.get("483108734604804107");
         guild = client.guilds.cache.find(x => x.id === "482989052136652800");
         dsNews = guild.roles.cache.find(x => x.id === "790431614378704906");
         dsChannel = client.channels.cache.find(x => x.id === "790431676970041356");
@@ -80,7 +88,10 @@ module.exports = async (client) => {
         dsNews = guild.roles.cache.find(x => x.id === Config.dsnews);
     }
 
-    channel.send("Reviví.");
+    new Log()
+        .setChannel(client.logChannel)
+        .setTarget(ChannelModules.ClientLogs)
+        .send({ content: `${client.Emojis.Check} Jeffrey Bot ONLINE.` });
 
     /* Buscar usuarios nivel 5 sin role nivel 5 */
     await functions.findLvls5(client, guild)
