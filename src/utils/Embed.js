@@ -60,6 +60,9 @@ class Embed extends Discord.EmbedBuilder {
         
         if(text){
             this.setFooter({text, iconURL: icon})
+        } else {
+            console.log("⚠️ EMBED no tiene TEXT. Icon: %s, Timestamp: %s", this, icon, timestamp);
+            console.log(this)
         }
         return this
     }

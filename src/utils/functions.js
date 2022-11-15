@@ -315,8 +315,8 @@ const GenerateLog = async function (guild, options = {
   logType: ChannelModules.GuildLogs, header: "", footer: "", description: [], header_icon: "", footer_icon: "", color: "", fields: []}) {
   let { logType, header, footer, description, header_icon, footer_icon, color, fields } = options;
   
+  if(!footer) return console.log("🔴 NO TIENE FOOTER", options)
   logType = logType ?? ChannelModules.GuildLogs;
-  footer = footer ?? "";
   description = description ?? [];
 
   const embed = new Embed()
