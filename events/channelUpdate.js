@@ -1,7 +1,6 @@
-const Discord = require("discord.js");
-
 const { GenerateLog, FetchAuditLogs, GetChangesAndCreateFields } = require("../src/utils/");
-const Colores = require("../src/resources/colores.json");
+const { Colores } = require("../src/resources");
+
 const { AuditLogEvent } = require("discord-api-types/v10");
 
 module.exports = async (client, oldchannel, channel) => {
@@ -36,7 +35,6 @@ module.exports = async (client, oldchannel, channel) => {
             `${channel}`,
             `ID: \`${channel.id}\`.`
         ],
-        header_icon: channel.guild.iconURL(),
         color: Colores.verdejeffrey,
         fields
     });

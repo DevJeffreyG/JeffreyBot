@@ -69,7 +69,7 @@ class Log {
         if (!await this.#reasonWorker()) return;
         if (!this.target || !new Enum(ChannelModules).exists(this.target)) return this.#jeffreyError.send();
 
-        let configured = this.#doc.getChannel(this.target);
+        let configured = this.#doc.getLogChannel(this.target);
         this.channel = configured ? await this.guild.channels.fetch(configured) : null;
 
         if (!this.channel) return this.#configError.send();

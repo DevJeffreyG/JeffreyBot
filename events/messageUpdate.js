@@ -1,8 +1,6 @@
-const Config = require("../src/resources/base.json");
-
+const { Config, Colores } = require("../src/resources");
 const { startLinks } = require("../index.js");
 const { GenerateLog } = require("../src/utils/functions");
-const { Colores } = require("../src/resources");
 
 module.exports = async (client, oldMessage, message) => {
     const prefix = "/";

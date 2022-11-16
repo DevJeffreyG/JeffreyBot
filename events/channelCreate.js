@@ -1,5 +1,5 @@
 const { GenerateLog } = require("../src/utils/");
-const Colores = require("../src/resources/colores.json");
+const { Colores } = require("../src/resources");
 
 module.exports = async (client, channel) => {
     let type;
@@ -26,7 +26,6 @@ module.exports = async (client, channel) => {
             `${channel}`,
             `ID: \`${channel.id}\`.`
         ],
-        header_icon: channel.guild.iconURL(),
         color: Colores.verdejeffrey
     });
 }

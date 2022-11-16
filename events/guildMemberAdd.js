@@ -2,8 +2,7 @@ const Discord = require("discord.js");
 
 const { time } = Discord;
 const { GenerateLog, DaysUntilToday, Initialize } = require("../src/utils/");
-const Config = require("../src/resources/base.json");
-const Colores = require("../src/resources/colores.json");
+const { Colores, Config } = require("../src/resources");
 
 const { Users } = require("mongoose").models;
 
@@ -85,8 +84,7 @@ module.exports = async (client, member) => {
             `Su cuenta tiene **${Math.floor(await DaysUntilToday(member.user.createdAt))}** días de edad (${time(member.user.createdAt)}).`,
             `¡Ahora somos **${member.guild.memberCount}** miembros en el servidor!`
           ],
-          header_icon: member.displayAvatarURL({ dynamic: true }),
-          footer_icon: member.guild.iconURL(),
+          footer_icon: member.displayAvatarURL({ dynamic: true }),
           color: Colores.verde
         });
       }
@@ -95,5 +93,5 @@ module.exports = async (client, member) => {
 
 
 
-  client.user.setActivity(`${prefix}ayuda - ${member.guild.memberCount} usuarios🔎`);
+  client.user.setActivity(`/ayuda - ${member.guild.memberCount} usuarios🔎`);
 }

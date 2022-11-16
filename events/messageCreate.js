@@ -1,9 +1,8 @@
 //packages
-const Discord = require("discord.js");
 const ms = require("ms");
 const moment = require('moment-timezone');
 
-const { Config } = require("../src/resources/");
+const { Config, Colores } = require("../src/resources/");
 const { Embed } = require("../src/utils");
 const { deleteLateMedia, disableEXPs, jeffreygID, multiplier, mantenimiento } = Config;
 
@@ -16,16 +15,9 @@ const startLinks = [
   "https://", "http://", "www."
 ];
 
-const active = new Map(); // musica
+const { GlobalDatasWork } = require("../src/utils/");
 
-const { intervalGlobalDatas } = require("../src/utils/");
-
-const Cumplidos = require("../src/resources/cumplidos.json");
-const Colores = require("../src/resources/colores.json");
-
-const { ToggledCommands, Users, Guilds } = require("mongoose").models;
-
-const cmdCooldown = ms("2s");
+const { Users, Guilds } = require("mongoose").models;
 
 module.exports = async (client, message) => {
   // Captcha.
@@ -33,17 +25,14 @@ module.exports = async (client, message) => {
   if (message.channel.type == "DM") return;
 
   const docGuild = await Guilds.getOrCreate(message.guild.id);
-  const prefix = "/";
   const messageArray = message.content.split(" ");
-  const cmd = messageArray[0].toLowerCase();
-  const args = messageArray.slice(1);
   const guild = message.guild;
   const author = message.author;
   const channel = message.channel;
 
   if (mantenimiento && author.id != jeffreygID) return console.log("MANTENIMIENTO");
 
-  await intervalGlobalDatas(client, true); // verificar si existen BOOSTS.
+  await GlobalDatasWork(guild, true); // verificar si existen BOOSTS.
 
   // buscar usuario
   const user = await Users.getOrCreate({
@@ -353,19 +342,5 @@ module.exports = async (client, message) => {
     }
   } else {
     return console.log("EXP y JEFFROS están deshabilitados, no es Jeffrey, no se han dado ni EXP ni JEFFROS.");
-  }
-
-
-  async function findCommand(cmd) {
-    let file;
-    client.baseCommands.forEach(async command => {
-      let foundAlias = command.aliases.find(x => x === cmd.slice(prefix.length)) ? true : false;
-
-      if (foundAlias) {
-        file = require("../oldcommands/" + command.file);
-      }
-    });
-
-    return file;
   }
 }

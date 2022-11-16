@@ -1,6 +1,6 @@
 const { time } = require("discord.js");
 const { GenerateLog } = require("../src/utils/");
-const Colores = require("../src/resources/colores.json");
+const { Colores } = require("../src/resources");
 
 module.exports = async (client, invite) => {
     client.invites[invite.code] = invite.uses;
@@ -13,8 +13,7 @@ module.exports = async (client, invite) => {
             `discord.gg/${invite.code}`,
             `Expira: ${new Date() > invite.expiresAt ? "Nunca" : time(invite.expiresAt)}`
         ],
-        header_icon: invite.inviter.displayAvatarURL(),
-        footer_icon: invite.guild.iconURL(),
+        footer_icon: invite.inviter.displayAvatarURL(),
         color: Colores.verdejeffrey
     });
 }

@@ -3,7 +3,7 @@ const { Guild, CommandInteraction, time } = require("discord.js");
 const moment = require("moment");
 const Chance = require("chance");
 
-const { DarkShops, Users } = require("mongoose").models;
+const { DarkShops, Users, Guilds } = require("mongoose").models;
 
 const { Tendencies, Enum } = require("./Enums");
 const Embed = require("./Embed");
@@ -403,6 +403,9 @@ class DarkShop {
     }
 
     async inflationWork() {
+        this.guilddoc = await Guilds.getOrCreate(this.guild.id);
+        if (!this.guilddoc.moduleIsActive("functions.darkshop")) return;
+
         this.doc = await DarkShops.getOrNull(this.guild.id);
         await this.#fetchInfo();
 

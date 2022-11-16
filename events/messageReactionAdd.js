@@ -1,8 +1,7 @@
 const Discord = require("discord.js");
 const ms = require("ms");
 
-const Config = require("../src/resources/base.json");
-const Colores = require("../src/resources/colores.json");
+const { Config, Colores } = require("../src/resources");
 const { Embed } = require("../src/utils");
 const { disableAwards, jeffreygID } = Config;
 

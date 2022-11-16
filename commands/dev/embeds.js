@@ -71,7 +71,7 @@ command.execute = async (interaction, models, params, client) => {
 
 \`DS.Q4\` **— Ya no me sirven los comandos, ¿qué pasa?**
 > Antes de la actualización de Jeffrey Bot v1.7.0 la DarkShop era un solo comando que contenía la inflación, cambios, depósitos, tienda, etc.
-> Con la llegada de la actualización, tanto la DarkShop como la tienda ha tenido cambios en cuanto a sus comandos (los cuales puedes ver usando el Slash Command \`${prefix}ayuda\`), ya que se han creado más de estos que ya hacían las mismas acciones.
+> Con la llegada de la actualización, tanto la DarkShop como la tienda ha tenido cambios en cuanto a sus comandos (los cuales puedes ver usando el Slash Command \`/ayuda\`), ya que se han creado más de estos que ya hacían las mismas acciones.
 > Esto se hizo con el fin de mantener un mejor orden tanto para los nuevos usuarios como para los veteranos en el servidor.`)
     .defColor(Colores.negro);
 
@@ -87,7 +87,7 @@ command.execute = async (interaction, models, params, client) => {
 \`SV.Q3\` **— ¿Cuánta EXP y Jeffros gano por mensaje? ¿Hay cooldown?**
 > Es aleatorio, pero en base, sin ningún tipo de multiplicador, o boost; ¡puedes ganar hasta **35 de EXP** y **15 Jeffros** por mensaje! Y sí, hay un cooldown base de 1 minuto.
 
-\`SV.Q4\` **— ¿Qué significan los ${Emojis.DarkJeffros} en el comando \`${prefix}top\`?**
+\`SV.Q4\` **— ¿Qué significan los ${Emojis.DarkJeffros} en el comando \`/top\`?**
 > Aquellos usuarios que tengan DarkJeffros, se mostrará la parte de los Jeffros que estos representan, haciendo la conversión dependiendo de la inflación actual. Esto para que se mantengan las posiciones de los usuarios equilibrados aunque se tengan algunos Jeffros invertidos en la **DarkShop**; los Jeffros que salen de primero son los totales que tiene el usuario, se incluyen los que están en la DarkShop.
 
 \`SV.Q5\` **— ¿Cuál es la invitación al server?**
@@ -128,7 +128,7 @@ command.execute = async (interaction, models, params, client) => {
 • Compartir pantalla, o stremear un juego en los chat de voz.
 
 <@&${Config.lvl20}>
-• 15% de descuento en la tienda (\`${prefix}shop\`).
+• 15% de descuento en la tienda (\`/shop\`).
 
 <@&${Config.lvl30}>
 • Bono de **${Emojis.Jeffros}2.000**.
@@ -141,7 +141,7 @@ command.execute = async (interaction, models, params, client) => {
 • Colores nuevos desbloqueados en <#552580632266407957>.
 
 <@&${Config.lvl60}>
-• Cooldown para usar el comando \`${prefix}coins\` reducido a la mitad. (\`5m\`)
+• Cooldown para usar el comando \`/coins\` reducido a la mitad. (\`5m\`)
 • Bono de **${Emojis.Jeffros}5.000**.
 
 <@&${Config.lvl70}>
@@ -158,7 +158,7 @@ Cooldown para conseguir Jeffros y EXP reducido a la octava parte. (\`7.5s\`).
 
 <@&${Config.lvl99}>
 • VIP Desbloqueado.
-• Cooldown para usar el comando \`${prefix}coins\` reducido a la cuarta parte. (\`2.5m\`).
+• Cooldown para usar el comando \`/coins\` reducido a la cuarta parte. (\`2.5m\`).
 
 <@&${Config.lvl100}>
 • Rol personalizado (nombre + color personalizado).`)
@@ -293,7 +293,7 @@ Cooldown para conseguir Jeffros y EXP reducido a la octava parte. (\`7.5s\`).
     .defDesc(`<@&595022419123634228> • Alguien que está boosteando el servidor, aparecerá en la lista de miembros por encima de todos menos del Staff.
 
 <@&529275759521431553> • Usuario que ha ascendido en el servidor, tendrá colores exclusivos y acceso anticipado a las notificaciones de Jeffrey, etc.
-➟ Si quieres conseguirlo antes de <@&${Config.lvl99}> ve a \`${prefix}shop\`.
+➟ Si quieres conseguirlo antes de <@&${Config.lvl99}> ve a \`/shop\`.
 
 <@&461259197368107020> • Personas las cuales tienen algún tipo de relación IRL con Jeffrey o/
 
@@ -314,7 +314,7 @@ Cooldown para conseguir Jeffros y EXP reducido a la octava parte. (\`7.5s\`).
 ➟ Los Jeffros son la moneda virtual del servidor. Puedes conseguirlos al hablar en <#${mainChannel}>.
 
 **—** ¿Cómo gasto mis Jeffros?
-➟ Los Jeffros se usarán para comprar items en la tienda del servidor (\`${prefix}shop\`) y usar los **Awards**.
+➟ Los Jeffros se usarán para comprar items en la tienda del servidor (\`/shop\`) y usar los **Awards**.
 
 **—** No confundir con los __Dark${Emojis.DarkJeffros}effros__:
 ➟ Los DarkJeffros se desbloquearán cuando un usuario consiga el nivel 5. Podrán ser usados en la DarkShop.
@@ -322,7 +322,7 @@ Cooldown para conseguir Jeffros y EXP reducido a la octava parte. (\`7.5s\`).
 **—** ¿Como consigo DarkJeffros?
 ➟ Piensa en los DarkJeffros como si fuesen bitcoins... ¿Por qué bitcoins? Porque es divertido.
 ➟ Los DarkJeffros solo se podrán conseguir cambiando Jeffros. Estos pueden ser más costosos dependiendo de la **inflación actual**.
-➟ Usando el comando \`${prefix}ayuda\` podrás tener más información en la categoría DarkShop de los comandos disponibles.`)
+➟ Usando el comando \`/ayuda\` podrás tener más información en la categoría DarkShop de los comandos disponibles.`)
     .defColor(Colores.verde);
 
     // STAFF
@@ -348,7 +348,7 @@ ${adminRole} • ${modRole}.
 
 ➟ ${jeffreyRole} • Es el rol de JeffreyG. Ten por seguro que si alguien tiene este rol es porque es el verdadero Jeffrey.
 
-➟ Usando el comando \`${prefix}serverinfo\` podrás ver quiénes hacen parte del equipo del Staff más cómodamente.`)
+➟ Usando el comando \`/serverinfo\` podrás ver quiénes hacen parte del equipo del Staff más cómodamente.`)
     .defColor(Colores.verde);
 
     // AWARDS
@@ -407,7 +407,7 @@ ${adminRole} • ${modRole}.
     .defAuthor({text: `Lo básico:`, icon: Config.darkLogoPng})
     .defDesc(`**—** Bienvenid@ a la DarkShop.
 **—** Con esta guía podrás entender básicamente todo acerca de esta nueva tienda dentro del servidor.
-**—** Lo básico vendría siendo los comandos dentro de la tienda, los cuales puedes ver usando \`${prefix}ds ayuda\`, cuando los hayas visto, vuelve aquí.`)
+**—** Lo básico vendría siendo los comandos dentro de la tienda, los cuales puedes ver usando \`/ds ayuda\`, cuando los hayas visto, vuelve aquí.`)
     .defColor(Colores.negro);
 
     let darkshopInformation2 = new Embed()
@@ -444,7 +444,7 @@ Ten cuidado, aquellos que tengan **${Emojis.Jeffros}20.000** o más; deberán pa
 **— La duración de los ${Emojis.DarkJeffros}DarkJeffros:**
 Cuando un usuario cambia sus Jeffros por DarkJeffros, su cuenta en esta tienda se verá comprometida por las autoridades del servidor, por esto, la misma tienda se encargará que a un plazo aleatorio todos los DarkJeffros que tengas en tu cuenta sean borrados para evitar problemas.
 Este plazo será definido por: \`La duración oculta de la inflación actual + 1 a ${Config.daysDarkJeffros} días adicionales\`.
-Puedes ver este plazo con \`${prefix}ds duration\`. Si no cambias tus DarkJeffros a Jeffros antes de este plazo, los perderás.`)
+Puedes ver este plazo con \`/ds duration\`. Si no cambias tus DarkJeffros a Jeffros antes de este plazo, los perderás.`)
     .defColor(Colores.negro);
 
     // MANUAL
@@ -540,7 +540,7 @@ Y la más importante:
 **Regla N°8**: __**Debes**__ cumplir las [Condiciones del servicio de Discord "TOS"](https://discord.com/terms) y sus [Directivas de la comunidad](https://discord.com/guidelines).
 
 \`—\` Un dato curioso: ${client.user} te enviará un mensaje al recibir cualquier tipo de warn, siempre y cuando tengas los MDs activados.
-Esto no es obligatorio, siempre puedes usar el comando \`${prefix}warns\` para conocer __tus__ warns.`)
+Esto no es obligatorio, siempre puedes usar el comando \`/warns\` para conocer __tus__ warns.`)
 .defColor(Colores.verde);
 
     let reglasFooterEmbed = new Embed()

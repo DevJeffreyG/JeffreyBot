@@ -1,13 +1,9 @@
 const Discord = require("discord.js");
 
-const { Initialize } = require("../src/utils/");
-
-const Config = require("../src/resources/base.json");
+const { Config } = require("../src/resources");
 const { Users } = require("mongoose").models;
 
 module.exports = async (client, member) => {
-    const prefix = await Initialize(member.guild.id);
-
     let channel = client.user.id === Config.testingJBID ? member.guild.channels.cache.find(x => x.id === "797258710997139537") : member.guild.channels.cache.find(x => x.id === Config.mainChannel);
     let tag = member.user.tag;
 
@@ -31,7 +27,7 @@ module.exports = async (client, member) => {
     .setDescription(fBye)
     .setColor("#66a0ff");
 
-    client.user.setActivity(`${prefix}ayuda - ${member.guild.memberCount} usuarios🔎`);
+    client.user.setActivity(`/ayuda - ${member.guild.memberCount} usuarios🔎`);
 
     // guardar los roles
     Users.findOne({
