@@ -1,6 +1,6 @@
 const ms = require("ms");
 
-const { Command, Categories, Embed, intervalGlobalDatas } = require("../../src/utils")
+const { Command, Categories, Embed, GlobalDatasWork } = require("../../src/utils")
 const { Colores } = require("../../src/resources")
 
 const command = new Command({
@@ -50,7 +50,7 @@ command.execute = async (interaction, models, params, client) => {
     if (!update) {
         return interaction.editReply({ content: null, embeds: [embed] });
     } else {
-        await intervalGlobalDatas(client);
+        await GlobalDatasWork(interaction.guild);
 
         return interaction.editReply({ content: "Interval de global datas ejecutado." })
             .then(m => {

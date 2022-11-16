@@ -63,16 +63,22 @@ const Schema = new mongoose.Schema({
         unlockedVaults: { type: Array },
         birthday: {
             day: { type: Number, default: null },
+            monthNumber: { type: Number, default: null },
             month: { type: String, default: null },
             locked: { type: Boolean, default: false },
             locked_since: { type: Date, default: null }
         },
+        birthday_reminders: [
+            {
+                id: { type: String, required: true },
+                reminded: { type: Boolean, default: false, required: true }
+            }
+        ],
         backup_roles: { type: Array },
         temp_roles: [
             {
                 role_id: { type: String, required: true },
-                active_since: { type: Date, required: true },
-                duration: { type: Number, required: true },
+                active_until: { type: Date, required: true },
                 special: {
                     type: { type: Number, default: null },
                     objetive: { type: Number, default: null },
@@ -138,10 +144,10 @@ Schema.pre("save", function () {
 })
 
 Schema.static("getOrCreate", async function ({ user_id, guild_id }) {
-    return this.findOne({
+    return await this.findOne({
         user_id: user_id,
         guild_id: guild_id
-    }) ?? new this({
+    }) ?? await new this({
         user_id: user_id,
         guild_id: guild_id
     }).save();
@@ -245,7 +251,7 @@ Schema.method("cooldown", function (modulo, options = { cooldown: null, save: tr
 
     if (info) return;
 
-    let c = precise ? cooldown: moment().add(cooldown, "ms").toDate()
+    let c = precise ? cooldown : moment().add(cooldown, "ms").toDate()
     let text = new HumanMs(moment(c)).left();
 
     this.data.cooldowns[modulo] = c;
@@ -265,6 +271,26 @@ Schema.method("delCooldown", function (modulo, options = { save: true }) {
 
 Schema.method("getBoosts", function () {
     return this.data.temp_roles;
+})
+
+Schema.method("getBirthdayReminders", function () {
+    return this.data.birthday_reminders;
+})
+
+Schema.method("hasReminderFor", function (id) {
+    return this.getBirthdayReminders().find(x => x.id === id) ? true : false;
+})
+
+Schema.method("isBirthday", function () {
+    let bdDay = this.data.birthday.day;
+    let bdMonth = this.data.birthday.monthNumber;
+
+    let now = new Date();
+    let actualDay = now.getDate();
+    let actualMonth = now.getMonth();
+
+    if ((actualDay == bdDay) && (actualMonth + 1 == bdMonth) && this.data.birthday.locked) return true;
+    return false;
 })
 
 module.exports = mongoose.model('Users', Schema)

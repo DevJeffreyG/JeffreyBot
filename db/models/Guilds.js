@@ -78,7 +78,7 @@ const GuildSchema = new Schema({
                     value: { type: String, required: true },
                     duration: { type: Number }
                 },
-                code: { type: String, required: true, unique: true },
+                code: { type: String, required: true },
                 id: { type: Number, required: true, sparse: true }
             }
         ]
@@ -88,7 +88,9 @@ const GuildSchema = new Schema({
             functions: {
                 suggestions: { type: Boolean, default: false },
                 tickets: { type: Boolean, default: false },
-                message_logs: { type: Boolean, default: false }
+                message_logs: { type: Boolean, default: false },
+                birthdays: { type: Boolean, default: false },
+                darkshop: { type: Boolean, default: false }
             },
             logs: {
                 guild: {
@@ -130,25 +132,36 @@ const GuildSchema = new Schema({
                 role_id: { type: String, required: true }
             }
         ],
+        birthday: { type: String },
+        darkshop_news: { type: String }
     },
     channels: {
-        guild_logs: { type: String },
-        moderation_logs: { type: String },
-        staff_logs: { type: String },
+        logs: {
+            guild_logs: { type: String },
+            moderation_logs: { type: String },
+            staff_logs: { type: String },
+        },
         chat_rewards: [
             {
                 channel_id: { type: String, required: true },
                 multiplier: { type: Number, default: 1 }
             }
         ],
-        twitter_notif: { type: String },
-        youtube_notif: { type: String },
-        twitch_notif: { type: String },
-        rules: { type: String },
-        information: { type: String },
-        faq: { type: String },
-        announcements: { type: String },
-        halloffame: { type: String }
+        notifier: {
+            twitter_notif: { type: String },
+            youtube_notif: { type: String },
+            twitch_notif: { type: String },
+        },
+        general: {
+            rules: { type: String },
+            information: { type: String },
+            faq: { type: String },
+            announcements: { type: String },
+            halloffame: { type: String },
+        },
+        darkshop: {
+            events: { type: String }
+        }
     }
 });
 
@@ -306,6 +319,14 @@ GuildSchema.method("getChannel", function(module) {
     return this.channels[module] ?? null;
 })
 
+GuildSchema.method("getLogChannel", function(module) {
+    return this.getChannel("logs." + module);
+})
+
+GuildSchema.method("getDarkShopChannel", function(module) {
+    return this.getChannel("darkshop." + module)
+})
+
 GuildSchema.method("moduleIsActive", function(query) {
     let general = this.settings.active_modules;
     const q = query.split(".");
@@ -319,6 +340,12 @@ GuildSchema.method("moduleIsActive", function(query) {
     }
 
     return general;
+})
+
+GuildSchema.method("getRoleByModule", function(module) {
+    if(this.roles[module] instanceof Array) return console.log("🔴 SÓLO ROLES QUE SEAN STRINGS")
+
+    return this.roles[module];
 })
 
 module.exports = mongoose.model('Guilds', GuildSchema);

@@ -1,4 +1,4 @@
-const { PermissionsBitField, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, EmbedBuilder, Guild, GuildMember, CommandInteraction, BaseInteraction, Message } = require("discord.js");
+const { PermissionsBitField, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, EmbedBuilder, Guild, GuildMember, CommandInteraction, BaseInteraction, Message, Client } = require("discord.js");
 const { ButtonStyle, OverwriteType } = require("discord-api-types/v10");
 
 const Config = require("../resources/base.json");
@@ -25,11 +25,18 @@ const { ApiClient } = require("@twurple/api");
 const { ClientCredentialsAuthProvider } = require("@twurple/auth");
 const { BoostObjetives, EndReasons, ChannelModules } = require("./Enums");
 const Log = require("./Log");
+const { Bases } = require("../resources");
 
 /* ##### MONGOOSE ######## */
 const RandomCumplido = function (force = null) {
   return force ? Cumplidos.c[force] : Cumplidos.c[Math.floor(Math.random() * Cumplidos.c.length)];
 }
+
+/**
+ * @deprecated
+ * @param {*} client 
+ * @param {*} guild 
+ */
 const findLvls5 = async function (client, guild) {
   let role = client.user.id === Config.testingJBID ? guild.roles.cache.find(x => x.id === "791006500973576262") : guild.roles.cache.find(x => x.id === Config.dsRole);
   Exps.find({
@@ -312,12 +319,14 @@ const FetchAuditLogs = async function (client, guild, types) {
  * @returns {Promise<Message|null>}
  */
 const GenerateLog = async function (guild, options = {
-  logType: ChannelModules.GuildLogs, header: "", footer: "", description: [], header_icon: "", footer_icon: "", color: "", fields: []}) {
+  logType: ChannelModules.GuildLogs, header: "", footer: "", description: [], header_icon: "", footer_icon: "", color: "", fields: []
+}) {
   let { logType, header, footer, description, header_icon, footer_icon, color, fields } = options;
-  
-  if(!footer) return console.log("🔴 NO TIENE FOOTER", options)
+
+  if (!footer) return console.log("🔴 NO TIENE FOOTER", options)
   logType = logType ?? ChannelModules.GuildLogs;
   description = description ?? [];
+  header_icon = header_icon ?? guild.iconURL({ dynamic: true });
 
   const embed = new Embed()
     .defAuthor({ text: header, icon: header_icon })
@@ -347,158 +356,169 @@ const GenerateLog = async function (guild, options = {
   return await new Log()
     .setGuild(guild)
     .setTarget(logType)
-    .send({embeds: [embed]})
+    .send({ embeds: [embed] })
 }
 
 /**
- * 
+ * GlobalData work
+ * @param {Guild} guild The Guild where the interval shall be executed
  * @param {boolean} [justTempRoles=false] Just execute interval of temporal roles
  * @returns void
  */
-const intervalGlobalDatas = async function (client, justTempRoles) {
-  justTempRoles = justTempRoles || false;
-  const { Emojis } = client;
+const GlobalDatasWork = async function (guild, justTempRoles = false) {
+  const { Emojis, EmojisObject } = guild.client;
+  const doc = await Guilds.getOrCreate(guild.id);
 
-  let guild;
-  let bdRole;
-  let logs;
-  let dsChannel = client.channels.cache.find(x => x.id === Config.dsChannel);
-  let dsNews;
+  const bdRole = guild.roles.cache.get(doc.getRoleByModule("birthday"));
 
-  if (client.user.id === Config.testingJBID) {
-    guild = client.guilds.cache.find(x => x.id === "482989052136652800");
-    bdRole = guild.roles.cache.find(x => x.id === "544687105977090061");
-    logs = guild.channels.cache.find(x => x.id === "483108734604804107");
-    dsNews = guild.roles.cache.find(x => x.id === "790431614378704906");
-    dsChannel = client.channels.cache.find(x => x.id === "790431676970041356");
-  } else {
-    guild = client.guilds.cache.find(x => x.id === Config.jgServer);
-    bdRole = guild.roles.cache.find(x => x.id === Config.bdRole);
-    logs = guild.channels.cache.find(x => x.id === Config.logChannel);
-    dsNews = guild.roles.cache.find(x => x.id === Config.dsnews);
-  }
-
-  await guild.members.fetch();
-  let members = guild.members.cache;
+  const members = guild.members.cache;
+  //console.log(members.values())
   // buscar roles temporales & cumpleaños
-  members.forEach(async (member) => {
+  for await (const member of members.values()) {
+    if (member.user.bot) continue
+
     let dbUser = await Users.getOrCreate({
       user_id: member.id,
       guild_id: guild.id
     });
 
-    if (!dbUser) return
+    let temp_roles = dbUser?.data.temp_roles ?? [];
+    let birthday = dbUser?.data.birthday.locked;
+    let birthday_reminders = dbUser?.getBirthdayReminders() ?? [];
+    let temproledeletions = await GlobalDatas.getTempRoleDeletions(member.id) ?? [];
 
-    let roles = dbUser.data.temp_roles;
-    let birthday = dbUser.data.birthday.locked;
-    let temproledeletions = await GlobalDatas.getTempRoleDeletions(member.id);
+    for (let i = 0; i < temp_roles.length; i++) {
+      const temprole = temp_roles[i];
+      let role = guild.roles.cache.find(x => x.id === temprole.role_id);
+      let until = temprole.active_until;
 
-    if (roles) {
-      for (let i = 0; i < dbUser.data.temp_roles.length; i++) {
-        const temprole = dbUser.data.temp_roles[i];
-        let role = guild.roles.cache.find(x => x.id === temprole.role_id);
-        let since = temprole.active_since;
-        let realDuration = temprole.duration;
-        let today = new Date();
+      if (moment().isAfter(until)) {
 
-        if (today - since >= realDuration) {
+        if (!temprole.isSub) {
+          // sacarle el role
+          console.log("🟢 Ha pasado el tiempo del temprole %s", temprole);
+          member.roles.remove(role);
 
-          if (!temprole.isSub) {
-            // sacarle el role
-            console.log("🟢 Ha pasado el tiempo del temprole %s", temprole);
+          // eliminar el temprole de la db
+          dbUser.data.temp_roles.splice(i, 1);
+          dbUser.save();
+        } else { // es una suscripción
+          let price = Number(temprole.sub_info.price);
+          let subName = temprole.sub_info.name;
+          let isCancelled = temprole.sub_info.isCancelled;
+
+          let notEnough = new ErrorEmbed(interaction)
+            .defDesc(`**—** No tienes suficientes Jeffros **(${Emojis.Jeffros}${price.toLocaleString('es-CO')})** para pagar la suscripción a \`${subName}\`.
+**—** Tu saldo ha quedado en **alerta roja**.`);
+
+          if (isCancelled) {
             member.roles.remove(role);
 
             // eliminar el temprole de la db
             dbUser.data.temp_roles.splice(i, 1);
             dbUser.save();
-          } else { // es una suscripción
-            let price = Number(temprole.sub_info.price);
-            let subName = temprole.sub_info.name;
-            let isCancelled = temprole.sub_info.isCancelled;
+          } else {
+            // cobrar jeffros
+            let jeffros = dbUser.economy.global;
 
-            let notEnough = new ErrorEmbed(interaction)
-              .defDesc(`**—** No tienes suficientes Jeffros **(${Emojis.Jeffros}${price.toLocaleString('es-CO')})** para pagar la suscripción a \`${subName}\`.
-**—** Tu saldo ha quedado en **alerta roja**.`);
+            let paidEmbed = new Embed({
+              type: "success",
+              data: {
+                title: "Pagado",
+                desc: [
+                  `Se han restado **${Emojis.Jeffros}${price.toLocaleString('es-CO')}** para pagar la suscripción a \`${subName}\`.`,
+                  `Tu saldo ha quedado en **${Emojis.Jeffros}${(jeffros.jeffros - price).toLocaleString('es-CO')}**.`
+                ]
+              }
+            })
 
-            if (isCancelled) {
-              member.roles.remove(role);
+            if (!jeffros || jeffros.jeffros < price) {
+              // quitarle los jeffros, y dejarlo en negativo
+              console.log(jeffros.userID, "ha quedado en negativos por no poder pagar", subName);
+              jeffros.jeffros -= price;
+              member.send({ embeds: [notEnough] });
 
               // eliminar el temprole de la db
               dbUser.data.temp_roles.splice(i, 1);
+
+              member.roles.remove(role);
               dbUser.save();
-            } else {
-              // cobrar jeffros
-              let jeffros = dbUser.economy.global;
+            } else { // cobrar
+              jeffros.jeffros -= price;
+              dbUser.save();
 
-              let paidEmbed = new Embed({
-                type: "success",
-                data: {
-                  title: "Pagado",
-                  desc: [
-                    `Se han restado **${Emojis.Jeffros}${price.toLocaleString('es-CO')}** para pagar la suscripción a \`${subName}\`.`,
-                    `Tu saldo ha quedado en **${Emojis.Jeffros}${(jeffros.jeffros - price).toLocaleString('es-CO')}**.`
-                  ]
-                }
-              })
+              // actualizar el globaldata
+              temprole.active_since = today;
+              dbUser.save();
 
-              if (!jeffros || jeffros.jeffros < price) {
-                // quitarle los jeffros, y dejarlo en negativo
-                console.log(jeffros.userID, "ha quedado en negativos por no poder pagar", subName);
-                jeffros.jeffros -= price;
-                member.send({ embeds: [notEnough] });
-
-                // eliminar el temprole de la db
-                dbUser.data.temp_roles.splice(i, 1);
-
-                member.roles.remove(role);
-                dbUser.save();
-              } else { // cobrar
-                jeffros.jeffros -= price;
-                dbUser.save();
-
-                // actualizar el globaldata
-                temprole.active_since = today;
-                dbUser.save();
-
-                member.send({ embeds: [paidEmbed] });
-              }
+              member.send({ embeds: [paidEmbed] });
             }
           }
         }
       }
     }
 
+    birthdayIf:
     if (birthday) {
-      let bdDay = dbUser.data.birthday.day;
-      let bdMonth = dbUser.data.birthday.month;
+      if (!doc.moduleIsActive("functions.birthdays")) break birthdayIf;
 
-      let now = new Date();
-      let actualDay = now.getDate();
-      let actualMonth = now.getMonth();
-
-      if ((actualDay == bdDay) && (actualMonth + 1 == bdMonth)) { // actualMonth + 1 ( 0 = ENERO && 11 = DICIEMBRE )
+      if (dbUser?.isBirthday()) { // actualMonth + 1 ( 0 = ENERO && 11 = DICIEMBRE )
         // ES EL CUMPLEAÑOS
-        if (!member.roles.cache.find(x => x.id === bdRole.id)) member.roles.add(bdRole);
+        if (!member.roles.cache.get(bdRole.id)) member.roles.add(bdRole);
       } else {
         // revisar si tiene el rol de cumpleaños, entonces quitarselo
-        if (member.roles.cache.find(x => x.id === bdRole.id)) member.roles.remove(bdRole);
+        if (member.roles.cache.get(bdRole.id)) member.roles.remove(bdRole);
       }
     }
 
-    if (temproledeletions) { // hay roles eliminados de manera temporal
-      for (const deletion of temproledeletions) {
-        if (moment().isAfter(deletion.until)) {
-          member.roles.add(deletion.role_id)
-          deletion.remove();
-        }
+    // hay roles eliminados de manera temporal
+    for (const deletion of temproledeletions) {
+      if (moment().isAfter(deletion.until)) {
+        member.roles.add(deletion.role_id)
+        deletion.remove();
       }
     }
-  })
 
-  if (justTempRoles === true) return;
+    for (const reminder_info of birthday_reminders) {
+      const reminder = reminder_info.id
+      const birthday_member = guild.members.cache.get(reminder);
+      let birthday_query = await Users.getOrCreate({ user_id: reminder, guild_id: guild.id });
+      if (birthday_query?.isBirthday() && !reminder_info.reminded) {
+        member.send({
+          embeds: [
+            new Embed()
+              .defAuthor({ text: `Hola`, /*icon: EmojisObject.Hola.url*/ })
+              .defDesc(`¡Vengo a recordarte que ${birthday_member} está de cumpleaños hoy!`)
+              .defFooter({
+                text: `Recibiste este mensaje porque quisiste que te lo recordara, para dejar de recibir esto usa /stats usuario:@${birthday_member.user.username} y presiona el botón de recordatorios`,
+                icon: guild.iconURL({ dynamic: true }),
+                timestamp: true
+              })
+              .defColor(Colores.verdeclaro)
+          ]
+        })
+          .catch(err => {
+            console.log(err)
+            console.log("⚠️ No se pudo enviar el recordatorio a %s", member.user.tag)
+            console.log("⚠️ Se eliminará el recordatorio")
+
+            dbUser.data.birthday_reminders.splice(dbUser.getBirthdayReminders().findIndex(x => x === reminder), 1)
+            dbUser.save();
+          })
+
+        reminder_info.reminded = true;
+        dbUser.save();
+      } else if(!birthday_query?.isBirthday() && reminder_info.reminded){
+        reminder_info.reminded = false;
+        dbUser.save();
+      }
+    }
+  }
+
+  if (justTempRoles) return;
 
   // ###### DARKSHOP ######
-  await ManageDarkShops(client);
+  await ManageDarkShops(guild.client);
   //await DarkShopWork(client, guild.id);
 
   // buscar temp bans
@@ -544,60 +564,58 @@ const intervalGlobalDatas = async function (client, justTempRoles) {
   GlobalDatas.find({ "info.type": "temporalPoll", "info.guild_id": guild.id }, async (err, polls) => {
     if (err) throw err;
 
-    if (polls) {
-      for (let i = 0; i < polls.length; i++) {
-        const poll = polls[i].info;
+    for (let i = 0; i < polls.length; i++) {
+      const poll = polls[i].info;
 
-        if (moment().isAfter(poll.until)) {
-          let c = guild.channels.cache.find(x => x.id === poll.channel_id);
-          let msg = await c.messages.fetch(poll.message_id);
+      if (moment().isAfter(poll.until)) {
+        let c = guild.channels.cache.find(x => x.id === poll.channel_id);
+        let msg = await c.messages.fetch(poll.message_id);
 
-          const reactions = msg.reactions.cache;
+        const reactions = msg.reactions.cache;
 
-          let reactionsInPoll = await new Promise(async (resolve, reject) => {
-            let count = {
-              no: [],
-              yes: []
+        let reactionsInPoll = await new Promise(async (resolve, reject) => {
+          let count = {
+            no: [],
+            yes: []
+          }
+
+          for (const reaction of reactions) {
+
+            let usersInThis = await reaction[1].users.fetch();
+
+            if (reaction[0] === "❌") {
+              usersInThis.forEach(async user => {
+                if (!user.bot) count.no.push(user.id)
+              });
+            } else {
+              usersInThis.forEach(async user => {
+                if (!user.bot) count.yes.push(user.id)
+              });
             }
+          }
+          resolve(count);
+        })
 
-            for (const reaction of reactions) {
+        let textEmbed = new Embed(msg.embeds[1]);
+        console.log(textEmbed)
 
-              let usersInThis = await reaction[1].users.fetch();
+        await msg.reactions.removeAll();
 
-              if (reaction[0] === "❌") {
-                usersInThis.forEach(async user => {
-                  if (!user.bot) count.no.push(user.id)
-                });
-              } else {
-                usersInThis.forEach(async user => {
-                  if (!user.bot) count.yes.push(user.id)
-                });
-              }
-            }
-            resolve(count);
-          })
+        // checkar que no hayan votos en ambos lados y si los hay, anularlos
+        let yes = reactionsInPoll.yes.filter(x => !reactionsInPoll.no.includes(x))
+        let no = reactionsInPoll.no.filter(x => !reactionsInPoll.yes.includes(x))
 
-          let textEmbed = new Embed(msg.embeds[1]);
-          console.log(textEmbed)
+        textEmbed.defAuthor({ text: "La encuesta del STAFF terminó", title: true })
+        textEmbed.defFooter({ text: "TERMINÓ" });
+        textEmbed.defDesc(textEmbed.description + `\n\n**RESULTADOS:**`)
+        textEmbed.defField(`✅ SÍ:`, `${yes.length}`, true)
+        textEmbed.defField(`❌ NO:`, `${no.length}`, true)
 
-          await msg.reactions.removeAll();
+        if (no.length === 0 && yes.length === 0) textEmbed.setFooter({ text: "TERMINÓ...! y... no... ¿votó nadie...? :(" });
 
-          // checkar que no hayan votos en ambos lados y si los hay, anularlos
-          let yes = reactionsInPoll.yes.filter(x => !reactionsInPoll.no.includes(x))
-          let no = reactionsInPoll.no.filter(x => !reactionsInPoll.yes.includes(x))
+        await msg.reply({ embeds: [textEmbed] });
 
-          textEmbed.defAuthor({ text: "La encuesta del STAFF terminó", title: true })
-          textEmbed.defFooter({ text: "TERMINÓ" });
-          textEmbed.defDesc(textEmbed.description + `\n\n**RESULTADOS:**`)
-          textEmbed.defField(`✅ SÍ:`, `${yes.length}`, true)
-          textEmbed.defField(`❌ NO:`, `${no.length}`, true)
-
-          if (no.length === 0 && yes.length === 0) textEmbed.setFooter({ text: "TERMINÓ...! y... no... ¿votó nadie...? :(" });
-
-          await msg.reply({ embeds: [textEmbed] });
-
-          polls[i].remove();
-        }
+        polls[i].remove();
       }
     }
   })
@@ -679,12 +697,11 @@ const LimitedTime = async function (victimMember, roleID = 0, duration, specialT
 
   if (duration === Infinity) return victimMember.roles.add(role); // es un role permanente???
 
-  let hoy = new Date();
+  let until = moment().add(duration, "ms").toDate();
 
   let toPush = {
     role_id: roleID,
-    active_since: hoy,
-    duration: duration,
+    active_until: until,
     special: {
       type: specialType,
       objetive: specialObjective,
@@ -1124,7 +1141,7 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
   });
 
   let confirmation = new Embed()
-    .defAuthor({ text: `${toConfirm}?`, icon: interaction.guild.iconURL() })
+    .defAuthor({ text: `¿${toConfirm}?`, icon: interaction.guild.iconURL() })
     .defDesc(DescriptionString)
     .defColor(Colores.rojo);
 
@@ -1150,7 +1167,9 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
         .setEmoji(client.EmojisObject.Deny.id)
     )
 
-  let msg = await interaction.editReply({ content: null, embeds, components: [row] }); // enviar mensaje de confirmación
+  let msg = await interaction.editReply({ content: null, embeds, components: [row] }).catch(err => { }); // enviar mensaje de confirmación
+
+  if (!msg) return null;
 
   return new Promise(async (resolve, reject) => {
     const filter = async i => {
@@ -1220,133 +1239,137 @@ const AfterInfraction = async function (user, data) {
   const { member, rule, proof, id, interaction } = data;
 
   // es un warn normal
-    const warns = user.warns;
-    const totalWarns = warns.length;
+  const warns = user.warns;
+  const totalWarns = warns.length;
 
-    const guild = member.guild;
+  const guild = member.guild;
 
-    // acciones de automod
-    let arrayEmbeds = [];
+  // acciones de automod
+  let arrayEmbeds = [];
 
-    let warnedEmbed = new Embed()
-      .defAuthor({ text: `Warn`, icon: interaction.client.EmojisObject.Danger.url })
-      .defDesc(`
+  let warnedEmbed = new Embed()
+    .defAuthor({ text: `Warn`, icon: interaction.client.EmojisObject.Danger.url })
+    .defDesc(`
 **—** Has sido __warneado__ por el STAFF.
 **—** Warns actuales: **${totalWarns}**.
 **—** Por infringir la regla: **${rule}**.
 **—** **[Pruebas](${proof})**.
 **—** ID de Warn: \`${id}\`.`)
-      .defColor(Colores.rojo)
-      .defFooter({ text: `Ten más cuidado la próxima vez!`, icon: interaction.guild.iconURL({dynamic: true}) });
+    .defColor(Colores.rojo)
+    .defFooter({ text: `Ten más cuidado la próxima vez!`, icon: interaction.guild.iconURL({ dynamic: true }) });
 
-    arrayEmbeds.push(warnedEmbed);
-    let banMember = false;
+  arrayEmbeds.push(warnedEmbed);
+  let banMember = false;
 
-    if (totalWarns >= 4) {
-      let autoMod = new Embed()
-        .defAuthor({ text: `Ban PERMANENTE.`, icon: client.EmojisObject.Ban.url })
-        .defDesc(`**—** PERMABAN.
+  if (totalWarns >= 4) {
+    let autoMod = new Embed()
+      .defAuthor({ text: `Ban PERMANENTE.`, icon: client.EmojisObject.Ban.url })
+      .defDesc(`**—** PERMABAN.
 **—** Warns actuales: **${totalWarns}**.
 **—** Razón de ban (AutoMod): Muchos warns.
+**—** Último warn por infringir la regla: **${rule}**.`)
+      .defColor(Colores.rojo);
+
+    arrayEmbeds.push(autoMod);
+    banMember = true;
+  } else
+
+    if (totalWarns >= 3) {
+      let autoMod = new Embed()
+        .defAuthor({ text: `TempBan`, icon: client.EmojisObject.Kick.url })
+        .defDesc(`**—** Ban (24h).
+**—** Warns actuales: **${totalWarns}**.
+**—** Razón de ban (AutoMod): 3 warns acumulados.
 **—** Último warn por infringir la regla: **${rule}**.`)
         .defColor(Colores.rojo);
 
       arrayEmbeds.push(autoMod);
-      banMember = true;
+      banMember = true
+
+
+      GlobalDatas.findOne({
+        "info.type": "temporalGuildBan",
+        "info.userID": member.id,
+        "info.guild_id": guild.id
+      }, (err, guildBan) => {
+        if (err) throw err;
+
+        let now = new Date();
+
+        if (!guildBan) {
+          const newBan = new GlobalDatas({
+            info: {
+              type: "temporalGuildBan",
+              userID: member.id,
+              guild_id: guild.id,
+              reason: `AutoMod. (Infringir "${rule}")`,
+              since: now,
+              duration: ms("1d")
+            }
+          });
+
+          newBan.save();
+        } else {
+          // si ya existe (how) cambiar el since
+          guildBan.info.since = now;
+          guildBan.save();
+
+        }
+
+        setTimeout(function () {
+          guild.unban(member.id)
+        }, ms("1d"));
+      });
     } else
 
-      if (totalWarns >= 3) {
-        let autoMod = new Embed()
-          .defAuthor({ text: `TempBan`, icon: client.EmojisObject.Kick.url })
-          .defDesc(`**—** Ban (24h).
-**—** Warns actuales: **${totalWarns}**.
-**—** Razón de ban (AutoMod): 3 warns acumulados.
-**—** Último warn por infringir la regla: **${rule}**.`)
-          .defColor(Colores.rojo);
-
-        arrayEmbeds.push(autoMod);
-        banMember = true
-
-
-        GlobalDatas.findOne({
-          "info.type": "temporalGuildBan",
-          "info.userID": member.id,
-          "info.guild_id": guild.id
-        }, (err, guildBan) => {
-          if (err) throw err;
-
-          let now = new Date();
-
-          if (!guildBan) {
-            const newBan = new GlobalDatas({
-              info: {
-                type: "temporalGuildBan",
-                userID: member.id,
-                guild_id: guild.id,
-                reason: `AutoMod. (Infringir "${rule}")`,
-                since: now,
-                duration: ms("1d")
-              }
-            });
-
-            newBan.save();
-          } else {
-            // si ya existe (how) cambiar el since
-            guildBan.info.since = now;
-            guildBan.save();
-
-          }
-
-          setTimeout(function () {
-            guild.unban(member.id)
-          }, ms("1d"));
-        });
-      } else
-
-        if (totalWarns >= 2) {
-          let infoEmbed = new Embed()
-            .defAuthor({ text: `Información`, icon: client.EmojisObject.Danger.url })
-            .defDesc(`**—** ${member.user.tag}, este es tu **warn número ❛ \`2\` ❜**
+      if (totalWarns >= 2) {
+        let infoEmbed = new Embed()
+          .defAuthor({ text: `Información`, icon: client.EmojisObject.Danger.url })
+          .defDesc(`**—** ${member.user.tag}, este es tu **warn número ❛ \`2\` ❜**
 *— ¿Qué impacto tendrá este warn?*
 **—** Tranquil@. Este warn no afectará en nada tu estadía en el servidor, sin embargo; el siguiente warn será un **ban de un día**.
 **—** Te sugiero comprar un **-1 Warn** en la tienda del servidor. *( \`/shop\` para más info de precios, etc. )*`)
-            .defColor(Colores.rojo);
+          .defColor(Colores.rojo);
 
-          arrayEmbeds.push(infoEmbed);
-        }
+        arrayEmbeds.push(infoEmbed);
+      }
 
-    // mensaje de warn normal
-    // embed que se le envía al usuario por el warn
+  // mensaje de warn normal
+  // embed que se le envía al usuario por el warn
 
-    let res = true
+  let res = true
 
-    await member.send({ embeds: arrayEmbeds })
-      .catch(e => {
-        res = false
-        interaction.editReply({ embeds: [new ErrorEmbed({ type: "notSent", data: { tag: member.user.tag, error: e } })] })
-      });
+  await member.send({ embeds: arrayEmbeds })
+    .catch(e => {
+      res = false
+      interaction.editReply({ embeds: [new ErrorEmbed({ type: "notSent", data: { tag: member.user.tag, error: e } })] })
+    });
 
-    if (banMember) console.log("Te baneo");//member.ban({reason: `AutoMod. (Infringir "${rule}")`});
-    return res
-    /*  else {
-    const { member, rule, proof } = data;
+  if (banMember) console.log("Te baneo");//member.ban({reason: `AutoMod. (Infringir "${rule}")`});
+  return res
+  /*  else {
+  const { member, rule, proof } = data;
 
-    let warnedEmbed = new Embed()
-      .defAuthor(`¡Cuidado! (Softwarn)`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
-      .defDesc(`
+  let warnedEmbed = new Embed()
+    .defAuthor(`¡Cuidado! (Softwarn)`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
+    .defDesc(`
 **—** Esto es sólo un llamado de atención.
 **—** Por infringir la regla: **${rule}**.
 **—** [Pruebas](${proof.url})`)
-      .defColor(Colores.rojo)
-      .defFooter({text: `Si vuelves a cometer esta misma falla serás warneado, ten cuidado.`, icon: 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png'});
+    .defColor(Colores.rojo)
+    .defFooter({text: `Si vuelves a cometer esta misma falla serás warneado, ten cuidado.`, icon: 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png'});
 
-    member.send({ embeds: [warnedEmbed] })
-      .catch(e => {
-        interaction.editReply({ embeds: [new ErrorEmbed({ type: "notSent", data: { tag: member.user.tag, error: e } })] })
-      });
-  } */
+  member.send({ embeds: [warnedEmbed] })
+    .catch(e => {
+      interaction.editReply({ embeds: [new ErrorEmbed({ type: "notSent", data: { tag: member.user.tag, error: e } })] })
+    });
+} */
 }
 
+/**
+ * El trabajo de la DarkShop y todo lo que conlleva
+ * @param {Client} client 
+ */
 const ManageDarkShops = async function (client) {
   await client.guilds.fetch()
 
@@ -1805,9 +1828,7 @@ const FindNewId = async function (generalQuery, specificQuery, toCheck) {
  * 
  * @param {GuildMember} member The Discord.JS Member to check for benefit
  * @param {Array} [objetivesToCheck=["any"]] The objetive of boost to check.
- * - jeffros
- * - exp
- * - all
+ * - BoostObjetives
  * - any
  * @returns {Boolean} This Member already has a temp role with the objetive searched for.
  */
@@ -1875,169 +1896,6 @@ const GetRandomItem = (array) => {
   return array[Math.floor(Math.random() * array.length)];
 }
 
-async function createEmbedWithParams(commandTree, guild, params, already) {
-  const docGuild = await Guilds.findOne({ guild_id: guild.id }) ?? await new Guilds({ guild_id: guild.id }).save();
-  already = already ?? "";
-
-  let embed = new Embed()
-    .defAuthor({ text: `▸ /${commandTree.name}`, icon: guild.iconURL() })
-    .defColor(Colores.nocolor)
-    .defFooter({ text: "<> Obligatorio () Opcional" });
-
-  let DescriptionString = `▸ El uso correcto es: /${commandTree.name} ${already}`;
-  for (let i = already.split(" ").length - 1; i < params.length; i++) {
-    const param = params[i]
-
-    if (!param.optional) {
-      DescriptionString += ` <${param.display ?? param.name}>`
-    } else {
-      DescriptionString += ` (${param.display ?? param.name})`
-    }
-  }
-
-  embed.defDesc(DescriptionString);
-
-  return embed;
-}
-
-async function switchParams(param, arg, args, message, guild, member, client, i) { // EL QUE SE USA EN LOS COMANDOS
-  let toReturn;
-  switch (param.type) {
-    case "Member":
-      // buscar por mención, o id
-      toReturn = message.mentions.members.first() ?? guild.members.cache.find(x => x.id === arg);
-
-      if (!toReturn && (arg.toLowerCase() === "yo" || arg.toLowerCase() === "me")) {
-        toReturn = message.member;
-      }
-
-      break;
-
-    case "Attachment":
-      if (message.attachments.size != 0) {
-        toReturn = message.attachments.first();
-      }
-      break;
-
-    case "NotSelfMember":
-      // no puede ser el mismo usuario que ejecuta el comando
-      let possibleReturn = message.mentions.members.first() ? message.mentions.members.first() : guild.members.cache.find(x => x.id === arg);
-      toReturn = possibleReturn.id != member.id ? possibleReturn : null;
-      break;
-
-    case "Role":
-      // buscar por mención, o id
-      toReturn = message.mentions.roles.first() ? message.mentions.roles.first() : guild.roles.cache.find(x => x.id === arg);
-      break;
-
-    case "Emoji":
-      let isCustom = arg.length > 5 ? true : false;
-
-      if (isCustom) {
-        let emote = arg.match(/\d/g); // sacando los números del emoji
-        emote = emote.join("");
-        toReturn = guild.emojis.cache.find(x => x.id === emote);
-      } else {
-        toReturn = arg;
-      }
-      break;
-
-    case "Channel":
-      toReturn = message.mentions.channels.first() ? message.mentions.channels.first() : guild.channels.cache.find(x => x.id === arg);
-      break;
-
-    case "Message":
-      const message_channel = response.find(x => x.param === param.requires_param).data;
-      toReturn = await message_channel.messages.fetch(arg);
-      break;
-
-    case "MessageLink":
-      const linkArray = arg.split("/");
-      const numbers = linkArray.filter(element => !isNaN(element) && element.length > 0);
-
-      const actualguild = client.guilds.cache.find(x => x.id === numbers[0]);
-      const actualchannel = actualguild.channels.cache.find(x => x.id === numbers[1]);
-      const actualmessage = await actualchannel.messages.fetch(numbers[2]).catch(err => console.log());
-
-      toReturn = actualmessage;
-      break;
-
-    case "Guild":
-      if (Number(arg)) toReturn = client.guilds.cache.find(x => x.id === arg);
-      break;
-
-    case "String":
-      toReturn = arg;
-      break;
-
-    case "JoinString":
-      toReturn = args.join(" ");
-
-      if (i != 0) {
-        for (let k = 0; k < i; k++) {
-          toReturn = toReturn.slice(args[k].length + 1)
-        }
-      }
-      break;
-
-    case "Array":
-      toReturn = arg.split(`${param.split}`)
-      break;
-
-    case "Number":
-      if (Number(arg)) toReturn = Number(arg);
-      break;
-
-    case "NaturalNumber":
-      if (Math.floor(arg) > 0) {
-        toReturn = Math.floor(arg)
-      }
-      break;
-
-    case "NaturalNumberNotInfinity":
-      if (Math.floor(arg) > 0 && Number(arg) != Infinity) {
-        toReturn = Math.floor(arg)
-      }
-      break;
-
-    case "Time":
-      if (Number(arg) === Infinity) toReturn = Infinity;
-      else toReturn = ms(arg);
-      break;
-
-    case "Boolean":
-      arg = arg.toLowerCase();
-      if (arg === "1" || arg === "true" || arg === "si" || arg === "sí" || arg === "yes" || arg === "y" || arg === "s") toReturn = true;
-      else if (arg === "0" || arg === "false" || arg === "no" || arg === "no" || arg === "n") toReturn = false;
-      break;
-
-    case "Options":
-      let possibleOptions = param.options;
-
-      optionsLoop:
-      for (let i = 0; i < possibleOptions.length; i++) {
-        const option = possibleOptions[i];
-
-        if (option === arg) {
-          toReturn = arg;
-          break optionsLoop;
-        }
-      }
-      break;
-
-    default:
-      toReturn = "FATAL"
-  }
-
-  return toReturn;
-}
-
-async function validateAnArg(param, arg, args, message, guild, member, client) {
-  let toReturn = await switchParams(param, arg, args, message, guild, member, client)
-
-  return toReturn != "FATAL" && toReturn ? true : false;
-}
-
 const isOnMobible = function (message) {
   return message.member.presence &&
     message.member.presence.clientStatus &&
@@ -2048,7 +1906,7 @@ const isOnMobible = function (message) {
 module.exports = {
   GetChangesAndCreateFields,
   FetchAuditLogs,
-  intervalGlobalDatas,
+  GlobalDatasWork,
   AddWarns,
   Interest,
   VaultWork,
