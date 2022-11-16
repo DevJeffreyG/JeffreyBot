@@ -23,12 +23,12 @@ command.execute = async (interaction, models, params, client) => {
 
     // codigo
     const quantity = cantidad.value;
-    const user = await Users.getOrCreate({user_id: interaction.user.id, guild_id: interaction.guild.id});
+    const user = await Users.getOrCreate({ user_id: interaction.user.id, guild_id: interaction.guild.id });
 
     const darkshop = new DarkShop(interaction.guild);
     const inflation = await darkshop.getInflation();
 
-    const darkjeffroValue = 200*inflation;
+    const darkjeffroValue = 200 * inflation;
 
     const darkjeffros = user.economy.dark.darkjeffros;
     const totalJeffros = Math.floor(darkjeffroValue * quantity);
@@ -57,7 +57,7 @@ command.execute = async (interaction, models, params, client) => {
     })
     embeds.push(success);
 
-    if(quantity > darkjeffros) return notEnough.send();
+    if (quantity > darkjeffros) return notEnough.send();
 
     const economy = user.economy.dark;
 
@@ -66,16 +66,17 @@ command.execute = async (interaction, models, params, client) => {
 
     await user.save();
 
-    if(new Chance().bool({likelihood: 20})) {
-        let sug = new Embed({
-            type: "didYouKnow",
-            data: `Si cambias DarkJeffros en la semana no los puedes recuperar`
-        })
+    let sug = new Embed({
+        type: "didYouKnow",
+        data: {
+            text: `Si cambias DarkJeffros en la semana no los puedes recuperar`,
+            likelihood: 20
+        }
+    })
 
-        embeds.push(sug);
-    }
+    if (sug.likelihood) embeds.push(sug);
 
-    return interaction.editReply({embeds});
+    return interaction.editReply({ embeds });
 
 }
 

@@ -15,13 +15,13 @@ command.addOption({
 
 command.execute = async (interaction, models, params, client) => {
     const { comando } = params;
-    if(comando) return command.execGetHelp(interaction, comando, client);
-    
-    await interaction.deferReply({ephemeral: true});
+    if (comando) return command.execGetHelp(interaction, comando, client);
+
+    await interaction.deferReply({ ephemeral: true });
     const guild = client.guilds.cache.find(x => x.id === interaction.guildId);
     const member = guild.members.cache.find(x => x.id === interaction.user.id);
     const helpEmojiURL = client.EmojisObject.Faq.url
-    
+
     // get all commands
     const commands = client.slash.map(slash => slash);
 
@@ -32,7 +32,7 @@ command.execute = async (interaction, models, params, client) => {
     let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
     let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
 
-    if(client.user.id === Config.testingJBID){
+    if (client.user.id === Config.testingJBID) {
         jeffreyRole = guild.roles.cache.find(x => x.id === "482992290550382592");
         staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
         adminRole = guild.roles.cache.find(x => x.id === "483105079285776384");
@@ -41,53 +41,53 @@ command.execute = async (interaction, models, params, client) => {
     // codigo
 
     let general = new Embed()
-    .defAuthor({text: `Comandos generales`, icon: helpEmojiURL})
-    .defColor(Colores.verde);
+        .defAuthor({ text: `Comandos generales`, icon: helpEmojiURL })
+        .defColor(Colores.verde);
 
     let fun = new Embed()
-    .defAuthor({text: `Comandos de diversión`, icon: helpEmojiURL})
-    .defColor(Colores.verde);
+        .defAuthor({ text: `Comandos de diversión`, icon: helpEmojiURL })
+        .defColor(Colores.verde);
 
     let music = new Embed()
-    .defAuthor({text: `Comandos de música ! MANTENIMIENTO !`, icon: helpEmojiURL})
-    .defColor(Colores.verde);
+        .defAuthor({ text: `Comandos de música ! MANTENIMIENTO !`, icon: helpEmojiURL })
+        .defColor(Colores.verde);
 
     let economy = new Embed()
-    .defAuthor({text: `Comandos de economía`, icon: helpEmojiURL})
-    .defColor(Colores.verde);
-    
+        .defAuthor({ text: `Comandos de economía`, icon: helpEmojiURL })
+        .defColor(Colores.verde);
+
     let darkshop = new Embed()
-    .defAuthor({text: `Comandos de la DarkShop`, icon: helpEmojiURL})
-    .defColor(Colores.negro);
+        .defAuthor({ text: `Comandos de la DarkShop`, icon: helpEmojiURL })
+        .defColor(Colores.negro);
 
     let moderation = new Embed()
-    .defAuthor({text: `Comandos de moderación`, icon: helpEmojiURL})
-    .defColor(Colores.rojo);
+        .defAuthor({ text: `Comandos de moderación`, icon: helpEmojiURL })
+        .defColor(Colores.rojo);
 
     let staff = new Embed()
-    .defAuthor({text: `Comandos de STAFF`, icon: helpEmojiURL})
-    .defColor(Colores.rojo);
+        .defAuthor({ text: `Comandos de STAFF`, icon: helpEmojiURL })
+        .defColor(Colores.rojo);
 
     let admin = new Embed()
-    .defAuthor({text: `Comandos de Administrador`, icon: helpEmojiURL})
-    .defColor(Colores.rojo);
+        .defAuthor({ text: `Comandos de Administrador`, icon: helpEmojiURL })
+        .defColor(Colores.rojo);
 
     let dev = new Embed()
-    .defAuthor({text: `Comandos de desarrollador`, icon: helpEmojiURL})
-    .defColor(Colores.nocolor);
+        .defAuthor({ text: `Comandos de desarrollador`, icon: helpEmojiURL })
+        .defColor(Colores.nocolor);
 
     let [generalDesc, funDesc, musicDesc, economyDesc, darkshopDesc, moderationDesc, staffDesc, adminDesc, devDesc] = ["", "", "", "", "", "", "", "", ""];
 
     for (let i = 0; i < commands.length; i++) {
         const helpCommand = commands[i];
-        
+
         const toAdd = `▸ \`/${helpCommand.name}\`: ${helpCommand.info}${helpCommand.info.endsWith("!") || helpCommand.info.endsWith("?") ? "" : "."}\n`;
 
-        switch(helpCommand.category){
+        switch (helpCommand.category) {
             case Categories.General:
                 generalDesc += toAdd;
                 break;
-            
+
             case Categories.Fun:
                 funDesc += toAdd;
                 break;
@@ -103,7 +103,7 @@ command.execute = async (interaction, models, params, client) => {
             case Categories.DarkShop:
                 darkshopDesc += toAdd;
                 break;
-            
+
             case Categories.Moderation:
                 moderationDesc += toAdd;
                 break;
@@ -115,7 +115,7 @@ command.execute = async (interaction, models, params, client) => {
             case Categories.Administration:
                 adminDesc += toAdd;
                 break;
-                
+
             case Categories.Developer:
                 devDesc += toAdd;
                 break;
@@ -139,48 +139,53 @@ command.execute = async (interaction, models, params, client) => {
     let isStaff = member.roles.cache.find(x => x === staffRole) ? true : false;
     let isAdmin = member.roles.cache.find(x => x === adminRole) ? true : false;
     let isJeffrey = member.roles.cache.find(x => x === jeffreyRole) ? true : false;
-    
+
     let arrayEmbeds = [];
 
-    if(general.description) arrayEmbeds.push(general);
-    if(fun.description) arrayEmbeds.push(fun);
-    if(music.description) arrayEmbeds.push(music);
-    if(economy.description) arrayEmbeds.push(economy);
-    if(darkshop.description) arrayEmbeds.push(darkshop);
+    if (general.description) arrayEmbeds.push(general);
+    if (fun.description) arrayEmbeds.push(fun);
+    if (music.description) arrayEmbeds.push(music);
+    if (economy.description) arrayEmbeds.push(economy);
+    if (darkshop.description) arrayEmbeds.push(darkshop);
 
-    if(isJeffrey){
-        if(moderation.description) arrayEmbeds.push(moderation);
-        if(staff.description) arrayEmbeds.push(staff);
-        if(admin.description) arrayEmbeds.push(admin);
-        if(dev.description) arrayEmbeds.push(dev);
-    } else if(isStaff){
-        if(moderation.description) arrayEmbeds.push(moderation);
-        if(staff.description) arrayEmbeds.push(staff);
-        if(isAdmin && admin.description) arrayEmbeds.push(admin);
+    if (isJeffrey) {
+        if (moderation.description) arrayEmbeds.push(moderation);
+        if (staff.description) arrayEmbeds.push(staff);
+        if (admin.description) arrayEmbeds.push(admin);
+        if (dev.description) arrayEmbeds.push(dev);
+    } else if (isStaff) {
+        if (moderation.description) arrayEmbeds.push(moderation);
+        if (staff.description) arrayEmbeds.push(staff);
+        if (isAdmin && admin.description) arrayEmbeds.push(admin);
     }
 
-    if(new Chance().bool({likelihood: 20})) {
-        let sug = new Embed({
-            type: "didYouKnow",
-            data: `Puedes obtener ayuda de un comando específico usando este mismo comando:\n\`/ayuda comando:(nombre)\``
-        })
+    let sug = new Embed({
+        type: "didYouKnow",
+        data: {
+            text: `Puedes obtener ayuda de un comando específico usando este mismo comando:\n\`/ayuda comando:(nombre)\``,
+            likelihood: 50
+        }
+    })
 
-        arrayEmbeds.push(sug);
-    }
+    console.log(sug)
 
-    return interaction.editReply({embeds: arrayEmbeds, ephemeral: true});
+    if (sug.likelihood) arrayEmbeds.push(sug);
+
+    return interaction.editReply({ embeds: arrayEmbeds, ephemeral: true });
 }
 
 command.execGetHelp = async (interaction, commandHelp, client) => {
     await interaction.deferReply();
     let comando = client.slash.get(commandHelp.value)
-    
-    if(!comando) return interaction.editReply({embeds: [
-        new ErrorEmbed({
-            type: "commandNotFound",
-            data: commandHelp.value,
-        })
-    ]})
+
+    if (!comando) return interaction.editReply({
+        embeds: [
+            new ErrorEmbed({
+                type: "commandNotFound",
+                data: commandHelp.value,
+            })
+        ]
+    })
 
     return comando.getHelp(interaction);
 }

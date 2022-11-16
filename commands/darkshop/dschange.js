@@ -18,8 +18,8 @@ command.addOption({
 })
 
 command.execute = async (interaction, models, params, client) => {
-    if(moment().day() != 0){
-        return interaction.reply({ephemeral: true, content: `${client.Emojis.Error} NO puedes cambiar más DarkJeffros hasta que sea domingo.`})
+    if (moment().day() != 0) {
+        return interaction.reply({ ephemeral: true, content: `${client.Emojis.Error} NO puedes cambiar más DarkJeffros hasta que sea domingo.` })
     }
     await interaction.deferReply();
     const { Users } = models;
@@ -28,14 +28,14 @@ command.execute = async (interaction, models, params, client) => {
 
     // codigo
     const quantity = cantidad.value;
-    const user = await Users.getOrCreate({user_id: interaction.user.id, guild_id: interaction.guild.id});
+    const user = await Users.getOrCreate({ user_id: interaction.user.id, guild_id: interaction.guild.id });
 
     let jeffros = user.economy.global.jeffros;
 
     const darkshop = new DarkShop(interaction.guild);
     const inflation = await darkshop.getInflation();
 
-    const darkjeffroValue = 200*inflation;
+    const darkjeffroValue = 200 * inflation;
 
     const totalJeffros = Math.floor(darkjeffroValue * quantity);
 
@@ -63,7 +63,7 @@ command.execute = async (interaction, models, params, client) => {
     })
     embeds.push(success);
 
-    if(totalJeffros > jeffros) return notEnough.send();
+    if (totalJeffros > jeffros) return notEnough.send();
 
     const hoy = new Date();
     const economy = user.economy.dark;
@@ -76,16 +76,17 @@ command.execute = async (interaction, models, params, client) => {
 
     await user.save();
 
-    if(new Chance().bool({likelihood: 20})) {
-        let sug = new Embed({
-            type: "didYouKnow",
-            data: `Puedes saber la cantidad exacta para cambiar todos tus Jeffros en el comando \`/dscalc\``
-        })
+    let sug = new Embed({
+        type: "didYouKnow",
+        data: {
+            text: `Puedes saber la cantidad exacta para cambiar todos tus Jeffros en el comando \`/dscalc\``,
+            likelihood: 20
+        }
+    })
 
-        embeds.push(sug);
-    }
+    if (sug.likelihood) embeds.push(sug);
 
-    return interaction.editReply({embeds});
+    return interaction.editReply({ embeds });
 
 }
 
