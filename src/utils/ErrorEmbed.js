@@ -187,15 +187,21 @@ ${data.error}
         this.defDesc(d);
     }
 
-    send(ephemeral = false){
+    async send(ephemeral = false){
         if(!this.interaction) return console.error("🔴 NO EXISTE this.interaction !!")
         else
 
-        if(ephemeral) this.interaction.reply({content: null, embeds: [this], components: [], ephemeral: true})
-        else
+        if(ephemeral) {
+            try {
+                return await this.interaction.reply({content: null, embeds: [this], components: [], ephemeral: true})
+            } catch(err) {
+                console.log("Oops!")
+                console.log(err)
+            }
+        }
         
         try {
-            this.interaction.editReply({content: null, embeds: [this], components: []});
+            await this.interaction.editReply({content: null, embeds: [this], components: []});
         } catch (err) {
             console.log("🔴 NO se envió el ErrorEmbed!")
             console.log(err);

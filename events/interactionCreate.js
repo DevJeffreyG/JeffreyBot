@@ -1,17 +1,20 @@
 const Discord = require("discord.js");
 const { time } = Discord;
-const ms = require("ms");
 
 const models = require("mongoose").models;
 const { ToggledCommands, Users, Guilds } = models
 
-const { Ticket, ErrorEmbed, intervalGlobalDatas, Categories, ValidateDarkShop, Embed } = require("../src/utils");
+const { Ticket, ErrorEmbed, GlobalDatasWork, Categories, ValidateDarkShop, Embed, Confirmation } = require("../src/utils");
 const { Config, Colores, Bases } = require("../src/resources");
 const { InteractionType } = require("discord-api-types/v10");
 const { jeffreygID, mantenimiento } = Config;
 
-const ticketCooldown = ms("1m");
-
+/**
+ * 
+ * @param {Discord.Client} client 
+ * @param {Interaction} interaction 
+ * @returns 
+ */
 module.exports = async (client, interaction) => {
   if (!client.fetchedGuilds.find(x => x === interaction.guild.id)) {
     await client.guilds.fetch(interaction.guild.id);
@@ -24,11 +27,12 @@ module.exports = async (client, interaction) => {
   }
 
   client.lastInteraction = interaction;
-  
+
   const author = interaction.user;
   const guild = interaction.guild;
   const customId = interaction.customId;
 
+  await GlobalDatasWork(guild);
   const docGuild = await Guilds.getOrCreate(guild.id);
   const user = await Users.getOrCreate({ user_id: author.id, guild_id: guild.id });
 
@@ -105,9 +109,11 @@ module.exports = async (client, interaction) => {
       if (typeof params[prop] === 'undefined') params[prop] = {}
     }
 
-    await intervalGlobalDatas(client);
-    
-    executeSlash(interaction, models, params, client)
+    try {
+      executeSlash(interaction, models, params, client)
+    } catch (err) {
+      console.log(err)
+    }
 
     async function executeSlash(interaction, models, params, client) {
       console.log(`-------- /${commandName} • por ${interaction.user.id} • en ${interaction.guild.name} (${interaction.guild.id}) ----------`)
@@ -118,17 +124,19 @@ module.exports = async (client, interaction) => {
           if (!validation.valid) return interaction.reply({ embeds: [validation.embed] })
         }
 
-        if(slashCommand.category === Categories.Developer){
-          if(!Bases.devIds.find(x => x === interaction.user.id)) return interaction.reply({ephemeral: true, content: "No puedes usar este comando porque no eres desarrollador de Jeffrey Bot"})
+        if (slashCommand.category === Categories.Developer) {
+          if (!Bases.devIds.find(x => x === interaction.user.id)) return interaction.reply({ ephemeral: true, content: "No puedes usar este comando porque no eres desarrollador de Jeffrey Bot" })
         }
         await slashCommand.execute(interaction, models, params, client);
       } catch (error) {
         console.error(error);
         let help = new ErrorEmbed(interaction, { type: "badCommand", data: { commandName, error } });
         try {
-          await interaction.reply({ content: null, embeds: [help], ephemeral: true });
-        } catch (er) {
-          await help.send();
+          await help.send()
+          //await interaction.reply({ content: null, embeds: [help], ephemeral: true });
+        } catch (err) {
+          console.log("⚠️ Un comando quiso ser usado y Discord no respondió:", client.lastInteraction)
+          console.log(err);
         }
       }
     }
@@ -145,8 +153,8 @@ module.exports = async (client, interaction) => {
     })
 
     if (customId.toUpperCase().includes("TICKET")) ticket = new Ticket(interaction);
-    if(customId.toUpperCase().includes("SUGGESTION") && !docGuild.moduleIsActive("functions.suggestions"))
-      return new ErrorEmbed(interaction, {type: "moduleDisabled"}).send(true);
+    if (customId.toUpperCase().includes("SUGGESTION") && !docGuild.moduleIsActive("functions.suggestions"))
+      return new ErrorEmbed(interaction, { type: "moduleDisabled" }).send(true);
 
     if (ticket) {
       return ticket.handle();
@@ -160,8 +168,8 @@ module.exports = async (client, interaction) => {
         if (!interaction.deferred) await interaction.deferReply({ ephemeral: true });
 
         let suggestion = docGuild.data.suggestions.find(x => x.message_id === interaction.message.id);
-        if(!suggestion) {
-          interaction.message.edit({ components: []})
+        if (!suggestion) {
+          interaction.message.edit({ components: [] })
           return suggestionNotFound.send()
         }
 
@@ -205,8 +213,8 @@ ${suggestion.suggestion}
         if (!interaction.deferred) await interaction.deferReply({ ephemeral: true });
 
         let suggestion = docGuild.data.suggestions.find(x => x.message_id === interaction.message.id);
-        if(!suggestion) {
-          interaction.message.edit({ components: []})
+        if (!suggestion) {
+          interaction.message.edit({ components: [] })
           return suggestionNotFound.send()
         }
 
@@ -250,8 +258,8 @@ ${suggestion.suggestion}
         if (!interaction.deferred) await interaction.deferReply({ ephemeral: true });
 
         let suggestion = docGuild.data.suggestions.find(x => x.message_id === interaction.message.id);
-        if(!suggestion) {
-          interaction.message.edit({ components: []})
+        if (!suggestion) {
+          interaction.message.edit({ components: [] })
           return suggestionNotFound.send()
         }
 
@@ -296,29 +304,69 @@ ${suggestion.suggestion}
         let error = false;
         try {
           await interaction.deferReply({ ephemeral: true });
-        } catch(err) {error = true}
+        } catch (err) { error = true }
 
         const Emojis = interaction.client.Emojis;
 
         let e = new Embed()
-        .defAuthor({text: "¿Cómo se juega Blackjack?", title: true})
-        .defColor(Colores.verdejeffrey)
-        .defDesc(`**Objetivo**: Consigue vencer a Jeffrey Bot consiguiendo un valor a **21** o lo más cercano a él **SIN PASARTE**.`)
-        .defField("Pedir y Plantarse", `**—** Pedir: Pides una carta a Jeffrey Bot\n**—** Plantarse: No puedes volver a pedir cartas. Es el turno de Jeffrey Bot para jugar.`)
-        .defField("Doblar", `**—** Duplicas tu apuesta actual, pides una carta más y luego te plantas.`)
-        .defField("Dividir", `**—** Sólo se puede usar cuando tus dos primeras cartas tienen el mismo número o letra: las separas en dos manos con la misma apuesta y se agrega una más a cada una.`)
-        .defField("Rendirse", `**—** Sólo te puedes rendir si has jugado menos de 2 veces por partida. Pierdes **lo que se pueda** de la mitad de tu apuesta.`)
-        .defField("Valores de las cartas", `**—** Los ases (${Emojis["1C"]}${Emojis["1H"]}${Emojis["1S"]}${Emojis["1D"]}) pueden valer **1** u **11** dependiendo si este hace que la mano se pase de **21**.
+          .defAuthor({ text: "¿Cómo se juega Blackjack?", title: true })
+          .defColor(Colores.verdejeffrey)
+          .defDesc(`**Objetivo**: Consigue vencer a Jeffrey Bot consiguiendo un valor a **21** o lo más cercano a él **SIN PASARTE**.`)
+          .defField("Pedir y Plantarse", `**—** Pedir: Pides una carta a Jeffrey Bot\n**—** Plantarse: No puedes volver a pedir cartas. Es el turno de Jeffrey Bot para jugar.`)
+          .defField("Doblar", `**—** Duplicas tu apuesta actual, pides una carta más y luego te plantas.`)
+          .defField("Dividir", `**—** Sólo se puede usar cuando tus dos primeras cartas tienen el mismo número o letra: las separas en dos manos con la misma apuesta y se agrega una más a cada una.`)
+          .defField("Rendirse", `**—** Sólo te puedes rendir si has jugado menos de 2 veces por partida. Pierdes **lo que se pueda** de la mitad de tu apuesta.`)
+          .defField("Valores de las cartas", `**—** Los ases (${Emojis["1C"]}${Emojis["1H"]}${Emojis["1S"]}${Emojis["1D"]}) pueden valer **1** u **11** dependiendo si este hace que la mano se pase de **21**.
 **—** Las cartas que tienen números tienen ese mismo valor.
 **—** ${Emojis.JC}${Emojis.QC}${Emojis.KC} y demás valen **10**.`)
-        .defField("El turno de Jeffrey Bot", `**—** Cuando sea el momento de jugar de Jeffrey Bot tomará una carta hasta que llegue a 17 o más.`)
-        .defField("Resultados", `**—** Si las primeras cartas que te tocan dan como resultado **21** ganas automáticamente, sin excepciones.
+          .defField("El turno de Jeffrey Bot", `**—** Cuando sea el momento de jugar de Jeffrey Bot tomará una carta hasta que llegue a 17 o más.`)
+          .defField("Resultados", `**—** Si las primeras cartas que te tocan dan como resultado **21** ganas automáticamente, sin excepciones.
 **—** Si te pasas de **21** pierdes, sin excepciones.
 **—** Si el valor de la mano de Jeffrey Bot es la misma que la tuya se termina el juego como empate y no pierdes nada de lo apostado.
 **—** Si el valor de la mano de Jeffrey Bot es 21 o menor y mayor que la tuya, pierdes.`)
-        .defFooter({text: "Gracias UnbelievaBoat#1046, te quiero mucho por favor no me denuncien."})
+          .defFooter({ text: "Gracias UnbelievaBoat#1046, te quiero mucho por favor no me denuncien." })
 
-        return error ? interaction.followUp({embeds: [e], ephemeral: true}) : interaction.editReply({embeds: [e]})
+        return error ? interaction.followUp({ embeds: [e], ephemeral: true }) : interaction.editReply({ embeds: [e] })
+      }
+
+      case "rememberBirthday": {
+        if (!interaction.deferred) await interaction.deferReply({ ephemeral: true }).catch(err => console.log(err));
+
+        let msg = await interaction.message.fetch();
+        let embed = msg.embeds[0];
+
+        const author_info = embed.data.author.name.split(" ");
+        const tag = author_info.find(x => x.includes("#"));
+
+        await interaction.guild.members.fetch()
+
+        const member = interaction.guild.members.cache.find(x => x.user.tag === tag);
+
+        if (!user.hasReminderFor(member.id)) {
+          let confirmation = await Confirmation("Recordar", [
+            `¿Deseas que te envíe un mensaje privado el día del cumpleaños de ${member}?`,
+            `Si no tienes los mensajes privados habilitados para entonces, no se te podrá recordar.`,
+            `Para eliminar el recordatorio sólo tienes que darle de nuevo al botón con mismo usuario.`,
+            `Siempre se te recordará hasta que lo elimines.`,
+            `No sabrán que tienes este recordatorio.`
+          ], interaction);
+          if (!confirmation) return;
+
+          user.data.birthday_reminders.push({ id: member.id })
+          await user.save();
+        } else {
+          let confirmation = await Confirmation("Dejar de recordar", [
+            `¿Ya no quieres que te recuerde del cumpleaños de ${member}?`,
+            `No sabrán que lo hiciste.`
+          ], interaction);
+          if (!confirmation) return;
+
+          user.data.birthday_reminders.splice(user.getBirthdayReminders().findIndex(x => x.id === member.id), 1)
+          await user.save();
+        }
+
+        return interaction.editReply({ embeds: [new Embed({ type: "success" })] })
+        break;
       }
 
       default:
