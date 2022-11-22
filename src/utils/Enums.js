@@ -161,18 +161,22 @@ const CardType = new Enum({
  * - Decreasing
  * - LargeSpike
  * - SmallSpike
+ * - LastMinute
+ * - InitialSpike
  */
 const Tendencies = new Enum({
     Random: 1,
     Decreasing: 2,
     LargeSpike: 3,
-    SmallSpike: 4
+    SmallSpike: 4,
+    LastMinute: 5,
+    InitialSpike: 6
 }).values
 
 /**
  * - GuildLogs - Logs para los eventos del servidor
  * - ModerationLogs - Logs para los comandos de moderación
- * - StaffLogs - Logs para las interacciones usuario-staff en el server (tickets, sugerencias, etc)
+ * - StaffLogs - Interacciones de usuarios en el server (tickets, sugerencias, etc) o simplemente logs/info para Staffs
  * - ClientLogs - Logs para Developer
  */
 const ChannelModules = new Enum({
@@ -191,6 +195,10 @@ const ChannelModules = new Enum({
  * - Ban
  * - TimeOut
  * - MsgClear
+ * - AutoMod
+ * - Logger
+ * - Settings
+ * - Error
  */
 const LogReasons = new Enum({
     Ticket: 1,
@@ -200,7 +208,11 @@ const LogReasons = new Enum({
     Pardon: 5,
     Ban: 6,
     TimeOut: 7,
-    MsgClear: 8
+    MsgClear: 8,
+    AutoMod: 9,
+    Logger: 10,
+    Settings: 11,
+    Error: 12
 }).values
 
 module.exports = {

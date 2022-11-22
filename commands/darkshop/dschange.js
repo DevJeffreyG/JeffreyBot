@@ -33,18 +33,16 @@ command.execute = async (interaction, models, params, client) => {
     let jeffros = user.economy.global.jeffros;
 
     const darkshop = new DarkShop(interaction.guild);
-    const inflation = await darkshop.getInflation();
+    const one = await darkshop.oneEquals();
 
-    const darkjeffroValue = 200 * inflation;
-
-    const totalJeffros = Math.floor(darkjeffroValue * quantity);
+    const totalJeffros = Math.round(one * quantity);
 
     const notEnough = new ErrorEmbed(interaction, {
         type: "economyError",
         data: {
             action: "change",
             error: `No tienes tantos Jeffros para cambiar.
-**▸** Inflación: **${Emojis.DarkJeffros}1** = **${Emojis.Jeffros}${darkjeffroValue.toLocaleString("es-CO")}**
+**▸** Inflación: **${Emojis.DarkJeffros}1** = **${Emojis.Jeffros}${one.toLocaleString("es-CO")}**
 **▸** Necesitas: **${Emojis.Jeffros}${totalJeffros.toLocaleString("es-CO")}**`,
             money: jeffros
         }
@@ -79,7 +77,7 @@ command.execute = async (interaction, models, params, client) => {
     let sug = new Embed({
         type: "didYouKnow",
         data: {
-            text: `Puedes saber la cantidad exacta para cambiar todos tus Jeffros en el comando \`/dscalc\``,
+            text: `Una vez a la semana puedes usar \`/predict\` para intentar adivinar si es buena idea vender tus DarkJeffros en el momento`,
             likelihood: 20
         }
     })

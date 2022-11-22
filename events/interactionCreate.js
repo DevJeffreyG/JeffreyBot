@@ -1,5 +1,5 @@
 const Discord = require("discord.js");
-const { time } = Discord;
+const { time, codeBlock } = Discord;
 
 const models = require("mongoose").models;
 const { ToggledCommands, Users, Guilds } = models
@@ -119,6 +119,9 @@ module.exports = async (client, interaction) => {
       console.log(`-------- /${commandName} • por ${interaction.user.id} • en ${interaction.guild.name} (${interaction.guild.id}) ----------`)
       try {
         if (slashCommand.category === Categories.DarkShop) {
+          if (!docGuild.moduleIsActive("functions.darkshop")) return new ErrorEmbed(interaction, {
+            type: "moduleDisabled"
+          }).send(true);
           // filtro de nivel 5
           let validation = await ValidateDarkShop(user, interaction.user);
           if (!validation.valid) return interaction.reply({ embeds: [validation.embed] })
@@ -187,9 +190,7 @@ module.exports = async (client, interaction) => {
           .defAuthor({ text: "¡Se ha aceptado una sugerencia tuya!", icon: interaction.client.EmojisObject.Check.url })
           .setDescription(`**—** ¡Gracias por ayudarnos a mejorar!
 **—** Se ha aceptado tu sugerencia:
-\`\`\`
-${suggestion.suggestion}
-\`\`\`
+${codeBlock(suggestion.suggestion)}
 **—** Nos tomamos la libertad de agregarte un role como forma de agradecimiento 😉`)
           .defColor(Colores.verde)
           .defFooter({ text: interaction.guild.name, icon: interaction.guild.iconURL(), timestamp: true });
@@ -233,9 +234,7 @@ ${suggestion.suggestion}
         let acceptedEmbed = new Embed()
           .defAuthor({ text: "¡Gracias por el interés!", icon: interaction.client.EmojisObject.Error.url })
           .defDesc(`**—** Hemos denegado tu sugerencia:
-\`\`\`
-${suggestion.suggestion}
-\`\`\`
+${codeBlock(suggestion.suggestion)}
 **—** ¡Gracias por ayudarnos a mejorar, siempre te tendremos en cuenta!`)
           .defColor(Colores.rojo)
           .defFooter({ text: interaction.guild.name, icon: interaction.guild.iconURL(), timestamp: true });
@@ -278,9 +277,7 @@ ${suggestion.suggestion}
         let acceptedEmbed = new Embed()
           .defAuthor({ text: "¡Gracias por el interés!", icon: interaction.client.EmojisObject.Error.url })
           .defDesc(`**—** Hemos determinado que tu sugerencia es inválida:
-\`\`\`
-${suggestion.suggestion}
-\`\`\`
+${codeBlock(suggestion.suggestion)}
 **—** Puede que esta haya sido una sugerencia repetida, o una ya denegada anteriormente.
 **—** ¡Gracias por ayudarnos a mejorar, siempre te tendremos en cuenta!`)
           .defColor(Colores.rojo)

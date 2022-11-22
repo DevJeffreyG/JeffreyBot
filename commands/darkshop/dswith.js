@@ -69,7 +69,7 @@ command.execute = async (interaction, models, params, client) => {
     let sug = new Embed({
         type: "didYouKnow",
         data: {
-            text: `Si cambias DarkJeffros en la semana no los puedes recuperar`,
+            text: `Si cambias DarkJeffros en la semana no los puedes recuperar hasta el domingo`,
             likelihood: 20
         }
     })

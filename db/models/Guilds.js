@@ -88,9 +88,10 @@ const GuildSchema = new Schema({
             functions: {
                 suggestions: { type: Boolean, default: false },
                 tickets: { type: Boolean, default: false },
-                message_logs: { type: Boolean, default: false },
+                logs: { type: Boolean, default: true },
                 birthdays: { type: Boolean, default: false },
-                darkshop: { type: Boolean, default: false }
+                darkshop: { type: Boolean, default: false },
+                
             },
             logs: {
                 guild: {
@@ -104,12 +105,17 @@ const GuildSchema = new Schema({
                     pardons: { type: Boolean, default: true },
                     bans: { type: Boolean, default: true },
                     timeouts: { type: Boolean, default: true },
-                    clears: { type: Boolean, default: true }
+                    clears: { type: Boolean, default: true },
+                    automod: { type: Boolean, default: true }
                 },
                 staff: {
                     tickets: { type: Boolean, default: true },
-                    settings: { type: Boolean, default: true }
+                    settings: { type: Boolean, default: true },
+                    errors: { type: Boolean, default: true },
                 }
+            },
+            automoderation: {
+                remove_links: { type: Boolean, default: false }
             }
         },
         autoroles: {
@@ -119,6 +125,11 @@ const GuildSchema = new Schema({
         minimum: {
             blackjack_bet: { type: Number, default: 1000 },
             darkshop_level: { type: Number, default: 5 }
+        },
+        functions: {
+            adjust_shop: { type: Boolean, default: true },
+            adjust_darkshop: { type: Boolean, default: true },
+            baseprice_darkshop: { type: Number, default: 200, integer: true },
         }
     },
     roles: { // id de roles
@@ -162,6 +173,9 @@ const GuildSchema = new Schema({
         darkshop: {
             events: { type: String }
         }
+    },
+    emojis: {
+        
     }
 });
 
@@ -315,8 +329,21 @@ GuildSchema.method("getBots", function () {
     return this.roles.bots
 });
 
-GuildSchema.method("getChannel", function(module) {
-    return this.channels[module] ?? null;
+GuildSchema.method("getChannel", function(query) {
+    let general = this.channels;
+    console.log(general)
+    const q = query.split(".");
+
+    if(q.length >= 1){
+        for (let i = 0; i < q.length; i++) {
+            const queryQ = q[i];
+            
+            general = general[queryQ]
+        }
+    }
+
+
+    return general ?? null;
 })
 
 GuildSchema.method("getLogChannel", function(module) {

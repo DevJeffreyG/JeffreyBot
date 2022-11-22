@@ -58,13 +58,12 @@ class Command {
                     this.addOption(data)
                 })
             } else {
-                console.log(this)
                 this.addOption(data);
             }
         })
     }
 
-    async addOption(data = { type: "string", name: "foo", desc: "bar", req: false, sub: null }) {
+    async addOption(data = { type: "string", name: "foo", desc: "bar", req: false, sub: null, choices: [] }) {
         this.#warning();
         if (!(data.type && data.name && data.desc)) return console.error("No están todos los datos para crear una opción:", this.data, data)
 
