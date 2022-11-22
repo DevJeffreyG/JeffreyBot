@@ -2,6 +2,7 @@ const Discord = require("discord.js");
 const { Command, Categories, isBannedFrom, FindNewId, DataWork, Embed, ErrorEmbed, Log, ChannelModules, LogReasons } = require("../../src/utils");
 const { Colores } = require("../../src/resources");
 const { ButtonStyle } = require("discord-api-types/v10");
+const { codeBlock } = require("discord.js");
 
 const command = new Command({
     name: "sug",
@@ -51,9 +52,7 @@ command.execute = async (interaction, models, params, client) => {
         .defAuthor({ text: "Nueva sugerencia", icon: interaction.member.displayAvatarURL() })
         .defDesc(`**—** Por: ${interaction.member}
 **—** Sugiere:
-\`\`\`
-${sugerencia}
-\`\`\`
+${codeBlock(sugerencia)}
 **—** ID: \`${newId}\`.`)
         .defColor(Colores.verdejeffrey);
 

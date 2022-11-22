@@ -1,6 +1,5 @@
-const { Command, Categories, ErrorEmbed, Embed } = require("../../src/utils");
-const { Config, Colores } = require("../../src/resources/");
-const Chance = require("chance");
+const { Command, Categories, ErrorEmbed, Embed, MemberHasAnyRole, isDeveloper } = require("../../src/utils");
+const { Colores, Bases } = require("../../src/resources/");
 
 const command = new Command({
     name: "ayuda",
@@ -14,13 +13,15 @@ command.addOption({
 });
 
 command.execute = async (interaction, models, params, client) => {
+    const { Guilds } = models;
     const { comando } = params;
     if (comando) return command.execGetHelp(interaction, comando, client);
 
     await interaction.deferReply({ ephemeral: true });
-    const guild = client.guilds.cache.find(x => x.id === interaction.guildId);
-    const member = guild.members.cache.find(x => x.id === interaction.user.id);
+    const guild = interaction.guild;
+    const member = interaction.member;
     const helpEmojiURL = client.EmojisObject.Faq.url
+    const doc = await Guilds.getOrCreate(guild.id);
 
     // get all commands
     const commands = client.slash.map(slash => slash);
@@ -28,15 +29,8 @@ command.execute = async (interaction, models, params, client) => {
     commands.sort((a, b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0)); // me lo robe y no entiendo como funciona :D
 
     // roles
-    let jeffreyRole = guild.roles.cache.find(x => x.id === Config.jeffreyRole);
-    let staffRole = guild.roles.cache.find(x => x.id === Config.staffRole);
-    let adminRole = guild.roles.cache.find(x => x.id === Config.adminRole);
-
-    if (client.user.id === Config.testingJBID) {
-        jeffreyRole = guild.roles.cache.find(x => x.id === "482992290550382592");
-        staffRole = guild.roles.cache.find(x => x.id === "535203102534402063");
-        adminRole = guild.roles.cache.find(x => x.id === "483105079285776384");
-    }
+    const adminRoles = doc.getAdmins();
+    const staffRoles = doc.getStaffs();
 
     // codigo
 
@@ -136,9 +130,11 @@ command.execute = async (interaction, models, params, client) => {
     admin.defDesc(adminDesc);
     dev.defDesc(devDesc);
 
-    let isStaff = member.roles.cache.find(x => x === staffRole) ? true : false;
-    let isAdmin = member.roles.cache.find(x => x === adminRole) ? true : false;
-    let isJeffrey = member.roles.cache.find(x => x === jeffreyRole) ? true : false;
+    //let isAdmin = member.roles.cache.find(x => x === adminRole) ? true : false;
+
+    const isStaff = MemberHasAnyRole(member, staffRoles);
+    const isAdmin = MemberHasAnyRole(member, adminRoles);
+    const isDev = isDeveloper(member)
 
     let arrayEmbeds = [];
 
@@ -148,7 +144,7 @@ command.execute = async (interaction, models, params, client) => {
     if (economy.description) arrayEmbeds.push(economy);
     if (darkshop.description) arrayEmbeds.push(darkshop);
 
-    if (isJeffrey) {
+    if (isDev) {
         if (moderation.description) arrayEmbeds.push(moderation);
         if (staff.description) arrayEmbeds.push(staff);
         if (admin.description) arrayEmbeds.push(admin);
@@ -166,8 +162,6 @@ command.execute = async (interaction, models, params, client) => {
             likelihood: 50
         }
     })
-
-    console.log(sug)
 
     if (sug.likelihood) arrayEmbeds.push(sug);
 

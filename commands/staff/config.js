@@ -1,5 +1,6 @@
+const { codeBlock, messageLink, hyperlink } = require("discord.js");
 const { Colores } = require("../../src/resources");
-const { Command, Categories, ErrorEmbed, Confirmation, FindNewId, Embed, Enum, ChannelModules } = require("../../src/utils")
+const { Command, Categories, ErrorEmbed, Confirmation, FindNewId, Embed, ChannelModules, Log, LogReasons } = require("../../src/utils")
 
 const command = new Command({
     name: "config",
@@ -12,28 +13,6 @@ const descValue = 50; // menuselectorlimit (warns, tickets)
 const explLength = maxValue - 85 - descValue;
 
 command.data
-    .addSubcommand(canales =>
-        canales
-            .setName("canales")
-            .setDescription("Cambiar la configuración de canales")
-            .addStringOption(modulo =>
-                modulo
-                    .setName("modulo")
-                    .setDescription("El módulo a cambiar")
-                    .setRequired(true)
-                    .addChoices(
-                        { name: "Guild Logs [Audit Logs]", value: String(ChannelModules.GuildLogs) },
-                        { name: "Moderation logs [Warns, Softw, etc]", value: String(ChannelModules.ModerationLogs) },
-                        { name: "Staff logs [Tickets, Sug, Config]", value: String(ChannelModules.StaffLogs) },
-                    )
-            )
-            .addChannelOption(nuevo =>
-                nuevo
-                    .setName("nuevo")
-                    .setDescription("El canal nuevo")
-                    .setRequired(true)
-            )
-    )
     .addSubcommand(min => min
         .setName("min")
         .setDescription("Establece el mínimo de algún módulo")
@@ -52,6 +31,31 @@ command.data
             .setMinValue(0.1)
             .setRequired(true)
         )
+    )
+    .addSubcommandGroup(canales =>
+        canales
+            .setName("canales")
+            .setDescription("Cambiar la configuración de canales")
+            .addSubcommand(r => r
+                .setName("logs")
+                .setDescription("Configuración de los canales para los logs")
+                .addStringOption(modulo =>
+                    modulo
+                        .setName("modulo")
+                        .setDescription("El módulo a cambiar")
+                        .setRequired(true)
+                        .addChoices(
+                            { name: "Guild Logs [Audit Logs]", value: String(ChannelModules.GuildLogs) },
+                            { name: "Moderation logs [Warns, Softw, etc]", value: String(ChannelModules.ModerationLogs) },
+                            { name: "Staff logs [Tickets, Sug, Config]", value: String(ChannelModules.StaffLogs) },
+                        )
+                )
+                .addChannelOption(nuevo =>
+                    nuevo
+                        .setName("nuevo")
+                        .setDescription("El canal nuevo")
+                        .setRequired(true)
+                ))
     )
     .addSubcommandGroup(module => module
         .setName("modules")
@@ -81,6 +85,7 @@ command.data
                     { name: "Pardons", value: "pardons" },
                     { name: "Bans", value: "bans" },
                     { name: "Timeouts", value: "timeouts" },
+                    { name: "Acciones del AutoMod", value: "automod" },
                 )
                 .setRequired(true)
             )
@@ -107,8 +112,22 @@ command.data
                 .setChoices(
                     { name: "Sugerencias", value: "suggestions" },
                     { name: "Tickets", value: "tickets" },
-                    { name: "Logs de mensajes", value: "message_logs" },
-
+                    { name: "Cumpleaños", value: "birthdays" },
+                    { name: "DarkShop", value: "darkshop" },
+                    { name: "Enviar Logs [config req]", value: "logs" },
+                    { name: "Eliminar links de usuarios sin permiso (Embed Links)", value: "moderation.remove_links" },
+                )
+                .setRequired(true)
+            )
+        )
+        .addSubcommand(automod => automod
+            .setName("automod")
+            .setDescription("Características de Auto moderación que se pueden activar")
+            .addStringOption(o => o
+                .setName("modulo")
+                .setDescription("El módulo seleccionado")
+                .setChoices(
+                    { name: "Eliminar links de usuarios sin permiso (Embed Links)", value: "remove_links" },
                 )
                 .setRequired(true)
             )
@@ -269,16 +288,16 @@ command.execute = async (interaction, models, params, client) => {
     const docGuild = await Guilds.getOrCreate(interaction.guild.id);
 
     switch (subcommand) {
-        case "canales":
-            await command.execChannel(interaction, docGuild, params);
-            break
-
         case "min":
             await command.execMin(interaction, docGuild, params);
             break
     }
 
     switch (subgroup) {
+        case "canales":
+            await command.execChannel(interaction, docGuild, params);
+            break;
+
         case "roles":
             await command.execRoles(interaction, docGuild, params);
             break;
@@ -291,17 +310,38 @@ command.execute = async (interaction, models, params, client) => {
             await command.execModules(interaction, docGuild, params);
             break;
     }
+
+    let message = await interaction.fetchReply();
+
+    return await new Log(interaction)
+        .setTarget(ChannelModules.StaffLogs)
+        .setReason(LogReasons.Settings)
+        .send({
+            embeds: [
+                new Embed()
+                    .defAuthor({ text: `Cambios en la configuración`, title: true })
+                    .defDesc(`**—** **${interaction.user.tag}** hizo cambios en la configuración del bot.
+**—** En \`/config ${subcommand ?? subgroup}\`: ${hyperlink("Mensaje", messageLink(interaction.channel.id, message.id))}`)
+                    .defColor(Colores.verde)
+                    .defFooter({ timestamp: true })
+            ]
+        })
 }
 
 command.execChannel = async (interaction, doc, params) => {
-    const { modulo, nuevo } = params.canales
+    const { subcommand, canales } = params;
+    const { modulo, nuevo } = canales
 
     const id = nuevo.value;
 
-    doc.channels[modulo.value] = id;
+    switch (subcommand) {
+        case "logs":
+            doc.channels.logs[modulo.value] = id;
+            break;
+    }
 
     await doc.save();
-    return interaction.editReply({ content: `✅ Actualizado ➡️ ${nuevo.channel}` });
+    interaction.editReply({ content: `✅ Actualizado ➡️ ${nuevo.channel}` });
 }
 
 command.execMin = async (interaction, doc, params) => {
@@ -321,7 +361,7 @@ command.execMin = async (interaction, doc, params) => {
     }
 
     await doc.save();
-    return interaction.editReply({ content: `✅ Actualizado ➡️ ${Math.ceil(cantidad.value)}` });
+    interaction.editReply({ content: `✅ Actualizado ➡️ ${Math.ceil(cantidad.value)}` });
 }
 
 command.execRoles = async (interaction, doc, params) => {
@@ -349,7 +389,7 @@ command.execRoles = async (interaction, doc, params) => {
     }
 
     await doc.save()
-    return interaction.editReply({ content: `✅ Actualizado ▶️ ${role.role}` });
+    interaction.editReply({ content: `✅ Actualizado ▶️ ${role.role}` });
 
     function modulesSwitch() {
         let exists = false;
@@ -394,9 +434,7 @@ command.execReglas = async (interaction, models, doc, params) => {
             let confirm = [
                 `General: **${resumen.value}**.`,
                 `Y como explicación sería:
-\`\`\`markdown
-${expl.value}
-\`\`\``,
+${codeBlock("markdown", expl.value)}`,
                 `ID & Posición: \`${newId}\`.`
             ]
 
@@ -412,7 +450,7 @@ ${expl.value}
 
             await doc.save();
 
-            return confirmation.editReply({
+            confirmation.editReply({
                 embeds: [
                     new Embed({
                         type: "success",
@@ -476,7 +514,7 @@ ${expl.value}
                 if (deleted) totalUsers += 1
             }
 
-            return confirmation.editReply({
+            confirmation.editReply({
                 embeds: [
                     new Embed({
                         type: "success",
@@ -505,7 +543,7 @@ ${expl.value}
             regla.position = pos.value;
             await doc.save();
 
-            return interaction.editReply({
+            interaction.editReply({
                 embeds: [
                     new Embed({
                         type: "success",
@@ -522,7 +560,7 @@ ${expl.value}
             regla.desc = desc.value;
             await doc.save();
 
-            return interaction.editReply({
+            interaction.editReply({
                 embeds: [
                     new Embed({
                         type: "success",
@@ -540,7 +578,7 @@ ${expl.value}
             regla.expl = expl.value;
             await doc.save();
 
-            return interaction.editReply({
+            interaction.editReply({
                 embeds: [
                     new Embed({
                         type: "success",
@@ -572,7 +610,7 @@ ${expl.value}
 **▸ ID**: \`${id}\`.`)
             }
 
-            return interaction.editReply({ embeds: [embed] })
+            interaction.editReply({ embeds: [embed] })
         }
     }
 }
@@ -612,10 +650,17 @@ command.execModules = async (interaction, doc, params) => {
             if (q) doc.settings.active_modules.functions[toggle] = false
             else doc.settings.active_modules.functions[toggle] = true
             break;
+
+        case "automod":
+            q = doc.settings.active_modules.automoderation[toggle];
+
+            if (q) doc.settings.active_modules.automoderation[toggle] = false
+            else doc.settings.active_modules.automoderation[toggle] = true
+            break;
     }
 
     await doc.save()
-    return interaction.editReply({ content: `✅ Actualizado ▶️ ${toggle}` });
+    interaction.editReply({ content: `✅ Actualizado ▶️ ${toggle}` });
 }
 
 module.exports = command;

@@ -119,4 +119,16 @@ Schema.static("newLockedGuild", function (data) {
     }).save();
 })
 
+Schema.static("getActivities", async function () {
+    return await this.findOne({
+        "info.type": "clientActivities"
+    }) ?? await new this({
+        info: {
+            type: "clientActivities",
+            fixed: null,
+            list: []
+        }
+    }).save();
+})
+
 module.exports = mongoose.model("GlobalDatas", Schema);

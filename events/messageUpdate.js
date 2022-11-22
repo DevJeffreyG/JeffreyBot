@@ -1,6 +1,7 @@
 const { Config, Colores } = require("../src/resources");
 const { startLinks } = require("../index.js");
 const { GenerateLog } = require("../src/utils/functions");
+const { codeBlock } = require("discord.js");
 
 module.exports = async (client, oldMessage, message) => {
     const prefix = "/";
@@ -16,8 +17,8 @@ module.exports = async (client, oldMessage, message) => {
       header: `Se ha editado un mensaje`,
       footer: `${member.user.tag}`,
       description: [
-        `Ahora: \`\`\`${message.content}\`\`\``,
-        `Antes: \`\`\`${oldMessage.content ?? "js\n null"}\`\`\``,
+        `Ahora: ${codeBlock(message.content)}`,
+        `Antes: ${codeBlock(oldMessage.content) ?? codeBlock("js", "null")}`,
         `ID: \`${message.id}\`.`
       ],
       header_icon: message.guild.iconURL({ dynamic: true }),

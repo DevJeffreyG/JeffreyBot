@@ -26,6 +26,9 @@ class Embed extends Discord.EmbedBuilder {
         return this
     }
 
+    /**
+     * @returns {this}
+     */
     defDesc(desc = " ") {
         if (!desc >= 1) return console.error("🔴 NO SE CAMBIÓ LA DESCRIPCIÓN, ESTÁ VACÍA")
         this.setDescription(desc)
@@ -66,8 +69,8 @@ class Embed extends Discord.EmbedBuilder {
         if (text) {
             this.setFooter({ text, iconURL: icon })
         } else {
-            console.log("⚠️ EMBED no tiene TEXT. Icon: %s, Timestamp: %s", this, icon, timestamp);
-            console.log(this)
+            console.log("⚠️ EMBED no tiene TEXT. Icon: %s, Timestamp: %s", icon, timestamp);
+            //console.log(this)
         }
         return this
     }

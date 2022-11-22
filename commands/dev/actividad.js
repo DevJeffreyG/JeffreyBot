@@ -1,49 +1,125 @@
-const { Command, Categories, Embed } = require("../../src/utils")
+const { Command, Categories, Embed, FindNewId, ActivityWork } = require("../../src/utils")
 const { Config, Colores } = require("../../src/resources")
+const { codeBlock } = require("discord.js")
 
 const command = new Command({
     name: "actividad",
-    desc: "Cambia la actividad del bot (temporalmente)",
+    desc: "Administra la actividad del bot",
     category: Categories.Developer
+})
+
+command.addSubcommand({
+    name: "add",
+    desc: "Crea una nueva actividad",
+})
+
+command.addSubcommand({
+    name: "remove",
+    desc: "Elimina una actividad de la lista",
+})
+
+command.addSubcommand({
+    name: "list",
+    desc: "Obtén la lista de las actividades actuales",
+})
+
+command.addSubcommand({
+    name: "set",
+    desc: "Establece de manera fija una actividad de la lista"
+})
+
+command.addSubcommand({
+    name: "cycle",
+    desc: "No hacer cambios pero iniciar el ActivityWork()"
+})
+
+command.addOption({
+    type: "integer",
+    name: "id",
+    desc: "La ID de la actividad en la lista existente, 0 para volverlo random de nuevo.",
+    sub: "set",
+    req: true
+})
+
+command.addOption({
+    type: "integer",
+    name: "id",
+    desc: "La ID de la actividad a eliminar",
+    req: true,
+    sub: "remove"
 })
 
 command.addOption({
     type: "string",
-    name: "actividad",
-    desc: "La nueva actividad del bot",
-    req: true
+    name: "nueva",
+    desc: "La nueva actividad a agregar",
+    req: true,
+    sub: "add"
+})
+
+command.addOption({
+    type: "string",
+    name: "tipo",
+    desc: "El tipo de actividad",
+    choices: ["Competing", "Listening", "Playing", "Watching"],
+    req: false,
+    sub: "add"
 })
 
 command.execute = async (interaction, models, params, client) => {
-    await interaction.deferReply({ephemeral: true});
+    await interaction.deferReply();
 
-    const { EmojisObject } = client
-    const { actividad } = params;
-    const author = interaction.member;
+    const { GlobalDatas } = models;
+    const { subcommand } = params;
+    const { nueva, id, tipo } = params[subcommand];
 
-    if(actividad.value == "default"){
-        let guilds = await client.guilds.fetch();
+    const activities = await GlobalDatas.getActivities();
 
-        let totalMembers = 0;
-        for(const key of guilds.keys()){
-            let actualGuild = client.guilds.cache.find(x => x.id === key);
-            actualGuild.members.fetch();
+    switch (subcommand) {
+        case "add":
+            activities.info.list.push({ value: nueva.value, type: tipo?.value, id: await FindNewId([activities], "info.list", "id") })
+            activities.markModified("info");
+            break;
 
-            totalMembers += actualGuild.memberCount;
-        }
+        case "remove":
+            activities.info.list.splice(activities.info.list.findIndex(x => x.id === id.value), 1)
+            if (activities.info.fixed === id.value) activities.info.fixed = null;
+            activities.markModified("info");
 
-        actividad.value = `/ayuda - ${totalMembers} usuarios🔎`
+            break;
+
+        case "list":
+            let e = new Embed()
+                .defAuthor({ text: "Lista de actividades", title: true })
+                .defColor(Colores.verde);
+
+            for (const act of activities.info.list) {
+                const { value } = act;
+                let actId = act.id;
+
+                e.defField(value, `Tipo: ${act.type ?? "playing"}\nID: ${actId}`);
+            }
+            return interaction.editReply({ embeds: [e] })
+
+        case "set":
+            let i = activities.info.list.find(x => x.id === id.value)
+            if (i) {
+                activities.info.fixed = id.value;
+                activities.markModified("info");
+            } else if (id.value === 0) {
+                activities.info.fixed = null;
+                activities.markModified("info");
+            }
+            else return interaction.editReply({ content: "ESA ID NO EXISTE" });
+            break;
+
+        case "cycle":
+            await ActivityWork(client);
+            break;
     }
 
-    let setgamembed = new Embed()
-    .defColor(Colores.verde)
-    .defAuthor({text: `Actividad actualizada`, icon: EmojisObject.Check.url})
-    .defDesc(`${client.user.username} ahora juega \`${actividad.value}\`.`)
-    .defFooter({text: `Puesto por ${author.user.tag}.`, icon: author.displayAvatarURL()});
-
-    client.user.setActivity(actividad.value);
-    console.log(`🔄 ${client.user.username} Ahora juega ${actividad.value}.`);
-    interaction.editReply({embeds: [setgamembed]});
+    await activities.save()
+    return interaction.editReply({ embeds: [new Embed({ type: "success" })] });
 }
 
 module.exports = command;

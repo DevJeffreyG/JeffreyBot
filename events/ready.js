@@ -1,4 +1,4 @@
-const { Bases, Config } = require("../src/resources");
+const { Bases } = require("../src/resources");
 
 const { GlobalDatas } = require("mongoose").models;
 const Chance = require("chance");
@@ -18,6 +18,7 @@ module.exports = async (client) => {
     client.blackjackCards = [];
     client.wonBlackjack = [];
     client.lockedGuilds = await GlobalDatas.getLockedGuilds();
+    client.totalMembers = 0;
 
     client.devGuild = await client.guilds.fetch(Bases.dev.guild)
         .catch(err => console.log("⚠️ DEV GUILD NOT FOUND!", err))
@@ -55,13 +56,12 @@ module.exports = async (client) => {
     let guilds = await client.guilds.fetch();
 
     // conteo
-    let totalMembers = 0;
     for (const partial of guilds.values()) {
         const guild = await partial.fetch();
         await guild.members.fetch();
 
 
-        totalMembers += guild.memberCount;
+        client.totalMembers += guild.memberCount;
 
         // invitaciones
         let invites = await guild.invites.fetch();
@@ -70,15 +70,22 @@ module.exports = async (client) => {
             client.invites[invite.code] = invite.uses;
         })
 
-        functions.GlobalDatasWork(guild)
-
-        new CronJob("1 * * * * *", async function () {
+        new CronJob("0 */1 * * * *", async function () {
             functions.GlobalDatasWork(guild);
-        }, null, true, "America/Bogota");
+        }, null, true, "America/Bogota", null, true);
     }
-
-    client.user.setActivity(`/ayuda - ${totalMembers} usuarios🔎`);
-
+    
+    // Cada minuto
+    new CronJob("0 */1 * * * *", async function () {
+        functions.ActivityWork(client)
+    }, null, true, "America/Bogota", null, true);
+    
+    // Cada 5 minutos
+    functions.ManageDarkShops(client)
+    new CronJob("0 */5 * * * *", async function () {
+        //functions.ManageDarkShops(client)
+    }, null, true, "America/Bogota", null, true);
+    
     console.log("============================================================");
     console.log(`❗❗❗ 💚 ${client.user.username} ONLINE 💚 ❗❗❗`);
 

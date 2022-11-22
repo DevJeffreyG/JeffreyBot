@@ -1,5 +1,5 @@
 const { PermissionsBitField, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, EmbedBuilder, Guild, GuildMember, CommandInteraction, BaseInteraction, Message, Client } = require("discord.js");
-const { ButtonStyle, OverwriteType } = require("discord-api-types/v10");
+const { ButtonStyle, OverwriteType, ActivityType } = require("discord-api-types/v10");
 
 const Config = require("../resources/base.json");
 const Colores = require("../resources/colores.json");
@@ -23,7 +23,7 @@ const { google } = require("googleapis");
 const Twitter = require("twitter");
 const { ApiClient } = require("@twurple/api");
 const { ClientCredentialsAuthProvider } = require("@twurple/auth");
-const { BoostObjetives, EndReasons, ChannelModules } = require("./Enums");
+const { BoostObjetives, EndReasons, ChannelModules, LogReasons } = require("./Enums");
 const Log = require("./Log");
 const { Bases } = require("../resources");
 
@@ -319,12 +319,13 @@ const FetchAuditLogs = async function (client, guild, types) {
  * @returns {Promise<Message|null>}
  */
 const GenerateLog = async function (guild, options = {
-  logType: ChannelModules.GuildLogs, header: "", footer: "", description: [], header_icon: "", footer_icon: "", color: "", fields: []
+  logType: ChannelModules.GuildLogs, logReason: LogReasons.Logger, header: "", footer: "", description: [], header_icon: "", footer_icon: "", color: "", fields: []
 }) {
-  let { logType, header, footer, description, header_icon, footer_icon, color, fields } = options;
+  let { logType, logReason, header, footer, description, header_icon, footer_icon, color, fields } = options;
 
   if (!footer) return console.log("🔴 NO TIENE FOOTER", options)
   logType = logType ?? ChannelModules.GuildLogs;
+  logReason = logReason ?? LogReasons.Logger;
   description = description ?? [];
   header_icon = header_icon ?? guild.iconURL({ dynamic: true });
 
@@ -356,6 +357,7 @@ const GenerateLog = async function (guild, options = {
   return await new Log()
     .setGuild(guild)
     .setTarget(logType)
+    .setReason(logReason)
     .send({ embeds: [embed] })
 }
 
@@ -508,7 +510,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
 
         reminder_info.reminded = true;
         dbUser.save();
-      } else if(!birthday_query?.isBirthday() && reminder_info.reminded){
+      } else if (!birthday_query?.isBirthday() && reminder_info.reminded) {
         reminder_info.reminded = false;
         dbUser.save();
       }
@@ -516,10 +518,6 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
   }
 
   if (justTempRoles) return;
-
-  // ###### DARKSHOP ######
-  await ManageDarkShops(guild.client);
-  //await DarkShopWork(client, guild.id);
 
   // buscar temp bans
   GlobalDatas.find({
@@ -1896,17 +1894,68 @@ const GetRandomItem = (array) => {
   return array[Math.floor(Math.random() * array.length)];
 }
 
-const isOnMobible = function (message) {
-  return message.member.presence &&
-    message.member.presence.clientStatus &&
-    message.member.presence.clientStatus.mobile === "online" &&
-    !message.member.presence.clientStatus.desktop ? true : false;
+/**
+ * 
+ * @param {BaseInteraction} interaction 
+ * @returns 
+ */
+const isOnMobible = function (interaction) {
+  return interaction.member.presence &&
+    interaction.member.presence.clientStatus &&
+    interaction.member.presence.clientStatus.mobile === "online" &&
+    !interaction.member.presence.clientStatus.desktop ? true : false;
+}
+
+/**
+ * Revisa si un miembro tiene algún rol con las Ids en el array
+ * @param {GuildMember} member 
+ * @param {Array} array 
+ * @returns {Boolean}
+ */
+const MemberHasAnyRole = function (member, array) {
+  const memberRoles = member.roles.cache;
+
+  let filtered = memberRoles.filter(role => array.includes(role))
+
+  if (filtered.size > 0) return true
+  return false
+}
+
+/**
+ * Revisar que si un miembro tiene alguna de las Ids registradas como Developer
+ * @param {GuildMember} member 
+ * @returns {Boolean}
+ */
+const isDeveloper = function (member) {
+  return Bases.devIds.find(x => x === member.id) ? true : false;
+}
+
+/**
+ * 
+ * @param {Client} client 
+ */
+const ActivityWork = async function (client) {
+  const activities = await GlobalDatas.getActivities();
+  let act;
+
+  if (!activities.info.fixed) {
+    act = GetRandomItem(activities.info.list)
+  } else {
+    act = activities.info.list.find(x => x.id === activities.info.fixed)
+  }
+
+  let acttype = act.type?.charAt(0).toUpperCase() + act.type?.slice(1);
+  let type = ActivityType[acttype] ?? ActivityType.Playing;
+  let activity = act.value.replace("{ USUARIOS }", client.totalMembers);
+  
+  return client.user.setActivity({name: activity, type})
 }
 
 module.exports = {
   GetChangesAndCreateFields,
   FetchAuditLogs,
   GlobalDatasWork,
+  ManageDarkShops,
   AddWarns,
   Interest,
   VaultWork,
@@ -1930,5 +1979,8 @@ module.exports = {
   isOnMobible,
   RandomCumplido,
   Sleep,
-  GetRandomItem
+  GetRandomItem,
+  MemberHasAnyRole,
+  isDeveloper,
+  ActivityWork
 }

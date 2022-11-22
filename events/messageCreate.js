@@ -3,7 +3,7 @@ const ms = require("ms");
 const moment = require('moment-timezone');
 
 const { Config, Colores } = require("../src/resources/");
-const { Embed } = require("../src/utils");
+const { Embed, Log, ChannelModules, LogReasons } = require("../src/utils");
 const { deleteLateMedia, disableEXPs, jeffreygID, multiplier, mantenimiento } = Config;
 
 const jeffreyMentions = {
@@ -11,23 +11,25 @@ const jeffreyMentions = {
   false: ["jeffros"]
 };
 
-const startLinks = [
-  "https://", "http://", "www."
+const links = [
+  "https", "http", "www.", "discord.gg", "discord.gift"
 ];
 
 const { GlobalDatasWork } = require("../src/utils/");
+const { ChannelType, PermissionsBitField, codeBlock } = require("discord.js");
 
 const { Users, Guilds } = require("mongoose").models;
 
 module.exports = async (client, message) => {
   // Captcha.
   if (message.author.bot) return;
-  if (message.channel.type == "DM") return;
+  if (message.channel.type === ChannelType.DM) return;
 
-  const docGuild = await Guilds.getOrCreate(message.guild.id);
+  const doc = await Guilds.getOrCreate(message.guild.id);
   const messageArray = message.content.split(" ");
   const guild = message.guild;
   const author = message.author;
+  const member = message.member;
   const channel = message.channel;
 
   if (mantenimiento && author.id != jeffreygID) return console.log("MANTENIMIENTO");
@@ -40,86 +42,43 @@ module.exports = async (client, message) => {
     guild_id: guild.id
   });
 
-  // eliminar multimedia en las noches
-  let ahora = moment().tz("America/Bogota");
-  let hour = ahora.hour();
-
-  if (deleteLateMedia && (hour >= 22 || hour < 7)) {
-    console.log("ESTAMOS EN EL BUCLE", ahora.hour());
-
-    // revisar si tiene attachments
-    let attachments = []
-    let embbeded = true;
-    for (const value of message.attachments.values()) {
-      embbeded = false;
-      attachments.push(value.proxyURL)
-    }
-
-    if (attachments.length > 0 || message.content.includes("https://cdn.discordapp.com/attachments/") || message.content.includes("https://media.discordapp.net/attachments/") || (message.embeds[0] && message.embeds[0].url.includes("https://tenor.com/view/"))) {
-      let m = message.guild.members.cache.find(x => x.id === author.id);
-
-      if (!m.roles.cache.find(x => x.id === Config.staffRole)) { // no es staff
-        let secretChannelWhatWHAT = guild.id === "447797737216278528" ? guild.channels.cache.find(x => x.id === "821929080709578792") : guild.channels.cache.find(x => x.id === "537095712102416384");
-
-        if (!embbeded) {
-          await secretChannelWhatWHAT.send({ content: `Enviado por **${m.user.tag}** a las __${moment(ahora).format('HH[:]mm')}__ en ${message.channel}.`, files: attachments });
-        } else {
-          let content = message.embeds[0] ? message.embeds[0].url : message.content;
-          await secretChannelWhatWHAT.send({ content: `Enviado por **${m.user.tag}** a las __${moment(ahora).format('HH[:]mm')}__ en ${message.channel}.\n\n${content}` });
-        }
-        return message.delete();
-      }
-    }
-  }
-
-  const jeffreyRole = client.user.id === Config.testingJBID ? guild.roles.cache.find(x => x.id === "482992290550382592") : guild.roles.cache.find(x => x.id === Config.jeffreyRole);
-  const adminRole = guild.roles.cache.find(x => x.id === docGuild.roles.admin);
-  const staffRole = guild.roles.cache.find(x => x.id === docGuild.roles.staff);
-  const logC = client.user.id === Config.testingJBID ? guild.channels.cache.find(x => x.id === "483108734604804107") : guild.channels.cache.find(x => x.id === Config.logChannel);
-  const gdpsSupportChannel = client.user.id === Config.testingJBID ? message.guild.channels.cache.find(x => x.id === "537095712102416384") : message.guild.channels.cache.find(x => x.id === Config.gdpsSupportChannel);
-  const spamChannel = client.user.id === Config.testingJBID ? message.guild.channels.cache.find(x => x.id === "537095712102416384") : message.guild.channels.cache.find(x => x.id === Config.spamChannel);
-  const offtopicChannel = client.user.id === Config.testingJBID ? message.guild.channels.cache.find(x => x.id === "537095712102416384") : message.guild.channels.cache.find(x => x.id === Config.offtopicChannel);
-
-  // mencionan a Jeffrey
-  let contentMsg = message.content.toLowerCase();
-
-  let embed = new Embed()
-    .defAuthor({ text: `${author.tag}`, icon: author.displayAvatarURL() })
-    .defDesc(`**__${author.username}__** dice: "\`${message.content}\`".`)
-    .defFooter({ text: `Mencionaron a Jeffrey.`, icon: message.guild.iconURL(), timestamp: true })
-    .defColor(Colores.verde)
-
-  for (let i = 0; i < jeffreyMentions.real.length; i++) {
-    const mention = jeffreyMentions.real[i];
-
-    if (contentMsg.includes(mention)) {
-      // falsos positivos JAJA
-      let fake = false;
-
-      falso:
-      for (let i = 0; i < jeffreyMentions.false.length; i++) {
-        const falso = jeffreyMentions.false[i];
-
-        if (contentMsg.includes(falso)) {
-          fake = true;
-          break falso;
-        }
-      }
-
-      const doNotSend = (fake || message.channel === offtopicChannel || message.channel === spamChannel) ?? false;
-
-      if (!doNotSend && message.member.roles.cache.find(x => x.id === staffRole.id)) return logC.send({ content: `Un **STAFF** ha mencionado a Jeffrey en ${message.channel}.`, embeds: [embed] });
-      else if (!doNotSend) return logC.send({ content: `Han mencionado a <@${jeffreygID}> en ${message.channel}.`, embeds: [embed] });
-    }
-  }
-
   // links
-  for (let i = 0; i < startLinks.length; i++) {
-    const start = startLinks[i];
+  const link = links.some(x => message.content.includes(x));
 
-    if (contentMsg.includes(start) && !(message.member.permissions.has("EMBED_LINKS") || channel === offtopicChannel || channel === spamChannel || channel === gdpsSupportChannel)) {
-      await message.delete();
-      return message.channel.send({ content: `No envíes links, **${author.tag}**`, ephemeral: true });
+  if (doc.moduleIsActive("automoderation.remove_links") && !member.permissions.missing(PermissionsBitField.Flags.EmbedLinks).length > 0) {
+    if (link) deleteLink(message)
+    else if (message.embeds.length > 0) deleteLink(message)
+
+    function deleteLink(message) {
+      message.delete();
+      message.author.send({
+        embeds: [
+          new Embed()
+            .defAuthor({ text: `No envíes links`, title: true })
+            .defDesc(`Detecté que incluiste un link en tu mensaje:
+${codeBlock(message.content)}`)
+            .defFooter({ text: `Discúlpame si fue un error :)`, icon: guild.iconURL({ dynamic: true }) })
+            .defColor(Colores.rojo)
+        ]
+      })
+        .catch(async err => {
+          let msg = await message.channel.send(`No envíes links, **${author.tag}**.`)
+
+          setTimeout(() => {
+            msg.delete();
+          })
+        });
+
+      new Log(message)
+      .setTarget(ChannelModules.ModerationLogs)
+      .setReason(LogReasons.AutoMod)
+      .send({embeds: [
+        new Embed()
+        .defAuthor({text: `Se eliminó un mensaje de ${author.tag}`, icon: member.displayAvatarURL({dynamic: true})})
+        .defDesc(`${codeBlock(message.content)}`)
+        .defColor(Colores.verde)
+        .defFooter({text: "NO se aplicaron sanciones", timestamp: true})
+      ]})
     }
   }
 

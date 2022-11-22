@@ -1,4 +1,5 @@
-const { CommandInteraction, GuildChannel, Guild } = require("discord.js");
+const { CommandInteraction, GuildChannel, Guild, Message } = require("discord.js");
+const Embed = require("./Embed");
 const { ChannelModules, Enum, LogReasons } = require("./Enums");
 const ErrorEmbed = require("./ErrorEmbed");
 const { Guilds } = require("mongoose").models;
@@ -16,12 +17,14 @@ class Log {
 
     /**
      * Crea un nuevo Log con la configuración del guild actual
-     * @param {CommandInteraction} interaction 
+     * @param {CommandInteraction|Message} interaction 
      */
     constructor(interaction = null) {
         this.interaction = interaction;
         this.guild = this.interaction?.guild;
         this.client = this.interaction?.client;
+
+        if (interaction instanceof Message) this.interaction = interaction.channel; // message.channel
 
         this.target = null;
         this.reason = null;
@@ -60,11 +63,11 @@ class Log {
     }
 
     async #fetch() {
-        if(this.target === ChannelModules.ClientLogs) return;
-        
+        if (this.target === ChannelModules.ClientLogs) return;
+
         this.#embeds();
         // prepara lo necesario
-        if(this.guild) this.#doc = await Guilds.getOrCreate(this.guild.id);
+        if (this.guild) this.#doc = await Guilds.getOrCreate(this.guild.id);
 
         if (!await this.#reasonWorker()) return;
         if (!this.target || !new Enum(ChannelModules).exists(this.target)) return this.#jeffreyError.send();
@@ -81,6 +84,11 @@ class Log {
         if (!this.reason) return true;
         if (!new Enum(LogReasons).exists(this.reason)) {
             this.#jeffreyReasonError.send();
+            return false;
+        }
+
+        if (!this.#doc.moduleIsActive("functions.logs")) {
+            this.enabled = false;
             return false;
         }
 
@@ -117,6 +125,18 @@ class Log {
             case LogReasons.MsgClear:
                 isEnabled = this.#doc.moduleIsActive("logs.moderation.clears");
                 break;
+
+            case LogReasons.AutoMod:
+                isEnabled = this.#doc.moduleIsActive("logs.moderation.automod");
+                break;
+
+            case LogReasons.Settings:
+                isEnabled = this.#doc.moduleIsActive("logs.staff.settings");
+                break;
+
+            case LogReasons.Settings:
+                isEnabled = this.#doc.moduleIsActive("logs.staff.errors");
+                break;
         }
 
         this.enabled = isEnabled;
@@ -127,7 +147,7 @@ class Log {
      * Definir el canal inmediatamente [DEVELOPER]
      * @param {GuildChannel} channel 
      */
-    setChannel(channel){
+    setChannel(channel) {
         this.channel = channel
         return this;
     }
@@ -136,7 +156,7 @@ class Log {
      * Definir el servidor inmediatamente
      * @param {Guild} guild 
      */
-     setGuild(guild){
+    setGuild(guild) {
         this.guild = guild
         return this;
     }
@@ -164,14 +184,21 @@ class Log {
     /**
      * Envía el log al canal configurado dependiendo su tipo
      */
-    async send(options = { content: null, embeds: [], components: [] }) {
-        let { content, embeds, components } = options;
+    async send(options = { embed: null, content: null, embeds: [], components: [] }) {
+        let { content, embeds, components, embed } = options;
 
         return new Promise(async (res, rej) => {
             if (!this.#fetched) await this.#fetch();
             if (!this.enabled) res(null);
 
-            let msg = await this.channel?.send({ content, embeds, components }).catch();
+            let msg;
+
+            if(embed){
+                if(embed instanceof Embed) msg = await this.channel?.send({ content, embeds: [embed], components }).catch();
+                else if(embed instanceof ErrorEmbed) msg = await embed.send()
+            }
+
+            msg = await this.channel?.send({ content, embeds, components }).catch();
 
             if (!msg && this.channel)
                 await this.#jeffreyMessageError.send()

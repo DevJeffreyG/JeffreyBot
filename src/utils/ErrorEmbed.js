@@ -2,11 +2,11 @@ const client = require("../../index");
 
 const Embed = require("./Embed");
 const Colores = require("../resources/colores.json");
-const { BaseInteraction } = require("discord.js");
+const { BaseInteraction, GuildChannel, codeBlock } = require("discord.js");
 
 class ErrorEmbed extends Embed {
     /**
-     * @param {BaseInteraction} inter - La interacción principal dada
+     * @param {BaseInteraction | GuildChannel} inter - La interacción principal dada
      * @param {Object} options La configuración de este ErrorEmbed {type, data}
      * @param {string} options.type ### El tipo de ErrorEmbed que va a ser
      * - commandNotFound
@@ -30,7 +30,7 @@ class ErrorEmbed extends Embed {
      */
     constructor(inter = null, options, ignorewarnings = false) {
         super()
-        if(inter && inter instanceof BaseInteraction === false) {
+        if(inter && inter instanceof BaseInteraction === false && !inter instanceof GuildChannel) {
             options = inter;
             inter = null;
         }
@@ -70,9 +70,7 @@ class ErrorEmbed extends Embed {
                 this.#errorName("Error en el codigo")
                 this.#errorAuthor(3);
                 this.#errorDesc("Jeffrey es tonto, y por eso hubo un error ejecutando este comando", `(\`/${data.commandName ?? this.interaction?.commandName}\`)`, ["Por favor, avísale de su grado de inservibilidad.", `**Y también dile que...**
-\`\`\`js
-${data.error}
-\`\`\``])
+${codeBlock("javascript", data.error)}`])
                 break;
 
             case "selfRep":
@@ -84,7 +82,7 @@ ${data.error}
             case "insuficientSetup":
                 this.#errorName("No se ha configurado")
                 this.#errorAuthor(5);
-                this.#errorDesc("No se puede usar este comando sin antes configurar el bot", `\`${data.needed.toUpperCase()}\``, [`Un administrador del servidor tiene que usar el comando \`/setup\` primero.`, `O el comando \`/config\` en su defecto.`])
+                this.#errorDesc("No se puede usar esta funcionalidad sin antes configurar el bot", `\`${data.needed.toUpperCase()}\``, [`Un administrador del servidor tiene que usar el comando \`/setup\` primero.`, `O el comando \`/config\` en su defecto.`])
                 this.defFooter({text: `Si aún no lo han hecho, muéstrales este mensaje.`});
                 break;
 
@@ -92,9 +90,7 @@ ${data.error}
                 this.#errorName("Error de comando")
                 this.#errorAuthor(6);
                 this.#errorDesc("Podrías usar este comando, pero Jeffrey es tonto", `\`${data.id}\``, [`**▸ También dile que...**
-\`\`\`json
-{ FATAL ERROR, ID ${data.id}, UNKNOWN "${data.unknown}" }
-\`\`\``])
+${codeBlock("json", `{ FATAL ERROR, ID ${data.id}, UNKNOWN "${data.unknown}`)}`])
                 break;
 
             case "notSent":
@@ -188,6 +184,7 @@ ${data.error}
     }
 
     async send(ephemeral = false){
+        if(this.interaction instanceof GuildChannel) return this.sendToChannel();
         if(!this.interaction) return console.error("🔴 NO EXISTE this.interaction !!")
         else
 
@@ -206,6 +203,10 @@ ${data.error}
             console.log("🔴 NO se envió el ErrorEmbed!")
             console.log(err);
         }
+    }
+
+    async sendToChannel() {
+        this.interaction.send({content: null, embeds: [this], components: []});
     }
 }
 
