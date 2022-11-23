@@ -1,8 +1,8 @@
 function doHeader(){
   let h = `<nav>
 <div class="nav-bar">
-    <div class="nav-bar-left"><a href ="https://jeffreybot.herokuapp.com/" style="color:WHITE;">
-        <img src="https://cdn.discordapp.com/attachments/482989052136652804/512689086276829184/JBLogo.png" alt="JB Logo" class="logo">
+    <div class="nav-bar-left"><a href ="/" style="color:WHITE;">
+        <img src="https://github.com/DevJeffreyG/JeffreyBot/blob/v2.X.X/src/resources/imgs/icon.png?raw=true" alt="JB Logo" class="logo">
     </div>
     <div class="nav-left-brand-text">Jeffrey Bot</a></div>
     <a href ="https://www.youtube.com/JeffreyG" target="_blank"><div class="nav-bar-right">

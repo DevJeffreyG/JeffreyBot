@@ -1,4 +1,3 @@
-const http = require("http");
 const express = require("express");
 const app = express();
 
@@ -10,6 +9,10 @@ app.get("/", function(req, res) {
   res.redirect("..");
 })
 
+app.get("/app-health", (req, res) => {
+  return res.sendStatus(200)
+})
+
 app.listen(port, function(){
-  console.log("me prendi"); 
+  console.log("Listening %s", port);
 })

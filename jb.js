@@ -1,4 +1,6 @@
 require("dotenv").config();
+require("./server");
+
 //jsons
 const Config = require("./base.json");
 const Colores = require("./resources/colores.json");
