@@ -3,7 +3,7 @@ const { Colores } = require("../../src/resources")
 
 const command = new Command({
     name: "inflacion",
-    desc: "Te muestra la inflación actual de los DarkJeffros",
+    desc: "Obtén la inflación actual de la DarkShop",
     category: Categories.DarkShop
 })
 

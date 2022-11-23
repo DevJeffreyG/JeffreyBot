@@ -72,12 +72,14 @@ class RouletteItem {
         this.numbers = this.item.value.match(/[0-9\.]/g).join("");
         this.nonumbers = this.item.value.replace(/[0-9\.]/g, "");
 
-        switch (Number(this.item.target)) {
-            case ItemObjetives.Jeffros:
-                this.target = this.user.economy.global.jeffros;
+        const { Currency } = this.interaction.client.getCustomEmojis(this.interaction.guild.id);
 
-                this.frontend_target = `**${this.interaction.client.Emojis.Jeffros}${this.target.toLocaleString("es-CO")}**`;
-                this.frontend_numbers = `**${this.interaction.client.Emojis.Jeffros}${this.numbers.toLocaleString("es-CO")}**`;
+        switch (Number(this.item.target)) {
+            case ItemObjetives.Currency:
+                this.target = this.user.economy.global.currency;
+
+                this.frontend_target = `**${Currency}${this.target.toLocaleString("es-CO")}**`;
+                this.frontend_numbers = `**${Currency}${this.numbers.toLocaleString("es-CO")}**`;
 
                 break;
 
@@ -145,18 +147,18 @@ class RouletteItem {
             case Number:
                 this.numbers = Number(this.numbers);
 
-                if (this.nonumbers === "-") this.user.economy.global.jeffros -= this.numbers;
+                if (this.nonumbers === "-") this.user.economy.global.currency -= this.numbers;
                 else if (this.nonumbers === "+") {
-                    this.user.addJeffros(this.numbers);
+                    this.user.addCurrency(this.numbers);
                     save = false;
                 }
-                else if (this.nonumbers === "*") this.user.economy.global.jeffros *= this.numbers;
+                else if (this.nonumbers === "*") this.user.economy.global.currency *= this.numbers;
                 else if (this.nonumbers === "%") {
                     this.frontend_numbers = `**${this.numbers.toLocaleString("es-CO")}%**`;
 
                     this.#embeds();
 
-                    this.user.economy.global.jeffros *= this.numbers / 100
+                    this.user.economy.global.currency *= this.numbers / 100
                 }
 
                 response = this.success;

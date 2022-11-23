@@ -5,46 +5,46 @@ const moment = require("moment");
 
 const command = new Command({
     name: "dschange",
-    desc: "Cambia Jeffros a DarkJeffros",
+    desc: "Invierte tu dinero normal en la DarkShop",
     category: Categories.DarkShop
 })
 
 command.addOption({
     type: "integer",
     name: "cantidad",
-    desc: "La cantidad de DarkJeffros que quieres",
+    desc: "La cantidad de dinero que quieres para la DarkShop",
     min: 1,
     req: true
 })
 
 command.execute = async (interaction, models, params, client) => {
     if (moment().day() != 0) {
-        return interaction.reply({ ephemeral: true, content: `${client.Emojis.Error} NO puedes cambiar más DarkJeffros hasta que sea domingo.` })
+        return interaction.reply({ ephemeral: true, content: `${client.Emojis.Error} NO puedes invertir más hasta que sea domingo.` })
     }
     await interaction.deferReply();
     const { Users } = models;
     const { cantidad } = params
-    const { Emojis } = client;
+    const { DarkCurrency, Currency } = client.getCustomEmojis(interaction.guild.id);
 
     // codigo
     const quantity = cantidad.value;
     const user = await Users.getOrCreate({ user_id: interaction.user.id, guild_id: interaction.guild.id });
 
-    let jeffros = user.economy.global.jeffros;
+    let money = user.economy.global.currency;
 
     const darkshop = new DarkShop(interaction.guild);
     const one = await darkshop.oneEquals();
 
-    const totalJeffros = Math.round(one * quantity);
+    const total = Math.round(one * quantity);
 
     const notEnough = new ErrorEmbed(interaction, {
         type: "economyError",
         data: {
             action: "change",
-            error: `No tienes tantos Jeffros para cambiar.
-**▸** Inflación: **${Emojis.DarkJeffros}1** = **${Emojis.Jeffros}${one.toLocaleString("es-CO")}**
-**▸** Necesitas: **${Emojis.Jeffros}${totalJeffros.toLocaleString("es-CO")}**`,
-            money: jeffros
+            error: `No tienes tanto dinero para cambiar.
+**▸** Inflación: **${DarkCurrency}1** = **${Currency}${one.toLocaleString("es-CO")}**
+**▸** Necesitas: **${Currency}${total.toLocaleString("es-CO")}**`,
+            money
         }
     })
 
@@ -54,30 +54,31 @@ command.execute = async (interaction, models, params, client) => {
         type: "success",
         data: {
             desc: [
-                `Se han restado **${Emojis.Jeffros}${totalJeffros.toLocaleString('es-CO')}**`,
-                `Se añadieron **${Emojis.DarkJeffros}${quantity.toLocaleString("es-CO")}** a tu cuenta`
+                `Se han restado **${Currency}${total.toLocaleString('es-CO')}**`,
+                `Se añadieron **${DarkCurrency}${quantity.toLocaleString("es-CO")}** a tu cuenta`
             ]
         }
     })
     embeds.push(success);
 
-    if (totalJeffros > jeffros) return notEnough.send();
+    if (total > money) return notEnough.send();
 
-    const hoy = new Date();
     const economy = user.economy.dark;
 
-    economy.darkjeffros += quantity;
-    user.economy.global.jeffros -= totalJeffros;
+    economy.currency += quantity;
+    user.economy.global.currency -= total;
 
     economy.accuracy = economy.accuracy ?? Number((Math.random() * 15).toFixed(1));
-    economy.dj_since = economy.dj_since ?? hoy;
+    economy.until = moment().add(1, "w")
+        .hour(0).minutes(0).seconds(0)
+        .milliseconds(0).toDate();
 
     await user.save();
 
     let sug = new Embed({
         type: "didYouKnow",
         data: {
-            text: `Una vez a la semana puedes usar \`/predict\` para intentar adivinar si es buena idea vender tus DarkJeffros en el momento`,
+            text: `Una vez a la semana puedes usar \`/predict\` para intentar adivinar si es buena idea vender tu inversión en ese momento`,
             likelihood: 20
         }
     })

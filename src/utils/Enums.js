@@ -98,16 +98,18 @@ const ItemActions = new Enum({
  * - Role
  * - Item
  * - Boost
- * - Jeffros
+ * - Currency
  * - TempRole
+ * - Exp
  */
 const ItemObjetives = new Enum({
     Warns: 1,
     Role: 2,
     Item: 3,
     Boost: 4,
-    Jeffros: 5,
-    TempRole: 6
+    Currency: 5,
+    TempRole: 6,
+    Exp: 7
 }).values
 
 /**
@@ -120,12 +122,12 @@ const BoostTypes = new Enum({
 }).values
 
 /**
- * - Jeffros
+ * - Currency
  * - Exp
  * - All
  */
 const BoostObjetives = new Enum({
-    Jeffros: 1,
+    Currency: 1,
     Exp: 2,
     All: 3
 }).values

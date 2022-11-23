@@ -405,6 +405,8 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
           dbUser.data.temp_roles.splice(i, 1);
           dbUser.save();
         } else { // es una suscripción
+          // REWORK NEEDED
+          return console.log("REWORK DE LAS SUBS")
           let price = Number(temprole.sub_info.price);
           let subName = temprole.sub_info.name;
           let isCancelled = temprole.sub_info.isCancelled;
@@ -622,6 +624,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
 
 /**
  * Add warns to an user
+ * @deprecated
  * @param {string} v The ID of the user
  * @param {number} c The number of warns to add
  */
@@ -646,6 +649,7 @@ const AddWarns = function (v, c) {
 
 /**
  * Add Interest if the item does not ignore it.
+ * @deprecated
  * @param {Object[]} author The Discord.JS User
  * @param {number} idUse The ID of the item to check
  */
@@ -725,6 +729,7 @@ const LimitedTime = async function (victimMember, roleID = 0, duration, specialT
 }
 
 /**
+ * @deprecated Needs rework
  * Adds a new subscription to the database and adds the role to the user.
  * @param {GuildMember} victimMember The Discord.JS GuildMember
  * @param {string} roleID The ID for the role given by the suscription
@@ -1568,7 +1573,7 @@ const DarkShopWork = async function (client, guildId) {
 
       let deletedTag = memberDJ ? memberDJ.user.tag : `<AUSENTE> (${darkuser.user_id})`
 
-      if (darkdata.darkjeffros === 0) {
+      if (darkdata.currency === 0) {
         let log = new Embed()
           .defColor(Colores.verde)
           .defDesc(`**—** Se ha eliminado la Duración de DarkJeffros de ${deletedTag}.
@@ -1589,7 +1594,7 @@ const DarkShopWork = async function (client, guildId) {
           .defDesc(`**—** Se han eliminado los DarkJeffros de **${deletedTag}**.
 **—** Desde: \`${darkdata.dj_since}\`.
 **—** Duración: \`${darkdata.duration}\`.
-**—** Tenía: **${Emojis.DarkJeffros}${darkdata.darkjeffros}**`)
+**—** Tenía: **${Emojis.DarkJeffros}${darkdata.currency}**`)
           .defFooter({ text: "Mensaje enviado a la vez que al usuario", timestamp: true })
 
         let embed = new Embed()
@@ -1598,7 +1603,7 @@ const DarkShopWork = async function (client, guildId) {
           .defDesc(`**—** Parece que no has vendido todos tus DarkJeffros. Han sido eliminados de tu cuenta tras haber concluido los días estipulados. (\`${darkdata.duration} días.\`)`)
           .defFooter("▸ Si crees que se trata de un error, contacta al Staff.");
 
-        darkdata.darkjeffros = 0;
+        darkdata.currency = 0;
         darkdata.dj_since = null;
         darkdata.duration = null;
 
@@ -1847,14 +1852,14 @@ const WillBenefit = async function (member, objetivesToCheck) {
     if (special) {
       objetivesToCheck.forEach(objetiveToCheck => {
         switch (objetiveToCheck) {
-          case BoostObjetives.Jeffros:
+          case BoostObjetives.Currency:
           case BoostObjetives.Exp:
           case BoostObjetives.All:
             if (special.objetive === objetiveToCheck) hasBoost = true;
             break;
 
           case "any":
-            if (special.objetive === BoostObjetives.Jeffros ||
+            if (special.objetive === BoostObjetives.Currency ||
               special.objetive === BoostObjetives.Exp ||
               special.objetive === BoostObjetives.All) hasBoost = true;
             break;

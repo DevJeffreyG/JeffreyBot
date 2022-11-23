@@ -162,10 +162,10 @@ ${codeBlock(message.content)}`)
     if (last.every(msg => msg.author.id === message.author.id)) lastAuthor = true;
   }
 
-  // ################################ EXP & JEFFROS
+  // ################################ EXP & JEFFROS REWORK NEEDED
 
   if (author.id == jeffreygID || !disableEXPs) {
-
+    return
     let benefitMultiplier = 1; // si es uno no pasaría nada
     // VIP 200%
     if (message.member.roles.cache.find(x => x.id === rewards.roles.vip)) benefitMultiplier += 1; // 2
@@ -220,11 +220,11 @@ ${codeBlock(message.content)}`)
 
     // agregar jeffros y exp
     if (!lastAuthor) {
-      await user.addJeffros(jeffrosToAdd)
+      await user.addCurrency(jeffrosToAdd)
       user.economy.global.exp += expToAdd;
 
-      user.data.lastExpJeffros.jeffros = jeffrosToAdd;
-      user.data.lastExpJeffros.exp = expToAdd;
+      user.data.lastGained.jeffros = jeffrosToAdd;
+      user.data.lastGained.exp = expToAdd;
       await user.save();
 
       let curLvl = user.economy.global.level;
@@ -252,7 +252,7 @@ ${codeBlock(message.content)}`)
           message.channel.send(`**${author} parece no detenerse.\n— ¡SUBE A NIVEL 30!**`)
           message.member.roles.add(rewards.roles[30]);
 
-          user.economy.global.jeffros += 2000;
+          user.economy.global.currency += 2000;
 
           await user.save();
         } else if (curLvl === 40) {
@@ -265,7 +265,7 @@ ${codeBlock(message.content)}`)
           message.channel.send(`**${author} no se rinde.\n— ¡SUBE A NIVEL 60!**`)
           message.member.roles.add(rewards.roles[60]);
 
-          user.economy.global.jeffros += 5000;
+          user.economy.global.currency += 5000;
           await user.save();
         } else if (curLvl === 70) {
           message.channel.send(`**${author} no va a parar.\n— ¡SUBE A NIVEL 70!**`)
@@ -274,13 +274,13 @@ ${codeBlock(message.content)}`)
           message.channel.send(`**${author} no para de sorprendernos.\n— ¡SUBE A NIVEL 80!**`)
           message.member.roles.add(rewards.roles[80]);
 
-          user.economy.global.jeffros += 6000;
+          user.economy.global.currency += 6000;
           await user.save();
         } else if (curLvl === 90) {
           message.channel.send(`**${author} está en la recta final.\n— ¡SUBE A NIVEL 90!**`)
           message.member.roles.add(rewards.roles[90]);
 
-          user.economy.global.jeffros += 10000;
+          user.economy.global.currency += 10000;
           await user.save();
         } else if (curLvl === 99) {
           message.channel.send(`**${author} está a punto de logralo.\n— ¡SUBE A NIVEL 99!**`)

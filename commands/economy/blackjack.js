@@ -2,14 +2,14 @@ const { Command, Categories, Blackjack, ErrorEmbed, Embed } = require("../../src
 
 const command = new Command({
     name: "blackjack",
-    desc: "Juega al Blackjack con los Jeffros",
+    desc: "Juega al Blackjack",
     category: Categories.Economy
 })
 
 command.addOption({
     type: "integer",
     name: "apuesta",
-    desc: "Cuántos Jeffros te vas a jugar",
+    desc: "Cuánto dinero te vas a jugar",
     min: 1,
     req: true
 })
@@ -30,12 +30,12 @@ command.execute = async (interaction, models, params, client) => {
         type: "economyError",
         data: {
             action: "blackjack",
-            error: `No tienes tantos Jeffros para apostar.`,
-            money: user.economy.global.jeffros
+            error: `No tienes tanto dinero para apostar.`,
+            money: user.economy.global.currency
         }
     })
 
-    if (user.economy.global.jeffros < apuesta.value) return notEnough.send();
+    if (user.economy.global.currency < apuesta.value) return notEnough.send();
     let winCounts = client.wonBlackjack.find(x => x.user === interaction.user.id && x.guild === interaction.guild.id)
 
     //console.log("Ha ganado %s en esta sesión", winCounts)

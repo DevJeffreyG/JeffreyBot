@@ -7,8 +7,8 @@ const command = new Command({
 })
 
 command.addSubcommand({
-    name: "jeffros",
-    desc: "Revisa el top de Jeffros"
+    name: "dinero",
+    desc: "Revisa el top del dinero"
 })
 
 command.addSubcommand({

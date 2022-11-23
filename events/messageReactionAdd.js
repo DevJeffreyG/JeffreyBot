@@ -20,7 +20,29 @@ module.exports = async (client, reaction, user) => {
     const doc = await Guilds.getOrCreate(guild.id);
     doc.workerAddAutoRole(message, reaction, user)
 
+    // ENCUESTAS
+    GlobalDatas.findOne({
+      "info.type": "temporalPoll",
+      "info.guild_id": guild.id,
+      "info.message_id": message.id
+    }, (err, poll) => {
+      if(err) throw err;
+
+      const reactionfilter = x => x.emoji.name === "✅" || x.emoji.name === "❌";
+
+      if(!poll) return;
+      if(!reactionfilter(reaction)) return reaction.users.remove(user);
+
+      const reactionToFind = reaction.emoji.name === "❌" ? "✅" : "❌";
+
+      const reactionToDelete = message.reactions.cache.find(x => x.emoji.name === reactionToFind);
+
+      reactionToDelete.users.remove(user);
+    })
+
     // AWARDS
+    // REWORK NEEDED
+    return;
     let silver = client.user.id === Config.testingJBID ? "880602500414201866" : Config.silverAward;
     let gold = client.user.id === Config.testingJBID ? "880602498224771092" : Config.goldAward;
     let platinium = client.user.id === Config.testingJBID ? "880602498195402812" : Config.platiniumAward;
@@ -172,13 +194,13 @@ module.exports = async (client, reaction, user) => {
             guild_id: guild.id
           });
 
-          if (!user_author || user_author.economy.global.jeffros < price) { // si no existe un documento con jeffros o son insuficientes
+          if (!user_author || user_author.economy.global.currency < price) { // si no existe un documento con jeffros o son insuficientes
             return msg.edit({content: `No tienes **${Emojis.Jeffros}${price.toLocaleString('es-CO')}**.`, embeds: null});
           }
 
           if (award === "oro" || award === "platino") { // si el award es de oro o platino
             if (user_reciever === user_author) { // si es el mismo usuario
-              user_reciever.economy.global.jeffros -= price - gift;
+              user_reciever.economy.global.currency -= price - gift;
 
               msg.edit({content: null, embeds: [paid]}).then(m => {
                 setTimeout(() => {
@@ -199,7 +221,7 @@ module.exports = async (client, reaction, user) => {
                 }
               });
 
-              user_author.economy.global.jeffros -= price;
+              user_author.economy.global.currency -= price;
               await newUser.save();
               await user_author.save();
 
@@ -212,8 +234,8 @@ module.exports = async (client, reaction, user) => {
               });
               return hallChannel.send({embeds: [hallOfFameEmbed]});
             } else {
-              user_author.economy.global.jeffros -= price;
-              user_reciever.economy.global.jeffros += gift;
+              user_author.economy.global.currency -= price;
+              user_reciever.economy.global.currency += gift;
 
               await user_reciever.save();
               await user_author.save();
@@ -229,7 +251,7 @@ module.exports = async (client, reaction, user) => {
             }
           } else {
             // SI EL PREMIO ES SILVER ENTONCES
-            user_author.economy.global.jeffros -= price;
+            user_author.economy.global.currency -= price;
 
             await user_author.save();
 
@@ -260,25 +282,4 @@ module.exports = async (client, reaction, user) => {
         });
       });
     }
-
-    // ENCUESTAS
-    GlobalDatas.findOne({
-      "info.type": "temporalPoll",
-      "info.guild_id": guild.id,
-      "info.message_id": message.id
-    }, (err, poll) => {
-      if(err) throw err;
-
-      const reactionfilter = x => x.emoji.name === "✅" || x.emoji.name === "❌";
-
-      if(!poll) return;
-      if(!reactionfilter(reaction)) return reaction.users.remove(user);
-
-      const reactionToFind = reaction.emoji.name === "❌" ? "✅" : "❌";
-
-      const reactionToDelete = message.reactions.cache.find(x => x.emoji.name === reactionToFind);
-
-      reactionToDelete.users.remove(user);
-    })
-
 }

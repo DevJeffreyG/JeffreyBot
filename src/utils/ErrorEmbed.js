@@ -50,6 +50,7 @@ class ErrorEmbed extends Embed {
 
         if(!options) return this.#customError();
 
+        const { DarkCurrency, Currency } = this.client.getCustomEmojis(this.interaction.guild.id);
         const { type, data } = options;
 
         switch(type){
@@ -132,7 +133,7 @@ ${codeBlock("json", `{ FATAL ERROR, ID ${data.id}, UNKNOWN "${data.unknown}`)}`]
             case "economyError":
                 this.#errorName("Mala transacción")
                 this.#errorAuthor(13)
-                this.#errorDesc("Error en la transacción", data.action, [data.error, `Tienes: **${data.darkshop ? this.client.Emojis.DarkJeffros : this.client.Emojis.Jeffros}${data.money.toLocaleString('es-CO')}**`])
+                this.#errorDesc("Error en la transacción", data.action, [data.error, `Tienes: **${data.darkshop ? DarkCurrency : Currency}${data.money.toLocaleString('es-CO')}**`])
                 break;
 
             case "execError":

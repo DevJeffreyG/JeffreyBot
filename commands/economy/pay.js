@@ -3,21 +3,21 @@ const { Config, Colores } = require("../../src/resources");
 
 const command = new Command({
     name: "pay",
-    desc: "Le das de tus Jeffros a otro usuario",
+    desc: "Le das de tu dinero a otro usuario",
     category: Categories.Economy
 })
 
 command.addOption({
     type: "user",
     name: "usuario",
-    desc: "El usuario al que le vas a dar Jeffros",
+    desc: "El usuario al que le vas a dar dinero",
     req: true
 })
 
 command.addOption({
     type: "integer",
     name: "cantidad",
-    desc: "La cantidad de Jeffros que vas a dar",
+    desc: "La cantidad de dinero que vas a dar",
     min: 1,
     req: true
 })
@@ -26,7 +26,7 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ephemeral: true});
     const { Users } = models
     const { usuario, cantidad } = params;
-    const { Emojis } = client;
+    const { Currency } = client.getCustomEmojis(interaction.guild.id);
 
     const author = interaction.user;
     const member = usuario.member;
@@ -46,27 +46,27 @@ command.execute = async (interaction, models, params, client) => {
     });
 
     let toConfirm = [
-        `¿Deseas pagarle **${Emojis.Jeffros}${quantity.toLocaleString('es-CO')}** a ${member}?`,
-        `Tienes **${Emojis.Jeffros}${author_user.economy.global.jeffros.toLocaleString('es-CO')}**.`,
-        `${member} tiene **${Emojis.Jeffros}${user.economy.global.jeffros.toLocaleString('es-CO')}**.`,
+        `¿Deseas pagarle **${Currency}${quantity.toLocaleString('es-CO')}** a ${member}?`,
+        `Tienes **${Currency}${author_user.economy.global.currency.toLocaleString('es-CO')}**.`,
+        `${member} tiene **${Currency}${user.economy.global.currency.toLocaleString('es-CO')}**.`,
         `Se mencionará al destinatario.`,
         `Esto no se puede deshacer, a menos que te los den devuelta.`
     ];
 
-    let confirmation = await Confirmation("Pagar Jeffros", toConfirm, interaction);
+    let confirmation = await Confirmation("Pagar dinero", toConfirm, interaction);
 
     if(!confirmation) return;
 
     let notEnough = new ErrorEmbed(interaction, {
         type: "economyError",
         data: {
-            action: "pay jeffros",
-            error: "No tienes suficientes Jeffros",
-            money: author_user.economy.global.jeffros
+            action: "pay",
+            error: "No tienes suficiente dinero",
+            money: author_user.economy.global.currency
         }
     })
 
-    if(author_user && author_user.economy.global.jeffros < quantity) return notEnough.send();
+    if(author_user && author_user.economy.global.currency < quantity) return notEnough.send();
 
     if(author.id === member.id){
         let msg = await interaction.fetchReply();
@@ -84,13 +84,13 @@ command.execute = async (interaction, models, params, client) => {
         return interaction.editReply({embeds: [e]});
     } else
 
-    author_user.economy.global.jeffros -= quantity;
-    await user.addJeffros(quantity);
+    author_user.economy.global.currency -= quantity;
+    await user.addCurrency(quantity);
 
     await author_user.save();
 
     const messenger = `**${author}**`;
-    const pay = `**${Emojis.Jeffros}${quantity.toLocaleString('es-CO')}**`;
+    const pay = `**${Currency}${quantity.toLocaleString('es-CO')}**`;
     const reciever = `**${member}**`;
 
     let possibleDescriptions = [

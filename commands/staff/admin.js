@@ -15,18 +15,18 @@ command.data
         keys
             .setName("keys")
             .setDescription("Administración de las llaves")
-            .addSubcommand(jeffrosk => jeffrosk
-                .setName("jeffros")
-                .setDescription("Añadir una nueva llave para canjear con recompensas de Jeffros")
+            .addSubcommand(dinerok => dinerok
+                .setName("dinero")
+                .setDescription("Añadir una nueva llave para canjear con recompensas de dinero")
                 .addIntegerOption(option => option
                     .setName("cantidad")
-                    .setDescription("Cantidad de Jeffros a dar")
+                    .setDescription("Cantidad de dinero a dar")
                     .setMinValue(1)
                     .setRequired(true))
             )
             .addSubcommand(expk => expk
                 .setName("exp")
-                .setDescription("Añadir una nueva llave para canjear con recompensas de Jeffros")
+                .setDescription("Añadir una nueva llave para canjear con recompensas de EXP")
                 .addIntegerOption(option => option
                     .setName("cantidad")
                     .setDescription("Cantidad de EXP a dar")
@@ -63,7 +63,7 @@ command.data
                     .setName("objetivo")
                     .setDescription("Lo que va a modificar")
                     .addChoices(
-                        { name: "Jeffros", value: String(BoostObjetives.Jeffros) },
+                        { name: "Dinero", value: String(BoostObjetives.Currency) },
                         { name: "EXP", value: String(BoostObjetives.Exp) },
                         { name: "Todo", value: String(BoostObjetives.All) },
                     )
@@ -133,7 +133,7 @@ command.data
                     .addIntegerOption(o =>
                         o
                             .setName("recompensa")
-                            .setDescription("La nueva cantidad de Jeffros a dar como recompensa")
+                            .setDescription("La nueva cantidad de dinero a dar como recompensa")
                     )
             )
             .addSubcommand(list =>
@@ -253,7 +253,7 @@ command.data
                         option.setName("boostobj")
                             .setDescription("El objetivo del boost (si es un boost)")
                             .addChoices(
-                                { name: "Jeffros", value: String(BoostObjetives.Jeffros) },
+                                { name: "Dinero", value: String(BoostObjetives.Currency) },
                                 { name: "EXP", value: String(BoostObjetives.Exp) },
                                 { name: "Todo", value: String(BoostObjetives.All) },
                             )
@@ -416,10 +416,10 @@ command.keysExec = async (interaction, models, params) => {
     }
 
     switch (subcommand) {
-        case "jeffros":
+        case "dinero":
         case "exp":
-            if (subcommand === "jeffros") type = "jeffros";
-            if (subcommand === "exp") type = "exp";
+            if (subcommand === "dinero") type = ItemObjetives.Currency;
+            if (subcommand === "exp") type = ItemObjetives.Exp;
 
             doc.data.keys.push({
                 config: {
@@ -443,12 +443,12 @@ command.keysExec = async (interaction, models, params) => {
             let boost_objetive = null;
 
             if (subcommand === "boost") {
-                type = "boost";
+                type = ItemObjetives.Boost;
                 boost_type = tipo.value;
                 boost_value = valor.value;
                 boost_objetive = objetivo.value;
             } else {
-                type = "role"
+                type = ItemObjetives.Role
             }
 
             doc.data.keys.push({
@@ -504,11 +504,9 @@ command.vaultExec = async (interaction, models, params, client) => {
     const { Guilds } = models;
     const { subcommand, vault } = params;
     const { codigo, pista, recompensa } = vault;
-    const { Emojis } = client;
+    const { Currency } = client.getCustomEmojis(interaction.guild.id)
 
     const doc = await Guilds.getOrCreate(interaction.guild.id)
-
-    console.log(params, codigo)
 
     switch (subcommand) {
         case "add": {
@@ -538,7 +536,7 @@ command.vaultExec = async (interaction, models, params, client) => {
                     title: "Nuevos textos",
                     desc: [
                         `Código: \`${code}\``,
-                        `Recompensa: **${Emojis.Jeffros}100**`,
+                        `Recompensa: **${Currency}100**`,
                         `ID de Código: \`${id}\``
                     ]
                 }
@@ -563,7 +561,7 @@ command.vaultExec = async (interaction, models, params, client) => {
             let confirm = [
                 `Código con ID \`${vaultCode.id}\` : "**${vaultCode.code}**".`,
                 `Tiene \`${vaultCode.hints.length}\` pistas adjuntas.`,
-                `Da de recompensa **${Emojis.Jeffros}${vaultCode.reward.toLocaleString("es-CO")}**`,
+                `Da de recompensa **${Currency}${vaultCode.reward.toLocaleString("es-CO")}**`,
                 `Esto no se puede deshacer.`
             ]
 
@@ -592,7 +590,7 @@ command.vaultExec = async (interaction, models, params, client) => {
             if (!pista && !recompensa) { // config del codigo actual
                 let e = new Embed()
                     .defAuthor({ text: `Configuración de ${vaultCode.code}`, title: true })
-                    .defDesc(`**—** Recompensa de **${Emojis.Jeffros}${vaultCode.reward.toLocaleString("es-CO")}**
+                    .defDesc(`**—** Recompensa de **${Currency}${vaultCode.reward.toLocaleString("es-CO")}**
 **—** Tiene \`${vaultCode.hints.length}\` pistas en total.
 **—** ID: \`${vaultCode.id}\`.`)
                     .defColor(Colores.verde);

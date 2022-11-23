@@ -1,4 +1,4 @@
-const { Command, Categories, LimitedTime, WillBenefit, HumanMs, ErrorEmbed } = require("../../src/utils");
+const { Command, Categories, LimitedTime, WillBenefit, HumanMs, ErrorEmbed, ItemObjetives, Enum, BoostTypes } = require("../../src/utils");
 
 const command = new Command({
     name: "canjear",
@@ -17,6 +17,8 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ ephemeral: true });
     const { Guilds, Users } = models;
     const { Emojis } = client;
+    const { Currency } = client.getCustomEmojis(interaction.guild.id);
+
     const _key = params.llave.value;
 
     const doc = await Guilds.getOrCreate(interaction.guild.id);
@@ -47,18 +49,18 @@ command.execute = async (interaction, models, params, client) => {
     let reply;
 
     switch (reward.type) {
-        case "jeffros":
-            user.economy.global.jeffros += Number(reward.value);
-            user.data.counts.jeffros += Number(reward.value);
-            reply = `Se han agregado ${Emojis.Jeffros}${Number(reward.value).toLocaleString("es-CO")} a tu cuenta.`
+        case ItemObjetives.Currency:
+            user.economy.global.currency += Number(reward.value);
+            user.data.counts.normal_currency += Number(reward.value);
+            reply = `Se han agregado ${Currency}${Number(reward.value).toLocaleString("es-CO")} a tu cuenta.`
             break;
 
-        case "exp":
+        case ItemObjetives.Exp:
             user.economy.global.exp += Number(reward.value);
             reply = `Se han agregado ${Number(reward.value).toLocaleString("es-CO")} puntos de EXP a tu cuenta.`
             break;
 
-        case "role":
+        case ItemObjetives.Role:
             const isTemp = (reward.duration > 0 && reward.duration != Infinity) ?? false;
             const role = interaction.guild.roles.cache.find(x => x.id === reward.value);
 
@@ -72,7 +74,7 @@ command.execute = async (interaction, models, params, client) => {
             reply = `Se ha agregado el role \`${role.name}\` ${isTemp ? `por ${new HumanMs(reward.duration).human}` : "permanentemente"}.`
             break;
 
-        case "boost":
+        case ItemObjetives.Boost:
             const brole = interaction.guild.roles.cache.find(x => x.id === reward.value);
             const willBenefit = await WillBenefit(interaction.member);
 
@@ -87,7 +89,7 @@ command.execute = async (interaction, models, params, client) => {
             // llamar la funcion para hacer un globaldata y dar el role con boost
             user = await LimitedTime(interaction.member, brole.id, reward.duration, reward.boost_type, reward.boost_objetive, reward.boost_value);
 
-            reply = `Se ha activado el boost ${reward.boost_type === "boostMultiplier" ? "multiplicador" : "de probabilidad"} x${reward.boost_value} por ${new HumanMs(reward.duration).human}.`
+            reply = `Se ha activado el boost ${new Enum(BoostTypes).translate(reward.boost_type) === BoostTypes.Multiplier ? "multiplicador" : "de probabilidad"} x${reward.boost_value} por ${new HumanMs(reward.duration).human}.`
             break;
 
         default:

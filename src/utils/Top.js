@@ -1,10 +1,18 @@
 const { DarkShops } = require("mongoose").models;
+const { CommandInteraction } = require("discord.js");
 const { Colores, Emojis } = require("../resources");
+const DarkShop = require("./DarkShop");
 const InteractivePages = require("./InteractivePages");
 
 class Top {
     #res = [];
 
+    /**
+     * 
+     * @param {*} users Mongoose Documents
+     * @param {CommandInteraction} interaction 
+     * @param {String} type 
+     */
     constructor(users, interaction, type) {
         this.type = type;
         this.users = users;
@@ -27,8 +35,8 @@ class Top {
     async init() {
         // generate top
         switch (this.type) {
-            case "jeffros":
-                await this.#jeffrosTop();
+            case "dinero":
+                await this.#currencyTop();
                 break;
 
             case "exp":
@@ -49,26 +57,27 @@ class Top {
         return interactive.init(this.interaction);
     }
 
-    async #jeffrosTop() {
-        this.base.title = "Top de Jeffros"
-        const darkshop = await DarkShops.getOrNull(this.interaction.guild.id);
-        const inflation = darkshop.inflation.value;
+    async #currencyTop() {
+        const { Currency, DarkCurrency } = this.interaction.client.getCustomEmojis(this.interaction.guild.id);
+        const darkshop = new DarkShop(this.interaction.guild);
 
-        this.users.forEach(user => {
+        this.base.title = `Top de ${Currency.name}`
+
+        this.users.forEach(async user => {
             const member = this.interaction.guild.members.cache.get(user.user_id) ?? null;
 
-            // agregar la cantidad de darkjeffros
+            // agregar la cantidad de darkcurrency
             if (member && !member.user.bot) {
 
-                let darkjeffros = user.economy.dark?.darkjeffros ?? 0;
-                let darkjeffrosValue = user.economy.dark?.darkjeffros ? Number(inflation * 200 * user.economy.dark.darkjeffros) : 0;
-                let finalQuantity = darkjeffrosValue != 0 ? (darkjeffrosValue) + user.economy.global.jeffros : user.economy.global.jeffros;
+                let darkcurrency = user.economy.dark?.currency ?? 0;
+                let darkcurrencyValue = user.economy.dark?.currency ? await darkshop.equals(null, user.economy.dark.currency) : 0;
+                let finalQuantity = darkcurrencyValue != 0 ? (darkcurrencyValue) + user.economy.global.currency : user.economy.global.currency;
 
                 let toPush = {
                     user_id: member.user.id,
-                    darkjeffros: darkjeffros, // numero de dj que tiene
-                    darkjeffrosValue: darkjeffrosValue, // lo que valen esos dj en jeffros ahora mismo
-                    total: finalQuantity // la suma del valor de los dj y los jeffros
+                    currency: darkcurrency, // numero de dj que tiene
+                    currencyValue: darkcurrencyValue, // lo que valen esos dcurrency en dinero ahora mismo
+                    total: finalQuantity // la suma del valor de los dcurrency y el dinero
                 }
 
                 this.#res.push(toPush)
@@ -84,10 +93,10 @@ class Top {
         // determinar el texto a agregar
         for await (const user of this.#res) {
             let darkshopMoney;
-            if (user.darkjeffros != 0) darkshopMoney = ` (${this.Emojis.DarkJeffros}${user.darkjeffros.toLocaleString('es-CO')}➟**${this.Emojis.Jeffros}${user.darkjeffrosValue.toLocaleString('es-CO')}**)`
+            if (user.currency != 0) darkshopMoney = ` (${DarkCurrency}${user.currency.toLocaleString('es-CO')}➟**${Currency}${user.currencyValue.toLocaleString('es-CO')}**)`
             else darkshopMoney = "";
 
-            const txt = this.#getTxt(user, [`${this.Emojis.Jeffros}${user.total.toLocaleString('es-CO')}${darkshopMoney}`])
+            const txt = this.#getTxt(user, [`${Currency}${user.total.toLocaleString('es-CO')}${darkshopMoney}`])
 
             this.top.set(user.user_id, {
                 txt
@@ -101,7 +110,6 @@ class Top {
         this.users.forEach(user => {
             const member = this.interaction.guild.members.cache.get(user.user_id) ?? null;
 
-            // agregar la cantidad de darkjeffros
             if (member && !member.user.bot) {
                 let toPush = {
                     user_id: member.user.id,
@@ -138,7 +146,6 @@ class Top {
         this.users.forEach(user => {
             const member = this.interaction.guild.members.cache.get(user.user_id) ?? null;
 
-            // agregar la cantidad de darkjeffros
             if (member && !member.user.bot) {
                 let toPush = {
                     user_id: member.user.id,
@@ -173,7 +180,6 @@ class Top {
         this.users.forEach(user => {
             const member = this.interaction.guild.members.cache.get(user.user_id) ?? null;
 
-            // agregar la cantidad de darkjeffros
             if (member && !member.user.bot) {
                 let toPush = {
                     user_id: member.user.id,

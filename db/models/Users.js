@@ -56,9 +56,9 @@ const Schema = new mongoose.Schema({
             }
         ],
         customrole: { type: String, required: true, default: "0" },
-        lastExpJeffros: {
+        lastGained: {
             exp: { type: Number },
-            jeffros: { type: Number }
+            currency: { type: Number }
         },
         unlockedVaults: { type: Array },
         birthday: {
@@ -95,20 +95,20 @@ const Schema = new mongoose.Schema({
         ],
         cooldowns: {
             coins: { type: Date, default: null },
-            jeffros_exp: { type: Date, default: null },
+            chat_rewards: { type: Date, default: null },
             rep: { type: Date, default: null },
             claim_rep: { type: Date, default: null },
             roulette: { type: Date, default: null },
             blackjack: { type: Date, default: null },
-            jeffros_to_exp: { type: Date, default: null },
+            currency_to_exp: { type: Date, default: null },
             inflation_prediction: { type: Date, default: null }
         },
         counts: { // all time
             roulette: { type: Number, default: 0 },
             blackjack: { type: Number, default: 0 },
-            jeffros: {
+            normal_currency: {
                 type: Number, default: function () {
-                    if (this.economy.global.jeffros) return this.economy.global.jeffros
+                    if (this.economy.global.currency) return this.economy.global.currency
                     return 0
                 }
             },
@@ -122,25 +122,49 @@ const Schema = new mongoose.Schema({
     },
     economy: {
         global: {
-            exp: { type: Number, required: true, default: 0 },
-            level: { type: Number, required: true, default: 0 },
-            reputation: { type: Number, required: true, default: 0 },
-            jeffros: { type: Number, required: true, default: 0 }
+            exp: { type: Number, required: true, default: 0, integer: true },
+            level: { type: Number, required: true, default: 0, integer: true },
+            reputation: { type: Number, required: true, default: 0, integer: true },
+            currency: {
+                type: Number, required: true, default: function ()  {
+                    return this.economy.global.jeffros
+                }, integer: true
+            },
+            jeffros: { type: Number, required: true, default: 0, integer: true }
         },
         dark: {
-            darkjeffros: { type: Number, default: 0 },
+            currency: {
+                type: Number, default: function() {
+                    return this.economy.dark.darkjeffros || 0;
+                }, integer: true
+            },
+            darkjeffros: { type: Number, default: 0, integer: true },
             accuracy: { type: Number, default: null },
-            dj_since: { type: Date, default: null }
+            until: { type: Date, default: null }
         }
     }
 })
 
 Schema.pre("save", function () {
-    this.economy.global.jeffros = Math.ceil(this.economy.global.jeffros);
-    this.economy.global.exp = Math.ceil(this.economy.global.exp);
-    this.economy.global.level = Math.ceil(this.economy.global.level);
+    this.economy.global.currency = Math.round(this.economy.global.currency);
+    this.economy.global.exp = Math.round(this.economy.global.exp);
+    this.economy.global.level = Math.round(this.economy.global.level);
 
-    this.economy.dark.darkjeffros = Math.ceil(this.economy.dark.darkjeffros);
+    this.economy.dark.currency = Math.round(this.economy.dark.currency);
+
+    if(this.economy.global.currency) {
+        let obj = this.economy.toObject();
+        delete obj.global.jeffros;
+
+        this.economy = obj;
+    }
+
+    if(this.economy.dark.currency) {
+        let obj = this.economy.toObject();
+        delete obj.dark.darkjeffro;
+
+        this.economy = obj;
+    }
 })
 
 Schema.static("getOrCreate", async function ({ user_id, guild_id }) {
@@ -158,9 +182,9 @@ Schema.method("addCount", async function (module, count = 1, save = true) {
     if (save) return await this.save();
 })
 
-Schema.method("addJeffros", async function (count) {
-    this.economy.global.jeffros += count;
-    this.data.counts.jeffros += count;
+Schema.method("addCurrency", async function (count) {
+    this.economy.global.currency += count;
+    this.data.counts.normal_currency += count;
     return await this.save();
 })
 
@@ -179,13 +203,13 @@ Schema.method("hasItem", function (itemId, darkshop = false) {
 })
 
 Schema.method("canBuy", function (price, darkshop = false) {
-    if (!darkshop) return this.economy.global.jeffros >= price
-    return this.economy.dark.darkjeffros >= price
+    if (!darkshop) return this.economy.global.currency >= price
+    return this.economy.dark.currency >= price
 })
 
-Schema.method("parseJeffros", function (Emojis, darkshop = false) {
-    if (!darkshop) return `**${Emojis.Jeffros}${this.economy.global.jeffros.toLocaleString("es-CO")}**`;
-    return `**${Emojis.DarkJeffros}${this.economy.dark.darkjeffros.toLocaleString("es-CO")}**`;
+Schema.method("parseCurrency", function (Emojis, darkshop = false) {
+    if (!darkshop) return `**${Emojis.Currency}${this.economy.global.currency.toLocaleString("es-CO")}**`;
+    return `**${Emojis.DarkCurrency}${this.economy.dark.currency.toLocaleString("es-CO")}**`;
 })
 
 Schema.method("isBannedFrom", function (module) {
@@ -227,7 +251,7 @@ Schema.method("cooldown", function (modulo, options = { cooldown: null, save: tr
             cooldown = ms("5m");
             break;
 
-        case "jeffros_to_exp":
+        case "currency_to_exp":
             cooldown = ms("1w");
             break;
 

@@ -3,116 +3,117 @@ const { Colores } = require("../../src/resources")
 
 const command = new Command({
     name: "manageeconomy",
-    desc: "Administra Jeffros o DarkJeffros de un usuario",
+    desc: "Administra los balances de un usuario",
     category: Categories.Developer
 });
 
 command.addSubcommandGroup({
-    name: "jeffros",
-    desc: "Administra los Jeffros de alguien"
+    name: "currency",
+    desc: "Administra el dinero de alguien"
 })
 
 command.addSubcommandGroup({
-    name: "darkjeffros",
-    desc: "Administra los DarkJeffros de alguien"
+    name: "darkcurrency",
+    desc: "Administra el dinero de la DarkShop de alguien"
 })
 
 command.addSubcommand({
     name: "add",
-    desc: "Añadir Jeffros a alguien",
-    group: "jeffros"
+    desc: "Añadir dinero a alguien",
+    group: "currency"
 })
 
 command.addOption({
     type: "user",
     name: "usuario",
-    desc: "Usuario al que le vas a agregar Jeffros",
+    desc: "Usuario al que le vas a agregar dinero",
     req: true,
-    sub: "jeffros.add"
+    sub: "currency.add"
 })
 
 command.addOption({
     type: "integer",
     name: "cantidad",
-    desc: "N# de Jeffros a agregar",
+    desc: "N# de dinero a agregar",
     req: true,
     min: 1,
-    sub: "jeffros.add"
+    sub: "currency.add"
 })
 
 command.addSubcommand({
     name: "add",
-    desc: "Añadir DarkJeffros a alguien",
-    group: "darkjeffros"
+    desc: "Añadir dinero de DarkShop a alguien",
+    group: "darkcurrency"
 })
 
 command.addOption({
     type: "user",
     name: "usuario",
-    desc: "Usuario al que le vas a agregar DarkJeffros",
+    desc: "Usuario al que le vas a agregar dinero de la DarkShop",
     req: true,
-    sub: "darkjeffros.add"
+    sub: "darkcurrency.add"
 })
 
 command.addOption({
     type: "integer",
     name: "cantidad",
-    desc: "N# de DarkJeffros a agregar",
+    desc: "N# de dinero DS a agregar",
     req: true,
     min: 1,
-    sub: "darkjeffros.add"
+    sub: "darkcurrency.add"
 })
 
 command.execute = async(interaction, models, params, client) => {
     await interaction.deferReply();
 
-    const { subgroup, subcommand, jeffros, darkjeffros } = params
+    const { subgroup, subcommand, currency, darkcurrency } = params
 
     switch(subgroup){
-        case "jeffros":
-            command.execJeffros(interaction, models, {subcommand, jeffros}, client)
+        case "currency":
+            command.execCurrency(interaction, models, {subcommand, currency}, client)
             break;
 
-        case "darkjeffros":
-            command.execDarkJeffros(interaction, models, {subcommand, darkjeffros}, client)
+        case "darkcurrency":
+            command.execDarkCurrency(interaction, models, {subcommand, darkcurrency}, client)
             break;
     }
 }
 
-command.execJeffros = async (interaction, models, params, client) => {
-    const { subcommand, jeffros } = params;
-    const { usuario, cantidad } = jeffros
+command.execCurrency = async (interaction, models, params, client) => {
+    const { subcommand, currency } = params;
+    const { usuario, cantidad } = currency
     const { Users } = models
-    const { Emojis } = client;
+    const { Currency } = client.getCustomEmojis(interaction.guild.id);darkcurrency
 
     const user = await Users.getOrCreate({user_id: usuario.value, guild_id: usuario.member.guild.id})
 
-    await user.addJeffros(cantidad.value)
+    await user.addCurrency(cantidad.value)
 
     let embed = new Embed()
-    .defAuthor({text: `¡Jeffros para ti, ${usuario.member.user.tag}!`, icon: usuario.member.guild.iconURL()})
-    .defDesc(`**+${Emojis.Jeffros}${cantidad.value.toLocaleString('es-CO')}
-— ${Emojis.Jeffros}${user.economy.global.jeffros.toLocaleString('es-CO')}**`)
+    .defAuthor({text: `¡Dinero para ti, ${usuario.member.user.tag}!`, icon: usuario.member.guild.iconURL()})
+    .defDesc(`**+${Currency}${cantidad.value.toLocaleString('es-CO')}
+— ${Currency}${user.economy.global.currency.toLocaleString('es-CO')}**`)
     .defColor(Colores.verde)
     .defThumbnail(usuario.member.displayAvatarURL());
 
     return interaction.editReply({content: null, embeds: [embed]});
 }
 
-command.execDarkJeffros = async (interaction, models, params, client) => {
-    const { subcommand, jeffros } = params;
-    const { usuario, cantidad } = jeffros
+command.execDarkCurrency = async (interaction, models, params, client) => {
+    const { subcommand, darkcurrency } = params;
+    const { usuario, cantidad } = darkcurrency
     const { Users } = models
+    const { DarkCurrency } = client.getCustomEmojis(interaction.guild.id);darkcurrency
 
     const user = await Users.getOrCreate({user_id: usuario.value, guild_id: usuario.member.guild.id})
 
-    user.economy.dark.darkjeffros += cantidad.value;
+    user.economy.dark.currency += cantidad.value;
     await user.save();
 
     let embed = new Embed()
-    .defAuthor({text: `¡DarkJeffros para ti, ${usuario.member.user.tag}!`, icon: usuario.member.guild.iconURL()})
-    .defDesc(`**+${Emojis.DarkJeffros}${cantidad.value.toLocaleString('es-CO')}
-— ${Emojis.DarkJeffros}${user.economy.dark.darkjeffros.toLocaleString('es-CO')}**`)
+    .defAuthor({text: `¡Dinero para ti, ${usuario.member.user.tag}!`, icon: usuario.member.guild.iconURL()})
+    .defDesc(`**+${DarkCurrency}${cantidad.value.toLocaleString('es-CO')}
+— ${DarkCurrency}${user.economy.dark.currency.toLocaleString('es-CO')}**`)
     .defColor(Colores.verde)
     .defThumbnail(usuario.member.displayAvatarURL());
 

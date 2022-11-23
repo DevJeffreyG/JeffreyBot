@@ -19,6 +19,7 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ ephemeral: true });
     const { Guilds, Users } = models;
     const { Emojis, EmojisObject } = client;
+    const { Currency } = client.getCustomEmojis(interaction.guild.id);
 
     const code = params.codigo ? params.codigo.value : null;
 
@@ -83,11 +84,11 @@ command.execute = async (interaction, models, params, client) => {
         .defDesc(reply.replace(new RegExp("{{ CODE }}", "g"), code));
 
     let gg = [
-        "Toma tus { JEFFROS } y vete de mi bóveda.",
-        "¿{ JEFFROS }? Felicidades, ahora deja de intentar.",
-        "{ JEFFROS }. ¿Ya puedes dejarme solo?",
-        "¿QUÉ? ¿DÓNDE ESTÁN MIS { JEFFROS }?",
-        "Tuviste suerte, pero la próxima no será tan fácil conseguir { JEFFROS }."
+        "Toma tus { PRIZE } y vete de mi bóveda.",
+        "¿{ PRIZE }? Felicidades, ahora deja de intentar.",
+        "{ PRIZE }. ¿Ya puedes dejarme solo?",
+        "¿QUÉ? ¿DÓNDE ESTÁN MIS { PRIZE }?",
+        "Tuviste suerte, pero la próxima no será tan fácil conseguir { PRIZE }."
     ];
 
     let finale = gg[Math.floor(Math.random() * gg.length)];
@@ -101,12 +102,12 @@ command.execute = async (interaction, models, params, client) => {
     if (user.data.unlockedVaults.find(x => x === codeInVault.id)) return interaction.editReply({ embeds: [reply] }); // lo tiene
 
     // no lo tiene...
-    await user.addJeffros(codeInVault.reward);
+    await user.addCurrency(codeInVault.reward);
 
     let ggEmbed = new Embed()
         .defAuthor({ text: `Desencriptado.`, icon: EmojisObject.Check.url })
         .defColor(Colores.verde)
-        .defDesc(finale.replace(new RegExp("{ JEFFROS }", "g"), `**${Emojis.Jeffros}${codeInVault.reward.toLocaleString('es-CO')}**`));
+        .defDesc(finale.replace(new RegExp("{ PRIZE }", "g"), `**${Currency}${codeInVault.reward.toLocaleString('es-CO')}**`));
 
     user.data.unlockedVaults.push(codeInVault.id);
     await user.save();

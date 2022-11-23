@@ -48,7 +48,7 @@ command.data
             .setName("objetivo")
             .setDescription("Lo que va a modificar")
             .addChoices(
-                { name: "Jeffros", value: String(BoostObjetives.Jeffros) },
+                { name: "Dinero", value: String(BoostObjetives.Currency) },
                 { name: "EXP", value: String(BoostObjetives.Exp) },
                 { name: "Todo", value: String(BoostObjetives.All) },
             )

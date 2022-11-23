@@ -71,10 +71,10 @@ const GuildSchema = new Schema({
                     usedBy: { type: Array }
                 },
                 reward: {
-                    type: { type: String, required: true },
-                    boost_type: { type: String, default: null },
+                    type: { type: Number, required: true },
+                    boost_type: { type: Number, default: null },
                     boost_value: { type: Number, default: null },
-                    boost_objetive: { type: String, default: null },
+                    boost_objetive: { type: Number, default: null },
                     value: { type: String, required: true },
                     duration: { type: Number }
                 },
@@ -91,7 +91,8 @@ const GuildSchema = new Schema({
                 logs: { type: Boolean, default: true },
                 birthdays: { type: Boolean, default: false },
                 darkshop: { type: Boolean, default: false },
-                
+                rep_to_currency: { type: Boolean, default: false },
+                currency_to_exp: { type: Boolean, default: false }
             },
             logs: {
                 guild: {
@@ -130,6 +131,7 @@ const GuildSchema = new Schema({
             adjust_shop: { type: Boolean, default: true },
             adjust_darkshop: { type: Boolean, default: true },
             baseprice_darkshop: { type: Number, default: 200, integer: true },
+            currency_per_rep: { type: Number, default: 500, integer: true }
         }
     },
     roles: { // id de roles
@@ -175,7 +177,10 @@ const GuildSchema = new Schema({
         }
     },
     emojis: {
-        
+        economy: {
+            currency: { type: String, default: null },
+            dark_currency: { type: String, default: null }
+        }
     }
 });
 
@@ -373,6 +378,21 @@ GuildSchema.method("getRoleByModule", function(module) {
     if(this.roles[module] instanceof Array) return console.log("🔴 SÓLO ROLES QUE SEAN STRINGS")
 
     return this.roles[module];
+})
+
+GuildSchema.method("getEmoji", function(query) {
+    let general = this.emojis;
+    const q = query.split(".");
+
+    if(q.length >= 1){
+        for (let i = 0; i < q.length; i++) {
+            const queryQ = q[i];
+            
+            general = general[queryQ]
+        }
+    }
+
+    return general;
 })
 
 module.exports = mongoose.model('Guilds', GuildSchema);

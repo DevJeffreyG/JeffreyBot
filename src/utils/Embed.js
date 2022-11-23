@@ -125,8 +125,9 @@ class Embed extends Discord.EmbedBuilder {
             case "statistics":
                 const user = data.user_doc;
                 const member = data.member;
+                const { Currency } = client.getCustomEmojis(data.member.guild.id);
 
-                const actualJeffros = user?.economy.global.jeffros.toLocaleString('es-CO') ?? 0;
+                const actualCurrency = user?.economy.global.currency.toLocaleString('es-CO') ?? 0;
                 const curExp = user?.economy.global.exp.toLocaleString('es-CO') ?? 0;
                 const curLvl = user?.economy.global.level.toLocaleString('es-CO') ?? 0;
                 const rep = user?.economy.global.reputation.toLocaleString('es-CO') ?? 0;
@@ -152,7 +153,7 @@ class Embed extends Discord.EmbedBuilder {
                 this.defAuthor({ text: `Estadísticas de ${member.user.tag}`, icon: member.guild.iconURL({ dynamic: true }) })
                     .defDesc(`**— Nivel**: ${curLvl}
 **— EXP**: ${curExp} / ${nxtLvlExp}
-**— Jeffros**: ${client.Emojis.Jeffros}${actualJeffros}
+**— ${Currency.name}**: ${Currency}${actualCurrency}
 **— Puntos de reputación**: ${rep}
 ${bdString}`)
                     .defThumbnail(member.displayAvatarURL())

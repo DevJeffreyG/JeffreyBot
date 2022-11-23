@@ -6,7 +6,7 @@ const moment = require("moment")
 
 const command = new Command({
     name: "predict",
-    desc: "De acuerdo a tu precisión, predice si es buena idea vender tus DarkJeffros en ese momento",
+    desc: "De acuerdo a tu precisión, predice si es buena idea recuperar tu inversión en ese momento",
     category: Categories.DarkShop
 })
 

@@ -6,13 +6,13 @@ const { multiplier } = Config;
 
 const command = new Command({
     name: "coins",
-    desc: "Gana Jeffros extras en un intervalo de 10 minutos (o menos)",
+    desc: "Gana dinero extra en un intervalo de 10 minutos (o menos)",
     category: Categories.Economy
 });
 
 command.execute = async (interaction, models, params, client) => {
     const { Users } = models
-    const { Emojis } = client;
+    const { Currency } = client.getCustomEmojis(interaction.guild.id);
     
     let coinsCooldown = ms("10m");
 
@@ -31,7 +31,7 @@ command.execute = async (interaction, models, params, client) => {
     }
 
     let money = Math.ceil(Math.random() * 20);
-    let tmoney = `**${Emojis.Jeffros}${money.toLocaleString('es-CO')}**`;
+    let tmoney = `**${Currency}${money.toLocaleString('es-CO')}**`;
     let randommember = guild.members.cache.random();
 
     while (randommember.user.id === author.id) { // el randommember NO puede ser el mismo usuario
@@ -41,11 +41,11 @@ command.execute = async (interaction, models, params, client) => {
 
     randommember = `**${randommember.displayName}**`;
 
-    let fakemoney = `${Math.ceil(Math.random() * 1000) + 999} Jeffros`;
+    let fakemoney = `${Math.ceil(Math.random() * 1000) + 999} ${Currency.name}`;
 
     if (multiplier != 1) {
         money = money * multiplier;
-        tmoney = `**${Emojis.Jeffros}${money.toLocaleString('es-CO')}**`;
+        tmoney = `**${Currency}${money.toLocaleString('es-CO')}**`;
     }
 
     // buscar usuario
@@ -60,10 +60,10 @@ command.execute = async (interaction, models, params, client) => {
         const specialInfo = temprole.special;
         
         if(specialInfo.type === BoostTypes.Multiplier){
-            if((specialInfo.objetive === BoostObjetives.Jeffros || specialInfo.objetive === BoostObjetives.All) && !specialInfo.disabled){
+            if((specialInfo.objetive === BoostObjetives.Currency || specialInfo.objetive === BoostObjetives.All) && !specialInfo.disabled){
                 money = money * Number(specialInfo.value);
-                tmoney = `**${Emojis.Jeffros}${money.toLocaleString('es-CO')}📈**`;
-                console.log(author.tag, "Boost de JEFFROS.")
+                tmoney = `**${Currency}${money.toLocaleString('es-CO')}📈**`;
+                console.log(author.tag, "Boost de CURRENCY.")
             }
         }
     }
@@ -99,7 +99,7 @@ command.execute = async (interaction, models, params, client) => {
         new Embed({type: "cooldown", data: {cool}})
     ]});
 
-    await user.addJeffros(money);
+    await user.addCurrency(money);
     
     return interaction.editReply({embeds: [embed]});
 }

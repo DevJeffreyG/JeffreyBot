@@ -20,6 +20,7 @@ class Blackjack {
     constructor(interaction, decks = 1) {
         this.interaction = interaction;
         this.client = interaction.client;
+        this.Emojis = this.client.getCustomEmojis(this.interaction.guild.id);
 
         this.shuffled = false;
         this.deckNumber = decks;
@@ -197,7 +198,7 @@ class Blackjack {
         //console.log("⚪ Se debería mostrar las cartas del Dealer? %s", showDealer)
         this.embed = new Embed()
             .defAuthor({ text: "Blackjack", icon: this.client.EmojisObject.BackCard.url })
-            .defDesc(`Hay **${this.client.Emojis.Jeffros}${this.bet.toLocaleString("es-CO")}** en juego.`)
+            .defDesc(`Hay **${this.Emojis.Currency}${this.bet.toLocaleString("es-CO")}** en juego.`)
             .defField("Tu mano", this.#translateCards(this.player_hand), true)
             .defField("Mano del Dealer", this.#translateCards(this.dealer_hand, showDealer ? false : true), true)
             .defFooter({ text: `Quedan ${this.deck.length} cartas en la baraja` })
@@ -414,7 +415,7 @@ class Blackjack {
                 type: "execError",
                 data: {
                     command: this.interaction.commandName,
-                    guide: `La apuesta debe ser **${this.interaction.client.Emojis.Jeffros}${this.doc.settings.minimum.blackjack_bet.toLocaleString("es-CO")}** o mayor.`
+                    guide: `La apuesta debe ser **${this.Emojis.Currency}${this.doc.settings.minimum.blackjack_bet.toLocaleString("es-CO")}** o mayor.`
                 }
             }).send()
         }
@@ -460,32 +461,32 @@ class Blackjack {
 
         if (won === -1) {
             this.embed
-                .defDesc(`Se te regresan **${this.client.Emojis.Jeffros}${this.bet.toLocaleString("es-CO")}**.`)
+                .defDesc(`Se te regresan **${this.Emojis.Currency}${this.bet.toLocaleString("es-CO")}**.`)
                 .defColor(Colores.cake)
         } else
 
             if (!won) {
                 this.embed
-                    .defDesc(`Perdiste **${this.client.Emojis.Jeffros}${this.bet.toLocaleString("es-CO")}**.`)
+                    .defDesc(`Perdiste **${this.Emojis.Currency}${this.bet.toLocaleString("es-CO")}**.`)
                     .defColor(Colores.rojo)
 
                 if (reason === EndReasons.GaveUp) {
                     this.embed
-                        .defDesc(`Perdiste **${this.client.Emojis.Jeffros}${this.bet.toLocaleString("es-CO")}** al rendirte.`)
+                        .defDesc(`Perdiste **${this.Emojis.Currency}${this.bet.toLocaleString("es-CO")}** al rendirte.`)
                         .defColor(Colores.rojooscuro)
                 }
-                this.user.economy.global.jeffros -= this.bet;
+                this.user.economy.global.currency -= this.bet;
 
-                console.log("🔴 %s perdió %s Jeffros en el Blackjack", this.interaction.user.tag, this.bet.toLocaleString("es-CO"));
+                console.log("🔴 %s perdió %s %s en el Blackjack", this.interaction.user.tag, this.bet.toLocaleString("es-CO"), this.Emojis.Currency.name);
             } else {
                 save = false;
                 this.embed
-                    .defDesc(`Ganaste **${this.client.Emojis.Jeffros}${this.bet.toLocaleString("es-CO")}**.`)
+                    .defDesc(`Ganaste **${this.Emojis.Currency}${this.bet.toLocaleString("es-CO")}**.`)
                     .defColor(Colores.verdejeffrey)
 
                 if (reason === EndReasons.Blackjack) {
                     this.embed
-                        .defDesc(`Ganaste **${this.client.Emojis.Jeffros}${this.bet.toLocaleString("es-CO")}** instantáneamente.`)
+                        .defDesc(`Ganaste **${this.Emojis.Currency}${this.bet.toLocaleString("es-CO")}** instantáneamente.`)
                         .defAuthor({ text: "BLACKJACK!", icon: this.client.EmojisObject.BackCard.url })
                 }
 
@@ -497,7 +498,7 @@ class Blackjack {
                     count: 1
                 })
 
-                this.user.addJeffros(this.bet)
+                this.user.addCurrency(this.bet)
                 await this.user.addCount("blackjack", 1, false);
             }
 

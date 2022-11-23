@@ -22,6 +22,8 @@ class DarkShop {
         this.client = guild.client
         this.interaction = interaction;
         this.now = moment();
+
+        this.Emojis = this.client.getCustomEmojis(this.guild.id);
     }
 
     async #sunday() {
@@ -29,8 +31,8 @@ class DarkShop {
 
         console.log("ES DOMINGOOOOOOOOOOO!")
 
-        // ELIMINAR DARKJEFFROS
-        await this.#removeDarkJeffros()
+        // ELIMINAR DARKCURRENCY
+        await this.#removeDarkCurrency()
 
         // CREAR NUEVA TENDENCIA PARA LOS SIGUIENTES DÍAS
         await this.#createTendency();
@@ -382,15 +384,19 @@ class DarkShop {
         return Number(new Chance().floating({ min: -5, max: 5, fixed: 2 }).toFixed(2));
     }
 
-    async #removeDarkJeffros() {
+    async #removeDarkCurrency() {
         const users = await Users.find({
             guild_id: this.guild.id
         });
 
         users.forEach(async user => {
             const darkdata = user.economy.dark;
+            const until = moment(darkdata.until);
+            if(moment().isBefore(until)) return console.log("aun no");
 
-            if (darkdata.darkjeffros != 0) {
+            console.log("post")
+
+            if (darkdata.currency != 0) {
                 // enviar mensaje al usuario
 
                 let memberDJ = this.guild.members.cache.find(x => x.id === user.user_id);
@@ -399,9 +405,9 @@ class DarkShop {
 
                 let log = new Embed()
                     .defColor(Colores.verde)
-                    .defDesc(`**—** Se han eliminado los DarkJeffros de **${deletedTag}**.
-**—** Desde: ${time(darkdata.dj_since)}.
-**—** Tenía: **${this.client.Emojis.DarkJeffros}${darkdata.darkjeffros.toLocaleString("es-CO")}**`)
+                    .defDesc(`**—** Se han eliminado los ${this.Emojis.DarkCurrency.name} de **${deletedTag}**.
+**—** Desde: ${time(moment(darkdata.until).subtract(1, "w").toDate())}.
+**—** Tenía: **${this.Emojis.DarkCurrency}${darkdata.currency.toLocaleString("es-CO")}**`)
                     .defFooter({ text: "Mensaje enviado a la vez que al usuario", timestamp: true })
 
                 const Logger = new Log(this.interaction)
@@ -411,7 +417,7 @@ class DarkShop {
                 let embed = new Embed()
                     .defAuthor({ text: `...`, icon: this.client.EmojisObject.Dark.url })
                     .defColor(Colores.negro)
-                    .defDesc(`**—** Parece que no has vendido todos tus DarkJeffros. Han sido eliminados de tu cuenta tras haber pasado una semana.`)
+                    .defDesc(`**—** Parece que no has vendido todos tus ${this.Emojis.DarkCurrency.name}. Han sido eliminados de tu cuenta tras haber pasado una semana.`)
                     .defFooter("▸ Si crees que se trata de un error, contacta al Staff.");
 
                 memberDJ?.send({ embeds: [embed] })
@@ -430,8 +436,8 @@ class DarkShop {
                 await Logger.send({ embeds: [log] });
             }
 
-            darkdata.darkjeffros = 0;
-            darkdata.dj_since = null;
+            darkdata.currency = 0;
+            darkdata.until = null;
 
             await user.save();
         })
@@ -512,7 +518,7 @@ class DarkShop {
     }
 
     /**
-     * El resultado de esto será lo que se multiplique con el precio Base de los DarkJeffros
+     * El resultado de esto será lo que se multiplique con el precio Base de los DarkCurrency en el servidor
      * @param {Number} customInflation En porcentaje
      * @returns {Number}
      */
@@ -529,7 +535,7 @@ class DarkShop {
     }
 
     /**
-     * Obtiene el precio base de los DarkJeffros configurado en este servidor
+     * Obtiene el precio base de los DarkCurrency configurado en este servidor
      * @returns {Number}
      */
     async getBasePrice() {
@@ -555,8 +561,8 @@ class DarkShop {
      * @param {Number} number 
      * @returns {Promise<Number>}
      */
-    async equals(inflacion, number) {
-        inflacion = Number(inflacion)
+    async equals(inflacion = null, number) {
+        inflacion = inflacion ? Number(inflacion) : await this.getInflation();
         const one = await this.oneEquals(inflacion);
         return Number((one * number).toFixed(2));
     }
@@ -567,15 +573,15 @@ class DarkShop {
     async inflationEmbed() {
         const { inflation, oldinflation } = await this.getRealInflations();
         const one = await this.oneEquals();
-        const { Emojis, EmojisObject } = this.client;
+        const { EmojisObject } = this.client;
 
         let stonks = oldinflation <= inflation ? "📈" : "📉";
 
         let stonksEmbed = new Embed()
             .defAuthor({ text: `DarkShop: Inflación`, icon: EmojisObject.Dark.url })
-            .defDesc(`${stonks} **—** La inflación actual de los DarkJeffros es de un **${inflation}%**.
-**— ${Emojis.DarkJeffros}1 = ${Emojis.Jeffros}${one.toLocaleString('es-CO')}**.
-**—** Antes era de un \`${oldinflation}%\`: (${Emojis.DarkJeffros}1 = ${Emojis.Jeffros}${(await this.oneEquals(oldinflation))?.toLocaleString("es-CO")}).`)
+            .defDesc(`${stonks} **—** La inflación actual de los ${this.Emojis.DarkCurrency.name} es de un **${inflation}%**.
+**— ${this.Emojis.DarkCurrency}1 = ${this.Emojis.Currency}${one.toLocaleString('es-CO')}**.
+**—** Antes era de un \`${oldinflation}%\`: (${this.Emojis.DarkCurrency}1 = ${this.Emojis.Currency}${(await this.oneEquals(oldinflation))?.toLocaleString("es-CO")}).`)
             .defColor(Colores.negro);
 
         this.interaction.reply({ embeds: [stonksEmbed] });

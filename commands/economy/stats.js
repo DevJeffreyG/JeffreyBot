@@ -5,15 +5,14 @@ const { Command, Categories, Embed, Enum, BoostObjetives } = require("../../src/
 
 const command = new Command({
     name: "stats",
-    desc: "¡Revisa tu EXP, nivel y Jeffros actuales, o de otro usuario!",
-    helpdesc: "Revisa tu EXP, nivel y Jeffros actuales, o de otro usuario",
+    desc: "Revisa tus estadísticas del servidor",
     category: Categories.Economy
 })
 
 command.addOption({
     type: "user",
     name: "usuario",
-    desc: "El usuario a revisar sus estadísticas"
+    desc: "El usuario al que vas a revisar sus estadísticas"
 })
 
 command.execute = async (interaction, models, params, client) => {

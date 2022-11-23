@@ -115,7 +115,9 @@ command.data
                     { name: "Cumpleaños", value: "birthdays" },
                     { name: "DarkShop", value: "darkshop" },
                     { name: "Enviar Logs [config req]", value: "logs" },
-                    { name: "Eliminar links de usuarios sin permiso (Embed Links)", value: "moderation.remove_links" },
+                    { name: "Convertir rep en dinero", value: "rep_to_currency" },
+                    { name: "Convertir dinero en EXP", value: "currency_to_exp" },
+                    { name: "Eliminar links de usuarios sin permiso (Embed Links)", value: "automoderation.remove_links" },
                 )
                 .setRequired(true)
             )
@@ -321,7 +323,7 @@ command.execute = async (interaction, models, params, client) => {
                 new Embed()
                     .defAuthor({ text: `Cambios en la configuración`, title: true })
                     .defDesc(`**—** **${interaction.user.tag}** hizo cambios en la configuración del bot.
-**—** En \`/config ${subcommand ?? subgroup}\`: ${hyperlink("Mensaje", messageLink(interaction.channel.id, message.id))}`)
+**—** En \`/config (...?) ${subcommand ?? subgroup}\`: ${hyperlink("Mensaje", messageLink(interaction.channel.id, message.id))}`)
                     .defColor(Colores.verde)
                     .defFooter({ timestamp: true })
             ]

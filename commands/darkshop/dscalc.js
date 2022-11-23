@@ -3,14 +3,14 @@ const { Config, Colores } = require("../../src/resources")
 
 const command = new Command({
     name: "dscalc",
-    desc: "Determina automáticamente cuantos Jeffros tienes actualmente",
+    desc: "Determina automáticamente cuantos dinero tienes invertido tienes actualmente",
     category: Categories.DarkShop
 })
 
 command.addOption({
     type: "integer",
-    name: "darkjeffros",
-    desc: "¿Cuánto valen X darkjeffros ahora mismo?",
+    name: "darkcurrency",
+    desc: "¿Cuánto vale X cantidad ahora mismo?",
     req: false,
     min: 1
 })
@@ -27,12 +27,13 @@ command.addOption({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { Users } = models;
-    const { darkjeffros, inflacion } = params;
+    const { darkcurrency, inflacion } = params;
 
-    const { Emojis, EmojisObject } = client;
+    const { EmojisObject } = client;
+    const { DarkCurrency, Currency } = client.getCustomEmojis(interaction.guild.id);
 
     const user = await Users.getOrCreate({ user_id: interaction.user.id, guild_id: interaction.guild.id });
-    const toCalc = darkjeffros?.value ?? user.economy.dark.darkjeffros;
+    const toCalc = darkcurrency?.value ?? user.economy.dark.currency;
     const darkshop = new DarkShop(interaction.guild);
 
     const inflation = inflacion?.value.toFixed(2) ?? await darkshop.getInflation();
@@ -44,19 +45,19 @@ command.execute = async (interaction, models, params, client) => {
     let stonksEmbed = new Embed()
         .defAuthor({ text: `Cálculo`, icon: EmojisObject.Dark.url })
         .defDesc(`📊 **— ${inflation}%**.
-**— ${Emojis.DarkJeffros}${toCalc.toLocaleString('es-CO')} = ${Emojis.Jeffros}${calculation.toLocaleString('es-CO')}**.`)
+**— ${DarkCurrency}${toCalc.toLocaleString('es-CO')} = ${Currency}${calculation.toLocaleString('es-CO')}**.`)
         .setColor(Colores.negro);
 
     embeds.push(stonksEmbed)
 
-    const total = Math.floor(user.economy.global.jeffros / one);
+    const total = Math.floor(user.economy.global.currency / one);
 
     let allConversion = new Embed()
         .defAuthor({ text: "Puedes convertir...", title: true })
-        .defDesc(`**${Emojis.Jeffros}${user.economy.global.jeffros.toLocaleString("es-CO")}** ➡️ **${Emojis.DarkJeffros}${total.toLocaleString("es-CO")}**`)
+        .defDesc(`**${Currency}${user.economy.global.currency.toLocaleString("es-CO")}** ➡️ **${DarkCurrency}${total.toLocaleString("es-CO")}**`)
         .defColor(Colores.verdejeffrey)
 
-    if (!darkjeffros && total != 0 && !inflacion) embeds.push(allConversion)
+    if (!darkcurrency && total != 0 && !inflacion) embeds.push(allConversion)
 
     return interaction.editReply({ embeds });
 }

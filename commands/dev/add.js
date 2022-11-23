@@ -14,7 +14,7 @@ command.data
             .setName("target")
             .setDescription("Lo que va a ser cambiado si llega a ser seleccionado")
             .setChoices( 
-                { name: "Jeffros", value: String(ItemObjetives.Jeffros) },
+                { name: "Currency", value: String(ItemObjetives.Currency) },
                 { name: "Role", value: String(ItemObjetives.Role) },
                 { name: "TempRole", value: String(ItemObjetives.TempRole) }
             )
@@ -55,7 +55,7 @@ command.data
             .setName("boostobj")
             .setDescription("Lo que va a modificar")
             .addChoices(
-                { name: "Jeffros", value: String(BoostObjetives.Jeffros) },
+                { name: "Currency", value: String(BoostObjetives.Currency) },
                 { name: "EXP", value: String(BoostObjetives.Exp) },
                 { name: "Todo", value: String(BoostObjetives.All) },
             )

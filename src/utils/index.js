@@ -13,6 +13,7 @@ const RoulleteItem = require("./RouletteItem");
 const Managers = require("./Managers");
 const Blackjack = require("./Blackjack");
 const Log = require("./Log");
+const CustomEmojis = require("./CustomEmojis");
 
 const Enums = require("./Enums");
 const Functions = require("./functions");
@@ -33,7 +34,8 @@ module.exports = {
     Managers,
     Blackjack,
     Log,
-
+    CustomEmojis,
+    
     ...Enums,
     ...Functions
 }

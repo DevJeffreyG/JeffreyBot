@@ -30,7 +30,9 @@ class Shop {
         this.interaction = inter;
         this.client = this.interaction.client;
 
-        this.Emojis = this.client.Emojis;
+        this.Emojis = this.client.getCustomEmojis(this.interaction.guild.id);
+
+        const { Currency, DarkCurrency } = this.Emojis;
 
         this.items = new Map();
         this.base = {
@@ -38,7 +40,7 @@ class Shop {
             author_icon: this.interaction.guild.iconURL({ dynamic: true }) ?? this.interaction.member.displayAvatarURL(),
             color: isDarkShop ? Colores.negro : Colores.verdejeffrey,
             description: ``,
-            addon: `**\`{item_id}\` — {item_name}**\n▸ {item_desc}\n▸ **${this.isDarkShop ? this.Emojis.DarkJeffros : this.Emojis.Jeffros}{item_price}**\n\n`,
+            addon: `**\`{item_id}\` — {item_name}**\n▸ {item_desc}\n▸ **${this.isDarkShop ? DarkCurrency : Currency}{item_price}**\n\n`,
             footer: `Página {ACTUAL} de {TOTAL}`,
             icon_footer: this.interaction.guild.iconURL()
         }
@@ -65,9 +67,9 @@ class Shop {
     async setup(options) {
         this.user = await Users.getOrCreate({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id });
         if (this.isDarkShop)
-            this.base.description = `**—** Bienvenid@ a la DarkShop. Para comprar items usa \`/dsbuy #\`.\n**—** Tienes **${this.Emojis.DarkJeffros}${this.user.economy.dark.darkjeffros.toLocaleString("es-CO")}**`;
+            this.base.description = `**—** Bienvenid@ a la DarkShop. Para comprar items usa \`/dsbuy #\`.\n**—** Tienes **${this.Emojis.DarkCurrency}${this.user.economy.dark.currency.toLocaleString("es-CO")}**`;
         else
-            this.base.description = `**—** ¡Bienvenid@ a la tienda! para comprar items usa \`/buy #\`.\n**—** Tienes **${this.Emojis.Jeffros}${this.user.economy.global.jeffros.toLocaleString("es-CO")}**`;
+            this.base.description = `**—** ¡Bienvenid@ a la tienda! para comprar items usa \`/buy #\`.\n**—** Tienes **${this.Emojis.Currency}${this.user.economy.global.currency.toLocaleString("es-CO")}**`;
 
         this.shop.items.forEach((item, index) => {
             var price = this.determinePrice(this.user, item, true);
@@ -112,11 +114,11 @@ class Shop {
 
         let toConfirm = [
             `¿Deseas comprar el item \`${itemName}\`?`,
-            `Pagarás **${this.isDarkShop ? this.Emojis.DarkJeffros : this.Emojis.Jeffros}${itemPrice}**.`,
+            `Pagarás **${this.isDarkShop ? this.Emojis.DarkCurrency : this.Emojis.Currency}${itemPrice}**.`,
             `Esta compra no se puede devolver.`
         ]
 
-        if (item.interest > 0) toConfirm.push(`Al comprar el item, su precio subirá (**+${this.isDarkShop ? this.Emojis.DarkJeffros : this.Emojis.Jeffros}${item.interest.toLocaleString("es-CO")}**)`)
+        if (item.interest > 0) toConfirm.push(`Al comprar el item, su precio subirá (**+${this.isDarkShop ? this.Emojis.DarkCurrency : this.Emojis.Currency}${item.interest.toLocaleString("es-CO")}**)`)
 
         let confirmation = await Confirmation("Comprar item", toConfirm, this.interaction);
         if (!confirmation) return;
@@ -127,8 +129,8 @@ class Shop {
             type: "economyError",
             data: {
                 action: "buy",
-                error: `No tienes suficientes ${this.isDarkShop ? "DarkJeffros" : "Jeffros"}`,
-                money: this.isDarkShop ? user.economy.dark.darkjeffros : user.economy.global.jeffros,
+                error: `No tienes suficientes ${this.isDarkShop ? this.Emojis.DarkCurrency.name : this.Emojis.Currency.name}`,
+                money: this.isDarkShop ? user.economy.dark.currency : user.economy.global.currency,
                 darkshop: this.isDarkShop
             }
         })
@@ -180,8 +182,8 @@ class Shop {
             }
         }
 
-        if (this.isDarkShop) user.economy.dark.darkjeffros -= price;
-        else user.economy.global.jeffros -= price;
+        if (this.isDarkShop) user.economy.dark.currency -= price;
+        else user.economy.global.currency -= price;
         user.data.inventory.push({ isDarkShop: this.isDarkShop, item_id: item.id, use_id: newUseId })
 
         let embed = new Embed({
@@ -189,9 +191,9 @@ class Shop {
             data: {
                 desc: [
                     "Pago realizado con éxito",
-                    `Compraste: \`${itemName}\` por **${this.isDarkShop ? this.Emojis.DarkJeffros : this.Emojis.Jeffros}${itemPrice}**`,
+                    `Compraste: \`${itemName}\` por **${this.isDarkShop ? this.Emojis.DarkCurrency : this.Emojis.Currency}${itemPrice}**`,
                     `Úsalo con \`/use ${newUseId}\``,
-                    `Ahora tienes: ${user.parseJeffros(this.Emojis, this.isDarkShop)}`
+                    `Ahora tienes: ${user.parseCurrency(this.Emojis, this.isDarkShop)}`
                 ]
             }
         })
@@ -486,7 +488,7 @@ Si es para la DarkShop, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
         this.shop.items.forEach(i => media += i.price);
         media /= this.shop.items.length;
 
-        let multidiff = Math.floor((this.isDarkShop ? this.user.economy.dark.darkjeffros : this.user.economy.global.jeffros) / media);
+        let multidiff = Math.floor((this.isDarkShop ? this.user.economy.dark.currency : this.user.economy.global.currency) / media);
 
         //console.log("🏳️ El promedio de precios es %s", media)
         //console.log("🏳️ dinero/media = %s", multidiff)

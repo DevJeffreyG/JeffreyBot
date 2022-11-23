@@ -240,25 +240,25 @@ command.execUsers = async (interaction, models, params, client) => {
                 }
 
                 if (jeffros) {
-                    finalQuery.economy.global.jeffros = jeffros.jeffros;
+                    finalQuery.economy.global.currency = jeffros.jeffros;
                 }
 
                 if (darkstats) {
                     // perfil
-                    finalQuery.economy.dark.darkjeffros = darkstats.djeffros;
+                    finalQuery.economy.dark.currency = darkstats.djeffros;
                     finalQuery.economy.dark.accuracy = darkstats.accuracy;
                 }
 
                 // GLOBALDATAS
                 // ultimos jeffros y exp
                 let last = await GlobalDatas.findOne({
-                    "info.type": "lastExpJeffros",
+                    "info.type": "lastGained",
                     "info.userID": user_id
                 });
 
                 if (last) {
-                    finalQuery.data.lastExpJeffros.exp = last.info.exp;
-                    finalQuery.data.lastExpJeffros.jeffros = last.info.jeffros;
+                    finalQuery.data.lastGained.exp = last.info.exp;
+                    finalQuery.data.lastGained.currency = last.info.jeffros;
                 }
 
                 // cumpleaños
@@ -279,11 +279,6 @@ command.execUsers = async (interaction, models, params, client) => {
                     "info.type": "dsDJDuration",
                     "info.userID": user_id
                 });
-
-                if (djDuration) {
-                    finalQuery.economy.dark.duration = djDuration.info.duration;
-                    finalQuery.economy.dark.dj_since = djDuration.info.since;
-                }
 
                 // roles
                 let tempRoles = await GlobalDatas.find({
@@ -413,7 +408,7 @@ command.execShops = async (interaction, models, params, client) => {
             value: use.special?.type ? use.special?.specialValue : null,
             objetive: use.special?.type ?
                 use.special?.specialObjective === "exp" ? BoostObjetives.Exp :
-                    use.special?.specialObjective === "jeffros" ? BoostObjetives.Jeffros : BoostObjetives.All :
+                    use.special?.specialObjective === "jeffros" ? BoostObjetives.Currency : BoostObjetives.All :
                 null
         }
         shop.items.push({

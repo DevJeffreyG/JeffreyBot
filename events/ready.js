@@ -4,6 +4,7 @@ const { GlobalDatas } = require("mongoose").models;
 const Chance = require("chance");
 
 const Managers = require("../src/utils/Managers");
+const CustomEmojis = require("../src/utils/CustomEmojis");
 let functions = require("../src/utils/functions");
 const { ChannelModules } = require("../src/utils/Enums");
 const Log = require("../src/utils/Log");
@@ -19,6 +20,8 @@ module.exports = async (client) => {
     client.wonBlackjack = [];
     client.lockedGuilds = await GlobalDatas.getLockedGuilds();
     client.totalMembers = 0;
+    client.CustomEmojis = new Map();
+    client.getCustomEmojis = (guildid) => { return client.CustomEmojis.get(guildid) };
 
     client.devGuild = await client.guilds.fetch(Bases.dev.guild)
         .catch(err => console.log("⚠️ DEV GUILD NOT FOUND!", err))
@@ -60,6 +63,9 @@ module.exports = async (client) => {
         const guild = await partial.fetch();
         await guild.members.fetch();
 
+        const customemojis = await new CustomEmojis(guild).build();
+
+        client.CustomEmojis.set(guild.id, customemojis.emojis);
 
         client.totalMembers += guild.memberCount;
 
@@ -74,18 +80,18 @@ module.exports = async (client) => {
             functions.GlobalDatasWork(guild);
         }, null, true, "America/Bogota", null, true);
     }
-    
+
     // Cada minuto
     new CronJob("0 */1 * * * *", async function () {
         functions.ActivityWork(client)
     }, null, true, "America/Bogota", null, true);
-    
+
     // Cada 5 minutos
     functions.ManageDarkShops(client)
     new CronJob("0 */5 * * * *", async function () {
         //functions.ManageDarkShops(client)
     }, null, true, "America/Bogota", null, true);
-    
+
     console.log("============================================================");
     console.log(`❗❗❗ 💚 ${client.user.username} ONLINE 💚 ❗❗❗`);
 
