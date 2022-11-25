@@ -1,0 +1,29 @@
+.button {
+    display: flex;
+    cursor: pointer;
+    
+    background-color: var(--dark);
+    color: var(--text-color);
+    border: solid 1px var(--dark);
+    
+    text-align: center;
+    align-items: center;
+    text-decoration: none;
+
+    font-size: calc(var(--navh) / 4);
+
+    margin: 4px;
+    padding: 10px !important;
+
+    border-radius: 10px;
+
+    max-height: 80%;
+
+    transition: .1s ease-in-out;
+}
+
+.button:hover {
+    color: var(--primary);
+
+    border: solid 1px var(--primary);
+}

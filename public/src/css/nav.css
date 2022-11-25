@@ -1,0 +1,52 @@
+nav {
+    position: absolute;
+    display: flex;
+    
+    width: 100vw;
+    height: var(--navh);
+
+    background-color: var(--bg-darker);
+
+    z-index: -1;
+    top: 0;
+}
+
+nav p {
+    line-height: var(--navh);
+    font-size: calc(var(--navh) - 50px);
+}
+
+nav * {
+    max-width: 100%;
+    max-height: var(--navh);
+}
+
+nav a {
+    color: var(--text-color);
+    text-decoration: none !important;
+}
+
+nav .left, nav .right {
+    display: flex;
+    cursor: pointer;
+    
+    padding: 0 15px;
+
+    flex-direction: row;
+    align-items: center;
+}
+
+nav .right {
+    cursor: auto;
+    margin-left: auto;
+}
+
+nav .left *, nav .right * {
+    padding: 0 5px;
+    
+    transition: .1s ease-in-out;
+}
+
+nav .left:hover * {
+    color: var(--primary) !important;
+}

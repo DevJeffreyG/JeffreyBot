@@ -4,8 +4,9 @@
   "description": "A multi-function Discord.JS bot",
   "main": "index.js",
   "scripts": {
-    "start": "cls & node index.js",
+    "start": "node index.js",
     "dev": "nodemon -x \"cls && node\" index.js",
+    "server": "nodemon -x \"cls && node\" server.js",
     "devcls": "nodemon ."
   },
   "repository": {
@@ -37,17 +38,21 @@
     "@twurple/api": "^5.2.5",
     "@twurple/auth": "^5.2.5",
     "@twurple/common": "^5.2.5",
+    "body-parser": "^1.20.1",
     "chance": "^1.1.9",
+    "cookie-parser": "^1.4.6",
     "craiyon": "^1.0.0",
     "cron": "^2.1.0",
     "discord-api-types": "^0.37.16",
     "discord.js": "^14.6.0",
     "dotenv": "^16.0.3",
+    "ejs": "^3.1.8",
     "express": "^4.18.2",
     "googleapis": "^109.0.1",
     "moment": "^2.29.4",
     "moment-timezone": "^0.5.38",
     "mongoose": "^6.7.1",
+    "path": "^0.12.7",
     "twitter": "^1.7.1"
   }
 }

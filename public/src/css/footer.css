@@ -1,0 +1,58 @@
+footer {
+    display: flex;
+    flex-direction: row;
+
+    position: absolute;
+    bottom: 0;
+
+    width: 100vw;
+    height: var(--footerh);
+
+    background-color: var(--bg-darker);
+}
+
+footer > div {
+    display: flex;
+
+    padding: 30px;
+    width: 50%;
+}
+
+footer a {
+    display: flex;
+    width: fit-content;
+    height: auto;
+}
+
+/* IZQUIEDA */
+footer div.left {
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+footer div.left #copyright {
+    color: var(--copy-color);
+}
+
+/* DERECHA */
+
+footer div.right {
+    flex-direction: row;
+}
+
+footer div.right > * {
+    margin-right:auto;
+}
+
+footer div.right div {
+    display: flex;
+
+    flex-direction: column;
+
+    max-height: 100%;
+    align-items: center;
+}
+
+footer div.right div > * {
+    margin: 10px 0;
+}
