@@ -8,8 +8,8 @@ const fs = require("fs")
 
 const rest = new REST({ version: '9'}).setToken(process.env.TOKEN);
 const route = process.env.DEV == "TRUE"
-    ? Routes.applicationGuildCommands(process.env.slashClientId, process.env.slashGuildId)
-    : Routes.applicationCommands(process.env.slashClientId)
+    ? Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.slashGuildId)
+    : Routes.applicationCommands(process.env.CLIENT_ID)
 
 class Commands {
     constructor(path = "./commands/"){
@@ -46,7 +46,7 @@ class Commands {
                 Ids.forEach(guildId => {
                     console.log("GuildCommand for", guildId + "!:", command.data.name);
                     this.guildcommands = [];
-                    this.routes.push(Routes.applicationGuildCommands(process.env.slashClientId, guildId));
+                    this.routes.push(Routes.applicationGuildCommands(process.env.CLIENT_ID, guildId));
 
                     client.slash.set(command.data.name, command)
                     this.guildcommands.push(command.data.toJSON())
@@ -72,8 +72,8 @@ class Commands {
                 await GlobalDatas.newGuildCommands({route: route, dev: true})
 
                 // eliminar cualquier comando global
-                if(rest.get(Routes.applicationCommands(process.env.slashClientId)))
-                    rest.put(Routes.applicationCommands(process.env.slashClientId), {body: []})
+                if(rest.get(Routes.applicationCommands(process.env.CLIENT_ID)))
+                    rest.put(Routes.applicationCommands(process.env.CLIENT_ID), {body: []})
 
                 this.#removeGuildCommands(true)
             } else {
