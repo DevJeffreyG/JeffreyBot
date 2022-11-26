@@ -2,6 +2,7 @@
     html {
         background-color: #23272a;
     }
+
     div#loading {
         background-color: #23272a;
 
@@ -76,30 +77,40 @@
     <div id="dot"></div>
     <div id="dot"></div>
 </div>
+        <%- include("nav") %>
 
-<%- include("nav") %>
+            <script>
+                const Sleep = ms => new Promise(r => setTimeout(r, ms));
+                window.onload = async () => {
+                    const loadingstyle = document.querySelector("#loading-style");
+                    const loading = document.querySelector("#loading")
 
-    <script>
-        window.onload = async () => {
-            const loadingstyle = document.querySelector("#loading-style");
-            const loading = document.querySelector("#loading")
+                    loading.setAttribute("class", "disappeared");
 
-            loading.setAttribute("class", "disappeared");
+                    await Sleep(2000)
 
-            await Sleep(2000)
+                    loading.remove();
+                    loadingstyle.remove();
+                }
 
-            loading.remove();
-            loadingstyle.remove();
-        }
+                const homeLogo = document.querySelector("#logo");
+                const loginButton = document.querySelector("#login-btt");
+                const sessionManager = document.querySelector(".session-manager");
 
-        const homeLogo = document.querySelector("#logo");
-        const loginButton = document.querySelector("#login-btt");
+                homeLogo.addEventListener("click", (target) => {
+                    window.location.href = "/"
+                })
 
-        homeLogo.addEventListener("click", (target) => {
-            window.location.href = "/"
-        })
+                loginButton?.addEventListener("click", () => { window.location.replace("/login") });
 
-        loginButton.addEventListener("click", () => { window.location.replace("/login") });
+                sessionManager?.addEventListener("click", () => {
+                    const menu = document.querySelector("div#manager");
+                    menu.classList.toggle("open");
+                })
 
-        const Sleep = ms => new Promise(r => setTimeout(r, ms));
-    </script>
+                const logout = document.querySelector("#logout");
+                logout?.addEventListener("click", () => {
+                    window.location.replace("/logout")
+                })
+
+            </script>

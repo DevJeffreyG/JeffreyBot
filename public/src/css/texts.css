@@ -1,14 +1,21 @@
 h1 {
+    margin: 20px 0;
     font-size: 500%;
     font-weight: bold;
 }
 
 h2 {
+    margin: 20px 0;
     font-size: 250%;
     font-weight: bold;
 }
 
 h3 {
+    margin: 20px 0;
     font-size: 150%;
     font-weight: normal;
+}
+
+.no-margin {
+    margin: 0 !important;
 }

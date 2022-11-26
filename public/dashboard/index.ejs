@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+</head>
+
+<body>
+    <%- include("../src/partials/index") %>
+        <div class="wrapper">
+            <% if(!session.discord_user) { %>
+                <script> window.location.replace("/logout") </script>
+                <% } %>
+
+                    <div class="container">
+                        <h2>Administra un servidor</h2>
+                    </div>
+                    <div class="container">
+                        <div class="boxes" id="guilds">
+                            <div class="guild-child" id="dummy"></div>
+                            <div class="guild-child" id="dummy"></div>
+                            <div class="guild-child" id="dummy"></div>
+                            
+                            <div class="guild-child" id="dummy"></div>
+                            <div class="guild-child" id="dummy"></div>
+                            <div class="guild-child" id="dummy"></div>
+                        </div>
+                    </div>
+
+                    <script>
+                        const container = document.querySelector("#guilds");
+
+                        new Promise(async r => {
+                            let guilds = await guild_work();
+                            document.querySelectorAll("#dummy").forEach(e => e.remove()); // eliminar los dummies
+                            r(guilds)
+                        }).then((guilds) => {
+                            console.log(guilds.length)
+
+                            const childs = document.querySelectorAll(".guild-child");
+                            for (const container of childs) {
+                                const bg = document.createElement("div");
+                                bg.id = "bg";
+                                bg.style.width = "100%";
+                                bg.style.height = "100%";
+
+                                const guild = guilds.find(x => x.id === container.id);
+                                if (!guild) continue;
+
+                                const icon = `https://cdn.discordapp.com/icons/${container.id}/${guild.icon}.png`
+                                bg.style["background-color"] = "transparent;";
+
+                                const circle = document.createElement("img")
+                                circle.id = "icon";
+
+                                if (guild.icon) {
+                                    circle.src = icon;
+
+                                    bg.style.background = `url('${icon}') center center / cover no-repeat`;
+
+                                    container.appendChild(circle)
+                                }
+                                container.appendChild(bg)
+
+                                // texto
+                                const w = document.createElement("div")
+                                w.id = "info";
+
+                                const texto = document.createElement("p");
+                                texto.innerText = `${guild.name}`
+                                w.appendChild(texto)
+                                container.appendChild(w);
+
+                            }
+                        })
+
+
+
+                        async function guild_work() {
+                            const guilds_query = await fetch("/api/discord/get-guilds")
+                            const guilds = await guilds_query.json();
+
+                            for (const guild of guilds) {
+                                console.log(guild.name)
+
+                                let element = document.createElement("div")
+                                element.classList.add("guild-child")
+                                element.id = guild.id
+
+                                container.appendChild(element)
+                            }
+
+                            return guilds;
+                        };
+
+                    </script>
+
+                    <%- include("../src/partials/footer") %>
+        </div>
+</body>
+
+</html>

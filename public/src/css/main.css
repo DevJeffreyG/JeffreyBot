@@ -3,7 +3,7 @@
 :root {
     --bg-color: #23272a;
     --bg-darker: #212427;
-
+    --bg-black: #121314;
 
     --primary: #d9ff52;
     --secondary: #f1ffbf;
@@ -34,15 +34,40 @@
 
 html {
     background-color: transparent;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+}
+
+ul {
+    list-style-type: none;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+label#copyright {
+    visibility: hidden;
+}
+
+label#copyright::before {
+    visibility: visible;
+    content: "© Colored Stealth 2018" !important;
+    margin-right: 3px;
 }
 
 body {
     margin-top: var(--navh);
-    margin-bottom: var(--footerh);
+
     background: var(--bg-color);
-    height: var(--bodyh);
+
+    min-height: var(--bodyh);
+    height: fit-content;
+    
+    max-width: 100%;
 }
 
 .float {
@@ -127,4 +152,90 @@ body {
 
 .social-icon.twitter:hover  {
     fill: var(--twitter);
+}
+
+.line {
+    width: 100%;
+    opacity: 0.2;
+
+    height: 1px;
+
+    cursor: initial !important;
+    background-color: var(--secondary);
+
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.top-margin {
+    margin-top: 50px;
+}
+
+.boxes {
+    display: flex;
+    flex-wrap: wrap;
+
+    width: min(100%, 948px);
+    min-height: 10px;
+}
+
+.boxes > * {
+    margin: 30px;
+
+    background-color: var(--bg-black);
+    width: calc((100% / 3) - 2 * 30px);
+    height: 170px;
+}
+
+.guild-child {
+    display: flex;
+    position: relative;
+
+    border-radius: 30px;
+    overflow: hidden;
+
+    align-items: center;
+    justify-content: center;
+
+    transition: 0.1s ease;
+}
+
+.guild-child:hover {
+    cursor: pointer;
+    box-shadow: inset 0px 0px 0px 2px var(--primary);
+}
+
+.guild-child > #bg {
+    filter: blur(16px);
+    opacity: 0.5;
+}
+
+.guild-child #icon {
+    position: absolute;
+    border-radius: 50%;
+
+    height: 50%;
+    width: auto;
+
+    top: 15%;
+
+    z-index: 3;
+}
+
+.guild-child #info {
+    position: absolute;
+    bottom: 15%;
+
+    border-radius: 10px;
+
+    padding: 5px;
+
+    background-color: var(--semitrans);
+
+    z-index: 1;
+}
+
+.wrapper {
+    min-height: var(--bodyh);
+    position: relative;
 }

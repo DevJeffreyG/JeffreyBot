@@ -17,14 +17,18 @@ app.use(express.static(app.get("root")));
 app.use(express.static(path.join(__dirname, "/public/src")));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json());
 
 const { connection } = require("./db");
-const { webRoutes, postRequest, postHandler, errorHandler } = require("./public/src/web")
+const { webRoutes, postHandler, errorHandler } = require("./public/src/web");
+const { Session } = require("./public/src/utils");
+
+const session = new Session();
+app.Session = session;
 
 connection.then(() => {
   
   webRoutes(app);
-  postRequest(app);
   postHandler(app);
   errorHandler(app);
   

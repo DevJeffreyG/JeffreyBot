@@ -3,34 +3,59 @@
 <footer>
     <div class="left">
         <div id="brand">
-            <h2>Jeffrey Bot</h2>
-            <p>Bot multifuncional que usualmente funciona bien desde 2018</p>
+            <h2 class="no-margin">Jeffrey Bot</h2 class="no-margin">
+            <p>El bot de Discord que lo tiene todo desde 2018</p>
         </div>
         <div id="copyright">
-            Copyright 2018 - Colored Stealth
+            <label id="copyright"></label>
         </div>
     </div>
     <div class="right">
-        <div id="jeffreyg">
-            <h3>Creador</h3>
-            <a href="/social/discord">
-                <%- include("../svg/discord.svg") %>
-            </a>
-            <a href="/social/youtube">
-                <%- include("../svg/youtube.svg") %>
-            </a>
-            <a href="/social/twitter">
-                <%- include("../svg/twitter.svg") %>
-            </a>
+        <div>
+            <p class="title">Funciones</p>
+            <ul>
+                <li><a href="">Moderación</a></li>
+                <li><a href="">Administración</a></li>
+                <li><a href="">Diversión</a></li>
+                <li><a href="">Social</a></li>
+                <li><a href="">Economía</a></li>
+            </ul>
         </div>
-        <div id="social">
-            <h3>Ayuda</h3>
-            <a href="/support/discord">
-                <%- include("../svg/discord.svg") %>
-            </a>
-            <a href="/support/github">
-                <%- include("../svg/github.svg") %>
-            </a>
+        <div id="jeffreyg">
+            <p class="title">Creador</p>
+            <ul>
+                <li><a href="/creator/">Acerca de Colored Stealth</a></li>
+                <li><a href="/creator/jeffreyg">Acerca de JeffreyG</a></li>
+                <li><a href="/creator/projects">Otros proyectos</a></li>
+            </ul>
+            <div id="social">
+                <a href="/creator/discord">
+                    <%- include("../svg/discord.svg") %>
+                </a>
+                <a href="/creator/youtube">
+                    <%- include("../svg/youtube.svg") %>
+                </a>
+                <a href="/creator/twitter">
+                    <%- include("../svg/twitter.svg") %>
+                </a>
+            </div>
+        </div>
+        <div id="jeffreybot">
+            <p class="title">Jeffrey Bot</p>
+            <ul>
+                <li><a href="">Acerca de Jeffrey Bot</a></li>
+                <li><a href="">Condiciones de servicio</a></li>
+                <li><a href="">Política de privacidad</a></li>
+                <li><a href="">Aportes de la comunidad</a></li>
+            </ul>
+            <div id="social">
+                <a href="/support/discord">
+                    <%- include("../svg/discord.svg") %>
+                </a>
+                <a href="/support/github">
+                    <%- include("../svg/github.svg") %>
+                </a>
+            </div>
         </div>
     </div>
 </footer>
