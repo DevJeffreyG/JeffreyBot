@@ -1,7 +1,4 @@
-<link rel="stylesheet" href="../css/main.css">
-<link rel="stylesheet" href="../css/texts.css">
-<link rel="stylesheet" href="../css/buttons.css">
-<link rel="stylesheet" href="../css/nav.css">
+<%- include("./styles.ejs") %>
 
 <nav>
     <div class="left" id="logo">
@@ -34,7 +31,7 @@
     </div>
 </nav>
 <% if(session.cookies.user) {%>
-<div id="manager">
+<div id="manager" style="margin-top: var(--navh);">
     <h1>Jeffrey Bot</h1>
     <a href="/dashboard/">Dashboard</a>
     <div class="line"></div>

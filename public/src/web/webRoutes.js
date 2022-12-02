@@ -1,23 +1,39 @@
 const { PermissionsBitField } = require("discord.js");
-const { Locale } = require("../utils");
+const path = require("path");
+
+const { Locale, Session, Dashboard } = require("../utils");
 
 const Express = require("express")();
 
-const oauth2 = "https://discord.com/api/oauth2/authorize?client_id=514123686530383872&redirect_uri=http%3A%2F%2Flocalhost%3A10000%2Fapi%2Fdiscord-callback&response_type=code&scope=identify%20email%20guilds";
 const API_ENDPOINT = "https://discord.com/api/v10";
 const REDIRECT_URI = "http://localhost:10000/api/discord-callback";
+
+const inviteLink = `https://discord.com/api/oauth2/authorize?client_id=${process.env.CLIENT_ID}&permissions=8&scope=bot%20applications.commands`
+const oauth2 = `https://discord.com/api/oauth2/authorize?client_id=${process.env.CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=identify%20email%20guilds`;
+const uptime = "https://stats.uptimerobot.com/oOR4JiDYNj";
 
 /**
  * 
  * @param {Express} app 
  */
 module.exports = (app) => {
-    var session = app.Session;
-    const locale = new Locale();
+    var session = app.Session; // Get Session
+    const locale = new Locale(); // Create Locale
+    const texts = locale.texts; // todo
 
-    const texts = locale.texts;
+    /* ===== EXTERNAL LINKS ===== */
+    app.get("/invite", (req, res) => { res.redirect(inviteLink + `&guild_id=${req.query.guildId}`) });
+    app.get("/login", (req, res) => { res.redirect(oauth2) });
+    app.get("/status", (req, res) => { res.redirect(uptime) });
 
-    app.get("/creator/", (req, res) => { prepare("./creator/", { req, res }) });
+    /* ===== FOOTER LINKS ===== */
+    app.get("/creator/", (req, res) => { prepare("./subpages/creator/", { req, res }) });
+    app.get("/creator/jeffreyg", (req, res) => { prepare("./subpages/creator/jeffreyg", { req, res }) });
+    app.get("/creator/projects", (req, res) => { prepare("./subpages/creator/projects", { req, res }) });
+
+    app.get("/creator/projects", (req, res) => { prepare("./subpages/creator/projects", { req, res }) });
+
+    /* ===== SOCIAL LINKS ===== */
     app.get("/creator/discord", (req, res) => { res.redirect("https://discord.gg/fJvVgkN") });
     app.get("/creator/youtube", (req, res) => { res.redirect("https://www.youtube.com/JeffreyG") });
     app.get("/creator/twitter", (req, res) => { res.redirect("https://www.twitter.com/fakeJeffreyG") });
@@ -25,15 +41,20 @@ module.exports = (app) => {
     app.get("/support/github", (req, res) => { res.redirect("https://github.com/DevJeffreyG/JeffreyBot") });
     app.get("/support/discord", (req, res) => { res.redirect("https://discord.gg/wk8aP4n") });
 
+    /* ===== GENERAL LINKS ===== */
     app.get("/app-health", (req, res) => { return res.sendStatus(200) });
     app.get("/", (req, res) => { prepare("home", { req, res }) });
 
-    app.get("/login", (req, res) => { res.redirect(oauth2) });
+    app.get("/dashboard", (req, res) => { prepare("./dashboard", { req, res }) });
+    app.get("/dashboard/*/", (req, res) => { prepare("./dashboard", { req, res }) });
     app.get("/logout", (req, res) => {
         res.clearCookie("user");
+        app.Session = new Session();
+        session = app.Session;
         res.redirect("/")
     });
 
+    /* ===== API CALLS ===== */
     app.get("/api/discord-callback", async (req, res) => {
         const code = req.query.code;
 
@@ -75,15 +96,80 @@ module.exports = (app) => {
             error: { message: "couldn't get user", response: user }
         })
 
-        console.log(user)
-
         session.setToken(token_type, access_token);
         session.setDiscordUser(user)
+
+        await getUserGuilds();
 
         res.cookie("user", user)
         res.redirect("/dashboard/")
     });
-    app.get("/api/discord/get-guilds", async (req, res) => {
+    app.get("/api/get-dashboard/", async (req, res) => {
+        let guildId = req.header("guildid")
+        const dashboard = new Dashboard(guildId);
+
+        session.setDashboard(dashboard);
+
+        console.log("Cache is")
+        console.log(session.dashboard.guildId);
+
+        res.send(dashboard);
+    })
+    app.get("/api/get-guild", async (req, res) => {
+        const guildId = req.header("guildid");
+
+        if (!guildId) return res.status(400)
+            .send({
+                error: { message: "missing guildid" },
+                status_code: 400
+            });
+
+        const query = await fetch(`${API_ENDPOINT}/guilds/${guildId}`, {
+            headers: {
+                authorization: `Bot ${process.env.TOKEN}`
+            }
+        })
+
+        const guild = await query.json();
+        if (guild.code === 50001) return res.status(400)
+            .send({
+                error: { message: "client not in guild", response: guild },
+                status_code: 400
+            })
+
+        res.send(guild);
+    })
+
+    /* ===== ERRORS ===== */
+    //app.get("/404/", (req, res) => { prepare("./subpages/errors/404", { req, res } )});
+
+    /**
+     * Render page with req and res to prepare necessary vars
+     * @param {String} toRender 
+     * @param {{req, res}}
+     * @returns 
+     */
+    function prepare(toRender, { req, res }) {
+        session.setCookies(req);
+
+        const base = {
+            texts,
+            session,
+            req,
+            res
+        }
+
+        for (const query in req.query) {
+            base[query] = req.query[query]
+        }
+
+        return res.render(toRender, base)
+    }
+
+    /**
+     * Get Guilds of User and set them to Session
+     */
+    async function getUserGuilds() {
         const query = await fetch(`${API_ENDPOINT}/users/@me/guilds`, {
             headers: {
                 authorization: `${session.token_type} ${session.token}`
@@ -95,28 +181,9 @@ module.exports = (app) => {
             const permissions = new PermissionsBitField(x.permissions)
             const checkAgainst = new PermissionsBitField(PermissionsBitField.Flags.ManageGuild)
 
-            if(permissions.has(checkAgainst)) return x;
+            if (permissions.has(checkAgainst)) return x;
         })
 
-        res.send(result);
-    })
-
-    app.get("/dashboard", (req, res) => { prepare("./dashboard/", { req, res }) });
-
-    //app.get("/tops/currency", (req, res) => { prepare("./tops/currency/", {req, res}) });
-
-    function prepare(toRender, { req, res }) {
-        session.setCookies(req);
-
-        const base = {
-            texts,
-            session
-        }
-
-        for (const query in req.query) {
-            base[query] = req.query[query]
-        }
-
-        return res.render(toRender, base)
+        session.setGuilds(result)
     }
 }

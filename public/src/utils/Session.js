@@ -16,6 +16,14 @@ class Session {
     setDiscordUser(user){
         this.discord_user = user
     }
+
+    setGuilds(json) {
+        this.guilds = json;
+    }
+
+    setDashboard(dashboard) {
+        this.dashboard = dashboard;
+    }
 }
 
 module.exports = Session

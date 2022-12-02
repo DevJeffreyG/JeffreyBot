@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeffrey Bot - Colored Stealth</title>
+    <script src="https://cdn.jsdelivr.net/gh/dixonandmoe/rellax@master/rellax.min.js"></script>
+</head>
+<body class="dark">
+    <%- include("../../src/partials/index") %>
+
+    <h1 class="rellax-title">Colored Stealth</h1>
+    <div class="rellax-container first">
+        <img src="https://media.discordapp.net/attachments/464810032081666048/514216459178868736/AlianzaBanner.png" alt="CS_Banner">
+    </div>
+
+    <div class="container bg after-rellax">
+        <div class="card reveal left keep">
+            <div id="logo">
+                <%- include("../../src/svg/coloredstealth.svg") %> 
+            </div>
+            <div class="description">
+                <h1 id="title">¿Qué es Colored Stealth?</h1>
+                <p id="content">
+                    Colored Stealth es el nombre en clave de un proyecto a manos de <a class="link-show" href="/creator/jeffreyg">JeffreyG</a>
+                    que tiene el fin de recopilar los productos/proyectos distribuidos por su creador al público.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="container after-rellax">
+        <div class="card reveal right keep dark">
+            <h1 id="title">¿Más información pronto...?</div>
+        </div>
+    </div>
+
+    <script>
+        var rellax = new Rellax(".rellax-container", {
+            speed: -9
+        })
+    </script>
+    
+    <%- include("../../src/partials/footer") %>
+</body>
+</html>

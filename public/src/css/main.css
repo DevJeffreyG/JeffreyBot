@@ -12,10 +12,14 @@
     --text-color: var(--secondary);
     --copy-color: #383b3d;
     --semitrans: rgba(255, 255, 255, 0.24);
+    --link-hover: #8ae678;
 
     --navh: 10vh;
     --footerh: 35vh;
     --bodyh: calc(100vh - var(--navh) - var(--footerh));
+    --rellax-conth: calc(100vh / 1.5);
+
+    --sidebarw: 300px;
 
     /* BRANDS */
     --none-color: #616161;
@@ -23,6 +27,17 @@
     --github: #000;
     --youtube: #ff0000;
     --twitter: #1D9BF0;
+}
+
+svg#ColoredStealth {
+    fill: var(--primary);
+    max-width: 512px;
+
+    transition: all .3s ease;
+}
+
+svg#ColoredStealth:hover {
+    scale: 1.015;
 }
 
 * {
@@ -35,6 +50,8 @@
 html {
     background-color: transparent;
     width: 100%;
+
+    overflow-x: hidden;
 }
 
 ul {
@@ -60,8 +77,6 @@ label#copyright::before {
 }
 
 body {
-    margin-top: var(--navh);
-
     background: var(--bg-color);
 
     min-height: var(--bodyh);
@@ -100,6 +115,7 @@ body {
     display: flex;
 
     width: 100%;
+    min-height: calc(75vh - var(--navh));
 
     flex-direction: column;
     
@@ -107,7 +123,51 @@ body {
     align-items: center;
 }
 
+.link-show {
+    text-decoration: underline !important;
+}
+
+.link-show:hover {
+    color: var(--link-hover) !important;
+}
+
+.bg {
+    background-color: var(--bg-color);
+    position: sticky;
+    z-index: 1;
+}
+
+.dark {
+    background-color: var(--bg-darker) !important;
+    position: sticky;
+    z-index: 1;
+}
+
+.container.after-rellax {
+    min-height: fit-content !important;
+}
+
+.first {
+    transform: translateY(var(--navh));
+}
+
 .avatar {
+    overflow: hidden;
+    border-radius: 50%;
+
+    min-width: initial !important;
+    min-height: initial !important;
+
+    width: 200px !important;
+    height: 200px !important;
+}
+
+.avatar img {
+    width: 100%;
+    height: auto;
+}
+
+.bubble {
     background-color: var(--bg-color);
     
     overflow: hidden;
@@ -120,7 +180,7 @@ body {
     animation: float 6s ease-in-out infinite;
 }
 
-.avatar img {
+.bubble img {
     height: 100%;
     max-width: 300px;
 }
@@ -165,10 +225,6 @@ body {
 
     padding: 0 !important;
     margin: 0 !important;
-}
-
-.top-margin {
-    margin-top: 50px;
 }
 
 .boxes {
@@ -238,4 +294,119 @@ body {
 .wrapper {
     min-height: var(--bodyh);
     position: relative;
+}
+
+.error {
+    display: block !important;
+    width: 90%;
+    margin: 10px;
+    margin-left: auto;
+    min-height: var(--bodyh);
+    font-size: 60px;
+}
+
+.rellax-container {
+    display: flex;
+    position: relative;
+    width: 100%;
+    height: var(--rellax-conth);
+
+    align-items: center;
+}
+
+.rellax-container.first {
+    height: calc(var(--rellax-conth) + var(--navh));
+}
+
+.rellax-container img {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+
+    z-index: -4;
+}
+
+/*
+    ==========
+    = REVEAL =
+    ==========
+*/
+
+.reveal {
+    position: relative;
+}
+
+.reveal > * {
+    transition: all 1s ease;
+    opacity: 0;
+}
+
+.reveal.left > * {
+    transform: translateX(-150px) !important;
+}
+
+.reveal.right > * {
+    transform: translateX(150px) !important;
+}
+
+.reveal.active {
+}
+
+.reveal.active > * {
+    transform: none !important;
+    opacity: 1;
+}
+
+/*
+    =========
+    = CARDS =
+    =========
+*/
+
+.card {
+    display: flex;
+
+    background-color: var(--bg-color);
+    
+    width: calc(100% - 2*4em);
+    height: 300px;
+    padding: 4em;
+
+    align-items: center;
+    justify-content: center;
+}
+
+.card > #title {
+    text-align: center;
+}
+
+.card > #content {
+    font-size: 1.5em;
+    width: 50%;
+}
+
+.card #logo {
+    min-width: 300px;
+    height: auto;
+
+    margin: 0 2em;
+}
+
+.card .description {
+    width: 75%;
+    display: flex;
+    flex-direction: column;
+
+    gap: 1.5em;
+
+    justify-content: center;
+}
+
+.card .description #title {
+    font-size: 3.5em;
+}
+
+.card .description #content {
+    font-size: 1.5em;
 }

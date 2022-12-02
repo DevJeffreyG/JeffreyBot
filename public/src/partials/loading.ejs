@@ -1,0 +1,94 @@
+<style id="loading-style">
+    html {
+        background-color: #23272a;
+    }
+
+    div#loading {
+        background-color: #23272a;
+
+        display: flex;
+        position: fixed;
+        top: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 999;
+
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+
+        transition: 0.3s ease-in-out;
+    }
+
+    div#dot {
+        opacity: 0.5;
+        margin: 10px;
+        height: 20px;
+        width: 20px;
+        background-color: white;
+        border-radius: 100%;
+
+        animation: loading 0.5s ease-in-out infinite;
+    }
+
+    div#dot:nth-child(0) {
+        animation-delay: 0s;
+    }
+
+    div#dot:nth-child(1) {
+        animation-delay: 0.2s;
+    }
+
+    div#dot:nth-child(2) {
+        animation-delay: 0.3s;
+    }
+
+    @keyframes loading {
+
+        0%,
+        100% {
+            opacity: 1;
+            transform: translatey(0px);
+
+            background-color: white;
+        }
+
+        25%,
+        75% {
+            opacity: 0.75;
+            background-color: #f1ffbf;
+        }
+
+        50% {
+            opacity: 0.5;
+            transform: translatey(-20px);
+        }
+    }
+
+    .disappeared {
+        opacity: 0;
+        background-color: transparent !important;
+        z-index: -999 !important;
+    }
+</style>
+
+<div id="loading">
+    <div id="dot"></div>
+    <div id="dot"></div>
+    <div id="dot"></div>
+</div>
+
+<script>
+    const Sleep = ms => new Promise(r => setTimeout(r, ms));
+    window.onload = async () => {
+        const loadingstyle = document.querySelector("#loading-style");
+        const loading = document.querySelector("#loading")
+
+        loading.setAttribute("class", "disappeared");
+
+        await Sleep(2000)
+
+        loading.remove();
+        loadingstyle.remove();
+    }
+</script>

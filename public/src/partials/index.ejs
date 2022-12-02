@@ -1,116 +1,47 @@
-<style id="loading-style">
-    html {
-        background-color: #23272a;
-    }
+<%- include("loading") %>
+    <%- include("nav") %>
 
-    div#loading {
-        background-color: #23272a;
+        <script>
+            const head = document.querySelector("head");
+            const homeLogo = document.querySelector("#logo");
+            const loginButton = document.querySelector("#login-btt");
+            const sessionManager = document.querySelector(".session-manager");
 
-        display: flex;
-        position: fixed;
-        top: 0;
-        width: 100vw;
-        height: 100vh;
-        z-index: 999;
+            homeLogo.addEventListener("click", (target) => {
+                window.location.href = "/"
+            })
 
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
+            window.addEventListener("scroll", revealWork);
 
-        transition: 0.3s ease-in-out;
-    }
+            loginButton?.addEventListener("click", () => { window.location.replace("/login") });
 
-    div#dot {
-        opacity: 0.5;
-        margin: 10px;
-        height: 20px;
-        width: 20px;
-        background-color: white;
-        border-radius: 100%;
+            sessionManager?.addEventListener("click", () => {
+                const menu = document.querySelector("div#manager");
+                menu.classList.toggle("open");
+            })
 
-        animation: loading 0.5s ease-in-out infinite;
-    }
+            const logout = document.querySelector("#logout");
+            logout?.addEventListener("click", () => {
+                window.location.replace("/logout")
+            })
 
-    div#dot:nth-child(0) {
-        animation-delay: 0s;
-    }
+            const favicon = document.createElement("link")
+            favicon.id = "favicon";
+            favicon.rel = "icon";
+            favicon.href = "https://cdn.glitch.com/2c61ee42-4a04-4a21-b074-65934d0afc88%2FJBLogo.ico?1553650131111"
+            favicon.type = "image/x-icon"
 
-    div#dot:nth-child(1) {
-        animation-delay: 0.2s;
-    }
+            head.appendChild(favicon);
 
-    div#dot:nth-child(2) {
-        animation-delay: 0.3s;
-    }
-
-    @keyframes loading {
-
-        0%,
-        100% {
-            opacity: 1;
-            transform: translatey(0px);
-
-            background-color: white;
-        }
-
-        25%,
-        75% {
-            opacity: 0.75;
-            background-color: #f1ffbf;
-        }
-
-        50% {
-            opacity: 0.5;
-            transform: translatey(-20px);
-        }
-    }
-
-    .disappeared {
-        opacity: 0;
-        background-color: transparent !important;
-        z-index: -999 !important;
-    }
-</style>
-
-<div id="loading">
-    <div id="dot"></div>
-    <div id="dot"></div>
-    <div id="dot"></div>
-</div>
-        <%- include("nav") %>
-
-            <script>
-                const Sleep = ms => new Promise(r => setTimeout(r, ms));
-                window.onload = async () => {
-                    const loadingstyle = document.querySelector("#loading-style");
-                    const loading = document.querySelector("#loading")
-
-                    loading.setAttribute("class", "disappeared");
-
-                    await Sleep(2000)
-
-                    loading.remove();
-                    loadingstyle.remove();
+            function revealWork() {
+                var reveals = document.querySelectorAll(".reveal");
+                for (let i = 0; i < reveals.length; i++) {
+                    const revElement = reveals[i];
+                    let windowHeight = window.innerHeight;
+                    let revealTop = revElement.getBoundingClientRect().top;
+                    let revealPoint = 150;
+                    if (revealTop < windowHeight - revealPoint) revElement.classList.add("active")
+                    else if (!revElement.classList.contains("keep")) revElement.classList.remove("active");
                 }
-
-                const homeLogo = document.querySelector("#logo");
-                const loginButton = document.querySelector("#login-btt");
-                const sessionManager = document.querySelector(".session-manager");
-
-                homeLogo.addEventListener("click", (target) => {
-                    window.location.href = "/"
-                })
-
-                loginButton?.addEventListener("click", () => { window.location.replace("/login") });
-
-                sessionManager?.addEventListener("click", () => {
-                    const menu = document.querySelector("div#manager");
-                    menu.classList.toggle("open");
-                })
-
-                const logout = document.querySelector("#logout");
-                logout?.addEventListener("click", () => {
-                    window.location.replace("/logout")
-                })
-
-            </script>
+            }
+        </script>
