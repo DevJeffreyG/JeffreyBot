@@ -6,8 +6,6 @@ const Chance = require("chance");
 
 const Colores = require("../resources/colores.json");
 
-const client = require("../../index");
-
 class Embed extends Discord.EmbedBuilder {
     /**
      * En caso de que Discord.JS se ponga chistoso y cambie por decimocuarta vez la forma de hacer embeds.
@@ -81,6 +79,7 @@ class Embed extends Discord.EmbedBuilder {
     }
 
     #setup(options) {
+        const client = require("../../index");
         const { RandomCumplido } = require("./functions");
         const { type, data } = options
 
