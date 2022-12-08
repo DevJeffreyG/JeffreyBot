@@ -1,5 +1,3 @@
-const client = require("../../index");
-
 const Embed = require("./Embed");
 const Colores = require("../resources/colores.json");
 const { BaseInteraction, GuildChannel, codeBlock } = require("discord.js");
@@ -46,7 +44,6 @@ class ErrorEmbed extends Embed {
         this.defColor(Colores.rojo)
 
         if(this.interaction) this.client = this.interaction.client;
-        else this.client = client;
 
         if(!options) return this.#customError();
 
