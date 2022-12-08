@@ -217,6 +217,17 @@ const LogReasons = new Enum({
     Error: 12
 }).values
 
+/**
+ * - ActiveModules
+ * - Minimum
+ * - Functions
+ */
+const ApiUpdate = new Enum({
+    ActiveModules: 1,
+    Minimum: 2,
+    Functions: 3
+}).values
+
 module.exports = {
     Enum,
     Categories,
@@ -230,5 +241,6 @@ module.exports = {
     CardType,
     Tendencies,
     ChannelModules,
-    LogReasons
+    LogReasons,
+    ApiUpdate
 }

@@ -6,6 +6,11 @@
             const homeLogo = document.querySelector("#logo");
             const loginButton = document.querySelector("#login-btt");
             const sessionManager = document.querySelector(".session-manager");
+            const jumpUp = document.querySelector("#jumpUp");
+
+            jumpUp?.addEventListener("click", () => {
+                window.location.replace("#")
+            })
 
             homeLogo.addEventListener("click", (target) => {
                 window.location.href = "/"

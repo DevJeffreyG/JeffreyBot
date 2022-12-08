@@ -27,3 +27,47 @@
 
     border: solid 1px var(--primary);
 }
+
+.button:active {
+    background-color: var(--notso-dark);
+}
+
+.button#jumpUp {
+    position: fixed;
+    right: 1.5rem;
+    width: fit-content;
+}
+
+.simplistic-button {
+    display: flex;
+    cursor: pointer;
+
+    border: solid 1px #fff;
+    border-radius: 10px;
+
+    box-sizing: border-box;
+
+    background-color: transparent;
+    color: #fff !important;
+    
+    padding: .9em !important;
+    margin: 4px;
+
+    font-size: calc(var(--navh) / 4);
+
+    text-align: center;
+    align-items: center;
+    text-decoration: none;
+
+    width: fit-content;
+    height: fit-content;
+    max-height: 80%;
+
+    transition: .1s ease-in-out;
+}
+
+.simplistic-button:hover {
+    background-color: #fff;
+    
+    color: #1b1b1b !important;
+}

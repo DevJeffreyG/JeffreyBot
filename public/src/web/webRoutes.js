@@ -1,5 +1,6 @@
 const { PermissionsBitField } = require("discord.js");
-const path = require("path");
+const Enums = require("../../../src/utils/Enums");
+const { Guilds } = require("mongoose").models;
 
 const { Locale, Session, Dashboard } = require("../utils");
 
@@ -139,6 +140,18 @@ module.exports = (app) => {
 
         res.send(guild);
     })
+    app.get("/api/db/get-guild", async (req, res) => {
+        const guildId = req.header("guildid");
+
+        if (!guildId) return res.status(400)
+            .send({
+                error: { message: "missing guildid" },
+                status_code: 400
+        });
+
+        const query = await Guilds.getOrCreate(guildId);
+        res.send(query)
+    })
 
     /* ===== ERRORS ===== */
     //app.get("/404/", (req, res) => { prepare("./subpages/errors/404", { req, res } )});
@@ -155,6 +168,7 @@ module.exports = (app) => {
         const base = {
             texts,
             session,
+            Enums,
             req,
             res
         }

@@ -41,8 +41,10 @@
 
                         bg.style.background = `url('${icon}') center center / cover no-repeat`;
 
-                        container.appendChild(circle)
+                    } else {
+                        circle.src = `/src/svg/discord.svg`
                     }
+                    container.appendChild(circle)
                     container.appendChild(bg)
 
                     // texto
@@ -51,6 +53,8 @@
 
                     const texto = document.createElement("p");
                     texto.innerText = `${partialguild.name}`
+
+                    if(partialguild.name.length > 30) w.style.fontSize = "10px";
                     w.appendChild(texto)
                     container.appendChild(w);
                 }
@@ -112,12 +116,14 @@
                         <%- include("./src/partials/footer") %>
                             <% } else { %>
                                 <dashboard class="first">
-                                    <div id="sidebar" class="left">
-                                        <a id="title" href="/dashboard">
-                                            <h1 class="title">
-                                                < Dashboard</h1>
-                                        </a>
-                                        <div class="line"></div>
+                                    <div class="sidebar-wrap">
+                                        <div id="sidebar">
+                                            <a id="title" href="/dashboard">
+                                                <h1 class="title">
+                                                    < Dashboard</h1>
+                                            </a>
+                                            <div class="line"></div>
+                                        </div>
                                     </div>
                                     <div class="container sidebar">
                                         <a id="guildhome" href="#">
@@ -140,7 +146,9 @@
                                                     window.open(`/invite/?guildId=${g}`, '_blank').focus();
                                                 }
 
-                                                const dashboard = new Dashboard(guild)
+                                                document.title += ` — ${guild.name}`;
+
+                                                const dashboard = new Dashboard(guild, <%- JSON.stringify(Enums.ApiUpdate) %>)
                                                 .setUrl('<%-req.url%>');
                                                 dashboard.init();
                                             })
@@ -148,5 +156,4 @@
                                 </dashboard>
                                 <%}%>
 </body>
-
 </html>

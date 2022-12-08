@@ -9,30 +9,35 @@ dashboard {
     =============
 */
 
-.sidebar.left {
-    left: 0;
-}
-
 .container.sidebar {
     justify-content: flex-start;
 
     width: calc(100% - var(--sidebarw));
-    height: 100%;
+    max-height: 100%;
 
-    margin-left: calc(var(--sidebarw) + 2*5px);
+    overflow-y: scroll;
 }
 
 .container #contents {
     display: flex;
+    flex-direction: column;
 
-    justify-content: center;
+    justify-content: flex-start;
+    align-items: center;
 
     width: 90%;
-    height: 100%;
+    /* height: calc(100% - var(--navh) - 2.5rem - 1.25rem*2); */
 
-    border-radius: 30px 30px 0 0;
+    gap: .5em;
+    padding-bottom: calc(5rem);
+    
+    border-radius: 30px ;
 
     background-color: rgba(0, 0, 0, 0.3);
+}
+
+#contents h1 {
+    margin: 0;
 }
 
 /*
@@ -41,21 +46,26 @@ dashboard {
     ===========
 */
 
+dashboard .sidebar-wrap {
+    height: 100%;
+    width: var(--sidebarw);
+
+    box-sizing: border-box;
+
+    overflow-y: auto;
+    padding: .3em;
+ 
+    background-color: var(--bg-black);
+}
+
 dashboard #sidebar {
     display: flex;
-    position: fixed;
     box-sizing: border-box;
 
     flex-direction: column;
 
-    padding: 5px;
+    padding: .3em;
     
-    background-color: var(--bg-black);
-    
-    border-radius: 0 10px;
-
-    height: 100%;
-    width: var(--sidebarw);
 }
 
 dashboard #sidebar .title {
@@ -79,6 +89,7 @@ dashboard #sidebar a {
 
 dashboard #sidebar a:hover {
     background-color: var(--bg-darker);
+    cursor: pointer;
     text-decoration: none;
 }
 
@@ -86,4 +97,87 @@ dashboard #sidebar a#title:hover {
     background-color: inherit;
     cursor: pointer;
     text-decoration: underline;
+}
+
+dashboard #sidebar a.active {
+    background-color: var(--bg-darker);
+}
+
+dashboard #sidebar a.active:hover {
+    background-color: var(--bg-color);
+}
+
+/*
+    ===========
+    = CONFIGS =
+    ===========
+*/
+
+.wrap {
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+}
+
+.section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+
+    justify-content: flex-start;
+
+    border-radius: 15px;
+    gap: .5rem;
+}
+
+.section > * {
+    width: 100%;
+    height: auto;
+
+    align-items: center;
+}
+
+.section .item {
+    box-sizing: border-box;
+
+    padding: 2rem;
+    border-radius: 15px;
+
+    width: 95%;
+    background-color: var(--bg-black);
+}
+
+.bool-selector {
+    display: flex;
+    max-height: 110px;
+
+    font-size: 40px;
+}
+
+.item div, .item input {
+    margin-left: auto;
+}
+
+.number-selector {
+    display: flex;
+    max-height: 110px;
+
+    font-size: 40px;
+}
+
+.item input {
+    width: 30%;
+    padding: .4rem;
+    
+    border: solid 2px var(--dark);
+    
+    border-radius: 10px;
+    
+    transition: all 50ms ease;
+}
+
+
+.item input:focus {
+    outline: solid 2px var(--primary);
 }

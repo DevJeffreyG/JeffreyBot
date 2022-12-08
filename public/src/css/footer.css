@@ -8,6 +8,11 @@ footer {
     background-color: var(--bg-darker);
 }
 
+footer #jumpUp {
+    font-family: 'Material Symbols Rounded' !important;
+    font-size: 14px;
+}
+
 .wrapper footer {
     bottom: - var(--footerh);
 }

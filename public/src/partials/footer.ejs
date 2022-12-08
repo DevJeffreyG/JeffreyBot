@@ -57,14 +57,23 @@
                 </a>
             </div>
         </div>
+        <div>
+            <span id="jumpUp" class="simplistic-button material-symbols-rounded">
+                keyboard_double_arrow_up
+            </span>
+        </div>
     </div>
 </footer>
 
 <script>
     const classed = document.querySelectorAll(".first");
 
-    if(classed.length > 0) {
+    if (classed.length > 0) {
         const footer = document.querySelector("footer");
         footer.classList.add("first");
     }
+
+    const scrollTop = document.querySelector("#jumpUp");
+    scrollTop.onclick = () => { window.scroll({ top: 0, behavior: "smooth" }) }
 </script>
+<script src="../js/Switches.js"></script>
