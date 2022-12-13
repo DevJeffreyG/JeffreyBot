@@ -1,4 +1,13 @@
+/**
+ * Crea un Dashboard.
+ * - Puede que esto no lo entienda en el futuro, pero por algo se empieza :D
+ */
 class Dashboard {
+    /**
+     * 
+     * @param {Guild} guild Discord Guild Object
+     * @param {Enums.ApiUpdate} enums 
+     */
     constructor(guild, enums) {
         this.ApiUpdate = enums;
         this.guild = guild;
@@ -88,6 +97,43 @@ class Dashboard {
     }
 
     /**
+     * 
+     * @param {Array} array Array de los elementos en total
+     * @param {NodeListOf<ChildNode>} excludeChildren Lista de los nodos que ya existen
+     * @param {Boolean} hidden
+     */
+    #createList(array, excludeChildren, hidden = true, excludeEveryone = true) {
+        let list = document.createElement("ul")
+        list.classList.add("item-list");
+        if (!hidden) list.classList.add("active")
+
+        let exists = array;
+        excluding:
+        for (const child of Array.from(excludeChildren)) {
+            if(!child.dataset.id) continue excluding;
+            exists = exists.filter(x => x.id != child.dataset.id)
+        }
+
+        if (excludeEveryone)
+            exists = exists.filter(x => x.id != this.guild.id)
+
+        // Discord Object
+        for (const item of exists) {
+            let gen = this.#itemOfList(item.id);
+            let element = document.createElement("li");
+
+            // solo dejar el color de texto
+            gen.style.cssText = `color: ${gen.style.color};`;
+
+            element.append(gen);
+
+            list.appendChild(element);
+        }
+
+        return list
+    }
+
+    /**
      * Crea la base de un selector
      * @param {HTMLElement} node 
      * @param {String} title 
@@ -103,7 +149,7 @@ class Dashboard {
     /**
      * Crea un Item con un switch
      * @param {String} parentId
-     * @returns {HTMLElement}
+     * @returns {HTMLElement} Parent
      */
     #createBoolSelector(parentId, { title, id }) {
         const parent = this.#createDivItem(parentId);
@@ -119,7 +165,7 @@ class Dashboard {
     /**
      * Crea un Item para número
      * @param {String} parentId 
-     * @returns {HTMLElement}
+     * @returns {HTMLElement} Parent
      */
     #createNumberSelector(parentId, { title, placeholder, id }, { min, max }) {
         const parent = this.#createDivItem(parentId);
@@ -143,6 +189,27 @@ class Dashboard {
     }
 
     /**
+     * Crea un Item para seleccionar roles del Guild
+     * @param {String} parentId 
+     * @returns {HTMLElement} Parent
+     */
+    #createRoleSelector(parentId, { title, id, max } ) {
+        const parent = this.#createDivItem(parentId);
+        parent.classList.add("role-selector");
+
+        const div = document.createElement("div")
+        div.classList.add("role-drop")
+        div.id = id
+
+        parent.append(title)
+        parent.appendChild(div)
+
+        if(max) div.dataset.max = max;
+
+        return parent
+    }
+
+    /**
      * Crea un link y se agrega al this.sidebar
      * @param {String} id La id con la que se creará el link
      * @param {String} title El texto que saldrá en el sidebar
@@ -155,53 +222,115 @@ class Dashboard {
         sidebar.appendChild(module);
     }
 
+    #createSidebarCopy() {
+
+        let wrapper = document.querySelector(".sidebar-wrap")
+
+        /**
+         * <div id="copyright">
+            <label id="copyright"></label>
+        </div>
+         */
+        let wrap = document.createElement("div");
+        wrap.id = "copyright";
+        let label = document.createElement("label")
+        label.id = "copyright"
+
+        wrap.appendChild(label)
+
+        wrapper.appendChild(wrap);
+    }
+
     #checkChanges() {
         const announcer = document.querySelector(".announcer");
         if (this.changes.size > 0) announcer.classList.add("active");
         else announcer.classList.remove("active")
     }
 
+    /**
+     * Crea un item para una lista de tipo Role o Channels
+     * @param {String} id 
+     * @returns {HTMLElement}
+     */
+    #itemOfList(id) {
+        let d = document.createElement("div");
+
+        let f = x => x.id === id;
+        let guildItem = this.guild.roles.find(f) || this.guild.channels.find(f)
+
+        d.dataset.id = id;
+        d.innerHTML = guildItem.name;
+
+        if (guildItem.color) {
+            d.style.borderColor = `#${guildItem.color.toString(16)}`
+            d.style.backgroundColor = `#${guildItem.color.toString(16)}3d` // opactity 20%
+            d.style.color = `#${guildItem.color.toString(16)}`;
+        }
+
+        return d;
+    }
+
     #sync() {
         const active = this.doc.settings.active_modules
 
-        findAndSync("functions-suggestions", active)
-        findAndSync("functions-tickets", active)
-        findAndSync("functions-logs", active)
-        findAndSync("functions-birthdays", active)
-        findAndSync("functions-darkshop", active)
-        findAndSync("functions-rep_to_currency", active)
-        findAndSync("functions-currency_to_exp", active)
+        this.#findAndSync("functions-suggestions", active)
+        this.#findAndSync("functions-tickets", active)
+        this.#findAndSync("functions-logs", active)
+        this.#findAndSync("functions-birthdays", active)
+        this.#findAndSync("functions-darkshop", active)
+        this.#findAndSync("functions-rep_to_currency", active)
+        this.#findAndSync("functions-currency_to_exp", active)
 
-        findAndSync("logs-guild-messageDelete", active)
-        findAndSync("logs-guild-messageUpdate", active)
+        this.#findAndSync("logs-guild-messageDelete", active)
+        this.#findAndSync("logs-guild-messageUpdate", active)
 
-        findAndSync("logs-moderation-warns", active)
-        findAndSync("logs-moderation-softwarns", active)
-        findAndSync("logs-moderation-pardons", active)
-        findAndSync("logs-moderation-bans", active)
-        findAndSync("logs-moderation-timeouts", active)
-        findAndSync("logs-moderation-clears", active)
-        findAndSync("logs-moderation-automod", active)
+        this.#findAndSync("logs-moderation-warns", active)
+        this.#findAndSync("logs-moderation-softwarns", active)
+        this.#findAndSync("logs-moderation-pardons", active)
+        this.#findAndSync("logs-moderation-bans", active)
+        this.#findAndSync("logs-moderation-timeouts", active)
+        this.#findAndSync("logs-moderation-clears", active)
+        this.#findAndSync("logs-moderation-automod", active)
 
-        findAndSync("logs-staff-tickets", active)
-        findAndSync("logs-staff-settings", active)
-        findAndSync("logs-staff-errors", active)
+        this.#findAndSync("logs-staff-tickets", active)
+        this.#findAndSync("logs-staff-settings", active)
+        this.#findAndSync("logs-staff-errors", active)
 
-        findAndSync("automoderation-remove_links", active)
+        this.#findAndSync("automoderation-remove_links", active)
 
         const minimum = this.doc.settings.minimum;
-        findAndSync("blackjack_bet", minimum);
-        findAndSync("darkshop_level", minimum);
+        this.#findAndSync("blackjack_bet", minimum);
+        this.#findAndSync("darkshop_level", minimum);
 
         const functions = this.doc.settings.functions;
-        findAndSync("adjust_shop", functions);
-        findAndSync("adjust_darkshop", functions);
-        
-        findAndSync("baseprice_darkshop", functions);
-        
-        findAndSync("currency_per_rep", functions);
+        this.#findAndSync("adjust_shop", functions);
+        this.#findAndSync("adjust_darkshop", functions);
+
+        this.#findAndSync("baseprice_darkshop", functions);
+        this.#findAndSync("currency_per_rep", functions);
+
+        this.#findAndSync("levels_deleteOldRole", functions);
+        this.#findAndSync("save_roles_onleft", functions);
 
 
+        const roles = this.doc.roles;
+        this.#findAndSync("admins", roles)
+        this.#findAndSync("staffs", roles)
+
+        this.#findAndSync("users", roles)
+        this.#findAndSync("bots", roles)
+
+        this.#findAndSync("birthday", roles)
+        this.#findAndSync("darkshop_news", roles)
+
+    }
+
+    /**
+         * 
+         * @param {String} id 
+         * @param {*} root 
+         */
+    #findAndSync(id, root) {
         /**
          * 
          * @param {*} id 
@@ -211,39 +340,64 @@ class Dashboard {
             return document.querySelector(`#${id}`);
         }
 
-        /**
-         * 
-         * @param {String} id 
-         * @param {*} root 
-         */
-        function findAndSync(id, root) {
-            let el = findWithId(id);
-            if (!el) return;
+        let el = findWithId(id);
+        if (!el) return;
 
-            let path = id.replace(/-/g, ".");
-            let active = root;
-            for (const p of path.split(".")) {
-                active = active[p]
-            }
-
-            switch (typeof active) {
-                case "boolean": // Switches
-                    if (active) el.classList.add("active");
-                    else el.classList.remove("active");
-                    break;
-
-                case "number":
-                    el.value = String(active);
-                    el.dataset.db = String(active);
-                    break;
-
-                default:
-                    console.log(typeof active)
-            }
-
-            return el;
-
+        let path = id.replace(/-/g, ".");
+        let active = root;
+        for (const p of path.split(".")) {
+            active = active[p]
         }
+
+        switch (typeof active) {
+            case "boolean": // Switches
+                if (active) el.classList.add("active");
+                else el.classList.remove("active");
+                break;
+
+            case "number":
+                el.value = String(active);
+                el.dataset.db = String(active);
+                break;
+
+            case "object":
+                if (Array.isArray(active)) {
+                    el.innerHTML = "";
+                    active.forEach(id => {
+                        let d = this.#itemOfList(id)
+                        el.appendChild(d)
+                    })
+
+                    const synced = el.childNodes;
+
+                    let list = this.#createList(el.className.includes("role") ? this.guild.roles : this.guild.channels, synced);
+                    el.append(list)
+                } else {
+
+                }
+                break;
+
+            case "string":
+                if(el.classList.contains("role-drop") && active.length > 0) {
+                    el.innerHTML = "";
+                    let d = this.#itemOfList(active)
+                    el.appendChild(d)
+
+                    let list = this.#createList(el.className.includes("role") ? this.guild.roles : this.guild.channels, el.childNodes);
+                    el.append(list)
+                }
+                break;
+
+            default:
+                if(el.classList.contains("role-drop")) {
+                    el.innerHTML = "";
+                    let list = this.#createList(el.className.includes("role") ? this.guild.roles : this.guild.channels, []);
+                    el.append(list)
+                }
+        }
+
+        return el;
+
     }
 
     async #activeModulesHandler() {
@@ -380,15 +534,32 @@ class Dashboard {
 
         container.appendChild(contents);
 
-        let main = this.#createDivSection("minimum");
+        // GENERALES
+        let main = this.#createDivSection("main");
         main.classList.add("wrap")
+        main.append("Generales")
+
+        let saveRoles = this.#createBoolSelector("lvloldr", {
+            title: "Guardar roles al salir del server",
+            id: "save_roles_onleft"
+        });
+
+        let lvlsOldRole = this.#createBoolSelector("lvloldr", {
+            title: "Eliminar roles viejos por nivel",
+            id: "levels_deleteOldRole"
+        });
+
+        // ECONOMIA
+        let econ = this.#createDivSection("econ");
+        econ.classList.add("wrap")
+        econ.append("Tiendas")
 
         let shopadjust = this.#createBoolSelector("adjshop", {
             title: "Ajustar precios de la tienda",
             id: "adjust_shop"
         });
 
-        let dsadjust = this.#createBoolSelector("adjshop", {
+        let dsadjust = this.#createBoolSelector("adjds", {
             title: "Ajustar precios de la DarkShop",
             id: "adjust_darkshop"
         });
@@ -405,13 +576,98 @@ class Dashboard {
             id: "currency_per_rep"
         }, { min: 1 });
 
-        this.#appendChilds(main, [shopadjust, dsadjust, basedarkshop, currperrep]);
+        this.#appendChilds(main, [saveRoles, lvlsOldRole]);
+        this.#appendChilds(econ, [shopadjust, dsadjust, basedarkshop, currperrep]);
+
+        this.#appendChilds(contents, [main, econ])
+        this.#sync();
+    }
+
+    async #rolesHandler() {
+        const container = this.container;
+        const contents = document.createElement("div")
+        contents.id = "contents";
+
+        let title = document.createElement("h1");
+        title.innerText = "Roles";
+        contents.appendChild(title)
+
+        container.appendChild(contents);
+
+        let staff = this.#createDivSection("staff");
+        staff.classList.add("wrap")
+        staff.append("De STAFF")
+
+        let admins = this.#createRoleSelector("radmins", {
+            title: "Roles de Admins",
+            id: "admins"
+        });
+
+        let staffs = this.#createRoleSelector("rstaffs", {
+            title: "Roles de Staffs",
+            id: "staffs"
+        });
+
+        this.#appendChilds(staff, [admins, staffs]);
+
+        let generals = this.#createDivSection("generals");
+        generals.classList.add("wrap")
+        generals.append("Generales")
+
+        let users = this.#createRoleSelector("radmins", {
+            title: "Roles de usuario",
+            id: "users"
+        });
+
+        let bots = this.#createRoleSelector("rstaffs", {
+            title: "Roles de Bots",
+            id: "bots"
+        });
+
+        let bd = this.#createRoleSelector("rbd", {
+            title: "Role de Cumpleaños",
+            id: "birthday",
+            max: 1
+        });
+
+        let dsRole = this.#createRoleSelector("rbd", {
+            title: "Role de eventos DarkShop",
+            id: "darkshop_news",
+            max: 1
+        });
+
+        this.#appendChilds(generals, [users, bots, bd, dsRole]);
+
+        this.#appendChilds(contents, [staff, generals])
+        this.#sync();
+    }
+
+    async #levelRolesHandler() {
+        const container = this.container;
+        const contents = document.createElement("div")
+        contents.id = "contents";
+
+        let title = document.createElement("h1");
+        title.innerText = "Roles por Niveles";
+        contents.appendChild(title)
+
+        container.appendChild(contents);
+
+        let main = this.#createDivSection("main");
+        main.classList.add("wrap")
+
+        //this.#appendChilds(main, []);
 
         this.#appendChilds(contents, [main])
         this.#sync();
     }
 
     async #handleQueries() {
+        // Si se clickea fuera, cerrar los dropdowns abiertos (.active)
+        var dropdowns = document.createElement('script');
+        dropdowns.src = '/src/js/DropDowns.js';
+        document.head.appendChild(dropdowns);
+
         await this.#getDocument();
         this.container = document.querySelector("div.container");
         let type;
@@ -433,14 +689,29 @@ class Dashboard {
                 type = this.ApiUpdate.Functions;
                 break;
 
-            default:
-                return
+            case "roles":
+                await this.#rolesHandler();
+                type = this.ApiUpdate.Roles;
+                break;
+
+            case "levels":
+                await this.#levelRolesHandler();
+                type = this.ApiUpdate.LevelRoles;
+                break;
         }
 
+        // Cambiar el color del boton del sidebar seleccionado
         let sidebarItems = Array.from(this.sidebar.querySelectorAll("a"));
-        const subpageSelected = sidebarItems.find(x => x.href.includes(this.query.page));
+        const subpageSelected = sidebarItems.find(x => x.href.includes(this.query?.page));
         subpageSelected.classList.add("active");
 
+        this.#switches();
+        this.#inputs();
+        this.#roleDrops();
+        this.#buttons(type);
+    }
+
+    #switches() {
         var switches = document.querySelectorAll(".switch");
         for (const Switch of switches) {
             Switch.addEventListener("click", () => {
@@ -456,7 +727,9 @@ class Dashboard {
                 this.#checkChanges()
             })
         }
+    }
 
+    #inputs() {
         var inputs = document.querySelectorAll("input");
         for (const input of inputs) {
             this.initial.set(input.id, input.dataset.db ?? input.value);
@@ -471,7 +744,68 @@ class Dashboard {
                 this.#checkChanges()
             })
         }
+    }
 
+    #roleDrops() {
+        var roleDrops = document.querySelectorAll(".role-drop");
+
+        for (const drop of roleDrops) {
+            function translate(nodes){
+                let translated = Array.from(nodes)
+                .filter(x => !x.classList.contains("item-list")) // eliminar la lista de todos los roles
+                .flatMap(x => x.dataset.id) // sacar solo las ids
+
+                return translated
+            }
+            this.initial.set(drop.id, translate(drop.childNodes));
+
+            drop.addEventListener("click", (click) => {
+                function arrayEquals(a, b) {
+                    return Array.isArray(a) &&
+                        Array.isArray(b) &&
+                        a.length === b.length &&
+                        a.every((val, index) => val === b[index]);
+                }
+
+                let clicked = click.target;
+
+                if (clicked.className.length < 1) {
+                    clicked = clicked.querySelector("div") ?? clicked;
+
+                    if (clicked.closest(".item-list")) { // Un item de la lista a agregar
+                        let gen = this.#itemOfList(clicked.dataset.id);
+                        drop.appendChild(gen)
+
+                        clicked.closest("li").remove();
+                    } else if (clicked.closest(".role-drop")) { // Un item que ya está agregado a la lista de roles
+                        clicked.remove()
+                        
+                        let actualList = drop.querySelector(".item-list");
+                        let newList = this.#createList(this.guild.roles, drop.childNodes)
+
+                        drop.replaceChild(newList, actualList)
+                    }
+
+                    const id = drop.id;                    
+
+                    this.changes.set(id, translate(drop.childNodes))
+                    
+                    if (arrayEquals(this.initial.get(id), this.changes.get(id))) this.changes.delete(id);
+
+                    this.#checkChanges()
+                    return;
+                }
+
+                let list = drop.querySelector("ul")
+                list.classList.toggle("active");
+            })
+        }
+    }
+
+    /**
+     * @param {Number} type El tipo de query para usar save()
+     */
+    #buttons(type) {
         const cancelButton = document.querySelector("#cancelChanges");
         cancelButton.addEventListener("click", async () => {
             await this.#getDocument();
@@ -558,14 +892,10 @@ class Dashboard {
 
         this.#addSeparator(this.sidebar);
 
-        const admins = this.#createSidebarOption("admins", "Roles de Adminstración")
-        const staffs = this.#createSidebarOption("staffs", "Roles de STAFF")
-        const bots = this.#createSidebarOption("bots", "Roles de Bots")
-        const levels = this.#createSidebarOption("bots", "Roles de niveles")
-        
-        const users = this.#createSidebarOption("users", "Roles de Usuarios")
+        const roles = this.#createSidebarOption("roles", "Roles")
+        const levels = this.#createSidebarOption("levels", "Roles de niveles")
 
-        this.#addSeparator(this.sidebar);   
+        this.#addSeparator(this.sidebar);
 
         const logs = this.#createSidebarOption("logs", "Canales de logs")
         const rewards = this.#createSidebarOption("chat_rewards", "Canales de recompensas")
@@ -574,14 +904,27 @@ class Dashboard {
         const general = this.#createSidebarOption("general", "Canales de generales")
         const dschannels = this.#createSidebarOption("darkshop", "Canales de DarkShop")
 
+        this.#createSidebarCopy()
+
         this.#handleQueries();
     }
 
     async save(type) {
+        // Check Permissions
+        let qperms = await fetch("/api/guild/has-permissions", {
+            headers: {
+                "guildid": this.guild.id
+            }
+        })
+        
+        let perms = await qperms.json();
+        if(!perms) return this.logout();
+
         if (!type) return console.error("🔴 NO TYPE SPECIFIED");
 
         const objChanges = Object.fromEntries(this.changes);
-        const changes = JSON.stringify(objChanges);
+        var changes = JSON.stringify(objChanges);
+
         let valid = true;
         let problems = new Map();
 
@@ -597,6 +940,7 @@ class Dashboard {
             const value = objChanges[prop]; // El valor que sería guardado en la base de datos
 
             // VALIDATION
+            inputV:
             switch (inputElement.type) {
                 case "number":
                     // revisar que sea un numero y que cumpla con las condiciones de minimo y maximo
@@ -608,10 +952,24 @@ class Dashboard {
                         valid = false;
                         problems.set(inputElement.parentElement, value);
                     }
-                    break;
+                    break inputV;
             }
 
-            if(!valid) break validation;
+            if(inputElement.className.includes("drop")) {
+                let childs = Array.from(inputElement.childNodes).filter(x => x.nodeName === "DIV");
+
+                if(childs.length > Number(inputElement.dataset.max)) {
+                    problems.set(inputElement.parentElement, value);
+                    valid = false;
+                }
+
+                if(inputElement.dataset.max === "1") { // Convertir el cambio en string
+                    this.changes.set(inputElement.id, childs.flatMap(x => x.dataset.id)[0]);
+                    changes = JSON.stringify(Object.fromEntries(this.changes));
+                }
+            }
+
+            if (!valid) break validation;
 
             // Actualizar los datasets para evitar que el announcer se active incorrectamente
             inputElement.dataset.db = String(value);
@@ -662,10 +1020,15 @@ class Dashboard {
         let res = await q.json();
 
         if (res) {
+            this.initial.clear();
             this.changes.clear();
             this.#checkChanges();
         }
 
         return res
+    }
+
+    logout(){
+        return window.location.replace("/logout");
     }
 }

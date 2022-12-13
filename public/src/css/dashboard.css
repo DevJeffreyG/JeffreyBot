@@ -47,12 +47,15 @@ dashboard {
 */
 
 dashboard .sidebar-wrap {
-    height: 100%;
+    position: relative;
+    height: calc(100%);
     width: var(--sidebarw);
 
     box-sizing: border-box;
 
     overflow-y: auto;
+    overflow-x: hidden;
+
     padding: .3em;
  
     background-color: var(--bg-black);
@@ -65,7 +68,20 @@ dashboard #sidebar {
     flex-direction: column;
 
     padding: .3em;
-    
+    margin-bottom: 50px;
+}
+
+dashboard #copyright {
+    position: sticky;
+    background-color: inherit;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: inherit;
+    height: 50px;
+
+    bottom: -.3em;
+    left: -.3em;
 }
 
 dashboard #sidebar .title {
@@ -148,6 +164,16 @@ dashboard #sidebar a.active:hover {
     background-color: var(--bg-black);
 }
 
+.item > div, .item > input {
+    margin-left: auto;
+}
+
+/*
+=========
+= BOOLS =
+=========
+*/
+
 .bool-selector {
     display: flex;
     max-height: 110px;
@@ -155,9 +181,11 @@ dashboard #sidebar a.active:hover {
     font-size: 40px;
 }
 
-.item div, .item input {
-    margin-left: auto;
-}
+/*
+===========
+= NUMBERS =
+===========
+*/
 
 .number-selector {
     display: flex;
@@ -180,4 +208,111 @@ dashboard #sidebar a.active:hover {
 
 .item input:focus {
     outline: solid 2px var(--primary);
+}
+
+/*
+=========
+= ROLES =
+=========
+*/
+
+.role-selector {
+    display: flex;
+    min-height: 110px;
+
+    font-size: 40px;
+}
+
+.role-drop {
+    position: relative;
+    
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: .05em;
+
+    cursor: pointer;
+
+    min-height: 1.1em;
+    width: 45%;
+    padding: .2em;
+
+    box-sizing: border-box;
+
+    background-color: rgba(51, 51, 51, 0.5);
+    border-radius: 10px;
+}
+
+.role-drop > div {
+    height: 80%;
+    font-size: .45em;
+    width: fit-content;
+
+    padding: .1em .5em;
+    border-radius: 10px;
+    
+    background-color: var(--semitrans);
+    border: solid 1px transparent;
+}
+
+.role-drop > div::before {
+    content: "@";
+    margin-right: .1em;
+}
+
+/*
+===========================
+= LISTAS (ROLES, CANALES) =
+===========================
+*/
+
+.item-list.active {
+    transform: translateY(0px);
+    visibility: visible;
+    opacity: 1;
+    filter: none;
+}
+
+.item-list {
+    filter: blur(2px);
+    visibility: hidden;
+    opacity: 0;
+    
+    position: absolute;
+    z-index: 10;
+    display: flex;
+
+    top: 100%;
+    transform: translateY(10px);
+    
+    flex-direction: column;
+    align-items: center;
+
+    background-color: var(--bg-black);
+    height: 400px;
+    width: 100%;
+
+    overflow-y: auto;
+
+    border-radius: 0 0 10px 10px;
+    transition: all 100ms ease;
+}
+
+.item-list li {
+    font-size: .5em;
+    
+    display: flex;
+    flex-direction: row;
+    
+    height: auto;
+    width: 90%;
+
+    padding: .5em;
+    border-radius: 10px;
+
+    transition: background 50ms ease;
+}
+
+.item-list li:hover {
+    background-color: var(--semitrans);
 }

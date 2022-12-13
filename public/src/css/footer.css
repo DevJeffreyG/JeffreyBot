@@ -47,10 +47,6 @@ footer div.left {
     justify-content: space-between;
 }
 
-footer div.left #copyright {
-    color: var(--copy-color);
-}
-
 /* DERECHA */
 
 footer div.right,

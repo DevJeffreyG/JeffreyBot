@@ -33,6 +33,10 @@ class Commands {
     async #load(client, Ids) {
         console.log("============ CARGANDO COMANDOS ============");
         const commandsFolder = fs.readdirSync(this.path).filter(file => !file.endsWith(".txt"));
+
+        Ids.forEach(guildId => {
+            this.routes.push(Routes.applicationGuildCommands(process.env.CLIENT_ID, guildId));
+        })
       
         for (const folder of commandsFolder) {
           const commandFiles = fs.readdirSync(`${this.path}/${folder}`).filter(file => file.endsWith(".js"));
@@ -40,13 +44,18 @@ class Commands {
           for(const file of commandFiles) {
             const command = require(`${this.path}/${folder}/${file}`);
 
+            client.slash.set(command.data.name, command);
+            console.log("▶️ Comando", command.data.name, "recibido, agregado a la lista")
+            this.commands.push(command.data.toJSON())
+
+            /* # LOS COMANDOS DE DEVELOPER ESTARÁN EN LOS GLOBAL COMMANDS TAMBIÉN
+            
             if(command.dev && Ids.lenght === 0) continue;
 
             if(command.dev && process.env.DEV != "TRUE"){
                 Ids.forEach(guildId => {
                     console.log("GuildCommand for", guildId + "!:", command.data.name);
                     this.guildcommands = [];
-                    this.routes.push(Routes.applicationGuildCommands(process.env.CLIENT_ID, guildId));
 
                     client.slash.set(command.data.name, command)
                     this.guildcommands.push(command.data.toJSON())
@@ -55,7 +64,7 @@ class Commands {
                 client.slash.set(command.data.name, command);
                 console.log("▶️ Comando", command.data.name, "recibido, agregado a la lista")
                 this.commands.push(command.data.toJSON())
-            }
+            } */
 
           }
         }
@@ -111,8 +120,7 @@ class Commands {
                 console.log("🔄 Eliminando Dev Guilds 🔄")
 
                 if(!this.routes.find(x => x === data.route)){
-                    console.log(data.route)
-                    GlobalDatas.removeGuildCommands(data.route);
+                    await GlobalDatas.removeGuildCommand(data.route);
                     await rest.put(data.route, { body: [] })
                 }
             }
@@ -122,7 +130,7 @@ class Commands {
                 await rest.put(data.route, { body: [] })
 
                 // eliminar globaldata
-                GlobalDatas.removeGuildCommands(data.route);
+                await GlobalDatas.removeGuildCommand(data.route);
             }
         })
 

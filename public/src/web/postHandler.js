@@ -35,6 +35,10 @@ module.exports = (app) => {
                 case ApiUpdate.Functions:
                     query = "settings.functions";
                     break;
+
+                case ApiUpdate.Roles:
+                    query = "roles";
+                    break;
             }
 
             query += `.${prop}`;

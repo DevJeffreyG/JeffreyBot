@@ -40,7 +40,7 @@ module.exports = (app) => {
     app.get("/creator/twitter", (req, res) => { res.redirect("https://www.twitter.com/fakeJeffreyG") });
 
     app.get("/support/github", (req, res) => { res.redirect("https://github.com/DevJeffreyG/JeffreyBot") });
-    app.get("/support/discord", (req, res) => { res.redirect("https://discord.gg/wk8aP4n") });
+    app.get("/support/discord", (req, res) => { res.redirect(`https://discord.gg/${process.env.SUPPORT_INVITE}`) });
 
     /* ===== GENERAL LINKS ===== */
     app.get("/app-health", (req, res) => { return res.sendStatus(200) });
@@ -151,6 +151,28 @@ module.exports = (app) => {
 
         const query = await Guilds.getOrCreate(guildId);
         res.send(query)
+    })
+    app.get("/api/guild/has-permissions", async(req, res) => {
+        const guildId = req.header("guildid");
+
+        const query = await fetch(`${API_ENDPOINT}/users/@me/guilds`, {
+            headers: {
+                authorization: `${session.token_type} ${session.token}`
+            }
+        });
+
+        const json = await query.json();
+
+        if(!json) res.send(true); // No se pudo fetchear
+
+        const result = json?.filter(x => {
+            const permissions = new PermissionsBitField(x.permissions)
+            const checkAgainst = new PermissionsBitField(PermissionsBitField.Flags.ManageGuild)
+
+            if (permissions.has(checkAgainst)) return x;
+        })
+
+        res.send(JSON.stringify(result.find(x => x.id === guildId) ?? false));
     })
 
     /* ===== ERRORS ===== */

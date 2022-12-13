@@ -22,7 +22,9 @@
 
             sessionManager?.addEventListener("click", () => {
                 const menu = document.querySelector("div#manager");
-                menu.classList.toggle("open");
+                const arrow = document.querySelector("span#arrow");
+                arrow.innerText === "arrow_drop_down" ? arrow.innerText = "arrow_drop_up" : arrow.innerText = "arrow_drop_down";
+                menu.classList.toggle("active");
             })
 
             const logout = document.querySelector("#logout");
@@ -36,7 +38,13 @@
             favicon.href = "https://cdn.glitch.com/2c61ee42-4a04-4a21-b074-65934d0afc88%2FJBLogo.ico?1553650131111"
             favicon.type = "image/x-icon"
 
+            const viewport = document.createElement("meta")
+            viewport.name = "viewport"
+            viewport.content = "width=1024, initial-scale=1.0"
+            //viewport.content = "width=device-width, initial-scale=1.0"
+
             head.appendChild(favicon);
+            head.appendChild(viewport);
 
             function revealWork() {
                 var reveals = document.querySelectorAll(".reveal");

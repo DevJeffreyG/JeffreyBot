@@ -131,14 +131,16 @@ const GuildSchema = new Schema({
             adjust_shop: { type: Boolean, default: true },
             adjust_darkshop: { type: Boolean, default: true },
             baseprice_darkshop: { type: Number, default: 200, integer: true },
-            currency_per_rep: { type: Number, default: 500, integer: true }
+            currency_per_rep: { type: Number, default: 500, integer: true },
+            levels_deleteOldRole: { type: Boolean, default: false },
+            save_roles_onleft: { type: Boolean, default: true }
         }
     },
     roles: { // id de roles
-        admins: { type: Array },
-        staffs: { type: Array },
-        users: { type: Array },
-        bots: { type: Array },
+        admins: { type: Array, default: [] },
+        staffs: { type: Array, default: [] },
+        users: { type: Array, default: [] },
+        bots: { type: Array, default: [] },
         levels: [
             {
                 level: { type: Number, required: true },

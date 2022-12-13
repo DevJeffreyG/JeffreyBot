@@ -3,7 +3,7 @@
     <div class="left">
         <div id="brand">
             <h2 class="no-margin">Jeffrey Bot</h2 class="no-margin">
-            <p>El bot de Discord que lo tiene todo desde 2018</p>
+            <p>Tu bot de Discord multifuncional de confianza</p>
         </div>
         <div id="copyright">
             <label id="copyright"></label>
@@ -28,13 +28,13 @@
                 <li><a href="/creator/projects">Otros proyectos</a></li>
             </ul>
             <div id="social">
-                <a href="/creator/discord">
+                <a href="/creator/discord" target="_blank">
                     <%- include("../svg/discord.svg") %>
                 </a>
-                <a href="/creator/youtube">
+                <a href="/creator/youtube" target="_blank">
                     <%- include("../svg/youtube.svg") %>
                 </a>
-                <a href="/creator/twitter">
+                <a href="/creator/twitter" target="_blank">
                     <%- include("../svg/twitter.svg") %>
                 </a>
             </div>
@@ -42,17 +42,17 @@
         <div id="jeffreybot">
             <p class="title">Jeffrey Bot</p>
             <ul>
-                <li><a href="/status">Status</a></li>
+                <li><a href="/status" target="_blank">Status</a></li>
                 <li><a href="/#about">Acerca de Jeffrey Bot</a></li>
-                <li><a href="/tos">Condiciones de servicio</a></li>
-                <li><a href="/privacy">Política de privacidad</a></li>
-                <li><a href="/community">Aportes de la comunidad</a></li>
+                <li><a href="/tos" target="_blank">Condiciones de servicio</a></li>
+                <li><a href="/privacy" target="_blank">Política de privacidad</a></li>
+                <li><a href="/community" target="_blank">Aportes de la comunidad</a></li>
             </ul>
             <div id="social">
-                <a href="/support/discord">
+                <!-- <a href="/support/discord">
                     <%- include("../svg/discord.svg") %>
-                </a>
-                <a href="/support/github">
+                </a> -->
+                <a href="/support/github" target="_blank">
                     <%- include("../svg/github.svg") %>
                 </a>
             </div>
@@ -76,4 +76,6 @@
     const scrollTop = document.querySelector("#jumpUp");
     scrollTop.onclick = () => { window.scroll({ top: 0, behavior: "smooth" }) }
 </script>
+
 <script src="../js/Switches.js"></script>
+<script src="../js/DropDowns.js"></script>

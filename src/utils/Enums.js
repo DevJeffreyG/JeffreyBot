@@ -221,11 +221,15 @@ const LogReasons = new Enum({
  * - ActiveModules
  * - Minimum
  * - Functions
+ * - Roles
+ * - LevelRoles
  */
 const ApiUpdate = new Enum({
     ActiveModules: 1,
     Minimum: 2,
-    Functions: 3
+    Functions: 3,
+    Roles: 4,
+    LevelRoles: 5
 }).values
 
 module.exports = {

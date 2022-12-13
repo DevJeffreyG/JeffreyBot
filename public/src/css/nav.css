@@ -103,7 +103,7 @@ div#manager {
     z-index: -1;
 }
 
-div#manager.open {
+div#manager.active {
     opacity: 1;
     filter: none;
     visibility: visible;
