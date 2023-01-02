@@ -1,10 +1,13 @@
-const { PermissionsBitField } = require("discord.js");
+const { PermissionsBitField, codeBlock } = require("discord.js");
 const Enums = require("../../../src/utils/Enums");
+const Embed = require("../../../src/utils/Embed");
 const { Guilds } = require("mongoose").models;
 
 const { Locale, Session, Dashboard } = require("../utils");
 
 const Express = require("express")();
+const ms = require("ms");
+const { Colores } = require("../../../src/resources");
 
 const API_ENDPOINT = "https://discord.com/api/v10";
 const REDIRECT_URI = "http://localhost:10000/api/discord-callback";
@@ -50,6 +53,7 @@ module.exports = (app) => {
     app.get("/dashboard/*/", (req, res) => { prepare("./dashboard", { req, res }) });
     app.get("/logout", (req, res) => {
         res.clearCookie("user");
+
         app.Session = new Session();
         session = app.Session;
         res.redirect("/")
@@ -131,14 +135,57 @@ module.exports = (app) => {
             }
         })
 
+        const query_channels = await fetch(`${API_ENDPOINT}/guilds/${guildId}/channels`, {
+            headers: {
+                authorization: `Bot ${process.env.TOKEN}`
+            }
+        });
+
         const guild = await query.json();
+        const channels = await query_channels.json();
+
         if (guild.code === 50001) return res.status(400)
             .send({
                 error: { message: "client not in guild", response: guild },
                 status_code: 400
             })
 
-        res.send(guild);
+        req.session.cookie.maxAge = ms("5m");
+
+        if(!Array.isArray(req.session.fetchedGuilds)) req.session.fetchedGuilds = [];
+        req.session.fetchedGuilds.push({guild, channels});
+
+        res.send({guild, channels});
+    })
+    app.get("/api/sendlog", async (req, res) => {
+        let channelId = req.header("channelid");
+        let changes = req.header("changes");
+        let page = req.header("page");
+        let executor = req.cookies.user;
+
+        let embed = new Embed()
+        .defAuthor({ text: `Cambios en la configuración`, title: true })
+        .defDesc(`**—** **${executor.username}#${executor.discriminator}** hizo cambios en la configuración del bot.
+**—** En la Dashboard.
+**—** Lo que se guardó: ${codeBlock("json", JSON.parse(changes))}
+**—** En qué sección se hizo: \`${page}\`.`)
+        .defColor(Colores.verde)
+        .defFooter({ timestamp: true })
+        .raw();
+
+        let sendQuery = await fetch(`${API_ENDPOINT}/channels/${channelId}/messages`, {
+            body: JSON.stringify({
+                embeds: [embed]
+            }),
+            headers: {
+                'Content-Type': "application/json",
+                authorization: `Bot ${process.env.TOKEN}`
+            },
+            method: "POST"
+        })
+
+        let response = await sendQuery.json();
+        res.send(response)
     })
     app.get("/api/db/get-guild", async (req, res) => {
         const guildId = req.header("guildid");

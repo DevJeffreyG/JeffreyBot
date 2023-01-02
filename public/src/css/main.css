@@ -64,7 +64,13 @@ ul {
 }
 
 a {
+    user-select: none;
     text-decoration: none;
+}
+
+img {
+    user-select: none;
+    pointer-events: none;
 }
 
 a:hover {
@@ -142,8 +148,16 @@ body {
 
     height: 100% !important;
 }
+.border-up {
+    border-radius: 15px 15px 0 0 !important;
+}
+
+.border-down {
+    border-radius: 0 0 15px 15px !important;
+}
 
 .link-show {
+    user-select: none;
     text-decoration: underline !important;
 }
 

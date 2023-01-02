@@ -44,11 +44,12 @@ class ErrorEmbed extends Embed {
         this.defColor(Colores.rojo)
 
         if(this.interaction) this.client = this.interaction.client;
+        else this.client = require("../../index")
 
         if(!options) return this.#customError();
 
-        const { DarkCurrency, Currency } = this.client.getCustomEmojis(this.interaction.guild.id);
         const { type, data } = options;
+        const { DarkCurrency, Currency } = this.client.getCustomEmojis(data?.guildId ?? this.interaction.guild.id)
 
         switch(type){
             case "commandNotFound":

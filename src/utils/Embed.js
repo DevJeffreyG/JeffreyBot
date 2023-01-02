@@ -78,6 +78,10 @@ class Embed extends Discord.EmbedBuilder {
         return this
     }
 
+    raw() {
+        return this.data;
+    }
+
     #setup(options) {
         const client = require("../../index");
         const { RandomCumplido } = require("./functions");

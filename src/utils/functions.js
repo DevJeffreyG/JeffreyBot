@@ -468,10 +468,10 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
 
       if (dbUser?.isBirthday()) { // actualMonth + 1 ( 0 = ENERO && 11 = DICIEMBRE )
         // ES EL CUMPLEAÑOS
-        if (!member.roles.cache.get(bdRole.id)) member.roles.add(bdRole);
+        if (!member.roles.cache.get(bdRole?.id)) member.roles.add(bdRole);
       } else {
         // revisar si tiene el rol de cumpleaños, entonces quitarselo
-        if (member.roles.cache.get(bdRole.id)) member.roles.remove(bdRole);
+        if (member.roles.cache.get(bdRole?.id)) member.roles.remove(bdRole);
       }
     }
 

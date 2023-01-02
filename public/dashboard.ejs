@@ -135,23 +135,39 @@
                                         document.querySelector("div.container").classList.remove("wrapper");
                                         var g = '<%- guildId %>';
 
-                                        fetch("/api/get-guild", {
-                                            headers: {
-                                                "guildid": g
+                                        function initDashboard(data) {
+                                            if (data.error) {
+                                                window.location.replace("/dashboard/")
+                                                window.open(`/invite/?guildId=${g}`, '_blank').focus();
                                             }
-                                        }).then(res => res.json())
-                                            .then(guild => {
-                                                if (guild.error) {
-                                                    window.location.replace("/dashboard/")
-                                                    window.open(`/invite/?guildId=${g}`, '_blank').focus();
-                                                }
+                                            
+                                            let { guild, channels } = data;
 
-                                                document.title += ` — ${guild.name}`;
+                                            guild.channels = channels;
 
-                                                const dashboard = new Dashboard(guild, <%- JSON.stringify(Enums.ApiUpdate) %>)
-                                                .setUrl('<%-req.url%>');
-                                                dashboard.init();
-                                            })
+                                            document.title += ` — ${guild.name}`;
+
+                                            const dashboard = new Dashboard(guild, <%- JSON.stringify(Enums.ApiUpdate) %>)
+                                            .setUrl('<%-req.url%>');
+                                            dashboard.init();
+                                        }
+
+                                            <%
+                                            var cached = req.session.fetchedGuilds?.find(x => x.guild.id === guildId);
+
+                                            if(!cached) {
+                                            %>
+                                                fetch("/api/get-guild", {
+                                                    headers: {
+                                                        "guildid": g
+                                                    }
+                                                }).then(res => res.json())
+                                                    .then(obj => {
+                                                        initDashboard(obj);
+                                                    })
+                                            <%} else { %>
+                                                initDashboard(<%- JSON.stringify(cached) %>);
+                                            <%}%>
                                     </script>
                                 </dashboard>
                                 <%}%>

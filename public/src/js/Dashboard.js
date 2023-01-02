@@ -3,6 +3,8 @@
  * - Puede que esto no lo entienda en el futuro, pero por algo se empieza :D
  */
 class Dashboard {
+    #type;
+    #querytype;
     /**
      * 
      * @param {Guild} guild Discord Guild Object
@@ -11,7 +13,11 @@ class Dashboard {
     constructor(guild, enums) {
         this.ApiUpdate = enums;
         this.guild = guild;
-        this.root = `./dashboard/${this.guild.id}`
+
+        this.guild.allchannels = guild.channels;
+
+        this.guild.channels = this.guild.allchannels.filter(x => x.type === 0 || x.type === 2 || x.type === 5);
+        this.guild.categories = this.guild.allchannels.filter(x => x.type === 4);
 
         this.anyDigit = /\d+/g;
         this.nonDigit = /\D+/g;
@@ -100,7 +106,8 @@ class Dashboard {
      * 
      * @param {Array} array Array de los elementos en total
      * @param {NodeListOf<ChildNode>} excludeChildren Lista de los nodos que ya existen
-     * @param {Boolean} hidden
+     * @param {Boolean} hidden Determina si la lista está oculta inicialmente
+     * @param {Boolean} excludeEveryone Determina si se elimina el rol '@everyone'
      */
     #createList(array, excludeChildren, hidden = true, excludeEveryone = true) {
         let list = document.createElement("ul")
@@ -110,12 +117,12 @@ class Dashboard {
         let exists = array;
         excluding:
         for (const child of Array.from(excludeChildren)) {
-            if(!child.dataset.id) continue excluding;
-            exists = exists.filter(x => x.id != child.dataset.id)
+            if (!child.dataset.id) continue excluding;
+            exists = exists?.filter(x => x.id != child.dataset.id)
         }
 
         if (excludeEveryone)
-            exists = exists.filter(x => x.id != this.guild.id)
+            exists = exists?.filter(x => x.id != this.guild.id)
 
         // Discord Object
         for (const item of exists) {
@@ -193,18 +200,61 @@ class Dashboard {
      * @param {String} parentId 
      * @returns {HTMLElement} Parent
      */
-    #createRoleSelector(parentId, { title, id, max } ) {
+    #createRoleSelector(parentId, { title, id, max, min }, interactable = true) {
         const parent = this.#createDivItem(parentId);
         parent.classList.add("role-selector");
 
         const div = document.createElement("div")
         div.classList.add("role-drop")
         div.id = id
+        if (interactable) {
+            let plus = document.createElement("span")
+            plus.classList.add("material-symbols-rounded")
+            plus.append("add_circle");
+            plus.id = "plus-icon"
+            div.appendChild(plus)
+
+            div.dataset.interactable = "";
+
+        }
 
         parent.append(title)
         parent.appendChild(div)
 
-        if(max) div.dataset.max = max;
+        if (max) div.dataset.max = max;
+        if (min) div.dataset.min = min;
+
+        return parent
+    }
+
+    /**
+     * Crea un Item para seleccionar canales del Guild
+     * @param {String} parentId 
+     * @returns {HTMLElement} Parent
+     */
+    #createChannelSelector(parentId, { title, id, max, min }, interactable = true) {
+        const parent = this.#createDivItem(parentId);
+        parent.classList.add("channel-selector");
+
+        const div = document.createElement("div")
+        div.classList.add("channel-drop")
+        div.id = id
+        if (interactable) {
+            let plus = document.createElement("span")
+            plus.classList.add("material-symbols-rounded")
+            plus.append("add_circle");
+            plus.id = "plus-icon"
+            div.appendChild(plus)
+
+            div.dataset.interactable = "";
+
+        }
+
+        parent.append(title)
+        parent.appendChild(div)
+
+        div.dataset.max = max || Infinity;
+        div.dataset.min = min || 0;
 
         return parent
     }
@@ -216,12 +266,15 @@ class Dashboard {
      */
     #createSidebarOption(id, title) {
         let module = document.createElement("a");
-        module.href = `./${this.guild.id}?page=${id}`;
+        module.href = id ? `./${this.guild.id}?page=${id}` : `./${this.guild.id}`;
         module.innerText = title
 
         sidebar.appendChild(module);
     }
 
+    /**
+     * Crea el copyright en el Sidebar
+     */
     #createSidebarCopy() {
 
         let wrapper = document.querySelector(".sidebar-wrap")
@@ -239,6 +292,17 @@ class Dashboard {
         wrap.appendChild(label)
 
         wrapper.appendChild(wrap);
+    }
+
+    #createButton({ title, id }) {
+        let button = document.createElement("button")
+        button.classList.add("button")
+        button.id = id;
+        button.style.width = "40%"
+
+        button.append(title)
+
+        return button
     }
 
     #checkChanges() {
@@ -312,6 +376,10 @@ class Dashboard {
         this.#findAndSync("levels_deleteOldRole", functions);
         this.#findAndSync("save_roles_onleft", functions);
 
+        this.#findAndSync("min_exp", functions);
+        this.#findAndSync("max_exp", functions);
+        this.#findAndSync("min_curr", functions);
+        this.#findAndSync("max_curr", functions);
 
         const roles = this.doc.roles;
         this.#findAndSync("admins", roles)
@@ -323,6 +391,21 @@ class Dashboard {
         this.#findAndSync("birthday", roles)
         this.#findAndSync("darkshop_news", roles)
 
+        this.#findAndSync("levels", roles)
+
+        const channels = this.doc.channels;
+
+        this.#findAndSync("general-rules", channels)
+        this.#findAndSync("general-information", channels)
+        this.#findAndSync("general-faq", channels)
+        this.#findAndSync("general-announcements", channels)
+        this.#findAndSync("general-halloffame", channels)
+
+        this.#findAndSync("logs-guild_logs", channels)
+        this.#findAndSync("logs-moderation_logs", channels)
+        this.#findAndSync("logs-staff_logs", channels)
+
+        this.#findAndSync("chat_rewards", channels)
     }
 
     /**
@@ -343,10 +426,12 @@ class Dashboard {
         let el = findWithId(id);
         if (!el) return;
 
+        if (el.dataset.type?.includes("sync")) return this.#syncWork(el);
+
         let path = id.replace(/-/g, ".");
         let active = root;
         for (const p of path.split(".")) {
-            active = active[p]
+            active = active ? active[p] : undefined;
         }
 
         switch (typeof active) {
@@ -378,26 +463,116 @@ class Dashboard {
                 break;
 
             case "string":
-                if(el.classList.contains("role-drop") && active.length > 0) {
-                    el.innerHTML = "";
-                    let d = this.#itemOfList(active)
-                    el.appendChild(d)
-
+                if ((el.classList.contains("role-drop") || el.classList.contains("channel-drop"))) {
+                    if(active.length > 0) {
+                        el.innerHTML = "";
+                        let d = this.#itemOfList(active)
+                        el.appendChild(d)
+                    }
+                    
                     let list = this.#createList(el.className.includes("role") ? this.guild.roles : this.guild.channels, el.childNodes);
                     el.append(list)
                 }
                 break;
 
             default:
-                if(el.classList.contains("role-drop")) {
+                if (el.classList.contains("role-drop") || el.classList.contains("channel-drop")) {
                     el.innerHTML = "";
                     let list = this.#createList(el.className.includes("role") ? this.guild.roles : this.guild.channels, []);
                     el.append(list)
                 }
         }
 
+        if (typeof el.dataset.interactable != "undefined") {
+            let plus = document.createElement("span")
+            plus.classList.add("material-symbols-rounded")
+            plus.append("add_circle");
+            plus.id = "plus-icon"
+
+            el.appendChild(plus)
+        }
+
         return el;
 
+    }
+
+    /**
+         * 
+         * @param {HTMLElement} element 
+         */
+    #syncWork(element) {
+        let syncType = element.dataset.type.split("-")[1];
+        switch (syncType) {
+            case "levels": {
+                let root = this.doc.roles.levels;
+
+                for (const data of root) {
+                    let { level, roles } = data;
+
+                    let levelWrapper = this.#createDivSection(String(level));
+
+                    let rolesSelector = this.#createRoleSelector("levelwrap", {
+                        title: `Para el nivel ${level}`,
+                        id: level
+                    }, false)
+
+                    for (const roleId of roles) {
+                        let e = this.#itemOfList(roleId)
+                        rolesSelector.firstElementChild.appendChild(e);
+                    }
+
+                    // <span class="material-symbols-rounded">close</span>
+                    let closeSpan = document.createElement("span");
+                    closeSpan.classList.add("material-symbols-rounded")
+                    closeSpan.append("close");
+
+                    let remove = this.#createButton({ title: closeSpan, id: "removeItem" })
+                    remove.style.width = "40px";
+
+                    rolesSelector.appendChild(remove)
+
+                    levelWrapper.appendChild(rolesSelector)
+
+                    if (!element.querySelector(`[id='${level}']`)) element.appendChild(levelWrapper);
+                }
+                break;
+            }
+
+            case "channelrewards": {
+                let root = this.doc.channels.chat_rewards;
+
+                for (const data of root) {
+                    let { channel, multiplier } = data;
+
+                    let channelWrapper = this.#createDivSection(String(channel));
+
+                    let channelSelector = this.#createChannelSelector("channelwrap", {
+                        title: `Multiplicador x${multiplier} en`,
+                        id: channel
+                    }, false)
+
+                    channelSelector.dataset.multiplier = multiplier;
+
+                    let e = this.#itemOfList(channel)
+                    channelSelector.firstElementChild.appendChild(e);
+
+                    // <span class="material-symbols-rounded">close</span>
+                    let closeSpan = document.createElement("span");
+                    closeSpan.classList.add("material-symbols-rounded")
+                    closeSpan.append("close");
+
+                    let remove = this.#createButton({ title: closeSpan, id: "removeItem" })
+                    remove.style.width = "40px";
+
+                    channelSelector.appendChild(remove)
+
+                    channelWrapper.appendChild(channelSelector)
+
+                    if (!element.querySelector(`[id='${channel}']`)) element.appendChild(channelWrapper);
+                }
+                break;
+            }
+        }
     }
 
     async #activeModulesHandler() {
@@ -488,7 +663,6 @@ class Dashboard {
         // ------------------------------------------
 
         this.#appendChilds(contents, [funciones, glogs, modlogs, stafflogs, automod])
-        this.#sync()
     }
 
     async #minimumHandler() {
@@ -520,7 +694,6 @@ class Dashboard {
         this.#appendChilds(main, [blackjackbet, darkshoplvl]);
 
         this.#appendChilds(contents, [main])
-        this.#sync();
     }
 
     async #functionsHandler() {
@@ -550,9 +723,9 @@ class Dashboard {
         });
 
         // ECONOMIA
-        let econ = this.#createDivSection("econ");
-        econ.classList.add("wrap")
-        econ.append("Tiendas")
+        let shop = this.#createDivSection("shop");
+        shop.classList.add("wrap")
+        shop.append("Tiendas")
 
         let shopadjust = this.#createBoolSelector("adjshop", {
             title: "Ajustar precios de la tienda",
@@ -576,11 +749,39 @@ class Dashboard {
             id: "currency_per_rep"
         }, { min: 1 });
 
-        this.#appendChilds(main, [saveRoles, lvlsOldRole]);
-        this.#appendChilds(econ, [shopadjust, dsadjust, basedarkshop, currperrep]);
+        let econ = this.#createDivSection("econ");
+        econ.classList.add("wrap")
+        econ.append("Economía");
 
-        this.#appendChilds(contents, [main, econ])
-        this.#sync();
+        let minexp = this.#createNumberSelector("minexp", {
+            title: "Mínima EXP dada por hablar",
+            placeholder: "Debe ser menor que el máximo",
+            id: "min_exp"
+        }, { min: 1 });
+
+        let maxexp = this.#createNumberSelector("maxexp", {
+            title: "Máxima EXP dada por hablar",
+            placeholder: "Debe ser mayor que el mínimo",
+            id: "max_exp"
+        }, { min: 1 });
+
+        let mincur = this.#createNumberSelector("mincur", {
+            title: "Mínimo dinero dado por hablar",
+            placeholder: "Debe ser menor que el máximo",
+            id: "min_curr"
+        }, { min: 1 });
+
+        let maxcur = this.#createNumberSelector("maxcur", {
+            title: "Máximo dinero dado por hablar",
+            placeholder: "Debe ser mayor que el mínimo",
+            id: "max_curr"
+        }, { min: 1 });
+
+        this.#appendChilds(main, [saveRoles, lvlsOldRole]);
+        this.#appendChilds(shop, [shopadjust, dsadjust, basedarkshop, currperrep]);
+        this.#appendChilds(econ, [minexp, maxexp, mincur, maxcur]);
+
+        this.#appendChilds(contents, [main, econ, shop])
     }
 
     async #rolesHandler() {
@@ -639,7 +840,80 @@ class Dashboard {
         this.#appendChilds(generals, [users, bots, bd, dsRole]);
 
         this.#appendChilds(contents, [staff, generals])
-        this.#sync();
+    }
+
+    async #channelsHandler() {
+        const container = this.container;
+        const contents = document.createElement("div")
+        contents.id = "contents";
+
+        let title = document.createElement("h1");
+        title.innerText = "Canales";
+        contents.appendChild(title)
+
+        container.appendChild(contents);
+
+        let general = this.#createDivSection("general");
+        general.classList.add("wrap")
+        general.append("Generales")
+
+        let rules = this.#createChannelSelector("crules", {
+            title: "Reglas",
+            id: "general-rules",
+            max: 1
+        });
+
+        let info = this.#createChannelSelector("cinfo", {
+            title: "Información",
+            id: "general-information",
+            max: 1
+        });
+
+        let faq = this.#createChannelSelector("cfaq", {
+            title: "FAQ",
+            id: "general-faq",
+            max: 1
+        });
+
+        let news = this.#createChannelSelector("cnews", {
+            title: "Anuncios",
+            id: "general-announcements",
+            max: 1
+        });
+
+        let hof = this.#createChannelSelector("chall", {
+            title: "Salón de la fama",
+            id: "general-halloffame",
+            max: 1
+        });
+
+        this.#appendChilds(general, [rules, info, faq, news, hof]);
+        
+        let logs = this.#createDivSection("logs");
+        logs.classList.add("wrap")
+        logs.append("Logs")
+
+        let guilds = this.#createChannelSelector("lguild", {
+            title: "Guild",
+            id: "logs-guild_logs",
+            max: 1
+        });
+
+        let moderation = this.#createChannelSelector("lmod", {
+            title: "Moderación",
+            id: "logs-moderation_logs",
+            max: 1
+        });
+
+        let staff = this.#createChannelSelector("lstaff", {
+            title: "STAFF",
+            id: "logs-staff_logs",
+            max: 1
+        });
+
+        this.#appendChilds(logs, [guilds, moderation, staff]);
+
+        this.#appendChilds(contents, [general, logs])
     }
 
     async #levelRolesHandler() {
@@ -653,13 +927,102 @@ class Dashboard {
 
         container.appendChild(contents);
 
-        let main = this.#createDivSection("main");
-        main.classList.add("wrap")
+        let toadd = this.#createDivSection("toadd");
+        toadd.classList.add("wrap")
+        toadd.classList.add("join")
+        toadd.dataset.ignoreSync = "";
 
-        //this.#appendChilds(main, []);
+        let existing = this.#createDivSection("main");
+        existing.classList.add("wrap")
+        existing.append("Actuales");
+        let actual = this.#createDivItem("levels")
+        actual.dataset.type = "sync-levels";
+        existing.appendChild(actual);
 
-        this.#appendChilds(contents, [main])
-        this.#sync();
+        let addLevel = this.#createNumberSelector("addlevel", {
+            title: "Nivel requerido",
+            placeholder: "Nivel cuando se le darán los roles",
+            id: "level"
+        }, {
+            min: 1
+        })
+
+        addLevel.classList.add("border-up");
+
+        let addRole = this.#createRoleSelector("addrole", {
+            title: "Roles dados",
+            id: "roles",
+            min: 1
+        })
+
+        addRole.classList.add("border-down");
+
+        let roleList = this.#createList(this.guild.roles, [])
+        addRole.firstElementChild.appendChild(roleList);
+
+        let submit = this.#createButton({
+            title: "Agregar",
+            id: "submit"
+        })
+
+        this.#appendChilds(toadd, [addLevel, addRole, submit]);
+
+        this.#appendChilds(contents, [toadd, existing])
+    }
+
+    async #channelRewardsHandler() {
+        const container = this.container;
+        const contents = document.createElement("div")
+        contents.id = "contents";
+
+        let title = document.createElement("h1");
+        title.innerText = "Recompensas en los canales";
+        contents.appendChild(title)
+
+        container.appendChild(contents);
+
+        let toadd = this.#createDivSection("toadd");
+        toadd.classList.add("wrap")
+        toadd.classList.add("join")
+        toadd.dataset.ignoreSync = "";
+
+        let existing = this.#createDivSection("main");
+        existing.classList.add("wrap")
+        existing.append("Actuales");
+        let actual = this.#createDivItem("chat_rewards")
+        actual.dataset.type = "sync-channelrewards";
+        existing.appendChild(actual);
+
+        let addChannel = this.#createChannelSelector("addchannel", {
+            title: "El canal configurado",
+            id: "channel",
+            min: 1,
+            max: 1
+        })
+
+        addChannel.classList.add("border-up");
+
+        let addMulti = this.#createNumberSelector("addmultiplier", {
+            title: "El multiplicador de la EXP y dinero",
+            placeholder: "La base de lo que se gana se multiplica por esto",
+            id: "multiplier"
+        }, {
+            min: 0.01
+        })
+
+        addMulti.classList.add("border-down");
+
+        let channelList = this.#createList(this.guild.channels, [])
+        addChannel.firstElementChild.appendChild(channelList);
+
+        let submit = this.#createButton({
+            title: "Agregar",
+            id: "submit"
+        })
+
+        this.#appendChilds(toadd, [addChannel, addMulti, submit]);
+
+        this.#appendChilds(contents, [toadd, existing])
     }
 
     async #handleQueries() {
@@ -670,45 +1033,75 @@ class Dashboard {
 
         await this.#getDocument();
         this.container = document.querySelector("div.container");
-        let type;
 
         // Página
         switch (this.query?.page) {
             case "active_modules":
                 await this.#activeModulesHandler();
-                type = this.ApiUpdate.ActiveModules;
+                this.#type = this.ApiUpdate.ActiveModules;
                 break;
 
             case "minimum":
                 await this.#minimumHandler();
-                type = this.ApiUpdate.Minimum;
+                this.#type = this.ApiUpdate.Minimum;
                 break;
 
             case "functions":
                 await this.#functionsHandler();
-                type = this.ApiUpdate.Functions;
+                this.#type = this.ApiUpdate.Functions;
                 break;
 
             case "roles":
                 await this.#rolesHandler();
-                type = this.ApiUpdate.Roles;
+                this.#type = this.ApiUpdate.Roles;
                 break;
 
             case "levels":
                 await this.#levelRolesHandler();
-                type = this.ApiUpdate.LevelRoles;
+                this.#type = this.ApiUpdate.LevelRoles;
+                break;
+
+            case "channels":
+                await this.#channelsHandler();
+                this.#type = this.ApiUpdate.Channels;
+                break;
+
+            case "chat_rewards":
+                await this.#channelRewardsHandler();
+                this.#type = this.ApiUpdate.RewardChannels;
                 break;
         }
+
+        this.#sync()
 
         // Cambiar el color del boton del sidebar seleccionado
         let sidebarItems = Array.from(this.sidebar.querySelectorAll("a"));
         const subpageSelected = sidebarItems.find(x => x.href.includes(this.query?.page));
-        subpageSelected.classList.add("active");
+        if(subpageSelected) subpageSelected.classList.add("active");
+        else sidebarItems.find(x => x.getAttribute("href") === `./${this.guild.id}`)?.classList.add("active");
+
+        if (this.sidebar.clientHeight / subpageSelected?.offsetTop < 1.5) {
+            console.info(this.sidebar.clientHeight / subpageSelected.offsetTop)
+            this.sidebar.parentElement.scroll({ top: subpageSelected.offsetTop, behavior: "smooth" })
+        }
 
         this.#switches();
         this.#inputs();
-        this.#roleDrops();
-        this.#buttons(type);
+
+        this.#drop("role-drop");
+        this.#drop("channel-drop");
+
+        this.#buttons();
+    }
+
+    /**
+     * 
+     * @param {HTMLElement} element
+     * @returns 
+     */
+    #ignoreSync(element) {
+        if (element.closest("[data-ignore-sync]")) return true
+        return false
     }
 
     #switches() {
@@ -724,7 +1117,7 @@ class Dashboard {
                 if (typeof get === "undefined") this.changes.set(id, Switch.classList.contains("active"));
                 else this.changes.delete(id);
 
-                this.#checkChanges()
+                if (!this.#ignoreSync(Switch)) this.#checkChanges();
             })
         }
     }
@@ -741,22 +1134,29 @@ class Dashboard {
                 if (typeof get === "undefined" || this.initial.get(id) != input.value) this.changes.set(id, input.value)
                 else this.changes.delete(id)
 
-                this.#checkChanges()
+                if (!this.#ignoreSync(input)) this.#checkChanges();
             })
         }
     }
 
-    #roleDrops() {
-        var roleDrops = document.querySelectorAll(".role-drop");
+    /**
+     * @param {String} classname
+     */
+    #drop(classname) {
+        var array = document.querySelectorAll(`.${classname}`);
+        let dropList = classname.includes("role") ? this.guild.roles : this.guild.channels;
 
-        for (const drop of roleDrops) {
-            function translate(nodes){
+        for (const drop of array) {
+            function translate(nodes) {
                 let translated = Array.from(nodes)
-                .filter(x => !x.classList.contains("item-list")) // eliminar la lista de todos los roles
-                .flatMap(x => x.dataset.id) // sacar solo las ids
+                    .filter(x => !x.classList.contains("item-list") && typeof x.dataset?.id != "undefined") // eliminar la lista de todos los roles & todo lo que no sea la info de role
+                    .flatMap(x => x.dataset.id) // sacar solo las ids
 
                 return translated
             }
+
+            if (typeof drop.dataset.interactable === "undefined") continue;
+
             this.initial.set(drop.id, translate(drop.childNodes));
 
             drop.addEventListener("click", (click) => {
@@ -777,22 +1177,22 @@ class Dashboard {
                         drop.appendChild(gen)
 
                         clicked.closest("li").remove();
-                    } else if (clicked.closest(".role-drop")) { // Un item que ya está agregado a la lista de roles
+                    } else if (clicked.closest(`.${classname}`)) { // Un item que ya está agregado a la lista
                         clicked.remove()
-                        
+
                         let actualList = drop.querySelector(".item-list");
-                        let newList = this.#createList(this.guild.roles, drop.childNodes)
+                        let newList = this.#createList(dropList, drop.childNodes)
 
                         drop.replaceChild(newList, actualList)
                     }
 
-                    const id = drop.id;                    
+                    const id = drop.id;
 
                     this.changes.set(id, translate(drop.childNodes))
-                    
+
                     if (arrayEquals(this.initial.get(id), this.changes.get(id))) this.changes.delete(id);
 
-                    this.#checkChanges()
+                    if (!this.#ignoreSync(drop)) this.#checkChanges();
                     return;
                 }
 
@@ -800,17 +1200,34 @@ class Dashboard {
                 list.classList.toggle("active");
             })
         }
+
     }
 
     /**
      * @param {Number} type El tipo de query para usar save()
      */
-    #buttons(type) {
+    #buttons() {
+        let removeWork = () => {
+            const removeButtons = document.querySelectorAll("#removeItem")
+            for (const button of removeButtons) {
+                button.addEventListener("click", () => {
+                    const item = button.parentElement;
+                    let info = item.querySelector("div");
+
+                    this.changes.set(info.id, info.childNodes)
+                    item.closest("div.section").remove();
+
+                    this.#checkChanges();
+                })
+            }
+        }
+
         const cancelButton = document.querySelector("#cancelChanges");
         cancelButton.addEventListener("click", async () => {
             await this.#getDocument();
             this.#sync();
             this.changes.clear();
+            removeWork();
 
             const announcer = document.querySelector(".announcer");
             announcer.classList.remove("active");
@@ -818,13 +1235,20 @@ class Dashboard {
 
         const saveButton = document.querySelector("#saveChanges");
         saveButton.addEventListener("click", async () => {
-            await this.save(type);
+            await this.save();
         })
 
         const jumpUp = document.querySelector("#jumpUp");
         jumpUp?.addEventListener("click", () => {
             this.container.scroll({ top: 0, behavior: "smooth" });
         })
+
+        const submit = document.querySelector("#submit");
+        submit?.addEventListener("click", async () => {
+            await this.add();
+        })
+
+        removeWork();
     }
 
     /**
@@ -886,6 +1310,10 @@ class Dashboard {
         // agregar secciones al sidebar
         this.sidebar = document.querySelector("div#sidebar");
 
+        const home = this.#createSidebarOption(null, "Inicio")        
+
+        this.#addSeparator(this.sidebar);
+
         const active = this.#createSidebarOption("active_modules", "Módulos activos")
         const minimum = this.#createSidebarOption("minimum", "Cantidades mínimas")
         const functions = this.#createSidebarOption("functions", "Funciones")
@@ -897,47 +1325,116 @@ class Dashboard {
 
         this.#addSeparator(this.sidebar);
 
-        const logs = this.#createSidebarOption("logs", "Canales de logs")
+        const canales = this.#createSidebarOption("channels", "Canales")
         const rewards = this.#createSidebarOption("chat_rewards", "Canales de recompensas")
 
-        const notif = this.#createSidebarOption("notifier", "Canales de notificaciones")
-        const general = this.#createSidebarOption("general", "Canales de generales")
-        const dschannels = this.#createSidebarOption("darkshop", "Canales de DarkShop")
+        this.#addSeparator(this.sidebar);
+        const ayuda = this.#createSidebarOption("help", "Ayuda")
+        const faq = this.#createSidebarOption("faq", "FAQ")
+
+        this.#addSeparator(this.sidebar);
 
         this.#createSidebarCopy()
 
         this.#handleQueries();
     }
 
-    async save(type) {
-        // Check Permissions
-        let qperms = await fetch("/api/guild/has-permissions", {
-            headers: {
-                "guildid": this.guild.id
-            }
-        })
-        
-        let perms = await qperms.json();
-        if(!perms) return this.logout();
-
-        if (!type) return console.error("🔴 NO TYPE SPECIFIED");
-
-        const objChanges = Object.fromEntries(this.changes);
-        var changes = JSON.stringify(objChanges);
+    async #validate() {
+        this.problems = new Map();
 
         let valid = true;
-        let problems = new Map();
+        const objChanges = Object.fromEntries(this.changes);
+        this.pushable_changes = JSON.stringify(objChanges);
+
+        if (this.changes.size === 0) valid = false;
+
+        if (this.#type === this.ApiUpdate.LevelRoles) {
+            const parent = document.querySelector("[data-type='sync-levels'");
+            let rawData = Array.from(parent.childNodes);
+
+            if (this.#querytype === "save") { // se está eliminado un role de niveles
+                let info = [];
+
+                for (const section of rawData) {
+                    const id = section.id; // el nivel req
+
+                    const rolesContainer = section.querySelector(`[id='${id}'].role-drop`);
+                    const roles = Array.from(rolesContainer.childNodes).flatMap(x => x.dataset.id)
+
+                    info.push({
+                        level: id,
+                        roles
+                    })
+                }
+
+                this.pushable_changes = JSON.stringify(info);
+
+                return valid;
+            } else if (this.#querytype === "add") {
+                // buscar que no exista ya
+                if (rawData.find(x => x.id === objChanges.level)) {
+                    this.problems.set(rawData.find(x => x.id === objChanges.level).firstChild, {})
+                    valid = false;
+                }
+            }
+        }
+        else if (this.#type === this.ApiUpdate.RewardChannels) {
+            const parent = document.querySelector("[data-type='sync-channelrewards'");
+            let rawData = Array.from(parent.childNodes);
+
+            if (this.#querytype === "save") { // se está eliminado un role de niveles
+                let info = [];
+
+                for (const section of rawData) {
+                    const id = section.id; // la id del canal
+
+                    const channelContainer = section.querySelector(`[id='${id}'].channel-drop`);
+                    const channel = channelContainer.firstElementChild.dataset.id;
+
+                    info.push({
+                        channel,
+                        multiplier: section.dataset.multiplier
+                    })
+                }
+
+                this.pushable_changes = JSON.stringify(info);
+
+                return valid;
+            } else if (this.#querytype === "add") {
+                // buscar que no exista ya
+                if (rawData.find(x => x.id === objChanges.level)) {
+                    this.problems.set(rawData.find(x => x.id === objChanges.level).firstChild, {})
+                    valid = false;
+                }
+            }
+        }
 
         /**
-         * ================
-         * = VERIFICACION =
-         * =   CAMBIOS    =
-         * ================
-         */
+                 * ================
+                 * = VERIFICACION =
+                 * =   CAMBIOS    =
+                 * ================
+                 */
         validation:
         for (const prop in objChanges) {
-            let inputElement = document.querySelector(`#${prop}`)
+            if (!valid) break validation;
+            let inputElement = document.getElementById(prop);
+
+            if (!inputElement) continue; // fue eliminado
+
             const value = objChanges[prop]; // El valor que sería guardado en la base de datos
+
+            let parent = inputElement.closest("div.section");
+            let allReq = parent.querySelectorAll("div.item");
+
+            let changed = Array.from(allReq).filter(x => typeof x.parentElement.dataset.ignoreSync != "undefined").flatMap(x => x.firstElementChild.id);
+
+            for (const req of changed) {
+                if (!this.changes.get(req)) {
+                    valid = false
+                    this.problems.set(parent.querySelector(`#${req}`).parentElement, {})
+                }
+            }
 
             // VALIDATION
             inputV:
@@ -950,22 +1447,22 @@ class Dashboard {
                         value > inputElement.max
                     ) {
                         valid = false;
-                        problems.set(inputElement.parentElement, value);
+                        this.problems.set(inputElement.parentElement, value);
                     }
                     break inputV;
             }
 
-            if(inputElement.className.includes("drop")) {
+            if (inputElement.className.includes("drop")) {
                 let childs = Array.from(inputElement.childNodes).filter(x => x.nodeName === "DIV");
 
-                if(childs.length > Number(inputElement.dataset.max)) {
-                    problems.set(inputElement.parentElement, value);
+                if (childs.length > Number(inputElement.dataset.max) || childs.length < Number(inputElement.dataset.min)) {
+                    this.problems.set(inputElement.parentElement, value);
                     valid = false;
                 }
 
-                if(inputElement.dataset.max === "1") { // Convertir el cambio en string
-                    this.changes.set(inputElement.id, childs.flatMap(x => x.dataset.id)[0]);
-                    changes = JSON.stringify(Object.fromEntries(this.changes));
+                if (inputElement.dataset.max === "1") { // Convertir el cambio en string
+                    this.changes.set(inputElement.id, childs.flatMap(x => x.dataset.id)[0] ?? String());
+                    this.pushable_changes = JSON.stringify(Object.fromEntries(this.changes));
                 }
             }
 
@@ -986,7 +1483,7 @@ class Dashboard {
                 { transform: `${initialTransform} rotate(0)` },
             ];
 
-            for (const element of Array.from(problems.keys())) {
+            for (const element of Array.from(this.problems.keys())) {
                 const initialColorEl = getComputedStyle(element).backgroundColor
 
                 const elementKeyframes = [
@@ -1001,17 +1498,41 @@ class Dashboard {
                 })
             }
 
-            return announcer.animate(announcerKeyframes, {
+            announcer.animate(announcerKeyframes, {
                 duration: 100,
                 iterations: 3,
             })
+
+            return valid;
         }
 
+        // Check Permissions
+        let qperms = await fetch("/api/guild/has-permissions", {
+            headers: {
+                "guildid": this.guild.id
+            }
+        })
+
+        let perms = await qperms.json();
+        if (!perms) return this.logout();
+
+        return valid;
+    }
+
+    async save() {
+        this.#querytype = "save";
+
+        const type = this.#type;
+        if (!type) return console.error("🔴 NO TYPE SPECIFIED");
+
+        if (!await this.#validate()) return;
+
         let q = await fetch("/api/db/update", {
-            body: changes,
+            body: this.pushable_changes,
             headers: {
                 "guildid": this.guild.id,
-                "updatetype": type,
+                "apitype": type,
+                "querytype": "save",
                 'Content-Type': 'application/json'
             },
             method: "POST"
@@ -1020,6 +1541,7 @@ class Dashboard {
         let res = await q.json();
 
         if (res) {
+            this.sendLog();
             this.initial.clear();
             this.changes.clear();
             this.#checkChanges();
@@ -1028,7 +1550,50 @@ class Dashboard {
         return res
     }
 
-    logout(){
+    async add() {
+        this.#querytype = "add";
+
+        const type = this.#type;
+        if (!type) return console.error("🔴 NO TYPE SPECIFIED");
+
+        if (!await this.#validate()) return;
+
+        let q = await fetch("/api/db/update", {
+            body: this.pushable_changes,
+            headers: {
+                "guildid": this.guild.id,
+                "apitype": type,
+                "querytype": "add",
+                'Content-Type': 'application/json'
+            },
+            method: "POST"
+        });
+
+        let res = await q.json();
+
+        if (res) {
+            this.sendLog();
+            this.initial.clear();
+            this.changes.clear();
+            this.#checkChanges();
+
+            window.location.reload();
+        }
+
+        return res
+    }
+
+    async sendLog() {
+        await fetch("/api/sendlog", {
+            headers: {
+                "changes": JSON.stringify(this.pushable_changes),
+                "page": this.query?.page,
+                "channelid": this.doc.channels.logs.guild_logs
+            }
+        })
+    }
+
+    logout() {
         return window.location.replace("/logout");
     }
 }

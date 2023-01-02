@@ -136,6 +136,15 @@ dashboard #sidebar a.active:hover {
     align-items: center;
 }
 
+.wrap.join {
+    gap: 0;
+    width: 95%;
+
+    padding: 1em 0;
+
+    background-color: var(--bg-black);
+}
+
 .section {
     width: 100%;
     display: flex;
@@ -162,6 +171,11 @@ dashboard #sidebar a.active:hover {
 
     width: 95%;
     background-color: var(--bg-black);
+}
+
+.wrap.join .item {
+    width: 100%;
+    border-radius: 0;
 }
 
 .item > div, .item > input {
@@ -216,14 +230,14 @@ dashboard #sidebar a.active:hover {
 =========
 */
 
-.role-selector {
+.role-selector, .channel-selector {
     display: flex;
     min-height: 110px;
 
     font-size: 40px;
 }
 
-.role-drop {
+.role-drop, .channel-drop {
     position: relative;
     
     display: flex;
@@ -236,6 +250,7 @@ dashboard #sidebar a.active:hover {
     min-height: 1.1em;
     width: 45%;
     padding: .2em;
+    padding-right: calc(.2em + 30px);
 
     box-sizing: border-box;
 
@@ -243,7 +258,15 @@ dashboard #sidebar a.active:hover {
     border-radius: 10px;
 }
 
-.role-drop > div {
+#plus-icon {
+    position: absolute;
+    height: fit-content !important;
+    top: 25%;
+    right: .3em;
+}
+
+.role-drop > div, .channel-drop > div {
+    user-select: none;
     height: 80%;
     font-size: .45em;
     width: fit-content;
@@ -257,6 +280,11 @@ dashboard #sidebar a.active:hover {
 
 .role-drop > div::before {
     content: "@";
+    margin-right: .1em;
+}
+
+.channel-drop > div::before {
+    content: "#";
     margin-right: .1em;
 }
 

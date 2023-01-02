@@ -1,11 +1,11 @@
 window.document.addEventListener("click", (click) => {
     var actives = document.querySelectorAll(".active");
         actives = Array.from(actives).filter(x => {
-            if(!(x.classList.contains("announcer") || x.classList.contains("switch") || x.nodeName === "A"))
+            if(!(x.classList.contains("announcer") || x.classList.contains("switch") || x.nodeName === "A" || x.classList.contains("reveal")))
                 return x
         });
 
-    let filter = click.target.closest(".role-drop") ||
+    let filter = click.target.closest(".role-drop") || click.target.closest(".channel-drop") ||
         click.target.closest(".session-manager") ||
         !click.target.parentNode || !click.target.parentNode?.parentNode;
         

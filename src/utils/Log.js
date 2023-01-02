@@ -35,28 +35,32 @@ class Log {
         this.#jeffreyError = new ErrorEmbed(this.interaction, {
             type: "badCommand",
             data: {
-                error: "INVALID LOG TARGET"
+                error: "INVALID LOG TARGET",
+                guildId: this.guild?.id
             }
         }, true)
 
         this.#jeffreyMessageError = new ErrorEmbed(this.interaction, {
             type: "badCommand",
             data: {
-                error: "INVALID CONTENT & EMBED"
+                error: "INVALID CONTENT & EMBED",
+                guildId: this.guild?.id
             }
         }, true)
 
         this.#jeffreyMessageError = new ErrorEmbed(this.interaction, {
             type: "badCommand",
             data: {
-                error: "INVALID REASON"
+                error: "INVALID REASON",
+                guildId: this.guild?.id
             }
         }, true)
 
         this.#configError = new ErrorEmbed(this.interaction, {
             type: "insuficientSetup",
             data: {
-                needed: new Enum(ChannelModules).translate(this.target)
+                needed: new Enum(ChannelModules).translate(this.target),
+                guildId: this.guild?.id
             }
         }, true)
 
@@ -158,6 +162,7 @@ class Log {
      */
     setGuild(guild) {
         this.guild = guild
+        if(!this.interaction) this.interaction = guild
         return this;
     }
 

@@ -133,7 +133,11 @@ const GuildSchema = new Schema({
             baseprice_darkshop: { type: Number, default: 200, integer: true },
             currency_per_rep: { type: Number, default: 500, integer: true },
             levels_deleteOldRole: { type: Boolean, default: false },
-            save_roles_onleft: { type: Boolean, default: true }
+            save_roles_onleft: { type: Boolean, default: true },
+            min_exp: { type: Number, default: 5, integer: true },
+            max_exp: { type: Number, default: 35, integer: true },
+            min_curr: { type: Number, default: 5, integer: true },
+            max_curr: { type: Number, default: 15, integer: true },
         }
     },
     roles: { // id de roles
@@ -144,7 +148,7 @@ const GuildSchema = new Schema({
         levels: [
             {
                 level: { type: Number, required: true },
-                role_id: { type: String, required: true }
+                roles: { type: Array, required: true }
             }
         ],
         birthday: { type: String },
@@ -158,7 +162,7 @@ const GuildSchema = new Schema({
         },
         chat_rewards: [
             {
-                channel_id: { type: String, required: true },
+                channel: { type: String, required: true },
                 multiplier: { type: Number, default: 1 }
             }
         ],
