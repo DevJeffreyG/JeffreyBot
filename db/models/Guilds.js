@@ -11,7 +11,7 @@ const GuildSchema = new Schema({
                 created_by: { type: String, required: true },
                 channel_id: { type: String, required: true },
                 message_id: { type: String, required: true },
-                start_date: { type: Date, default: () => new Date() },
+                creation_date: { type: Date, default: () => new Date() },
                 last_reminded: { type: Date, default: null },
                 end_date: { type: Date, default: null },
                 end_reason: { type: String, default: null },
@@ -24,6 +24,8 @@ const GuildSchema = new Schema({
                 user_id: { type: String, required: true },
                 channel_id: { type: String, required: true },
                 message_id: { type: String, required: true },
+                creation_date: { type: Date, default: () => new Date() },
+                last_reminded: { type: Date, default: null },
                 suggestion: { type: String, required: true },
                 accepted: { type: Boolean, default: null },
                 reason: { type: String, default: null},
@@ -159,14 +161,20 @@ const GuildSchema = new Schema({
         ],
         birthday: { type: String },
         darkshop_news: { type: String },
-        suggester_role: { type: String }
+        suggester_role: { type: String },
+        notifications: {
+            youtube: { type: String },
+            twitter: { type: String },
+            twitch: { type: String }
+        }
     },
     channels: {
         logs: {
             guild_logs: { type: String },
             moderation_logs: { type: String },
             staff_logs: { type: String },
-            suggestions: { type: String }
+            suggestions: { type: String },
+            user_left: { type: String }
         },
         chat_rewards: [
             {
@@ -175,8 +183,8 @@ const GuildSchema = new Schema({
             }
         ],
         notifier: {
-            twitter_notif: { type: String },
             youtube_notif: { type: String },
+            twitter_notif: { type: String },
             twitch_notif: { type: String },
         },
         general: {
@@ -363,6 +371,20 @@ GuildSchema.method("getChannel", function(query) {
         }
     }
 
+    return general ?? null;
+})
+
+GuildSchema.method("getCategory", function(query) {
+    let general = this.categories;
+    const q = query.split(".");
+
+    if(q.length >= 1){
+        for (let i = 0; i < q.length; i++) {
+            const queryQ = q[i];
+            
+            general = general[queryQ]
+        }
+    }
 
     return general ?? null;
 })
@@ -375,8 +397,23 @@ GuildSchema.method("getDarkShopChannel", function(module) {
     return this.getChannel("darkshop." + module)
 })
 
-GuildSchema.method("moduleIsActive", function(query) {
-    let general = this.settings.active_modules;
+GuildSchema.method("getRole", function(query) {
+    let general = this.roles;
+    const q = query.split(".");
+
+    if(q.length >= 1){
+        for (let i = 0; i < q.length; i++) {
+            const queryQ = q[i];
+            
+            general = general[queryQ]
+        }
+    }
+
+    return general ?? null;
+})
+
+GuildSchema.method("moduleIsActive", function(query, initial = this.settings.active_modules) {
+    let general = initial;
     const q = query.split(".");
 
     if(q.length >= 1){

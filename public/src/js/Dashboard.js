@@ -428,6 +428,10 @@ class Dashboard {
         this.#findAndSync("darkshop_news", roles)
         this.#findAndSync("suggester_role", roles)
 
+        this.#findAndSync("notifications-youtube", roles)
+        this.#findAndSync("notifications-twitter", roles)
+        this.#findAndSync("notifications-twitch", roles)
+
         this.#findAndSync("levels", roles)
 
         const channels = this.doc.channels;
@@ -444,6 +448,12 @@ class Dashboard {
         this.#findAndSync("logs-moderation_logs", channels)
         this.#findAndSync("logs-staff_logs", channels)
         this.#findAndSync("logs-suggestions", channels)
+        this.#findAndSync("logs-user_left", channels)
+
+        this.#findAndSync("notifier-youtube_notif", channels)
+        this.#findAndSync("notifier-twitter_notif", channels)
+        this.#findAndSync("notifier-twitch_notif", channels)
+
 
         this.#findAndSync("chat_rewards", channels)
 
@@ -912,7 +922,31 @@ class Dashboard {
 
         this.#appendChilds(generals, [users, bots, bd, suggester, dsRole]);
 
-        this.#appendChilds(contents, [staff, generals])
+        let noti = this.#createDivSection("generals");
+        noti.classList.add("wrap")
+        noti.append("Notifier [JeffreyG Only (WIP)]")
+
+        let yt = this.#createRoleSelector("ryt", {
+            title: "YouTube",
+            id: "notifications-youtube",
+            max: 1
+        });
+
+        let tw = this.#createRoleSelector("rtw", {
+            title: "Twitter",
+            id: "notifications-twitter",
+            max: 1
+        });
+
+        let tv = this.#createRoleSelector("rtv", {
+            title: "Twitch",
+            id: "notifications-twitch",
+            max: 1
+        });
+
+        this.#appendChilds(noti, [yt, tw, tv]);
+
+        this.#appendChilds(contents, [staff, generals, noti])
     }
 
     async #channelsHandler() {
@@ -1002,9 +1036,39 @@ class Dashboard {
             max: 1
         });
 
-        this.#appendChilds(logs, [guilds, moderation, staff, sugs]);
+        let user_left = this.#createChannelSelector("luserleft", {
+            title: "Sugerencias",
+            id: "logs-user_left",
+            max: 1
+        });
 
-        this.#appendChilds(contents, [general, ds, logs])
+        this.#appendChilds(logs, [guilds, moderation, staff, sugs, user_left]);
+        
+        let noti = this.#createDivSection("logs");
+        noti.classList.add("wrap")
+        noti.append("Notifier [JeffreyG Only (WIP)]")
+
+        let yt = this.#createChannelSelector("cyt", {
+            title: "YouTube",
+            id: "notifier-youtube_notif",
+            max: 1
+        });
+
+        let tw = this.#createChannelSelector("ctw", {
+            title: "Twitter",
+            id: "notifier-twitter_notif",
+            max: 1
+        });
+
+        let tv = this.#createChannelSelector("ctv", {
+            title: "Twitch",
+            id: "notifier-twitch_notif",
+            max: 1
+        });
+
+        this.#appendChilds(noti, [yt, tw, tv]);
+
+        this.#appendChilds(contents, [general, ds, logs, noti])
     }
 
     async #categoriesHandler() {
