@@ -5,7 +5,7 @@ window.document.addEventListener("click", (click) => {
                 return x
         });
 
-    let filter = click.target.closest(".role-drop") || click.target.closest(".channel-drop") ||
+    let filter = click.target.closest(".role-drop") || click.target.closest(".channel-drop") || click.target.closest(".category-drop") ||
         click.target.closest(".session-manager") ||
         !click.target.parentNode || !click.target.parentNode?.parentNode;
         

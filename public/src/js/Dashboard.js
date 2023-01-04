@@ -260,6 +260,38 @@ class Dashboard {
     }
 
     /**
+     * Crea un Item para seleccionar categorías del Guild
+     * @param {String} parentId 
+     * @returns {HTMLElement} Parent
+     */
+    #createCategorySelector(parentId, { title, id, max, min }, interactable = true) {
+        const parent = this.#createDivItem(parentId);
+        parent.classList.add("channel-selector");
+
+        const div = document.createElement("div")
+        div.classList.add("category-drop")
+        div.id = id
+        if (interactable) {
+            let plus = document.createElement("span")
+            plus.classList.add("material-symbols-rounded")
+            plus.append("add_circle");
+            plus.id = "plus-icon"
+            div.appendChild(plus)
+
+            div.dataset.interactable = "";
+
+        }
+
+        parent.append(title)
+        parent.appendChild(div)
+
+        div.dataset.max = max || Infinity;
+        div.dataset.min = min || 0;
+
+        return parent
+    }
+
+    /**
      * Crea un link y se agrega al this.sidebar
      * @param {String} id La id con la que se creará el link
      * @param {String} title El texto que saldrá en el sidebar
@@ -320,7 +352,7 @@ class Dashboard {
         let d = document.createElement("div");
 
         let f = x => x.id === id;
-        let guildItem = this.guild.roles.find(f) || this.guild.channels.find(f)
+        let guildItem = this.guild.roles.find(f) || this.guild.channels.find(f) || this.guild.categories.find(f);
 
         d.dataset.id = id;
         d.innerHTML = guildItem.name;
@@ -344,6 +376,7 @@ class Dashboard {
         this.#findAndSync("functions-darkshop", active)
         this.#findAndSync("functions-rep_to_currency", active)
         this.#findAndSync("functions-currency_to_exp", active)
+        this.#findAndSync("functions-staff_reminders", active)
 
         this.#findAndSync("logs-guild-messageDelete", active)
         this.#findAndSync("logs-guild-messageUpdate", active)
@@ -362,9 +395,10 @@ class Dashboard {
 
         this.#findAndSync("automoderation-remove_links", active)
 
-        const minimum = this.doc.settings.minimum;
-        this.#findAndSync("blackjack_bet", minimum);
-        this.#findAndSync("darkshop_level", minimum);
+        const quantities = this.doc.settings.quantities;
+        this.#findAndSync("blackjack_bet", quantities);
+        this.#findAndSync("darkshop_level", quantities);
+        this.#findAndSync("percentage_skipfirewall", quantities);
 
         const functions = this.doc.settings.functions;
         this.#findAndSync("adjust_shop", functions);
@@ -375,6 +409,8 @@ class Dashboard {
 
         this.#findAndSync("levels_deleteOldRole", functions);
         this.#findAndSync("save_roles_onleft", functions);
+        this.#findAndSync("sug_remind", functions);
+        this.#findAndSync("ticket_remind", functions);
 
         this.#findAndSync("min_exp", functions);
         this.#findAndSync("max_exp", functions);
@@ -390,6 +426,7 @@ class Dashboard {
 
         this.#findAndSync("birthday", roles)
         this.#findAndSync("darkshop_news", roles)
+        this.#findAndSync("suggester_role", roles)
 
         this.#findAndSync("levels", roles)
 
@@ -401,11 +438,19 @@ class Dashboard {
         this.#findAndSync("general-announcements", channels)
         this.#findAndSync("general-halloffame", channels)
 
+        this.#findAndSync("darkshop-events", channels)
+
         this.#findAndSync("logs-guild_logs", channels)
         this.#findAndSync("logs-moderation_logs", channels)
         this.#findAndSync("logs-staff_logs", channels)
+        this.#findAndSync("logs-suggestions", channels)
 
         this.#findAndSync("chat_rewards", channels)
+
+        const categories = this.doc.categories;
+
+        this.#findAndSync("tickets", categories)
+
     }
 
     /**
@@ -434,6 +479,9 @@ class Dashboard {
             active = active ? active[p] : undefined;
         }
 
+        let listType = el.className.includes("role") ? this.guild.roles : 
+        el.className.includes("channel") ? this.guild.channels : this.guild.categories;
+
         switch (typeof active) {
             case "boolean": // Switches
                 if (active) el.classList.add("active");
@@ -455,7 +503,7 @@ class Dashboard {
 
                     const synced = el.childNodes;
 
-                    let list = this.#createList(el.className.includes("role") ? this.guild.roles : this.guild.channels, synced);
+                    let list = this.#createList(listType, synced);
                     el.append(list)
                 } else {
 
@@ -463,22 +511,22 @@ class Dashboard {
                 break;
 
             case "string":
-                if ((el.classList.contains("role-drop") || el.classList.contains("channel-drop"))) {
+                if (el.className.includes("drop")) {
                     if(active.length > 0) {
                         el.innerHTML = "";
                         let d = this.#itemOfList(active)
                         el.appendChild(d)
                     }
                     
-                    let list = this.#createList(el.className.includes("role") ? this.guild.roles : this.guild.channels, el.childNodes);
+                    let list = this.#createList(listType, el.childNodes);
                     el.append(list)
                 }
                 break;
 
             default:
-                if (el.classList.contains("role-drop") || el.classList.contains("channel-drop")) {
+                if (el.className.includes("drop")) {
                     el.innerHTML = "";
-                    let list = this.#createList(el.className.includes("role") ? this.guild.roles : this.guild.channels, []);
+                    let list = this.#createList(listType, []);
                     el.append(list)
                 }
         }
@@ -602,8 +650,9 @@ class Dashboard {
         let ds = this.#createBoolSelector("darkshop", { title: "DarkShop", id: "functions-darkshop" });
         let repcurr = this.#createBoolSelector("rep_to_currency", { title: "Rep -> $", id: "functions-rep_to_currency" });
         let currexp = this.#createBoolSelector("currency_to_exp", { title: "$ -> EXP", id: "functions-currency_to_exp" });
+        let staffreminders = this.#createBoolSelector("staff_reminders", { title: "Recordatorios al STAFF", id: "functions-staff_reminders" });
 
-        this.#appendChilds(funciones, [suggestions, tickets, flogs, bd, ds, repcurr, currexp]);
+        this.#appendChilds(funciones, [suggestions, tickets, flogs, bd, ds, repcurr, currexp, staffreminders]);
 
         /*
         ========
@@ -665,22 +714,22 @@ class Dashboard {
         this.#appendChilds(contents, [funciones, glogs, modlogs, stafflogs, automod])
     }
 
-    async #minimumHandler() {
+    async #quantitiesHandler() {
         const container = this.container;
         const contents = document.createElement("div")
         contents.id = "contents";
 
         let title = document.createElement("h1");
-        title.innerText = "Cantidades mínimas";
+        title.innerText = "Cantidades";
         contents.appendChild(title)
 
         container.appendChild(contents);
 
-        let main = this.#createDivSection("minimum");
+        let main = this.#createDivSection("quantities");
         main.classList.add("wrap")
 
         let blackjackbet = this.#createNumberSelector("blackjackbet", {
-            title: "Apuesta de Blackjack",
+            title: "Apuesta mínima en Blackjack",
             placeholder: "Cantidad mínima para apostar",
             id: "blackjack_bet"
         }, { min: 1 });
@@ -691,7 +740,13 @@ class Dashboard {
             id: "darkshop_level"
         }, { min: 0 });
 
-        this.#appendChilds(main, [blackjackbet, darkshoplvl]);
+        let skipfirewall = this.#createNumberSelector("dsskip", {
+            title: "Probabilidad de saltarse la Firewall",
+            placeholder: "Probabilidad de que el item funcione",
+            id: "percentage_skipfirewall"
+        }, { min: 0, max: 100 });
+
+        this.#appendChilds(main, [blackjackbet, darkshoplvl, skipfirewall]);
 
         this.#appendChilds(contents, [main])
     }
@@ -721,6 +776,18 @@ class Dashboard {
             title: "Eliminar roles viejos por nivel",
             id: "levels_deleteOldRole"
         });
+
+        let dayRemindSug = this.#createNumberSelector("sugremind", {
+            title: "Días pasados necesarios (sugerencias)",
+            placeholder: "Días para que se recuerde las sugerencias sin respuesta",
+            id: "sug_remind"
+        }, { min: 1 });
+
+        let dayRemindTicket = this.#createNumberSelector("ticketremind", {
+            title: "Días pasados necesarios (tickets)",
+            placeholder: "Días para que se recuerde los tickets sin respuesta",
+            id: "ticket_remind"
+        }, { min: 1 });
 
         // ECONOMIA
         let shop = this.#createDivSection("shop");
@@ -777,7 +844,7 @@ class Dashboard {
             id: "max_curr"
         }, { min: 1 });
 
-        this.#appendChilds(main, [saveRoles, lvlsOldRole]);
+        this.#appendChilds(main, [saveRoles, lvlsOldRole, dayRemindSug, dayRemindTicket]);
         this.#appendChilds(shop, [shopadjust, dsadjust, basedarkshop, currperrep]);
         this.#appendChilds(econ, [minexp, maxexp, mincur, maxcur]);
 
@@ -831,13 +898,19 @@ class Dashboard {
             max: 1
         });
 
+        let suggester = this.#createRoleSelector("rbd", {
+            title: "Role de recompensa de sugerencias",
+            id: "suggester_role",
+            max: 1
+        });
+
         let dsRole = this.#createRoleSelector("rbd", {
             title: "Role de eventos DarkShop",
             id: "darkshop_news",
             max: 1
         });
 
-        this.#appendChilds(generals, [users, bots, bd, dsRole]);
+        this.#appendChilds(generals, [users, bots, bd, suggester, dsRole]);
 
         this.#appendChilds(contents, [staff, generals])
     }
@@ -888,6 +961,18 @@ class Dashboard {
         });
 
         this.#appendChilds(general, [rules, info, faq, news, hof]);
+
+        let ds = this.#createDivSection("darkshop");
+        ds.classList.add("wrap")
+        ds.append("DarkShop")
+
+        let events = this.#createChannelSelector("cdsevents", {
+            title: "Eventos",
+            id: "darkshop-events",
+            max: 1
+        });
+
+        this.#appendChilds(ds, [events]);
         
         let logs = this.#createDivSection("logs");
         logs.classList.add("wrap")
@@ -911,9 +996,40 @@ class Dashboard {
             max: 1
         });
 
-        this.#appendChilds(logs, [guilds, moderation, staff]);
+        let sugs = this.#createChannelSelector("lsugs", {
+            title: "Sugerencias",
+            id: "logs-suggestions",
+            max: 1
+        });
 
-        this.#appendChilds(contents, [general, logs])
+        this.#appendChilds(logs, [guilds, moderation, staff, sugs]);
+
+        this.#appendChilds(contents, [general, ds, logs])
+    }
+
+    async #categoriesHandler() {
+        const container = this.container;
+        const contents = document.createElement("div")
+        contents.id = "contents";
+
+        let title = document.createElement("h1");
+        title.innerText = "Categorías";
+        contents.appendChild(title)
+
+        container.appendChild(contents);
+
+        let main = this.#createDivSection("main");
+        main.classList.add("wrap")
+
+        let tickets = this.#createCategorySelector("ctickets", {
+            title: "Tickets",
+            id: "tickets",
+            max: 1
+        });
+
+        this.#appendChilds(main, [tickets]);
+
+        this.#appendChilds(contents, [main])
     }
 
     async #levelRolesHandler() {
@@ -1041,9 +1157,9 @@ class Dashboard {
                 this.#type = this.ApiUpdate.ActiveModules;
                 break;
 
-            case "minimum":
-                await this.#minimumHandler();
-                this.#type = this.ApiUpdate.Minimum;
+            case "quantities":
+                await this.#quantitiesHandler();
+                this.#type = this.ApiUpdate.Quantities;
                 break;
 
             case "functions":
@@ -1059,6 +1175,11 @@ class Dashboard {
             case "levels":
                 await this.#levelRolesHandler();
                 this.#type = this.ApiUpdate.LevelRoles;
+                break;
+
+            case "categories":
+                await this.#categoriesHandler();
+                this.#type = this.ApiUpdate.Categories;
                 break;
 
             case "channels":
@@ -1090,6 +1211,7 @@ class Dashboard {
 
         this.#drop("role-drop");
         this.#drop("channel-drop");
+        this.#drop("category-drop");
 
         this.#buttons();
     }
@@ -1144,7 +1266,8 @@ class Dashboard {
      */
     #drop(classname) {
         var array = document.querySelectorAll(`.${classname}`);
-        let dropList = classname.includes("role") ? this.guild.roles : this.guild.channels;
+        let dropList = classname.includes("role") ? this.guild.roles :
+        classname.includes("channel") ? this.guild.channels : this.guild.categories;
 
         for (const drop of array) {
             function translate(nodes) {
@@ -1168,6 +1291,7 @@ class Dashboard {
                 }
 
                 let clicked = click.target;
+
 
                 if (clicked.className.length < 1) {
                     clicked = clicked.querySelector("div") ?? clicked;
@@ -1315,7 +1439,7 @@ class Dashboard {
         this.#addSeparator(this.sidebar);
 
         const active = this.#createSidebarOption("active_modules", "Módulos activos")
-        const minimum = this.#createSidebarOption("minimum", "Cantidades mínimas")
+        const quantities = this.#createSidebarOption("quantities", "Cantidades")
         const functions = this.#createSidebarOption("functions", "Funciones")
 
         this.#addSeparator(this.sidebar);
@@ -1326,6 +1450,7 @@ class Dashboard {
         this.#addSeparator(this.sidebar);
 
         const canales = this.#createSidebarOption("channels", "Canales")
+        const categorias = this.#createSidebarOption("categories", "Categorías")
         const rewards = this.#createSidebarOption("chat_rewards", "Canales de recompensas")
 
         this.#addSeparator(this.sidebar);
@@ -1443,8 +1568,8 @@ class Dashboard {
                     // revisar que sea un numero y que cumpla con las condiciones de minimo y maximo
                     if (
                         (typeof value !== "number" && isNaN(value)) ||
-                        value < inputElement.min ||
-                        value > inputElement.max
+                        Number(value) < Number(inputElement.min) ||
+                        Number(value) > Number(inputElement.max)
                     ) {
                         valid = false;
                         this.problems.set(inputElement.parentElement, value);
@@ -1502,6 +1627,8 @@ class Dashboard {
                 duration: 100,
                 iterations: 3,
             })
+
+            console.info(this.problems);
 
             return valid;
         }

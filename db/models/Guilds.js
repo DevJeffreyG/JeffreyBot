@@ -12,6 +12,7 @@ const GuildSchema = new Schema({
                 channel_id: { type: String, required: true },
                 message_id: { type: String, required: true },
                 start_date: { type: Date, default: () => new Date() },
+                last_reminded: { type: Date, default: null },
                 end_date: { type: Date, default: null },
                 end_reason: { type: String, default: null },
                 ended_by: { type: String, default: null },
@@ -25,6 +26,7 @@ const GuildSchema = new Schema({
                 message_id: { type: String, required: true },
                 suggestion: { type: String, required: true },
                 accepted: { type: Boolean, default: null },
+                reason: { type: String, default: null},
                 id: { type: Number, sparse: true }
             }
         ],
@@ -92,7 +94,8 @@ const GuildSchema = new Schema({
                 birthdays: { type: Boolean, default: false },
                 darkshop: { type: Boolean, default: false },
                 rep_to_currency: { type: Boolean, default: false },
-                currency_to_exp: { type: Boolean, default: false }
+                currency_to_exp: { type: Boolean, default: false },
+                staff_reminders: { type: Boolean, default: true }
             },
             logs: {
                 guild: {
@@ -123,9 +126,10 @@ const GuildSchema = new Schema({
             channel_id: { type: String },
             message_id: { type: String }
         },
-        minimum: {
+        quantities: {
             blackjack_bet: { type: Number, default: 1000 },
-            darkshop_level: { type: Number, default: 5 }
+            darkshop_level: { type: Number, default: 5 },
+            percentage_skipfirewall: { type: Number, default: 100 }
         },
         functions: {
             adjust_shop: { type: Boolean, default: true },
@@ -138,6 +142,8 @@ const GuildSchema = new Schema({
             max_exp: { type: Number, default: 35, integer: true },
             min_curr: { type: Number, default: 5, integer: true },
             max_curr: { type: Number, default: 15, integer: true },
+            sug_remind: { type: Number, default: 7, integer: true },
+            ticket_remind: { type: Number, default: 7, integer: true },
         }
     },
     roles: { // id de roles
@@ -152,13 +158,15 @@ const GuildSchema = new Schema({
             }
         ],
         birthday: { type: String },
-        darkshop_news: { type: String }
+        darkshop_news: { type: String },
+        suggester_role: { type: String }
     },
     channels: {
         logs: {
             guild_logs: { type: String },
             moderation_logs: { type: String },
             staff_logs: { type: String },
+            suggestions: { type: String }
         },
         chat_rewards: [
             {
@@ -181,6 +189,9 @@ const GuildSchema = new Schema({
         darkshop: {
             events: { type: String }
         }
+    },
+    categories: {
+        tickets: { type: String }
     },
     emojis: {
         economy: {
@@ -342,7 +353,6 @@ GuildSchema.method("getBots", function () {
 
 GuildSchema.method("getChannel", function(query) {
     let general = this.channels;
-    console.log(general)
     const q = query.split(".");
 
     if(q.length >= 1){

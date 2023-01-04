@@ -27,8 +27,8 @@ module.exports = (app) => {
                 query = "settings.active_modules";
                 break;
 
-            case ApiUpdate.Minimum:
-                query = "settings.minimum";
+            case ApiUpdate.Quantities:
+                query = "settings.quantities";
                 break;
 
             case ApiUpdate.Functions:
@@ -49,6 +49,10 @@ module.exports = (app) => {
 
             case ApiUpdate.RewardChannels:
                 query = "channels.chat_rewards";
+                break;
+
+            case ApiUpdate.Categories:
+                query = "categories";
                 break;
         }
 

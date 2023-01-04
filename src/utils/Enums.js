@@ -66,13 +66,17 @@ const Categories = new Enum({
  * - Firewall
  * - Subscription
  * - Temporal
+ * - SkipFirewall
+ * - CriminalPedia
  */
 const ItemTypes = new Enum({
     StackOverflow: 1,
     ResetInterest: 2,
     Firewall: 3,
     Subscription: 4,
-    Temporal: 5
+    Temporal: 5,
+    SkipFirewall: 6,
+    CriminalPedia: 7
 }).values
 
 /**
@@ -178,14 +182,16 @@ const Tendencies = new Enum({
 /**
  * - GuildLogs - Logs para los eventos del servidor
  * - ModerationLogs - Logs para los comandos de moderación
- * - StaffLogs - Interacciones de usuarios en el server (tickets, sugerencias, etc) o simplemente logs/info para Staffs
+ * - StaffLogs - Interacciones de usuarios en el server (tickets, recordatorios, etc) o simplemente logs/info para Staffs
  * - ClientLogs - Logs para Developer
+ * - SuggestionLogs - Donde se envían las sugerencias 
  */
 const ChannelModules = new Enum({
     GuildLogs: "guild_logs",
     ModerationLogs: "moderation_logs",
     StaffLogs: "staff_logs",
-    ClientLogs: "client_logs"
+    ClientLogs: "client_logs",
+    SuggestionLogs: "suggestions"
 }).values
 
 /**
@@ -219,21 +225,23 @@ const LogReasons = new Enum({
 
 /**
  * - ActiveModules
- * - Minimum
+ * - Quantities
  * - Functions
  * - Roles
  * - LevelRoles
  * - Channels
  * - RewardChannels
+ * - Categories
  */
 const ApiUpdate = new Enum({
     ActiveModules: 1,
-    Minimum: 2,
+    Quantities: 2,
     Functions: 3,
     Roles: 4,
     LevelRoles: 5,
     Channels: 6,
-    RewardChannels: 7
+    RewardChannels: 7,
+    Categories: 8
 }).values
 
 module.exports = {

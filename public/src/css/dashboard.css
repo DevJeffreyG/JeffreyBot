@@ -237,7 +237,7 @@ dashboard #sidebar a.active:hover {
     font-size: 40px;
 }
 
-.role-drop, .channel-drop {
+.role-drop, .channel-drop, .category-drop {
     position: relative;
     
     display: flex;
@@ -265,7 +265,7 @@ dashboard #sidebar a.active:hover {
     right: .3em;
 }
 
-.role-drop > div, .channel-drop > div {
+.role-drop > div, .channel-drop > div, .category-drop > div {
     user-select: none;
     height: 80%;
     font-size: .45em;
@@ -283,7 +283,7 @@ dashboard #sidebar a.active:hover {
     margin-right: .1em;
 }
 
-.channel-drop > div::before {
+.channel-drop > div::before, .category-drop > div::before {
     content: "#";
     margin-right: .1em;
 }
