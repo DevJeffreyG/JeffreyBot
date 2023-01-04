@@ -1,10 +1,10 @@
-const { ActionRowBuilder, SelectMenuBuilder, ButtonBuilder, PermissionsBitField, time } = require("discord.js");
+const { ActionRowBuilder, SelectMenuBuilder, ButtonBuilder, PermissionsBitField, time, MessageComponentInteraction, StringSelectMenuBuilder } = require("discord.js");
 const { ButtonStyle } = require("discord-api-types/v10");
 
-const Embed = require("./Embed");
-const ErrorEmbed = require("./ErrorEmbed");
+const Embed = require("../utils/Embed");
+const ErrorEmbed = require("../utils/ErrorEmbed");
 
-const { Confirmation, FindNewId, isBannedFrom } = require("./functions");
+const { Confirmation, FindNewId, isBannedFrom } = require("../utils/functions");
 
 const Config = require("../resources/base.json");
 const Colores = require("../resources/colores.json");
@@ -12,13 +12,16 @@ const Colores = require("../resources/colores.json");
 const { Guilds, Users } = require("mongoose").models;
 
 const ms = require("ms");
-const Log = require("./Log");
-const { ChannelModules } = require("./Enums");
+const Log = require("../utils/Log");
+const { ChannelModules } = require("../utils/Enums");
 
 const ticketCooldown = ms("1m");
 const activeCreatingTicket = new Map();
 
 class Ticket {
+    /**
+     * @param {MessageComponentInteraction} interaction 
+     */
     constructor(interaction) {
         let info = this.#getTicketInfo(interaction)
         this.interaction = interaction;
@@ -46,9 +49,8 @@ class Ticket {
 
     async handle() {
         this.user = await Users.getOrCreate({ guild_id: this.guild.id, user_id: this.userId });
-        this.doc = await Guilds.getOrCreate(this.interaction.guild.id);
 
-        if(!this.doc.moduleIsActive("functions.tickets")) return new ErrorEmbed(this.interaction, {type: "moduleDisabled"}).send(true);
+        if(!this.docGuild.moduleIsActive("functions.tickets")) return new ErrorEmbed(this.interaction, {type: "moduleDisabled"}).send({ephemeral: true});
         if (!this.interaction.deferred) await this.interaction.deferReply({ ephemeral: true });
 
         switch (this.customId) {
@@ -72,7 +74,7 @@ class Ticket {
 
     async #createTicket() {
         const interaction = this.interaction;
-        const doc = this.doc;
+        const doc = this.docGuild;
 
         // baneado de crear tickets
         if (await isBannedFrom(interaction, "TICKETS")) return new ErrorEmbed(interaction, { type: "moduleBanned" }).send();
@@ -85,7 +87,7 @@ class Ticket {
             activeCreatingTicket.delete(interaction.user.id)
         }, ticketCooldown)
 
-        let selectMenuTopic = new SelectMenuBuilder()
+        let selectMenuTopic = new StringSelectMenuBuilder()
             .setCustomId("selectTopic")
             .setPlaceholder("¿Qué necesitas hablar con el STAFF?")
             .addOptions(
@@ -119,7 +121,7 @@ class Ticket {
         let newId = await FindNewId(await Guilds.find(), "data.tickets", "id");
 
         const channelName = `ticket${newId}-${topic}-${this.userId}`;
-        const category = this.client.user.id === Config.testingJBID ? this.guild.channels.cache.find(x => x.id === "919009755857555496") : this.guild.channels.cache.find(x => x.id === Config.ticketsCategory);
+        const category = this.guild.channels.cache.get(this.docGuild.getCategory("tickets"));
         const ticketType = topic.toUpperCase();
 
         let general = new Embed()
@@ -264,7 +266,7 @@ class Ticket {
             created_by: interaction.user.id,
             channel_id: toPin.channel.id,
             message_id: toPin.id,
-            start_date: new Date(),
+            creation_date: new Date(),
             id: newId
         });
 
