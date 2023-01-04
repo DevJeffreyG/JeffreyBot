@@ -4,7 +4,6 @@ const Embed = require("./Embed");
 const ErrorEmbed = require("./ErrorEmbed");
 const InteractivePages = require("./InteractivePages");
 const FilePages = require("./FilePages");
-const Ticket = require("./Ticket");
 const Shop = require("./Shop");
 const DarkShop = require("./DarkShop");
 const Top = require("./Top");
@@ -14,6 +13,7 @@ const Managers = require("./Managers");
 const Blackjack = require("./Blackjack");
 const Log = require("./Log");
 const CustomEmojis = require("./CustomEmojis");
+const Modal = require("./Modal");
 
 const Enums = require("./Enums");
 const Functions = require("./functions");
@@ -25,7 +25,6 @@ module.exports = {
     ErrorEmbed,
     InteractivePages,
     FilePages,
-    Ticket,
     Shop,
     DarkShop,
     Top,
@@ -35,6 +34,7 @@ module.exports = {
     Blackjack,
     Log,
     CustomEmojis,
+    Modal,
     
     ...Enums,
     ...Functions
