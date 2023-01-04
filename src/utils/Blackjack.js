@@ -410,12 +410,12 @@ class Blackjack {
         });
 
         this.doc = await Guilds.getOrCreate(this.interaction.guild.id);
-        if (this.bet < this.doc.settings.minimum.blackjack_bet) {
+        if (this.bet < this.doc.settings.quantities.blackjack_bet) {
             return new ErrorEmbed(this.interaction, {
                 type: "execError",
                 data: {
                     command: this.interaction.commandName,
-                    guide: `La apuesta debe ser **${this.Emojis.Currency}${this.doc.settings.minimum.blackjack_bet.toLocaleString("es-CO")}** o mayor.`
+                    guide: `La apuesta debe ser **${this.Emojis.Currency}${this.doc.settings.quantities.blackjack_bet.toLocaleString("es-CO")}** o mayor.`
                 }
             }).send()
         }

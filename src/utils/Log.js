@@ -138,7 +138,7 @@ class Log {
                 isEnabled = this.#doc.moduleIsActive("logs.staff.settings");
                 break;
 
-            case LogReasons.Settings:
+            case LogReasons.Error:
                 isEnabled = this.#doc.moduleIsActive("logs.staff.errors");
                 break;
         }
@@ -188,6 +188,7 @@ class Log {
 
     /**
      * Envía el log al canal configurado dependiendo su tipo
+     * @returns {Promise<Message | null>}
      */
     async send(options = { embed: null, content: null, embeds: [], components: [] }) {
         let { content, embeds, components, embed } = options;
@@ -201,9 +202,7 @@ class Log {
             if(embed){
                 if(embed instanceof Embed) msg = await this.channel?.send({ content, embeds: [embed], components }).catch();
                 else if(embed instanceof ErrorEmbed) msg = await embed.send()
-            }
-
-            msg = await this.channel?.send({ content, embeds, components }).catch();
+            } else msg = await this.channel?.send({ content, embeds, components }).catch();
 
             if (!msg && this.channel)
                 await this.#jeffreyMessageError.send()

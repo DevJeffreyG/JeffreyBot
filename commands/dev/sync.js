@@ -29,9 +29,9 @@ command.addSubcommand({
 })
 
 command.addOption({
-    type: "string",
-    name: "id",
-    desc: "Id del role a sincronizar",
+    type: "role",
+    name: "role",
+    desc: "Role a sincronizar con los permisos default de un mute",
     req: true,
     sub: "mute"
 })
@@ -45,10 +45,9 @@ command.execute = async (interaction, models, params, client) => {
     switch (subcommand) {
         case "mute": {
             await interaction.editReply({ content: `${Emojis.Loading} Sincronizando...` })
-            const role = interaction.guild.roles.cache.find(x => x.id === params[subcommand].id.value);
+            const role = params[subcommand].role.role;
 
             const perms = {
-                [PermissionsBitField.Flags.ViewChannel]: false,
                 [PermissionsBitField.Flags.SendMessages]: false,
                 [PermissionsBitField.Flags.AddReactions]: false
             }

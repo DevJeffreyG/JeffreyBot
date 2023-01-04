@@ -41,7 +41,7 @@ module.exports = async (client, reaction, user) => {
     })
 
     // AWARDS
-    // REWORK NEEDED
+    // TODO: REWORK NEEDED
     return;
     let silver = client.user.id === Config.testingJBID ? "880602500414201866" : Config.silverAward;
     let gold = client.user.id === Config.testingJBID ? "880602498224771092" : Config.goldAward;

@@ -41,7 +41,7 @@ module.exports = async (client, oldMessage, message) => {
       spamChannel = message.guild.channels.cache.find(x => x.id === "537095712102416384");
       gdpsSupportChannel = message.guild.channels.cache.find(x => x.id === "537095712102416384");
     }
-    // links
+    // TODO: links
     if (member.permissions.has("EMBED_LINKS") || channel === offtopicChannel || channel === spamChannel || channel === gdpsSupportChannel) return;
   
     for (let i = 0; i < startLinks.length; i++) {
