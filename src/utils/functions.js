@@ -1,4 +1,4 @@
-const { PermissionsBitField, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, EmbedBuilder, Guild, GuildMember, CommandInteraction, BaseInteraction, Message, Client } = require("discord.js");
+const { PermissionsBitField, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, EmbedBuilder, Guild, GuildMember, CommandInteraction, BaseInteraction, Message, Client, time, hyperlink } = require("discord.js");
 const { ButtonStyle, OverwriteType, ActivityType } = require("discord-api-types/v10");
 
 const Config = require("../resources/base.json");
@@ -30,31 +30,6 @@ const { Bases } = require("../resources");
 /* ##### MONGOOSE ######## */
 const RandomCumplido = function (force = null) {
   return force ? Cumplidos.c[force] : Cumplidos.c[Math.floor(Math.random() * Cumplidos.c.length)];
-}
-
-/**
- * @deprecated
- * @param {*} client 
- * @param {*} guild 
- */
-const findLvls5 = async function (client, guild) {
-  let role = client.user.id === Config.testingJBID ? guild.roles.cache.find(x => x.id === "791006500973576262") : guild.roles.cache.find(x => x.id === Config.dsRole);
-  Exps.find({
-    serverID: guild.id
-  }, async (err, exps) => {
-    if (err) throw err;
-
-    if (!exps) return;
-
-    for (let i = 0; i < exps.length; i++) {
-      let exp = exps[i];
-      let member = guild.members.cache.find(x => x.id === exp.userID);
-
-      if (exp.level >= 5) {
-        if (member && !member.roles.cache.find(x => x.id === role.id)) await member.roles.add(role);
-      }
-    }
-  })
 }
 
 const GetChangesAndCreateFields = async function (logsFetched) {
@@ -323,7 +298,7 @@ const GenerateLog = async function (guild, options = {
 }) {
   let { logType, logReason, header, footer, description, header_icon, footer_icon, color, fields } = options;
 
-  if (!footer) return console.log("🔴 NO TIENE FOOTER", options)
+  if (!footer) console.log("🔴 NO TIENE FOOTER", options)
   logType = logType ?? ChannelModules.GuildLogs;
   logReason = logReason ?? LogReasons.Logger;
   description = description ?? [];
@@ -352,7 +327,7 @@ const GenerateLog = async function (guild, options = {
 
   let docGuild = await Guilds.findOne({ guild_id: guild.id }) ?? null;
 
-  if (!docGuild) return console.error("No se ha configurado un logchannel en el servidor", guild.name);
+  if (!docGuild) return console.error("🔴 No se ha configurado un logchannel en el servidor", guild.name);
 
   return await new Log()
     .setGuild(guild)
@@ -619,67 +594,64 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
       }
     }
   })
-  return;
-}
 
-/**
- * Add warns to an user
- * @deprecated
- * @param {string} v The ID of the user
- * @param {number} c The number of warns to add
- */
-const AddWarns = function (v, c) {
-  Warns.findOne({
-    userID: v.id
-  }, (err, victimWarns) => {
-    if (err) throw err;
+  // buscar tickets sin respuesta
+  ticketReminder:
+  for (const ticket of doc.data.tickets) {
+    if (!doc.moduleIsActive("functions.staff_reminders")) break ticketReminder;
+    if (ticket.end_date) continue;
 
-    if (!victimWarns) {
-      const newWarn = new Warns({
-        userID: v.id,
-        warns: c
-      });
-      newWarn.save();
-    } else {
-      victimtotalWarns += c;
-      victimWarns.save();
+    let lastReminded = ticket.last_reminded ? moment(ticket.last_reminded) : ticket.creation_date;
+    let dayDiff = moment().diff(lastReminded, "d");
+
+    if (dayDiff >= doc.settings.functions.ticket_remind) { // si la dif se cumple con la config, recordar
+      let embed = new Embed()
+        .defAuthor({ text: "Recordatorio de Ticket", icon: guild.iconURL({ dynamic: true }) })
+        .defDesc(`Hay un ticket que no ha recibido atención por más de ${doc.settings.functions.ticket_remind} días (${dayDiff}d).`)
+        .defField(ticket.type, `**—** Creado por ${guild.members.cache.get(ticket.created_by)}.
+**—** ${guild.channels.cache.get(ticket.channel_id)}, el ${time(ticket.creation_date)}`)
+        .defColor(Colores.verde)
+
+      await new Log()
+        .setTarget(ChannelModules.StaffLogs)
+        .setReason(LogReasons.Logger)
+        .setGuild(guild)
+        .send({ embed })
+
+      ticket.last_reminded = new Date();
     }
-  })
-}
+  }
 
-/**
- * Add Interest if the item does not ignore it.
- * @deprecated
- * @param {Object[]} author The Discord.JS User
- * @param {number} idUse The ID of the item to check
- */
-const Interest = function (author, idUse) {
-  DarkItems.findOne({
-    id: idUse
-  }, (err, item) => {
-    TotalPurchases.findOne({
-      userID: author.id,
-      itemID: idUse
-    }, (err, alli) => {
+  suggestionReminder:
+  for (const suggestion of doc.data.suggestions) {
+    if (!doc.moduleIsActive("functions.staff_reminders")) break suggestionReminder;
+    if (typeof suggestion.accepted === "boolean") continue;
 
-      if (item.ignoreInterest == false && !alli) {
-        const newAll = new TotalPurchases({
-          userID: author.id,
-          itemID: idUse,
-          quantity: 1,
-          isDarkShop: true
-        });
+    let lastReminded = suggestion.last_reminded ? moment(suggestion.last_reminded) : suggestion.creation_date;
+    let dayDiff = moment().diff(lastReminded, "d");
+    let channel = await guild.channels.fetch(suggestion.channel_id);
+    let message = await channel.messages.fetch(suggestion.message_id);
 
-        return newAll.save();
-      } else if (item.ignoreInterest == false && alli) {
-        alli.quantity += 1;
-        return alli.save();
-      } else {
-        // no hacer nada, se ignora el interés
-        return;
-      }
-    })
-  })
+    if (dayDiff >= doc.settings.functions.sug_remind) { // si la dif se cumple con la config, recordar
+      let embed = new Embed()
+        .defAuthor({ text: "Recordatorio de sugerencia", icon: guild.iconURL({ dynamic: true }) })
+        .defDesc(`Hay una sugerencia que no ha recibido atención por más de ${doc.settings.functions.sug_remind} días (${dayDiff}d).`)
+        .defField(`ID: ${suggestion.id}`, `**—** Sugerencia por ${guild.members.cache.get(suggestion.user_id)}.
+**—** ${hyperlink("Mensaje de sugerencia", message.url)}, el ${time(suggestion.creation_date)}`)
+        .defColor(Colores.verde)
+
+      await new Log()
+        .setTarget(ChannelModules.StaffLogs)
+        .setReason(LogReasons.Logger)
+        .setGuild(guild)
+        .send({ embed })
+
+      suggestion.last_reminded = new Date();
+    }
+  }
+
+  await doc.save();
+  return;
 }
 
 /**
@@ -790,306 +762,178 @@ const VaultWork = function (vault, user, interaction, notCodeEmbed) { // mostrar
   return interactive.init(interaction);
 }
 
+/**
+ * @param {Client} client 
+ */
 const handleUploads = async function (client) {
-  let guild, bellytChannel, belltwChannel, belltvChannel, role;
 
-  if (client.user.id === Config.testingJBID) {
-    guild = client.guilds.cache.find(x => x.id === "482989052136652800");
-    bellytChannel = client.channels.cache.find(x => x.id === "881031615084634182");
-    belltwChannel = client.channels.cache.find(x => x.id === "881031732369960990");
-    belltvChannel = client.channels.cache.find(x => x.id === "881031774174588968");
-    role = guild.roles.cache.find(x => x.id === "881028196282290256")
-  } else {
-    bellytChannel = client.channels.cache.find(x => x.id === Config.bellytChannel);
-    belltwChannel = client.channels.cache.find(x => x.id === Config.belltwChannel);
-    belltvChannel = client.channels.cache.find(x => x.id === Config.belltvChannel);
-    role = guild.roles.cache.find(x => x.id === Config.bellRole)
-  }
+  for await (const guild of client.guilds.cache.values()) {
+    if (guild.id != Config.jgServer && guild.id != Bases.dev.guild) continue;
 
-  // revisar si existe el globaldata
-  let interval = ms("30s");
-  let query = await GlobalDatas.findOne({
-    "info.type": "bellNotification"
-  });
+    const doc = await Guilds.getOrCreate(guild.id);
 
-  if (!query) {
-    const newNotification = new GlobalDatas({
-      info: {
-        type: "bellNotification",
-        postedVideos: [{ "what": "DELETETHIS" }],
-        postedTweets: [{ "what": "DELETETHIS" }],
-        postedOnLive: [{ "what": "DELETETHIS" }]
-      }
-    })
+    const bellytChannel = client.channels.cache.get(doc.getChannel("notifier.youtube_notif"));
+    const belltwChannel = client.channels.cache.get(doc.getChannel("notifier.twitter_notif"));
+    const belltvChannel = client.channels.cache.get(doc.getChannel("notifier.twitch_notif"));
 
-    await newNotification.save();
-    query = await GlobalDatas.findOne({
+    const ytRole = guild.roles.cache.get(doc.getRole("notifications.youtube"));
+    const twRole = guild.roles.cache.get(doc.getRole("notifications.twitter"));
+    const tvRole = guild.roles.cache.get(doc.getRole("notifications.twitch"));
+
+    // revisar si existe el globaldata
+    let interval = ms("30s");
+    let noti = await GlobalDatas.findOne({
       "info.type": "bellNotification"
     });
-  }
 
-  setInterval(async () => {
-    let config = {
+    if (!noti) {
+      const newNotification = new GlobalDatas({
+        info: {
+          type: "bellNotification",
+          lastVideo: null,
+          lastTweet: null,
+          lastLive: null
+        }
+      })
+
+      await newNotification.save();
+      noti = await GlobalDatas.findOne({
+        "info.type": "bellNotification"
+      });
+    }
+
+    const config = {
       youtube_channelId: "UCCYiF7GGja7iJgsc4LN0oHw",
       twitter_screenname: "JeffreyG__",
       twitch_username: "jeffreyg_"
     }
 
-    // youtube
-    let comentarios = ["Ha llegado el momento, chécalo para evitar que Jeffrey entre en depresión", "Dale like o comenta algo si te gustó lo suficiente :D", "Espero que nos veamos en la próxima, ¡y que no sea en 3 meses!", "BROOOO Está rebueno míralo, a lo bien.", "No sabría decir si es lamentable, espero que no, ¿por qué no lo ves para comprobarlo y me dices qué tal?"]
-    let comentario = comentarios[Math.floor(Math.random() * comentarios.length)];
+    let changed = false;
+    if (bellytChannel && belltwChannel && belltvChannel) setInterval(async () => {
+      // youtube
+      let comentarios = ["Ha llegado el momento, chécalo para evitar que Jeffrey entre en depresión", "Dale like o comenta algo si te gustó lo suficiente :D", "Espero que nos veamos en la próxima, ¡y que no sea en 3 meses!", "BROOOO Está rebueno míralo, a lo bien.", "No sabría decir si es lamentable, espero que no, ¿por qué no lo ves para comprobarlo y me dices qué tal?"]
+      let comentario = GetRandomItem(comentarios);
 
-    google.youtube("v3").activities.list({
-      key: process.env.YOUTUBE_TOKEN,
-      part: "snippet, contentDetails",
-      channelId: config.youtube_channelId
-    })
-      .then(async response => {
-        //console.log(response.data.items[0])
-        let item;
+      google.youtube("v3").activities.list({
+        key: process.env.YOUTUBE_TOKEN,
+        part: "snippet, contentDetails",
+        channelId: config.youtube_channelId
+      })
+        .then(async response => {
+          let item;
 
-        itemLoop:
-        for (let i = 0; i < response.data.items.length; i++) {
-          const _item = response.data.items[i];
+          itemLoop:
+          for (let i = 0; i < response.data.items.length; i++) {
+            const _item = response.data.items[i];
 
-          if (_item.snippet.type === "upload") {
-            item = response.data.items[i];
-            break itemLoop;
-          } else {
-            item = null;
+            if (_item.snippet.type === "upload") {
+              item = response.data.items[i];
+              break itemLoop;
+            } else {
+              item = null;
+            }
           }
-        }
+          if (!item) return;
 
-        if (!item) return;
-
-        const data = item.snippet;
-        const itemId = item.id;
-        const videoId = item.contentDetails.upload.videoId;
-
-        let noti = await GlobalDatas.findOne({
-          "info.type": "bellNotification"
-        });
-
-        let posted = false;
-
-        lastlinkLoop:
-        for (let i = 0; i < noti.info.postedVideos.length; i++) {
-          const video = noti.info.postedVideos[i];
-
-          if (video.id === itemId) {
-            posted = true;
-            break lastlinkLoop;
-          }
-        }
-
-        if (noti.info.postedVideos && posted) return;
-        else {
-
+          const itemId = item.id;
+          const videoId = item.contentDetails.upload.videoId;
           const videoLink = `https://www.youtube.com/watch?v=${videoId}`;
 
-          let toPush = {
-            title: data.title,
-            id: itemId,
-            link: videoLink,
-            author: data.channelTitle
+          if (noti.info.lastVideo === itemId) return; // ya se envió la noti
+          else {
+            changed = true;
+            noti.info.lastVideo = itemId;
+
+            bellytChannel.send({ content: `**:fire::zap:️¡NUEVO VÍDEO, ${ytRole}!:zap:️:fire:**\n\n${comentario}\n\n➟ ${videoLink}` });
           }
+        })
+        .catch(err => console.log("YOUTUBE", err));
 
-          if ((noti.info.postedVideos.length === 1 && noti.info.postedVideos[0].what) || !noti.info.postedVideos) {
-            noti.info.postedVideos[0] = toPush;
-          } else {
-            noti.info.postedVideos.push(toPush);
-          }
-
-          noti.markModified("info");
-          await noti.save();
-
-          let parsed = noti.info.postedVideos[noti.info.postedVideos.length - 1];
-          if (!bellytChannel) return;
-
-          bellytChannel.send({ content: `**:fire::zap:️¡NUEVO VÍDEO, ${role}!:zap:️:fire:**\n\n${comentario}\n\n➟ ${parsed.link}` });
-        }
-
-      })
-      .catch(err => console.log("YOUTUBE", err));
-
-    // twitter
-    const twitterClient = new Twitter({
-      consumer_key: process.env.TWITTER_API,
-      consumer_secret: process.env.TWITTER_SECRET,
-      access_token_key: process.env.TWITTER_ACCESS_TOKEN,
-      access_token_secret: process.env.TWITTER_ACCESS_SECRET
-    });
-
-    twitterClient.get('statuses/user_timeline', { screen_name: config.twitter_screenname, count: 5 }, async function (error, tweets, response) {
-      if (error) throw error;
-      const tweet = tweets[0]; // ultimo tweet de {config.twitter_screenname}
-      const tweetId = tweet.id_str;
-      const link = `https://twitter.com/${config.twitter_screenname}/status/${tweetId}`;
-
-      let noti = await GlobalDatas.findOne({
-        "info.type": "bellNotification"
+      // twitter
+      const twitterClient = new Twitter({
+        consumer_key: process.env.TWITTER_API,
+        consumer_secret: process.env.TWITTER_SECRET,
+        access_token_key: process.env.TWITTER_ACCESS_TOKEN,
+        access_token_secret: process.env.TWITTER_ACCESS_SECRET
       });
 
-      let posted = false;
-      lastlinkLoop:
-      for (let i = 0; i < noti.info.postedTweets.length; i++) {
-        const _tweet = noti.info.postedTweets[i];
+      twitterClient.get('statuses/user_timeline', { screen_name: config.twitter_screenname, count: 5 }, async function (error, tweets, response) {
+        if (error) throw error;
+        const tweet = tweets[0]; // ultimo tweet de {config.twitter_screenname}
 
-        if (_tweet.id === tweetId) {
-          posted = true;
-          break lastlinkLoop;
-        }
-      }
+        const tweetId = tweet.id_str;
+        const link = `https://twitter.com/${config.twitter_screenname}/status/${tweetId}`;
 
-      if (noti.info.postedTweets && posted) return;
-      else {
-        let toPush = {
-          id: tweetId,
-          link: link,
-          author: tweet.user.screen_name,
-          time: tweet.created_at
+        if (noti.info.lastTweet === tweetId) return;
+        else {
+          changed = true;
+          noti.info.lastTweet = tweetId;
+
+          let tweetDate = new Date(tweet.created_at)
+          let time = moment(tweetDate).tz("America/Bogota");
+
+          belltwChannel.send(`${twRole}, Jeffrey escribió un tweet **(${time})**\n\n\`[\` ${link} \`]\``);
         }
 
-        if ((noti.info.postedTweets.length === 1 && noti.info.postedTweets[0].what) || !noti.info.postedTweets) {
-          noti.info.postedTweets[0] = toPush;
-        } else {
-          noti.info.postedTweets.push(toPush);
-        }
-
-        noti.markModified("info");
-        await noti.save();
-
-        let parsed = noti.info.postedTweets[noti.info.postedTweets.length - 1];
-        let tweetDate = new Date(parsed.time)
-        let time = moment(tweetDate).tz("America/Bogota");
-
-        if (!belltwChannel) return;
-
-        belltwChannel.send(`Jeffrey escribió un tweet **(${time})**\n\n\`[\` ${parsed.link} \`]\``);
-      }
-
-    });
-
-    // twitch
-    let saludos = ["Di hola", "Ven y saluda", "Llégate", "Esto no pasa todo el tiempo, ven"]
-    let saludo = saludos[Math.floor(Math.random() * saludos.length)];
-    const streamLink = `https://twitch.tv/${config.twitch_username}`;
-
-    const authProvider = new ClientCredentialsAuthProvider(process.env.TWITCH_CLIENT, process.env.TWITCH_SECRET);
-    const apiClient = new ApiClient({ authProvider });
-
-    let streaming = await isStreaming(config.twitch_username);
-
-    if (streaming) { // si está directo
-      const stream = await getStream(config.twitch_username);
-      const streamId = stream.id;
-
-      const streamTitle = stream.title;
-
-      let noti = await GlobalDatas.findOne({
-        "info.type": "bellNotification"
       });
 
-      let posted = false;
+      // twitch
+      let saludos = ["Di hola", "Ven y saluda", "Llégate", "Esto no pasa todo el tiempo, ven"]
+      let saludo = GetRandomItem(saludos);
+      const streamLink = `https://twitch.tv/${config.twitch_username}`;
 
-      lastVod:
-      for (let i = 0; i < noti.info.postedOnLive.length; i++) {
-        const _stream = noti.info.postedOnLive[i];
+      const authProvider = new ClientCredentialsAuthProvider(process.env.TWITCH_CLIENT, process.env.TWITCH_SECRET);
+      const apiClient = new ApiClient({ authProvider });
 
-        if (_stream.id === streamId) {
-          posted = true;
-          break lastVod;
+      let streaming = await isStreaming(config.twitch_username);
+
+      if (streaming) { // si está directo
+        const stream = await getStream(config.twitch_username);
+
+        const streamId = stream.id;
+        const streamTitle = stream.title;
+
+        if (noti.info.lastLive === streamId) return console.log("ESTÁ EN DIRECTO, PERO YA SE HA PUBLICADO");
+        else {
+          changed = true;
+          noti.info.lastLive = streamId;
+
+          belltvChannel.send(`**🔴 ¡Jeffrey está en directo, ${tvRole}!** 🔴\n\`➟\` **${streamTitle}**\n\n**${saludo} ➟ ${streamLink} !! :D**`);
         }
       }
 
-      if (noti.info.postedOnLive && posted) return console.log("ESTÁ EN DIRECTO, PERO YA SE HA PUBLICADO");
-      else {
-        let toPush = {
-          title: streamTitle,
-          link: streamLink,
-          id: streamId
+      async function isStreaming(username) {
+        try {
+          const user = await apiClient.users.getUserByName(username);
+
+          if (!user) return false;
+          return await user.getStream() !== null;
+        } catch (err) {
+          console.log(err)
         }
-
-        if ((noti.info.postedOnLive.length === 1 && noti.info.postedOnLive[0].what) || !noti.info.postedOnLive) {
-          noti.info.postedOnLive[0] = toPush;
-        } else {
-          noti.info.postedOnLive.push(toPush);
-        }
-
-        noti.markModified("info");
-        await noti.save();
-
-        let parsed = noti.info.postedOnLive[noti.info.postedOnLive.length - 1];
-        if (!belltvChannel) return;
-
-        belltvChannel.send(`**🔴 ¡Jeffrey está en directo, ${role}!** 🔴\n\`➟\` **${parsed.title}**\n\n**${saludo} ➟ ${parsed.link} !! :D**`);
       }
-    }
 
-    async function isStreaming(username) {
-      try {
+      async function getStream(username) {
         const user = await apiClient.users.getUserByName(username);
 
-        if (!user) return false;
-        return await user.getStream() !== null;
-      } catch (err) {
-        console.log(err)
+        if (!user) return null;
+
+        const stream = await user.getStream()
+
+        if (!stream) return null;
+
+        return stream;
       }
-    }
 
-    async function getStream(username) {
-      const user = await apiClient.users.getUserByName(username);
-
-      if (!user) return null;
-
-      const stream = await user.getStream()
-
-      if (!stream) return null;
-
-      return stream;
-    }
-  }, interval);
-}
-
-/**
- * @deprecated Now using Log.js
- * @param {*} interaction The Discord.JS Interaction that triggers the command
- * @param {String} dataSearch The Data to search in the setup of this Guild
- * - OPINION_LOGS_CHANNEL
- * @returns 
- */
-const DataWork = async function (interaction, dataSearch) {
-  return console.log("🔴 Deprecated DataWork")
-  const guild = interaction.guild;
-
-  const docGuild = await Guilds.getOrCreate(guild.id);
-
-  const insuficientSetup = new ErrorEmbed(interaction, { type: "insuficientSetup", data: { dataSearch } })
-
-  let response;
-
-  switch (dataSearch.toUpperCase()) {
-    case "OPINION_LOGS_CHANNEL":
-      if (docGuild.channels.opinion_logs) {
-        response = guild.channels.cache.find(x => x.id === docGuild.channels.opinion_logs);
+      if (changed) {
+        noti.markModified("info")
+        await noti.save().then(res => {
+          console.log(res.info);
+        });
       }
-      break;
-
-    case "ADMIN_USER":
-      let admins = docGuild.getAdmins();
-
-      interaction.member.roles.cache.some(role => {
-        console.log(admins)
-        if (admins.includes(role.id)) response = role
-      })
-      break;
-
-    default:
-      response = null;
+    }, interval);
   }
 
-  if (!response) insuficientSetup.send();
-  return response;
 
 }
 
@@ -1384,294 +1228,6 @@ const ManageDarkShops = async function (client) {
 }
 
 /**
- * @deprecated
- * @param {*} client The Discord.JS Client
- * @param {String} guildId The Sting of the Guild#id where the commands is executed
- */
-const DarkShopWork = async function (client, guildId) {
-  return console.log("⚠️ DarkShopWork DEPRECATED! Usa ManageDarkShops !!");
-  const { Emojis } = client;
-
-  const maxDaysNormalInflation = Config.daysNormalInflation;
-  const maxDaysEventInflation = Config.daysEventInflation;
-  const guild = client.guilds.cache.find(x => x.id === guildId);
-
-  const dsChannel = client.user.id === Config.testingJBID ? client.channels.cache.find(x => x.id === "790431676970041356") : client.channels.cache.find(x => x.id === Config.dsChannel);
-  const dsNews = client.user.id === Config.testingJBID ? guild.roles.cache.find(x => x.id === "790431614378704906") : guild.roles.cache.find(x => x.id === Config.dsnews);
-  const logchannel = client.user.id === Config.testingJBID ? guild.channels.cache.find(x => x.id === "537095712102416384") : guild.channels.cache.find(x => x.id === Config.logChannel);
-
-  // datas nuevas en caso de necesarias
-  const today = new Date();
-
-  let inflation = Number(Math.random() * 10 + 1).toFixed(2);
-  if (Number(inflation) > 10) inflation = 10;
-
-  const baseDuration = Number(Math.random() * maxDaysNormalInflation).toFixed(1); // duración máxima de inflacion
-
-  // eventos
-  const percentage = Math.random() * 100;
-  const event = percentage >= 52 ? 0 : percentage >= 14 ? 1 : 2; // 0 baja, 1 sube, 2 igual
-
-  const eventDuration = Number((Math.random() * maxDaysEventInflation) + 1).toFixed(1); // duración máxima de eventos
-
-  const darkshop = await DarkShops.findOne({ guild_id: guildId }) ?? await new DarkShops({
-    guild_id: guildId,
-    inflation: {
-      value: inflation,
-      since: today,
-      duration: Number(baseDuration)
-    },
-    event: {
-      newinflation: await generateNewEventInflation(event),
-      since: today,
-      count: Number(eventDuration)
-    }
-  }).save();
-
-  // leer y cambiar inflaciones si es necesario
-  // INFLACIÓN NORMAL
-  const oldDateInflation = new Date(darkshop.inflation.since);
-
-  const pastDaysInflation = await DaysUntilToday(oldDateInflation);
-  const actualInflation = darkshop.inflation.value;
-
-  if (pastDaysInflation >= darkshop.inflation.duration) {
-    darkshop.inflation.old = actualInflation;
-    darkshop.inflation.since = today;
-    darkshop.inflation.duration = baseDuration;
-    darkshop.inflation.value = inflation;
-
-    await darkshop.save();
-
-    console.log("Se ha cambiado la inflación, ahora es", inflation, "|| era:", actualInflation);
-  }
-
-  // EVENTOS
-  const oldDateEvent = new Date(darkshop.event.since);
-
-  const pastDaysEvent = await DaysUntilToday(oldDateEvent);
-
-  if (pastDaysEvent >= darkshop.event.count) {
-    console.log("Ahora mismo hay un evento.")
-    // enviar mensaje random de evento
-    let newInflation = `**${darkshop.event.newinflation}%**`;
-    let rndmEventSUBE = [
-      `Estamos de suerte, se han devaluado los Jeffros, la inflación ha subido al ${newInflation}`,
-      `Los Jeffros se levantaron con pie izquierdo, la inflación sube a ${newInflation}`,
-      `Nuestro momento ha llegado, los Jeffros se han devaluado y la inflación sube a ${newInflation}`,
-      `Hora de sacar nuestra artillería, han hecho que los Jeffros se devalúen, la inflacion sube a ${newInflation}`,
-      `Esto no pasa muy seguido ¿verdad? hoy estamos de suerte, la inflación sube a ${newInflation}`,
-      `Bastante espectacular, ¿no? la inflación ha subido a ${newInflation}`
-    ];
-
-    let rndmEventBAJA = [
-      `Parece que algo en las oficinas ha hecho que la inflación baje al ${newInflation}`,
-      `Mira que hay que tener mala suerte, se han regalado miles de Jeffros por todo el planeta y ha hecho que la inflación baje a ${newInflation}`,
-      `Al otro lado de la moneda se le dio por fortalecerse, la inflación baja a ${newInflation}`,
-      `Han intenado raidearnos, tuvimos que tomar decisiones, la inflación baja a ${newInflation}`,
-      `La inflación baja a ${newInflation}. Hay que ver el lado positivo, con suerte nos va mejor para la próxima`,
-      `Hay días buenos, y otras veces, sólo hay días. La inflación baja a ${newInflation}`
-    ];
-
-    let rndmEventIGUAL = [
-      `Por poco... nos han intentado robar en una de nuestras sucursales, la inflación se queda en ${newInflation}`,
-      `Parece que casi nos involucran en una mala jugada, la inflación queda en ${newInflation}`,
-      `Casi que no lo logramos, pero la inflación queda en ${newInflation}`,
-      `Menos mal, la cosa se puso difícil pero logramos hacer que la inflación quedase en ${newInflation}`,
-      `¿Qué tal? Casi que nos hacen la jugada, pero somos mejores que ellos. La inflación se queda en ${newInflation}`,
-      `Esto es increíble, logramos quedarnos en ${newInflation}, buen trabajo, equipo.`
-    ];
-
-    let rSube = rndmEventSUBE[Math.floor(Math.random() * rndmEventSUBE.length)];
-    let rBaja = rndmEventBAJA[Math.floor(Math.random() * rndmEventBAJA.length)];
-    let rIgual = rndmEventIGUAL[Math.floor(Math.random() * rndmEventIGUAL.length)];
-
-    // revisar si baja, sube o se queda igual de acuerdo a la inflación actual
-
-    const oldInflation = Number(darkshop.inflation.value);
-    const eventInflation = Number(darkshop.event.newinflation);
-    let actualEvent;
-
-    if (eventInflation > oldInflation) {
-      actualEvent = 1;
-    } else if (eventInflation < oldInflation) {
-      actualEvent = 0;
-    } else {
-      actualEvent = 2;
-    }
-
-    switch (actualEvent) {
-      case 1:
-        let embed = new Embed()
-          .defAuthor({ text: `Evento`, icon: Config.darkLogoPng })
-          .defDesc(rSube)
-          .defColor(Colores.negro)
-          .defFooter({ text: `La inflación SUBE.`, timestamp: true });
-
-        dsChannel.send({ content: `${dsNews}`, embeds: [embed] });
-        break;
-
-      case 0:
-        let embed2 = new Embed()
-          .defAuthor({ text: `Evento`, icon: Config.darkLogoPng })
-          .defDesc(rBaja)
-          .defColor(Colores.negro)
-          .defFooter({ text: `La inflación BAJA.`, timestamp: true });
-
-        dsChannel.send({ content: `${dsNews}`, embeds: [embed2] });
-        break;
-
-      case 2:
-        let embed3 = new Embed()
-          .defAuthor({ text: `Evento`, icon: Config.darkLogoPng })
-          .defDesc(rIgual)
-          .defColor(Colores.negro)
-          .defFooter({ text: `La inflación se MANTIENE.`, timestamp: true });
-
-        dsChannel.send({ content: `${dsNews}`, embeds: [embed3] });
-        break;
-    }
-
-    // aplicar el evento a la inflacion actual
-
-    darkshop.inflation.old = oldInflation;
-    darkshop.inflation.value = eventInflation;
-
-    await darkshop.save();
-
-    console.log("# Se ha actualizado la inflación debido al evento.")
-
-    // crear de una el nuevo evento
-    darkshop.event = {
-      newinflation: await generateNewEventInflation(event),
-      since: today,
-      count: eventDuration
-    }
-
-    await darkshop.save();
-  }
-
-  // DURACION DE LOS DARKJEFFROS
-  const darkusers = await Users.find({
-    guild_id: guildId,
-    "economy.dark.duration": { $gt: 0 }
-  });
-
-  darkusers.forEach(async darkuser => {
-    const darkdata = darkuser.economy.dark;
-
-    const pastDaysDJ = await DaysUntilToday(darkdata.dj_since);
-
-    //console.log("Han pasado %s de %s días de %s", pastDaysDJ, darkdata.duration, darkuser.user_id);
-
-    if (pastDaysDJ >= darkdata.duration) { // ya pasaron los días para cambiar los darkjeffros.
-      let memberDJ = guild.members.cache.find(x => x.id === darkuser.user_id);
-
-      if (!memberDJ) {
-        console.log("No se encontró al usuario %s. Pero se eliminaron sus DarkJeffros", darkuser.user_id)
-      }
-
-      let deletedTag = memberDJ ? memberDJ.user.tag : `<AUSENTE> (${darkuser.user_id})`
-
-      if (darkdata.currency === 0) {
-        let log = new Embed()
-          .defColor(Colores.verde)
-          .defDesc(`**—** Se ha eliminado la Duración de DarkJeffros de ${deletedTag}.
-**—** Desde: \`${darkdata.dj_since}\`.
-**—** Duración: \`${darkdata.duration}\`.`)
-          .defFooter({ text: "No se ha enviado mensaje al usuario porque sus darkjeffros eran 0.", timestamp: true });
-
-        darkdata.dj_since = null;
-        darkdata.duration = null;
-
-        await darkuser.save();
-
-        console.log("Se ha eliminado la duración de DJ de", deletedTag)
-        logchannel.send({ embeds: [log] });
-      } else {
-        let log = new Embed()
-          .defColor(Colores.verde)
-          .defDesc(`**—** Se han eliminado los DarkJeffros de **${deletedTag}**.
-**—** Desde: \`${darkdata.dj_since}\`.
-**—** Duración: \`${darkdata.duration}\`.
-**—** Tenía: **${Emojis.DarkJeffros}${darkdata.currency}**`)
-          .defFooter({ text: "Mensaje enviado a la vez que al usuario", timestamp: true })
-
-        let embed = new Embed()
-          .defAuthor({ text: `...`, icon: Config.darkLogoPng })
-          .defColor(Colores.negro)
-          .defDesc(`**—** Parece que no has vendido todos tus DarkJeffros. Han sido eliminados de tu cuenta tras haber concluido los días estipulados. (\`${darkdata.duration} días.\`)`)
-          .defFooter("▸ Si crees que se trata de un error, contacta al Staff.");
-
-        darkdata.currency = 0;
-        darkdata.dj_since = null;
-        darkdata.duration = null;
-
-        await darkuser.save();
-
-        console.log("Se ha eliminado la duración de DJ de", deletedTag)
-
-        // intentar enviar un mensaje al MD.
-        memberDJ.send({ embeds: [embed] })
-          .catch(err => {
-            logchannel.send(`**${deletedTag} no recibió MD de DarkJeffros eliminados.**\n\`\`\`javascript\n${err}\`\`\``)
-          });
-
-        logchannel.send({ embeds: [log] });
-      }
-    }
-  })
-
-  return darkshop;
-
-  async function generateNewEventInflation(event) { // nuevo evento de inflacion en caso de necesitarse
-    let ds = await DarkShops.findOne({ guild_id: guildId }) ?? null
-    const oldinflation = ds?.inflation.value ?? inflation; // tomar la inflación actual o la que se generó si no existe
-
-    console.log("Se está creando un nuevo evento a futuro");
-
-    let newinflation;
-
-    if (event === 0) { // baja
-      if (oldinflation < 1) {
-        newinflation = Number(Math.random() * oldinflation).toFixed(2);
-
-        let att = 0; // intentos máximos pa que no se muera si la inflacion es muy baja de por si
-        while (newinflation < 1 && att < 15) {
-          newinflation = Number(Math.random() * (inflation * 6)).toFixed(2);
-          att++
-        }
-
-        if (newinflation < 1) newinflation = Number(Math.random() * 10).toFixed(2); // por si el while no es suficiente
-        while (newinflation < 1) { // si sigue siendo menor a 1 hallar una inflacion normalmente
-          newinflation = Number(Math.random() * 10).toFixed(2);
-        }
-      } else { // si es mayor a 1 entonces bajar la inflacion, ahora también puede ser menor a 1
-        newinflation = Number(Math.random() * oldinflation).toFixed(2);
-      }
-
-    } else if (event === 1) { // sube
-      newinflation = Number(Math.random() * 10).toFixed(2);
-
-      while (newinflation <= oldinflation) {
-        newinflation = Number(Math.random() * 10).toFixed(2);
-      }
-
-      if (newinflation > 10) newinflation = 10;
-    } else { // igual
-      newinflation = oldinflation;
-    }
-
-    if (newinflation < 0) newinflation = 0.1
-    if (newinflation > 10) newinflation = 10
-
-    console.log({ newinflation, event })
-
-    return Number(newinflation);
-  }
-}
-
-/**
  * 
  * @param {*} user The mongoose User
  * @param {*} author The Discord.JS User
@@ -1699,9 +1255,9 @@ const ValidateDarkShop = async function (user, author) {
   const notReady = new Embed()
     .defColor(Colores.rojo)
     .defDesc(desc)
-    .defFooter({ text: `▸ Vuelve cuando seas nivel ${guild.settings.minimum.darkshop_level}.` });
+    .defFooter({ text: `▸ Vuelve cuando seas nivel ${guild.settings.quantities.darkshop_level}.` });
 
-  if (user.economy.global.level < guild.settings.minimum.darkshop_level) return { valid: false, embed: notReady }
+  if (user.economy.global.level < guild.settings.quantities.darkshop_level) return { valid: false, embed: notReady }
   else return { valid: true, embed: null };
 }
 
@@ -1972,24 +1528,36 @@ const UpdateObj = function (obj, prop, value) {
     obj[prop[0]] = value;
 }
 
+/**
+ * @returns {String} Una barra llena de acuerdo al porcentaje pasado
+ * @param {Number} percentage En termino de porcentaje (10, 90, 100, 50, etc)
+ * @param {{blocks: Number, empty: String, full: String}} options 
+ */
+const ProgressBar = function (percentage, options = { blocks: 10, empty: "⬜", full: "🟩" }) {
+  const { empty, full, blocks } = options;
+
+  let fullNum = Math.floor(blocks * percentage / 100);
+  let emptyNum = Math.floor(blocks - fullNum);
+
+  let fullBlocks = full.repeat(fullNum)
+  let emptyBlocks = empty.repeat(emptyNum)
+
+  return fullBlocks + emptyBlocks;
+}
+
 module.exports = {
   GetChangesAndCreateFields,
   FetchAuditLogs,
   GlobalDatasWork,
   ManageDarkShops,
-  AddWarns,
-  Interest,
   VaultWork,
-  findLvls5,
   LimitedTime,
   Subscription,
   handleUploads,
-  DataWork,
   isBannedFrom,
   Confirmation,
   AfterInfraction,
   InteractivePages,
-  DarkShopWork,
   ValidateDarkShop,
   DeterminePrice,
   FindNewId,
@@ -2004,5 +1572,6 @@ module.exports = {
   MemberHasAnyRole,
   isDeveloper,
   ActivityWork,
-  UpdateObj
+  UpdateObj,
+  ProgressBar
 }
