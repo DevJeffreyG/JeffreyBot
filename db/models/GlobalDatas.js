@@ -47,8 +47,8 @@ Schema.static("newGuildCommands", async function ({ route, dev = false }) {
     }).save();
 })
 
-Schema.static("getGuildCommands", function () {
-    return this.find({
+Schema.static("getGuildCommands", async function () {
+    return await this.find({
         "info.type": "guildcommands"
     });
 })
@@ -61,8 +61,8 @@ Schema.static("getTempGuildBans", function (guild, user) {
     });
 })
 
-Schema.static("removeGuildCommands", function (route) {
-    return this.findOneAndDelete({
+Schema.static("removeGuildCommand", async function (route) {
+    return await this.findOneAndDelete({
         "info.type": "guildcommands",
         "info.route": route
     }).then(query => {

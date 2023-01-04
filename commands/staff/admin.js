@@ -285,8 +285,10 @@ command.data
                             .setDescription("Si es algún item especial, el tipo que es. [DS] = DarkShop")
                             .addChoices(
                                 { name: "Firewall [DS]", value: String(ItemTypes.Firewall) },
-                                { name: "Stack Overflow [DS]", value: String(ItemTypes.StackOverflow) },
+                                { name: "~(+5%) Precisión (Stack Overflow) [DS]", value: String(ItemTypes.StackOverflow) },
                                 { name: "Reset Interest [DS]", value: String(ItemTypes.ResetInterest) },
+                                { name: "Skip Firewall [DS]", value: String(ItemTypes.SkipFirewall) },
+                                { name: "~(-5%) Precisión (Criminal Pedia) [DS]", value: String(ItemTypes.CriminalPedia) },
                             )
                     )
                     .addStringOption(option =>
@@ -369,6 +371,10 @@ command.data
                             .setDescription("El nuevo precio del item")
                             .setMinValue(1)
                             .setRequired(true))
+                    .addIntegerOption(option =>
+                        option.setName("interes")
+                            .setDescription("El costo que debería agregarse después de comprar este item. (0 para desactivar)")
+                            .setMinValue(0))
             )
     )
 

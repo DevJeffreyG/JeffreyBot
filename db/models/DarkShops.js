@@ -36,7 +36,6 @@ const DarkShopsSchema = new Schema({
         values: { type: Object, required: true },
         tendency_type: { type: Number, required: true },
         initial_value: { type: Number, required: true },
-        last_value: { type: Number, required: true },
         old_tendency: { type: Number, default: null },
         since: { type: Date, required: true, default: () => {
             return new Date();
