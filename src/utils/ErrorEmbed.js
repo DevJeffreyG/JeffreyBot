@@ -10,6 +10,7 @@ class ErrorEmbed extends Embed {
      * - commandNotFound
      * - toggledCommand
      * - badCommand
+     * - badFunction
      * - selfRep
      * - insuficientSetup
      * - commandError
@@ -23,6 +24,7 @@ class ErrorEmbed extends Embed {
      * - execError
      * - moduleBanned
      * - moduleDisabled
+     * - notPerms
      * @param {string} options.data - La información que tiene este tipo
      * @description Creación de un ErrorEmbed
      */
@@ -151,6 +153,19 @@ ${codeBlock("json", `{ FATAL ERROR, ID ${data.id}, UNKNOWN "${data.unknown}`)}`]
                 this.#errorDesc("No puedes usar eso", "los administradores han deshabilitado esta funcionalidad.")
                 break;
 
+            case "badFunction":
+                this.#errorName("Error en el codigo")
+                this.#errorAuthor(17);
+                this.#errorDesc("Jeffrey es tonto, y por eso hubo un error ejecutando esta función", `(\`${this.interaction.type}\`)`, ["Por favor, avísale de su grado de inservibilidad.", `**Y también dile que...**
+${codeBlock("javascript", data.error)}`])
+                break;
+
+            case "notPerms":
+                this.#errorName("Denegado")
+                this.#errorAuthor(18)
+                this.#errorDesc("No puedes usar eso", "No tienes los permisos necesarios.")
+                break;
+
             default:
                 console.error("⚠️🔴 No existe %s como tipo de Error ❗❗", type);
         }
@@ -182,14 +197,23 @@ ${codeBlock("json", `{ FATAL ERROR, ID ${data.id}, UNKNOWN "${data.unknown}`)}`]
         this.defDesc(d);
     }
 
-    async send(ephemeral = false){
+    async send(options = {ephemeral: false, followup: false }){
+        const { ephemeral, followup } = options;
+
         if(this.interaction instanceof GuildChannel) return this.sendToChannel();
         if(!this.interaction) return console.error("🔴 NO EXISTE this.interaction !!")
         else
 
-        if(ephemeral) {
+        if(ephemeral && !followup) {
             try {
                 return await this.interaction.reply({content: null, embeds: [this], components: [], ephemeral: true})
+            } catch(err) {
+                console.log("Oops!")
+                console.log(err)
+            }
+        } else if (followup) {
+            try {
+                return await this.interaction.followUp({content: null, embeds: [this], components: [], ephemeral: ephemeral})
             } catch(err) {
                 console.log("Oops!")
                 console.log(err)
