@@ -1,30 +1,38 @@
 const Discord = require("discord.js");
 
 const { time } = Discord;
-const { GenerateLog, DaysUntilToday, Initialize } = require("../src/utils/");
+const { GenerateLog, DaysUntilToday, Embed, GetRandomItem } = require("../src/utils/");
 const { Colores, Config } = require("../src/resources");
 
-const { Users } = require("mongoose").models;
+const { Users, Guilds} = require("mongoose").models;
 
 module.exports = async (client, member) => {
   let tag = member.user.tag;
   const guild = member.guild;
-  let channel = guild.channels.cache.find(x => x.id === Config.mainChannel);
-  let reglasC = guild.channels.cache.find(x => x.id === Config.rulesChannel);
-  let infoC = guild.channels.cache.find(x => x.id === Config.infoChannel);
-  let botRole = guild.roles.cache.find(x => x.id === Config.botRole);
 
-  const prefix = await Initialize(member.guild.id);
+  // crear usuario nuevo
+  const user = await Users.getOrCreate({
+    user_id: member.id,
+    guild_id: guild.id
+  });
 
-  if (client.user.id === Config.testingJBID) {
-    channel = guild.channels.cache.find(x => x.id === "535500338015502357");
-    reglasC = guild.channels.cache.find(x => x.id === "482993020472393741");
-    infoC = guild.channels.cache.find(x => x.id === "483007894942515202");
-    botRole = guild.roles.cache.find(x => x.id === "794646554690322432");
-  }
+  const doc = await Guilds.getOrCreate(guild.id);
+
+  // cargar los roles que tenia antes
+  if(doc.moduleIsActive("functions.save_roles_onleft", doc.settings)) user.data.backup_roles.forEach(roleId => {
+    const role = guild.roles.cache.find(x => x.id === roleId);
+    if (role) member.roles.add(role);
+  })
+
+  user.data.backup_roles = [];
+  user.save();
+
+  let reglasC = guild.channels.cache.get(doc.getChannel("general.rules"));
+  let infoC = guild.channels.cache.get(doc.getChannel("general.information"));
 
   if (member.user.bot) {
-    return member.roles.add(botRole);
+    let botRoles = doc.getBots();
+    botRoles.forEach(role => member.roles.add(role))
   }
 
   let bienvenidas = [
@@ -34,44 +42,14 @@ module.exports = async (client, member) => {
     `¡Hey! Hola **${tag}**, gracias por unirte a \`${guild.name}\` 😄 ¡Pásate por ${reglasC} e ${infoC} para que te hagas una idea de como funciona el server!`
   ];
 
-  let fBienv = bienvenidas[Math.floor(Math.random() * bienvenidas.length)];
+  let fBienv = GetRandomItem(bienvenidas);
 
-  if (member.user.id === "373901344995803138") {
-    // si el usuario es ares
-    fBienv = `Hola **${tag}**. Bienvenido, otra vez.`;
-  }
+  let embed = new Embed()
+    .defDesc(fBienv)
+    .defFooter({text: `* Para poder hablar en el chat debes aceptar las reglas`, icon: guild.iconURL()})
+    .defColor(Colores.verde);
 
-  let embed = new Discord.EmbedBuilder()
-    .setDescription(fBienv)
-    .setFooter(`* Para poder hablar en el chat debes aceptar las reglas`, guild.iconURL())
-    .setColor(Colores.verde);
-
-  member.send({ embeds: [embed] }).catch(e => {
-    channel.send({ embeds: [embed] });
-  });
-
-  // crear usuario nuevo
-  let query = await Users.findOne({
-    user_id: member.id,
-    guild_id: member.guild.id
-  });
-
-  if (!query) {
-    const newUser = new Users({
-      user_id: member.id,
-      guild_id: guild.id
-    });
-
-    newUser.save();
-  } else { // cargar los roles que tenia antes
-    query.data.backup_roles.forEach(roleId => {
-      const role = guild.roles.cache.find(x => x.id === roleId);
-      if (role) member.roles.add(role);
-    })
-
-    query.data.backup_roles = [];
-    query.save();
-  }
+  member.send({ embeds: [embed] }).catch(e => {});
 
   member.guild.invites.fetch().then((invites) => {
     invites.forEach(async invite => {

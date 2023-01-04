@@ -1,10 +1,11 @@
 const Discord = require("discord.js");
 
 const { Config } = require("../src/resources");
-const { Users } = require("mongoose").models;
+const { Users, Guilds } = require("mongoose").models;
 
 module.exports = async (client, member) => {
-    let channel = client.user.id === Config.testingJBID ? member.guild.channels.cache.find(x => x.id === "797258710997139537") : member.guild.channels.cache.find(x => x.id === Config.mainChannel);
+    const doc = await Guilds.getOrCreate(member.guild.id);
+    let channel = member.guild.channels.cache.get(doc.getLogChannel("user_left"));
     let tag = member.user.tag;
 
     let despedidas = [
@@ -21,6 +22,7 @@ module.exports = async (client, member) => {
     ];
 
     if (member.user.bot) return;
+    if (member.pending) return;
 
     const fBye = despedidas[Math.floor(Math.random() * despedidas.length)];
     let embed = new Discord.EmbedBuilder()
@@ -30,19 +32,20 @@ module.exports = async (client, member) => {
     client.user.setActivity(`/ayuda - ${member.guild.memberCount} usuarios🔎`);
 
     // guardar los roles
-    Users.findOne({
+    let user = await Users.getOrCreate({
         user_id: member.id,
         guild_id: member.guild.id
-    }, (err, user) => {
-        if(err) throw err;
+    });
+
+    if(doc.moduleIsActive("functions.save_roles_onleft", doc.settings)) {
         member.roles.cache.forEach(role => {
             if(role.id != member.guild.id) user.data.backup_roles.push(role.id);
         })
 
-        user.save();
-    });
+        await user.save();
+    }
 
     return channel.send({embeds: [embed]}).then(msg => {
-        msg.react(client.user.id === Config.testingJBID ? "🤬" : member.guild.emojis.cache.get("524673704655847427"));
+        msg.react(client.Emojis.PressF);
     });
 }
