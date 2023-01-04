@@ -1,5 +1,4 @@
-const { Command, Categories, Embed, Log, LogReasons, ChannelModules} = require("../../src/utils")
-const { Colores } = require("../../src/resources")
+const { Command, Categories, Embed } = require("../../src/utils")
 
 const command = new Command({
     name: "hackban",
@@ -28,21 +27,8 @@ command.execute = async (interaction, models, params, client) => {
 
     const user = usuario.value;
     const reason = razon ? razon.value : "HackBan";
-
-    let bEmbed = new Embed()
-    .defAuthor({text: `HackBan`, icon: interaction.guild.iconURL()})
-    .defDesc(`**—** Usuario baneado: **${user}**.
-**—** Moderador: **${interaction.user.tag}**.
-**—** Razón: ${reason}.`)
-    .defColor(Colores.verde);
     
     await interaction.guild.members.ban(user, {reason})
-
-    new Log(interaction)
-        .setReason(LogReasons.Ban)
-        .setTarget(ChannelModules.ModerationLogs)
-        .send({ embeds: [bEmbed] })
-
 
     return interaction.editReply({embeds: [
         new Embed({

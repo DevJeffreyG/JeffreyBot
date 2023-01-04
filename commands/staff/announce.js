@@ -25,13 +25,16 @@ command.data
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
 
+    const { Guilds } = models;
     const { subcommand } = params;
     const { titulo, anuncio, imagen } = params[subcommand];
 
+    const doc = await Guilds.getOrCreate(interaction.guild.id)
+
     switch (subcommand) {
         case "jbnews":
-            let jbNRole = client.user.id === Config.testingJBID ? interaction.guild.roles.cache.find(x => x.id === '790393911519870986') : interaction.guild.roles.cache.find(x => x.id === Config.jbnews);
-            let ch = client.user.id === Config.testingJBID ? interaction.guild.channels.cache.find(x => x.id === "483007967239602196") : interaction.guild.channels.cache.find(x => x.id === Config.announceChannel);
+            let jbNRole = interaction.guild.roles.cache.get(Config.jbnews);
+            let ch = interaction.guild.channels.cache.get(doc.getChannel("general.announcements"));
 
             if (!anuncio && !imagen) return interaction.editReply({ embeds: [new ErrorEmbed({ type: "badParams", data: { help: "Si no hay 'anuncio' debe haber una imagen." } })] });
             if (titulo) title = titulo.value;

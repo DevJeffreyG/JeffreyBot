@@ -28,12 +28,15 @@ command.execute = async (interaction, models, params, client) => {
 
     await interaction.deferReply();
     const { duracion, anuncio } = params;
-    const { GlobalDatas } = models;
+    const { GlobalDatas, Guilds } = models;
+
+    const doc = await Guilds.getOrCreate(interaction.guild.id);
+
     const duration = ms(duracion.value) || Infinity;
     const poll = anuncio.value;
 
     const guild = interaction.guild;
-    const channel = client.user.id === Config.testingJBID ? guild.channels.cache.find(x => x.id === "483007967239602196") : guild.channels.cache.find(x => x.id === Config.announceChannel);
+    const channel = interaction.guild.channels.cache.get(doc.getChannel("general.announcements"));
     const timestamp = duration != Infinity ? moment().add(duration, "ms").toDate() : null;
     const image = importImage("vota");
 

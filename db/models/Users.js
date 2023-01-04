@@ -130,7 +130,7 @@ const Schema = new mongoose.Schema({
                     return this.economy.global.jeffros
                 }, integer: true
             },
-            jeffros: { type: Number, required: true, default: 0, integer: true }
+            jeffros: { type: Number, default: 0, integer: true }
         },
         dark: {
             currency: {
@@ -140,6 +140,7 @@ const Schema = new mongoose.Schema({
             },
             darkjeffros: { type: Number, default: 0, integer: true },
             accuracy: { type: Number, default: null },
+            criminal_acc: { type: Number, default: null },
             until: { type: Date, default: null }
         }
     }
@@ -165,6 +166,9 @@ Schema.pre("save", function () {
 
         this.economy = obj;
     }
+
+    if(this.economy.dark.accuracy < 10) this.economy.dark.accuracy = 10;
+    this.economy.dark.criminal_acc = 100 - this.economy.dark.accuracy;
 })
 
 Schema.static("getOrCreate", async function ({ user_id, guild_id }) {

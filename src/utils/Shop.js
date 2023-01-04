@@ -342,7 +342,7 @@ Si es para la DarkShop, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
                 break;
 
             case "price":
-                await this.#editPrice(item, params.precio.value);
+                await this.#editPrice(item, params.precio.value, params.interes?.value);
                 break;
         }
 
@@ -356,7 +356,7 @@ Si es para la DarkShop, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
         });
 
         this.base.description = `**—** [NOT READY]: Falta el uso (\`/admin items use-info\`)\n**—** [HIDDEN]: Item desactivado (\`/admin items toggle\`)\n**—** [✅]: El item es visible y usable para cualquiera.`;
-        this.base.addon = this.base.addon.substring(0, 2) + "{publicInfo} — ID: " + this.base.addon.substr(2)
+        this.base.addon = this.base.addon.substring(0, 2) + "{publicInfo} — ID: " + this.base.addon.substring(2, this.base.addon.length - 4) + `\n+ ${this.isDarkShop ? this.Emojis.DarkCurrency : this.Emojis.Currency}{item_interest}** al comprarlo.\n\n`
 
         this.shop.items.forEach((item, index) => {
             let publicInfo;
@@ -370,6 +370,7 @@ Si es para la DarkShop, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
                 item_name: item.name,
                 item_desc: item.description,
                 item_price: price,
+                item_interest: item.interest,
                 item_id: item.id,
                 publicInfo,
                 index
@@ -433,8 +434,9 @@ Si es para la DarkShop, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
         return this.shop.save();
     }
 
-    async #editPrice(item, value) {
+    async #editPrice(item, value, interest_value) {
         item.price = value;
+        item.interest = interest_value;
         return this.shop.save();
     }
 

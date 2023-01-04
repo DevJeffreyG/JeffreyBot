@@ -1,6 +1,6 @@
-const { Command, Categories, Embed, DaysUntilToday } = require("../../src/utils")
+const { Command, Categories, Embed, DaysUntilToday, ProgressBar } = require("../../src/utils")
 const { Config, Colores } = require("../../src/resources");
-const { time } = require("discord.js")
+const { time, inlineCode } = require("discord.js")
 
 const command = new Command({
     name: "darkstats",
@@ -31,11 +31,13 @@ command.execute = async (interaction, models, params, client) => {
 
     const currency = economy?.currency.toLocaleString("es-CO") ?? "?";
     const accuracy = economy?.accuracy ?? "?";
+    const criminal = economy?.criminal_acc ?? "?";
 
     let meEmbed = new Embed()
         .defAuthor({ text: `Estadísiticas del usuario N°${member.id}`, icon: client.EmojisObject.Dark.url })
         .defDesc(`**— ${DarkCurrency.name}**: **${DarkCurrency}${currency}**.
-**— Precisión**: ${accuracy}%
+**— Precisión**: ${ProgressBar(accuracy)} ${inlineCode(accuracy + "%")}
+**— Habilidad criminal**: ${ProgressBar(criminal)} ${inlineCode(criminal + "%")}
 **— Items**: Usa \`/dsinventory\`.`)
         .defThumbnail(member.displayAvatarURL({dynamic: true}))
         .defColor(Colores.negro);

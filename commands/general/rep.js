@@ -25,7 +25,7 @@ command.execute = async (interaction, models, params, client) => {
 
     const member = usuario.member;
 
-    if (member.id === author.id) return new ErrorEmbed(interaction, {type: "selfRep", data: member}).send(true)
+    if (member.id === author.id) return new ErrorEmbed(interaction, {type: "selfRep", data: member}).send({ephemeral: true})
     
     const user = await Users.getOrCreate({user_id: member.id, guild_id: guild.id});
     const user_author = await Users.getOrCreate({user_id: author.id, guild_id: guild.id});

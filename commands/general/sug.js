@@ -13,7 +13,7 @@ const command = new Command({
 command.addOption({
     type: "string",
     name: "sugerencia",
-    desc: "Recuerda que esto lo ven los miembros del STAFF, y pueden quitarte el acceso a este comando.",
+    desc: "Los usuarios y el STAFF verán esta sugerencia :)",
     req: true
 })
 
@@ -35,11 +35,11 @@ command.execute = async (interaction, models, params, client) => {
         .addComponents(
             new Discord.ButtonBuilder()
                 .setCustomId("acceptSuggestion")
-                .setLabel("Aceptar")
+                .setLabel("Aprobar")
                 .setStyle(ButtonStyle.Primary),
             new Discord.ButtonBuilder()
                 .setCustomId("denySuggestion")
-                .setLabel("Denegar")
+                .setLabel("Rechazar")
                 .setStyle(ButtonStyle.Secondary),
 
             new Discord.ButtonBuilder()
@@ -49,7 +49,8 @@ command.execute = async (interaction, models, params, client) => {
         )
 
     let embed = new Embed()
-        .defAuthor({ text: "Nueva sugerencia", icon: interaction.member.displayAvatarURL() })
+        .defAuthor({ text: interaction.user.tag, icon: interaction.member.displayAvatarURL() })
+        .defTitle("Sugerencia")
         .defDesc(`**—** Por: ${interaction.member}
 **—** Sugiere:
 ${codeBlock(sugerencia)}
@@ -57,9 +58,14 @@ ${codeBlock(sugerencia)}
         .defColor(Colores.verdejeffrey);
 
     let msg = await new Log(interaction)
-        .setTarget(ChannelModules.StaffLogs)
+        .setTarget(ChannelModules.SuggestionLogs)
         .setReason(LogReasons.Suggestion)
         .send({ embeds: [embed], components: [row] });
+
+    if(!msg) return;
+
+    await msg.react(client.Emojis.Check);
+    await msg.react(client.Emojis.Cross);
 
     docGuild.data.suggestions.push({
         user_id: interaction.user.id,

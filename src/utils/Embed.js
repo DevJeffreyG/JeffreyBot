@@ -11,7 +11,7 @@ class Embed extends Discord.EmbedBuilder {
      * En caso de que Discord.JS se ponga chistoso y cambie por decimocuarta vez la forma de hacer embeds.
      */
     constructor(options) {
-        if (options instanceof Discord.Embed) super(options.data)
+        if (options instanceof Discord.Embed) return super(options.data)
         else super()
         if (options) this.#setup(options)
     }
@@ -20,6 +20,12 @@ class Embed extends Discord.EmbedBuilder {
         title ?
             this.setTitle(text) :
             this.setAuthor({ name: text, iconURL: icon, url })
+
+        return this
+    }
+
+    defTitle(text){
+        this.setTitle(text)
 
         return this
     }
@@ -46,12 +52,15 @@ class Embed extends Discord.EmbedBuilder {
         return this
     }
 
-    defFields(fields = [up, down, inline]) {
+    defFields(fields = [{up, down, inline}]) {
         if (fields.length == 0) return console.error("⚠️ BAD ARRAY OF FIELDS");
+        this.data.fields = [];
 
         fields.forEach(field => {
             this.defField(field.up, field.down, field.inline);
         });
+
+        return this
     }
 
     defFooter({ text, icon = null, timestamp = null }) {

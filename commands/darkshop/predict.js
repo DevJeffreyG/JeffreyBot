@@ -38,7 +38,7 @@ command.execute = async (interaction, models, params, client) => {
     // entre menor, mejor
     let worst = all[all.length - 1];
     let best = all[0];
-    let r = false;
+    let r = new Chance().bool();
 
     let guessCorrectly = new Chance().bool({ likelihood: user.economy.dark?.accuracy });
 

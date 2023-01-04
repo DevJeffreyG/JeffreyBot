@@ -68,10 +68,8 @@ command.execute = async (interaction, models, params, client) => {
     economy.currency += quantity;
     user.economy.global.currency -= total;
 
-    economy.accuracy = economy.accuracy ?? Number((Math.random() * 15).toFixed(1));
-    economy.until = moment().add(1, "w")
-        .hour(0).minutes(0).seconds(0)
-        .milliseconds(0).toDate();
+    economy.accuracy = economy.accuracy ?? Number(10 + (Math.random() * 10).toFixed(1));
+    economy.until = moment().add(1, "w").startOf("day").toDate();
 
     await user.save();
 

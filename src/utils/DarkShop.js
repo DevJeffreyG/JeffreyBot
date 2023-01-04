@@ -36,6 +36,19 @@ class DarkShop {
 
         // CREAR NUEVA TENDENCIA PARA LOS SIGUIENTES DÍAS
         await this.#createTendency();
+
+        // ANUNCIARLO
+        if(!this.guilddoc) await this.#getGuildDoc();
+        const dsChannel = await this.guild.channels.fetch(this.guilddoc.getDarkShopChannel("events"));
+        const dsNewsRole = await this.guild.roles.fetch(this.guilddoc.getRoleByModule("darkshop_news"))
+
+        dsChannel?.send({content: dsNewsRole ?? "", embeds: [
+            new Embed()
+            .defAuthor({text: "Domingo", icon: this.client.EmojisObject.Dark.url})
+            .defDesc(`**—** Se termina una semana, y empieza la busqueda de beneficios.
+**—** La inflación hoy estará en **${this.baseValue}%**. Ya veremos **qué pasa en la semana...**`)
+            .defColor(Colores.negro)
+        ]})
     }
 
     async #weekWork() {
@@ -48,7 +61,6 @@ class DarkShop {
         this.values = this.doc.inflation.values;
         this.tendency = this.doc.inflation.tendency_type;
         this.baseValue = this.doc.inflation.initial_value;
-        this.lastValue = this.doc.inflation.last_value;
         this.oldtendency = this.doc.inflation.old_tendency;
         this.since = this.doc.inflation.since;
 
@@ -56,7 +68,6 @@ class DarkShop {
             values: this.values,
             tendency_type: this.tendency,
             initial_value: this.baseValue,
-            last_value: this.lastValue,
             old_tendency: this.oldtendency
         }
     }
@@ -72,7 +83,6 @@ class DarkShop {
                     values: inflations,
                     tendency_type: type,
                     initial_value: this.baseValue,
-                    last_value: this.lastValue,
                     since: this.since
                 }
             }).save()
@@ -80,7 +90,6 @@ class DarkShop {
             this.doc.inflation.values = inflations;
             this.doc.inflation.tendency_type = type;
             this.doc.inflation.initial_value = this.baseValue;
-            this.doc.inflation.last_value = this.lastValue;
             this.doc.inflation.old_tendency = this.oldtendency;
             this.doc.inflation.since = this.since;
 
@@ -96,7 +105,6 @@ class DarkShop {
     }
 
     #randomTendency() {
-        let old = null;
         let type = null;
         let check = [ // default si no hay una tendencia vieja registrada
             { item: Tendencies.Random, likelihood: 35 },
@@ -106,7 +114,7 @@ class DarkShop {
         ];
 
         // obtener la anterior
-        old = this.doc?.inflation.old_tendency;
+        let old = this.doc?.inflation.old_tendency;
         if (old) {
             this.oldtendency = old;
 
@@ -292,8 +300,7 @@ class DarkShop {
         /* console.log("🟢 Finalmente, tenemos:")
         console.log(values) */
         this.values = values;
-        this.lastValue = values["6"][1];
-        this.since = new Date();
+        this.since = moment().day(0).toDate();
 
         console.log(this.values)
 
@@ -392,12 +399,11 @@ class DarkShop {
         users.forEach(async user => {
             const darkdata = user.economy.dark;
             const until = moment(darkdata.until);
-            if(moment().isBefore(until)) return console.log("aun no");
-
-            console.log("post")
+            if(moment().isBefore(until)) return;
 
             if (darkdata.currency != 0) {
                 // enviar mensaje al usuario
+                console.log(`🟥 ${user.user_id} se eliminarán sus DarkCurrency por haber pasado una semana.`)
 
                 let memberDJ = this.guild.members.cache.find(x => x.id === user.user_id);
 
@@ -493,19 +499,27 @@ class DarkShop {
 
         if (day === "0") { // si es domingo
             inflation = this.baseValue
-            oldinflation = this.lastValue
+            oldinflation = 0
         } else {
             if (this.now.hour() >= 12) {
                 inflation = this.values[day][1];
                 oldinflation = this.values[day][0];
             }
             else {
+                let beforeday = this.values[String(Number(day) - 1)];
                 inflation = this.values[day][0];
-                oldinflation = this.values[String(Number(day) - 1)][1] ?? this.baseValue;
+                oldinflation = beforeday ? beforeday[1] : this.baseValue;
             }
         }
 
         return { inflation, oldinflation }
+    }
+
+    getShopTimezone() {
+        let hour = this.now.hour();
+        let now = this.now;
+
+        return {hour, now}
     }
 
     /**
@@ -576,12 +590,16 @@ class DarkShop {
         const { EmojisObject } = this.client;
 
         let stonks = oldinflation <= inflation ? "📈" : "📉";
+        let tz = this.getShopTimezone();
 
         let stonksEmbed = new Embed()
             .defAuthor({ text: `DarkShop: Inflación`, icon: EmojisObject.Dark.url })
-            .defDesc(`${stonks} **—** La inflación actual de los ${this.Emojis.DarkCurrency.name} es de un **${inflation}%**.
-**— ${this.Emojis.DarkCurrency}1 = ${this.Emojis.Currency}${one.toLocaleString('es-CO')}**.
-**—** Antes era de un \`${oldinflation}%\`: (${this.Emojis.DarkCurrency}1 = ${this.Emojis.Currency}${(await this.oneEquals(oldinflation))?.toLocaleString("es-CO")}).`)
+            .defDesc(`**${this.Emojis.DarkCurrency}1 = ${this.Emojis.Currency}${one.toLocaleString('es-CO')}**
+
+${stonks} **—** La inflación actual de los ${this.Emojis.DarkCurrency.name} es de un \`${inflation}%\`.
+${stonks} **—** Antes era de un \`${oldinflation}%\`: (**${this.Emojis.DarkCurrency}1 = ${this.Emojis.Currency}${(await this.oneEquals(oldinflation))?.toLocaleString("es-CO")}**).
+
+${tz.now.day != 0 ? `**—** La inflación inicial fue \`${this.baseValue}%\`.\n`: ""}**—** La inflación cambiará ${time((tz.hour >= 12 ? tz.now.add(1, "day").startOf("day") : tz.now.hour(12).startOf("hour")).toDate(), "R")}.`)
             .defColor(Colores.negro);
 
         this.interaction.reply({ embeds: [stonksEmbed] });

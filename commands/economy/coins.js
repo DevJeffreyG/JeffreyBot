@@ -22,13 +22,8 @@ command.execute = async (interaction, models, params, client) => {
     const author = client.users.cache.find(x => x.id === interaction.user.id);
     const member = guild.members.cache.find(x => x.id === interaction.user.id);
 
-    if(client.user.id === Config.testingJBID){
-        if (member.roles.cache.find(x => x.id === "887151110861779035")) coinsCooldown /= 2; //5m
-        if (member.roles.cache.find(x => x.id === "887151260086702081")) coinsCooldown /= 2; //2.5m
-    } else {
-        if (member.roles.cache.find(x => x.id === Config.lvl60)) coinsCooldown /= 2;
-        if (member.roles.cache.find(x => x.id === Config.lvl99)) coinsCooldown /= 2;
-    }
+    if (member.roles.cache.get(Config.lvl60)) coinsCooldown /= 2;
+    if (member.roles.cache.get(Config.lvl99)) coinsCooldown /= 2;
 
     let money = Math.ceil(Math.random() * 20);
     let tmoney = `**${Currency}${money.toLocaleString('es-CO')}**`;
