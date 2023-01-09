@@ -42,7 +42,7 @@ class DarkShop {
         const dsChannel = await this.guild.channels.fetch(this.guilddoc.getDarkShopChannel("events"));
         const dsNewsRole = await this.guild.roles.fetch(this.guilddoc.getRoleByModule("darkshop_news"))
 
-        dsChannel?.send({content: dsNewsRole ?? "", embeds: [
+        dsChannel?.send({content: dsNewsRole.toString() ?? null, embeds: [
             new Embed()
             .defAuthor({text: "Domingo", icon: this.client.EmojisObject.Dark.url})
             .defDesc(`**—** Se termina una semana, y empieza la busqueda de beneficios.
