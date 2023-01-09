@@ -231,40 +231,32 @@ Schema.method("toggleBan", async function (module) {
     return this.data.isBanned[module];
 })
 
-Schema.method("cooldown", function (modulo, options = { cooldown: null, save: true, check: true, info: false, instant: false, precise: false }) {
-    let { cooldown, save, check, info, instant, precise } = options
+/**
+ * - (true) SAVE: GUARDA EL DOCUMENTO USER
+ * - (true) CHECK: REVISA SI EL USUARIO TIENE COOLDOWN
+ * - (false) INFO: SOLO SE OBTIENE INFO, NO SE CAMBIA NADA EN LA BASE DE DATOS
+ * - (false) INSTANT: SIEMPRE DEVUELVE LA INFO DEL COOLDOWN, COMO SI SIEMPRE HUBIESE TENIDO EL COOLDOWN
+ * - (false) PRECISE: NO SE AGREGA EL COOLDOWN, SINO QUE SE ESTABLECE LA FECHA CUANDO SE TERMINA EL COOLDOWN EN LA BASE DE DATOS
+ *                    REQUIERE "FORCE_COOLDOWN"
+ */
+Schema.method("cooldown", async function (modulo, options = { force_cooldown: null, save: true, check: true, info: false, instant: false, precise: false }) {
+    let { force_cooldown, save, check, info, instant, precise } = options
+    const doc = await mongoose.models.Guilds.getOrCreate(this.guild_id)
+    const cooldownInfo = !force_cooldown ? doc.getCooldown(modulo) : null;
+
+    const baseCooldown = cooldownInfo?.base;
+    let modifiers = cooldownInfo?.modifiers;
+    modifiers?.sort((a, b) => a - b);
+
+    const modifier = modifiers?.find(x => this.economy.global.level >= x.level);
+
+    const cooldown = force_cooldown ?? (modifier ? baseCooldown * modifier?.multiplier : baseCooldown);
 
     if (check == undefined) check = true;
     if (save == undefined) save = true;
     if (precise == undefined) precise = false;
 
-    if (!cooldown) switch (modulo) {
-        case "rep":
-            cooldown = ms("1d")
-            break;
-
-        case "claim_rep":
-            cooldown = ms("3h")
-            break;
-
-        case "roulette":
-            cooldown = ms("1d");
-            break;
-
-        case "blackjack":
-            cooldown = ms("5m");
-            break;
-
-        case "currency_to_exp":
-            cooldown = ms("1w");
-            break;
-
-        default:
-            cooldown = ms("5m")
-            break;
-    }
-
-    console.log("⚠️ Se está usando el cooldown %s", precise ? cooldown : new HumanMs(cooldown).human)
+    if(!info) console.log("⚠️ Se está usando el cooldown %s", precise ? cooldown : new HumanMs(cooldown).human)
 
     if (this.data.cooldowns[modulo] && check) {
         let timer = this.data.cooldowns[modulo];
@@ -277,6 +269,7 @@ Schema.method("cooldown", function (modulo, options = { cooldown: null, save: tr
         let text = new HumanMs(toCheck).left(); */
     }
 
+    if(info && !check) return cooldown;
     if (info) return;
 
     let c = precise ? cooldown : moment().add(cooldown, "ms").toDate()

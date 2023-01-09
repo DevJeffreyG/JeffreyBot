@@ -14,16 +14,27 @@ command.execute = async (interaction, models, params, client) => {
     const { Users } = models
     const { Currency } = client.getCustomEmojis(interaction.guild.id);
     
-    let coinsCooldown = ms("10m");
-
     await interaction.deferReply();
 
     const guild = client.guilds.cache.find(x => x.id === interaction.guildId);
     const author = client.users.cache.find(x => x.id === interaction.user.id);
     const member = guild.members.cache.find(x => x.id === interaction.user.id);
 
-    if (member.roles.cache.get(Config.lvl60)) coinsCooldown /= 2;
-    if (member.roles.cache.get(Config.lvl99)) coinsCooldown /= 2;
+    const user = await Users.getOrCreate({
+        user_id: author.id,
+        guild_id: guild.id
+    })
+
+    let cooldownInfo = await user.cooldown("coins", {check: false, info: true})
+
+    let cool = await user.cooldown("coins", {save: false})
+    if(cool) return interaction.editReply({content: null, embeds: [
+        new Embed({type: "cooldown", data: {cool}})
+    ]});
+
+
+    /* if (member.roles.cache.get(Config.lvl60)) coinsCooldown /= 2;
+    if (member.roles.cache.get(Config.lvl99)) coinsCooldown /= 2; */
 
     let money = Math.ceil(Math.random() * 20);
     let tmoney = `**${Currency}${money.toLocaleString('es-CO')}**`;
@@ -42,12 +53,6 @@ command.execute = async (interaction, models, params, client) => {
         money = money * multiplier;
         tmoney = `**${Currency}${money.toLocaleString('es-CO')}**`;
     }
-
-    // buscar usuario
-    const user = await Users.getOrCreate({
-        user_id: author.id,
-        guild_id: guild.id
-    })
     
     // buscar si tiene boost
     for (let i = 0; i < user.data.temp_roles.length; i++) {
@@ -74,7 +79,7 @@ command.execute = async (interaction, models, params, client) => {
     ).replace(
         new RegExp("{ FAKE MONEY }", "g"),
         `${fakemoney}`
-    ).replace(new RegExp("{ COOLDOWN }", "g"), `${coinsCooldown/60000}`);
+    ).replace(new RegExp("{ COOLDOWN }", "g"), `${cooldownInfo/60000}`);
 
     let memberColor = member.displayHexColor;
 
@@ -88,11 +93,6 @@ command.execute = async (interaction, models, params, client) => {
         let img = rAuthor ? rAuthor.displayAvatarURL() : guild.iconURL();
         embed.defFooter({text: `• Respuesta sugerida por ${suggestor}`, icon: img})
     }
-
-    let cool = user.cooldown("coins", {cooldown: coinsCooldown, save: false})
-    if(cool) return interaction.editReply({content: null, embeds: [
-        new Embed({type: "cooldown", data: {cool}})
-    ]});
 
     await user.addCurrency(money);
     

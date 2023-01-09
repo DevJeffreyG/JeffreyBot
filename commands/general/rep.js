@@ -30,7 +30,7 @@ command.execute = async (interaction, models, params, client) => {
     const user = await Users.getOrCreate({user_id: member.id, guild_id: guild.id});
     const user_author = await Users.getOrCreate({user_id: author.id, guild_id: guild.id});
 
-    let cool = user_author.cooldown("rep");
+    let cool = await user_author.cooldown("rep");
 
     if(cool) return interaction.reply({content: null, embeds: [
         new Embed({type: "cooldown", data: {cool}})

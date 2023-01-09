@@ -60,9 +60,9 @@ command.execute = async (interaction, models, params, client) => {
     console.log(`🟢 Se predijo que ${r ? "sí" : "no"} hay que venderlos con ${now}%. Es correcto: ${guessCorrectly}`)
     console.log("⚪ Lo mejor: %s\n⚪ Lo peor: %s", best, worst);
 
-    let cooldown = moment().weekday(7).hour(0).minutes(0).seconds(0).millisecond(0).toDate();
+    let force_cooldown = moment().weekday(7).hour(0).minutes(0).seconds(0).millisecond(0).toDate();
 
-    let cool = user.cooldown("inflation_prediction", { cooldown, precise: true } )
+    let cool = await user.cooldown("inflation_prediction", { force_cooldown, precise: true } )
     if(cool) return interaction.editReply({content: null, embeds: [
         new Embed({type: "cooldown", data: {cool}})
     ]});

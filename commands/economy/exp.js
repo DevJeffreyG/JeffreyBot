@@ -39,7 +39,7 @@ command.execute = async (interaction, models, params, client) => {
         }
     }).send()
 
-    let cool = user.cooldown("currency_to_exp", { save: false });
+    let cool = await user.cooldown("currency_to_exp", { save: false });
     if (cool) return interaction.editReply({ embeds: [new Embed({ type: "cooldown", data: { cool } })] });
 
     let confirmation = await Confirmation("Cambiar dinero", [

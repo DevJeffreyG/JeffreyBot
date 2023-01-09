@@ -40,10 +40,10 @@ command.execute = async (interaction, models, params, client) => {
 
     //console.log("Ha ganado %s en esta sesión", winCounts)
 
-    let cool = user.cooldown("blackjack", { info: true })
+    let cool = await user.cooldown("blackjack", { info: true })
 
     if (winCounts?.count === 5) {
-        cool = user.cooldown("blackjack", { instant: true })
+        cool = await user.cooldown("blackjack", { instant: true })
         if (cool) return interaction.editReply({ embeds: [new Embed({ type: "cooldown", data: { cool } })] })
         winCounts.count = 0;
     } else if (cool) return interaction.editReply({ embeds: [new Embed({ type: "cooldown", data: { cool } })] })

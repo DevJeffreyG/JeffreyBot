@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
+const ms = require("ms");
 
 const Schema = mongoose.Schema;
+
+const cooldownModifier = {
+    multiplier: { type: Number, required: true },
+    level: { type: Number, required: true }
+}
 
 const GuildSchema = new Schema({
     guild_id: { type: String, required: true, unique: true },
@@ -146,6 +152,26 @@ const GuildSchema = new Schema({
             max_curr: { type: Number, default: 15, integer: true },
             sug_remind: { type: Number, default: 7, integer: true },
             ticket_remind: { type: Number, default: 7, integer: true },
+        },
+        cooldowns: {
+            bases: {
+                coins: { type: String, default: "10m" },
+                chat_rewards: { type: String, default: "1m" },
+                rep: { type: String, default: "1d" },
+                claim_rep: { type: String, default: "3h" },
+                roulette: { type: String, default: "1d" },
+                blackjack: { type: String, default: "5m" },
+                currency_to_exp: { type: String, default: "1w" },
+            },
+            modifiers: {
+                coins: [cooldownModifier],
+                chat_rewards: [cooldownModifier],
+                rep: [cooldownModifier],
+                claim_rep: [cooldownModifier],
+                roulette: [cooldownModifier],
+                blackjack: [cooldownModifier],
+                currency_to_exp: [cooldownModifier],
+            }
         }
     },
     roles: { // id de roles
@@ -220,6 +246,13 @@ GuildSchema.static("getOrCreate", async function (id) {
 GuildSchema.static("getById", async function (id) {
     return await this.findOne({ guild_id: id })
 });
+
+GuildSchema.method("getCooldown", function(modulo, toString = false) {
+    const base = this.settings.cooldowns.bases[modulo];
+    const modifiers = this.settings.cooldowns.modifiers[modulo];
+    
+    return toString ? {base, modifiers } : {base: ms(base), modifiers};
+})
 
 GuildSchema.method("getVaultCode", function (code) {
     return this.data.vault_codes.find(x => x.code === code);

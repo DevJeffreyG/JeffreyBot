@@ -1,4 +1,4 @@
-const { Command, Categories, Confirmation, Embed, ErrorEmbed } = require("../../src/utils")
+const { Command, Categories, Confirmation, Embed, ErrorEmbed, HumanMs } = require("../../src/utils")
 
 const command = new Command({
     name: "claimrep",
@@ -19,7 +19,7 @@ command.execute = async (interaction, models, params, client) => {
         type: "moduleDisabled"
     }).send();
 
-    let cool = user.cooldown("claim_rep", { save: false });
+    let cool = await user.cooldown("claim_rep", { save: false });
     if (cool) return interaction.editReply({
         content: null, embeds: [
             new Embed({ type: "cooldown", data: { cool } })
@@ -30,7 +30,7 @@ command.execute = async (interaction, models, params, client) => {
 
     let toConfirm = [
         `Se añadirán **${Currency}${value.toLocaleString("es-CO")}** a tu cuenta.`,
-        `Sólo puedes usar este comando cada 3 horas.`
+        `Sólo puedes usar este comando cada ${new HumanMs(await user.cooldown("claim_rep", {info: true, check: false})).human}.`
     ]
 
     let confirmation = await Confirmation("Reclamar reputación", toConfirm, interaction);
