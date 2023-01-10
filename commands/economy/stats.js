@@ -68,7 +68,7 @@ command.execute = async (interaction, models, params, client) => {
     let sug = new Embed({
         type: "didYouKnow",
         data: {
-            text: `Si ves las estadísitcas de otro usuario y tiene establecido su cumpleaños puedo recordartelo`,
+            text: `Si ves las estadísticas de otro usuario y tiene establecido su cumpleaños puedo recordartelo`,
             likelihood: 5
         }
     })
