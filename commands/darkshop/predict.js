@@ -1,4 +1,4 @@
-const { Command, Categories, Embed, DarkShop, GetRandomItem } = require("../../src/utils")
+const { Command, Categories, Embed, DarkShop, GetRandomItem, Cooldowns } = require("../../src/utils")
 const { Colores } = require("../../src/resources")
 
 const Chance = require("chance")
@@ -62,7 +62,7 @@ command.execute = async (interaction, models, params, client) => {
 
     let force_cooldown = moment().weekday(7).hour(0).minutes(0).seconds(0).millisecond(0).toDate();
 
-    let cool = await user.cooldown("inflation_prediction", { force_cooldown, precise: true } )
+    let cool = await user.cooldown(Cooldowns.InflationPrediction, { force_cooldown, precise: true } )
     if(cool) return interaction.editReply({content: null, embeds: [
         new Embed({type: "cooldown", data: {cool}})
     ]});

@@ -244,6 +244,36 @@ const ApiUpdate = new Enum({
     Categories: 8
 }).values
 
+/**
+ * - Coins
+ * - ChatRewards
+ * - Rep
+ * - ClaimRep
+ * - Roulette
+ * - Blackjack
+ * - CurrencyToExp
+ * - InflationPrediction
+ */
+const Cooldowns = new Enum({
+    Coins: "coins",
+    ChatRewards: "chat_rewards",
+    Rep: "rep",
+    ClaimRep: "claim_rep",
+    Roulette: "roulette",
+    Blackjack: "blackjack",
+    CurrencyToExp: "currency_to_exp",
+    InflationPrediction: "inflation_prediction"
+}).values;
+
+/**
+ * - Level
+ * - Role
+ */
+const ModifierType = new Enum({
+    Level: 1,
+    Role: 2
+}).values;
+
 module.exports = {
     Enum,
     Categories,
@@ -258,5 +288,7 @@ module.exports = {
     Tendencies,
     ChannelModules,
     LogReasons,
-    ApiUpdate
+    ApiUpdate,
+    Cooldowns,
+    ModifierType
 }

@@ -1,4 +1,4 @@
-const { Command, Categories, Embed } = require("../../src/utils")
+const { Command, Categories, Embed, Cooldowns, Enum } = require("../../src/utils")
 const ms = require("ms")
 
 const command = new Command({
@@ -18,6 +18,7 @@ command.addOption({
     type: "string",
     name: "modulo",
     desc: "Módulo a administrar",
+    choices: new Enum(Cooldowns).array(),
     req: true
 })
 
@@ -32,8 +33,6 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { miembro, modulo, cooldown } = params
     const { Users } = models
-
-    console.log(params)
 
     const user = await Users.getOrCreate({user_id: miembro.value, guild_id: miembro.member.guild.id})
     if(cooldown.value != "0") await user.cooldown(modulo.value, {force_cooldown: ms(cooldown.value), save: true, check: false});

@@ -1,5 +1,5 @@
 const ms = require("ms");
-const { Command, Categories, HumanMs, Embed, BoostTypes, BoostObjetives } = require("../../src/utils");
+const { Command, Categories, HumanMs, Embed, BoostTypes, BoostObjetives, Cooldowns } = require("../../src/utils");
 
 const { Config, Responses } = require("../../src/resources/");
 const { multiplier } = Config;
@@ -25,9 +25,9 @@ command.execute = async (interaction, models, params, client) => {
         guild_id: guild.id
     })
 
-    let cooldownInfo = await user.cooldown("coins", {check: false, info: true})
+    let cooldownInfo = await user.cooldown(Cooldowns.Coins, {check: false, info: true})
 
-    let cool = await user.cooldown("coins", {save: false})
+    let cool = await user.cooldown(Cooldowns.Coins, {save: false})
     if(cool) return interaction.editReply({content: null, embeds: [
         new Embed({type: "cooldown", data: {cool}})
     ]});

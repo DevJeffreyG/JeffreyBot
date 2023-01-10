@@ -1,4 +1,4 @@
-const { Command, Categories, ItemObjetives, BoostObjetives, WillBenefit, Embed } = require("../../src/utils")
+const { Command, Categories, ItemObjetives, BoostObjetives, WillBenefit, Embed, Cooldowns } = require("../../src/utils")
 const Chance = require("chance");
 const moment = require("moment");
 const RouletteItem = require("../../src/utils/RouletteItem");
@@ -15,7 +15,7 @@ command.execute = async (interaction, models, params, client) => {
     const { GlobalDatas, Users } = models;
 
     const user = await Users.getOrCreate({user_id: interaction.user.id, guild_id: interaction.guild.id});
-    let cool = await user.cooldown("roulette")
+    let cool = await user.cooldown(Cooldowns.Roulette)
     if(cool) return interaction.editReply({content: null, embeds: [
         new Embed({type: "cooldown", data: {cool}})
     ]});

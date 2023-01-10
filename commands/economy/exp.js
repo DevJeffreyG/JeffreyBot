@@ -1,4 +1,4 @@
-const { Command, Categories, Confirmation, ErrorEmbed, Embed } = require("../../src/utils");
+const { Command, Categories, Confirmation, ErrorEmbed, Embed, Cooldowns } = require("../../src/utils");
 const command = new Command({
     name: "exp",
     desc: "Transforma tu dinero en experiencia para tu perfil cada semana",
@@ -39,7 +39,7 @@ command.execute = async (interaction, models, params, client) => {
         }
     }).send()
 
-    let cool = await user.cooldown("currency_to_exp", { save: false });
+    let cool = await user.cooldown(Cooldowns.CurrencyToExp, { save: false });
     if (cool) return interaction.editReply({ embeds: [new Embed({ type: "cooldown", data: { cool } })] });
 
     let confirmation = await Confirmation("Cambiar dinero", [
