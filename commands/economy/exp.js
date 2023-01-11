@@ -22,7 +22,7 @@ command.execute = async (interaction, models, params, client) => {
     const { Currency } = client.getCustomEmojis(interaction.guild.id);
 
     const guild = await Guilds.getOrCreate(interaction.guild.id);
-    if (!guild.moduleIsActive("currency_to_exp")) return new ErrorEmbed(interaction, { type: "moduleDisabled" }).send();
+    if (!guild.moduleIsActive("functions.currency_to_exp")) return new ErrorEmbed(interaction, { type: "moduleDisabled" }).send();
 
     const user = await Users.getOrCreate({
         user_id: interaction.user.id,

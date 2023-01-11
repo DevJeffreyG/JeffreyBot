@@ -400,22 +400,22 @@ class Dashboard {
         this.#findAndSync("darkshop_level", quantities);
         this.#findAndSync("percentage_skipfirewall", quantities);
 
+        this.#findAndSync("baseprice_darkshop", quantities);
+        this.#findAndSync("currency_per_rep", quantities);
+
+        this.#findAndSync("min_exp", quantities);
+        this.#findAndSync("max_exp", quantities);
+        this.#findAndSync("min_curr", quantities);
+        this.#findAndSync("max_curr", quantities);
+
         const functions = this.doc.settings.functions;
         this.#findAndSync("adjust_shop", functions);
         this.#findAndSync("adjust_darkshop", functions);
-
-        this.#findAndSync("baseprice_darkshop", functions);
-        this.#findAndSync("currency_per_rep", functions);
 
         this.#findAndSync("levels_deleteOldRole", functions);
         this.#findAndSync("save_roles_onleft", functions);
         this.#findAndSync("sug_remind", functions);
         this.#findAndSync("ticket_remind", functions);
-
-        this.#findAndSync("min_exp", functions);
-        this.#findAndSync("max_exp", functions);
-        this.#findAndSync("min_curr", functions);
-        this.#findAndSync("max_curr", functions);
 
         const roles = this.doc.roles;
         this.#findAndSync("admins", roles)
@@ -735,8 +735,9 @@ class Dashboard {
 
         container.appendChild(contents);
 
-        let main = this.#createDivSection("quantities");
-        main.classList.add("wrap")
+        let min = this.#createDivSection("min");
+        min.classList.add("wrap")
+        min.append("Mínimos")
 
         let blackjackbet = this.#createNumberSelector("blackjackbet", {
             title: "Apuesta mínima en Blackjack",
@@ -756,9 +757,51 @@ class Dashboard {
             id: "percentage_skipfirewall"
         }, { min: 0, max: 100 });
 
-        this.#appendChilds(main, [blackjackbet, darkshoplvl, skipfirewall]);
+        this.#appendChilds(min, [blackjackbet, darkshoplvl, skipfirewall]);
 
-        this.#appendChilds(contents, [main])
+        let bases = this.#createDivSection("bases")
+        min.classList.add("wrap")
+        min.append("Valores base")
+
+        let basedarkshop = this.#createNumberSelector("basepriceds", {
+            title: "Precio base de la moneda (DarkShop)",
+            placeholder: "Valor de la moneda cuando la inflación está en 0%",
+            id: "baseprice_darkshop"
+        }, { min: 1 });
+
+        let currperrep = this.#createNumberSelector("currperrep", {
+            title: "Dinero dado por nivel",
+            placeholder: "El dinero dado por cada punto de reputación",
+            id: "currency_per_rep"
+        }, { min: 1 });
+
+        let minexp = this.#createNumberSelector("minexp", {
+            title: "Mínima EXP dada por hablar",
+            placeholder: "Debe ser menor que el máximo",
+            id: "min_exp"
+        }, { min: 1 });
+
+        let maxexp = this.#createNumberSelector("maxexp", {
+            title: "Máxima EXP dada por hablar",
+            placeholder: "Debe ser mayor que el mínimo",
+            id: "max_exp"
+        }, { min: 1 });
+
+        let mincur = this.#createNumberSelector("mincur", {
+            title: "Mínimo dinero dado por hablar",
+            placeholder: "Debe ser menor que el máximo",
+            id: "min_curr"
+        }, { min: 1 });
+
+        let maxcur = this.#createNumberSelector("maxcur", {
+            title: "Máximo dinero dado por hablar",
+            placeholder: "Debe ser mayor que el mínimo",
+            id: "max_curr"
+        }, { min: 1 });
+
+        this.#appendChilds(bases, [basedarkshop, currperrep, minexp, maxexp, mincur, maxcur]);
+
+        this.#appendChilds(contents, [min, bases])
     }
 
     async #functionsHandler() {
@@ -814,51 +857,10 @@ class Dashboard {
             id: "adjust_darkshop"
         });
 
-        let basedarkshop = this.#createNumberSelector("basepriceds", {
-            title: "Precio base de la moneda (DarkShop)",
-            placeholder: "Valor de la moneda cuando la inflación está en 0%",
-            id: "baseprice_darkshop"
-        }, { min: 1 });
-
-        let currperrep = this.#createNumberSelector("currperrep", {
-            title: "Dinero dado por nivel",
-            placeholder: "El dinero dado por cada punto de reputación",
-            id: "currency_per_rep"
-        }, { min: 1 });
-
-        let econ = this.#createDivSection("econ");
-        econ.classList.add("wrap")
-        econ.append("Economía");
-
-        let minexp = this.#createNumberSelector("minexp", {
-            title: "Mínima EXP dada por hablar",
-            placeholder: "Debe ser menor que el máximo",
-            id: "min_exp"
-        }, { min: 1 });
-
-        let maxexp = this.#createNumberSelector("maxexp", {
-            title: "Máxima EXP dada por hablar",
-            placeholder: "Debe ser mayor que el mínimo",
-            id: "max_exp"
-        }, { min: 1 });
-
-        let mincur = this.#createNumberSelector("mincur", {
-            title: "Mínimo dinero dado por hablar",
-            placeholder: "Debe ser menor que el máximo",
-            id: "min_curr"
-        }, { min: 1 });
-
-        let maxcur = this.#createNumberSelector("maxcur", {
-            title: "Máximo dinero dado por hablar",
-            placeholder: "Debe ser mayor que el mínimo",
-            id: "max_curr"
-        }, { min: 1 });
-
         this.#appendChilds(main, [saveRoles, lvlsOldRole, dayRemindSug, dayRemindTicket]);
-        this.#appendChilds(shop, [shopadjust, dsadjust, basedarkshop, currperrep]);
-        this.#appendChilds(econ, [minexp, maxexp, mincur, maxcur]);
-
-        this.#appendChilds(contents, [main, econ, shop])
+        this.#appendChilds(shop, [shopadjust, dsadjust]);
+        
+        this.#appendChilds(contents, [main, shop])
     }
 
     async #rolesHandler() {
@@ -1037,7 +1039,7 @@ class Dashboard {
         });
 
         let user_left = this.#createChannelSelector("luserleft", {
-            title: "Sugerencias",
+            title: "Usuario se va del server",
             id: "logs-user_left",
             max: 1
         });
