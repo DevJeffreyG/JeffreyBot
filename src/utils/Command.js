@@ -167,7 +167,7 @@ class Command {
 
         if (data.choices) {
             data.choices.forEach(choice => {
-                option.addChoices({ name: choice, value: choice.toLowerCase() })
+                option.addChoices({ name: choice.name ?? choice, value: choice.value ?? choice.toLowerCase() })
             });
         }
 

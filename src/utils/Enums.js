@@ -35,6 +35,26 @@ class Enum {
         let a = this.array();
         return a.find(x => x === this.translate(query)) ? true : false;
     }
+
+    /**
+     * Convierte los datos en un array de forma: [{name: nombre, value: valor}]
+     * @returns Array
+     */
+    complexArray() {
+        let arr = [];
+
+        let names = this.array();
+
+        for(const name of names) {
+            let obj = {};
+            obj.name = name
+            obj.value = this.values[name];
+
+            arr.push(obj)
+        }
+
+        return arr;
+    }
 }
 
 /**
