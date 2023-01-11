@@ -1,6 +1,5 @@
 const mongoose = require('mongoose')
 const moment = require("moment")
-const ms = require("ms")
 
 const HumanMs = require("../../src/utils/HumanMs")
 const { time } = require('discord.js')
@@ -149,7 +148,6 @@ const Schema = new mongoose.Schema({
 Schema.pre("save", function () {
     this.economy.global.currency = Math.round(this.economy.global.currency);
     this.economy.global.exp = Math.round(this.economy.global.exp);
-    this.economy.global.level = Math.round(this.economy.global.level);
 
     this.economy.dark.currency = Math.round(this.economy.dark.currency);
 
@@ -169,6 +167,20 @@ Schema.pre("save", function () {
 
     if(this.economy.dark.accuracy < 10) this.economy.dark.accuracy = 10;
     this.economy.dark.criminal_acc = 100 - this.economy.dark.accuracy;
+
+    // Corregir nivel actual
+    const expNow = this.economy.global.exp;
+    let realLvl = Math.floor(- ( 25 - Math.sqrt(5*(105+2*expNow)) ) / 10); // solved: 10 * (level ** 2) + 50 * level + 100
+    const nextLevel = this.getNextLevelExp(realLvl)
+
+    if(nextLevel < expNow) realLvl++;
+    if(realLvl < 0) realLvl = 0;
+
+    // Cambio de nivel
+    if(this.economy.global.level != realLvl) mongoose.models.Guilds.getOrCreate(this.guild_id).then(doc => doc.manageLevelUp(realLvl, this));
+
+    this.economy.global.level = realLvl // la ecuacion se toma como si la exp ahora fuese la exp necesaria para el siguiente nivel
+
 })
 
 Schema.static("getOrCreate", async function ({ user_id, guild_id }) {
@@ -179,6 +191,12 @@ Schema.static("getOrCreate", async function ({ user_id, guild_id }) {
         user_id: user_id,
         guild_id: guild_id
     }).save();
+})
+
+Schema.method("getNextLevelExp", function(level = null) {
+    if(!level) level = this.economy.global.level;
+
+    return 10 * (level ** 2) + 50 * level + 100;
 })
 
 Schema.method("addCount", async function (module, count = 1, save = true) {

@@ -1,3 +1,4 @@
+const { Collection } = require('discord.js');
 const mongoose = require('mongoose');
 const ms = require("ms");
 
@@ -5,7 +6,8 @@ const Schema = mongoose.Schema;
 
 const cooldownModifier = {
     multiplier: { type: Number, required: true },
-    level: { type: Number, required: true }
+    requirement: { type: Number, required: true },
+    type: { type: Number, required: true }
 }
 
 const GuildSchema = new Schema({
@@ -137,19 +139,19 @@ const GuildSchema = new Schema({
         quantities: {
             blackjack_bet: { type: Number, default: 1000 },
             darkshop_level: { type: Number, default: 5 },
-            percentage_skipfirewall: { type: Number, default: 100 }
-        },
-        functions: {
-            adjust_shop: { type: Boolean, default: true },
-            adjust_darkshop: { type: Boolean, default: true },
-            baseprice_darkshop: { type: Number, default: 200, integer: true },
-            currency_per_rep: { type: Number, default: 500, integer: true },
-            levels_deleteOldRole: { type: Boolean, default: false },
-            save_roles_onleft: { type: Boolean, default: true },
+            percentage_skipfirewall: { type: Number, default: 100 },
             min_exp: { type: Number, default: 5, integer: true },
             max_exp: { type: Number, default: 35, integer: true },
             min_curr: { type: Number, default: 5, integer: true },
             max_curr: { type: Number, default: 15, integer: true },
+            baseprice_darkshop: { type: Number, default: 200, integer: true },
+            currency_per_rep: { type: Number, default: 500, integer: true }
+        },
+        functions: {
+            adjust_shop: { type: Boolean, default: true },
+            adjust_darkshop: { type: Boolean, default: true },
+            levels_deleteOldRole: { type: Boolean, default: false },
+            save_roles_onleft: { type: Boolean, default: true },
             sug_remind: { type: Number, default: 7, integer: true },
             ticket_remind: { type: Number, default: 7, integer: true },
         },
@@ -246,6 +248,49 @@ GuildSchema.static("getOrCreate", async function (id) {
 GuildSchema.static("getById", async function (id) {
     return await this.findOne({ guild_id: id })
 });
+
+GuildSchema.method("manageLevelUp", async function(level, userDoc) {
+    const client = require("../../index");
+    const guild = await client.guilds.fetch(this.guild_id);
+    const member = await guild.members.fetch(userDoc.user_id);
+
+    const roles = new Collection();
+    const toRemoveRoles = new Collection();
+
+    const rewardsList = this.roles.levels.sort((a, b) => b.level - a.level);
+
+    const reward = rewardsList.find(x => level >= x.level);
+    if(!reward) return
+    for await (const roleId of reward.roles) {
+        roles.set(roleId, await guild.roles.fetch(roleId))
+    }
+
+    if(this.settings.functions.levels_deleteOldRole) { // Se eliminan las recompensas viejas
+        const rewardsToRemove = rewardsList.filter(x => x != reward);
+
+        for (const reward of rewardsToRemove) {
+            for (const roleId of reward.roles) {
+                toRemoveRoles.set(roleId, guild.roles.cache.get(roleId))
+            }
+        }
+    } else {
+        // todo lo que pueda ser agregado como recompensa (sincronizarlos)
+        let reversedList = rewardsList.reverse();
+        let index = reversedList.findIndex(x => x === reward);
+
+        reversedList.splice(index);
+        reversedList.filter(x => x != reward);
+
+        for (const reward of reversedList) {
+            for (const roleId of reward.roles) {
+                roles.set(roleId, guild.roles.cache.get(roleId))
+            }
+        }
+    }
+
+    if(!member.roles.cache.hasAll(...roles.keys())) await member.roles.add(roles).catch(err => console.log(err)); // Si le falta algun role, agregarlo
+    if(toRemoveRoles.size > 0) member.roles.remove(toRemoveRoles).catch(err => console.log(err)); // Si hay roles para eliminar, hacerlo
+})
 
 GuildSchema.method("getCooldown", function(modulo, toString = false) {
     const base = this.settings.cooldowns.bases[modulo];

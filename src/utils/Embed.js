@@ -144,7 +144,7 @@ class Embed extends Discord.EmbedBuilder {
                 const curLvl = user?.economy.global.level.toLocaleString('es-CO') ?? 0;
                 const rep = user?.economy.global.reputation.toLocaleString('es-CO') ?? 0;
 
-                const nxtLvlExp = (10 * (curLvl ** 2) + 50 * curLvl + 100).toLocaleString('es-CO'); // fórmula de MEE6. 5 * (level ^ 2) + 50 * level + 100
+                const nxtLvlExp = (user.getNextLevelExp()).toLocaleString('es-CO'); // fórmula de MEE6. 5 * (level ^ 2) + 50 * level + 100
 
                 let bdData = user?.data.birthday;
                 let bdString = "";
