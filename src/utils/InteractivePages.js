@@ -1,6 +1,5 @@
-const Discord = require("discord.js");
-const { ButtonStyle } = require("discord-api-types/v10");
-const { time } = Discord;
+const { ButtonStyle, ButtonBuilder, ActionRowBuilder, time } = require("discord.js");
+
 const ms = require("ms");
 const Embed = require("./Embed");
 const { Colores } = require("../resources");
@@ -112,14 +111,14 @@ class InteractivePages {
     async init(interaction) {
         const client = interaction.client;
 
-        const row = new Discord.ActionRowBuilder()
+        const row = new ActionRowBuilder()
             .addComponents(
-                new Discord.ButtonBuilder()
+                new ButtonBuilder()
                     .setCustomId("back")
                     .setEmoji("⬅️")
                     .setStyle(ButtonStyle.Primary)
                     .setDisabled(true),
-                new Discord.ButtonBuilder()
+                new ButtonBuilder()
                     .setCustomId("next")
                     .setEmoji("➡️")
                     .setStyle(ButtonStyle.Primary),

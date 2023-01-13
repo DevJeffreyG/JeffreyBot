@@ -1,5 +1,4 @@
-const { PermissionsBitField, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, EmbedBuilder, Guild, GuildMember, CommandInteraction, BaseInteraction, Message, Client, time, hyperlink } = require("discord.js");
-const { ButtonStyle, OverwriteType, ActivityType } = require("discord-api-types/v10");
+const { ActivityType, ButtonStyle, OverwriteType, PermissionsBitField, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, EmbedBuilder, Guild, GuildMember, CommandInteraction, BaseInteraction, Message, Client, time, hyperlink } = require("discord.js");
 
 const Config = require("../resources/base.json");
 const Colores = require("../resources/colores.json");
@@ -1343,12 +1342,12 @@ const DeterminePrice = async function (user, item, returnString, isDarkShop) {
  * @example
  * ```javascript
  * let query = await Model.find();
- * const id = await FindNewId(query, "data.example", "id");
- * const generalid = await FindNewId(query, "", "id");
+ * const id = FindNewId(query, "data.example", "id");
+ * const generalid = FindNewId(query, "", "id");
  * ```
  * @returns {Number} Unique ID within the query
  */
-const FindNewId = async function (generalQuery, specificQuery, toCheck) {
+const FindNewId = function (generalQuery, specificQuery, toCheck) {
   // id
   let idsNow = []; // ids en uso actualmente
   let newId = 1;

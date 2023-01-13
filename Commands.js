@@ -1,12 +1,10 @@
-const { REST } = require('@discordjs/rest');
-const { Routes } = require('discord-api-types/v9');
-const { Collection } = require("discord.js");
+const { Collection, Routes, REST } = require("discord.js");
 
 const { GlobalDatas } = require("mongoose").models;
 
 const fs = require("fs")
 
-const rest = new REST({ version: '9'}).setToken(process.env.TOKEN);
+const rest = new REST({ version: '10'}).setToken(process.env.TOKEN);
 const route = process.env.DEV == "TRUE"
     ? Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.slashGuildId)
     : Routes.applicationCommands(process.env.CLIENT_ID)

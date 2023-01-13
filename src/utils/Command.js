@@ -1,5 +1,4 @@
-const { SlashCommandBuilder, SlashCommandSubcommandGroupBuilder, SlashCommandSubcommandBuilder } = require('@discordjs/builders');
-const { PermissionFlagsBits } = require('discord-api-types/v10');
+const { PermissionFlagsBits, SlashCommandBuilder, SlashCommandSubcommandGroupBuilder, SlashCommandSubcommandBuilder } = require('discord.js');
 
 const Embed = require("./Embed");
 const Colores = require("../resources/colores.json");

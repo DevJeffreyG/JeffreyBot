@@ -1,12 +1,11 @@
-const Discord = require("discord.js");
-const { ButtonStyle } = require("discord-api-types/v10");
+const { Attachment, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const ms = require("ms");
 const { EndReasons } = require("./Enums");
 
 class FilePages {
     /**
      * Cheaper version of InteractivePages
-     * @param {Discord.Attachment[]} files Array of files to use as pages
+     * @param {Attachment[]} files Array of files to use as pages
      */
     constructor(files) {
         this.files = files;
@@ -15,14 +14,14 @@ class FilePages {
     async init(interaction) {
         const client = interaction.client;
 
-        const row = new Discord.ActionRowBuilder()
+        const row = new ActionRowBuilder()
             .addComponents(
-                new Discord.ButtonBuilder()
+                new ButtonBuilder()
                     .setCustomId("back")
                     .setEmoji("⬅️")
                     .setStyle(ButtonStyle.Primary)
                     .setDisabled(true),
-                new Discord.ButtonBuilder()
+                new ButtonBuilder()
                     .setCustomId("next")
                     .setEmoji("➡️")
                     .setStyle(ButtonStyle.Primary),
@@ -30,7 +29,7 @@ class FilePages {
 
         if (this.files.length === 1) row.components.forEach(c => c.setDisabled()); // no tiene más de una pagina
 
-        let msg = await interaction.editReply({ content: "", components: [row], files: [this.files[0]]});
+        let msg = await interaction.editReply({ content: "", components: [row], files: [this.files[0]] });
 
         const filter = async i => {
             try {
@@ -74,11 +73,11 @@ class FilePages {
             interaction.editReply({ components: [row] });
 
             let index = client.activeCollectors.findIndex(x => x.collector === collector && x.userid === interaction.user.id);
-            if (!isNaN(index)){
+            if (!isNaN(index)) {
                 client.activeCollectors.splice(index, 1);
             } else console.log(`🟥 NO SE ELIMINÓ DE LOS ACTIVECOLLECTORS !! {FILE PAGES}`)
 
-            if(r === EndReasons.OldCollector) return interaction.deleteReply()
+            if (r === EndReasons.OldCollector) return interaction.deleteReply()
         })
     }
 }

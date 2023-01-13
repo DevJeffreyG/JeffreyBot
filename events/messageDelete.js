@@ -1,4 +1,4 @@
-const { AuditLogEvent } = require("discord-api-types/v10");
+const { AuditLogEvent } = require("discord.js");
 const { Config, Colores } = require("../src/resources/");
 const { FetchAuditLogs, GenerateLog } = require("../src/utils");
 const { Users } = require("mongoose").models;

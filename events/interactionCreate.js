@@ -1,13 +1,7 @@
-const { time, codeBlock, ModalBuilder, Client, TextInputBuilder, ActionRowBuilder } = require("discord.js");
+const { Client } = require("discord.js");
 
-const models = require("mongoose").models;
-const { ToggledCommands, Users, Guilds } = models
-
-const { Ticket, ErrorEmbed, GlobalDatasWork, Categories, ValidateDarkShop, Embed, Confirmation, Log, LogReasons, ChannelModules } = require("../src/utils");
-const { Config, Colores, Bases } = require("../src/resources");
-const { InteractionType, TextInputStyle } = require("discord-api-types/v10");
+const { GlobalDatasWork } = require("../src/utils");
 const Handlers = require("../Handlers");
-const { jeffreygID, mantenimiento } = Config;
 
 /**
  * 

@@ -1,7 +1,6 @@
-const Discord = require("discord.js");
+const { ButtonStyle, ButtonBuilder, ActionRowBuilder } = require("discord.js");
 const { Command, Categories, Embed, importImage } = require("../../src/utils");
 const { Colores, Config, EmbedImages, Bases } = require("../../src/resources");
-const { ButtonStyle } = require("discord-api-types/v10");
 
 const command = new Command({
     name: "embeds",
@@ -589,9 +588,9 @@ Esto no es obligatorio, siempre puedes usar el comando \`/warns\` para conocer _
         .defDesc("¿Necesitas ayuda? ¿Alguna duda? ¿Warn injusto?\nPulsa el botón de aquí abajo para crear un ticket para hablar directamente con el STAFF.")
         .defColor(Colores.verdeclaro);
 
-    let ticketRow = new Discord.ActionRowBuilder()
+    let ticketRow = new ActionRowBuilder()
         .addComponents(
-            new Discord.ButtonBuilder()
+            new ButtonBuilder()
                 .setCustomId("createTicket")
                 .setLabel("CREAR TICKET")
                 .setStyle(ButtonStyle.Success)

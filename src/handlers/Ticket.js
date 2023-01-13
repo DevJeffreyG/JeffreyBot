@@ -1,5 +1,4 @@
-const { ActionRowBuilder, SelectMenuBuilder, ButtonBuilder, PermissionsBitField, time, MessageComponentInteraction, StringSelectMenuBuilder } = require("discord.js");
-const { ButtonStyle } = require("discord-api-types/v10");
+const { ButtonStyle, ActionRowBuilder, SelectMenuBuilder, ButtonBuilder, PermissionsBitField, time, MessageComponentInteraction, StringSelectMenuBuilder } = require("discord.js");
 
 const Embed = require("../utils/Embed");
 const ErrorEmbed = require("../utils/ErrorEmbed");

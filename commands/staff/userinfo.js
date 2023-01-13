@@ -1,5 +1,4 @@
-const { ActionRowBuilder, ButtonBuilder, time } = require("discord.js")
-const { ButtonStyle, PermissionFlagsBits } = require("discord-api-types/v10");
+const { ActionRowBuilder, ButtonBuilder, time, ButtonStyle, PermissionFlagsBits } = require("discord.js")
 
 const { Command, Categories, Embed, EndReasons } = require("../../src/utils")
 const { Colores, Config } = require("../../src/resources")

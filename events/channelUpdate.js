@@ -1,7 +1,7 @@
 const { GenerateLog, FetchAuditLogs, GetChangesAndCreateFields } = require("../src/utils/");
 const { Colores } = require("../src/resources");
 
-const { AuditLogEvent } = require("discord-api-types/v10");
+const { AuditLogEvent } = require("discord.js");
 
 module.exports = async (client, oldchannel, channel) => {
     const guild = channel.guild;
