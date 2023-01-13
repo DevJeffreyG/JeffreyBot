@@ -27,14 +27,13 @@ const client = new Client({
   ]
 });
 
-const { connection } = require('./db')
+const { connection } = require('./db');
 
 console.log("==============================================")
 console.log(`🦊 INICIALIZANDO ${require("./package.json").name} v${require("./package.json").version} ...`)
 
 connection.then(async (c) => {
   console.log(`🟢 Conectado a la base de datos ${c.connection.name} 🖥️`)
-  const Commands = require("./Commands");
 
   //client.on("debug", console.log)
 
@@ -51,9 +50,6 @@ connection.then(async (c) => {
       })
     })
   }, null, true, 'America/Bogota');
-
-  // slash commands
-  await Commands.prepare(client, ["482989052136652800"]);
   await client.login(process.env.TOKEN)
 
   // events

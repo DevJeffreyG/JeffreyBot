@@ -25,6 +25,7 @@ const { ClientCredentialsAuthProvider } = require("@twurple/auth");
 const { BoostObjetives, EndReasons, ChannelModules, LogReasons } = require("./Enums");
 const Log = require("./Log");
 const { Bases } = require("../resources");
+const Commands = require("../../Commands");
 
 /* ##### MONGOOSE ######## */
 const RandomCumplido = function (force = null) {
@@ -1544,6 +1545,21 @@ const ProgressBar = function (percentage, options = { blocks: 10, empty: "⬜", 
   return fullBlocks + emptyBlocks;
 }
 
+/**
+ * @param {Client} client 
+ */
+const UpdateCommands = async function(client) {
+  const ClientCommands = new Commands(["./commands/", "./contextmenus/"]);
+  return new Promise(async (res, rej) => {
+    try {
+      let resp = await ClientCommands.prepare(client, ["482989052136652800"])
+      res(resp);
+    } catch(err) {
+      rej(err)
+    }
+  })
+}
+
 module.exports = {
   GetChangesAndCreateFields,
   FetchAuditLogs,
@@ -1572,5 +1588,6 @@ module.exports = {
   isDeveloper,
   ActivityWork,
   UpdateObj,
-  ProgressBar
+  ProgressBar,
+  UpdateCommands
 }

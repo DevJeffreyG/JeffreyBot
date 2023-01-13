@@ -1,5 +1,5 @@
-const { Colores } = require("../src/resources/");
-const { Embed, Log, ChannelModules, LogReasons, Cooldowns, BoostTypes, BoostObjetives, Multipliers, RequirementType, ErrorEmbed } = require("../src/utils");
+const { Colores, Bases } = require("../src/resources/");
+const { Embed, Log, ChannelModules, LogReasons, Cooldowns, BoostTypes, BoostObjetives, Multipliers, RequirementType, ErrorEmbed, UpdateCommands } = require("../src/utils");
 
 const links = [
   "https", "http", "www.", "discord.gg", "discord.gift"
@@ -20,7 +20,21 @@ const { Users, Guilds } = require("mongoose").models;
 module.exports = async (client, message) => {
   // Captcha.
   if (message.author.bot) return;
-  if (message.channel.type === ChannelType.DM) return;
+  if (message.channel.type === ChannelType.DM) {
+    if(!Bases.devIds.find(x => x === message.author.id)) return;
+
+    if(message.content === "~commands") {
+      try {
+        await UpdateCommands(client)
+
+        message.reply("[DEV] Se actualizaron los comandos")
+      } catch (err) {
+        message.reply({content: `[DEV] Hubo un error al actualizar los comandos.\n${codeBlock("json", err)}`});
+      }
+    }
+
+    return;
+  }
 
   const doc = await Guilds.getOrCreate(message.guild.id);
   const guild = message.guild;
