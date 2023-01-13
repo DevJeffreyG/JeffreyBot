@@ -3,6 +3,7 @@ const moment = require("moment")
 
 const HumanMs = require("../../src/utils/HumanMs")
 const { time } = require('discord.js')
+const { RequirementType } = require('../../src/utils/Enums')
 
 const Schema = new mongoose.Schema({
     guild_id: { type: String, required: true },
@@ -125,7 +126,7 @@ const Schema = new mongoose.Schema({
             level: { type: Number, required: true, default: 0, integer: true },
             reputation: { type: Number, required: true, default: 0, integer: true },
             currency: {
-                type: Number, required: true, default: function ()  {
+                type: Number, required: true, default: function () {
                     return this.economy.global.jeffros
                 }, integer: true
             },
@@ -133,7 +134,7 @@ const Schema = new mongoose.Schema({
         },
         dark: {
             currency: {
-                type: Number, default: function() {
+                type: Number, default: function () {
                     return this.economy.dark.darkjeffros || 0;
                 }, integer: true
             },
@@ -151,33 +152,33 @@ Schema.pre("save", function () {
 
     this.economy.dark.currency = Math.round(this.economy.dark.currency);
 
-    if(this.economy.global.currency) {
+    if (this.economy.global.currency) {
         let obj = this.economy.toObject();
         delete obj.global.jeffros;
 
         this.economy = obj;
     }
 
-    if(this.economy.dark.currency) {
+    if (this.economy.dark.currency) {
         let obj = this.economy.toObject();
         delete obj.dark.darkjeffro;
 
         this.economy = obj;
     }
 
-    if(this.economy.dark.accuracy < 10) this.economy.dark.accuracy = 10;
+    if (this.economy.dark.accuracy < 10) this.economy.dark.accuracy = 10;
     this.economy.dark.criminal_acc = 100 - this.economy.dark.accuracy;
 
     // Corregir nivel actual
     const expNow = this.economy.global.exp;
-    let realLvl = Math.floor(- ( 25 - Math.sqrt(5*(105+2*expNow)) ) / 10); // solved: 10 * (level ** 2) + 50 * level + 100
+    let realLvl = Math.floor(- (25 - Math.sqrt(5 * (105 + 2 * expNow))) / 10); // solved: 10 * (level ** 2) + 50 * level + 100
     const nextLevel = this.getNextLevelExp(realLvl)
 
-    if(nextLevel < expNow) realLvl++;
-    if(realLvl < 0) realLvl = 0;
+    if (nextLevel < expNow) realLvl++;
+    if (realLvl < 0) realLvl = 0;
 
     // Cambio de nivel
-    if(this.economy.global.level != realLvl) mongoose.models.Guilds.getOrCreate(this.guild_id).then(doc => doc.manageLevelUp(realLvl, this));
+    if (this.economy.global.level != realLvl) mongoose.models.Guilds.getOrCreate(this.guild_id).then(doc => doc.manageLevelUp(realLvl, this));
 
     this.economy.global.level = realLvl // la ecuacion se toma como si la exp ahora fuese la exp necesaria para el siguiente nivel
 
@@ -193,8 +194,8 @@ Schema.static("getOrCreate", async function ({ user_id, guild_id }) {
     }).save();
 })
 
-Schema.method("getNextLevelExp", function(level = null) {
-    if(!level) level = this.economy.global.level;
+Schema.method("getNextLevelExp", function (level = null) {
+    if (!level) level = this.economy.global.level;
 
     return 10 * (level ** 2) + 50 * level + 100;
 })
@@ -256,25 +257,45 @@ Schema.method("toggleBan", async function (module) {
  * - (false) INSTANT: SIEMPRE DEVUELVE LA INFO DEL COOLDOWN, COMO SI SIEMPRE HUBIESE TENIDO EL COOLDOWN
  * - (false) PRECISE: NO SE AGREGA EL COOLDOWN, SINO QUE SE ESTABLECE LA FECHA CUANDO SE TERMINA EL COOLDOWN EN LA BASE DE DATOS
  *                    REQUIERE "FORCE_COOLDOWN"
+ * - (false) LOG: CONSOLE.LOG
  */
-Schema.method("cooldown", async function (modulo, options = { force_cooldown: null, save: true, check: true, info: false, instant: false, precise: false }) {
-    let { force_cooldown, save, check, info, instant, precise } = options
+Schema.method("cooldown", async function (modulo, options = { force_cooldown: null, save: true, check: true, info: false, instant: false, precise: false, log: false }) {
+    let { force_cooldown, save, check, info, instant, precise, log } = options
     const doc = await mongoose.models.Guilds.getOrCreate(this.guild_id)
     const cooldownInfo = !force_cooldown ? doc.getCooldown(modulo) : null;
 
     const baseCooldown = cooldownInfo?.base;
     let modifiers = cooldownInfo?.modifiers;
-    modifiers?.sort((a, b) => a - b);
 
-    const modifier = modifiers?.find(x => this.economy.global.level >= x.level);
+    const LevelModif = modifiers?.filter(x => x.req_type === RequirementType.Level).sort((a, b) => b.requirement - a.requirement)
+    const RoleModif = modifiers?.filter(x => x.req_type === RequirementType.Role).sort((a, b) => a.multiplier - b.multiplier)
+
+    if (RoleModif.length > 0) {
+        const client = require("../../index");
+
+        const guild = client.guilds.cache.get(this.guild_id);
+        const member = guild.members.cache.get(this.user_id);
+
+        roles = member.roles.cache;
+    }
+
+    const selectedLevelModif = LevelModif?.find(x => this.economy.global.level >= x.requirement);
+    const selectedRoleModif = typeof roles != "undefined" ? RoleModif?.find(x => {
+        if (roles.get(x.requirement)) return x
+    }) : null;
+
+    let modifier = selectedLevelModif ?? selectedRoleModif ?? null;
+    if (selectedRoleModif?.multiplier < selectedLevelModif?.multiplier) modifier = selectedRoleModif
+    else if (selectedLevelModif?.multiplier < selectedRoleModif?.multiplier) modifier = selectedLevelModif
 
     const cooldown = force_cooldown ?? (modifier ? baseCooldown * modifier?.multiplier : baseCooldown);
 
     if (check == undefined) check = true;
     if (save == undefined) save = true;
     if (precise == undefined) precise = false;
+    if (log == undefined) log = false;
 
-    if(!info) console.log("⚠️ Se está usando el cooldown %s", precise ? cooldown : new HumanMs(cooldown).human)
+    if (!info && log) console.log("⚠️ Se está usando el cooldown %s", precise ? cooldown : new HumanMs(cooldown).human)
 
     if (this.data.cooldowns[modulo] && check) {
         let timer = this.data.cooldowns[modulo];
@@ -287,7 +308,7 @@ Schema.method("cooldown", async function (modulo, options = { force_cooldown: nu
         let text = new HumanMs(toCheck).left(); */
     }
 
-    if(info && !check) return cooldown;
+    if (info && !check) return cooldown;
     if (info) return;
 
     let c = precise ? cooldown : moment().add(cooldown, "ms").toDate()
@@ -295,7 +316,7 @@ Schema.method("cooldown", async function (modulo, options = { force_cooldown: nu
 
     this.data.cooldowns[modulo] = c;
     if (save) this.save();
-    else console.log("⚠️ NO se guardó el cooldown inmediatamente")
+    else if (log) console.log("⚠️ NO se guardó el cooldown inmediatamente")
 
     return instant ? { mention: time(c, "R"), timestamp: c, text } : null
 })

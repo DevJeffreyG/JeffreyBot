@@ -1,6 +1,6 @@
 const { codeBlock, messageLink, hyperlink } = require("discord.js");
 const { Colores } = require("../../src/resources");
-const { Command, Categories, ErrorEmbed, Confirmation, FindNewId, Embed, ChannelModules, Log, LogReasons } = require("../../src/utils")
+const { Command, Categories, ErrorEmbed, Confirmation, FindNewId, Embed, ChannelModules, Log, LogReasons, Cooldowns, Enum, ModifierType, RequirementType, Multipliers } = require("../../src/utils")
 
 const command = new Command({
     name: "config",
@@ -12,8 +12,14 @@ const maxValue = 1024; // api limit
 const descValue = 50; // menuselectorlimit (warns, tickets)
 const explLength = maxValue - 85 - descValue;
 
+const CooldownChoices = new Enum(Cooldowns).complexArray();
+CooldownChoices.splice(CooldownChoices.length - 1)
+
+const MultiplierChoices = new Enum(Multipliers).complexArray();
+const RequirementTypesChoices = new Enum(RequirementType).complexArray();
+
 command.data
-    .addSubcommand(dashboard => 
+    .addSubcommand(dashboard =>
         dashboard
             .setName("dashboard")
             .setDescription("Obtén el link para la Dashboard de este servidor, y poder configurarlo"))
@@ -112,11 +118,107 @@ command.data
                     .setDescription("Obtén la lista de las reglas en este servidor")
             )
     )
+    .addSubcommandGroup(cooldowns =>
+        cooldowns
+            .setName("cooldowns")
+            .setDescription("Toda la configuración de los cooldowns")
+            .addSubcommand(base =>
+                base
+                    .setName("base")
+                    .setDescription("Cambia el cooldown base de diferentes módulos")
+                    .addStringOption(modulo => modulo
+                        .setName("modulo")
+                        .setDescription("El módulo a modificar")
+                        .addChoices(...CooldownChoices)
+                        .setRequired(true)
+                    )
+                    .addStringOption(cool => cool
+                        .setName("cooldown")
+                        .setDescription("El cooldown que se tomará como base. (1d, 10m, 1w, 30s)")
+                        .setRequired(true)
+                    )
+            )
+            .addSubcommand(modify =>
+                modify
+                    .setName("modificar")
+                    .setDescription("Cambia el cooldown de acuerdo al nivel de un usuario [NO se acumulan]")
+                    .addStringOption(modulo => modulo
+                        .setName("modulo")
+                        .setDescription("El módulo a modificar")
+                        .addChoices(...CooldownChoices)
+                        .setRequired(true)
+                    )
+                    .addStringOption(tipo => tipo
+                        .setName("tipo")
+                        .setDescription("El tipo de requerimiento")
+                        .addChoices(...RequirementTypesChoices)
+                        .setRequired(true)
+                    )
+                    .addNumberOption(o => o
+                        .setName("modificador")
+                        .setDescription("La base se multiplicará por este valor: (0 sería eliminar el cooldown, 1 el mismo, más a 1 se sube.)")
+                        .setMinValue(0)
+                        .setRequired(true)
+                    )
+                    .addIntegerOption(lvl => lvl
+                        .setName("nivel")
+                        .setDescription("El nivel al que se aplicará este modificador")
+                        .setMinValue(1)
+                    )
+                    .addRoleOption(role => role
+                        .setName("role")
+                        .setDescription("El role que se necesita para que se aplique el modificador")
+                    )
+            )
+    )
+    .addSubcommand(addmult =>
+        addmult
+            .setName("add-multi")
+            .setDescription("Agregar un modificador de multiplicador. [Acumulables]")
+                    .addStringOption(modulo => modulo
+                        .setName("modulo")
+                        .setDescription("El módulo a modificar")
+                        .addChoices(...MultiplierChoices)
+                        .setRequired(true)
+                    )
+                    .addStringOption(tipo => tipo
+                        .setName("tipo")
+                        .setDescription("El tipo de requerimiento")
+                        .addChoices(...RequirementTypesChoices)
+                        .setRequired(true)
+                    )
+                    .addNumberOption(o => o
+                        .setName("modificador")
+                        .setDescription("Estos modificadores se suman al inicial, que es 1: (0 no hace nada, 1 sería el doble)")
+                        .setMinValue(0)
+                        .setRequired(true)
+                    )
+                    .addIntegerOption(lvl => lvl
+                        .setName("nivel")
+                        .setDescription("El nivel al que se aplicará este modificador")
+                        .setMinValue(1)
+                    )
+                    .addRoleOption(role => role
+                        .setName("role")
+                        .setDescription("El role que se necesita para que se aplique el modificador")
+                    )
+    )
+    .addSubcommand(delmodify =>
+        delmodify
+            .setName("del-modif")
+            .setDescription("Elimina un modificador por su ID")
+            .addIntegerOption(id => id
+                .setName("id")
+                .setDescription("La ID del modificador.")
+                .setRequired(true)
+            )
+    )
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { Guilds } = models;
     const { subcommand, subgroup } = params;
+    const { modulo, tipo, modificador, id, nivel, role } = params[subcommand];
 
     const docGuild = await Guilds.getOrCreate(interaction.guild.id);
 
@@ -126,11 +228,63 @@ command.execute = async (interaction, models, params, client) => {
                 content: `${process.env.HOME_PAGE}/dashboard/${interaction.guild.id}`
             })
             break
+
+        case "add-multi":
+            if(
+                (!nivel && !role) ||
+                (Number(tipo.value) == RequirementType.Level && !nivel) ||
+                (Number(tipo.value) == RequirementType.Role && !role)
+            ) return new ErrorEmbed(interaction, {
+                type: "badParams",
+                data: {
+                    help: "Debe haber un nivel o un role, y este debe coincidir con el tipo"
+                }
+            }).send();
+
+            const newId = FindNewId(await Guilds.find(), "settings.modifiers", "id");
+
+            docGuild.settings.modifiers.push({
+                type: ModifierType.Multiplier,
+                module: modulo.value,
+                multiplier: modificador.value,
+                requirement: nivel ? Number(nivel.value) : String(role.value),
+                req_type: tipo.value,
+                id: newId
+            })
+
+            await docGuild.save();
+
+            interaction.editReply({embeds: [new Embed({
+                type: "success",
+                data: {
+                    desc: [
+                        "Se ha agregado el modificador",
+                        `ID: \`${newId}\``
+                    ]
+                }
+            })]})
+            break;
+
+        case "del-modif":
+            // modulo, cooldown
+            let index = docGuild.settings.modifiers.findIndex(x => x.id === id.value);
+            docGuild.settings.modifiers.splice(index, 1);
+
+            await docGuild.save();
+
+            interaction.editReply({embeds: [new Embed({
+                type: "success"
+            })]})
+            break;
     }
 
     switch (subgroup) {
         case "reglas":
             await command.execReglas(interaction, models, docGuild, params);
+            break;
+
+        case "cooldowns":
+            await command.execCooldowns(interaction, models, docGuild, params);
             break;
     }
 
@@ -343,6 +497,60 @@ ${codeBlock("markdown", expl.value)}`,
             interaction.editReply({ embeds: [embed] })
         }
     }
+}
+
+command.execCooldowns = async (interaction, models, doc, params) => {
+    const { subcommand, cooldowns } = params;
+    const { Guilds, Users } = models;
+    const { modulo, cooldown, tipo, modificador, nivel, role, id} = cooldowns;
+
+    switch(subcommand) {
+        case "base":
+            // modulo, cooldown
+            doc.settings.cooldowns.bases[modulo] = cooldown;
+
+            interaction.editReply({embeds: [new Embed({
+                type: "success"
+            })]})
+            break;
+
+        case "modificar":
+            // modulo, tipo, modificador, nivel, role
+            if(
+                (!nivel && !role) ||
+                (Number(tipo.value) == RequirementType.Level && !nivel) ||
+                (Number(tipo.value) == RequirementType.Role && !role)
+            ) return new ErrorEmbed(interaction, {
+                type: "badParams",
+                data: {
+                    help: "Debe haber un nivel o un role, y este debe coincidir con el tipo"
+                }
+            }).send();
+
+            const newId = FindNewId(await Guilds.find(), "settings.modifiers", "id");
+
+            doc.settings.modifiers.push({
+                type: ModifierType.Cooldown,
+                module: modulo.value,
+                multiplier: modificador.value,
+                requirement: nivel ? Number(nivel.value) : String(role.value),
+                req_type: tipo.value,
+                id: newId
+            })
+
+            interaction.editReply({embeds: [new Embed({
+                type: "success",
+                data: {
+                    desc: [
+                        "Se ha agregado el modificador",
+                        `ID: \`${newId}\``
+                    ]
+                }
+            })]})
+            break;
+    }
+
+    await doc.save();
 }
 
 module.exports = command;

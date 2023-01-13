@@ -47,8 +47,8 @@ class Enum {
 
         for(const name of names) {
             let obj = {};
-            obj.name = name
-            obj.value = this.values[name];
+            obj.name = String(name);
+            obj.value = String(this.values[name]);
 
             arr.push(obj)
         }
@@ -289,10 +289,26 @@ const Cooldowns = new Enum({
  * - Level
  * - Role
  */
-const ModifierType = new Enum({
+const RequirementType = new Enum({
     Level: 1,
     Role: 2
 }).values;
+
+/**
+ * - Cooldown
+ * - Multiplier
+ */
+const ModifierType = new Enum({
+    Cooldown: 1,
+    Multiplier: 2
+}).values;
+
+/**
+ * - ChatRewards
+ */
+const Multipliers = new Enum({
+    ChatRewards: "chat_rewards"
+}).values
 
 module.exports = {
     Enum,
@@ -310,5 +326,7 @@ module.exports = {
     LogReasons,
     ApiUpdate,
     Cooldowns,
-    ModifierType
+    RequirementType,
+    ModifierType,
+    Multipliers
 }

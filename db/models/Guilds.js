@@ -2,12 +2,17 @@ const { Collection } = require('discord.js');
 const mongoose = require('mongoose');
 const ms = require("ms");
 
+const { ModifierType } = require('../../src/utils/Enums');
+
 const Schema = mongoose.Schema;
 
-const cooldownModifier = {
+const modifiers = {
+    type: { type: Number, required: true },
+    module: { type: String, required: true },
     multiplier: { type: Number, required: true },
-    requirement: { type: Number, required: true },
-    type: { type: Number, required: true }
+    requirement: { type: Schema.Types.Mixed, required: true },
+    req_type: { type: Number, required: true },
+    id: { type: Number, sparse: true }
 }
 
 const GuildSchema = new Schema({
@@ -36,7 +41,7 @@ const GuildSchema = new Schema({
                 last_reminded: { type: Date, default: null },
                 suggestion: { type: String, required: true },
                 accepted: { type: Boolean, default: null },
-                reason: { type: String, default: null},
+                reason: { type: String, default: null },
                 id: { type: Number, sparse: true }
             }
         ],
@@ -156,25 +161,15 @@ const GuildSchema = new Schema({
             ticket_remind: { type: Number, default: 7, integer: true },
         },
         cooldowns: {
-            bases: {
-                coins: { type: String, default: "10m" },
-                chat_rewards: { type: String, default: "1m" },
-                rep: { type: String, default: "1d" },
-                claim_rep: { type: String, default: "3h" },
-                roulette: { type: String, default: "1d" },
-                blackjack: { type: String, default: "5m" },
-                currency_to_exp: { type: String, default: "1w" },
-            },
-            modifiers: {
-                coins: [cooldownModifier],
-                chat_rewards: [cooldownModifier],
-                rep: [cooldownModifier],
-                claim_rep: [cooldownModifier],
-                roulette: [cooldownModifier],
-                blackjack: [cooldownModifier],
-                currency_to_exp: [cooldownModifier],
-            }
-        }
+            coins: { type: String, default: "10m" },
+            chat_rewards: { type: String, default: "1m" },
+            rep: { type: String, default: "1d" },
+            claim_rep: { type: String, default: "3h" },
+            roulette: { type: String, default: "1d" },
+            blackjack: { type: String, default: "5m" },
+            currency_to_exp: { type: String, default: "1w" },
+        },
+        modifiers: [modifiers]
     },
     roles: { // id de roles
         admins: { type: Array, default: [] },
@@ -249,7 +244,7 @@ GuildSchema.static("getById", async function (id) {
     return await this.findOne({ guild_id: id })
 });
 
-GuildSchema.method("manageLevelUp", async function(level, userDoc) {
+GuildSchema.method("manageLevelUp", async function (level, userDoc) {
     const client = require("../../index");
     const guild = await client.guilds.fetch(this.guild_id);
     const member = await guild.members.fetch(userDoc.user_id);
@@ -260,12 +255,12 @@ GuildSchema.method("manageLevelUp", async function(level, userDoc) {
     const rewardsList = this.roles.levels.sort((a, b) => b.level - a.level);
 
     const reward = rewardsList.find(x => level >= x.level);
-    if(!reward) return
+    if (!reward) return
     for await (const roleId of reward.roles) {
         roles.set(roleId, await guild.roles.fetch(roleId))
     }
 
-    if(this.settings.functions.levels_deleteOldRole) { // Se eliminan las recompensas viejas
+    if (this.settings.functions.levels_deleteOldRole) { // Se eliminan las recompensas viejas
         const rewardsToRemove = rewardsList.filter(x => x != reward);
 
         for (const reward of rewardsToRemove) {
@@ -288,15 +283,19 @@ GuildSchema.method("manageLevelUp", async function(level, userDoc) {
         }
     }
 
-    if(!member.roles.cache.hasAll(...roles.keys())) await member.roles.add(roles).catch(err => console.log(err)); // Si le falta algun role, agregarlo
-    if(toRemoveRoles.size > 0) member.roles.remove(toRemoveRoles).catch(err => console.log(err)); // Si hay roles para eliminar, hacerlo
+    if (!member.roles.cache.hasAll(...roles.keys())) await member.roles.add(roles).catch(err => console.log(err)); // Si le falta algun role, agregarlo
+    if (toRemoveRoles.size > 0) member.roles.remove(toRemoveRoles).catch(err => console.log(err)); // Si hay roles para eliminar, hacerlo
 })
 
-GuildSchema.method("getCooldown", function(modulo, toString = false) {
-    const base = this.settings.cooldowns.bases[modulo];
-    const modifiers = this.settings.cooldowns.modifiers[modulo];
-    
-    return toString ? {base, modifiers } : {base: ms(base), modifiers};
+GuildSchema.method("getCooldown", function (modulo, toString = false) {
+    const base = this.settings.cooldowns[modulo];
+    const modifiers = this.settings.modifiers.filter(x => x.module == modulo && x.type == ModifierType.Cooldown);
+
+    return toString ? { base, modifiers } : { base: ms(base), modifiers };
+})
+
+GuildSchema.method("getMultipliers", function(modulo) {
+    return this.settings.modifiers.filter(x => x.module == modulo && x.type === ModifierType.Multiplier);
 })
 
 GuildSchema.method("getVaultCode", function (code) {
@@ -437,14 +436,14 @@ GuildSchema.method("getBots", function () {
     return this.roles.bots
 });
 
-GuildSchema.method("getChannel", function(query) {
+GuildSchema.method("getChannel", function (query) {
     let general = this.channels;
     const q = query.split(".");
 
-    if(q.length >= 1){
+    if (q.length >= 1) {
         for (let i = 0; i < q.length; i++) {
             const queryQ = q[i];
-            
+
             general = general[queryQ]
         }
     }
@@ -452,14 +451,14 @@ GuildSchema.method("getChannel", function(query) {
     return general ?? null;
 })
 
-GuildSchema.method("getCategory", function(query) {
+GuildSchema.method("getCategory", function (query) {
     let general = this.categories;
     const q = query.split(".");
 
-    if(q.length >= 1){
+    if (q.length >= 1) {
         for (let i = 0; i < q.length; i++) {
             const queryQ = q[i];
-            
+
             general = general[queryQ]
         }
     }
@@ -467,22 +466,22 @@ GuildSchema.method("getCategory", function(query) {
     return general ?? null;
 })
 
-GuildSchema.method("getLogChannel", function(module) {
+GuildSchema.method("getLogChannel", function (module) {
     return this.getChannel("logs." + module);
 })
 
-GuildSchema.method("getDarkShopChannel", function(module) {
+GuildSchema.method("getDarkShopChannel", function (module) {
     return this.getChannel("darkshop." + module)
 })
 
-GuildSchema.method("getRole", function(query) {
+GuildSchema.method("getRole", function (query) {
     let general = this.roles;
     const q = query.split(".");
 
-    if(q.length >= 1){
+    if (q.length >= 1) {
         for (let i = 0; i < q.length; i++) {
             const queryQ = q[i];
-            
+
             general = general[queryQ]
         }
     }
@@ -490,14 +489,14 @@ GuildSchema.method("getRole", function(query) {
     return general ?? null;
 })
 
-GuildSchema.method("moduleIsActive", function(query, initial = this.settings.active_modules) {
+GuildSchema.method("moduleIsActive", function (query, initial = this.settings.active_modules) {
     let general = initial;
     const q = query.split(".");
 
-    if(q.length >= 1){
+    if (q.length >= 1) {
         for (let i = 0; i < q.length; i++) {
             const queryQ = q[i];
-            
+
             general = general[queryQ]
         }
     }
@@ -505,20 +504,20 @@ GuildSchema.method("moduleIsActive", function(query, initial = this.settings.act
     return general;
 })
 
-GuildSchema.method("getRoleByModule", function(module) {
-    if(this.roles[module] instanceof Array) return console.log("🔴 SÓLO ROLES QUE SEAN STRINGS")
+GuildSchema.method("getRoleByModule", function (module) {
+    if (this.roles[module] instanceof Array) return console.log("🔴 SÓLO ROLES QUE SEAN STRINGS")
 
     return this.roles[module];
 })
 
-GuildSchema.method("getEmoji", function(query) {
+GuildSchema.method("getEmoji", function (query) {
     let general = this.emojis;
     const q = query.split(".");
 
-    if(q.length >= 1){
+    if (q.length >= 1) {
         for (let i = 0; i < q.length; i++) {
             const queryQ = q[i];
-            
+
             general = general[queryQ]
         }
     }
