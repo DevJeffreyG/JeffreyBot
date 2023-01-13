@@ -421,7 +421,11 @@ Si es para la DarkShop, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
         const interactive = new InteractivePages(this.base, this.items, 3, options)
         this.pages = interactive.pages;
 
-        await interactive.init(this.interaction);
+        try {
+            await interactive.init(this.interaction);
+        } catch(err) {
+            console.log(err);
+        }
     }
 
     async #editName(item, value) {

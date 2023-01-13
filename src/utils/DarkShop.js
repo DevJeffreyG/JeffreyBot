@@ -439,7 +439,7 @@ class DarkShop {
                         })
                     })
 
-                await Logger.send({ embeds: [log] });
+                await Logger.setReason(LogReasons.Logger).send({ embeds: [log] });
             }
 
             darkdata.currency = 0;

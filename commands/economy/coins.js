@@ -6,7 +6,7 @@ const { multiplier } = Config;
 
 const command = new Command({
     name: "coins",
-    desc: "Gana dinero extra en un intervalo de 10 minutos (o menos)",
+    desc: "Gana dinero extra cada cierto tiempo",
     category: Categories.Economy
 });
 
@@ -31,10 +31,6 @@ command.execute = async (interaction, models, params, client) => {
     if(cool) return interaction.editReply({content: null, embeds: [
         new Embed({type: "cooldown", data: {cool}})
     ]});
-
-
-    /* if (member.roles.cache.get(Config.lvl60)) coinsCooldown /= 2;
-    if (member.roles.cache.get(Config.lvl99)) coinsCooldown /= 2; */
 
     let money = Math.ceil(Math.random() * 20);
     let tmoney = `**${Currency}${money.toLocaleString('es-CO')}**`;
@@ -62,8 +58,7 @@ command.execute = async (interaction, models, params, client) => {
         if(specialInfo.type === BoostTypes.Multiplier){
             if((specialInfo.objetive === BoostObjetives.Currency || specialInfo.objetive === BoostObjetives.All) && !specialInfo.disabled){
                 money = money * Number(specialInfo.value);
-                tmoney = `**${Currency}${money.toLocaleString('es-CO')}📈**`;
-                console.log(author.tag, "Boost de CURRENCY.")
+                tmoney = `**${Currency}${money.toLocaleString('es-CO')}🚀**`;
             }
         }
     }

@@ -760,8 +760,8 @@ class Dashboard {
         this.#appendChilds(min, [blackjackbet, darkshoplvl, skipfirewall]);
 
         let bases = this.#createDivSection("bases")
-        min.classList.add("wrap")
-        min.append("Valores base")
+        bases.classList.add("wrap")
+        bases.append("Valores base")
 
         let basedarkshop = this.#createNumberSelector("basepriceds", {
             title: "Precio base de la moneda (DarkShop)",

@@ -122,10 +122,19 @@ ${codeBlock(suggestion.suggestion)}`)
                             new Log(this.interaction)
                                 .setTarget(ChannelModules.StaffLogs)
                                 .setReason(LogReasons.Error)
-                                .send({ content: `No se pudo agregar el role de agradecimiento a ${suggester} por sugerir: ${codeBlock(suggestion.suggestion)} Error: ${codeBlock("js", err)}` })
+                                .send({
+                                    embeds: [
+                                        new ErrorEmbed()
+                                            .defDesc(`No se pudo agregar el role de agradecimiento a ${suggester} por sugerir:
+${codeBlock(suggestion.suggestion)}
+Error:
+${codeBlock("js", err)}`)
+                                            .raw()
+                                    ]
+                                })
                         });
 
-                    embed.defDesc(acceptedEmbed.data.description + `**—** Nos tomamos la libertad de agregarte un role como forma de agradecimiento 😉`);
+                    embed.defDesc(embed.data.description + `**—** Nos tomamos la libertad de agregarte un role como forma de agradecimiento 😉`);
                 }
                 this.interaction.reply({ ephemeral: true, content: "Se ha aceptado la sugerencia, se ha enviado un mensaje al usuario y se le ha dado el rol de colaborador." });
                 break;

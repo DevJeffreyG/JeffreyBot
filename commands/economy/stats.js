@@ -20,7 +20,7 @@ command.execute = async (interaction, models, params, client) => {
     const { Users } = models
     const { usuario } = params;
 
-    const guild = client.guilds.cache.find(x => x.id === interaction.guildId);
+    const guild = interaction.guild;
 
     // codigo
     const selectedUser = usuario?.member && usuario?.member.id != interaction.member.id;
@@ -52,10 +52,11 @@ command.execute = async (interaction, models, params, client) => {
 
             let boostobj = new Enum(BoostObjetives).translate(objetive);
             if (boostobj === "All") boostobj = "Todo"
+            if (boostobj === "Currency") boostobj = client.getCustomEmojis(guild.id).Currency.name;
 
-            meEmbed
+            embed
                 .defField(`— 🚀 Boost de ${boostobj} x${value}`,
-                    `▸ Hasta: ${time(moment(boost.active_since).add(boost.duration, "ms").toDate())}`, true);
+                    `▸ Hasta: ${time(moment(boost.active_until).toDate())}`, true);
         }
     }
 

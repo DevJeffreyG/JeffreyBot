@@ -36,7 +36,7 @@ class ErrorEmbed extends Embed {
         }
         
         if(inter) this.interaction = inter;
-        else if(!ignorewarnings) console.log("❗ Considera usando ErrorEmbed.send()", options)
+        else if(!ignorewarnings && options) console.log("❗ Considera usando ErrorEmbed.send()", options)
 
         this.options = options;
         this.#setup(options)
