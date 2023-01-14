@@ -1,4 +1,4 @@
-const { BaseInteraction, InteractionType, time, CommandInteraction, MessageComponentInteraction, ModalSubmitInteraction } = require("discord.js");
+const { BaseInteraction, InteractionType, time, CommandInteraction, MessageComponentInteraction, ModalSubmitInteraction, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction } = require("discord.js");
 
 const { Ticket, Suggestion } = require("./src/handlers/");
 const { Bases } = require("./src/resources");
@@ -10,7 +10,7 @@ const { ToggledCommands, Users, Guilds } = models;
 class Handlers {
     /**
      * 
-     * @param {BaseInteraction | CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction } interaction 
+     * @param {BaseInteraction | CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction | ContextMenuCommandInteraction | MessageContextMenuCommandInteraction | UserContextMenuCommandInteraction } interaction 
      * @param {Boolean} [init=true]
      */
     constructor(interaction, init = true) {
@@ -29,7 +29,8 @@ class Handlers {
 
         switch (this.interaction.type) {
             case InteractionType.ApplicationCommand:
-                return this.slashHandler();
+                if(this.interaction.isChatInputCommand()) return this.slashHandler();
+                if(this.interaction.isContextMenuCommand()) return this.contextMenuHandler();
 
             case InteractionType.MessageComponent:
                 return this.componentHandler();
@@ -40,11 +41,8 @@ class Handlers {
     }
 
     async slashHandler() {
-        const docGuild = this.doc;
-        const user = this.user;
-
         const commandName = this.interaction.commandName;
-        const slashCommand = this.client.slash.get(commandName);
+        this.executedCommand = this.client.commands.get(commandName);
 
         let toggledQuery = await ToggledCommands.getToggle(commandName);
 
@@ -78,7 +76,7 @@ class Handlers {
         // opciones normales
         if (!needFix) {
             //console.log("🟢 Params ANTES de opciones normales:", params)
-            for (const option of slashCommand.data.options) {
+            for (const option of this.executedCommand.data.options) {
                 //console.log(option)
                 let { name } = option
                 params[name] = this.interaction.options.get(name) // si no tiene opciones dentro (sería un subcommand)
@@ -90,10 +88,10 @@ class Handlers {
             //console.log("🟢 Params ANTES de opciones subcommands:", params)
 
             // sacar el subcommand que se va a usar
-            let using = slashCommand.data.options.find(x => x.name === sub);
+            let using = this.executedCommand.data.options.find(x => x.name === sub);
 
             if (!using) { // está dentro de un subgroup
-                let _group = slashCommand.data.options.find(x => x.name === group)
+                let _group = this.executedCommand.data.options.find(x => x.name === group)
                 using = _group.options.find(x => x.name === sub)
 
                 prop = group // cambiar la prop donde se guardan los params
@@ -114,38 +112,25 @@ class Handlers {
         }
 
         try {
-            executeSlash(this.interaction, models, params, this.client)
+            this.#executeCommand(this.interaction, models, params, this.client)
         } catch (err) {
             console.log(err)
         }
+    }
 
-        async function executeSlash(interaction, models, params, client) {
-            console.log(`-------- /${commandName} • por ${interaction.user.id} • en ${interaction.guild.name} (${interaction.guild.id}) ----------`)
-            try {
-                if (slashCommand.category === Categories.DarkShop) {
-                    if (!docGuild.moduleIsActive("functions.darkshop")) return new ErrorEmbed(interaction, {
-                        type: "moduleDisabled"
-                    }).send({ ephemeral: true });
-                    // filtro de nivel 5
-                    let validation = await ValidateDarkShop(user, interaction.user);
-                    if (!validation.valid) return interaction.reply({ embeds: [validation.embed] })
-                }
+    async contextMenuHandler() {
+        const commandName = this.interaction.commandName;
+        this.executedCommand = this.client.commands.get(commandName);
 
-                if (slashCommand.category === Categories.Developer) {
-                    if (!Bases.devIds.find(x => x === interaction.user.id)) return interaction.reply({ ephemeral: true, content: "No puedes usar este comando porque no eres desarrollador de Jeffrey Bot" })
-                }
-                await slashCommand.execute(interaction, models, params, client);
-            } catch (error) {
-                console.error(error);
-                let help = new ErrorEmbed(interaction, { type: "badCommand", data: { commandName, error } });
-                try {
-                    await help.send()
-                    //await interaction.reply({ content: null, embeds: [help], ephemeral: true });
-                } catch (err) {
-                    console.log("⚠️ Un comando quiso ser usado y Discord no respondió:", this.client.lastInteraction)
-                    console.log(err);
-                }
-            }
+        const params = {
+            user: this.interaction.targetUser,
+            message: this.interaction.targetMessage
+        }
+
+        try {
+            this.#executeCommand(this.interaction, models, params, this.client)
+        } catch (err) {
+            console.log(err)
         }
     }
 
@@ -233,6 +218,37 @@ class Handlers {
 
     async modalHandler() {
         this.suggestion?.handle();
+    }
+
+    async #executeCommand(interaction, models, params, client) {
+        console.log(`-------- ${interaction.commandName} • por ${interaction.user.id} • en ${interaction.guild.name} (${interaction.guild.id}) ----------`)
+
+        try {
+            if(!this.executedCommand) throw new Error(`Se quiso ejecutar un comando pero no se encontró mappeado. ${interaction.commandName}`)
+            if (this.executedCommand.category === Categories.DarkShop) {
+                if (!this.doc.moduleIsActive("functions.darkshop")) return new ErrorEmbed(interaction, {
+                    type: "moduleDisabled"
+                }).send({ ephemeral: true });
+                // filtro de nivel 5
+                let validation = await ValidateDarkShop(this.user, interaction.user);
+                if (!validation.valid) return interaction.reply({ embeds: [validation.embed] })
+            }
+
+            if (this.executedCommand.category === Categories.Developer) {
+                if (!Bases.devIds.find(x => x === interaction.user.id)) return interaction.reply({ ephemeral: true, content: "No puedes usar este comando porque no eres desarrollador de Jeffrey Bot" })
+            }
+            await this.executedCommand.execute(interaction, models, params, client);
+        } catch (error) {
+            console.error(error);
+            let help = new ErrorEmbed(interaction, { type: "badCommand", data: { commandName: this.interaction.commandName, error } });
+            try {
+                await help.send()
+                //await interaction.reply({ content: null, embeds: [help], ephemeral: true });
+            } catch (err) {
+                console.log("⚠️ Un comando quiso ser usado y Discord no respondió:", this.client.lastInteraction)
+                console.log(err);
+            }
+        }
     }
 }
 

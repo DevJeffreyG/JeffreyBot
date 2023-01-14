@@ -223,7 +223,11 @@ ${codeBlock("javascript", data.error)}`])
         try {
             await this.interaction.editReply({content: null, embeds: [this], components: []});
         } catch (err) {
-            console.log("🔴 NO se envió el ErrorEmbed!")
+            try {
+                await this.interaction.reply({content: null, embeds: [this], components: [], ephemeral: true});
+            } catch(replyerr) {
+                console.log("🔴 NO se envió el ErrorEmbed!")
+            }
             console.log(err);
         }
     }
