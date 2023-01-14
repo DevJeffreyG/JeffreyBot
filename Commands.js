@@ -18,27 +18,45 @@ class Commands {
         this.rest = new REST({ version: '10'}).setToken(process.env.TOKEN);
     }
 
+    /**
+     * @param {Client} client 
+     * @returns {Client}
+     */
+    async map(client) {
+        this.client = client;
+
+        for await (const path of this.paths) {
+            this.path = path;
+            await this.#load();
+        }
+
+        this.client.mapped = true;
+        return this.client;
+    }
+
     async prepare(client, Ids = []){
-        client.slash = new Collection();
-        
         this.client = client;
         this.ids = Ids;
 
-        for await (const path of this.paths) {
+        if(!this.client.mapped) for await (const path of this.paths) {
             this.path = path;
             await this.#load()
         }
         
         return new Promise(async (res, rej) => {
+            if(this.commands.length < 1) this.commands = this.client.rawCommands;
             let response = await this.#register()
 
             if(response instanceof Error) rej(response)
-            else res(response)
+            else {
+                client.mapped = true;
+                res(response)
+            }
         })
     }
 
     async #load() {
-        console.log("============ CARGANDO COMANDOS ============");
+        console.log("============ MAPPEANDO COMANDOS ============");
         console.log(this.path);
         const commandsFolder = fs.readdirSync(this.path).filter(file => !file.endsWith(".txt"));
 
@@ -52,11 +70,13 @@ class Commands {
           for(const file of commandFiles) {
             const command = require(`${this.path}/${folder}/${file}`);
 
-            this.client.slash.set(command.data.name, command);
+            this.client.commands.set(command.data.name, command);
             console.log("▶️ Comando", command.data.name, "recibido, agregado a la lista")
             this.commands.push(command.data.toJSON())
           }
         }
+
+        this.client.rawCommands = this.commands;
     }
 
     async #register() {
@@ -80,7 +100,7 @@ class Commands {
 
             console.log("⚪ ACTUALIZANDO COMANDOS")
             await this.rest.put(this.route, {body: this.commands})
-            console.log("🟢 SLASH COMMANDS ACTUALIZADOS")
+            console.log("🟢 APPLICATION COMMANDS ACTUALIZADOS")
             return this
         } catch (error) {
             return new Error(error)
@@ -127,7 +147,7 @@ class Commands {
             let permissions = [];
             const doc = await Guilds.getById(guild.id);
 
-            const cmd = client.slash.get(comm.name)
+            const cmd = client.commands.get(comm.name)
             actualPermissions = cmd.permissions;
 
             if(!(actualPermissions instanceof Array) && actualPermissions !== null) return console.error("BAD PERMISSIONS, NOT ARRAY!", cmd)

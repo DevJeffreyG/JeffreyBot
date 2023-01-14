@@ -8,9 +8,14 @@ const CustomEmojis = require("../src/utils/CustomEmojis");
 let functions = require("../src/utils/functions");
 const { ChannelModules } = require("../src/utils/Enums");
 const Log = require("../src/utils/Log");
+const { Collection, Client } = require("discord.js");
+const Commands = require("../Commands");
 
 const CronJob = require("cron").CronJob;
 
+/**
+ * @param {Client} client 
+ */
 module.exports = async (client) => {
     client.invites = [];
     client.logsFetched = {};
@@ -21,6 +26,9 @@ module.exports = async (client) => {
     client.lockedGuilds = await GlobalDatas.getLockedGuilds();
     client.totalMembers = 0;
     client.CustomEmojis = new Map();
+    client.rawCommands = [];
+    client.commands = new Collection();
+    client.mapped = false; // Si ya se cargaron los comandos al client
     client.getCustomEmojis = (guildid) => { return client.CustomEmojis.get(guildid) };
 
     client.devGuild = await client.guilds.fetch(Bases.dev.guild)
@@ -31,6 +39,11 @@ module.exports = async (client) => {
 
     client.crashChannel = await devChannels.get(Bases.dev.crashes);
     client.logChannel = await devChannels.get(Bases.dev.logs);
+
+    if(!client.mapped) {
+        const CommandsLoad = new Commands(["./commands/", "./contextmenus/"]);
+        client = await CommandsLoad.map(client);
+    }
 
     new Chance().mixin({
         "prob": function (array) {
