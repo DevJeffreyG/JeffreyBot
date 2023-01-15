@@ -236,7 +236,12 @@ class Handlers {
             if (this.executedCommand.category === Categories.Developer) {
                 if (!Bases.devIds.find(x => x === interaction.user.id)) return interaction.reply({ ephemeral: true, content: "No puedes usar este comando porque no eres desarrollador de Jeffrey Bot" })
             }
-            await this.executedCommand.execute(interaction, models, params, client);
+            try {
+                await this.executedCommand.execute(interaction, models, params, client);
+            } catch(err) {
+                console.log("🔴 No se pudo ejecutar el comando")
+                console.log(err)
+            }
         } catch (error) {
             console.error(error);
             let help = new ErrorEmbed(interaction, { type: "badCommand", data: { commandName: this.interaction.commandName, error } });

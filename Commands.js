@@ -57,7 +57,7 @@ class Commands {
 
     async #load() {
         console.log("============ MAPPEANDO COMANDOS ============");
-        console.log(this.path);
+        console.log("Path:", this.path);
         const commandsFolder = fs.readdirSync(this.path).filter(file => !file.endsWith(".txt"));
 
         this.ids.forEach(guildId => {

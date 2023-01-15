@@ -13,7 +13,7 @@ const descValue = 50; // menuselectorlimit (warns, tickets)
 const explLength = maxValue - 85 - descValue;
 
 const CooldownChoices = new Enum(Cooldowns).complexArray();
-CooldownChoices.splice(CooldownChoices.length - 1)
+CooldownChoices.splice(CooldownChoices.findIndex(x => x.name === "InflationPrediction"), 1)
 
 const MultiplierChoices = new Enum(Multipliers).complexArray();
 const RequirementTypesChoices = new Enum(RequirementType).complexArray();

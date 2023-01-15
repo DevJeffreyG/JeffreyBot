@@ -1,5 +1,5 @@
 const ms = require("ms");
-const { Command, Categories, HumanMs, Embed, BoostTypes, BoostObjetives, Cooldowns } = require("../../src/utils");
+const { Command, Categories, HumanMs, Embed, BoostTypes, BoostObjetives, Cooldowns, GetRandomItem } = require("../../src/utils");
 
 const { Config, Responses } = require("../../src/resources/");
 const { multiplier } = Config;
@@ -63,7 +63,7 @@ command.execute = async (interaction, models, params, client) => {
         }
     }
 
-    let index = Responses.r[Math.floor(Math.random() * Responses.r.length)];
+    let index = GetRandomItem(Responses.coins);
     let textString = index.text;
     let text = textString.replace(
         new RegExp("{ MONEY }", "g"),
@@ -82,7 +82,7 @@ command.execute = async (interaction, models, params, client) => {
     .defColor(memberColor)
     .defDesc(`${text}.`);
 
-    if(index.author.toUpperCase() != "NONE"){
+    if(index.author){
         let rAuthor = guild.members.cache.find(x => x.id === index.author);
         let suggestor = rAuthor ? rAuthor.user.tag : "un usuario";
         let img = rAuthor ? rAuthor.displayAvatarURL() : guild.iconURL();

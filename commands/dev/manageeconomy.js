@@ -83,7 +83,7 @@ command.execCurrency = async (interaction, models, params, client) => {
     const { subcommand, currency } = params;
     const { usuario, cantidad } = currency
     const { Users } = models
-    const { Currency } = client.getCustomEmojis(interaction.guild.id);darkcurrency
+    const { Currency } = client.getCustomEmojis(interaction.guild.id);
 
     const user = await Users.getOrCreate({user_id: usuario.value, guild_id: usuario.member.guild.id})
 
@@ -103,7 +103,7 @@ command.execDarkCurrency = async (interaction, models, params, client) => {
     const { subcommand, darkcurrency } = params;
     const { usuario, cantidad } = darkcurrency
     const { Users } = models
-    const { DarkCurrency } = client.getCustomEmojis(interaction.guild.id);darkcurrency
+    const { DarkCurrency } = client.getCustomEmojis(interaction.guild.id);
 
     const user = await Users.getOrCreate({user_id: usuario.value, guild_id: usuario.member.guild.id})
 

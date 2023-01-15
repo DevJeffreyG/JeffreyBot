@@ -1,4 +1,4 @@
-const { Command, Categories, ErrorEmbed, Embed, MemberHasAnyRole, isDeveloper } = require("../../src/utils");
+const { Command, Categories, ErrorEmbed, Embed, MemberHasAnyRole, isDeveloper, ContextMenu } = require("../../src/utils");
 const { Colores, Bases } = require("../../src/resources/");
 
 const command = new Command({
@@ -24,7 +24,7 @@ command.execute = async (interaction, models, params, client) => {
     const doc = await Guilds.getOrCreate(guild.id);
 
     // get all commands
-    const commands = client.slash.map(slash => slash);
+    const commands = client.commands.map(slash => slash);
 
     commands.sort((a, b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0)); // me lo robe y no entiendo como funciona :D
 
@@ -74,6 +74,7 @@ command.execute = async (interaction, models, params, client) => {
 
     for (let i = 0; i < commands.length; i++) {
         const helpCommand = commands[i];
+        if(helpCommand instanceof ContextMenu) continue;
 
         const toAdd = `▸ \`/${helpCommand.name}\`: ${helpCommand.info}${helpCommand.info.endsWith("!") || helpCommand.info.endsWith("?") ? "" : "."}\n`;
 
@@ -170,7 +171,7 @@ command.execute = async (interaction, models, params, client) => {
 
 command.execGetHelp = async (interaction, commandHelp, client) => {
     await interaction.deferReply();
-    let comando = client.slash.get(commandHelp.value)
+    let comando = client.commands.get(commandHelp.value)
 
     if (!comando) return interaction.editReply({
         embeds: [

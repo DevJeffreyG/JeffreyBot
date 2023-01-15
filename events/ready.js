@@ -102,7 +102,7 @@ module.exports = async (client) => {
     // Cada 5 minutos
     functions.ManageDarkShops(client)
     new CronJob("0 */5 * * * *", async function () {
-        // TODO: functions.ManageDarkShops(client)
+        functions.ManageDarkShops(client)
     }, null, true, "America/Bogota", null, true);
 
     console.log("============================================================");

@@ -3,8 +3,8 @@ const { Colores } = require("../../src/resources");
 
 const command = new Command({
     name: "rep",
-    desc: "Cada 24h puedes darle un punto de reputación a un usuario!",
-    helpdesc: "Da un punto de reputación a un usuario cada 24 horas",
+    desc: "Dale un punto de reputación a un usuario que se lo merezca!",
+    helpdesc: "Da un punto de reputación a un usuario",
     category: Categories.General
 })
 
