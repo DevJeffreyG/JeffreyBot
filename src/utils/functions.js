@@ -1,4 +1,4 @@
-const { ActivityType, ButtonStyle, OverwriteType, PermissionsBitField, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, EmbedBuilder, Guild, GuildMember, CommandInteraction, BaseInteraction, Message, Client, time, hyperlink } = require("discord.js");
+const { ActivityType, ButtonStyle, OverwriteType, PermissionsBitField, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, EmbedBuilder, Guild, GuildMember, CommandInteraction, BaseInteraction, Message, Client, time, hyperlink, codeBlock } = require("discord.js");
 
 const Config = require("../resources/base.json");
 const Colores = require("../resources/colores.json");
@@ -331,14 +331,14 @@ const GenerateLog = async function (guild, options = {
 
   try {
     return await new Log()
-    .setGuild(guild)
-    .setTarget(logType)
-    .setReason(logReason)
-    .send({ embeds: [embed] })
-  } catch(err) {
+      .setGuild(guild)
+      .setTarget(logType)
+      .setReason(logReason)
+      .send({ embeds: [embed] })
+  } catch (err) {
     console.log(err);
   }
-  
+
 }
 
 /**
@@ -1553,16 +1553,71 @@ const ProgressBar = function (percentage, options = { blocks: 10, empty: "⬜", 
 /**
  * @param {Client} client 
  */
-const UpdateCommands = async function(client) {
+const UpdateCommands = async function (client) {
   const ClientCommands = new Commands(["./commands/", "./contextmenus/"]);
   return new Promise(async (res, rej) => {
     try {
       let resp = await ClientCommands.prepare(client, ["482989052136652800"])
       res(resp);
-    } catch(err) {
+    } catch (err) {
       rej(err)
     }
   })
+}
+
+/**
+ * @param {Message} message 
+ * @returns {Promise<Boolean>}
+ */
+const DeleteLink = async function (message) {
+  const doc = await Guilds.getOrCreate(message.guild.id);
+  const member = message.member;
+  const link = Config.Links.some(x => message.content.includes(x));
+
+  if (!doc.moduleIsActive("automoderation.remove_links")) return false;
+  if (!member.permissions.missing(PermissionsBitField.Flags.EmbedLinks).length > 0) return false;
+
+  if (!link && message.embeds.length < 1) return false;
+
+  message.delete();
+  message.author.send({
+    embeds: [
+      new Embed()
+        .defAuthor({ text: `No envíes links`, title: true })
+        .defDesc(`Detecté que incluiste un link en tu mensaje:
+${codeBlock(message.content)}`)
+        .defFooter({ text: `Discúlpame si fue un error :)`, icon: message.guild.iconURL({ dynamic: true }) })
+        .defColor(Colores.rojo)
+    ]
+  })
+    .catch(async err => {
+      let msg = await message.channel.send(`No envíes links, **${message.author.tag}**.`)
+
+      setTimeout(() => {
+        msg.delete();
+      })
+    });
+
+  try {
+    new Log(message)
+    .setTarget(ChannelModules.ModerationLogs)
+    .setReason(LogReasons.AutoMod)
+    .send({
+      embeds: [
+        new Embed()
+          .defAuthor({ text: `Se eliminó un mensaje de ${message.author.tag}`, icon: member.displayAvatarURL({ dynamic: true }) })
+          .defDesc(`${codeBlock(message.content)}`)
+          .defColor(Colores.verde)
+          .defFooter({ text: "NO se aplicaron sanciones", timestamp: true })
+      ]
+    })
+  } catch(err) {
+    console.log(err);
+  }
+
+  return true;
+
+
 }
 
 module.exports = {
@@ -1594,5 +1649,6 @@ module.exports = {
   ActivityWork,
   UpdateObj,
   ProgressBar,
-  UpdateCommands
+  UpdateCommands,
+  DeleteLink
 }

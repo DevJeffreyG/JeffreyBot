@@ -1,12 +1,8 @@
-const { Colores, Bases } = require("../src/resources/");
-const { Embed, Log, ChannelModules, LogReasons, Cooldowns, BoostTypes, BoostObjetives, Multipliers, RequirementType, ErrorEmbed, UpdateCommands } = require("../src/utils");
-
-const links = [
-  "https", "http", "www.", "discord.gg", "discord.gift"
-];
+const { Bases } = require("../src/resources/");
+const { Log, ChannelModules, LogReasons, Cooldowns, BoostTypes, BoostObjetives, Multipliers, RequirementType, ErrorEmbed, UpdateCommands, DeleteLink } = require("../src/utils");
 
 const { GlobalDatasWork } = require("../src/utils/");
-const { ChannelType, PermissionsBitField, codeBlock, Client, Message } = require("discord.js");
+const { ChannelType, codeBlock, Client, Message } = require("discord.js");
 const Chance = require("chance");
 
 const { Users, Guilds } = require("mongoose").models;
@@ -39,7 +35,6 @@ module.exports = async (client, message) => {
   const doc = await Guilds.getOrCreate(message.guild.id);
   const guild = message.guild;
   const author = message.author;
-  const member = message.member;
 
   await GlobalDatasWork(guild, true); // verificar si existen BOOSTS.
 
@@ -49,47 +44,7 @@ module.exports = async (client, message) => {
     guild_id: guild.id
   });
 
-  // links
-  const link = links.some(x => message.content.includes(x));
-
-  if (doc.moduleIsActive("automoderation.remove_links") && !member.permissions.missing(PermissionsBitField.Flags.EmbedLinks).length > 0) {
-    if (link) deleteLink(message)
-    else if (message.embeds.length > 0) deleteLink(message)
-
-    function deleteLink(message) {
-      message.delete();
-      message.author.send({
-        embeds: [
-          new Embed()
-            .defAuthor({ text: `No envíes links`, title: true })
-            .defDesc(`Detecté que incluiste un link en tu mensaje:
-${codeBlock(message.content)}`)
-            .defFooter({ text: `Discúlpame si fue un error :)`, icon: guild.iconURL({ dynamic: true }) })
-            .defColor(Colores.rojo)
-        ]
-      })
-        .catch(async err => {
-          let msg = await message.channel.send(`No envíes links, **${author.tag}**.`)
-
-          setTimeout(() => {
-            msg.delete();
-          })
-        });
-
-      new Log(message)
-        .setTarget(ChannelModules.ModerationLogs)
-        .setReason(LogReasons.AutoMod)
-        .send({
-          embeds: [
-            new Embed()
-              .defAuthor({ text: `Se eliminó un mensaje de ${author.tag}`, icon: member.displayAvatarURL({ dynamic: true }) })
-              .defDesc(`${codeBlock(message.content)}`)
-              .defColor(Colores.verde)
-              .defFooter({ text: "NO se aplicaron sanciones", timestamp: true })
-          ]
-        })
-    }
-  }
+  if(await DeleteLink(message)) return;
 
   // JEFFROS & EXP
   const chat_rewards = doc.channels.chat_rewards;

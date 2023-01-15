@@ -107,6 +107,9 @@
             "desc": "Se han eliminado todos los comandos normales, y se han convertido en Slash Commands"
         }
     ],
+    "Links": [
+        "https", "http", "www.", "discord.gg", "discord.gift"
+    ],
     "jeffreygID": "437668432604037142",
     "jgServer": "447797737216278528",
     "testingServer": "482989052136652800",
