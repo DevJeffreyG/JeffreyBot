@@ -208,11 +208,10 @@ class Handlers {
                 }
 
                 return interaction.editReply({ embeds: [new Embed({ type: "success" })] })
-                break;
             }
 
             default:
-                console.log("No hay acciones para el botón con customId", this.interaction.customId);
+                //console.log("No hay acciones para el botón con customId", this.interaction.customId);
         }
     }
 
