@@ -1,4 +1,4 @@
-const { ContextMenuCommandBuilder, ContextMenuCommandInteraction, Client } = require("discord.js");
+const { ContextMenuCommandBuilder, ContextMenuCommandInteraction, Client, PermissionFlagsBits } = require("discord.js");
 const { Categories } = require("./Enums");
 
 class ContextMenu {
@@ -12,7 +12,7 @@ class ContextMenu {
 
         this.name = this.data.name;
         this.type = this.data.type;
-        this.category = this.data.category;
+        this.category = data.category;
 
         this.#setPerms();
 
