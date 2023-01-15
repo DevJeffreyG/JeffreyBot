@@ -1,32 +1,31 @@
 {
-    "r": 
-    [
+    "coins": [
         {
-            "author": "None",
+            "author": null,
             "text": "Te ofreces para dar clases particulares a domicilio, terminas con tendencias suicidas pero ganas { MONEY }"
         },
         {
-            "author": "None",
+            "author": null,
             "text": "Hoy te flipas en la oficina y te dan { MONEY } para que tomes tus pastillas medicadas"
         },
         {
-            "author": "None",
+            "author": null,
             "text": "Repartes el periódico por tu barrio, ganas { MONEY }"
         },
         {
-            "author": "None",
+            "author": null,
             "text": "Le haces un dibujo a { MEMBER } y te paga { MONEY }"
         },
         {
-            "author": "None",
+            "author": null,
             "text": "Te patrocina una marca reconocida y te dan { MONEY } para que hables basura de otra marca"
         },
         {
-            "author": "None",
+            "author": null,
             "text": "Te vuelves youtuber, fallas en el intento, pero ganas { MONEY }"
         },
         {
-            "author": "None",
+            "author": null,
             "text": "{ MEMBER } te da { MONEY } por cambiar de puesto en el McDonalds"
         },
         {
@@ -78,7 +77,7 @@
             "text": "Trabajas en una empresa de PCs en el primer dia te corren por limpiar los PCs con aceite de oliva, pero te dan { MONEY } y una demanda"
         },
         {
-            "author": "None",
+            "author": null,
             "text": "Te pagaron { MONEY } por jugar un juego muerto, espero que estés orgullos@"
         },
         {
@@ -110,51 +109,51 @@
             "text": "Creas tu propio estudio indie y creas un videojuego pero la gente piratea tu juego y solo consigues { MONEY }"
         },
         {
-            "author": "None",
+            "author": null,
             "text": "MrBeast te regala { MONEY } mientras te comes una pizza en el parque"
         },
         {
-            "author": "None",
+            "author": null,
             "text": "Participas en un sorteo. No ganas nada pero te encuentras { MONEY } cuando sales de casa"
         },
         {
-            "author": "None",
+            "author": null,
             "text": "Le copias una canción a un artista, logras sacar { MONEY } antes de que te detecte el copyright"
         },
         {
-            "author": "None",
+            "author": null,
             "text": "Te cuelgas de la fama de { MEMBER } y logras sacar { MONEY } con el clickbait"
         },
         {
-            "author": "None",
+            "author": null,
             "text": "El vídeo de { MEMBER } se hace viral, intentas copiar la idea, fallas, pero te quedas con { MONEY }"
         },
         {
-            "author": "None",
+            "author": null,
             "text": "Crackeas un juego para una compañía fraudulenta por { MONEY }"
         },
         {
-            "author": "None",
+            "author": null,
             "text": "Mientras caminabas por tu barrio encuentras { MONEY } tirados en la carretera"
         },
         {
-            "author": "None",
+            "author": null,
             "text": "Las rosas son rojas, las violetas azules, toma, { MONEY } que estás pobre"
         },
         {
-            "author": "None",
+            "author": null,
             "text": "{ MEMBER } te ha confundido por mendig@, te regala { MONEY }"
         },
         {
-            "author": "None",
+            "author": null,
             "text": "Creas tu empresa de ensueño de licuadoras y consigues { MONEY }"
         },
         {
-            "author": "None",
+            "author": null,
             "text": "Intentas llamar la atención del público con clickbait, ganas { MONEY }"
         },
         {
-            "author": "None",
+            "author": null,
             "text": "Haces alto cover de la canción de { MEMBER } y te da { MONEY } por el intento"
         },
         {
@@ -226,16 +225,50 @@
             "text": "Desarrollas un videojuego, te llueven críticas de lo malo que fue y ganas { MONEY } antes de retirarlo de la tienda, y también ganas depresión"
         },
         {
-            "author": "None",
+            "author": null,
             "text": "Inviertes { FAKE MONEY } en la bolsa del servidor, consigues { MONEY } de profit"
         },
         {
-            "author": "None",
+            "author": null,
             "text": "Intentas iniciar tu propio negocio con tus { FAKE MONEY } ahorrados, sigues los consejos de un tipo en YouTube y ganas { MONEY }"
         },
         {
-            "author": "None",
+            "author": null,
             "text": "Subes un vídeo a YouTube y generaste { FAKE MONEY }, por un reclamo de derechos de autor te quitan casi todo, te quedas con { MONEY }"
         }
-    ]
+    ],
+    "rob": {
+        "success": [
+            {
+                "author": null,
+                "text": "Entraste a la casa de { MEMBER } y logras escapar con { MONEY }"
+            },
+            {
+                "author": null,
+                "text": "Consigues hackear a { MEMBER } y le sacas { MONEY }"
+            },
+            {
+                "author": null,
+                "text": "Las contraseñas de { MEMBER } eran todas iguales, consigues sus datos bancarios y le sacas { MONEY }"
+            },
+            {
+                "author": null,
+                "text": "{ MEMBER } iba caminando descuidad@ y logras quitarle { MONEY } sin que se de cuenta"
+            },
+            {
+                "author": null,
+                "text": "Estafaste a { MEMBER } por { MONEY }, le falta calle"
+            }
+        ],
+        "fail": [
+            {
+                "author": null,
+                "text": "Al intentar entrar a la casa de { MEMBER } activas la alarma y te multan { MONEY } en la comisaría"
+            },
+            {
+                "author": "366361149027123200",
+                "text": "Intentas robar la cartera de { MEMBER }, te cortas con las llaves de su bolsillo; te arrodillas para llorar y se te caen { MONEY } del tuyo"
+            }
+        ]
+    }
 }

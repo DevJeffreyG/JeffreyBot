@@ -101,7 +101,8 @@ const Schema = new mongoose.Schema({
             roulette: { type: Date, default: null },
             blackjack: { type: Date, default: null },
             currency_to_exp: { type: Date, default: null },
-            inflation_prediction: { type: Date, default: null }
+            inflation_prediction: { type: Date, default: null },
+            rob: { type: Date, default: null },
         },
         counts: { // all time
             roulette: { type: Number, default: 0 },

@@ -164,7 +164,14 @@ const GuildSchema = new Schema({
                     price: { type: Number, default: 1800, integer: true },
                     gift: { type: Number, default: 700, integer: true }
                 },
+            },
+            rob: {
+                min_success: { type: Number, default: 5 },
+                max_success: { type: Number, default: 15 },
+                min_fail: { type: Number, default: 10 },
+                max_fail: { type: Number, default: 30 },
             }
+            
         },
         functions: {
             adjust_shop: { type: Boolean, default: true },
@@ -182,6 +189,7 @@ const GuildSchema = new Schema({
             roulette: { type: String, default: "1d" },
             blackjack: { type: String, default: "5m" },
             currency_to_exp: { type: String, default: "1w" },
+            rob: { type: String, default: "15m" },
         },
         modifiers: [modifiers]
     },
