@@ -38,17 +38,19 @@ class DarkShop {
         await this.#createTendency();
 
         // ANUNCIARLO
-        if(!this.guilddoc) await this.#getGuildDoc();
+        if (!this.guilddoc) await this.#getGuildDoc();
         const dsChannel = await this.guild.channels.fetch(this.guilddoc.getDarkShopChannel("events"));
         const dsNewsRole = await this.guild.roles.fetch(this.guilddoc.getRoleByModule("darkshop_news"))
 
-        dsChannel?.send({content: dsNewsRole.toString() ?? null, embeds: [
-            new Embed()
-            .defAuthor({text: "Domingo", icon: this.client.EmojisObject.Dark.url})
-            .defDesc(`**—** Se termina una semana, y empieza la busqueda de beneficios.
+        dsChannel?.send({
+            content: dsNewsRole.toString() ?? null, embeds: [
+                new Embed()
+                    .defAuthor({ text: "Domingo", icon: this.client.EmojisObject.Dark.url })
+                    .defDesc(`**—** Se termina una semana, y empieza la busqueda de beneficios.
 **—** La inflación hoy estará en **${this.baseValue}%**. Ya veremos **qué pasa en la semana...**`)
-            .defColor(Colores.negro)
-        ]})
+                    .defColor(Colores.negro)
+            ]
+        })
     }
 
     async #weekWork() {
@@ -278,21 +280,21 @@ class DarkShop {
 
             // la inflación sube en los últimos días luego de bajar como en Decreasing
             case Tendencies.LastMinute: {
-                let dec = new Chance().integer({min: 9, max: 11});
+                let dec = new Chance().integer({ min: 9, max: 11 });
                 let inc = 12 - dec; // dura de 1 a 3 medios días siendo el último el mayor profit
 
-                decrease(dec, { minRemoval: 3, maxRemoval: 5}, { min: 0.85, max: 0.9});
-                increase(inc, { minAdd: 5, maxAdd: 10}, {min: 5, max: 40});
+                decrease(dec, { minRemoval: 3, maxRemoval: 5 }, { min: 0.85, max: 0.9 });
+                increase(inc, { minAdd: 5, maxAdd: 10 }, { min: 5, max: 40 });
                 break;
             }
 
             // se consigue profit nada más iniciar la semana, después simplemente pierdes
             case Tendencies.InitialSpike: {
-                let inc = new Chance().integer({min: 1, max: 3});
+                let inc = new Chance().integer({ min: 1, max: 3 });
                 let dec = 12 - inc;
 
-                increase(inc, {minAdd: 1, maxAdd: 10}, {min: 1.4, max: 5});
-                decrease(dec, {minRemoval: 3, maxRemoval: 5}, {min: 0.4, max: 1.2});
+                increase(inc, { minAdd: 1, maxAdd: 10 }, { min: 1.4, max: 5 });
+                decrease(dec, { minRemoval: 3, maxRemoval: 5 }, { min: 0.4, max: 1.2 });
                 break;
             }
         }
@@ -374,7 +376,7 @@ class DarkShop {
             toPush = Number(toPush.toFixed(2));
             if (toPush > 200) toPush = 200;
             if (toPush < -200) toPush = -200;
-            if(toPush === -0) toPush = 0;
+            if (toPush === -0) toPush = 0;
 
             //console.log("PUSHING", toPush)
 
@@ -399,7 +401,7 @@ class DarkShop {
         users.forEach(async user => {
             const darkdata = user.economy.dark;
             const until = moment(darkdata.until);
-            if(moment().isBefore(until)) return;
+            if (moment().isBefore(until)) return;
 
             if (darkdata.currency != 0) {
                 // enviar mensaje al usuario
@@ -416,7 +418,8 @@ class DarkShop {
 **—** Tenía: **${this.Emojis.DarkCurrency}${darkdata.currency.toLocaleString("es-CO")}**`)
                     .defFooter({ text: "Mensaje enviado a la vez que al usuario", timestamp: true })
 
-                const Logger = new Log(this.interaction)
+                const ErrorLogger = new Log(this.interaction)
+                    .setGuild(this.guild)
                     .setTarget(ChannelModules.StaffLogs)
                     .setReason(LogReasons.Error)
 
@@ -428,18 +431,23 @@ class DarkShop {
 
                 memberDJ?.send({ embeds: [embed] })
                     .catch(error => {
-                        Logger.send({
+                        ErrorLogger.send({
                             embed: new ErrorEmbed(this.interaction, {
                                 type: "notSent",
                                 data: {
                                     tag: memberDJ.user.tag,
-                                    error
+                                    error,
+                                    guildId: this.guild.id
                                 }
                             })
                         })
                     })
 
-                await Logger.setReason(LogReasons.Logger).send({ embeds: [log] });
+                new Log(this.interaction)
+                    .setGuild(this.guild)
+                    .setTarget(ChannelModules.StaffLogs)
+                    .setReason(LogReasons.Logger)
+                    .send({ embeds: [log] });
             }
 
             darkdata.currency = 0;
@@ -519,7 +527,7 @@ class DarkShop {
         let hour = this.now.hour();
         let now = this.now;
 
-        return {hour, now}
+        return { hour, now }
     }
 
     /**
@@ -599,7 +607,7 @@ class DarkShop {
 ${stonks} **—** La inflación actual de los ${this.Emojis.DarkCurrency.name} es de un \`${inflation}%\`.
 ${stonks} **—** Antes era de un \`${oldinflation}%\`: (**${this.Emojis.DarkCurrency}1 = ${this.Emojis.Currency}${(await this.oneEquals(oldinflation))?.toLocaleString("es-CO")}**).
 
-${tz.now.day != 0 ? `**—** La inflación inicial fue \`${this.baseValue}%\`.\n`: ""}**—** La inflación cambiará ${time((tz.hour >= 12 ? tz.now.add(1, "day").startOf("day") : tz.now.hour(12).startOf("hour")).toDate(), "R")}.`)
+${tz.now.day != 0 ? `**—** La inflación inicial fue \`${this.baseValue}%\`.\n` : ""}**—** La inflación cambiará ${time((tz.hour >= 12 ? tz.now.add(1, "day").startOf("day") : tz.now.hour(12).startOf("hour")).toDate(), "R")}.`)
             .defColor(Colores.negro);
 
         this.interaction.reply({ embeds: [stonksEmbed] });

@@ -1,4 +1,4 @@
-const { time, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentAssertions } = require("discord.js");
+const { time, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const moment = require("moment");
 
 const { Command, Categories, Embed, Enum, BoostObjetives } = require("../../src/utils")

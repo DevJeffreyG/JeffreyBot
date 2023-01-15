@@ -153,11 +153,10 @@ class Embed extends Discord.EmbedBuilder {
                     let day = bdData.day;
                     let month = bdData.monthNumber - 1;
 
-                    const timestamp = moment().tz("America/Bogota")
+                    const timestamp = moment()
                         .month(month)
                         .date(day)
-                        .hour(0).minutes(0).seconds(0)
-                        .milliseconds(0);
+                        .startOf("day")
 
                     bdString = (day != null) && (month != null) ? `**— Cumpleaños**: ${time(timestamp.toDate(), "D")}.` : "";
                 }

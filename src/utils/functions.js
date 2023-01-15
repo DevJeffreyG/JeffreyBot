@@ -329,11 +329,16 @@ const GenerateLog = async function (guild, options = {
 
   if (!docGuild) return console.error("🔴 No se ha configurado un logchannel en el servidor", guild.name);
 
-  return await new Log()
+  try {
+    return await new Log()
     .setGuild(guild)
     .setTarget(logType)
     .setReason(logReason)
     .send({ embeds: [embed] })
+  } catch(err) {
+    console.log(err);
+  }
+  
 }
 
 /**
@@ -870,7 +875,7 @@ const handleUploads = async function (client) {
           noti.info.lastTweet = tweetId;
 
           let tweetDate = new Date(tweet.created_at)
-          let time = moment(tweetDate).tz("America/Bogota");
+          let time = moment(tweetDate);
 
           belltwChannel.send(`${twRole}, Jeffrey escribió un tweet **(${time})**\n\n\`[\` ${link} \`]\``);
         }

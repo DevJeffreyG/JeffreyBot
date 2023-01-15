@@ -4,6 +4,9 @@ require("./server");
 const { Client, GatewayIntentBits, Partials } = require("discord.js");
 const CronJob = require("cron").CronJob;
 
+const moment = require("moment-timezone")
+moment.tz.setDefault("America/Bogota")
+
 const Events = require("./Events");
 const Errors = require("./Errors");
 
