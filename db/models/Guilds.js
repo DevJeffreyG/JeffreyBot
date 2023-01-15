@@ -150,7 +150,21 @@ const GuildSchema = new Schema({
             min_curr: { type: Number, default: 5, integer: true },
             max_curr: { type: Number, default: 15, integer: true },
             baseprice_darkshop: { type: Number, default: 200, integer: true },
-            currency_per_rep: { type: Number, default: 500, integer: true }
+            currency_per_rep: { type: Number, default: 500, integer: true },
+            awards: {
+                tier1: {
+                    price: { type: Number, default: 100, integer: true },
+                    gift: { type: Number, default: 0, integer: true }
+                },
+                tier2: {
+                    price: { type: Number, default: 500, integer: true },
+                    gift: { type: Number, default: 100, integer: true }
+                },
+                tier3: {
+                    price: { type: Number, default: 1800, integer: true },
+                    gift: { type: Number, default: 700, integer: true }
+                },
+            }
         },
         functions: {
             adjust_shop: { type: Boolean, default: true },
