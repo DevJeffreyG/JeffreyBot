@@ -18,30 +18,36 @@ command.addOption({
 })
 
 command.execute = async (interaction, models, params, client) => {
-    await interaction.deferReply();
+    if (!interaction.deferred) await interaction.deferReply();
 
     const { descripcion } = params;
     const { Emojis } = client;
 
     console.log("⚪ Prompt: %s", descripcion.value)
 
-    interaction.editReply({content: `${Emojis.Loading} Creando obras maestras...? No, no esperes mucho.`});
+    interaction.editReply({ content: `${Emojis.Loading} Creando obras maestras...? No, no esperes mucho.` });
 
-    let generated = await Cr.generate({
-        prompt: descripcion.value
-    })
+    try {
+        var generated = await Cr.generate({
+            prompt: descripcion.value
+        })
+    } catch(err) {
+        console.log(err);
+        return interaction.editReply({ content: "No se pudieron crear tus obras maestras por un error con el servidor :("})
+    }
 
-    interaction.editReply({content: `${Emojis.Loading} Guardando los resultados...`});
+
+    interaction.editReply({ content: `${Emojis.Loading} Guardando los resultados...` });
 
     const images = generated.images;
     const files = [];
 
-    for(const image of images) {
+    for (const image of images) {
         let buffer = image.asBuffer();
         let att = new AttachmentBuilder(buffer)
         files.push(att);
     }
-    
+
     let interactive = new FilePages(files)
     interactive.init(interaction);
 }

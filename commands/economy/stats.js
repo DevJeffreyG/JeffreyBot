@@ -16,7 +16,7 @@ command.addOption({
 })
 
 command.execute = async (interaction, models, params, client) => {
-    await interaction.deferReply();
+    if (!interaction.deferred) await interaction.deferReply();
     const { Users } = models
     const { usuario } = params;
 

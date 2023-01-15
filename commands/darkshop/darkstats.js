@@ -15,7 +15,8 @@ command.addOption({
 })
 
 command.execute = async (interaction, models, params, client) => {
-    await interaction.deferReply();
+    if (!interaction.deferred) await interaction.deferReply();
+
     const { Users } = models
     const { usuario } = params;
     const { DarkCurrency } = client.getCustomEmojis(interaction.guild.id);
@@ -39,7 +40,7 @@ command.execute = async (interaction, models, params, client) => {
 **— Precisión**: ${ProgressBar(accuracy)} ${inlineCode(accuracy + "%")}
 **— Habilidad criminal**: ${ProgressBar(criminal)} ${inlineCode(criminal + "%")}
 **— Items**: Usa \`/dsinventory\`.`)
-        .defThumbnail(member.displayAvatarURL({dynamic: true}))
+        .defThumbnail(member.displayAvatarURL({ dynamic: true }))
         .defColor(Colores.negro);
 
     return interaction.editReply({ embeds: [meEmbed] });
