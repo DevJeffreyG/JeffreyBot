@@ -141,7 +141,6 @@ const Schema = new mongoose.Schema({
             },
             darkjeffros: { type: Number, default: 0, integer: true },
             accuracy: { type: Number, default: null },
-            criminal_acc: { type: Number, default: null },
             until: { type: Date, default: null }
         }
     }
@@ -167,8 +166,7 @@ Schema.pre("save", function () {
         this.economy = obj;
     }
 
-    if (this.economy.dark.accuracy < 10) this.economy.dark.accuracy = 10;
-    this.economy.dark.criminal_acc = 100 - this.economy.dark.accuracy;
+    if (this.economy.dark.accuracy > 80) this.economy.dark.accuracy = 80;
 
     // Corregir nivel actual
     const expNow = this.economy.global.exp;

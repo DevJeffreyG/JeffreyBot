@@ -5,7 +5,7 @@ const { Responses, Colores } = require("../../src/resources");
 const command = new Command({
     name: "rob",
     desc: "Intenta robarle dinero normal a un usuario",
-    category: Categories.DarkShop
+    category: Categories.Economy
 })
 
 command.addOption({
@@ -40,7 +40,7 @@ command.execute = async (interaction, models, params, client) => {
         ]
     });
 
-    const { min_success, max_success, min_fail, max_fail } = doc.settings.quantities.rob;
+    const { min_success, max_success, min_fail, max_fail, percentage } = doc.settings.quantities.rob;
 
     const success = GetRandomItem(Responses.rob.success);
     const fail = GetRandomItem(Responses.rob.fail);
@@ -51,24 +51,10 @@ command.execute = async (interaction, models, params, client) => {
     const successValue = Math.round(victim.economy.global.currency * successPerc);
     const failedValue = Math.round(user.economy.global.currency * failedPerc);
 
-    const successText = success.text.replace(
-        new RegExp("{ MONEY }", "g"),
-        `**${Currency}${successValue.toLocaleString("es-CO")}**`
-    ).replace(
-        new RegExp("{ MEMBER }", "g"),
-        `**${victimMember.displayName}**`
-    )
+    const successText = replace(success.text)
+    const failedText = replace(fail.text)
 
-    const failedText = fail.text.replace(
-        new RegExp("{ MONEY }", "g"),
-        `**${Currency}${failedValue.toLocaleString("es-CO")}**`
-    ).replace(
-        new RegExp("{ MEMBER }", "g"),
-        `**${victimMember.displayName}**`
-    )
-
-    // Revisar la Inteligencia Criminal
-    if (!new Chance().bool({ likelihood: 1 })) {
+    if (!new Chance().bool({likelihood: percentage })) {
         // Fallido
         var suggester = getAuthor(fail);
 
@@ -98,13 +84,23 @@ command.execute = async (interaction, models, params, client) => {
 
     await user.save();
     return interaction.editReply({ embeds: [embed] });
-
+r
     function getAuthor(obj) {
         if (!obj.author) return false;
 
         let author = interaction.guild.members.cache.get(obj.author) ?? true;
 
         return author;
+    }
+
+    function replace(text) {
+        return text.replace(
+            new RegExp("{ MONEY }", "g"),
+            `**${Currency}${successValue.toLocaleString("es-CO")}**`
+        ).replace(
+            new RegExp("{ MEMBER }", "g"),
+            `**${victimMember.displayName}**`
+        )
     }
 }
 

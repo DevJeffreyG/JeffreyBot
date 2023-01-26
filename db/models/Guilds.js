@@ -116,7 +116,7 @@ const GuildSchema = new Schema({
                 guild: {
                     messageDelete: { type: Boolean, default: false },
                     messageUpdate: { type: Boolean, default: false },
-                    // etc
+                    // TODO: Agregar más logs
                 },
                 moderation: {
                     warns: { type: Boolean, default: true },
@@ -166,6 +166,7 @@ const GuildSchema = new Schema({
                 },
             },
             rob: {
+                percentage: { type: Number, default: 60 },
                 min_success: { type: Number, default: 5 },
                 max_success: { type: Number, default: 15 },
                 min_fail: { type: Number, default: 10 },
