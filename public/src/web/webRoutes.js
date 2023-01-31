@@ -205,8 +205,6 @@ module.exports = (app) => {
     app.get("/api/db/get-changelogs", async (req, res) => {
         let query = await ChangeLogs.find();
 
-        console.log(query)
-
         res.send(query);
     })
     app.get("/api/guild/has-permissions", async (req, res) => {

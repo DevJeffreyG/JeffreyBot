@@ -118,8 +118,8 @@ module.exports = (app) => {
     })
 
     app.post("/api/db/add-changelog", async (req, res) => {
-        const { version, changes } = req.body
-        let query = await ChangeLogs.create(version, changes)
+        const { info, changes } = req.body
+        let query = await ChangeLogs.create(info, changes)
 
         res.send(query ? true : false);
     })

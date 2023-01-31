@@ -5,14 +5,14 @@
     <title>Jeffrey Bot - Cambios</title>
     <script src="https://cdn.jsdelivr.net/gh/dixonandmoe/rellax@master/rellax.min.js"></script>
     <link rel="stylesheet" href="./src/css/forms.css">
+    <%- include("./src/partials/momentjs") %>
 </head>
 
 <body>
     <%- include("./src/partials/index") %>
         <h1 class="rellax-title">Últimos Cambios</h1>
         <div class="rellax-container first">
-            <img src="https://media.discordapp.net/attachments/464810032081666048/514216459178868736/AlianzaBanner.png"
-                alt="ChangelogBanner">
+            <div style="background-image: linear-gradient(to bottom, var(--dark), var(--primary), var(--dark)); height: 100%; width: 100%;"></div>
         </div>
         <% if(session && req.query["show-panel"]){%>
             <script>
@@ -45,6 +45,7 @@
                         <input type="button" value="Agregar cambio [Consola]" onclick="addChange()"">
 
                         Versión de Jeffrey Bot: <input type="text" id="version" placeholder="Versión">
+                        Eslogan: <input type="text" id="slogan" placeholder="Eslogan">
                         <input type="button" value="Enviar actualización" onclick="send()">
                     </form>
                     `;
@@ -68,6 +69,9 @@
 
                     function send() {
                         const version = form.querySelector("input#version").value;
+                        const sloganq = form.querySelector("input#slogan").value ?? null;
+                        
+                        const slogan = sloganq?.length > 0 ? sloganq : null;
 
                         if (!version) return console.log("No está la versión especificada D:");
                         if (changes.length < 1) return console.log("No hay cambios!");
@@ -76,7 +80,10 @@
 
                         fetch("/api/db/add-changelog", {
                             body: JSON.stringify({
-                                version, changes
+                                info: {
+                                    version,
+                                    slogan
+                                }, changes
                             }),
                             headers: {
                                 'Content-Type': 'application/json'
@@ -102,6 +109,8 @@
                         fetch("/api/db/get-changelogs")
                         .then(r => r.json())
                         .then(async db => {
+                            db.sort((a, b) => b.version.localeCompare(a.version));
+
                             for await (const changelog of db) {
                                 await createPatch(changelog)
                             }
@@ -116,10 +125,19 @@
                             desc.className = "description";
 
                             const version = document.createElement("h1")
+                            const slogan = document.createElement("p")
+                            slogan.className = "slogan";
+
                             const changes = document.createElement("p");
+                            changes.id = "changelogList";
+
                             const changesList = document.createElement("ul");
 
                             version.innerText = `v${changelog.version}`;
+                            if(changelog.slogan) slogan.innerText = changelog.slogan;
+                                else slogan.remove();
+
+                            if(slogan) version.appendChild(slogan)
 
                             // cambios
                             changelog.changes.sort((a, b) => a.type - b.type)
@@ -132,7 +150,13 @@
                                 title.innerText = `${prefix} ${change.title}`;
 
                                 const desc = document.createElement("p")
-                                desc.innerText = change.description;
+                                var fetchedDesc = change.description;
+
+                                // agregar punto final en caso de ser necesario
+                                if(!fetchedDesc.endsWith(".") && !(fetchedDesc.endsWith(":") || fetchedDesc.endsWith("!") || fetchedDesc.endsWith("?")))
+                                    fetchedDesc += ".";
+
+                                desc.innerText = fetchedDesc;
                                 
                                 item.appendChild(title);
                                 item.appendChild(desc);
@@ -149,7 +173,12 @@
 
                             const date = new Date(changelog.timestamp);
 
-                            desc.append(`Cambios anunciados el ${date.toLocaleDateString()} a las ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`)
+                            const line = document.createElement("div")
+                            line.className = "line";
+
+                            desc.appendChild(line)
+                            
+                            desc.append(`Cambios anunciados ${moment(date).fromNow()}, el ${moment(date).format("LLL")}.`)
                         }
                     </script>
                 </div>

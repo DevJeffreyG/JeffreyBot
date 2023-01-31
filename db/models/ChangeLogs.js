@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const Schema = new mongoose.Schema({
     version: { type: String, required: true, unique: true },
+    slogan: { type: String, require: false },
     changes: [
         {
             type: { type: Number, required: true },
@@ -12,12 +13,12 @@ const Schema = new mongoose.Schema({
     timestamp: { type: Date, default: () => { return new Date() } },
 })
 
-Schema.static("create", async function(version, changes) {
+Schema.static("create", async function(info, changes) {
     try {
         await new this({
-            version,
-            changes,
-            id
+            version: info.version,
+            slogan: info.slogan ?? null,
+            changes
         }).save()
         return true;
     } catch(err) {
