@@ -1,7 +1,8 @@
 const { PermissionsBitField, codeBlock } = require("discord.js");
 const Enums = require("../../../src/utils/Enums");
+const Bases = require("../../../src/resources/general.json");
 const Embed = require("../../../src/utils/Embed");
-const { Guilds } = require("mongoose").models;
+const { Guilds, ChangeLogs } = require("mongoose").models;
 
 const { Locale, Session, Dashboard } = require("../utils");
 
@@ -36,6 +37,8 @@ module.exports = (app) => {
     app.get("/creator/projects", (req, res) => { prepare("./subpages/creator/projects", { req, res }) });
 
     app.get("/creator/projects", (req, res) => { prepare("./subpages/creator/projects", { req, res }) });
+
+    app.get("/changelog", (req, res) => { prepare("./changelog", { req, res }) })
 
     /* ===== SOCIAL LINKS ===== */
     app.get("/creator/discord", (req, res) => { res.redirect("https://discord.gg/fJvVgkN") });
@@ -152,10 +155,10 @@ module.exports = (app) => {
 
         req.session.cookie.maxAge = ms("5m");
 
-        if(!Array.isArray(req.session.fetchedGuilds)) req.session.fetchedGuilds = [];
-        req.session.fetchedGuilds.push({guild, channels});
+        if (!Array.isArray(req.session.fetchedGuilds)) req.session.fetchedGuilds = [];
+        req.session.fetchedGuilds.push({ guild, channels });
 
-        res.send({guild, channels});
+        res.send({ guild, channels });
     })
     app.get("/api/sendlog", async (req, res) => {
         let channelId = req.header("channelid");
@@ -164,14 +167,14 @@ module.exports = (app) => {
         let executor = req.cookies.user;
 
         let embed = new Embed()
-        .defAuthor({ text: `Cambios en la configuración`, title: true })
-        .defDesc(`**—** **${executor.username}#${executor.discriminator}** hizo cambios en la configuración del bot.
+            .defAuthor({ text: `Cambios en la configuración`, title: true })
+            .defDesc(`**—** **${executor.username}#${executor.discriminator}** hizo cambios en la configuración del bot.
 **—** En la Dashboard.
 **—** Lo que se guardó: ${codeBlock("json", JSON.parse(changes))}
 **—** En qué sección se hizo: \`${page}\`.`)
-        .defColor(Colores.verde)
-        .defFooter({ timestamp: true })
-        .raw();
+            .defColor(Colores.verde)
+            .defFooter({ timestamp: true })
+            .raw();
 
         let sendQuery = await fetch(`${API_ENDPOINT}/channels/${channelId}/messages`, {
             body: JSON.stringify({
@@ -194,12 +197,19 @@ module.exports = (app) => {
             .send({
                 error: { message: "missing guildid" },
                 status_code: 400
-        });
+            });
 
         const query = await Guilds.getOrCreate(guildId);
         res.send(query)
     })
-    app.get("/api/guild/has-permissions", async(req, res) => {
+    app.get("/api/db/get-changelogs", async (req, res) => {
+        let query = await ChangeLogs.find();
+
+        console.log(query)
+
+        res.send(query);
+    })
+    app.get("/api/guild/has-permissions", async (req, res) => {
         const guildId = req.header("guildid");
 
         const query = await fetch(`${API_ENDPOINT}/users/@me/guilds`, {
@@ -210,7 +220,7 @@ module.exports = (app) => {
 
         const json = await query.json();
 
-        if(!json) res.send(true); // No se pudo fetchear
+        if (!json) res.send(true); // No se pudo fetchear
 
         const result = json?.filter(x => {
             const permissions = new PermissionsBitField(x.permissions)
@@ -238,6 +248,7 @@ module.exports = (app) => {
             texts,
             session,
             Enums,
+            Bases,
             req,
             res
         }

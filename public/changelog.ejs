@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Jeffrey Bot - Cambios</title>
+    <script src="https://cdn.jsdelivr.net/gh/dixonandmoe/rellax@master/rellax.min.js"></script>
+    <link rel="stylesheet" href="./src/css/forms.css">
+</head>
+
+<body>
+    <%- include("./src/partials/index") %>
+        <h1 class="rellax-title">Últimos Cambios</h1>
+        <div class="rellax-container first">
+            <img src="https://media.discordapp.net/attachments/464810032081666048/514216459178868736/AlianzaBanner.png"
+                alt="ChangelogBanner">
+        </div>
+        <% if(session && req.query["show-panel"]){%>
+            <script>
+                if (<%- Bases.devIds.find(x => x === session.discord_user?.id) %>) {
+                    const changes = [];
+
+                    // Buscar lo que está justo después del parallax
+                    const parallax = document.querySelector(".rellax-container.first")
+
+                    var adminPanel = document.createElement("div")
+                    adminPanel.className = "container after-rellax bg";
+                    adminPanel.id = "adminPanel";
+                    adminPanel.style.paddingBottom = "1rem";
+                    adminPanel.style.borderBottom = "#000 solid .2rem";
+
+                    parallax.after(adminPanel);
+
+                    adminPanel = document.querySelector("#adminPanel")
+
+                    adminPanel.innerHTML = `
+                    <form class="margin-top border-bottom" id="newChangelog">
+                        Agregar un cambio:
+                        <input type="text" id="title" placeholder="Título">
+                        <textarea id="desc" cols="30" rows="10" form="newChangelog" placeholder="Descripción"></textarea>
+                        <select id="type">
+                            <option value="<%- Enums.ChangelogTypes.Added %>">Agregado</option>
+                            <option value="<%- Enums.ChangelogTypes.Removed %>">Eliminado</option>
+                            <option value="<%- Enums.ChangelogTypes.Updated %>">Actualizado</option>
+                        </select>
+                        <input type="button" value="Agregar cambio [Consola]" onclick="addChange()"">
+
+                        Versión de Jeffrey Bot: <input type="text" id="version" placeholder="Versión">
+                        <input type="button" value="Enviar actualización" onclick="send()">
+                    </form>
+                    `;
+
+                    const form = document.querySelector("form#newChangelog");
+
+                    function addChange() {
+                        const title = form.querySelector("input#title").value;
+                        const desc = form.querySelector("textarea#desc").value;
+                        const type = form.querySelector("select#type").value;
+
+                        if (!title || !desc || !type) return console.log("No están todos los campos!")
+
+                        changes.push({
+                            title, description: desc, type
+                        })
+
+                        console.log(changes);
+                        form.reset();
+                    }
+
+                    function send() {
+                        const version = form.querySelector("input#version").value;
+
+                        if (!version) return console.log("No está la versión especificada D:");
+                        if (changes.length < 1) return console.log("No hay cambios!");
+
+                        console.log(JSON.stringify(changes))
+
+                        fetch("/api/db/add-changelog", {
+                            body: JSON.stringify({
+                                version, changes
+                            }),
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            method: "POST",
+                        }).then(r => r.json())
+                            .then(res => {
+                                if (res) return window.location.reload();
+
+                                console.log("Hubo un error.")
+                                form.reset();
+                            })
+                    }
+                }
+            </script>
+            <%}%>
+
+                <div id="parent" class="container bg after-rellax">
+                    <script>
+                        const container = document.querySelector("#parent");
+
+                        // agregar los cambios de la base de datos
+                        fetch("/api/db/get-changelogs")
+                        .then(r => r.json())
+                        .then(async db => {
+                            for await (const changelog of db) {
+                                await createPatch(changelog)
+                            }
+                        })
+
+                
+                        async function createPatch(changelog) {
+                            const parent = document.createElement("div");
+                            parent.className = "card long-card reveal right keep";
+
+                            const desc = document.createElement("div")
+                            desc.className = "description";
+
+                            const version = document.createElement("h1")
+                            const changes = document.createElement("p");
+                            const changesList = document.createElement("ul");
+
+                            version.innerText = `v${changelog.version}`;
+
+                            // cambios
+                            changelog.changes.sort((a, b) => a.type - b.type)
+                            changelog.changes.forEach(change => {
+                                const prefix = change.type === <%- Enums.ChangelogTypes.Added %> ? "➕" :
+                                change.type === <%- Enums.ChangelogTypes.Removed %> ? "➖" : "🔃"
+                                const item = document.createElement("li");
+
+                                const title = document.createElement("h4")
+                                title.innerText = `${prefix} ${change.title}`;
+
+                                const desc = document.createElement("p")
+                                desc.innerText = change.description;
+                                
+                                item.appendChild(title);
+                                item.appendChild(desc);
+
+                                changesList.appendChild(item);
+                            })
+                            
+                            changes.appendChild(changesList);
+                            desc.appendChild(version)
+                            desc.appendChild(changes)
+                            parent.appendChild(desc)
+
+                            container.appendChild(parent)
+
+                            const date = new Date(changelog.timestamp);
+
+                            desc.append(`Cambios anunciados el ${date.toLocaleDateString()} a las ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`)
+                        }
+                    </script>
+                </div>
+
+                <script>
+                    var rellax = new Rellax(".rellax-container", {
+                        speed: -9
+                    })
+                </script>
+                <%- include("./src/partials/footer") %>
+</body>
+
+</html>

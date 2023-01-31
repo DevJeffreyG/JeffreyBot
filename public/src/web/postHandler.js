@@ -3,7 +3,7 @@ const { UpdateObj } = require("../../../src/utils/functions");
 const Log = require("../../../src/utils/Log");
 
 const Express = require("express")();
-const { Guilds } = require("mongoose").models;
+const { Guilds, ChangeLogs } = require("mongoose").models;
 
 /**
  * 
@@ -68,7 +68,7 @@ module.exports = (app) => {
                         await save()
                         break changesLoop;
                     } else {
-                        UpdateObj(doc, query+`.${prop}`, value)
+                        UpdateObj(doc, query + `.${prop}`, value)
                     }
                     break;
 
@@ -79,7 +79,7 @@ module.exports = (app) => {
 
             await save()
         }
-        
+
         switch (querytype) {
             case "add":
                 let temp = doc;
@@ -95,7 +95,7 @@ module.exports = (app) => {
                 break;
 
             case "save": {
-                if(changes.length === 0) {
+                if (changes.length === 0) {
                     UpdateObj(doc, query, changes)
                     await save()
                 }
@@ -115,5 +115,12 @@ module.exports = (app) => {
 
             return response
         }
+    })
+
+    app.post("/api/db/add-changelog", async (req, res) => {
+        const { version, changes } = req.body
+        let query = await ChangeLogs.create(version, changes)
+
+        res.send(query ? true : false);
     })
 }

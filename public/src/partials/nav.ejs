@@ -36,6 +36,11 @@
 <div id="manager" style="margin-top: var(--navh);">
     <h1>Jeffrey Bot</h1>
     <a href="/dashboard/">Dashboard</a>
+    <a href="/changelog">Últimos Cambios</a>
+    <% if(Bases.devIds.find(x => session.discord_user?.id)) {%>
+        <div class="line"></div>
+        <a href="/changelog?show-panel=true">Admin: Changelog</a>
+    <%}%>
     <div class="line"></div>
     <div id="logout">Cerrar sesión</div>
 </div>

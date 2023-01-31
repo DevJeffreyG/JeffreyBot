@@ -312,6 +312,17 @@ const Multipliers = new Enum({
     ChatRewards: "chat_rewards"
 }).values
 
+/**
+ * - Added
+ * - Updated
+ * - Removed
+ */
+const ChangelogTypes = new Enum({
+    Added: 1,
+    Updated: 2,
+    Removed: 3
+}).values;
+
 module.exports = {
     Enum,
     Categories,
@@ -330,5 +341,6 @@ module.exports = {
     Cooldowns,
     RequirementType,
     ModifierType,
-    Multipliers
+    Multipliers,
+    ChangelogTypes
 }
