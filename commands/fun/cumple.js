@@ -50,7 +50,7 @@ command.execute = async (interaction, models, params, client) => {
             break;
 
         case "lock":
-            if (user.data.birthday.locked) return interaction.editReply("Locked ❌");
+            if (user.data.birthday.locked) return interaction.editReply(`${client.Emojis.Error} Aún no ha pasado un año, no puedes continuar.`);
             command.lock(interaction, models, user, client)
             break;
     }
@@ -107,7 +107,7 @@ command.execEdit = async (interaction, models, data, client) => {
         await data.user.save();
     }
 
-    if (userBD.locked) return interaction.editReply({ content: "Locked ❌" });
+    if (userBD.locked) return interaction.editReply({ content: `${client.Emojis.Error} Aún no ha pasado un año, no puedes continuar.` });
 
     let monthString = data.mes.charAt(0).toUpperCase() + data.mes.slice(1);
 

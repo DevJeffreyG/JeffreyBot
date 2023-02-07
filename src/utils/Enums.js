@@ -87,7 +87,6 @@ const Categories = new Enum({
  * - Subscription
  * - Temporal
  * - SkipFirewall
- * - CriminalPedia
  */
 const ItemTypes = new Enum({
     StackOverflow: 1,
@@ -95,8 +94,7 @@ const ItemTypes = new Enum({
     Firewall: 3,
     Subscription: 4,
     Temporal: 5,
-    SkipFirewall: 6,
-    CriminalPedia: 7
+    SkipFirewall: 6
 }).values
 
 /**

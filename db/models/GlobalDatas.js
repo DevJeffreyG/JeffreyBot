@@ -1,15 +1,52 @@
 const mongoose = require("mongoose");
 const moment = require("moment");
-const ms = require("ms")
 
 const Schema = mongoose.Schema({
     info: Object
 });
 
+Schema.static("getPoll", async function(message_id){
+    return await this.findOne({
+        type: "temporalPoll",
+        "info.message_id": message_id
+    });
+})
+
+Schema.method("pollYes", function(data){
+    let voteInNoIndex = this.info.no.findIndex(x => x === data);
+    
+    // hay un voto en no con la misma informacion
+    if(voteInNoIndex != -1) this.info.no.splice(voteInNoIndex, 1);
+
+    // ya votó
+    if(this.info.yes.find(x => x === data)) return;
+
+    this.info.yes.push(data);
+    this.markModified("info");
+
+    this.save();
+})
+
+Schema.method("pollNo", function(data){
+    let voteInYesIndex = this.info.yes.findIndex(x => x === data);
+    
+    // hay un voto en sí con la misma informacion
+    if(voteInYesIndex != -1) this.info.yes.splice(voteInYesIndex, 1);
+
+    // ya votó
+    if(this.info.no.find(x => x === data)) return;
+
+    this.info.no.push(data);
+    this.markModified("info");
+
+    this.save();
+})
+
 Schema.static("newTempRoleDeletion", async function (data) {
     if (
         await this.findOne({
             "info.type": "temproledeletion",
+            "info.guild_id": data.guild_id,
             "info.user_id": data.user_id,
             "info.role_id": data.role_id
         })
@@ -20,8 +57,9 @@ Schema.static("newTempRoleDeletion", async function (data) {
             info: {
                 type: "temproledeletion",
                 user_id: data.user_id,
+                guild_id: data.guild_id,
                 role_id: data.role_id,
-                until: moment().add(ms(data.duration), "ms").toDate(),
+                until: moment().add(data.duration, "ms").toDate(),
                 boost: data.boost ?? null
             }
         }).save();
@@ -70,10 +108,11 @@ Schema.static("removeGuildCommand", async function (route) {
     })
 })
 
-Schema.static("getTempRoleDeletions", function (user_id) {
+Schema.static("getTempRoleDeletions", function (user_id, guild_id) {
     return this.find({
         "info.type": "temproledeletion",
-        "info.user_id": user_id
+        "info.user_id": user_id,
+        "info.guild_id": guild_id
     });
 })
 
@@ -96,27 +135,6 @@ Schema.static("getRouletteItems", async function () {
     return await this.find({
         "info.type": "rouletteItem"
     });
-})
-
-Schema.static("getLockedGuilds", async function () {
-    return await this.find({
-        "info.type": "lockedGuilds"
-    });
-})
-
-Schema.static("newLockedGuild", function (data) {
-
-    const { guild, originalFeatures, originalPerms, newChannel } = data;
-
-    return new this({
-        info: {
-            type: "lockedGuilds",
-            guild,
-            originalFeatures,
-            originalPerms,
-            newChannel
-        }
-    }).save();
 })
 
 Schema.static("getActivities", async function () {

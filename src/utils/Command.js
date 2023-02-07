@@ -8,12 +8,52 @@ class Command {
     constructor(data = { name: "foo", desc: "bar", helpdesc: null, category: "0" }) {
         if (!(data.name && data.desc && data.category)) return console.error("No están todos los datos para crear un comando:", data)
 
+        let prefix = "";
+
+        switch (data.category) {
+            case Categories.General:
+                prefix = "GENERAL";
+                break;
+
+            case Categories.Fun:
+                prefix = "FUN";
+                break;
+
+            case Categories.Economy:
+                prefix = "ECON";
+                break;
+
+            case Categories.DarkShop:
+                prefix = "DS";
+                break;
+
+            case Categories.Staff:
+                prefix = "STAFF";
+                break;
+
+            case Categories.Administration:
+                prefix = "ADMIN";
+                break;
+
+            case Categories.Moderation:
+                prefix = "MOD";
+                break;
+
+            case Categories.Developer:
+                prefix = "DEV";
+                break;
+
+            case Categories.Music:
+                prefix = "MUSIC";
+                break;
+        }
+
         this.data = new SlashCommandBuilder()
             .setName(data.name.toLowerCase())
-            .setDescription(data.desc)
+            .setDescription(`[${prefix}] ${data.desc}`)
 
         this.name = this.data.name;
-        this.info = data.helpdesc ?? this.data.description;
+        this.info = data.helpdesc ?? data.desc;
         this.category = data.category;
         this.#setPerms();
         this.execute = async (interaction, models, params, client) => {
@@ -160,8 +200,8 @@ class Command {
             .setRequired(data.req ?? false)
 
         if ((data.type === "integer" || data.type === "number")) {
-            if(data.min) option.setMinValue(data.min)
-            if(data.max) option.setMaxValue(data.max)
+            if (data.min) option.setMinValue(data.min)
+            if (data.max) option.setMaxValue(data.max)
         }
 
         if (data.choices) {
@@ -174,18 +214,20 @@ class Command {
     }
 
     #getHelpEmbed(interaction) {
+        // TODO: Mostrar los parámetros, junto a subcomandos y subgrupos
         let embed = new Embed()
             .defAuthor({ text: `Ayuda: /${this.name}`, icon: interaction.guild.iconURL(), title: true })
             .defDesc(`▸ ${this.info}`)
             .setColor(Colores.verde)
+            .defFooter({ text: "Esto será más completo en el futuro de Jeffrey Bot 🦊" })
             .defThumbnail(interaction.client.user.avatarURL())
 
         return embed;
     }
 
-    #warning(){
+    #warning() {
         this.methodsCount++
-        if(this.methodsCount > 5) return console.log(`⚠️ Hay muchos constructores custom (${this.methodsCount}), considera creando el slash command manualmente ➡️ ${this.name}`)
+        if (this.methodsCount > 5) return console.log(`⚠️ Hay muchos constructores custom (${this.methodsCount}), considera creando el slash command manualmente ➡️ ${this.name}`)
     }
 
 }

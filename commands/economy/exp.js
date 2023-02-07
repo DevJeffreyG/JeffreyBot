@@ -1,4 +1,4 @@
-const { Command, Categories, Confirmation, ErrorEmbed, Embed, Cooldowns } = require("../../src/utils");
+const { Command, Categories, Confirmation, ErrorEmbed, Embed, Cooldowns, HumanMs } = require("../../src/utils");
 const command = new Command({
     name: "exp",
     desc: "Transforma tu dinero en experiencia para tu perfil cada semana",
@@ -45,7 +45,7 @@ command.execute = async (interaction, models, params, client) => {
     let confirmation = await Confirmation("Cambiar dinero", [
         `¿Cambiar **${Currency}${dinero.value.toLocaleString("es-CO")}** a EXP?`,
         "Esta acción NO se puede deshacer.",
-        "Sólo puedes usar este comando una vez por semana."
+        `Sólo puedes usar este comando cada ${new HumanMs(await user.cooldown(Cooldowns.CurrencyToExp, {info: true, check: false})).human}.`
     ], interaction)
     if (!confirmation) return;
 

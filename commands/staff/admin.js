@@ -169,7 +169,7 @@ command.data
                     .addIntegerOption(o =>
                         o
                             .setName("descuento")
-                            .setDescription("El descuento aplicado (en porcentaje, ej: 10, 15, 50)")
+                            .setDescription("El descuento aplicado (en porcentaje, ej: 10, 15, 50) [0 para eliminar]")
                             .setRequired(true)
                     )
             )
@@ -198,7 +198,7 @@ command.data
             .addSubcommand(delitem =>
                 delitem
                     .setName("del-item")
-                    .setDescription("Eliminar un item a alguna de las tiendas")
+                    .setDescription("Eliminar un item de alguna de las tiendas")
                     .addBooleanOption(darkshop =>
                         darkshop.setName("darkshop")
                             .setDescription("¿El item es para la DarkShop?")
@@ -218,7 +218,7 @@ command.data
             .addSubcommand(useinfo =>
                 useinfo
                     .setName("use-info")
-                    .setDescription("Editar el uso que tiene un item de la tienda")
+                    .setDescription("Editar el uso que tiene un item de la tienda. [DS] = DarkShop")
                     .addBooleanOption(darkshop =>
                         darkshop.setName("darkshop")
                             .setDescription("¿El item es de la DarkShop?")
@@ -282,13 +282,12 @@ command.data
                             .setDescription("Si es un tipo role o boost, ¿cuánto dura? 1d, 7d, 10m, etc"))
                     .addStringOption(o =>
                         o.setName("especial")
-                            .setDescription("Si es algún item especial, el tipo que es. [DS] = DarkShop")
+                            .setDescription("Si es algún item especial, el tipo que es.")
                             .addChoices(
                                 { name: "Firewall [DS]", value: String(ItemTypes.Firewall) },
                                 { name: "~(+5%) Precisión (Stack Overflow) [DS]", value: String(ItemTypes.StackOverflow) },
                                 { name: "Reset Interest [DS]", value: String(ItemTypes.ResetInterest) },
-                                { name: "Skip Firewall [DS]", value: String(ItemTypes.SkipFirewall) },
-                                { name: "~(-5%) Precisión (Criminal Pedia) [DS]", value: String(ItemTypes.CriminalPedia) },
+                                { name: "Skip Firewall [DS]", value: String(ItemTypes.SkipFirewall) }
                             )
                     )
                     .addStringOption(option =>
@@ -412,7 +411,7 @@ command.keysExec = async (interaction, models, params) => {
 
     // generar nueva key
     let keysq = await Guilds.find();
-    const generatedID = await FindNewId(keysq, "data.keys", "id");
+    const generatedID = FindNewId(keysq, "data.keys", "id");
     const doc = await Guilds.getOrCreate(interaction.guild.id)
 
     // code
@@ -516,7 +515,7 @@ command.vaultExec = async (interaction, models, params, client) => {
 
     switch (subcommand) {
         case "add": {
-            const id = await FindNewId(await Guilds.find(), "data.vault_codes", "id");
+            const id = FindNewId(await Guilds.find(), "data.vault_codes", "id");
             const code = codigo.value.toUpperCase();
 
             let exists = new ErrorEmbed(interaction, {
@@ -638,6 +637,11 @@ command.vaultExec = async (interaction, models, params, client) => {
                 ]
             })
         }
+
+        case "list": {
+            // TODO: Mostrar la lista de todos los códigos
+            return interaction.editReply({content: "Vuelve más tarde, esto será añadido en una actualización futura."})
+        }
     }
 }
 
@@ -665,7 +669,7 @@ command.shopExec = async (interaction, models, params, client) => {
             let confirmation = await Confirmation("Eliminar item", [
                 `El item con Id \`${id.value}\` de la ${isDarkShop ? "DarkShop" : "tienda"}.`,
                 `Se eliminará el item de todos los inventarios.`,
-                `No se devolverá ningún Jeffro.`
+                `No se devolverá dinero.`
             ], interaction)
 
             if (!confirmation) return;

@@ -1,6 +1,6 @@
 const { Command, Categories, Embed, ErrorEmbed, Confirmation, FindNewId, AfterInfraction, Log, LogReasons, ChannelModules } = require("../../src/utils")
 const { Colores } = require("../../src/resources/");
-const { SelectMenuBuilder, ActionRowBuilder, AttachmentBuilder } = require("discord.js")
+const { StringSelectMenuBuilder, ActionRowBuilder, AttachmentBuilder } = require("discord.js")
 
 const command = new Command({
     name: "warn",
@@ -30,7 +30,7 @@ command.execute = async (interaction, models, params, client) => {
     // revisar que estén las reglas activadas
     const doc = await Guilds.getOrCreate(interaction.guild.id);
 
-    let selectMenu = new SelectMenuBuilder()
+    let selectMenu = new StringSelectMenuBuilder()
         .setCustomId("selectRule")
         .setPlaceholder("Selecciona la regla infringida");
 
@@ -67,13 +67,13 @@ command.execute = async (interaction, models, params, client) => {
         );
     }
 
-    selectMenu.addOptions({ label: "Cancelar", value: "cancel", emoji: "❌" });
+    selectMenu.addOptions({ label: "Cancelar", value: "cancel", emoji: client.Emojis.Cross });
 
     let row = new ActionRowBuilder().addComponents([selectMenu]);
 
     await interaction.editReply({ content: "**¿Qué regla infringió?**", components: [row] })
 
-    const filter = (inter) => inter.isSelectMenu() && inter.user.id === interaction.user.id;
+    const filter = (inter) => inter.isStringSelectMenu() && inter.user.id === interaction.user.id;
     const collector = interaction.channel.createMessageComponentCollector({ filter, max: "1" });
 
     collector.on("collect", async (collected) => {
@@ -132,7 +132,7 @@ command.execute = async (interaction, models, params, client) => {
         // como sí tiene el soft, agregar warn
         let users = await Users.find();
 
-        let newId = await FindNewId(users, "warns", "id");
+        let newId = FindNewId(users, "warns", "id");
 
         const data = {
             member: member,

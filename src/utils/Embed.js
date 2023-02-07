@@ -158,7 +158,7 @@ class Embed extends Discord.EmbedBuilder {
                         .date(day)
                         .startOf("day")
 
-                    bdString = (day != null) && (month != null) ? `**— Cumpleaños**: ${time(timestamp.toDate(), "D")}.` : "";
+                    bdString = (day != null) && (month != null) ? `**— Cumpleaños**: ${time(timestamp.toDate(), "D")}. (${time(timestamp.toDate(), "R")})` : "";
                 }
 
                 this.defAuthor({ text: `Estadísticas de ${member.user.tag}`, icon: member.guild.iconURL({ dynamic: true }) })

@@ -39,9 +39,10 @@ command.execute = async (interaction, models, params, client) => {
             "Las rosas son rojas",
             "Los caballos comen manzanas",
             "¿Sabías que 10 de cada 10 vídeos subidos por Jeffrey, están en YouTube por más de una semana ocultos antes de ser públicos?",
-            "No tengo plata. ¿me donan?",
-            "Mindblowing",
-            "En plan, sé que no se usa este comando mucho, pero en plan, adiós, ¿sabes?"
+            "No tengo dinero. ¿Me donas?",
+            "Mindblowing...",
+            "En plan, sé que no se usa este comando mucho, pero en plan, adiós, ¿sabes?",
+            "Y a día de hoy siguen los mismos códigos."
         ];
 
         let relleno = respRelleno[Math.floor(Math.random() * respRelleno.length)];

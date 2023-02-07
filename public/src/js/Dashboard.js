@@ -354,6 +354,10 @@ class Dashboard {
         let f = x => x.id === id;
         let guildItem = this.guild.roles.find(f) || this.guild.channels.find(f) || this.guild.categories.find(f);
 
+        if(!guildItem) guildItem = {
+            name: "[ ELIMINADO ]"
+        };
+
         d.dataset.id = id;
         d.innerHTML = guildItem.name;
 
@@ -1781,7 +1785,7 @@ class Dashboard {
             headers: {
                 "changes": JSON.stringify(this.pushable_changes),
                 "page": this.query?.page,
-                "channelid": this.doc.channels.logs.guild_logs
+                "channelid": this.doc.channels.logs.staff_logs
             }
         })
     }

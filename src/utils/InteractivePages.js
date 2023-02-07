@@ -109,6 +109,12 @@ class InteractivePages {
     }
 
     async init(interaction) {
+        try {
+            await interaction.deferReply();
+        } catch(err) {
+            //console.log(`⚠ ${err}`);
+        }
+        
         const client = interaction.client;
 
         const row = new ActionRowBuilder()
@@ -128,7 +134,12 @@ class InteractivePages {
         if (this.pag != 1) row.components[0].setDisabled(false)
         if (this.pag === this.pages.size) row.components[1].setDisabled(true)
 
-        let msg = await interaction.editReply({ content: "", components: [row], embeds: [this.firstEmbed] });
+        try {
+            var msg = await interaction.editReply({ content: "", components: [row], embeds: [this.firstEmbed] });
+        } catch(err) {
+            console.log(err)
+            return;
+        }
 
         const filter = async i => {
             try {
@@ -165,8 +176,6 @@ class InteractivePages {
             if (pagn === this.pages.size) row.components[1].setDisabled();
             else row.components[1].setDisabled(false);
 
-            console.log(pagn)
-
             let embed = new Embed()
                 .defAuthor({ text: this.base.title, icon: this.base.author_icon })
                 .defColor(this.base.color)
@@ -179,7 +188,8 @@ class InteractivePages {
 
         collector.on("end", async (i, r) => {
             row.components.forEach(c => c.setDisabled());
-            interaction.editReply({ components: [row] });
+            await interaction.editReply({ components: [row] })
+                .catch(err => console.log("... %s", err));
 
             let index = client.activeCollectors.findIndex(x => x.collector === collector && x.userid === interaction.user.id);
             if (!isNaN(index)){

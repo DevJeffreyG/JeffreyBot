@@ -30,36 +30,40 @@ class ErrorEmbed extends Embed {
      */
     constructor(inter = null, options, ignorewarnings = false) {
         super()
-        if(inter && inter instanceof BaseInteraction === false && !inter instanceof GuildChannel) {
+        if (inter && inter instanceof BaseInteraction === false && !inter instanceof GuildChannel) {
             options = inter;
             inter = null;
         }
-        
-        if(inter) this.interaction = inter;
-        else if(!ignorewarnings && options) console.log("❗ Considera usando ErrorEmbed.send()", options)
+
+        if (inter) this.interaction = inter;
+        else if (!ignorewarnings && options) console.log("❗ Considera usando ErrorEmbed.send()", options)
 
         this.options = options;
         this.#setup(options)
     }
 
-    #setup(options){
+    #setup(options) {
         this.defColor(Colores.rojo)
 
-        if(this.interaction?.client) this.client = this.interaction.client;
+        if (this.interaction?.client) this.client = this.interaction.client;
         else this.client = require("../../index")
 
-        if(!options) return this.#customError();
+        if (!options) return this.#customError();
 
         const { type, data } = options;
 
-        const { DarkCurrency, Currency } = this.client.getCustomEmojis(data?.guildId ?? this.interaction?.guild?.id) || this.client.Emojis
+        try {
+            var { DarkCurrency, Currency } = this.client.getCustomEmojis(data?.guildId ?? this.interaction?.guild?.id) || this.client.Emojis
+        } catch (err) {
+            return console.log("🔴 No está el cliente... aún.");
+        }
 
-        switch(type){
+        switch (type) {
             case "commandNotFound":
                 this.#errorName("No existe")
                 this.#errorAuthor(1);
                 this.#errorDesc("No se pudo encontrar el comando", `(\`/${data}\`)`)
-                this.defFooter({text: `Usa el comando /ayuda para ver todos los comandos del bot`})
+                this.defFooter({ text: `Usa el comando /ayuda para ver todos los comandos del bot` })
                 break;
 
             case "toggledCommand":
@@ -85,7 +89,7 @@ ${codeBlock("javascript", data.error)}`])
                 this.#errorName("No se ha configurado")
                 this.#errorAuthor(5);
                 this.#errorDesc("No se puede usar esta funcionalidad sin antes configurar el bot", `\`${data.needed.toUpperCase()}\``, [`Un administrador del servidor tiene que usar el comando \`/setup\` primero.`, `O el comando \`/config\` en su defecto.`])
-                this.defFooter({text: `Si aún no lo han hecho, muéstrales este mensaje.`});
+                this.defFooter({ text: `Si aún no lo han hecho, muéstrales este mensaje.` });
                 break;
 
             case "commandError":
@@ -100,13 +104,13 @@ ${codeBlock("json", `{ FATAL ERROR, ID ${data.id}, UNKNOWN "${data.unknown}`)}`]
                 this.#errorAuthor(7);
                 this.#errorDesc("No pude enviar el mensaje al usuario por privado", data.tag, [data.error])
                 break;
-                
+
             case "badParams":
                 this.#errorName("Mala ejecución")
                 this.#errorAuthor(8)
                 this.#errorDesc("No puedes ejecutar ese comando así", data.help)
                 break;
-            
+
             case "alreadyExists":
                 this.#errorName("Ya existe")
                 this.#errorAuthor(9)
@@ -172,22 +176,22 @@ ${codeBlock("javascript", data.error)}`])
         }
     }
 
-    #customError(){
-        this.defAuthor({text: "Error", icon: this.client.EmojisObject.Error.url});
+    #customError() {
+        this.defAuthor({ text: "Error", icon: this.client.EmojisObject.Error.url });
     }
 
-    #errorName(name){
+    #errorName(name) {
         this.errorName = name;
         return this
     }
 
-    #errorAuthor(errorNumber){
+    #errorAuthor(errorNumber) {
         this.errorNumber = errorNumber
-        this.defAuthor({text: `Error ${errorNumber} — ${this.errorName ?? this.options.type}`, icon: this.client.EmojisObject.Error.url})
+        this.defAuthor({ text: `Error ${errorNumber} — ${this.errorName ?? this.options.type}`, icon: this.client.EmojisObject.Error.url })
         return this;
     }
 
-    #errorDesc(desc, principal, more = []){
+    #errorDesc(desc, principal, more = []) {
         this.defDesc(`**— ${desc} ▸ ${principal}**`);
         let d = this.description;
 
@@ -198,35 +202,35 @@ ${codeBlock("javascript", data.error)}`])
         this.defDesc(d);
     }
 
-    async send(options = {ephemeral: false, followup: false }){
+    async send(options = { ephemeral: false, followup: false }) {
         const { ephemeral, followup } = options;
 
-        if(this.interaction instanceof GuildChannel) return this.sendToChannel();
-        if(!this.interaction) return console.error("🔴 NO EXISTE this.interaction !!")
+        if (this.interaction instanceof GuildChannel) return this.sendToChannel();
+        if (!this.interaction) return console.error("🔴 NO EXISTE this.interaction !!")
         else
 
-        if(ephemeral && !followup) {
-            try {
-                return await this.interaction.reply({content: null, embeds: [this], components: [], ephemeral: true})
-            } catch(err) {
-                console.log("Oops!")
-                console.log(err)
+            if (ephemeral && !followup) {
+                try {
+                    return await this.interaction.reply({ content: null, embeds: [this], components: [], ephemeral: true })
+                } catch (err) {
+                    console.log("Oops!")
+                    console.log(err)
+                }
+            } else if (followup) {
+                try {
+                    return await this.interaction.followUp({ content: null, embeds: [this], components: [], ephemeral: ephemeral })
+                } catch (err) {
+                    console.log("Oops!")
+                    console.log(err)
+                }
             }
-        } else if (followup) {
-            try {
-                return await this.interaction.followUp({content: null, embeds: [this], components: [], ephemeral: ephemeral})
-            } catch(err) {
-                console.log("Oops!")
-                console.log(err)
-            }
-        }
-        
+
         try {
-            await this.interaction.editReply({content: null, embeds: [this], components: []});
+            await this.interaction.editReply({ content: null, embeds: [this], components: [] });
         } catch (err) {
             try {
-                await this.interaction.reply({content: null, embeds: [this], components: [], ephemeral: true});
-            } catch(replyerr) {
+                await this.interaction.reply({ content: null, embeds: [this], components: [], ephemeral: true });
+            } catch (replyerr) {
                 console.log("🔴 NO se envió el ErrorEmbed!")
             }
             console.log(err);
@@ -234,7 +238,7 @@ ${codeBlock("javascript", data.error)}`])
     }
 
     async sendToChannel() {
-        this.interaction.send({content: null, embeds: [this], components: []});
+        this.interaction.send({ content: null, embeds: [this], components: [] });
     }
 }
 

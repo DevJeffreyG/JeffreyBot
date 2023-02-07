@@ -32,13 +32,11 @@ command.execute = async (interaction, models, params, client) => {
 
     const currency = economy?.currency.toLocaleString("es-CO") ?? "?";
     const accuracy = economy?.accuracy ?? "?";
-    const criminal = economy?.criminal_acc ?? "?";
 
     let meEmbed = new Embed()
         .defAuthor({ text: `Estadísiticas del usuario N°${member.id}`, icon: client.EmojisObject.Dark.url })
         .defDesc(`**— ${DarkCurrency.name}**: **${DarkCurrency}${currency}**.
-**— Precisión**: ${ProgressBar(accuracy)} ${inlineCode(accuracy + "%")}
-**— Habilidad criminal**: ${ProgressBar(criminal)} ${inlineCode(criminal + "%")}
+**— Precisión**: ${await ProgressBar(accuracy)} ${inlineCode(accuracy + "%")}
 **— Items**: Usa \`/dsinventory\`.`)
         .defThumbnail(member.displayAvatarURL({ dynamic: true }))
         .defColor(Colores.negro);

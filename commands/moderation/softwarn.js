@@ -1,6 +1,6 @@
 const { Command, Categories, Embed, ErrorEmbed, Confirmation, FindNewId, Log, LogReasons, ChannelModules } = require("../../src/utils")
 const { Colores } = require("../../src/resources/");
-const { SelectMenuBuilder, ActionRowBuilder, AttachmentBuilder } = require("discord.js")
+const { ActionRowBuilder, AttachmentBuilder, StringSelectMenuBuilder } = require("discord.js")
 const command = new Command({
     name: "softwarn",
     desc: "Controla las advertencias hechas a un usuario",
@@ -29,7 +29,7 @@ command.execute = async (interaction, models, params, client) => {
     // revisar que estén las reglas activadas
     const doc = await Guilds.getOrCreate(interaction.guild.id);
 
-    let selectMenu = new SelectMenuBuilder()
+    let selectMenu = new StringSelectMenuBuilder()
         .setCustomId("selectRule")
         .setPlaceholder("Selecciona la regla infringida");
 
@@ -60,19 +60,19 @@ command.execute = async (interaction, models, params, client) => {
         selectMenu.addOptions(
             {
                 label: regla.name,
-                value: regla.position.toString(),
+                value: regla.id.toString(),
                 description: desc
             }
         );
     }
 
-    selectMenu.addOptions({ label: "Cancelar", value: "cancel", emoji: "❌" });
+    selectMenu.addOptions({ label: "Cancelar", value: "cancel", emoji: client.Emojis.Cross });
 
     let row = new ActionRowBuilder().addComponents([selectMenu]);
 
     await interaction.editReply({ content: "**¿Qué regla infringió?**", components: [row] })
 
-    const filter = (inter) => inter.isSelectMenu() && inter.user.id === interaction.user.id;
+    const filter = (inter) => inter.isStringSelectMenu() && inter.user.id === interaction.user.id;
     const collector = interaction.channel.createMessageComponentCollector({ filter, max: "1" });
 
     collector.on("collect", async (collected) => {
@@ -129,7 +129,7 @@ command.execute = async (interaction, models, params, client) => {
 
         // como no tiene el soft, agregarlo
         let users = await Users.find();
-        let newId = await FindNewId(users, "softwarns", "id");
+        let newId = FindNewId(users, "softwarns", "id");
 
         softwarns.push({ rule_id: rule, proof: msg.attachments.first().url, id: newId });
         if (hasSoft) softwarns.splice(indexOfSoftwarn, 1);

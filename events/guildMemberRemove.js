@@ -29,8 +29,6 @@ module.exports = async (client, member) => {
     .setDescription(fBye)
     .setColor("#66a0ff");
 
-    client.user.setActivity(`/ayuda - ${member.guild.memberCount} usuarios🔎`);
-
     // guardar los roles
     let user = await Users.getOrCreate({
         user_id: member.id,
@@ -45,7 +43,7 @@ module.exports = async (client, member) => {
         await user.save();
     }
 
-    return channel.send({embeds: [embed]}).then(msg => {
+    if(channel) channel.send({embeds: [embed]}).then(msg => {
         msg.react(client.Emojis.PressF);
     });
 }

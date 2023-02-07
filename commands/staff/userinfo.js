@@ -90,7 +90,9 @@ ${member.roles.cache.toJSON().sort().join(", ")}`)
         // sacar la regla
         let regla = reglas.find(x => x.id === warn.rule_id)?.name ?? "Víctima de la DARKSHOP";
 
-        warns.defField(`— ${regla} : Regla N°${warn.rule_id}`, `**— [Pruebas](${warn.proof})\n— ID: ${warn.id}**`)
+        if(warn.rule_id != 0) warns.defField(`— ${regla} : Regla N°${warn.rule_id}`, `**— [Pruebas](${warn.proof})\n— ID: ${warn.id}**`)
+            else warns.defField(`— ${regla}`, `**— ID: ${warn.id}**`)
+
         hasW = true;
     });
 
@@ -155,13 +157,17 @@ ${member.roles.cache.toJSON().sort().join(", ")}`)
         if (pagn === embeds.length - 1) row.components[1].setDisabled();
         else row.components[1].setDisabled(false);
 
-        await interaction.editReply({ embeds: [embeds[pagn]], components: [row] });
+        try {
+            await interaction.editReply({ embeds: [embeds[pagn]], components: [row] });
+        } catch(err) {
+            console.log(err);
+        }
 
     });
 
-    collector.on("end", (i, r) => {
+    collector.on("end", async (i, r) => {
         row.components.forEach(c => c.setDisabled());
-        interaction.editReply({ components: [row] });
+        await interaction.editReply({ components: [row] });
 
         let index = client.activeCollectors.findIndex(x => x.collector === collector && x.userid === interaction.user.id);
         if (!isNaN(index)) {

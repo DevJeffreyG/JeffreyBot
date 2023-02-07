@@ -28,7 +28,7 @@ command.execute = async (interaction, models, params, client) => {
     const darkshop = new DarkShop(interaction.guild);
 
     const usermoney = user.economy.dark.currency;
-    const total = await darkshop.equals(null, quantity);
+    const total = Math.round(await darkshop.equals(null, quantity));
 
     const notEnough = new ErrorEmbed(interaction, {
         type: "economyError",

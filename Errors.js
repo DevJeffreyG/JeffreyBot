@@ -16,7 +16,7 @@ module.exports = async (client) => {
     var devChannels = await devGuild?.channels.fetch()
         .catch(err => console.log("⚠️ NOT POSSIBLE TO FETCH CHANNELS!", err));
 
-    var crashChannel = await devChannels.get(Bases.dev.crashes);
+    var crashChannel = devChannels.get(Bases.dev.crashes);
 
     var lastinter;
     var title = `**⚠️ ¡JEFFREY BOT HA CRASHEADO!** ⚠️\n`

@@ -1,4 +1,4 @@
-const { GuildMember, SelectMenuBuilder, ActionRowBuilder, BaseInteraction } = require("discord.js")
+const { GuildMember, StringSelectMenuBuilder, ActionRowBuilder, BaseInteraction, CommandInteraction } = require("discord.js")
 const moment = require("moment");
 const ms = require("ms")
 const Chance = require("chance");
@@ -8,9 +8,10 @@ const Colores = require("../resources/colores.json");
 
 const Embed = require("./Embed");
 const ErrorEmbed = require("./ErrorEmbed");
-const { ItemTypes, ItemObjetives, ItemActions, ItemEffects } = require("./Enums");
+const { ItemTypes, ItemObjetives, ItemActions, ItemEffects, LogReasons, ChannelModules } = require("./Enums");
 
 const { FindNewId, LimitedTime, Subscription, WillBenefit } = require("./functions");
+const Log = require("./Log");
 
 const models = require("mongoose").models;
 const { Shops, DarkShops, Users, Guilds, GlobalDatas } = models;
@@ -18,7 +19,7 @@ const { Shops, DarkShops, Users, Guilds, GlobalDatas } = models;
 class Item {
     /**
      * 
-     * @param {BaseInteraction} interaction 
+     * @param {BaseInteraction | CommandInteraction} interaction 
      * @param {Number} id 
      * @param {Boolean} isDarkShop 
      */
@@ -37,7 +38,7 @@ class Item {
         this.notfound = new ErrorEmbed(interaction, {
             type: "execError",
             data: {
-                guide: `Algo no ha ido bien, no puedes usar este item ahora mismo. Dile a los administradores que revisen el uso del item \`${this.itemId}\``
+                guide: `Algo no ha ido bien, no puedes usar este item ahora mismo. Dile a los administradores que revisen el uso del item con ID: \`${this.itemId}\`.`
             }
         })
 
@@ -45,7 +46,7 @@ class Item {
             type: "errorFetch",
             data: {
                 type: "warns",
-                guide: "No existen warns vinculados a tu usuario",
+                guide: "No existen warns vinculados al usuario",
             }
         })
 
@@ -53,8 +54,8 @@ class Item {
             type: "alreadyExists",
             data: {
                 action: "add role",
-                existing: "El role que te da este item",
-                context: "tu perfil"
+                existing: "El role que da este item",
+                context: "el destino"
             }
         })
 
@@ -62,8 +63,8 @@ class Item {
             type: "alreadyExists",
             data: {
                 action: "add boost",
-                existing: "El boost que te da este item (te beneficia aún más)",
-                context: "tu perfil"
+                existing: "El boost que da este item (te beneficia aún más)",
+                context: "el destino"
             }
         })
 
@@ -71,8 +72,8 @@ class Item {
             type: "doesntExist",
             data: {
                 action: "remove role",
-                missing: "El role que te quita este item",
-                context: "el perfil"
+                missing: "El role que quita este item",
+                context: "el destino"
             }
         })
 
@@ -80,7 +81,7 @@ class Item {
             type: "execError",
             data: {
                 command: this.interaction.commandName,
-                guide: "Este item ya está activado"
+                guide: "Este item ya está activo"
             }
         })
 
@@ -88,7 +89,7 @@ class Item {
             type: "execError",
             data: {
                 command: this.interaction.commandName,
-                guide: "Ya se ha eliminado temporalmente este rol, para este usuario"
+                guide: "Ya se ha eliminado temporalmente este rol"
             }
         })
 
@@ -142,15 +143,22 @@ class Item {
     /**
      * 
      * @param {Number} id The UseId of the item
-     * @param {GuildMember} [victim = null] The member affected (darkshop)
+     * @param {GuildMember} [qvictim = null] The member affected (darkshop)
      * @returns 
      */
-    async use(id, victim = null) {
+    async use(id, qvictim = this.interaction.member) {
         if (!this.#verify()) return;
+
+        var victim = qvictim;
 
         this.victim = victim?.id != this.user.user_id && victim ? // la victima NO puede ser el mismo usuario
             await Users.getOrCreate({ user_id: victim.id, guild_id: this.interaction.guild.id }) :
             null;
+
+        if(!this.isDarkShop) { // la victima será el usuario si NO es la darkshop
+            this.victim = await Users.getOrCreate({user_id: this.interaction.user.id, guild_id: this.interaction.guild.id});
+            victim = this.interaction.member;
+        }
 
         this.victimMember = this.victim ? victim : null; // this.victim es el doc de mongoose
 
@@ -167,7 +175,14 @@ class Item {
         const work = await this.#useWork();
 
         if (work) {
-            this.interaction.editReply({ embeds: [this.success], components: [], content: null });
+            if (this.isDarkShop) {
+                await this.interaction.editReply({ content: `${this.interaction.client.Emojis.Loading} Usando...` })
+                await this.interaction.followUp({ ephemeral: true, embeds: [this.success], components: [], content: null });
+                
+                this.interaction.deleteReply()
+            } else {
+                this.interaction.editReply({ embeds: [this.success], components: [], content: null });
+            }
             console.log("🟩 Item usado con éxito.")
         }
         console.log("===========================")
@@ -223,7 +238,7 @@ class Item {
         const warns = this.victim.warns;
 
         for (let i = 0; i < this.given; i++) {
-            const id = await FindNewId(await Users.find(), "warns", "id");
+            const id = FindNewId(await Users.find(), "warns", "id");
             this.victim.data.counts.warns += 1;
             warns.push({ rule_id: 0, id });
 
@@ -257,11 +272,16 @@ class Item {
 
     // ROLES
     async #addRole() {
-        if(this.victimMember) this.member = this.victimMember;
+        if (this.victimMember) this.member = this.victimMember;
         if (!await this.#darkshopWork()) return false;
 
         const role = this.interaction.guild.roles.cache.find(x => x.id === this.given);
-        if(!role) {
+        if (!role) {
+            await new Log(this.interaction)
+                .setReason(LogReasons.Error)
+                .setTarget(ChannelModules.StaffLogs)
+                .send({content: `${this.interaction.client.Emojis.Error} \`ITEM ${this.itemId}\`: **No se encontró el role ${this.given} en el servidor.**`});
+
             console.log("🔴 No se encontro el role %s en el servidor", this.given);
             this.notfound.send();
             return false;
@@ -277,9 +297,23 @@ class Item {
         if (this.isTemp) {
             let query = await LimitedTime(this.member, this.given, this.duration);
 
-            if(!this.isDarkShop) this.user = query;
+            if (!this.isDarkShop) this.user = query;
         }
-        if (this.isSub) this.user = await Subscription(this.member, this.given, this.duration, this.price, this.name)
+        if (this.isSub) {
+            try {
+                this.user = await Subscription(this.member, this.given, this.duration, this.price, this.name)
+            } catch(err) {
+                console.log(err);
+
+                await new Log(this.interaction)
+                    .setReason(LogReasons.Error)
+                    .setTarget(ChannelModules.StaffLogs)
+                    .send({content: `${this.interaction.client.Emojis.Error} \`ITEM ${this.itemId}\`: **Las suscripciones aún no están terminadas en la versión 2.0.0.**`});
+
+                this.notfound.send();
+                return false;
+            }
+        }
         else this.member.roles.add(role);
 
         this.#removeItemFromInv()
@@ -289,7 +323,12 @@ class Item {
     async #removeRole() {
         if (!await this.#darkshopWork()) return false;
         const role = this.interaction.guild.roles.cache.find(x => x.id === this.given);
-        if(!role) {
+        if (!role) {
+            await new Log(this.interaction)
+                .setReason(LogReasons.Error)
+                .setTarget(ChannelModules.StaffLogs)
+                .send({content: `${this.interaction.client.Emojis.Error} \`ITEM ${this.itemId}\`: **No se encontró el role ${this.given} en el servidor.**`});
+
             console.log("🔴 No se encontro el role %s en el servidor", this.given);
             this.notfound.send();
             return false;
@@ -298,18 +337,20 @@ class Item {
         console.log("🗨️ Eliminando el role %s a %s por %s", role.name, this.victimMember.user.tag, this.duration);
 
         if (!this.victimMember.roles.cache.find(x => x === role)) {
-            console.log("🔴 No tiene el role que te quita el item. %s", this.victimMember.roles.cache)
+            console.log("🔴 No tiene el role que quita el item. %s", this.victimMember.roles.cache)
             this.norole.send();
             return false;
         }
 
         // globaldata
-        let globaldata = await GlobalDatas.newTempRoleDeletion({ user_id: this.victimMember.id, role_id: role.id, duration: this.duration });
-        if (!globaldata) {
-            this.roleDeleted.send();
-            return false
+        if(this.duration){
+            let globaldata = await GlobalDatas.newTempRoleDeletion({ user_id: this.victimMember.id, guild_id: this.victimMember.guild.id, role_id: role.id, duration: this.duration });
+            if (!globaldata) {
+                this.roleDeleted.send();
+                return false
+            }
         }
-
+        
         this.victimMember.roles.remove(role);
 
         this.#removeItemFromInv()
@@ -334,18 +375,6 @@ class Item {
                 this.#removeItemFromInv()
                 return true;
 
-            case ItemTypes.CriminalPedia:
-                console.log("🟩 Criminal Pedia!")
-
-                let toRemove = Number((Math.random() * 5).toFixed(1));
-
-                console.log("🟩 Se eliminará %s% al accuracy de %s", toRemove, this.interaction.user.tag)
-                this.user.economy.dark.accuracy -= toRemove
-                if (this.user.economy.dark.accuracy < 10) this.user.economy.dark.accuracy = 10;
-                await this.user.save()
-
-                this.#removeItemFromInv()
-                return true;
             case ItemTypes.Firewall:
                 console.log("🟩 Firewall!");
                 return await this.#activateItem();
@@ -357,7 +386,7 @@ class Item {
                 const purchases = this.user.data.purchases;
 
                 const row = new ActionRowBuilder()
-                const selector = new SelectMenuBuilder()
+                const selector = new StringSelectMenuBuilder()
                     .setCustomId("resetInterestMenu")
                     .setPlaceholder("¿A qué item quieres eliminarle el interés?");
 
@@ -377,11 +406,11 @@ class Item {
                     selector.addOptions({ label: item.name, value: String(item.id) })
                 }
 
-                selector.addOptions({ label: "Cancelar", value: "cancel", emoji: "❌" })
+                selector.addOptions({ label: "Cancelar", value: "cancel", emoji: this.interaction.client.Emojis.Cross })
 
                 await this.interaction.editReply({ components: [row] });
 
-                let filter = (i) => i.isSelectMenu() && i.customId === "resetInterestMenu" && i.user.id === this.interaction.user.id;
+                let filter = (i) => i.isStringSelectMenu() && i.customId === "resetInterestMenu" && i.user.id === this.interaction.user.id;
                 const resetCollector = await this.interaction.channel.awaitMessageComponent({ filter, time: ms("1m") }).catch(() => { });
 
                 if (!resetCollector || resetCollector.values[0] === "cancel") {
@@ -411,12 +440,17 @@ class Item {
 
     async #removeItem() {
         if (!await this.#darkshopWork()) return false;
-
+        // TODO:
     }
 
     async #addBoost() {
         const role = this.interaction.guild.roles.cache.find(x => x.id === this.given);
-        if(!role) {
+        if (!role) {
+            await new Log(this.interaction)
+                .setReason(LogReasons.Error)
+                .setTarget(ChannelModules.StaffLogs)
+                .send({content: `${this.interaction.client.Emojis.Error} \`ITEM ${this.itemId}\`: **No se encontró el role ${this.given} en el servidor.**`});
+
             console.log("🔴 No se encontro el role %s en el servidor", this.given);
             this.notfound.send();
             return false;
@@ -461,7 +495,7 @@ class Item {
 
         // globaldata
         let globaldata = await GlobalDatas.newTempRoleDeletion({
-            user_id: this.victimMember.id, role_id: role.id, duration: this.duration, boost: this.boost_objetive
+            user_id: this.victimMember.id, guild_id: this.victimMember.guild.id, role_id: role.id, duration: this.duration, boost: this.boost_objetive
         });
         if (!globaldata) {
             this.roleDeleted.send();
@@ -523,10 +557,10 @@ class Item {
 
         if (firewall) { // tiene una firewall activa
             // ¿se la salta?
-            let skip = this.user.hasItem(skipFirewallItem.id, true) && new Chance().bool({likelihood: this.doc.settings.quantities.percentage_skipfirewall})
+            let skip = this.user.hasItem(skipFirewallItem.id, true) && new Chance().bool({ likelihood: this.doc.settings.quantities.percentage_skipfirewall })
 
             // eliminar el skip, se la salte o no
-            if(this.user.hasItem(skipFirewallItem.id, true)) {
+            if (this.user.hasItem(skipFirewallItem.id, true)) {
                 console.log("⚪ Se eliminó el skip de firewall de %s", this.interaction.user.tag)
                 let skipIndex = this.user.data.inventory.findIndex(x => x.item_id === skipFirewallItem.id && x.isDarkShop)
 
@@ -543,7 +577,6 @@ class Item {
                 dsEvents?.send({ embeds: [fail] })
 
                 await this.#removeItemFromInv() // como es fallido, no llega al codigo base para que se elimine el item
-                this.interaction.deleteReply()
                 return false;
             } else { // se salta la firewall
                 console.log("🟢 Se ha saltado la Firewall")
@@ -556,7 +589,7 @@ class Item {
                 return true
             } else { // ni siquiera es parte de la red de la darkshop
                 dsEvents?.send({ embeds: [fail] })
-                this.interaction.deleteReply()
+
                 return false // para que no se elimine el item
             }
         }

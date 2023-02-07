@@ -202,7 +202,9 @@ class Log {
             if(embed){
                 if(embed instanceof Embed) msg = await this.channel?.send({ content, embeds: [embed], components }).catch();
                 else if(embed instanceof ErrorEmbed) msg = await embed.send()
-            } else msg = await this.channel?.send({ content, embeds, components }).catch();
+            } else msg = await this.channel?.send({ content, embeds, components }).catch(err => {
+                this.channel = null;
+            });
 
             if (!msg && this.channel)
                 await this.#jeffreyMessageError.send()

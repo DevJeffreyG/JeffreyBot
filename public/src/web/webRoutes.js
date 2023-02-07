@@ -11,9 +11,9 @@ const ms = require("ms");
 const { Colores } = require("../../../src/resources");
 
 const API_ENDPOINT = "https://discord.com/api/v10";
-const REDIRECT_URI = "http://localhost:10000/api/discord-callback";
+const REDIRECT_URI = `${process.env.HOME_PAGE}/api/discord-callback`;
 
-const inviteLink = `https://discord.com/api/oauth2/authorize?client_id=${process.env.CLIENT_ID}&permissions=8&scope=bot%20applications.commands`
+const inviteLink = `https://discord.com/api/oauth2/authorize?client_id=${process.env.CLIENT_ID}&permissions=${process.env.PERMISSIONS_VALUE}&scope=bot%20applications.commands`
 const oauth2 = `https://discord.com/api/oauth2/authorize?client_id=${process.env.CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=identify%20email%20guilds`;
 const uptime = "https://stats.uptimerobot.com/oOR4JiDYNj";
 
@@ -67,10 +67,7 @@ module.exports = (app) => {
         const code = req.query.code;
 
         if (!code) return res.status(400)
-            .send({
-                error: { message: "missing code" },
-                status_code: 400
-            });
+            .redirect("/")
 
         // conseguir token
         const params = new URLSearchParams();
@@ -267,15 +264,19 @@ module.exports = (app) => {
                 authorization: `${session.token_type} ${session.token}`
             }
         });
-        const json = await query.json();
+        try {
+            const json = await query.json();
 
-        const result = json?.filter(x => {
-            const permissions = new PermissionsBitField(x.permissions)
-            const checkAgainst = new PermissionsBitField(PermissionsBitField.Flags.ManageGuild)
+            const result = json?.filter(x => {
+                const permissions = new PermissionsBitField(x.permissions)
+                const checkAgainst = new PermissionsBitField(PermissionsBitField.Flags.ManageGuild)
 
-            if (permissions.has(checkAgainst)) return x;
-        })
+                if (permissions.has(checkAgainst)) return x;
+            })
 
-        session.setGuilds(result)
+            session.setGuilds(result)
+        } catch (err) {
+            console.log(err)
+        }
     }
 }

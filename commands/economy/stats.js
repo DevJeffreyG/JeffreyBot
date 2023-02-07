@@ -48,7 +48,7 @@ command.execute = async (interaction, models, params, client) => {
 
     if (boosts?.length > 0) {
         for (const boost of boosts) {
-            const { type, objetive, value } = boost.special;
+            const { type, objetive, value, disabled } = boost.special;
 
             let boostobj = new Enum(BoostObjetives).translate(objetive);
             if (boostobj === "All") boostobj = "Todo"
@@ -56,7 +56,7 @@ command.execute = async (interaction, models, params, client) => {
 
             embed
                 .defField(`— 🚀 Boost de ${boostobj} x${value}`,
-                    `▸ Hasta: ${time(moment(boost.active_until).toDate())}`, true);
+                    `▸ Hasta: ${time(moment(boost.active_until).toDate())}${disabled ? `\n▸ **Desactivado**.` : ""}`, true);
         }
     }
 

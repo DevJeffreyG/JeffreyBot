@@ -15,4 +15,4 @@ const legacy = new Schema({
   lastupdate: { type: Date, default: () => { return new Date(); }}
 })
 
-module.exports = mongoose.model("LegacyList", legacy);
+module.exports = mongoose.model("Legacy", legacy);

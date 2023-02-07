@@ -28,7 +28,7 @@ command.execute = async (interaction, models, params, client) => {
     const docGuild = await Guilds.getOrCreate(interaction.guild.id);
     if(!docGuild.moduleIsActive("functions.suggestions")) return new ErrorEmbed(interaction, {type: "moduleDisabled"}).send();
 
-    const newId = await FindNewId(await Guilds.find(), "data.suggestions", "id"); // crear la nueva id para el ticket
+    const newId = FindNewId(await Guilds.find(), "data.suggestions", "id"); // crear la nueva id para el ticket
 
     const row = new ActionRowBuilder()
         .addComponents(
@@ -76,7 +76,7 @@ ${codeBlock(sugerencia)}
 
     await docGuild.save();
 
-    return interaction.editReply({ content: "✅ ¡Gracias!" });
+    return interaction.editReply({ content: `${client.Emojis.Check} ¡Gracias!` });
 
 }
 

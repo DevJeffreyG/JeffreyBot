@@ -136,7 +136,7 @@
                                         var g = '<%- guildId %>';
 
                                         function initDashboard(data) {
-                                            if (data.error) {
+                                            if (data.guild.code) {
                                                 window.location.replace("/dashboard/")
                                                 window.open(`/invite/?guildId=${g}`, '_blank').focus();
                                             }
@@ -154,7 +154,6 @@
 
                                             <%
                                             var cached = req.session.fetchedGuilds?.find(x => x.guild.id === guildId);
-
                                             if(!cached) {
                                             %>
                                                 fetch("/api/get-guild", {

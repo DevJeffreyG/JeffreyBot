@@ -1,153 +1,178 @@
-const { GuildFeature, ChannelType, PermissionsBitField, time } = require("discord.js");
-const { Command, Categories, Confirmation } = require("../../src/utils")
+const { ChannelType, PermissionsBitField, OverwriteType } = require("discord.js");
+const { Command, Categories, Confirmation, Log, LogReasons, ChannelModules, ErrorEmbed } = require("../../src/utils")
 
 const command = new Command({
     name: "lockdown",
-    desc: "Inicia el lockdown en el servidor",
+    desc: "Deshabilita temporalmente el canal donde se ejecuta el comando.",
     category: Categories.Administration
 })
 
 command.execute = async (interaction, models, params, client) => {
-    await interaction.deferReply();
+    await interaction.deferReply({ ephemeral: true });
 
-    const { GlobalDatas } = models;
+    const discordError = new ErrorEmbed(interaction, {
+        type: "discordLimitation",
+        data: {
+            action: "edit channel",
+            help: `No pude editar el canal por un problema con Discord. Verifica que Jeffrey Bot tenga acceso a este canal en los permisos.`
+        }
+    });
+
+    const { Guilds } = models;
+
+    const doc = await Guilds.getOrCreate(interaction.guild.id);
 
     const guild = interaction.guild;
     const Loading = client.Emojis.Loading;
 
-    client.lockedGuilds = await GlobalDatas.getLockedGuilds();
+    let locked = doc.data.locked_channels;
 
-    let locked = client.lockedGuilds;
-    let thisLock = locked.find(x => x.info.guild === interaction.guild.id)?.info;
-
-    if (thisLock) return unlock(); // togglear si ya está en lockdown
-    thisLock = {
-        guild: interaction.guild.id
-    }
+    if (locked.find(x => x.channel_id === interaction.channel.id)) return unlock(); // togglear si ya está en lockdown
 
     let confirmation = await Confirmation("Lockdown", [
-        "Se ocultarán TODOS los canales actuales para TODOS los roles del servidor.",
+        `Se ocultará ${interaction.channel} para TODOS los roles del servidor, incluyendo el role @everyone.`,
+        `Roles configurados de STAFF & Administradores **SÍ** podrán ver este canal.`,
         "Para volver a la normalidad hay que volver a usar este comando.",
-        "Se pausarán las invitaciones del servidor.",
-        "Se creará un canal adicional al final donde los administradores pueden anunciar a los miembros, en el tema estará la situación actual del servidor."
+        "Ten en cuenta que esto NO debe de hacerse más de dos veces en 10 minutos."
     ], interaction);
-    if(!confirmation) return;
+    if (!confirmation) return;
 
-    interaction.editReply({ content: `${Loading} Pausando invitaciones`, embeds: [] })
-    try { await guild.edit({ features: interaction.guild.features.concat(GuildFeature.InvitesDisabled) }) } catch (err) { }
+    try {
+        await lock()
+        return interaction.editReply({ content: `${client.Emojis.Check} Listo` })
+    } catch (err) {
+        console.log(err);
+        return discordError.send();
+    }
 
-    interaction.editReply({ content: `${Loading} Obteniendo canales de texto y voz` })
-    await guild.channels.fetch();
+    async function lock() {
+        /* interaction.editReply({ content: `${Loading} Pausando invitaciones`, embeds: [] })
+            try { await guild.edit({ features: interaction.guild.features.concat(GuildFeature.InvitesDisabled) }) } catch (err) { } */
 
-    interaction.editReply({ content: `${Loading} Obteniendo roles` })
-    await guild.roles.fetch();
+        await interaction.editReply({ content: `${Loading} Obteniendo roles`, embeds: [] })
+        await guild.roles.fetch();
 
-    // creacion de permisos denegados que va a tener cada role
-    let revokedPermissions = [
-        PermissionsBitField.Flags.SendMessages,
-        PermissionsBitField.Flags.ViewChannel,
-        PermissionsBitField.Flags.Connect,
-        PermissionsBitField.Flags.UseApplicationCommands,
-        PermissionsBitField.Flags.ChangeNickname
-    ]
+        // creacion de permisos denegados que va a tener cada role
+        let revokedPermissions = [
+            PermissionsBitField.Flags.SendMessages,
+            PermissionsBitField.Flags.ViewChannel,
+            PermissionsBitField.Flags.Connect,
+            PermissionsBitField.Flags.UseApplicationCommands,
+            PermissionsBitField.Flags.ChangeNickname
+        ]
 
+        let grantedPermissions = [
+            PermissionsBitField.Flags.ViewChannel,
+            PermissionsBitField.Flags.SendMessages
+        ]
 
-    let data = [];
+        let newChannelPerms = [];
 
-    // la forma en que se denegan los permisos a todos los roles del servidor
-    guild.roles.cache.forEach(role => {
-        data.push({
-            id: role.id,
-            deny: revokedPermissions,
-            allow: []
+        // la forma en que se denegan los permisos a todos los roles del servidor
+        let staffRoles = doc.getStaffs();
+        let adminRoles = doc.getAdmins();
+
+        let roles = guild.roles.cache.filter(x => {
+            if(!staffRoles.find(y => x.id === y) && !adminRoles.find(y => x.id === y)) return x;
         })
-    })
 
-    interaction.editReply({ content: `${Loading} Guardando los permisos actuales de todos los roles` })
-    let originalPerms = [];
+        let admitedRoles = guild.roles.cache.filter(x => {
+            if(staffRoles.find(y => x.id == y) || adminRoles.find(y => x.id === y)) return x;
+        })
 
-    // para cada uno de los canales
-    guild.channels.cache.forEach(channel => {
+        roles.forEach(role => {
+            newChannelPerms.push({
+                id: role.id,
+                deny: revokedPermissions,
+                allow: [],
+                type: OverwriteType.Role
+            })
+        })
+
+        admitedRoles.forEach(role => {
+            newChannelPerms.push({
+                id: role.id,
+                deny: [],
+                allow: grantedPermissions,
+                type: OverwriteType.Role
+            })
+        })
+
+        await interaction.editReply({ content: `${Loading} Guardando los permisos actuales de todos los roles` })
+
+        const channel = interaction.channel;
+
         if (channel.type != ChannelType.GuildText && channel.type != ChannelType.GuildVoice) return;
 
-        let perms = [];
+        let oldPerms = [];
 
         // tomar cada permiso actual en cada uno de los canales del servidor y guardar la informacion
         channel.permissionOverwrites.cache.forEach(perm => {
-            perms.push({ id: perm.id, denied: perm.deny.toArray(), allowed: perm.allow.toArray() });
+            oldPerms.push({ id: perm.id, denied: perm.deny.toArray(), allowed: perm.allow.toArray(), type: perm.type });
         })
-        originalPerms.push({ channel: channel.id, perms })
+        let newLock = { channel_id: channel.id, perms: oldPerms };
 
         // denegar todos los permisos a cada role en el canal actual
-        channel.permissionOverwrites.set(data, `[BULK] Lockdown por ${interaction.user.tag}`)
-    })
+        await interaction.editReply({ content: `${Loading} Editando el canal actual` })
+        await channel.edit({ permissionOverwrites: newChannelPerms, reason: `[BULK] Lockdown por ${interaction.user.tag}` })
 
-    thisLock.originalPerms = originalPerms;
+        doc.data.locked_channels.push(newLock);
+        doc.save();
 
-    interaction.editReply({ content: `${Loading} Creando nuevo canal de información` })
-    let lockChannel = await guild.channels.create({
-        name: "lockdown",
-        type: ChannelType.GuildAnnouncement,
-        topic: `El servidor fue puesto en lockdown el ${time(new Date())} por un administrador.\nPor favor vuelve más tarde, ¡disculpa las molestias!`,
-        position: 0,
-        permissionOverwrites: [{
-            id: guild.id,
-            allow: [
-                PermissionsBitField.Flags.ViewChannel,
-                PermissionsBitField.Flags.AddReactions
-            ],
-            deny: [
-                PermissionsBitField.Flags.SendMessages,
-                PermissionsBitField.Flags.CreatePublicThreads,
-                PermissionsBitField.Flags.CreatePrivateThreads,
-            ]
-        }],
-        reason: `[BULK] Lockdown por ${interaction.user.tag}`
-    })
-
-    thisLock.newChannel = lockChannel.id
-
-    GlobalDatas.newLockedGuild(thisLock);
-
-    return interaction.editReply({ content: `${client.Emojis.Check} Listo` })
+        await new Log(interaction)
+            .setReason(LogReasons.Settings)
+            .setTarget(ChannelModules.ModerationLogs)
+            .send({ content: `- **${interaction.user.tag}** inició lockdown en ${interaction.channel}.` });
+    }
 
     async function unlock() {
         console.log("🟢 Unlocking!")
 
-        interaction.editReply({ content: `${Loading} Habilitando invitaciones` })
-        try { await guild.edit({ features: interaction.guild.features.filter(x => x != GuildFeature.InvitesDisabled) }); } catch (err) { }
+        /* interaction.editReply({ content: `${Loading} Habilitando invitaciones` })
+        try { await guild.edit({ features: interaction.guild.features.filter(x => x != GuildFeature.InvitesDisabled) }); } catch (err) { } */
 
-        await guild.channels.fetch();
-        interaction.editReply({ content: `${Loading} Regresando los permisos a los canales` })
-        
-        // para cada uno de los canales
-        guild.channels.cache.forEach(channel => {
-            if (channel.type != ChannelType.GuildText && channel.type != ChannelType.GuildVoice) return;
-            
-            // buscar en el globaldata.info los permisos originales que fueron guardados en el lockdown
-            let q = thisLock.originalPerms.find(x => x.channel === channel.id); // buscar los del canal actual
+        interaction.editReply({ content: `${Loading} Regresando los permisos al canal` })
 
-            if(!q) return; // si no encuentra, seguir (se eliminó el canal mientras estaba el lockdown)
+        const channel = interaction.channel;
 
-            // traducir lo que está en la base de datos para poder cambiarlo
-            let oldPermissionsQuery = q.perms;
-            let oldPermissions = []
-            oldPermissionsQuery.forEach(p => oldPermissions.push({ // para cada permiso que tiene el canal actual
-                id: p.id,
-                allow: p.allowed,
-                deny: p.denied
-            }))
+        if (channel.type != ChannelType.GuildText && channel.type != ChannelType.GuildVoice) return;
 
-            // actualizarlo con la informacion traducida a la original
-            channel.permissionOverwrites.set(oldPermissions, `[BULK] Se terminó el lockdown (${interaction.user.tag})`);
-        })
+        // buscar los permisos originales que fueron guardados en el lockdown
+        let q = locked.find(x => x.channel_id === channel.id); // buscar los del canal actual
 
-        let c = guild.channels.cache.get(thisLock.newChannel); // el canal que se creo despues de iniciar el lockdown
-        interaction.editReply({ content: `${Loading} Eliminando el canal ${c}` })
-        c.delete(`[BULK] Se terminó el lockdown (${interaction.user.tag})`)
+        if (!q) return await new Log(interaction)
+            .setReason(LogReasons.Error)
+            .setTarget(ChannelModules.StaffLogs)
+            .send({ content: `${client.Emojis.Error} **No se encontró información de lockdown para este canal en la base de datos**.` });
 
-        // eliminar el globaldata
-        await locked.find(x => x.info === thisLock).remove();
+        // traducir lo que está en la base de datos para poder cambiarlo
+        let oldPermissionsQuery = q.perms;
+        let oldPermissions = []
+        oldPermissionsQuery.forEach(p => oldPermissions.push({ // para cada permiso que tiene el canal actual
+            id: p.id,
+            allow: p.allowed,
+            deny: p.denied,
+            type: p.type
+        }))
+
+        // actualizarlo con la informacion traducida a la original
+        await channel.edit({ permissionOverwrites: oldPermissions, reason: `[BULK] Se terminó el lockdown (${interaction.user.tag})` })
+            .catch(err => {
+                console.log(err)
+                return discordError.send();
+            })
+
+        // eliminar el original perms
+        let lockedIndex = locked.findIndex(x => x.channel_id === channel.id);
+
+        doc.data.locked_channels.splice(lockedIndex);
+        doc.save();
+
+        await new Log(interaction)
+            .setReason(LogReasons.Settings)
+            .setTarget(ChannelModules.ModerationLogs)
+            .send({ content: `- **${interaction.user.tag}** detuvo el lockdown en ${interaction.channel}.` });
+
         return interaction.editReply({ content: `${client.Emojis.Check} Listo` })
     }
 }

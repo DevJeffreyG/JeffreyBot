@@ -35,6 +35,14 @@ command.execute = async (interaction, models, params, client) => {
 
     if (!key) return error.send();
 
+    // si llega al punto máximo de usos borrar
+    if (key.config.used >= key.config.maxuses) {
+        await key.remove();
+
+        interaction.deleteReply();
+        return doc.save();
+    }
+
     const user = await Users.getOrCreate({
         user_id: interaction.user.id,
         guild_id: interaction.guild.id
@@ -103,10 +111,7 @@ command.execute = async (interaction, models, params, client) => {
 
     await user.save();
 
-    // si llega al punto máximo de usos borrar
-    if (key.config.maxuses === key.config.used) await key.remove();
-
-    return interaction.editReply({ content: `✅ ${reply}` });
+    return interaction.editReply({ content: `${client.Emojis.Check} ${reply}` });
 }
 
 module.exports = command;

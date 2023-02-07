@@ -128,10 +128,9 @@ const Schema = new mongoose.Schema({
             reputation: { type: Number, required: true, default: 0, integer: true },
             currency: {
                 type: Number, required: true, default: function () {
-                    return this.economy.global.jeffros
+                    return this.economy.global.jeffros || 0
                 }, integer: true
-            },
-            jeffros: { type: Number, default: 0, integer: true }
+            }
         },
         dark: {
             currency: {
@@ -139,7 +138,6 @@ const Schema = new mongoose.Schema({
                     return this.economy.dark.darkjeffros || 0;
                 }, integer: true
             },
-            darkjeffros: { type: Number, default: 0, integer: true },
             accuracy: { type: Number, default: null },
             until: { type: Date, default: null }
         }
@@ -269,7 +267,7 @@ Schema.method("cooldown", async function (modulo, options = { force_cooldown: nu
     const LevelModif = modifiers?.filter(x => x.req_type === RequirementType.Level).sort((a, b) => b.requirement - a.requirement)
     const RoleModif = modifiers?.filter(x => x.req_type === RequirementType.Role).sort((a, b) => a.multiplier - b.multiplier)
 
-    if (RoleModif.length > 0) {
+    if (RoleModif?.length > 0) {
         const client = require("../../index");
 
         const guild = client.guilds.cache.get(this.guild_id);
@@ -329,7 +327,7 @@ Schema.method("delCooldown", function (modulo, options = { save: true }) {
 })
 
 Schema.method("getBoosts", function () {
-    return this.data.temp_roles;
+    return this.data.temp_roles.filter(x => x.special.type);
 })
 
 Schema.method("getBirthdayReminders", function () {

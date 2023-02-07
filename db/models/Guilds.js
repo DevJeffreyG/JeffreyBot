@@ -98,6 +98,19 @@ const GuildSchema = new Schema({
                 code: { type: String, required: true },
                 id: { type: Number, required: true, sparse: true }
             }
+        ],
+        locked_channels: [
+            {
+                channel_id: { type: String, required: true }, 
+                perms: [
+                    {
+                        id: { type: String, required: true },
+                        denied: [{ type: String }],
+                        allowed: [{ type: String }],
+                        type: { type: Number }
+                    }
+                ]
+            }
         ]
     },
     settings: {

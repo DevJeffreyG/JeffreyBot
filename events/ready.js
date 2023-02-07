@@ -23,7 +23,6 @@ module.exports = async (client) => {
     client.fetchedGuilds = [];
     client.blackjackCards = [];
     client.wonBlackjack = [];
-    client.lockedGuilds = await GlobalDatas.getLockedGuilds();
     client.totalMembers = 0;
     client.CustomEmojis = new Map();
     client.rawCommands = [];

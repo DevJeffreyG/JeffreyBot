@@ -121,6 +121,8 @@ module.exports = async (client, message) => {
       const temprole = user.data.temp_roles[i];
       const specialInfo = temprole.special;
 
+      if(specialInfo.disabled) continue;
+
       if (specialInfo.type === BoostTypes.Multiplier) {
         if (specialInfo.objetive === BoostObjetives.Currency) {
           currencyToAdd *= Number(specialInfo.value);

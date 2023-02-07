@@ -164,7 +164,7 @@ command.execute = async (interaction, models, params, client) => {
         case "add":
             let emote = emoji.value;
             let id = emote.match(/\d/g);
-            let newId = await FindNewId(await Guilds.find(), "data.autoroles", "id");
+            let newId = FindNewId(await Guilds.find(), "data.autoroles", "id");
 
             if (id && id.length > SnowflakeUtil.generate().length - 5) emote = id;
 
@@ -264,7 +264,7 @@ command.execute = async (interaction, models, params, client) => {
             autoRole.toggle_group = toggleGroupId;
             await doc.save();
 
-            return interaction.editReply({ content: `✅ AutoRole \`${autoRole.id}\` toggled para **${toggleGroup.group_name}**!\nPuedes cambiar el nombre del Toggle Group con \`/admin autoroles edit_toggle\``, embeds: [], components: [] });
+            return interaction.editReply({ content: `${client.Emojis.Check} AutoRole \`${autoRole.id}\` toggled para **${toggleGroup.group_name}**!\nPuedes cambiar el nombre del Toggle Group con \`/autoroles edit_toggle\``, embeds: [], components: [] });
         }
 
         case "edit_toggle": {
@@ -273,7 +273,7 @@ command.execute = async (interaction, models, params, client) => {
 
             toggleGroup.group_name = nuevo.value;
             await doc.save();
-            return interaction.editReply({ content: `✅ Toggle Group \`${toggleGroup.id}\` ➡️ **${toggleGroup.group_name}**!`, embeds: [], components: [] });
+            return interaction.editReply({ content: `${client.Emojis.Check} Toggle Group \`${toggleGroup.id}\` ➡️ **${toggleGroup.group_name}**!`, embeds: [], components: [] });
         }
 
         case "list": {

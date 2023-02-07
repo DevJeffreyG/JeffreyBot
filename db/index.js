@@ -1,6 +1,8 @@
 const fs = require('fs')
 const mongoose = require('mongoose')
 
+mongoose.set("strictQuery", true);
+
 var models = {}
 
 fs.readdirSync('./db/models/').forEach(f => {

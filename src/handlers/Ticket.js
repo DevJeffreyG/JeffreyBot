@@ -1,4 +1,4 @@
-const { ButtonStyle, ActionRowBuilder, SelectMenuBuilder, ButtonBuilder, PermissionsBitField, time, MessageComponentInteraction, StringSelectMenuBuilder } = require("discord.js");
+const { ButtonStyle, ActionRowBuilder, ButtonBuilder, PermissionsBitField, time, MessageComponentInteraction, StringSelectMenuBuilder } = require("discord.js");
 
 const Embed = require("../utils/Embed");
 const ErrorEmbed = require("../utils/ErrorEmbed");
@@ -47,11 +47,12 @@ class Ticket {
     }
 
     async handle() {
+        if(!this.docGuild) await this.#fetchDocGuild();
         this.user = await Users.getOrCreate({ guild_id: this.guild.id, user_id: this.userId });
 
         if(!this.docGuild.moduleIsActive("functions.tickets")) return new ErrorEmbed(this.interaction, {type: "moduleDisabled"}).send({ephemeral: true});
         if (!this.interaction.deferred) await this.interaction.deferReply({ ephemeral: true });
-
+        
         switch (this.customId) {
             case "createTicket":
                 this.#createTicket();
@@ -72,18 +73,17 @@ class Ticket {
     }
 
     async #createTicket() {
-        const interaction = this.interaction;
         const doc = this.docGuild;
 
         // baneado de crear tickets
-        if (await isBannedFrom(interaction, "TICKETS")) return new ErrorEmbed(interaction, { type: "moduleBanned" }).send();
+        if (await isBannedFrom(this.interaction, "TICKETS")) return new ErrorEmbed(this.interaction, { type: "moduleBanned" }).send();
 
         // tiene cooldown
-        if (activeCreatingTicket.has(interaction.user.id)) return interaction.editReply(`Alto ahí velocista, por favor espera ${ms((ticketCooldown) - (new Date().getTime() - activeCreatingTicket.get(interaction.user.id)))} antes de volver a darle al botón.`);
+        if (activeCreatingTicket.has(this.interaction.user.id)) return this.interaction.editReply(`Alto ahí velocista, por favor espera ${ms((ticketCooldown) - (new Date().getTime() - activeCreatingTicket.get(this.interaction.user.id)))} antes de volver a darle al botón.`);
 
-        activeCreatingTicket.set(interaction.user.id, new Date());
+        activeCreatingTicket.set(this.interaction.user.id, new Date());
         let ticketTimeout = setTimeout(() => {
-            activeCreatingTicket.delete(interaction.user.id)
+            activeCreatingTicket.delete(this.interaction.user.id)
         }, ticketCooldown)
 
         let selectMenuTopic = new StringSelectMenuBuilder()
@@ -97,27 +97,27 @@ class Ticket {
                 { label: "Hay un problema con Jeffrey Bot", value: "jeffreybot" }
             )
             .addOptions(
-                { label: "Cancelar", value: "cancel", emoji: "❌" }
+                { label: "Cancelar", value: "cancel", emoji: this.client.Emojis.Cross }
             );
 
         let selectingTopic = new ActionRowBuilder().addComponents([selectMenuTopic]);
 
-        await interaction.editReply({ content: "¿Qué necesitas?", components: [selectingTopic] });
+        await this.interaction.editReply({ content: "¿Qué necesitas?", components: [selectingTopic] });
 
-        let filter = (i) => i.isSelectMenu() && i.customId === "selectTopic" && i.user.id === interaction.user.id;
-        let topicCollector = await interaction.channel.awaitMessageComponent({ filter, time: ticketCooldown }).catch(() => { });
+        let filter = (i) => i.isStringSelectMenu() && i.customId === "selectTopic" && i.user.id === this.interaction.user.id;
+        let topicCollector = await this.interaction.channel.awaitMessageComponent({ filter, time: ticketCooldown }).catch(() => { });
 
-        if (!topicCollector) return interaction.editReply({ content: "Cancelado.", components: [] });
+        if (!topicCollector) return this.interaction.editReply({ content: "Cancelado.", components: [] });
         await topicCollector.deferUpdate();
 
         const topic = topicCollector.values[0];
-        if (topic === "cancel") return interaction.editReply({ content: "Cancelado.", components: [] });
+        if (topic === "cancel") return this.interaction.editReply({ content: "Cancelado.", components: [] });
         // reiniciar el cooldown
         this.#resetCooldown(ticketTimeout, activeCreatingTicket);
 
         let toConfirm = [];
         let giveDetails = "Explícale al STAFF tu situación"; // lo que se envía junto al mensaje de creacion del ticket
-        let newId = await FindNewId(await Guilds.find(), "data.tickets", "id");
+        let newId = FindNewId(await Guilds.find(), "data.tickets", "id");
 
         const channelName = `ticket${newId}-${topic}-${this.userId}`;
         const category = this.guild.channels.cache.get(this.docGuild.getCategory("tickets"));
@@ -153,16 +153,18 @@ class Ticket {
             general.defAuthor({ text: `Reporte a un usuario.`, title: true });
             giveDetails = `Explica la situación, ¿a quién estás reportando? ¿cuáles son las pruebas y razones del reporte?\nEres libre de mencionarlos si crees que es urgente y pasa mucho tiempo.`
         } else if (topic === "warn") {
-            filter = (i) => i.isSelectMenu() && i.customId === "selectWarn" && i.user.id === interaction.user.id; // cambiar el filtro de la customId
+            filter = (i) => i.isStringSelectMenu() && i.customId === "selectWarn" && i.user.id === this.interaction.user.id; // cambiar el filtro de la customId
 
             // mostrar los WARNS
-            let selectMenuWarn = new SelectMenuBuilder()
+            let selectMenuWarn = new StringSelectMenuBuilder()
                 .setCustomId("selectWarn")
                 .setPlaceholder("Selecciona el WARN por el que quieres crear un ticket");
 
             for (let i = 0; i < this.user.warns.length; i++) {
                 const warn = this.user.warns[i];
                 const regla = doc.data.rules.find(x => x.id === warn.rule_id);
+
+                if(!regla) continue;
 
                 const label = `ID: ${warn.id} — Por: ${regla.name}`
                 let desc = regla.desc ?? regla.expl;
@@ -172,14 +174,14 @@ class Ticket {
 
                 if (!warn.madeTicket) selectMenuWarn.addOptions({ label, value: warn.id.toString(), description: desc });
             }
-            selectMenuWarn.addOptions({ label: "Cancelar", value: "cancel", emoji: "❌" });
+            selectMenuWarn.addOptions({ label: "Cancelar", value: "cancel", emoji: this.client.Emojis.Cross });
 
             let selectingWarn = new ActionRowBuilder().addComponents([selectMenuWarn]);
 
             await topicCollector.editReply({ content: "¿Cuál es el warn por el cuál quieres hacer el ticket?", components: [selectingWarn] });
 
-            let warnCollector = await interaction.channel.awaitMessageComponent({ filter, time: ticketCooldown }).catch(() => { });
-            if (!warnCollector) return interaction.editReply({ content: "Cancelado.", components: [] });
+            let warnCollector = await this.interaction.channel.awaitMessageComponent({ filter, time: ticketCooldown }).catch(() => { });
+            if (!warnCollector) return this.interaction.editReply({ content: "Cancelado.", components: [] });
 
             await warnCollector.deferUpdate();
             if (warnCollector.values[0] == "cancel") return warnCollector.editReply({ content: "Cancelado.", components: [] });
@@ -197,10 +199,10 @@ class Ticket {
 
             selectedWarn.madeTicket = true;
         } else if (topic === "softwarn") {
-            filter = (i) => i.isSelectMenu() && i.customId === "selectSoftWarn" && i.user.id === interaction.user.id; // cambiar el filtro de la customId
+            filter = (i) => i.isStringSelectMenu() && i.customId === "selectSoftWarn" && i.user.id === this.interaction.user.id; // cambiar el filtro de la customId
 
             // mostrar los WARNS
-            let selectMenuSoftWarn = new SelectMenuBuilder()
+            let selectMenuSoftWarn = new StringSelectMenuBuilder()
                 .setCustomId("selectSoftWarn")
                 .setPlaceholder("Selecciona el SOFTWARN por el que quieres crear un ticket");
 
@@ -211,14 +213,14 @@ class Ticket {
 
                 if (!softwarn.madeTicket) selectMenuSoftWarn.addOptions({ label, value: softwarn.id.toString(), description: Reglas[softwarn.rule_id].description });
             }
-            selectMenuSoftWarn.addOptions({ label: "Cancelar", value: "cancel", emoji: "❌" });
+            selectMenuSoftWarn.addOptions({ label: "Cancelar", value: "cancel", emoji: this.client.Emojis.Cross });
 
             let selectingWarn = new ActionRowBuilder().addComponents([selectMenuSoftWarn]);
 
             await topicCollector.editReply({ content: "¿Cuál es el softwarn por el cuál quieres hacer el ticket?", components: [selectingWarn] });
 
-            let softwarnCollector = await interaction.channel.awaitMessageComponent({ filter, time: ticketCooldown }).catch(() => { });
-            if (!softwarnCollector) return interaction.editReply({ content: "Cancelado.", components: [] });
+            let softwarnCollector = await this.interaction.channel.awaitMessageComponent({ filter, time: ticketCooldown }).catch(() => { });
+            if (!softwarnCollector) return this.interaction.editReply({ content: "Cancelado.", components: [] });
 
             await softwarnCollector.deferUpdate();
 
@@ -246,13 +248,13 @@ class Ticket {
             giveDetails = "Explica ¿cuál es exactamente tu problema con Jeffrey Bot?";
         }
 
-        let confirmation = await Confirmation("Nuevo ticket", toConfirm, interaction);
+        let confirmation = await Confirmation("Nuevo ticket", toConfirm, this.interaction);
         if (!confirmation) return;
 
         // CREAR CANAL  
         let channel = await category.children.create({
             name: channelName,
-            topic: `**—** Ticket creado por **${interaction.user.tag}** (${time()})`,
+            topic: `**—** Ticket creado por **${this.interaction.user.tag}** (${time()})`,
             permissionOverwrites: this.permissions
         });
 
@@ -262,7 +264,7 @@ class Ticket {
         // GUARDARLO EN LA BASE DE DATOS
         this.docGuild.data.tickets.push({
             type: ticketType,
-            created_by: interaction.user.id,
+            created_by: this.interaction.user.id,
             channel_id: toPin.channel.id,
             message_id: toPin.id,
             creation_date: new Date(),
@@ -274,11 +276,11 @@ class Ticket {
 
         await channel.send(`${this.author}, este será el canal donde el STAFF te podrá ayudar.\n${giveDetails}`)
 
-        await new Log(interaction)
+        await new Log(this.interaction)
             .setTarget(ChannelModules.StaffLogs)
-            .send({ content: `- **${interaction.user.tag}** ha creado un nuevo ticket **(${ticketType})**: ${channel}` });
+            .send({ content: `- **${this.interaction.user.tag}** ha creado un nuevo ticket **(${ticketType})**: ${channel}` });
 
-        return interaction.editReply({ content: `✅ Se ha creado el ticket: ${channel}`, embeds: [] });
+        return this.interaction.editReply({ content: `${this.client.Emojis.Check} Se ha creado el ticket: ${channel}`, embeds: [] });
     }
 
     async #closeTicket() {
@@ -328,7 +330,7 @@ class Ticket {
             .setTarget(ChannelModules.StaffLogs)
             .send({ content: `- **${interaction.user.tag}** ha forzado el cierre del ticket: ${channel}` });
 
-        return interaction.editReply({ content: "✅ Se cerró el Ticket.", embeds: [], components: [] });
+        return interaction.editReply({ content: `${this.client.Emojis.Check} Se cerró el Ticket.`, embeds: [], components: [] });
     }
 
     async #resolveTicket() {
@@ -366,7 +368,7 @@ class Ticket {
 
         this.docGuild.save();
 
-        interaction.editReply({ content: "✅ El Ticket se marcó como resuelto.", embeds: [], components: [] });
+        interaction.editReply({ content: `${this.client.Emojis.Check} El Ticket se marcó como resuelto.`, embeds: [], components: [] });
 
         await new Log(interaction)
             .setTarget(ChannelModules.StaffLogs)
@@ -419,7 +421,7 @@ class Ticket {
 
         let originalCreator = this.guild.members.cache.find(x => x.id === ticket.created_by);
 
-        interaction.editReply({ content: "✅ Se reabrió el ticket.", embeds: [], components: [] });
+        interaction.editReply({ content: `${this.client.Emojis.Check} Se reabrió el ticket.`, embeds: [], components: [] });
 
         await new Log(interaction)
             .setTarget(ChannelModules.StaffLogs)
@@ -481,6 +483,10 @@ class Ticket {
         timeout = setTimeout(() => {
             map.delete(this.userId)
         }, ticketCooldown)
+    }
+
+    async #fetchDocGuild() {
+        this.docGuild = await Guilds.getById(this.interaction.guild.id);
     }
 
 

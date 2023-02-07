@@ -77,7 +77,7 @@ command.execute = async (interaction, models, params, client) => {
         case "role":
             // llamar la funcion para hacer globaldata
             await LimitedTime(usuario.member, role.role.id, duration);
-            return interaction.editReply({ content: `✅ Agregado el temp role a ${usuario.user.tag} por ${tiempo.value}` });
+            return interaction.editReply({ content: `${client.Emojis.Check} Agregado el temp role a ${usuario.user.tag} por ${tiempo.value}` });
 
         case "boost":
             let btype = tipo.value;
@@ -100,7 +100,7 @@ command.execute = async (interaction, models, params, client) => {
 
             // llamar la funcion para hacer un globaldata y dar el role con boost
             await LimitedTime(usuario.member, role.role.id, duration, btype, bobj, multi);
-            return interaction.editReply({ content: `✅ Agregado el boost a ${usuario.user.tag} por ${tiempo.value}`, embeds: [] });
+            return interaction.editReply({ content: `${client.Emojis.Check} Agregado el boost a ${usuario.user.tag} por ${tiempo.value}`, embeds: [] });
     }
 }
 

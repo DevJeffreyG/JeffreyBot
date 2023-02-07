@@ -26,7 +26,7 @@ command.execute = async (interaction, models, params, client) => {
         ]
     });
 
-    let value = user.economy.global.reputation * guild.settings.functions.currency_per_rep;
+    let value = user.economy.global.reputation * guild.settings.quantities.currency_per_rep;
 
     let toConfirm = [
         `Se añadirán **${Currency}${value.toLocaleString("es-CO")}** a tu cuenta.`,

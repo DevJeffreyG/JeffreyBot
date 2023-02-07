@@ -46,7 +46,7 @@ class DarkShop {
             content: dsNewsRole.toString() ?? null, embeds: [
                 new Embed()
                     .defAuthor({ text: "Domingo", icon: this.client.EmojisObject.Dark.url })
-                    .defDesc(`**—** Se termina una semana, y empieza la busqueda de beneficios.
+                    .defDesc(`**—** Se termina una semana, y empieza la búsqueda de beneficios.
 **—** La inflación hoy estará en **${this.baseValue}%**. Ya veremos **qué pasa en la semana...**`)
                     .defColor(Colores.negro)
             ]
@@ -542,7 +542,7 @@ class DarkShop {
     /**
      * El resultado de esto será lo que se multiplique con el precio Base de los DarkCurrency en el servidor
      * @param {Number} customInflation En porcentaje
-     * @returns {Number}
+     * @returns {Promise<Number>}
      */
     async getState(customInflation = null) {
         let inflation = customInflation ?? await this.getInflation();
@@ -558,12 +558,12 @@ class DarkShop {
 
     /**
      * Obtiene el precio base de los DarkCurrency configurado en este servidor
-     * @returns {Number}
+     * @returns {Promise<Number>}
      */
     async getBasePrice() {
         if (!this.guilddoc) await this.#getGuildDoc();
 
-        return this.guilddoc.settings.functions.baseprice_darkshop;
+        return this.guilddoc.settings.quantities.baseprice_darkshop;
     }
 
     /**

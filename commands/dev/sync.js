@@ -1,4 +1,4 @@
-const { Command, Categories, Confirmation, FindNewId, ItemActions, ItemObjetives, Item, BoostTypes, BoostObjetives, ItemTypes, ItemEffects, DarkShopWork } = require("../../src/utils")
+const { Command, Categories, Confirmation, FindNewId, ItemActions, ItemObjetives, BoostTypes, BoostObjetives, ItemTypes, ItemEffects, ManageDarkShops } = require("../../src/utils")
 
 const { PermissionsBitField } = require("discord.js");
 
@@ -28,6 +28,11 @@ command.addSubcommand({
     desc: "Sincroniza los AutoRoles viejos y re-agregar las reacciones en caso de que se necesite"
 })
 
+command.addSubcommand({
+    name: "legacy",
+    desc: "Reunión"
+})
+
 command.addOption({
     type: "role",
     name: "role",
@@ -36,10 +41,18 @@ command.addOption({
     sub: "mute"
 })
 
+command.addOption({
+    type: "role",
+    name: "role",
+    desc: "LegacyRole",
+    req: true,
+    sub: "legacy"
+})
+
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { subcommand } = params
-    const { AutoRoles, Guilds } = models;
+    const { AutoRoles, Guilds, Legacy } = models;
     const { Emojis } = client;
 
     switch (subcommand) {
@@ -62,7 +75,7 @@ command.execute = async (interaction, models, params, client) => {
                 console.log("🔄", q.name, "actualizado");
             })
 
-            return interaction.editReply({ content: `✅ ${role} Sincronizado.`, allowedMentions: { parse: [] } })
+            return interaction.editReply({ content: `${client.Emojis.Check} ${role} Sincronizado.`, allowedMentions: { parse: [] } })
         }
 
         case "autoroles": {
@@ -73,7 +86,7 @@ command.execute = async (interaction, models, params, client) => {
                 const doc = await Guilds.getOrCreate(arole.serverID);
                 const general = await Guilds.find();
 
-                const newId = await FindNewId(general, "data.autoroles", "id")
+                const newId = FindNewId(general, "data.autoroles", "id")
 
                 if (doc.data.autoroles.find(x =>
                     x.channel_id === arole.channelID &&
@@ -109,7 +122,7 @@ command.execute = async (interaction, models, params, client) => {
                 await fetched.react(emote);
             }
 
-            return interaction.editReply({ content: `✅ Sincronizados.` })
+            return interaction.editReply({ content: `${client.Emojis.Check} Sincronizados.` })
         }
 
         case "users": {
@@ -132,6 +145,56 @@ command.execute = async (interaction, models, params, client) => {
 
             command.execShops(confirmation, models, params, client);
             break;
+        }
+
+        case "legacy": {
+            // Variables
+            const guild = interaction.guild;
+            const legacyrole = params[subcommand].role.role;
+
+            let report = await interaction.editReply(`${Emojis.Loading} Reuniendo todos los miembros...`);
+
+            await guild.members.fetch();
+
+            const members = guild.members.cache;
+
+            await report.edit(`${Emojis.Loading} Actualizando la base de datos...`);
+
+            let q = await Legacy.findOne({
+                guild_id: guild.id
+            });
+
+            if (!q) q = await new Legacy({
+                guild_id: guild.id
+            }).save();
+
+            let userList = [];
+
+            members.forEach(member => {
+                if(member.user.bot) return;
+                if (legacyrole) member.roles.add(legacyrole);
+
+                let roles = [];
+
+                member.roles.cache.forEach(r => {
+                    roles.push(r.name);
+                })
+
+                userList.push({
+                    user_id: member.id,
+                    roles,
+                    member_since: member.joinedAt
+                })
+            });
+
+            q.user_list = userList;
+            q.lastupdate = new Date();
+
+            await report.edit(`${Emojis.Loading} Guardando base de datos...`);
+
+            await q.save();
+
+            return report.edit(`${Emojis.Check} Se ha actualizado la Legacy List.`);
         }
     }
 }
@@ -189,7 +252,7 @@ command.execUsers = async (interaction, models, params, client) => {
                     let toPush = [];
 
                     let usos = await Users.find();
-                    let newUseId = await FindNewId(usos, "data.inventory", "use_id");
+                    let newUseId = FindNewId(usos, "data.inventory", "use_id");
 
                     for (let i = 0; i < purchases.length; i++) {
                         let itemID = Number(purchases[i].itemID);
@@ -351,7 +414,7 @@ command.execUsers = async (interaction, models, params, client) => {
 
     });
 
-    return interaction.editReply({ content: `✅ Sincronizado.`, allowedMentions: { parse: [] } })
+    return interaction.editReply({ content: `${client.Emojis.Check} Sincronizado.`, allowedMentions: { parse: [] } })
 }
 
 command.execShops = async (interaction, models, params, client) => {
@@ -376,7 +439,7 @@ command.execShops = async (interaction, models, params, client) => {
         if (q) console.log("🔴 Se ha eliminado:", q);
     });
 
-    await DarkShopWork(client, interaction.guild.id);
+    await ManageDarkShops(client);
 
     const shop = await Shops.getOrCreate(interaction.guild.id);
     const darkshop = await DarkShops.getOrNull(interaction.guild.id);
@@ -476,7 +539,7 @@ command.execShops = async (interaction, models, params, client) => {
 
     console.log("✅ SINCRONIZADOS")
     console.log("========================")
-    return interaction.editReply({ content: `✅ Sincronizado.`, allowedMentions: { parse: [] } })
+    return interaction.editReply({ content: `${client.Emojis.Check} Sincronizado.`, allowedMentions: { parse: [] } })
 }
 
 module.exports = command;

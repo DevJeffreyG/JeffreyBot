@@ -1,11 +1,11 @@
 const { BaseInteraction, InteractionType, time, CommandInteraction, MessageComponentInteraction, ModalSubmitInteraction, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction } = require("discord.js");
 
 const { Ticket, Suggestion } = require("./src/handlers/");
-const { Bases } = require("./src/resources");
-const { ErrorEmbed, Embed, Categories, ValidateDarkShop } = require("./src/utils");
+const { Bases, Colores } = require("./src/resources");
+const { ErrorEmbed, Embed, Categories, ValidateDarkShop, Confirmation } = require("./src/utils");
 
 const models = require("mongoose").models;
-const { ToggledCommands, Users, Guilds } = models;
+const { ToggledCommands, Users, Guilds, GlobalDatas } = models;
 
 class Handlers {
     /**
@@ -29,8 +29,8 @@ class Handlers {
 
         switch (this.interaction.type) {
             case InteractionType.ApplicationCommand:
-                if(this.interaction.isChatInputCommand()) return this.slashHandler();
-                if(this.interaction.isContextMenuCommand()) return this.contextMenuHandler();
+                if (this.interaction.isChatInputCommand()) return this.slashHandler();
+                if (this.interaction.isContextMenuCommand()) return this.contextMenuHandler();
 
             case InteractionType.MessageComponent:
                 return this.componentHandler();
@@ -140,16 +140,16 @@ class Handlers {
 
         switch (this.interaction.customId) {
             case "deleteMessage":
-                interaction.message.delete();
+                this.interaction.message.delete();
                 break;
 
             case "bjHelp": {
                 let error = false;
                 try {
-                    await interaction.deferReply({ ephemeral: true });
+                    await this.interaction.deferReply({ ephemeral: true });
                 } catch (err) { error = true }
 
-                const Emojis = interaction.client.Emojis;
+                const Emojis = this.interaction.client.Emojis;
 
                 let e = new Embed()
                     .defAuthor({ text: "¿Cómo se juega Blackjack?", title: true })
@@ -169,49 +169,64 @@ class Handlers {
     **—** Si el valor de la mano de Jeffrey Bot es 21 o menor y mayor que la tuya, pierdes.`)
                     .defFooter({ text: "Gracias UnbelievaBoat#1046, te quiero mucho por favor no me denuncien." })
 
-                return error ? interaction.followUp({ embeds: [e], ephemeral: true }) : interaction.editReply({ embeds: [e] })
+                return error ? this.interaction.followUp({ embeds: [e], ephemeral: true }) : this.interaction.editReply({ embeds: [e] })
             }
             case "rememberBirthday": {
-                if (!interaction.deferred) await interaction.deferReply({ ephemeral: true }).catch(err => console.log(err));
+                if (!this.interaction.deferred) await this.interaction.deferReply({ ephemeral: true }).catch(err => console.log(err));
 
-                let msg = await interaction.message.fetch();
+                let msg = this.interaction.message;
                 let embed = msg.embeds[0];
 
                 const author_info = embed.data.author.name.split(" ");
                 const tag = author_info.find(x => x.includes("#"));
 
-                await interaction.guild.members.fetch()
+                await this.interaction.guild.members.fetch()
 
-                const member = interaction.guild.members.cache.find(x => x.user.tag === tag);
+                const member = this.interaction.guild.members.cache.find(x => x.user.tag === tag);
 
-                if (!user.hasReminderFor(member.id)) {
+                if (!this.user.hasReminderFor(member.id)) {
                     let confirmation = await Confirmation("Recordar", [
                         `¿Deseas que te envíe un mensaje privado el día del cumpleaños de ${member}?`,
                         `Si no tienes los mensajes privados habilitados para entonces, no se te podrá recordar.`,
                         `Para eliminar el recordatorio sólo tienes que darle de nuevo al botón con mismo usuario.`,
                         `Siempre se te recordará hasta que lo elimines.`,
                         `No sabrán que tienes este recordatorio.`
-                    ], interaction);
+                    ], this.interaction);
                     if (!confirmation) return;
 
-                    user.data.birthday_reminders.push({ id: member.id })
-                    await user.save();
+                    this.user.data.birthday_reminders.push({ id: member.id })
+                    await this.user.save();
                 } else {
                     let confirmation = await Confirmation("Dejar de recordar", [
                         `¿Ya no quieres que te recuerde del cumpleaños de ${member}?`,
                         `No sabrán que lo hiciste.`
-                    ], interaction);
+                    ], this.interaction);
                     if (!confirmation) return;
 
-                    user.data.birthday_reminders.splice(user.getBirthdayReminders().findIndex(x => x.id === member.id), 1)
-                    await user.save();
+                    this.user.data.birthday_reminders.splice(this.user.getBirthdayReminders().findIndex(x => x.id === member.id), 1)
+                    await this.user.save();
                 }
 
-                return interaction.editReply({ embeds: [new Embed({ type: "success" })] })
+                return this.interaction.editReply({ embeds: [new Embed({ type: "success" })] })
+            }
+            case "yesPoll": {
+                let poll = await GlobalDatas.getPoll(this.interaction.message.id);
+                if(!poll) return this.interaction.reply({ephemeral: true, content: "Esta encuesta ya terminó y no puedes seguir votando"})
+
+                poll.pollYes(this.interaction.user.id)
+                return this.interaction.reply({ephemeral: true, embeds: [new Embed({type: "success", data: { desc: "Se registró tu voto"}})]});
+            }
+
+            case "noPoll": {
+                let poll = await GlobalDatas.getPoll(this.interaction.message.id);
+                if(!poll) return this.interaction.reply({ephemeral: true, content: "Esta encuesta ya terminó y no puedes seguir votando"})
+
+                poll.pollNo(this.interaction.user.id)
+                return this.interaction.reply({ephemeral: true, embeds: [new Embed({type: "success", data: { desc: "Se registró tu voto"}})]});
             }
 
             default:
-                //console.log("No hay acciones para el botón con customId", this.interaction.customId);
+            //console.log("No hay acciones para el botón con customId", this.interaction.customId);
         }
     }
 
@@ -223,7 +238,7 @@ class Handlers {
         console.log(`-------- ${interaction.commandName} • por ${interaction.user.id} • en ${interaction.guild.name} (${interaction.guild.id}) ----------`)
 
         try {
-            if(!this.executedCommand) throw new Error(`Se quiso ejecutar un comando pero no se encontró mappeado. ${interaction.commandName}`)
+            if (!this.executedCommand) throw new Error(`Se quiso ejecutar un comando pero no se encontró mappeado. ${interaction.commandName}`)
             if (this.executedCommand.category === Categories.DarkShop) {
                 if (!this.doc.moduleIsActive("functions.darkshop")) return new ErrorEmbed(interaction, {
                     type: "moduleDisabled"
@@ -238,20 +253,30 @@ class Handlers {
             }
             try {
                 await this.executedCommand.execute(interaction, models, params, client);
-            } catch(err) {
+            } catch (err) {
                 console.log("🔴 No se pudo ejecutar el comando")
                 console.log(err)
+
+                try {
+                    this.#sendErrorEmbed(err);
+                } catch (err) { }
             }
         } catch (error) {
             console.error(error);
-            let help = new ErrorEmbed(interaction, { type: "badCommand", data: { commandName: this.interaction.commandName, error } });
             try {
-                await help.send()
-                //await interaction.reply({ content: null, embeds: [help], ephemeral: true });
-            } catch (err) {
-                console.log("⚠️ Un comando quiso ser usado y Discord no respondió:", this.client.lastInteraction)
-                console.log(err);
-            }
+                this.#sendErrorEmbed(error);
+            } catch (err) { }
+        }
+    }
+
+    async #sendErrorEmbed(error) {
+        let help = new ErrorEmbed(this.interaction, { type: "badCommand", data: { commandName: this.interaction.commandName, error } });
+        try {
+            return await help.send()
+            //await interaction.reply({ content: null, embeds: [help], ephemeral: true });
+        } catch (err) {
+            console.log("⚠️ Un comando quiso ser usado y Discord no respondió:", this.client.lastInteraction)
+            console.log(err);
         }
     }
 }

@@ -1,5 +1,6 @@
-const { Command, Categories, Embed,} = require("../../src/utils")
-const ms = require("ms")
+const { Command, Categories, Embed, ErrorEmbed, } = require("../../src/utils")
+const ms = require("ms");
+const { codeBlock } = require("discord.js");
 
 const command = new Command({
     name: "mute",
@@ -24,29 +25,41 @@ command.addOption({
 command.addOption({
     type: "string",
     name: "razon",
-    desc: "La razón del baneo",
+    desc: "La razón del mute",
     req: false
 });
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
 
-    const { usuario, tiempo, razon} = params;
+    const { usuario, tiempo, razon } = params;
 
     const user = usuario.member;
     const timeout = tiempo.value;
     const reason = razon?.value;
-    
-    await user.timeout(ms(timeout), reason)
 
-    return interaction.editReply({embeds: [
-        new Embed({
-            type: "success",
+    try {
+        await user.timeout(ms(timeout), reason)
+    } catch (err) {
+        return new ErrorEmbed(interaction, {
+            type: "discordLimitation",
             data: {
-                desc: "Se ha muteado al usuario"
+                action: "timeout",
+                help: `No pude expulsar temporalmente a este usuario:\n${codeBlock(err)}`
             }
-        })
-    ]})
+        }).send();
+    }
+
+    return interaction.editReply({
+        embeds: [
+            new Embed({
+                type: "success",
+                data: {
+                    desc: "Se ha muteado al usuario"
+                }
+            })
+        ]
+    })
 }
 
 module.exports = command;

@@ -327,7 +327,7 @@ const GenerateLog = async function (guild, options = {
 
   let docGuild = await Guilds.findOne({ guild_id: guild.id }) ?? null;
 
-  if (!docGuild) return console.error("🔴 No se ha configurado un logchannel en el servidor", guild.name);
+  if (!docGuild) return //console.error("🔴 No se ha configurado un logchannel en el servidor", guild.name);
 
   try {
     return await new Log()
@@ -367,7 +367,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
     let temp_roles = dbUser?.data.temp_roles ?? [];
     let birthday = dbUser?.data.birthday.locked;
     let birthday_reminders = dbUser?.getBirthdayReminders() ?? [];
-    let temproledeletions = await GlobalDatas.getTempRoleDeletions(member.id) ?? [];
+    let temproledeletions = await GlobalDatas.getTempRoleDeletions(member.id, guild.id) ?? [];
 
     for (let i = 0; i < temp_roles.length; i++) {
       const temprole = temp_roles[i];
@@ -385,7 +385,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
           dbUser.data.temp_roles.splice(i, 1);
           dbUser.save();
         } else { // es una suscripción
-          // REWORK NEEDED
+          // TODO: REWORK NEEDED
           return console.log("REWORK DE LAS SUBS")
           let price = Number(temprole.sub_info.price);
           let subName = temprole.sub_info.name;
@@ -457,8 +457,16 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
 
     // hay roles eliminados de manera temporal
     for (const deletion of temproledeletions) {
-      if (moment().isAfter(deletion.until)) {
-        member.roles.add(deletion.role_id)
+      if (moment().isAfter(deletion.info.until)) {
+        let temproleIndex = dbUser.data.temp_roles.findIndex(x => x.special.objetive === deletion.info.boost && x.role_id === deletion.info.role_id && x.special.disabled === true)
+        member.roles.add(deletion.info.role_id)
+
+        if (temproleIndex != -1) {
+          dbUser.data.temp_roles[temproleIndex].special.disabled = false;
+          dbUser.markModified("data")
+          dbUser.save();
+        }
+
         deletion.remove();
       }
     }
@@ -471,7 +479,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
         member.send({
           embeds: [
             new Embed()
-              .defAuthor({ text: `Hola`, /*icon: EmojisObject.Hola.url*/ })
+              .defAuthor({ text: `Hola`, icon: EmojisObject.Hola.url })
               .defDesc(`¡Vengo a recordarte que ${birthday_member} está de cumpleaños hoy!`)
               .defFooter({
                 text: `Recibiste este mensaje porque quisiste que te lo recordara, para dejar de recibir esto usa /stats usuario:@${birthday_member.user.username} y presiona el botón de recordatorios`,
@@ -500,6 +508,30 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
   }
 
   if (justTempRoles) return;
+
+  // buscar items deshabilitados temporalmente
+  Shops.getOrCreate(guild.id).then((shop) => {
+    for (const item of shop.items) {
+      if (moment().isAfter(item.disabled_until)) {
+        item.disabled = false;
+        item.disabled_until = null;
+      }
+    }
+
+    shop.save();
+  })
+
+  DarkShops.getOrNull(guild.id).then((shop) => {
+    if (!shop) return
+    for (const item of shop?.items) {
+      if (moment().isAfter(item.disabled_until)) {
+        item.disabled = false;
+        item.disabled_until = null;
+      }
+    }
+
+    shop.save();
+  })
 
   // buscar temp bans
   GlobalDatas.find({
@@ -551,7 +583,9 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
         let c = guild.channels.cache.find(x => x.id === poll.channel_id);
         let msg = await c.messages.fetch(poll.message_id);
 
-        const reactions = msg.reactions.cache;
+
+
+        /* const reactions = msg.reactions.cache;
 
         let reactionsInPoll = await new Promise(async (resolve, reject) => {
           let count = {
@@ -574,26 +608,32 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
             }
           }
           resolve(count);
-        })
+        }) */
 
-        let textEmbed = new Embed(msg.embeds[1]);
-        console.log(textEmbed)
+        const { yes, no } = poll;
+
+        let textEmbed = new Embed()
+          .defColor(Colores.verdeclaro)
+          .defAuthor({ text: "La encuesta del STAFF terminó:", title: true })
+          .defDesc(poll.poll + `\n\n**LOS USUARIOS DICEN:**`)
+          .defField(`${msg.client.Emojis.Check} SÍ:`, `${yes.length}`, true)
+          .defField(`${msg.client.Emojis.Cross} NO:`, `${no.length}`, true);
 
         await msg.reactions.removeAll();
 
-        // checkar que no hayan votos en ambos lados y si los hay, anularlos
-        let yes = reactionsInPoll.yes.filter(x => !reactionsInPoll.no.includes(x))
-        let no = reactionsInPoll.no.filter(x => !reactionsInPoll.yes.includes(x))
-
-        textEmbed.defAuthor({ text: "La encuesta del STAFF terminó", title: true })
-        textEmbed.defFooter({ text: "TERMINÓ" });
-        textEmbed.defDesc(textEmbed.description + `\n\n**RESULTADOS:**`)
-        textEmbed.defField(`✅ SÍ:`, `${yes.length}`, true)
-        textEmbed.defField(`❌ NO:`, `${no.length}`, true)
-
         if (no.length === 0 && yes.length === 0) textEmbed.setFooter({ text: "TERMINÓ...! y... no... ¿votó nadie...? :(" });
 
-        await msg.reply({ embeds: [textEmbed] });
+        let replyMsg = await msg.reply({ embeds: [textEmbed] });
+
+        const row = new ActionRowBuilder()
+          .setComponents(
+            new ButtonBuilder()
+              .setLabel("Resultados")
+              .setURL(replyMsg.url)
+              .setStyle(ButtonStyle.Link)
+          )
+
+        msg.edit({ components: [row] });
 
         polls[i].remove();
       }
@@ -706,16 +746,18 @@ const LimitedTime = async function (victimMember, roleID = 0, duration, specialT
 }
 
 /**
- * @deprecated Needs rework
+ * @deprecated TODO: Rework
+ * 
  * Adds a new subscription to the database and adds the role to the user.
  * @param {GuildMember} victimMember The Discord.JS GuildMember
  * @param {string} roleID The ID for the role given by the suscription
  * @param {Number} interval The interval of time in which the user will pay (ms)
  * @param {Number} jeffrosPerInterval The price the user will pay every interval
  * @param {string} subscriptionName The name of the suscription
- * @returns void
  */
 const Subscription = async function (victimMember, roleID, interval, jeffrosPerInterval, subscriptionName) {
+  return new Error("Subscriptions are not enabled in 2.0.0");
+
   let role = victimMember.guild.roles.cache.find(x => x.id === roleID);
   let user = await Users.getOrCreate({ user_id: victimMember.id, guild_id: victimMember.guild.id });
 
@@ -1011,15 +1053,15 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
         .setCustomId("confirmAction")
         .setLabel("Aceptar")
         .setStyle(ButtonStyle.Success)
-        .setEmoji(client.EmojisObject.Allow.id),
+        .setEmoji(client.EmojisObject.Check.id),
       new ButtonBuilder()
         .setCustomId("cancelAction")
         .setLabel("Cancelar")
         .setStyle(ButtonStyle.Danger)
-        .setEmoji(client.EmojisObject.Deny.id)
+        .setEmoji(client.EmojisObject.Cross.id)
     )
 
-  let msg = await interaction.editReply({ content: null, embeds, components: [row] }).catch(err => { }); // enviar mensaje de confirmación
+  let msg = await interaction.editReply({ content: null, embeds, components: [row] }).catch(err => { console.log(err) }); // enviar mensaje de confirmación
 
   if (!msg) return null;
 
@@ -1394,7 +1436,7 @@ const FindNewId = function (generalQuery, specificQuery, toCheck) {
  * @param {Array} [objetivesToCheck=["any"]] The objetive of boost to check.
  * - BoostObjetives
  * - any
- * @returns {Boolean} This Member already has a temp role with the objetive searched for.
+ * @returns {Promise<Boolean>} This Member already has a temp role with the objetive searched for.
  */
 const WillBenefit = async function (member, objetivesToCheck) {
   objetivesToCheck = objetivesToCheck ?? ["any"];
@@ -1600,18 +1642,18 @@ ${codeBlock(message.content)}`)
 
   try {
     new Log(message)
-    .setTarget(ChannelModules.ModerationLogs)
-    .setReason(LogReasons.AutoMod)
-    .send({
-      embeds: [
-        new Embed()
-          .defAuthor({ text: `Se eliminó un mensaje de ${message.author.tag}`, icon: member.displayAvatarURL({ dynamic: true }) })
-          .defDesc(`${codeBlock(message.content)}`)
-          .defColor(Colores.verde)
-          .defFooter({ text: "NO se aplicaron sanciones", timestamp: true })
-      ]
-    })
-  } catch(err) {
+      .setTarget(ChannelModules.ModerationLogs)
+      .setReason(LogReasons.AutoMod)
+      .send({
+        embeds: [
+          new Embed()
+            .defAuthor({ text: `Se eliminó un mensaje de ${message.author.tag}`, icon: member.displayAvatarURL({ dynamic: true }) })
+            .defDesc(`${codeBlock(message.content)}`)
+            .defColor(Colores.verde)
+            .defFooter({ text: "NO se aplicaron sanciones", timestamp: true })
+        ]
+      })
+  } catch (err) {
     console.log(err);
   }
 

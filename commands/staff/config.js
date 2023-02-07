@@ -22,7 +22,8 @@ command.data
     .addSubcommand(dashboard =>
         dashboard
             .setName("dashboard")
-            .setDescription("Obtén el link para la Dashboard de este servidor, y poder configurarlo"))
+            .setDescription("Obtén el link para la Dashboard de este servidor, y poder configurarlo")
+    )
     .addSubcommandGroup(reglas =>
         reglas
             .setName("reglas")
@@ -31,9 +32,9 @@ command.data
                 add
                     .setName("add")
                     .setDescription("Agrega una regla nueva")
-                    .addStringOption(resumen =>
-                        resumen
-                            .setName("resumen")
+                    .addStringOption(nombre =>
+                        nombre
+                            .setName("nombre")
                             .setDescription("Lo que engloba toda la regla")
                             .setMaxLength(50)
                             .setRequired(true)
@@ -218,7 +219,6 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { Guilds } = models;
     const { subcommand, subgroup } = params;
-    const { modulo, tipo, modificador, id, nivel, role } = params[subcommand];
 
     const docGuild = await Guilds.getOrCreate(interaction.guild.id);
 
@@ -230,6 +230,8 @@ command.execute = async (interaction, models, params, client) => {
             break
 
         case "add-multi":
+            const { modulo, modificador, tipo, nivel, role } = params[subcommand];
+
             if(
                 (!nivel && !role) ||
                 (Number(tipo.value) == RequirementType.Level && !nivel) ||
@@ -266,6 +268,7 @@ command.execute = async (interaction, models, params, client) => {
             break;
 
         case "del-modif":
+            const { id } = params[subcommand];
             // modulo, cooldown
             let index = docGuild.settings.modifiers.findIndex(x => x.id === id.value);
             docGuild.settings.modifiers.splice(index, 1);
@@ -308,15 +311,15 @@ command.execute = async (interaction, models, params, client) => {
 command.execReglas = async (interaction, models, doc, params) => {
     const { subcommand, reglas } = params;
     const { Guilds, Users } = models;
-    const { resumen, expl, id, pos, desc } = reglas;
+    const { nombre, expl, id, pos, desc } = reglas;
 
     const regla = doc.data.rules.find(x => x.id === id?.value) ?? null;
 
     switch (subcommand) {
         case "add": {
-            const newId = await FindNewId(await Guilds.find(), "data.rules", "id");
+            const newId = FindNewId(await Guilds.find(), "data.rules", "id");
             let confirm = [
-                `General: **${resumen.value}**.`,
+                `Nombre: **${nombre.value}**.`,
                 `Y como explicación sería:
 ${codeBlock("markdown", expl.value)}`,
                 `ID & Posición: \`${newId}\`.`
@@ -326,7 +329,7 @@ ${codeBlock("markdown", expl.value)}`,
             if (!confirmation) return;
 
             doc.data.rules.push({
-                name: resumen.value,
+                name: nombre.value,
                 expl: expl.value,
                 position: newId,
                 id: newId
@@ -334,14 +337,14 @@ ${codeBlock("markdown", expl.value)}`,
 
             await doc.save();
 
-            confirmation.editReply({
+            return confirmation.editReply({
                 embeds: [
                     new Embed({
                         type: "success",
                         data: {
                             desc: [
                                 "Se ha creado la nueva regla",
-                                `Resumen: **${resumen.value}**`,
+                                `Nombre: **${nombre.value}**`,
                                 `Explicación: **'** ${expl.value} **'**`,
                                 `ID: \`${newId}\``
                             ]
@@ -358,7 +361,7 @@ ${codeBlock("markdown", expl.value)}`,
 
             let confirm = [
                 `Regla con ID: \`${regla.id}\`.`,
-                `Resumen: **${regla.name}**.`,
+                `Nombre: **${regla.name}**.`,
                 `Explicación: **${regla.expl}**.`,
                 `Descripción simple: **${regla.desc ?? "Nada"}**.`,
                 `Posición: \`${regla.position}\`.`,
@@ -398,7 +401,7 @@ ${codeBlock("markdown", expl.value)}`,
                 if (deleted) totalUsers += 1
             }
 
-            confirmation.editReply({
+            return confirmation.editReply({
                 embeds: [
                     new Embed({
                         type: "success",
@@ -427,7 +430,7 @@ ${codeBlock("markdown", expl.value)}`,
             regla.position = pos.value;
             await doc.save();
 
-            interaction.editReply({
+            return interaction.editReply({
                 embeds: [
                     new Embed({
                         type: "success",
@@ -444,7 +447,7 @@ ${codeBlock("markdown", expl.value)}`,
             regla.desc = desc.value;
             await doc.save();
 
-            interaction.editReply({
+            return interaction.editReply({
                 embeds: [
                     new Embed({
                         type: "success",
@@ -462,7 +465,7 @@ ${codeBlock("markdown", expl.value)}`,
             regla.expl = expl.value;
             await doc.save();
 
-            interaction.editReply({
+            return interaction.editReply({
                 embeds: [
                     new Embed({
                         type: "success",
@@ -494,7 +497,7 @@ ${codeBlock("markdown", expl.value)}`,
 **▸ ID**: \`${id}\`.`)
             }
 
-            interaction.editReply({ embeds: [embed] })
+            return interaction.editReply({ embeds: [embed] })
         }
     }
 }
@@ -507,7 +510,7 @@ command.execCooldowns = async (interaction, models, doc, params) => {
     switch(subcommand) {
         case "base":
             // modulo, cooldown
-            doc.settings.cooldowns.bases[modulo] = cooldown;
+            doc.settings.cooldowns[modulo.value] = cooldown.value;
 
             interaction.editReply({embeds: [new Embed({
                 type: "success"

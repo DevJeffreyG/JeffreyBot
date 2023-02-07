@@ -77,7 +77,7 @@ command.execute = async (interaction, models, params, client) => {
 
     switch (subcommand) {
         case "add":
-            activities.info.list.push({ value: nueva.value, type: tipo?.value, id: await FindNewId([activities], "info.list", "id") })
+            activities.info.list.push({ value: nueva.value, type: tipo?.value, id: FindNewId([activities], "info.list", "id") })
             activities.markModified("info");
             break;
 

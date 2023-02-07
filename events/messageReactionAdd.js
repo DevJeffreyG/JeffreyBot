@@ -19,14 +19,14 @@ module.exports = async (client, reaction, user) => {
     }, (err, poll) => {
       if(err) throw err;
 
-      const reactionfilter = x => x.emoji.name === "✅" || x.emoji.name === "❌";
+      const reactionfilter = x => x.emoji.id === client.EmojisObject.Check.id || x.emoji.id === client.EmojisObject.Cross.id;
 
       if(!poll) return;
       if(!reactionfilter(reaction)) return reaction.users.remove(user);
 
-      const reactionToFind = reaction.emoji.name === "❌" ? "✅" : "❌";
+      const reactionToFind = reaction.emoji.id === client.EmojisObject.Cross.id ? client.EmojisObject.Check.id : client.EmojisObject.Cross.id;
 
-      const reactionToDelete = message.reactions.cache.find(x => x.emoji.name === reactionToFind);
+      const reactionToDelete = message.reactions.cache.find(x => x.emoji.id === reactionToFind);
 
       reactionToDelete.users.remove(user);
     })

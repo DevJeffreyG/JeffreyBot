@@ -57,7 +57,7 @@ command.execute = async (interaction, models, params, client) => {
         r = r ? false : true;
     }
 
-    console.log(`🟢 Se predijo que ${r ? "sí" : "no"} hay que venderlos con ${now}%. Es correcto: ${guessCorrectly}`)
+    console.log(`🟢 Se predijo que ${r ? "sí" : "no"} hay que venderlos con ${now}%. Garantizado es correcto: ${guessCorrectly}`)
     console.log("⚪ Lo mejor: %s\n⚪ Lo peor: %s", best, worst);
 
     let force_cooldown = moment().weekday(7).hour(0).minutes(0).seconds(0).millisecond(0).toDate();

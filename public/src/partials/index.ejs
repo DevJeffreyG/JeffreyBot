@@ -1,4 +1,5 @@
 <%- include("loading") %>
+<%- include("favicon") %>
     <%- include("nav") %>
 
         <script>
@@ -32,18 +33,11 @@
                 window.location.replace("/logout")
             })
 
-            const favicon = document.createElement("link")
-            favicon.id = "favicon";
-            favicon.rel = "icon";
-            favicon.href = "https://cdn.glitch.com/2c61ee42-4a04-4a21-b074-65934d0afc88%2FJBLogo.ico?1553650131111"
-            favicon.type = "image/x-icon"
-
             const viewport = document.createElement("meta")
             viewport.name = "viewport"
             viewport.content = "width=1024, initial-scale=1.0"
             //viewport.content = "width=device-width, initial-scale=1.0"
 
-            head.appendChild(favicon);
             head.appendChild(viewport);
 
             function revealWork() {

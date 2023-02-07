@@ -4,13 +4,13 @@ const ms = require("ms");
 
 const models = require('mongoose').models
 
-const { Users, Shops } = models;
+const { Users, Shops, Guilds } = models;
 const { FindNewId, Confirmation } = require("./functions")
 const InteractivePages = require("./InteractivePages");
 const { Colores, Emojis } = require("../resources");
 const ErrorEmbed = require("./ErrorEmbed");
 const Embed = require("./Embed");
-const { ItemObjetives, ItemTypes } = require("./Enums");
+const { ItemObjetives, ItemTypes, ItemActions } = require("./Enums");
 const HumanMs = require("./HumanMs");
 
 /**
@@ -65,6 +65,8 @@ class Shop {
     }
 
     async setup(options) {
+        if(!this.doc) await this.#fetchDoc();
+        
         this.user = await Users.getOrCreate({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id });
         if (this.isDarkShop)
             this.base.description = `**—** Bienvenid@ a la DarkShop. Para comprar items usa \`/dsbuy #\`.\n**—** Tienes **${this.Emojis.DarkCurrency}${this.user.economy.dark.currency.toLocaleString("es-CO")}**`;
@@ -88,6 +90,8 @@ class Shop {
     }
 
     async buy(itemId) {
+        if(!this.doc) await this.#fetchDoc();
+        
         const member = this.interaction.member;
 
         let user = await Users.getOrCreate({
@@ -171,7 +175,7 @@ class Shop {
         if (!user.canBuy(price, this.isDarkShop)) return noMoney.send();
         if (user.hasItem(itemId, this.isDarkShop)) return hasItem.send();
 
-        const newUseId = await FindNewId(await Users.find(), "data.inventory", "use_id");
+        const newUseId = FindNewId(await Users.find(), "data.inventory", "use_id");
 
         // revisar si debe agregarse interés
         if (item.interest > 0) {
@@ -226,7 +230,7 @@ class Shop {
     }
 
     async addItem(params) {
-        const newId = await FindNewId(this.shop.items, "", "id");
+        const newId = FindNewId(this.shop.items, "", "id");
 
         let success = new Embed({
             type: "success",
@@ -257,7 +261,7 @@ class Shop {
             type: "execError",
             data: {
                 command: this.interaction.commandName,
-                guide: `Si se usa un tipo role, **debe tener**: \`role\` y \`duracion\`.`
+                guide: `Si se usa un tipo role, **debe tener**: \`role\`.`
             }
         })
 
@@ -265,8 +269,15 @@ class Shop {
             type: "execError",
             data: {
                 command: this.interaction.commandName,
-                guide: `Si se usa un tipo boost, **debe tener**: \`role\`, \`boostobj\`, \`boosttype\`, \`boostval\` y \`duracion\`.
-Si es para la DarkShop, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
+                guide: `Si se usa un tipo boost agregando, **debe tener**: \`role\`, \`boostobj\`, \`boosttype\`, \`boostval\` y \`duracion\`.
+Si es eliminando, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
+            }
+        })
+      
+         let notValidCombination = new ErrorEmbed(this.interaction, {
+            type: "execError",
+            data: {
+                guide: `Si se usa un tipo item, **no puede eliminarse**.`
             }
         })
 
@@ -295,8 +306,8 @@ Si es para la DarkShop, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
         use.effect = this.isDarkShop ? params.efecto?.value : null;
 
         use.item_info.type = params.especial?.value ?? use.item_info.type;
-        use.item_info.duration = use.objetive == ItemObjetives.Role ||
-            use.objetive == ItemObjetives.Boost && params.duracion?.value ? ms(params.duracion?.value) : null
+        use.item_info.duration = (use.objetive == ItemObjetives.Role ||
+            use.objetive == ItemObjetives.Boost) && params.duracion?.value ? ms(params.duracion?.value) : null
 
         use.boost_info.type = ItemObjetives.Boost ? params.boosttype?.value : null
         use.boost_info.value = ItemObjetives.Boost ? params.boostval?.value : null
@@ -304,9 +315,9 @@ Si es para la DarkShop, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
 
         // boost verification
         if (use.objetive === ItemObjetives.Boost) {
-            if (!use.given && !this.isDarkShop) return boostError.send();
-            if (!use.boost_info.type && !this.isDarkShop) return boostError.send();
-            if (!use.boost_info.value && !this.isDarkShop) return boostError.send();
+            if (!use.given && use.action == ItemActions.Add) return boostError.send();
+            if (!use.boost_info.type && use.action == ItemActions.Add) return boostError.send();
+            if (!use.boost_info.value && use.action == ItemActions.Add) return boostError.send();
             if (!use.boost_info.objetive) return boostError.send();
             if (!use.item_info.duration) return boostError.send();
         }
@@ -314,7 +325,10 @@ Si es para la DarkShop, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
         // role verification
         if (use.objetive === ItemObjetives.Role) {
             if (!use.given) return roleError.send();
-            if (!use.item_info.duration) return roleError.send();
+        }
+
+        if(use.objetive === ItemObjetives.Item) {
+            if (use.action === ItemActions.Remove) return notValidCombination.send();
         }
 
         // ds verification
@@ -350,6 +364,7 @@ Si es para la DarkShop, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
     }
 
     async showAllItems() {
+        if(!this.doc) await this.#fetchDoc();
         this.user = await Users.getOrCreate({
             user_id: this.interaction.user.id,
             guild_id: this.interaction.guild.id
@@ -381,7 +396,7 @@ Si es para la DarkShop, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
     }
 
     async addDiscount(level, discount) {
-        const id = await FindNewId(await Shops.find(), "discounts", "id");
+        const id = FindNewId(await Shops.find(), "discounts", "id");
 
         let q = this.shop.discounts.find(x => x.level === level);
         if (q) {
@@ -417,6 +432,10 @@ Si es para la DarkShop, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
         return this.interaction.editReply({ embeds: [this.updated] });
     }
 
+    async #fetchDoc() {
+        this.doc = await Guilds.getOrCreate(this.interaction.guild.id);
+    }
+
     async #prepareInit(options = {}) {
         const interactive = new InteractivePages(this.base, this.items, 3, options)
         this.pages = interactive.pages;
@@ -440,7 +459,7 @@ Si es para la DarkShop, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
 
     async #editPrice(item, value, interest_value) {
         item.price = value;
-        item.interest = interest_value;
+        item.interest = interest_value ?? 0;
         return this.shop.save();
     }
 
@@ -478,7 +497,7 @@ Si es para la DarkShop, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
         }
     }
 
-    determinePrice(user, item, toString = false, handleDifference = true) {
+    determinePrice(user, item, toString = false) {
         const originalPrice = item.price;
 
         // nuevo precio a partir de interés
@@ -490,21 +509,23 @@ Si es para la DarkShop, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
         let precio = interestPrice;
 
         // para calmar a los mr inversiones
-        let media = 0;
-        this.shop.items.forEach(i => media += i.price);
-        media /= this.shop.items.length;
-
-        let multidiff = Math.floor((this.isDarkShop ? this.user.economy.dark.currency : this.user.economy.global.currency) / media);
-
-        //console.log("🏳️ El promedio de precios es %s", media)
-        //console.log("🏳️ dinero/media = %s", multidiff)
-
-        if (multidiff > 100 && handleDifference) {
-            let fix = multidiff * 15;
-            console.log("🟩 Fixing %s with %s", precio, fix)
-            precio += fix;
+        if(this.doc.settings.functions[this.isDarkShop ? "adjust_darkshop" : "adjust_shop" ]) {
+            let media = 0;
+            this.shop.items.forEach(i => media += i.price);
+            media /= this.shop.items.length;
+    
+            let multidiff = Math.floor((this.isDarkShop ? this.user.economy.dark.currency : this.user.economy.global.currency) / media);
+    
+            //console.log("🏳️ El promedio de precios es %s", media)
+            //console.log("🏳️ dinero/media = %s", multidiff)
+    
+            if (multidiff > 100) {
+                let fix = multidiff * 15;
+                console.log("🟩 Fixing %s with %s", precio, fix)
+                precio += fix;
+            }
         }
-
+        
         let work = this.#discountsWork(user, precio);
 
         if (toString) {

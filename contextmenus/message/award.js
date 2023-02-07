@@ -56,7 +56,7 @@ command.execute = async (interaction, models, params, client) => {
 
     const filter = (inter) => inter.user.id === interaction.user.id;
 
-    const component = await msg.awaitMessageComponent({ filter, time: ms("1m") })
+    const component = await msg.awaitMessageComponent({ filter, time: ms("1m") }).catch(err => console.log(err));
     component.deferUpdate();
 
     const doc = await Guilds.getOrCreate(interaction.guild.id);

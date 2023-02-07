@@ -33,9 +33,9 @@ command.execute = async (interaction, models, params, client) => {
 
     let msg = await interaction.editReply({embeds: [embed]});
 
-    await msg.react("✅");
+    await msg.react(client.Emojis.Check);
     await msg.react("🤷");
-    await msg.react("❌");
+    await msg.react(client.Emojis.Cross);
 }
 
 module.exports = command;
