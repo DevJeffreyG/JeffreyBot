@@ -285,7 +285,7 @@ class Ticket {
 
     async #closeTicket() {
         const interaction = this.interaction;
-        if (this.ticketCreator === interaction.user.id) return interaction.editReply({ content: "Sólo el STAFF puede forzar el cierre del ticket." });
+        if (!this.interaction.member.roles.cache.hasAny(...this.staffRoles)) return interaction.editReply({ content: "Sólo el STAFF puede forzar el cierre del ticket." });
 
         let confirmation = await Confirmation("Forzar cierre", [`El autor del ticket no lo ha marcado como resuelto`, `¿Estás segur@ de que quieres cerrar el ticket?`], interaction, true);
         if (!confirmation) return;
@@ -383,7 +383,7 @@ class Ticket {
 
     async #reopenTicket() {
         const interaction = this.interaction;
-        if (this.ticketCreator === interaction.user.id) return interaction.editReply({ content: "Sólo el STAFF puede reabrir el ticket." });
+        if (!this.interaction.member.roles.cache.hasAny(...this.staffRoles)) return interaction.editReply({ content: "Sólo el STAFF puede reabrir el ticket." });
 
         let confirmation = await Confirmation("Abrir ticket", [`¿Estás segur@ de que quieres volver a abrir el ticket?`, `Se mencionará al creador original del ticket`], interaction, true);
         if (!confirmation) return;
@@ -456,9 +456,9 @@ class Ticket {
     #setStaffPerms() {
         Guilds.getById(this.guild.id).then(g => {
             this.docGuild = g;
-            let staffs = g.getStaffs();
+            this.staffRoles = g.getStaffs();
 
-            staffs.forEach(id => {
+            this.staffRoles.forEach(id => {
                 this.permissions.push({
                     id,
                     allow: [PermissionsBitField.All]
@@ -488,8 +488,6 @@ class Ticket {
     async #fetchDocGuild() {
         this.docGuild = await Guilds.getById(this.interaction.guild.id);
     }
-
-
 }
 
 module.exports = Ticket;

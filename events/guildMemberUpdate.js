@@ -1,6 +1,6 @@
 const { time, codeBlock } = require("discord.js");
 const { Colores } = require("../src/resources");
-const { ChannelModules, LogReasons, GenerateLog, Log } = require("../src/utils");
+const { ChannelModules, LogReasons, GenerateLog, Log, ErrorEmbed } = require("../src/utils");
 
 const { Guilds } = require("mongoose").models;
 
@@ -25,7 +25,12 @@ module.exports = async (client, oldMember, newMember) => {
                         .setGuild(guild)
                         .setReason(LogReasons.Error)
                         .setTarget(ChannelModules.StaffLogs)
-                        .send({content: `${client.Emojis.Error} **No se pudo agregar el role (${roleId}) a ${newMember.user.tag}**:\n${codeBlock("json", err)}`});
+                        .send({
+                            embeds: [
+                                new ErrorEmbed()
+                                    .defDesc(`**No se pudo agregar el role (${roleId}) a ${newMember.user.tag}**:\n${codeBlock("json", err)}`)
+                            ]
+                        });
 
 
                     console.log(`🔴 No se pudo agregar el role (${roleId})`);
@@ -34,7 +39,7 @@ module.exports = async (client, oldMember, newMember) => {
         })
     }
 
-    if(!moment(newTimeout).isSame(moment(oldTimeout))){
+    if (!moment(newTimeout).isSame(moment(oldTimeout))) {
         if (moment(newTimeout).isAfter(moment())) { // timeout
             GenerateLog(guild, {
                 logType: ChannelModules.ModerationLogs,
@@ -47,7 +52,7 @@ module.exports = async (client, oldMember, newMember) => {
                 color: Colores.verdejeffrey
             });
         } else { // se quito el timeout
-    
+
             GenerateLog(guild, {
                 logType: ChannelModules.ModerationLogs,
                 logReason: LogReasons.TimeOut,
@@ -59,5 +64,5 @@ module.exports = async (client, oldMember, newMember) => {
             });
         }
     }
-    
+
 }

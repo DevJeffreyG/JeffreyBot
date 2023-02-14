@@ -13,6 +13,7 @@ const Schema = new mongoose.Schema({
             rule_id: { type: Number },
             madeTicket: { type: Boolean, default: false },
             proof: { type: String, default: null },
+            date: { type: Date, default: () => { return new Date() }},
             id: { type: Number, sparse: true }
         }
     ],
@@ -20,7 +21,8 @@ const Schema = new mongoose.Schema({
         {
             rule_id: { type: Number },
             madeTicket: { type: Boolean, default: false },
-            proof: { type: String, default: "na" },
+            proof: { type: String, default:  null },
+            date: { type: Date, default: () => { return new Date() }},
             id: { type: Number, sparse: true }
         }
     ],

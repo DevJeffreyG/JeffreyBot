@@ -17,15 +17,15 @@ module.exports = async (client, message) => {
   // Captcha.
   if (message.author.bot) return;
   if (message.channel.type === ChannelType.DM) {
-    if(!Bases.devIds.find(x => x === message.author.id)) return;
+    if (!Bases.devIds.find(x => x === message.author.id)) return;
 
-    if(message.content === "~commands") {
+    if (message.content === "~commands") {
       try {
         await UpdateCommands(client)
 
         message.reply("[DEV] Se actualizaron los comandos")
       } catch (err) {
-        message.reply({content: `[DEV] Hubo un error al actualizar los comandos.\n${codeBlock("json", err)}`});
+        message.reply({ content: `[DEV] Hubo un error al actualizar los comandos.\n${codeBlock("json", err)}` });
       }
     }
 
@@ -44,7 +44,7 @@ module.exports = async (client, message) => {
     guild_id: guild.id
   });
 
-  if(await DeleteLink(message)) return;
+  if (await DeleteLink(message)) return;
 
   // JEFFROS & EXP
   const chat_rewards = doc.channels.chat_rewards;
@@ -58,7 +58,7 @@ module.exports = async (client, message) => {
   let configured = channels.get(message.channel.id)
 
   if (configured) { // Está dentro de los canales configurados
-    const {  multiplier } = configured;
+    const { multiplier } = configured;
 
     const minMoney = doc.settings.quantities.min_curr;
     const maxMoney = doc.settings.quantities.max_curr;
@@ -73,15 +73,15 @@ module.exports = async (client, message) => {
     const multipliers = doc.getMultipliers(Multipliers.ChatRewards);
     let customMultiplier = 1;
 
-    for(const mult of multipliers) {
+    for (const mult of multipliers) {
       switchWork:
-      switch(mult.req_type){
+      switch (mult.req_type) {
         case RequirementType.Level:
-          if(user.economy.global.level >= mult.requirement) customMultiplier += mult.multiplier;
+          if (user.economy.global.level >= mult.requirement) customMultiplier += mult.multiplier;
           break switchWork;
-        
+
         case RequirementType.Role:
-          if(message.member.roles.cache.get(mult.requirement)) customMultiplier += mult.multiplier;
+          if (message.member.roles.cache.get(mult.requirement)) customMultiplier += mult.multiplier;
           break switchWork;
       }
     }
@@ -92,24 +92,24 @@ module.exports = async (client, message) => {
       var currencyToAdd = new Chance().integer({ min: minMoney, max: maxMoney }) * toMultiply
       var expToAdd = new Chance().integer({ min: minExp, max: maxExp }) * toMultiply
     } catch (err) {
-      if(err instanceof RangeError) {
+      if (err instanceof RangeError) {
         new Log(message)
-        .setReason(LogReasons.Error)
-        .setTarget(ChannelModules.StaffLogs)
-        .send({
-          embeds: [
-            new ErrorEmbed()
-            .defDesc(`No se ha podido agregar ni EXP ni ${client.getCustomEmojis(guild.id).Currency.name}. Mínimos y máximos deben ser menores y mayores los unos con los otros. \`/config dashboard\`.`)
-            .defFields([
-              { up: "Min Money", down: String(minMoney), inline: true },
-              { up: "Max Money", down: String(maxMoney), inline: true },
-              { up: "||                             ||", down: String(" ") },
-              { up: "Min EXP", down: String(minExp), inline: true },
-              { up: "Max EXP", down: String(maxExp), inline: true }
-            ])
-            .raw()
-          ]
-        });
+          .setReason(LogReasons.Error)
+          .setTarget(ChannelModules.StaffLogs)
+          .send({
+            embeds: [
+              new ErrorEmbed()
+                .defDesc(`No se ha podido agregar ni EXP ni ${client.getCustomEmojis(guild.id).Currency.name}. Mínimos y máximos deben ser menores y mayores los unos con los otros. \`/config dashboard\`.`)
+                .defFields([
+                  { up: "Min Money", down: String(minMoney), inline: true },
+                  { up: "Max Money", down: String(maxMoney), inline: true },
+                  { up: "||                             ||", down: String(" ") },
+                  { up: "Min EXP", down: String(minExp), inline: true },
+                  { up: "Max EXP", down: String(maxExp), inline: true }
+                ])
+                .raw()
+            ]
+          });
 
         currencyToAdd = 0;
         expToAdd = 0;
@@ -121,7 +121,7 @@ module.exports = async (client, message) => {
       const temprole = user.data.temp_roles[i];
       const specialInfo = temprole.special;
 
-      if(specialInfo.disabled) continue;
+      if (specialInfo.disabled) continue;
 
       if (specialInfo.type === BoostTypes.Multiplier) {
         if (specialInfo.objetive === BoostObjetives.Currency) {
@@ -132,7 +132,7 @@ module.exports = async (client, message) => {
           expToAdd *= Number(specialInfo.value);
         }
 
-        if(specialInfo.objetive === BoostObjetives.All) {
+        if (specialInfo.objetive === BoostObjetives.All) {
           currencyToAdd *= Number(specialInfo.value)
           expToAdd *= Number(specialInfo.value)
         }

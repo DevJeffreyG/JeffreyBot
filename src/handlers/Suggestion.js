@@ -125,11 +125,7 @@ ${codeBlock(suggestion.suggestion)}`)
                                 .send({
                                     embeds: [
                                         new ErrorEmbed()
-                                            .defDesc(`No se pudo agregar el role de agradecimiento a ${suggester} por sugerir:
-${codeBlock(suggestion.suggestion)}
-Error:
-${codeBlock("js", err)}`)
-                                            .raw()
+                                            .defDesc(`No se pudo agregar el role de agradecimiento a ${suggester} por sugerir:${codeBlock(suggestion.suggestion)}Error:${codeBlock("js", err)}`)
                                     ]
                                 })
                         });

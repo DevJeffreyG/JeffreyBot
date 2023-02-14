@@ -155,8 +155,8 @@ class Item {
             await Users.getOrCreate({ user_id: victim.id, guild_id: this.interaction.guild.id }) :
             null;
 
-        if(!this.isDarkShop) { // la victima será el usuario si NO es la darkshop
-            this.victim = await Users.getOrCreate({user_id: this.interaction.user.id, guild_id: this.interaction.guild.id});
+        if (!this.isDarkShop) { // la victima será el usuario si NO es la darkshop
+            this.victim = await Users.getOrCreate({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id });
             victim = this.interaction.member;
         }
 
@@ -178,7 +178,7 @@ class Item {
             if (this.isDarkShop) {
                 await this.interaction.editReply({ content: `${this.interaction.client.Emojis.Loading} Usando...` })
                 await this.interaction.followUp({ ephemeral: true, embeds: [this.success], components: [], content: null });
-                
+
                 this.interaction.deleteReply()
             } else {
                 this.interaction.editReply({ embeds: [this.success], components: [], content: null });
@@ -280,7 +280,12 @@ class Item {
             await new Log(this.interaction)
                 .setReason(LogReasons.Error)
                 .setTarget(ChannelModules.StaffLogs)
-                .send({content: `${this.interaction.client.Emojis.Error} \`ITEM ${this.itemId}\`: **No se encontró el role ${this.given} en el servidor.**`});
+                .send({
+                    embeds: [
+                        new ErrorEmbed()
+                            .defDesc(`${this.interaction.client.Emojis.Error} \`ITEM ${this.itemId}\`: **No se encontró el role ${this.given} en el servidor.**`)
+                    ]
+                });
 
             console.log("🔴 No se encontro el role %s en el servidor", this.given);
             this.notfound.send();
@@ -302,13 +307,18 @@ class Item {
         if (this.isSub) {
             try {
                 this.user = await Subscription(this.member, this.given, this.duration, this.price, this.name)
-            } catch(err) {
+            } catch (err) {
                 console.log(err);
 
                 await new Log(this.interaction)
                     .setReason(LogReasons.Error)
                     .setTarget(ChannelModules.StaffLogs)
-                    .send({content: `${this.interaction.client.Emojis.Error} \`ITEM ${this.itemId}\`: **Las suscripciones aún no están terminadas en la versión 2.0.0.**`});
+                    .send({
+                        embeds: [
+                            new ErrorEmbed()
+                                .defDesc(`${this.interaction.client.Emojis.Error} \`ITEM ${this.itemId}\`: **Las suscripciones aún no están terminadas en la versión 2.0.0.**`)
+                        ]
+                    });
 
                 this.notfound.send();
                 return false;
@@ -327,7 +337,12 @@ class Item {
             await new Log(this.interaction)
                 .setReason(LogReasons.Error)
                 .setTarget(ChannelModules.StaffLogs)
-                .send({content: `${this.interaction.client.Emojis.Error} \`ITEM ${this.itemId}\`: **No se encontró el role ${this.given} en el servidor.**`});
+                .send({
+                    embeds: [
+                        new ErrorEmbed()
+                            .defDesc(`${this.interaction.client.Emojis.Error} \`ITEM ${this.itemId}\`: **No se encontró el role ${this.given} en el servidor.**`)
+                    ]
+                });
 
             console.log("🔴 No se encontro el role %s en el servidor", this.given);
             this.notfound.send();
@@ -343,14 +358,14 @@ class Item {
         }
 
         // globaldata
-        if(this.duration){
+        if (this.duration) {
             let globaldata = await GlobalDatas.newTempRoleDeletion({ user_id: this.victimMember.id, guild_id: this.victimMember.guild.id, role_id: role.id, duration: this.duration });
             if (!globaldata) {
                 this.roleDeleted.send();
                 return false
             }
         }
-        
+
         this.victimMember.roles.remove(role);
 
         this.#removeItemFromInv()
@@ -449,7 +464,12 @@ class Item {
             await new Log(this.interaction)
                 .setReason(LogReasons.Error)
                 .setTarget(ChannelModules.StaffLogs)
-                .send({content: `${this.interaction.client.Emojis.Error} \`ITEM ${this.itemId}\`: **No se encontró el role ${this.given} en el servidor.**`});
+                .send({
+                    embeds: [
+                        new ErrorEmbed()
+                            .defDesc(`${this.interaction.client.Emojis.Error} \`ITEM ${this.itemId}\`: **No se encontró el role ${this.given} en el servidor.**`)
+                    ]
+                });
 
             console.log("🔴 No se encontro el role %s en el servidor", this.given);
             this.notfound.send();

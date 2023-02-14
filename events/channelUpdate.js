@@ -29,7 +29,7 @@ module.exports = async (client, oldchannel, channel) => {
 
     let fields = await GetChangesAndCreateFields(logs);
 
-    GenerateLog(channel.guild, {
+    /* GenerateLog(channel.guild, {
         header: `Se ha actualizado ${type}`,
         description: [
             `${channel}`,
@@ -37,5 +37,5 @@ module.exports = async (client, oldchannel, channel) => {
         ],
         color: Colores.verdejeffrey,
         fields
-    });
+    }); */
 }

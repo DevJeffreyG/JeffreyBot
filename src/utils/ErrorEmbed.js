@@ -75,7 +75,7 @@ class ErrorEmbed extends Embed {
             case "badCommand":
                 this.#errorName("Error en el codigo")
                 this.#errorAuthor(3);
-                this.#errorDesc("Jeffrey es tonto, y por eso hubo un error ejecutando este comando", `(\`/${data.commandName ?? this.interaction?.commandName}\`)`, ["Por favor, avísale de su grado de inservibilidad.", `**Y también dile que...**
+                this.#errorDesc("Hubo un error ejecutando este comando", `(\`/${data.commandName ?? this.interaction?.commandName}\`)`, ["Avisa a JeffreyG.", `**Y también dile que...**
 ${codeBlock("javascript", data.error)}`])
                 break;
 

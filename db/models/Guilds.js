@@ -49,6 +49,7 @@ const GuildSchema = new Schema({
             {
                 channel_id: { type: String, required: true },
                 message_id: { type: String, required: true },
+                guild_emote: { type: String, default: null },
                 emote: { type: String, required: true },
                 role_id: { type: String, required: true },
                 toggle_group: { type: Number, default: null },
@@ -152,7 +153,8 @@ const GuildSchema = new Schema({
         },
         autoroles: {
             channel_id: { type: String },
-            message_id: { type: String }
+            message_id: { type: String },
+            guild_id: { type: String },
         },
         quantities: {
             blackjack_bet: { type: Number, default: 1000 },
@@ -351,9 +353,16 @@ GuildSchema.method("getOrCreateToggleGroup", function (id) {
     return q;
 })
 
-GuildSchema.method("addAutoRole", async function (emote, role_id, id) {
+GuildSchema.method("addAutoRole", async function (emoteInfo, role_id, id) {
+    let emote = emoteInfo;
+    let guild_emote = null;
     let channel_id = this.settings.autoroles.channel_id;
     let message_id = this.settings.autoroles.message_id;
+
+    if(typeof emote != "string") {
+        emote = emoteInfo.id;
+        guild_emote = emoteInfo.guild.id;
+    }
 
     let creatable = true;
     this.data.autoroles.forEach(auto => {
@@ -373,6 +382,7 @@ GuildSchema.method("addAutoRole", async function (emote, role_id, id) {
     this.data.autoroles.push({
         channel_id,
         message_id,
+        guild_emote,
         emote,
         role_id,
         id

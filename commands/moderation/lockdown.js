@@ -73,11 +73,11 @@ command.execute = async (interaction, models, params, client) => {
         let adminRoles = doc.getAdmins();
 
         let roles = guild.roles.cache.filter(x => {
-            if(!staffRoles.find(y => x.id === y) && !adminRoles.find(y => x.id === y)) return x;
+            if (!staffRoles.find(y => x.id === y) && !adminRoles.find(y => x.id === y)) return x;
         })
 
         let admitedRoles = guild.roles.cache.filter(x => {
-            if(staffRoles.find(y => x.id == y) || adminRoles.find(y => x.id === y)) return x;
+            if (staffRoles.find(y => x.id == y) || adminRoles.find(y => x.id === y)) return x;
         })
 
         roles.forEach(role => {
@@ -143,7 +143,12 @@ command.execute = async (interaction, models, params, client) => {
         if (!q) return await new Log(interaction)
             .setReason(LogReasons.Error)
             .setTarget(ChannelModules.StaffLogs)
-            .send({ content: `${client.Emojis.Error} **No se encontró información de lockdown para este canal en la base de datos**.` });
+            .send({
+                embeds: [
+                    new ErrorEmbed()
+                        .defDesc(`**No se encontró información de lockdown para este canal en la base de datos**`)
+                ]
+            });
 
         // traducir lo que está en la base de datos para poder cambiarlo
         let oldPermissionsQuery = q.perms;

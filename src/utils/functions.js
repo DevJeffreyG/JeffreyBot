@@ -192,7 +192,7 @@ const GetChangesAndCreateFields = async function (logsFetched) {
   })
 
   //console.log("FIELDS ACTUALIZADOS", fields);
-  console.log("----------------")
+  //console.log("----------------")
 
 
   if (fields.length > 0) return fields;
@@ -379,7 +379,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
         if (!temprole.isSub) {
           // sacarle el role
           console.log("🟢 Ha pasado el tiempo del temprole %s", temprole);
-          member.roles.remove(role);
+          if(role) member.roles.remove(role);
 
           // eliminar el temprole de la db
           dbUser.data.temp_roles.splice(i, 1);
@@ -1099,7 +1099,7 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
 
         return resolve(interaction);
       } else {
-        i.editReply({ embeds: [cancelEmbed], components: [] });
+        await i.editReply({ embeds: [cancelEmbed], components: [] });
 
         return resolve(false);
       }

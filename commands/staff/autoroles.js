@@ -1,6 +1,6 @@
 const { Command, Categories, Embed, ErrorEmbed, FindNewId, Confirmation } = require("../../src/utils")
 const { Colores } = require("../../src/resources")
-const { SnowflakeUtil } = require("discord.js")
+const { SnowflakeUtil, hyperlink } = require("discord.js")
 
 const command = new Command({
     name: "autoroles",
@@ -85,6 +85,11 @@ command.data
                     .setName("mensaje")
                     .setDescription("La id del mensaje donde se creará el autorole")
             )
+            .addStringOption(o =>
+                o
+                    .setName("server")
+                    .setDescription("La id del servidor donde está el emoji")
+            )
     )
     .addSubcommand(list =>
         list
@@ -96,7 +101,7 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { Guilds } = models
     const { subcommand } = params;
-    const { canal, mensaje, emoji, role, autorole, toggle, nuevo } = params[subcommand];
+    const { canal, mensaje, server, emoji, role, autorole, toggle, nuevo } = params[subcommand];
 
     const doc = await Guilds.getOrCreate(interaction.guild.id);
     let config = await getConfig();
@@ -150,6 +155,12 @@ command.execute = async (interaction, models, params, client) => {
 
             doc.settings.autoroles.channel_id = ch.id;
             doc.settings.autoroles.message_id = msg.id;
+
+            if(server) {
+                let guild = await interaction.client.guilds.fetch(server.value).catch(err => {return null});
+                doc.settings.autoroles.guild_id = guild?.id;
+            }
+
             await doc.save();
 
             return interaction.editReply({
@@ -167,6 +178,15 @@ command.execute = async (interaction, models, params, client) => {
             let newId = FindNewId(await Guilds.find(), "data.autoroles", "id");
 
             if (id && id.length > SnowflakeUtil.generate().length - 5) emote = id;
+
+            if(config.guild) emote = await config.guild.emojis.fetch(emoji.value).catch(err => {return null});
+
+            if(!emote) return new ErrorEmbed(interaction, {
+                type: "badParams",
+                data: {
+                    help: `No encontré ese emote en el servidor '${config.guild ?? interaction.guild}'`
+                }
+            }).send();
 
             let q = await doc.addAutoRole(emote, role.value, newId);
 
@@ -291,10 +311,12 @@ command.execute = async (interaction, models, params, client) => {
                 let emote = !isNaN(autorole.emote) ? interaction.guild.emojis.cache.find(x => x.id === autorole.emote) : autorole.emote;
                 let grupo = autorole.toggle_group ? doc.getOrCreateToggleGroup(autorole.toggle_group) : "No tiene";
                 let aRole = interaction.guild.roles.cache.find(x => x.id === autorole.role_id);
-                let actualC = await interaction.guild.channels.cache.find(x => x.id === autorole.channel_id);
-                let actualFetch = await actualC.messages.fetch(autorole.message_id).catch(err => null);
+                let actualC = await interaction.guild.channels.fetch(autorole.channel_id);
+                let actualFetch = await actualC.messages.fetch(autorole.message_id);
 
-                await listEmbed.defField(`— ${emote}`, `▸ **ID**: ${autorole.id}.\n▸ **Toggle Grupo**: ${grupo != "No tiene" ? grupo.group_name + ", **" + grupo.id + "**" : grupo}.\n▸ ${aRole}.\n▸ [Mensaje](${actualFetch.url})`)
+                console.log(actualC, actualFetch)
+
+                listEmbed.defField(`— ${emote}`, `▸ **ID**: ${autorole.id}.\n▸ **Toggle Grupo**: ${grupo != "No tiene" ? grupo.group_name + ", **" + grupo.id + "**" : grupo}.\n▸ ${aRole}.\n▸ ${hyperlink("Mensaje", actualFetch?.url)}`)
             }
 
             return interaction.editReply({ embeds: [listEmbed] });
@@ -308,7 +330,9 @@ command.execute = async (interaction, models, params, client) => {
         await ch.messages.fetch();
         let msg = ch.messages.cache.find(x => x.id === doc.settings.autoroles.message_id);
 
-        return { ch, msg };
+        let guild = await interaction.client.guilds.fetch(doc.settings.autoroles.guild_id) ?? null;
+
+        return { ch, msg, guild };
     }
 }
 

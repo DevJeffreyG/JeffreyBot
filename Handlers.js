@@ -1,4 +1,4 @@
-const { BaseInteraction, InteractionType, time, CommandInteraction, MessageComponentInteraction, ModalSubmitInteraction, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction } = require("discord.js");
+const { BaseInteraction, InteractionType, time, CommandInteraction, MessageComponentInteraction, ModalSubmitInteraction, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction, DiscordAPIError } = require("discord.js");
 
 const { Ticket, Suggestion } = require("./src/handlers/");
 const { Bases, Colores } = require("./src/resources");
@@ -270,7 +270,14 @@ class Handlers {
     }
 
     async #sendErrorEmbed(error) {
-        let help = new ErrorEmbed(this.interaction, { type: "badCommand", data: { commandName: this.interaction.commandName, error } });
+        let help = error instanceof DiscordAPIError ? new ErrorEmbed(this.interaction, {
+            type: "discordLimitation",
+            data: {
+                action: `/${this.interaction.commandName}`,
+                help: error
+            }
+        }) : new ErrorEmbed(this.interaction, { type: "badCommand", data: { commandName: this.interaction.commandName, error } });
+
         try {
             return await help.send()
             //await interaction.reply({ content: null, embeds: [help], ephemeral: true });

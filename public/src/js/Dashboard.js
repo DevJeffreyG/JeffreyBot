@@ -362,9 +362,15 @@ class Dashboard {
         d.innerHTML = guildItem.name;
 
         if (guildItem.color) {
-            d.style.borderColor = `#${guildItem.color.toString(16)}`
-            d.style.backgroundColor = `#${guildItem.color.toString(16)}3d` // opactity 20%
-            d.style.color = `#${guildItem.color.toString(16)}`;
+            let hexColor = guildItem.color.toString(16);
+
+            if(hexColor.length < 6) hexColor = `${"0".repeat(6 - hexColor.length)}${hexColor}`;
+            
+            d.style.borderColor = `#${hexColor}`
+            d.style.backgroundColor = `#${hexColor}3d` // opactity 20%
+            d.style.color = `#${hexColor}`;
+
+            if(id === "1074797437308387358") console.log(hexColor)
         }
 
         return d;
