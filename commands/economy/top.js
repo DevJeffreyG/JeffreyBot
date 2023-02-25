@@ -28,11 +28,11 @@ command.addSubcommand({
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
-    const { Users, Shops } = models
+    const { Users } = models
     const { subcommand } = params
 
     // codigo
-    const top = new Top(await Users.find({guild_id: interaction.guild.id}), interaction, subcommand)
+    const top = new Top(await Users.find({ guild_id: interaction.guild.id }), interaction, subcommand)
     return top.init();
 }
 

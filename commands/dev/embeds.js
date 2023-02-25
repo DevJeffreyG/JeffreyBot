@@ -75,6 +75,28 @@ command.execute = async (interaction, models, params, client) => {
             break;
 
         case "información":
+            // bienvenida
+            let saludo = importImage("hola");
+            await interaction.channel.send({
+                embeds: [
+                    new Embed()
+                        .defImage(saludo.attachment)
+                        .defColor(Colores.verdejeffrey),
+                    new Embed()
+                        .defTitle("¡Bienvenid@ al servidor de JeffreyG!")
+                        .defDesc(`**—** Mira la información a continuación y las <#523159573935423509> antes de empezar tu viaje en el servidor.\n
+**Invitación al servidor:**
+> **https://discord.gg/fJvVgkN**
+
+**Y aquí están las redes de Jeffrey**:
+> ${Emojis.YouTube} • https://www.youtube.com/JeffreyG
+> ${Emojis.Twitch} • https://twitch.tv/JeffreyG_
+> ${Emojis.Twitter} • https://www.twitter.com/JeffreyG__
+> ${Emojis.Twitter} • https://www.twitter.com/fakeJeffreyG`)
+                        .defColor(Colores.verdeclaro)
+                ], files: [saludo.file]
+            });
+
             // niveles
             let niveles = importImage("niveles");
 
@@ -603,7 +625,7 @@ Ahora, creo que es bastante obvio que lo único que Jeffrey espera de ti es:
                     new Embed()
                         .defTitle(`¿Eso significa que...?`)
                         .defDesc(`
-**—** Inversiones. Debido a la inflación, puedes llegar incluso a comprar **${Emojis.DarkJeffros}100** por **${Emojis.Jeffros}19.048** que esos mismos ${Emojis.DarkJeffros}100 cuesten **${Emojis.Jeffros}60.000**.
+**—** Inversiones. Debido a la inflación, puedes llegar incluso a comprar **${Emojis.DarkJeffros}100** por **${Emojis.Jeffros}19.048** que esos mismos **${Emojis.DarkJeffros}100** cuesten **${Emojis.Jeffros}60.000**.
 **—** Mientras más dinero tengas, muchas cosas se volverán más costosas, ten cuidado.\n
 **—** Sólo puedes cambiar **DarkJeffros** los **domingos**, y si pasa toda la semana y no los cambiaste, el próximo domingo **los perderás todos**.
 **—** Puedes usar \`/predict\` para predecir una vez por semana si es buena idea revender tus **DarkJeffros** con la inflación de **ese momento**.

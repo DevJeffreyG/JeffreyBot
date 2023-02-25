@@ -203,7 +203,7 @@ command.execUsers = async (interaction, models, params, client) => {
 
     const { Users, TotalPurchases, DarkStats, Exps, Jeffros, Purchases, WonCodes, GlobalDatas } = models;
 
-    const guildToSearch = "447797737216278528"; //message.guild.id;
+    const guildToSearch = interaction.guild.id;
 
     await interaction.guild.members.fetch();
     let members = interaction.guild.members.cache;
@@ -421,7 +421,7 @@ command.execShops = async (interaction, models, params, client) => {
 
     const { Shops, DarkShops, Items, DarkItems, Uses, DarkUses } = models
 
-    const guildToSearch = "447797737216278528"; // interaction.guild.id
+    const guildToSearch = interaction.guild.id
 
     const normalItems = await Items.find({ serverID: guildToSearch });
     const darkItems = await DarkItems.find();

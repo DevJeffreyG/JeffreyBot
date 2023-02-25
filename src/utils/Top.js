@@ -64,13 +64,11 @@ class Top {
         this.base.title = `Top de ${Currency.name}`
         await this.interaction.guild.members.fetch();
 
-        for await(const user of this.users) {
+        for await (const user of this.users) {
             const member = this.interaction.guild.members.cache.get(user.user_id) ?? null;
 
             // agregar la cantidad de darkcurrency
             if (member && !member.user.bot) {
-                console.log(member.id === "437668432604037142");
-
                 let darkcurrency = user.economy.dark?.currency ?? 0;
                 let darkcurrencyValue = user.economy.dark?.currency ? await darkshop.equals(null, user.economy.dark.currency) : 0;
                 let finalQuantity = darkcurrencyValue != 0 ? darkcurrencyValue + user.economy.global.currency : user.economy.global.currency;
@@ -88,8 +86,6 @@ class Top {
 
         // ordenar de mayor a menor
         this.#sort();
-
-        console.log(this.#res)
 
         const userRank = this.#getRank(this.#res, this.interaction.user.id);
         this.base.footer = `Eres el ${userRank.textRank} en el top • Página {ACTUAL} de {TOTAL}`
@@ -190,7 +186,7 @@ class Top {
                     total: user.data.counts.warns
                 }
 
-                if(toPush.total != 0) this.#res.push(toPush)
+                if (toPush.total != 0) this.#res.push(toPush)
             }
         });
 
