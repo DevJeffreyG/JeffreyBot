@@ -227,6 +227,7 @@ const GuildSchema = new Schema({
         suggester_role: { type: String },
         notifications: {
             youtube: { type: String },
+            youtube_shorts: { type: String },
             twitter: { type: String },
             twitch: { type: String }
         }

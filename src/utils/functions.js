@@ -842,11 +842,10 @@ const handleUploads = async function (client) {
     const doc = await Guilds.getOrCreate(guild.id);
 
     const bellytChannel = client.channels.cache.get(doc.getChannel("notifier.youtube_notif"));
-    const belltwChannel = client.channels.cache.get(doc.getChannel("notifier.twitter_notif"));
     const belltvChannel = client.channels.cache.get(doc.getChannel("notifier.twitch_notif"));
 
     const ytRole = guild.roles.cache.get(doc.getRole("notifications.youtube"));
-    const twRole = guild.roles.cache.get(doc.getRole("notifications.twitter"));
+    const ytShortsRole = guild.roles.cache.get(doc.getRole("notifications.youtube_shorts"));
     const tvRole = guild.roles.cache.get(doc.getRole("notifications.twitch"));
 
     // revisar si existe el globaldata
@@ -878,10 +877,13 @@ const handleUploads = async function (client) {
     }
 
     let changed = false;
-    if (bellytChannel && belltwChannel && belltvChannel) setInterval(async () => {
+    if (bellytChannel && belltvChannel) setInterval(async () => {
       // youtube
       let comentarios = ["Ha llegado el momento, chécalo para evitar que Jeffrey entre en depresión", "Dale like o comenta algo si te gustó lo suficiente :D", "Espero que nos veamos en la próxima, ¡y que no sea en 3 meses!", "BROOOO Está rebueno míralo, a lo bien.", "No sabría decir si es lamentable, espero que no, ¿por qué no lo ves para comprobarlo y me dices qué tal?"]
+      let short_comentarios = ["Venga va, que es menos de un minuto chécalo."]
+      
       let comentario = GetRandomItem(comentarios);
+      let short_comentario = GetRandomItem(short_comentarios);
 
       google.youtube("v3").activities.list({
         key: process.env.YOUTUBE_TOKEN,
@@ -896,7 +898,7 @@ const handleUploads = async function (client) {
             const _item = response.data.items[i];
 
             if (_item.snippet.type === "upload") {
-              item = response.data.items[i];
+              item = _item;
               break itemLoop;
             } else {
               item = null;
@@ -910,41 +912,21 @@ const handleUploads = async function (client) {
 
           if (noti.info.lastVideo === itemId) return; // ya se envió la noti
           else {
-            changed = true;
-            noti.info.lastVideo = itemId;
+            fetch(`https://www.youtube.com/shorts/${videoId}`).then(res => {
+              let isShort = res.status === 200 ? true : false;
 
-            bellytChannel.send({ content: `**:fire::zap:️¡NUEVO VÍDEO, ${ytRole}!:zap:️:fire:**\n\n${comentario}\n\n➟ ${videoLink}` });
+              changed = true;
+              noti.info.lastVideo = itemId;
+
+              if(isShort) {
+                bellytChannel.send({ content: `**¡NUEVO SHORT, ${ytShortsRole}!**\n\n${short_comentario}\n\n➟ https://www.youtube.com/shorts/${videoId}` });
+              } else {
+                bellytChannel.send({ content: `**:fire::zap:️¡NUEVO VÍDEO, ${ytRole}!:zap:️:fire:**\n\n${comentario}\n\n➟ ${videoLink}` });
+              }
+            });
           }
         })
         .catch(err => console.log("YOUTUBE", err));
-
-      // twitter
-      const twitterClient = new Twitter({
-        consumer_key: process.env.TWITTER_API,
-        consumer_secret: process.env.TWITTER_SECRET,
-        access_token_key: process.env.TWITTER_ACCESS_TOKEN,
-        access_token_secret: process.env.TWITTER_ACCESS_SECRET
-      });
-
-      twitterClient.get('statuses/user_timeline', { screen_name: config.twitter_screenname, count: 5 }, async function (error, tweets, response) {
-        if (error) throw error;
-        const tweet = tweets[0]; // ultimo tweet de {config.twitter_screenname}
-
-        const tweetId = tweet.id_str;
-        const link = `https://twitter.com/${config.twitter_screenname}/status/${tweetId}`;
-
-        if (noti.info.lastTweet === tweetId) return;
-        else {
-          changed = true;
-          noti.info.lastTweet = tweetId;
-
-          let tweetDate = new Date(tweet.created_at)
-          let time = moment(tweetDate);
-
-          belltwChannel.send(`${twRole}, Jeffrey escribió un tweet **(${time})**\n\n\`[\` ${link} \`]\``);
-        }
-
-      });
 
       // twitch
       let saludos = ["Di hola", "Ven y saluda", "Llégate", "Esto no pasa todo el tiempo, ven"]

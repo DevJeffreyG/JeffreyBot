@@ -437,7 +437,8 @@ class Dashboard {
         this.#findAndSync("suggester_role", roles)
 
         this.#findAndSync("notifications-youtube", roles)
-        this.#findAndSync("notifications-twitter", roles)
+        this.#findAndSync("notifications-youtube_shorts", roles)
+        //this.#findAndSync("notifications-twitter", roles)
         this.#findAndSync("notifications-twitch", roles)
 
         this.#findAndSync("levels", roles)
@@ -459,7 +460,7 @@ class Dashboard {
         this.#findAndSync("logs-user_left", channels)
 
         this.#findAndSync("notifier-youtube_notif", channels)
-        this.#findAndSync("notifier-twitter_notif", channels)
+        //this.#findAndSync("notifier-twitter_notif", channels)
         this.#findAndSync("notifier-twitch_notif", channels)
 
 
@@ -942,11 +943,17 @@ class Dashboard {
             max: 1
         });
 
-        let tw = this.#createRoleSelector("rtw", {
+        let ytshorts = this.#createRoleSelector("ryt", {
+            title: "YouTube Shorts",
+            id: "notifications-youtube_shorts",
+            max: 1
+        });
+
+        /* let tw = this.#createRoleSelector("rtw", {
             title: "Twitter",
             id: "notifications-twitter",
             max: 1
-        });
+        }); */
 
         let tv = this.#createRoleSelector("rtv", {
             title: "Twitch",
@@ -954,7 +961,7 @@ class Dashboard {
             max: 1
         });
 
-        this.#appendChilds(noti, [yt, tw, tv]);
+        this.#appendChilds(noti, [yt, ytshorts, tv]);
 
         this.#appendChilds(contents, [staff, generals, noti])
     }
@@ -1064,11 +1071,11 @@ class Dashboard {
             max: 1
         });
 
-        let tw = this.#createChannelSelector("ctw", {
+        /* let tw = this.#createChannelSelector("ctw", {
             title: "Twitter",
             id: "notifier-twitter_notif",
             max: 1
-        });
+        }); */
 
         let tv = this.#createChannelSelector("ctv", {
             title: "Twitch",
@@ -1076,7 +1083,7 @@ class Dashboard {
             max: 1
         });
 
-        this.#appendChilds(noti, [yt, tw, tv]);
+        this.#appendChilds(noti, [yt, tv]);
 
         this.#appendChilds(contents, [general, ds, logs, noti])
     }
