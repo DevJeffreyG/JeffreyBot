@@ -68,8 +68,4 @@ module.exports = async (client, member) => {
       }
     })
   })
-
-
-
-  client.user.setActivity(`/ayuda - ${member.guild.memberCount} usuarios🔎`);
 }
