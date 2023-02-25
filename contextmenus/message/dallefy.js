@@ -17,8 +17,6 @@ command.execute = async (interaction, models, params, client) => {
         }
     }, client)
 
-    console.log("ping!")
-
     interaction.followUp({ephemeral: true, content: `La entrada tomada del mensaje fue \`${params.message.content}\`.`})
 }
 

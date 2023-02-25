@@ -66,7 +66,7 @@ command.execute = async (interaction, models, params, client) => {
         }
     })
 
-    if(author_user && author_user.economy.global.currency < quantity) return notEnough.send();
+    if(!author_user.canBuy(quantity)) return notEnough.send();
 
     if(author.id === member.id){
         let msg = await interaction.fetchReply();

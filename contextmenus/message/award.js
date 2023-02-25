@@ -97,6 +97,15 @@ command.execute = async (interaction, models, params, client) => {
     ], interaction)
     if (!confirmation) return;
 
+    if(!user.canBuy(price)) return new ErrorEmbed(interaction, {
+        type: "economyError",
+        data: {
+            action: "Dar Award",
+            error: "No tienes suficiente dinero",
+            money: user.economy.global.currency
+        }
+    }).send();
+
     const hallEmbed = new Embed();
     const star = hyperlink("★", message.url);
     var content = message.content;

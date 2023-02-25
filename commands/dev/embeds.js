@@ -651,7 +651,8 @@ Ahora, creo que es bastante obvio que lo único que Jeffrey espera de ti es:
                         .defDesc(`**—** Ahora que eres VIP, tienes algunos beneficios sobre los demás usuarios:\n
 <#552580632266407957> • Colores especiales, colores extras con los que puedes colorear tu nombre.\n
 <#595986219364646923> • Roles exclusivos de VIPs, ¡notificaciones de vídeos nuevos de Jeffrey antes de tiempo!\n
-🚀 • Obtienes 100% más de lo que obtendrías normalmente hablando en los canales.`)
+🚀 • Obtienes 100% más de lo que obtendrías normalmente hablando en los canales.\n
+https://discord.gg/${process.env.SUPPORT_INVITE} • Servidor **exclusivo** de pruebas de Jeffrey Bot.`)
                         .defColor(Colores.nocolor)
                 ], files: [info.file]
             })
