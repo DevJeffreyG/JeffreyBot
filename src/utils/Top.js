@@ -62,30 +62,34 @@ class Top {
         const darkshop = new DarkShop(this.interaction.guild);
 
         this.base.title = `Top de ${Currency.name}`
+        await this.interaction.guild.members.fetch();
 
-        this.users.forEach(async user => {
+        for await(const user of this.users) {
             const member = this.interaction.guild.members.cache.get(user.user_id) ?? null;
 
             // agregar la cantidad de darkcurrency
             if (member && !member.user.bot) {
+                console.log(member.id === "437668432604037142");
 
                 let darkcurrency = user.economy.dark?.currency ?? 0;
                 let darkcurrencyValue = user.economy.dark?.currency ? await darkshop.equals(null, user.economy.dark.currency) : 0;
-                let finalQuantity = darkcurrencyValue != 0 ? (darkcurrencyValue) + user.economy.global.currency : user.economy.global.currency;
+                let finalQuantity = darkcurrencyValue != 0 ? darkcurrencyValue + user.economy.global.currency : user.economy.global.currency;
 
                 let toPush = {
                     user_id: member.user.id,
                     currency: darkcurrency, // numero de dj que tiene
-                    currencyValue: darkcurrencyValue, // lo que valen esos dcurrency en dinero ahora mismo
-                    total: finalQuantity // la suma del valor de los dcurrency y el dinero
+                    currencyValue: Math.round(darkcurrencyValue), // lo que valen esos dcurrency en dinero ahora mismo
+                    total: Math.round(finalQuantity) // la suma del valor de los dcurrency y el dinero
                 }
 
                 this.#res.push(toPush)
             }
-        });
+        }
 
         // ordenar de mayor a menor
         this.#sort();
+
+        console.log(this.#res)
 
         const userRank = this.#getRank(this.#res, this.interaction.user.id);
         this.base.footer = `Eres el ${userRank.textRank} en el top • Página {ACTUAL} de {TOTAL}`

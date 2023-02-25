@@ -1,6 +1,6 @@
-const { Command, Categories, Embed, DaysUntilToday, ProgressBar } = require("../../src/utils")
-const { Config, Colores } = require("../../src/resources");
-const { time, inlineCode } = require("discord.js")
+const { Command, Categories, Embed, ProgressBar } = require("../../src/utils")
+const { Colores } = require("../../src/resources");
+const { inlineCode } = require("discord.js")
 
 const command = new Command({
     name: "darkstats",

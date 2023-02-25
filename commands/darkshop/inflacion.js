@@ -1,5 +1,4 @@
-const { Command, Categories, Embed, DarkShop } = require("../../src/utils")
-const { Colores } = require("../../src/resources")
+const { Command, Categories, DarkShop } = require("../../src/utils")
 
 const command = new Command({
     name: "inflacion",

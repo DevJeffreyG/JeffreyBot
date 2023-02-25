@@ -65,6 +65,7 @@ command.execute = async (interaction, models, params, client) => {
             if(!emoji) return interaction.editReply({content: `No encontré ese emoji, verifica que hayas escrito bien el nombre.`});
         
             let finalEmbed = new Embed()
+            .defImage(emoji.url)
             .defAuthor({text: `Emoji: ${name}`, icon: emoji.url})
             .defDesc(`**—** Nombre del Role: \`${name}\`.
 **—** ID: \`${emoji.id}\`.

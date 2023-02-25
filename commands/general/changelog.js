@@ -1,5 +1,4 @@
-const { Command, Categories, Embed, isOnMobible } = require("../../src/utils");
-const { Config, Colores } = require("../../src/resources");
+const { Command, Categories } = require("../../src/utils");
 
 const command = new Command({
     name: "changelog",

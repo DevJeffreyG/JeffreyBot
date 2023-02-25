@@ -11,18 +11,6 @@ module.exports = async (client, reaction, user) => {
     const message = reaction.message;
 
     const doc = await Guilds.getOrCreate(guild.id);
-    try {
-        await doc.workerRemoveAutoRole(message, reaction, user)
-    } catch (err) {
-        await new Log()
-            .setGuild(guild)
-            .setTarget(ChannelModules.StaffLogs)
-            .setReason(LogReasons.Error)
-            .send({
-                embeds: [
-                    new ErrorEmbed()
-                        .defDesc(`Hubo un error eliminando un ${hyperlink("AutoRole", message.url)} a ${user.tag}:${codeBlock("json", err)}`)
-                ]
-            });
-    }
+    
+    doc.workerRemoveAutoRole(message, reaction, user)
 }

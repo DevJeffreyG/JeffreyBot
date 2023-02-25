@@ -10,6 +10,9 @@ const { Colores } = require("../resources");
 const Users = require("../../db/models/Users");
 const Guilds = require("../../db/models/Guilds");
 
+/**
+ * TY UnbelievaBoat 💚 !
+ */
 class Blackjack {
 
     /**
@@ -240,6 +243,12 @@ class Blackjack {
         this.collector.on("collect", async (i) => {
             this.#getDeck(); // para rellenar, en caso de ser necesario
 
+            if(this.ended) try {
+                return i.update();
+            } catch(err) {
+                console.log(err)
+            }
+
             switch (i.customId) {
                 case "hit":
                     this.#hit();
@@ -318,7 +327,7 @@ class Blackjack {
         let hit = true;
         let saved = 0;
 
-        while (hit) {
+        while (hit && this.#checkValue() != 21) {
             // que juegue el dealer
             let obj = this.#checkValue(this.dealer_hand, true);
             let dealer_value = obj.value;

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const moment = require("moment")
+const moment = require("moment-timezone")
 
 const HumanMs = require("../../src/utils/HumanMs")
 const { time } = require('discord.js')
@@ -173,7 +173,7 @@ Schema.pre("save", function () {
     let realLvl = Math.floor(- (25 - Math.sqrt(5 * (105 + 2 * expNow))) / 10); // solved: 10 * (level ** 2) + 50 * level + 100
     const nextLevel = this.getNextLevelExp(realLvl)
 
-    if (nextLevel < expNow) realLvl++;
+    if (expNow >= nextLevel) realLvl++;
     if (realLvl < 0) realLvl = 0;
 
     // Cambio de nivel

@@ -1,6 +1,6 @@
 const { Command, Categories, ItemObjetives, BoostObjetives, WillBenefit, Embed, Cooldowns } = require("../../src/utils")
 const Chance = require("chance");
-const moment = require("moment");
+const moment = require("moment-timezone");
 const RouletteItem = require("../../src/utils/RouletteItem");
 
 const command = new Command({

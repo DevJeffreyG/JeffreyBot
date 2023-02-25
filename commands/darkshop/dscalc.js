@@ -1,5 +1,5 @@
 const { Command, Categories, Embed, DarkShop } = require("../../src/utils");
-const { Config, Colores } = require("../../src/resources")
+const { Colores } = require("../../src/resources")
 
 const command = new Command({
     name: "dscalc",

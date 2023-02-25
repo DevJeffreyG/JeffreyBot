@@ -1,4 +1,4 @@
-const { Command, Categories, ItemObjetives, Embed, ItemTypes, BoostTypes, BoostObjetives, ErrorEmbed, Confirmation } = require("../../src/utils")
+const { Command, Categories, ItemObjetives, Embed, BoostTypes, BoostObjetives, ErrorEmbed, Confirmation } = require("../../src/utils")
 
 const command = new Command({
     name: "add",

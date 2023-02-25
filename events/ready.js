@@ -1,14 +1,16 @@
 const { Bases } = require("../src/resources");
 
-const { GlobalDatas } = require("mongoose").models;
 const Chance = require("chance");
+
+const { Collection, Client, time } = require("discord.js");
 
 const Managers = require("../src/utils/Managers");
 const CustomEmojis = require("../src/utils/CustomEmojis");
 let functions = require("../src/utils/functions");
 const { ChannelModules } = require("../src/utils/Enums");
 const Log = require("../src/utils/Log");
-const { Collection, Client } = require("discord.js");
+const Embed = require("../src/utils/Embed");
+
 const Commands = require("../Commands");
 
 const CronJob = require("cron").CronJob;
@@ -17,6 +19,7 @@ const CronJob = require("cron").CronJob;
  * @param {Client} client 
  */
 module.exports = async (client) => {
+    client.isOnLockdown = false;
     client.invites = [];
     client.logsFetched = {};
     client.activeCollectors = [];
@@ -110,7 +113,17 @@ module.exports = async (client) => {
     new Log()
         .setChannel(client.logChannel)
         .setTarget(ChannelModules.ClientLogs)
-        .send({ content: `${client.Emojis.Check} Jeffrey Bot ONLINE.` });
+        .send({ embeds: [
+            new Embed({type: "success", data: {
+                title: "ONLINE",
+                desc: [
+                    "Jeffrey Bot está **ONLINE**",
+                    `**DEV MODE**: ${process.env.DEV === "TRUE" ? "`SÍ`" : "`NO`"}`,
+                    `**v${client.version}**`,
+                    `${time()}`
+                ]
+            }})
+        ] });
     console.log("=================== LOGS =======================")
 
     /* YOUTUBE NOTIFACTIONS */

@@ -1,4 +1,4 @@
-const { Config, Colores } = require("../../src/resources");
+const { Colores } = require("../../src/resources");
 const { Command, Categories, Embed } = require("../../src/utils");
 
 const command = new Command({

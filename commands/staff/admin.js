@@ -1,5 +1,5 @@
 const { Command, Categories, Embed, ErrorEmbed, FindNewId, Confirmation, Shop, ItemTypes, ItemObjetives, ItemActions, BoostTypes, BoostObjetives, ItemEffects } = require("../../src/utils")
-const { Colores, Emojis } = require("../../src/resources")
+const { Colores } = require("../../src/resources")
 
 const ms = require("ms");
 

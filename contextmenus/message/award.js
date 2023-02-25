@@ -1,6 +1,6 @@
-const { ApplicationCommandType, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageContextMenuCommandInteraction, Client, hyperlink } = require("discord.js");
+const { ApplicationCommandType, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageContextMenuCommandInteraction, Client, hyperlink, codeBlock } = require("discord.js");
 const { Colores } = require("../../src/resources");
-const { ContextMenu, Categories, Embed, Confirmation } = require("../../src/utils");
+const { ContextMenu, Categories, Embed, Confirmation, ErrorEmbed, Log, LogReasons, ChannelModules } = require("../../src/utils");
 
 const ms = require("ms")
 
@@ -56,14 +56,34 @@ command.execute = async (interaction, models, params, client) => {
 
     const filter = (inter) => inter.user.id === interaction.user.id;
 
-    const component = await msg.awaitMessageComponent({ filter, time: ms("1m") }).catch(err => console.log(err));
+    const component = await msg.awaitMessageComponent({ filter, time: ms("1m") }).catch(err => {});
+    if(!component) return;
+
     component.deferUpdate();
 
     const doc = await Guilds.getOrCreate(interaction.guild.id);
     const user = await Users.getOrCreate({ user_id: interaction.user.id, guild_id: interaction.guild.id });
     const message_user = await Users.getOrCreate({ user_id: message.author.id, guild_id: interaction.guild.id });
 
-    const hall = await interaction.guild.channels.fetch(doc.getChannel("general.halloffame"))
+    const hall = await interaction.guild.channels.fetch(doc.getChannel("general.halloffame")).catch(err => {});
+    if(!hall) {
+        new Log(interaction)
+        .setReason(LogReasons.Error)
+        .setTarget(ChannelModules.StaffLogs)
+        .send({
+            embeds: [
+                new ErrorEmbed()
+                    .defDesc(`**No se pudo encontrar el canal configurado para los Awards.**`)
+            ]
+        })
+
+        return new ErrorEmbed(interaction, {
+            type: "execError",
+            data: {
+                guide: "No hay un canal de premios configurado, avísale a los Administradores."
+            }
+        }).send()
+    }
 
     const tierNum = component.customId.slice(-1)
     const quantityProperty = `tier${tierNum}`;
@@ -123,7 +143,23 @@ command.execute = async (interaction, models, params, client) => {
     await user.save();
 
     // Enviar mensaje
-    hall.send({embeds: [hallEmbed]});
+    try {
+        await hall.send({embeds: [hallEmbed]});
+    } catch(err) {
+        new Log(interaction)
+            .setReason(LogReasons.Error)
+            .setTarget(ChannelModules.StaffLogs)
+            .send({embeds: [
+                new ErrorEmbed()
+                    .defDesc(`**No se pudo enviar el mensaje al canal de los Awards.**${codeBlock("json", err)}`)
+            ]});
+        interaction.followUp({ephemeral: true, embeds: [new ErrorEmbed(interaction, {
+            type: "execError",
+            data: {
+                guide: "No pude enviar el mensaje al canal, avísale a los Administradores. El autor del mensaje sí se recibió el premio."
+            }
+        })]})
+    }
 
     return interaction.editReply({
         embeds: [

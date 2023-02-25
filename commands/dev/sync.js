@@ -53,11 +53,10 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { subcommand } = params
     const { AutoRoles, Guilds, Legacy } = models;
-    const { Emojis } = client;
 
     switch (subcommand) {
         case "mute": {
-            await interaction.editReply({ content: `${Emojis.Loading} Sincronizando...` })
+            await interaction.editReply({ content: `${client.Emojis.Loading} Sincronizando...` })
             const role = params[subcommand].role.role;
 
             const perms = {
@@ -65,10 +64,10 @@ command.execute = async (interaction, models, params, client) => {
                 [PermissionsBitField.Flags.AddReactions]: false
             }
 
-            await interaction.editReply({ content: `${Emojis.Loading} Obteniendo todos los canales...` })
+            await interaction.editReply({ content: `${client.Emojis.Loading} Obteniendo todos los canales...` })
             let fetched = await interaction.guild.channels.fetch();
 
-            await interaction.editReply({ content: `${Emojis.Loading} Sincronizando (${fetched.size} canales)...` })
+            await interaction.editReply({ content: `${client.Emojis.Loading} Sincronizando (${fetched.size} canales)...` })
 
             fetched.each(async channel => {
                 let q = await channel.permissionOverwrites.edit(role, perms);
@@ -80,7 +79,7 @@ command.execute = async (interaction, models, params, client) => {
 
         case "autoroles": {
             let all = await AutoRoles.find();
-            await interaction.editReply({ content: `${Emojis.Loading} Sincronizando los autoroles...` });
+            await interaction.editReply({ content: `${client.Emojis.Loading} Sincronizando los autoroles...` });
 
             for await (const arole of all) {
                 const doc = await Guilds.getOrCreate(arole.serverID);
@@ -152,13 +151,13 @@ command.execute = async (interaction, models, params, client) => {
             const guild = interaction.guild;
             const legacyrole = params[subcommand].role.role;
 
-            let report = await interaction.editReply(`${Emojis.Loading} Reuniendo todos los miembros...`);
+            let report = await interaction.editReply(`${client.Emojis.Loading} Reuniendo todos los miembros...`);
 
             await guild.members.fetch();
 
             const members = guild.members.cache;
 
-            await report.edit(`${Emojis.Loading} Actualizando la base de datos...`);
+            await report.edit(`${client.Emojis.Loading} Actualizando la base de datos...`);
 
             let q = await Legacy.findOne({
                 guild_id: guild.id
@@ -190,17 +189,17 @@ command.execute = async (interaction, models, params, client) => {
             q.user_list = userList;
             q.lastupdate = new Date();
 
-            await report.edit(`${Emojis.Loading} Guardando base de datos...`);
+            await report.edit(`${client.Emojis.Loading} Guardando base de datos...`);
 
             await q.save();
 
-            return report.edit(`${Emojis.Check} Se ha actualizado la Legacy List.`);
+            return report.edit(`${client.Emojis.Check} Se ha actualizado la Legacy List.`);
         }
     }
 }
 
 command.execUsers = async (interaction, models, params, client) => {
-    await interaction.editReply({ embeds: [], content: `${Emojis.Loading} Sincronizando...` })
+    await interaction.editReply({ embeds: [], content: `${client.Emojis.Loading} Sincronizando...` })
 
     const { Users, TotalPurchases, DarkStats, Exps, Jeffros, Purchases, WonCodes, GlobalDatas } = models;
 
@@ -418,7 +417,7 @@ command.execUsers = async (interaction, models, params, client) => {
 }
 
 command.execShops = async (interaction, models, params, client) => {
-    await interaction.editReply({ embeds: [], content: `${Emojis.Loading} Sincronizando...` })
+    await interaction.editReply({ embeds: [], content: `${client.Emojis.Loading} Sincronizando...` })
 
     const { Shops, DarkShops, Items, DarkItems, Uses, DarkUses } = models
 
@@ -493,7 +492,7 @@ command.execShops = async (interaction, models, params, client) => {
         await shop.save();
     }
 
-    interaction.editReply({ content: `${Emojis.Loading} Tienda normal sincronizada.`, allowedMentions: { parse: [] } })
+    interaction.editReply({ content: `${client.Emojis.Loading} Tienda normal sincronizada.`, allowedMentions: { parse: [] } })
 
     console.log("================")
     console.log("🖤 DARKSHOP ITEMS")

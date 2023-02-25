@@ -49,7 +49,12 @@ module.exports = (app) => {
     app.get("/support/discord", (req, res) => { res.redirect(`https://discord.gg/${process.env.SUPPORT_INVITE}`) });
 
     /* ===== GENERAL LINKS ===== */
-    app.get("/app-health", (req, res) => { return res.sendStatus(200) });
+    app.get("/app-health", (req, res) => {
+        let client = require("../../../index");
+
+        if(client.readyAt) return res.sendStatus(200)
+        return res.sendStatus(503)
+    });
     app.get("/", (req, res) => { prepare("home", { req, res }) });
 
     app.get("/dashboard", (req, res) => { prepare("./dashboard", { req, res }) });
@@ -276,6 +281,7 @@ module.exports = (app) => {
 
             session.setGuilds(result)
         } catch (err) {
+            console.log(query)
             console.log(err)
         }
     }

@@ -1,5 +1,5 @@
 const { Command, Categories, Confirmation, Embed } = require("../../src/utils");
-const moment = require("moment");
+const moment = require("moment-timezone");
 
 const command = new Command({
     name: "cumple",

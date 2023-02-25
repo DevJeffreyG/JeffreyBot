@@ -16,7 +16,6 @@ command.addOption({
 })
 
 command.execute = async (interaction, models, params, client) => {
-    await interaction.deferReply();
 
     const { usuario } = params;
     const { Users, Guilds } = models;
@@ -25,9 +24,10 @@ command.execute = async (interaction, models, params, client) => {
     const victimMember = usuario.member;
 
     if (victimMember === interaction.member) {
-        interaction.followUp({ ephemeral: true, content: "No es un buena idea robarte a ti mismo." })
-        return interaction.deleteReply();
+        return interaction.reply({ ephemeral: true, content: "No es un buena idea robarte a ti mismo." })
     }
+
+    await interaction.deferReply();
 
     const doc = await Guilds.getOrCreate(interaction.guild.id);
     const user = await Users.getOrCreate({ user_id: interaction.user.id, guild_id: interaction.guild.id });

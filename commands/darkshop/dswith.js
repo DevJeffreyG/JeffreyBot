@@ -1,5 +1,4 @@
 const { Command, Categories, ErrorEmbed, Embed, DarkShop } = require("../../src/utils")
-const Chance = require("chance");
 
 const command = new Command({
     name: "dswith",

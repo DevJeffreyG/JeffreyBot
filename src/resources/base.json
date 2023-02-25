@@ -1,14 +1,4 @@
 {
-    "prefix": "/",
-    "tvPrefix": "!",
-    "mantenimiento": false,
-    "deleteLateMedia": false,
-    "disableEXPs": false,
-    "disableAwards": false,
-    "multiplier": 1,
-    "daysDarkJeffros": 30,
-    "daysNormalInflation": 14,
-    "daysEventInflation": 20,
     "Links": [
         "https", "http", "www.", "discord.gg", "discord.gift"
     ],

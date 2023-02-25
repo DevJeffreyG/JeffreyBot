@@ -1,5 +1,5 @@
 const { Command, Categories, Embed, VaultWork } = require("../../src/utils");
-const { Colores, Config } = require("../../src/resources");
+const { Colores } = require("../../src/resources");
 const chance = require("chance");
 
 const command = new Command({

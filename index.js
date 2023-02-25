@@ -31,13 +31,15 @@ const client = new Client({
 });
 
 const { connection } = require('./db');
+const pckVersion = require("./package.json").version;
 
 console.log("==============================================")
-console.log(`🦊 INICIALIZANDO ${require("./package.json").name} v${require("./package.json").version} ...`)
+console.log(`🦊 INICIALIZANDO ${require("./package.json").name} v${pckVersion} ...`)
 
 connection.then(async (c) => {
   console.log(`🟢 Conectado a la base de datos ${c.connection.name} 🖥️`)
 
+  client.version = pckVersion;
   //client.on("debug", console.log)
 
   new CronJob('0 0 31 11 *', async function () { // reiniciar precios de la darkshop anualmente
@@ -53,13 +55,17 @@ connection.then(async (c) => {
       })
     })
   }, null, true, 'America/Bogota');
-  await client.login(process.env.TOKEN)
+  try {
+    await client.login(process.env.TOKEN)
+    // events
+    Events(client);
 
-  // events
-  Events(client);
+    // error handling
+    Errors(client);
 
-  // error handling
-  Errors(client);
+  } catch (err) {
+    console.log(err)
+  }
 })
 
 module.exports = client;

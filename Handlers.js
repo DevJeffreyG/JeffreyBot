@@ -21,6 +21,12 @@ class Handlers {
     }
 
     async #startHandler() {
+        if(this.interaction.client.isOnLockdown && !this.#isDev()) try {
+            return await this.interaction.reply({ephemeral: true, embeds: [new ErrorEmbed().defDesc(`Jeffrey Bot está en bloqueado ahora mismo, lamentamos los inconvenientes.`)]});
+        } catch(err) {
+            console.log(err)
+        }
+
         this.doc = await Guilds.getOrCreate(this.interaction.guild.id);
         this.user = await Users.getOrCreate({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id })
 
@@ -166,8 +172,7 @@ class Handlers {
                     .defField("Resultados", `**—** Si las primeras cartas que te tocan dan como resultado **21** ganas automáticamente, sin excepciones.
     **—** Si te pasas de **21** pierdes, sin excepciones.
     **—** Si el valor de la mano de Jeffrey Bot es la misma que la tuya se termina el juego como empate y no pierdes nada de lo apostado.
-    **—** Si el valor de la mano de Jeffrey Bot es 21 o menor y mayor que la tuya, pierdes.`)
-                    .defFooter({ text: "Gracias UnbelievaBoat#1046, te quiero mucho por favor no me denuncien." })
+    **—** Si el valor de la mano de Jeffrey Bot es 21 o menor y mayor que la tuya, pierdes.`);
 
                 return error ? this.interaction.followUp({ embeds: [e], ephemeral: true }) : this.interaction.editReply({ embeds: [e] })
             }
@@ -249,7 +254,7 @@ class Handlers {
             }
 
             if (this.executedCommand.category === Categories.Developer) {
-                if (!Bases.devIds.find(x => x === interaction.user.id)) return interaction.reply({ ephemeral: true, content: "No puedes usar este comando porque no eres desarrollador de Jeffrey Bot" })
+                if (!this.#isDev()) return interaction.reply({ ephemeral: true, content: "No puedes usar este comando porque no eres desarrollador de Jeffrey Bot" })
             }
             try {
                 await this.executedCommand.execute(interaction, models, params, client);
@@ -285,6 +290,10 @@ class Handlers {
             console.log("⚠️ Un comando quiso ser usado y Discord no respondió:", this.client.lastInteraction)
             console.log(err);
         }
+    }
+
+    #isDev() {
+        return Bases.devIds.find(x => x === this.interaction.user.id);
     }
 }
 

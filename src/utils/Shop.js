@@ -1,5 +1,5 @@
 const Discord = require("discord.js");
-const moment = require("moment");
+const moment = require("moment-timezone");
 const ms = require("ms");
 
 const models = require('mongoose').models
@@ -12,6 +12,7 @@ const ErrorEmbed = require("./ErrorEmbed");
 const Embed = require("./Embed");
 const { ItemObjetives, ItemTypes, ItemActions } = require("./Enums");
 const HumanMs = require("./HumanMs");
+const DarkShop = require("./DarkShop");
 
 /**
  * Taken from [tutmonda](https://github.com/Jleguim/tutmonda-project) 💜
@@ -65,9 +66,10 @@ class Shop {
     }
 
     async setup(options) {
+        this.user = await Users.getOrCreate({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id });
+        
         if(!this.doc) await this.#fetchDoc();
         
-        this.user = await Users.getOrCreate({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id });
         if (this.isDarkShop)
             this.base.description = `**—** Bienvenid@ a la DarkShop. Para comprar items usa \`/dsbuy #\`.\n**—** Tienes **${this.Emojis.DarkCurrency}${this.user.economy.dark.currency.toLocaleString("es-CO")}**`;
         else
@@ -434,6 +436,11 @@ Si es eliminando, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
 
     async #fetchDoc() {
         this.doc = await Guilds.getOrCreate(this.interaction.guild.id);
+
+        if(this.isDarkShop) {
+            this.darkshop = new DarkShop(this.interaction.guild);
+            this.darkshopEquivalency = await this.darkshop.equals(null, this.user.economy.dark.currency)
+        }
     }
 
     async #prepareInit(options = {}) {
@@ -513,14 +520,16 @@ Si es eliminando, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
             let media = 0;
             this.shop.items.forEach(i => media += i.price);
             media /= this.shop.items.length;
-    
-            let multidiff = Math.floor((this.isDarkShop ? this.user.economy.dark.currency : this.user.economy.global.currency) / media);
+
+            console.log(Math.round(this.darkshopEquivalency) + this.user.economy.global.currency)
+
+            let multidiff = Math.floor((this.isDarkShop ? Math.round(this.darkshopEquivalency) + this.user.economy.global.currency : this.user.economy.global.currency) / media);
     
             //console.log("🏳️ El promedio de precios es %s", media)
             //console.log("🏳️ dinero/media = %s", multidiff)
     
             if (multidiff > 100) {
-                let fix = multidiff * 15;
+                let fix = this.isDarkShop ? multidiff / 20 : multidiff * 15;
                 console.log("🟩 Fixing %s with %s", precio, fix)
                 precio += fix;
             }

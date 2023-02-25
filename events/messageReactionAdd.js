@@ -13,20 +13,8 @@ module.exports = async (client, reaction, user) => {
 
   // AUTOROLES
   const doc = await Guilds.getOrCreate(guild.id);
-  try {
-    await doc.workerAddAutoRole(message, reaction, user)
-  } catch (err) {
-    await new Log()
-      .setGuild(guild)
-      .setTarget(ChannelModules.StaffLogs)
-      .setReason(LogReasons.Error)
-      .send({
-        embeds: [
-          new ErrorEmbed()
-            .defDesc(`Hubo un error agregando un ${hyperlink("AutoRole", message.url)} a ${user.tag}:${codeBlock("json", err)}`)
-        ]
-      });
-  }
+
+  doc.workerAddAutoRole(message, reaction, user);
 
   // ENCUESTAS
   GlobalDatas.findOne({

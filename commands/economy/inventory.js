@@ -1,6 +1,6 @@
 const { time } = require("discord.js")
 const { Command, Categories, ErrorEmbed, Embed } = require("../../src/utils")
-const { Config, Colores } = require("../../src/resources");
+const { Colores } = require("../../src/resources");
 
 const command = new Command({
     name: "inventory",

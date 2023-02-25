@@ -142,7 +142,7 @@ command.data
             .addSubcommand(modify =>
                 modify
                     .setName("modificar")
-                    .setDescription("Cambia el cooldown de acuerdo al nivel de un usuario [NO se acumulan]")
+                    .setDescription("Cambia el cooldown de acuerdo a un requerimiento [NO se acumulan]")
                     .addStringOption(modulo => modulo
                         .setName("modulo")
                         .setDescription("El módulo a modificar")

@@ -351,7 +351,18 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
   const { Emojis, EmojisObject } = guild.client;
   const doc = await Guilds.getOrCreate(guild.id);
 
-  const bdRole = guild.roles.cache.get(doc.getRoleByModule("birthday"));
+  const bdRole = doc.getRoleByModule("birthday") ? await guild.roles.fetch(doc.getRoleByModule("birthday")).catch(err => {
+    new Log()
+      .setGuild(guild)
+      .setReason(LogReasons.Error)
+      .setTarget(ChannelModules.StaffLogs)
+      .send({
+        embeds: [
+          new ErrorEmbed()
+            .defDesc("**No se pudo conseguir el role de cumpleaños**")
+        ]
+      })
+  }) : null;
 
   const members = guild.members.cache;
   //console.log(members.values())
@@ -379,7 +390,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
         if (!temprole.isSub) {
           // sacarle el role
           console.log("🟢 Ha pasado el tiempo del temprole %s", temprole);
-          if(role) member.roles.remove(role);
+          if (role) member.roles.remove(role);
 
           // eliminar el temprole de la db
           dbUser.data.temp_roles.splice(i, 1);
@@ -447,6 +458,17 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
       if (!doc.moduleIsActive("functions.birthdays")) break birthdayIf;
 
       if (dbUser?.isBirthday()) { // actualMonth + 1 ( 0 = ENERO && 11 = DICIEMBRE )
+        if (!bdRole) return new Log()
+          .setGuild(guild)
+          .setReason(LogReasons.Error)
+          .setTarget(ChannelModules.StaffLogs)
+          .send({
+            embeds: [
+              new ErrorEmbed()
+                .defDesc("**No se pudo agregar el role, no se pudo conseguir el role de cumpleaños**")
+            ]
+          })
+
         // ES EL CUMPLEAÑOS
         if (!member.roles.cache.get(bdRole?.id)) member.roles.add(bdRole);
       } else {
@@ -1239,7 +1261,7 @@ const AfterInfraction = async function (user, data) {
       interaction.editReply({ embeds: [new ErrorEmbed({ type: "notSent", data: { tag: member.user.tag, error: e } })] })
     });
 
-  if (banMember) console.log("Te baneo");//member.ban({reason: `AutoMod. (Infringir "${rule}")`});
+  if (banMember) member.ban({ reason: `AutoMod. (Infringir "${rule}")` });
   return res
   /*  else {
   const { member, rule, proof } = data;

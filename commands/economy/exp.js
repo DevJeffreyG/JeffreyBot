@@ -1,7 +1,7 @@
 const { Command, Categories, Confirmation, ErrorEmbed, Embed, Cooldowns, HumanMs } = require("../../src/utils");
 const command = new Command({
     name: "exp",
-    desc: "Transforma tu dinero en experiencia para tu perfil cada semana",
+    desc: "Transforma tu dinero en experiencia para tu perfil",
     category: Categories.Economy
 })
 
@@ -10,7 +10,7 @@ command.addOption({
     name: "dinero",
     desc: "El dinero que quieras cambiar a EXP",
     min: 1,
-    max: 20000,
+    max: 2000,
     req: true
 })
 

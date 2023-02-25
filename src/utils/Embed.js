@@ -1,7 +1,7 @@
 const Discord = require("discord.js");
 const { time } = Discord;
 
-const moment = require("moment");
+const moment = require("moment-timezone");
 const Chance = require("chance");
 
 const Colores = require("../resources/colores.json");
@@ -18,7 +18,7 @@ class Embed extends Discord.EmbedBuilder {
 
     defAuthor({ text, icon = null, url = null, title = false }) {
         title ?
-            this.setTitle(text) :
+            this.defTitle(text) :
             this.setAuthor({ name: text, iconURL: icon, url })
 
         return this
@@ -84,6 +84,16 @@ class Embed extends Discord.EmbedBuilder {
 
     defThumbnail(url) {
         this.setThumbnail(url)
+        return this
+    }
+
+    defURL(url) {
+        this.setURL(url)
+        return this
+    }
+
+    defImage(url) {
+        this.setImage(url)
         return this
     }
 

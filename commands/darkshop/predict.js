@@ -2,11 +2,11 @@ const { Command, Categories, Embed, DarkShop, GetRandomItem, Cooldowns } = requi
 const { Colores } = require("../../src/resources")
 
 const Chance = require("chance")
-const moment = require("moment")
+const moment = require("moment-timezone")
 
 const command = new Command({
     name: "predict",
-    desc: "De acuerdo a tu precisión, predice si es buena idea recuperar tu inversión en ese momento",
+    desc: "De acuerdo a tu precisión, predice si es buena idea recuperar tu inversión en este momento",
     category: Categories.DarkShop
 })
 
@@ -19,6 +19,9 @@ command.execute = async (interaction, models, params, client) => {
     const { Users } = models;
 
     const user = await Users.getOrCreate({ user_id: interaction.user.id, guild_id: interaction.guild.id });
+
+    if(user.economy.dark.darkjeffros === 0) return interaction.editReply(`${client.Emojis.Error} "No tengo nada invertido, mejor espero a tener...".`)
+
     const darkshop = new DarkShop(interaction.guild, interaction)
     const values = await darkshop.getAllValues();
     const now = await darkshop.getInflation();

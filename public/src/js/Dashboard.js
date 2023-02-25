@@ -369,8 +369,6 @@ class Dashboard {
             d.style.borderColor = `#${hexColor}`
             d.style.backgroundColor = `#${hexColor}3d` // opactity 20%
             d.style.color = `#${hexColor}`;
-
-            if(id === "1074797437308387358") console.log(hexColor)
         }
 
         return d;

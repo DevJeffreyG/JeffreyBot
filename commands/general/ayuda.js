@@ -1,5 +1,5 @@
-const { Command, Categories, ErrorEmbed, Embed, MemberHasAnyRole, isDeveloper, ContextMenu } = require("../../src/utils");
-const { Colores, Bases } = require("../../src/resources/");
+const { Command, Categories, ErrorEmbed, Embed, MemberHasAnyRole, isDeveloper, ContextMenu, ValidateDarkShop } = require("../../src/utils");
+const { Colores } = require("../../src/resources/");
 
 const command = new Command({
     name: "ayuda",
@@ -13,7 +13,7 @@ command.addOption({
 });
 
 command.execute = async (interaction, models, params, client) => {
-    const { Guilds } = models;
+    const { Guilds, Users } = models;
     const { comando } = params;
     if (comando) return command.execGetHelp(interaction, comando, client);
 
@@ -143,7 +143,12 @@ command.execute = async (interaction, models, params, client) => {
     if (fun.description) arrayEmbeds.push(fun);
     if (music.description) arrayEmbeds.push(music);
     if (economy.description) arrayEmbeds.push(economy);
-    if (darkshop.description) arrayEmbeds.push(darkshop);
+    if (darkshop.description) {
+        let user = await Users.getOrCreate({user_id: interaction.user.id, guild_id: guild.id})
+        let validation = await ValidateDarkShop(user, interaction.user);
+        
+        if (doc.moduleIsActive("functions.darkshop") && validation.valid) arrayEmbeds.push(darkshop);
+    }
 
     if (isDev) {
         if (moderation.description) arrayEmbeds.push(moderation);

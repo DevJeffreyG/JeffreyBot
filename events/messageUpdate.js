@@ -5,6 +5,8 @@ const { codeBlock } = require("discord.js");
 module.exports = async (client, oldMessage, message) => {
     const prefix = "/";
     const member = message.member;
+    
+    if(!member) return;
   
     if (member.user.bot) return;
     if (message.channel.type == "DM") return;

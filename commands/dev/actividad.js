@@ -1,6 +1,5 @@
 const { Command, Categories, Embed, FindNewId, ActivityWork } = require("../../src/utils")
-const { Config, Colores } = require("../../src/resources")
-const { codeBlock } = require("discord.js")
+const { Colores } = require("../../src/resources")
 
 const command = new Command({
     name: "actividad",

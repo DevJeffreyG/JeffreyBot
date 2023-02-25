@@ -1,8 +1,6 @@
-const ms = require("ms");
-const { Command, Categories, HumanMs, Embed, BoostTypes, BoostObjetives, Cooldowns, GetRandomItem } = require("../../src/utils");
+const { Command, Categories, Embed, BoostTypes, BoostObjetives, Cooldowns, GetRandomItem } = require("../../src/utils");
 
 const { Config, Responses } = require("../../src/resources/");
-const { multiplier } = Config;
 
 const command = new Command({
     name: "coins",
@@ -44,11 +42,6 @@ command.execute = async (interaction, models, params, client) => {
     randommember = `**${randommember.displayName}**`;
 
     let fakemoney = `${Math.ceil(Math.random() * 1000) + 999} ${Currency.name}`;
-
-    if (multiplier != 1) {
-        money = money * multiplier;
-        tmoney = `**${Currency}${money.toLocaleString('es-CO')}**`;
-    }
     
     // buscar si tiene boost
     for (let i = 0; i < user.data.temp_roles.length; i++) {

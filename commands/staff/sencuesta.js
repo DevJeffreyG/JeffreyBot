@@ -1,8 +1,8 @@
 const { Command, Categories, Embed, importImage, FindNewId, GetRandomItem } = require("../../src/utils")
-const { Config, Colores } = require("../../src/resources")
+const { Colores } = require("../../src/resources")
 
 const ms = require("ms");
-const moment = require("moment");
+const moment = require("moment-timezone");
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, time } = require("discord.js");
 
 const command = new Command({

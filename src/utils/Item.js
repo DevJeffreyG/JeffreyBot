@@ -1,5 +1,5 @@
 const { GuildMember, StringSelectMenuBuilder, ActionRowBuilder, BaseInteraction, CommandInteraction } = require("discord.js")
-const moment = require("moment");
+const moment = require("moment-timezone");
 const ms = require("ms")
 const Chance = require("chance");
 

@@ -1,6 +1,6 @@
 const { Guild, CommandInteraction, time } = require("discord.js");
 
-const moment = require("moment");
+const moment = require("moment-timezone");
 const Chance = require("chance");
 
 const { DarkShops, Users, Guilds } = require("mongoose").models;
@@ -31,8 +31,10 @@ class DarkShop {
 
         console.log("ES DOMINGOOOOOOOOOOO!")
 
+        await this.#fetchInfo();
+
         // ELIMINAR DARKCURRENCY
-        await this.#removeDarkCurrency()
+        await this.removeDarkCurrency()
 
         // CREAR NUEVA TENDENCIA PARA LOS SIGUIENTES DÍAS
         await this.#createTendency();
@@ -63,18 +65,17 @@ class DarkShop {
         this.values = this.doc.inflation.values;
         this.tendency = this.doc.inflation.tendency_type;
         this.baseValue = this.doc.inflation.initial_value;
-        this.oldtendency = this.doc.inflation.old_tendency;
         this.since = this.doc.inflation.since;
 
         return {
             values: this.values,
             tendency_type: this.tendency,
-            initial_value: this.baseValue,
-            old_tendency: this.oldtendency
+            initial_value: this.baseValue
         }
     }
 
     async #createTendency() {
+        let oldValues = this.values;
         let type = this.#randomTendency();
         let inflations = this.#randomValues(type);
 
@@ -92,7 +93,7 @@ class DarkShop {
             this.doc.inflation.values = inflations;
             this.doc.inflation.tendency_type = type;
             this.doc.inflation.initial_value = this.baseValue;
-            this.doc.inflation.old_tendency = this.oldtendency;
+            this.doc.inflation.last_value = oldValues[6][1];
             this.doc.inflation.since = this.since;
 
             await this.doc.save();
@@ -101,8 +102,7 @@ class DarkShop {
         return {
             values: inflations,
             tendency_type: type,
-            initial_value: this.baseValue,
-            old_tendency: this.oldtendency
+            initial_value: this.baseValue
         }
     }
 
@@ -116,10 +116,8 @@ class DarkShop {
         ];
 
         // obtener la anterior
-        let old = this.doc?.inflation.old_tendency;
+        let old = this.doc?.inflation.tendency_type; // aún no se ha guardado una nueva inflaciónn para este momento
         if (old) {
-            this.oldtendency = old;
-
             switch (old) {
                 case Tendencies.Random:
                     check = [
@@ -302,7 +300,7 @@ class DarkShop {
         /* console.log("🟢 Finalmente, tenemos:")
         console.log(values) */
         this.values = values;
-        this.since = moment().day(0).toDate();
+        this.since = moment().day(0).startOf("day").toDate();
 
         console.log(this.values)
 
@@ -393,7 +391,7 @@ class DarkShop {
         return Number(new Chance().floating({ min: -5, max: 5, fixed: 2 }).toFixed(2));
     }
 
-    async #removeDarkCurrency() {
+    async removeDarkCurrency() {
         const users = await Users.find({
             guild_id: this.guild.id
         });
@@ -507,7 +505,7 @@ class DarkShop {
 
         if (day === "0") { // si es domingo
             inflation = this.baseValue
-            oldinflation = 0
+            oldinflation = this.doc.inflation.last_value;
         } else {
             if (this.now.hour() >= 12) {
                 inflation = this.values[day][1];
@@ -600,6 +598,9 @@ class DarkShop {
         let stonks = oldinflation <= inflation ? "📈" : "📉";
         let tz = this.getShopTimezone();
 
+        let date = tz.now.day != 0 ? (tz.hour >= 12 ? tz.now.add(1, "day").startOf("day") : tz.now.hour(12).startOf("hour")).toDate() :
+            tz.now.add(1, "day").startOf("day").toDate();
+
         let stonksEmbed = new Embed()
             .defAuthor({ text: `DarkShop: Inflación`, icon: EmojisObject.Dark.url })
             .defDesc(`**${this.Emojis.DarkCurrency}1 = ${this.Emojis.Currency}${one.toLocaleString('es-CO')}**
@@ -607,7 +608,7 @@ class DarkShop {
 ${stonks} **—** La inflación actual de los ${this.Emojis.DarkCurrency.name} es de un \`${inflation}%\`.
 ${stonks} **—** Antes era de un \`${oldinflation}%\`: (**${this.Emojis.DarkCurrency}1 = ${this.Emojis.Currency}${(await this.oneEquals(oldinflation))?.toLocaleString("es-CO")}**).
 
-${tz.now.day != 0 ? `**—** La inflación inicial fue \`${this.baseValue}%\`.\n` : ""}**—** La inflación cambiará ${time((tz.hour >= 12 ? tz.now.add(1, "day").startOf("day") : tz.now.hour(12).startOf("hour")).toDate(), "R")}.`)
+${tz.now.day != 0 ? `**—** La inflación inicial fue \`${this.baseValue}%\`.\n` : ""}**—** La inflación cambiará ${time(date, "R")}.`)
             .defColor(Colores.negro);
 
         this.interaction.reply({ embeds: [stonksEmbed] });

@@ -4,7 +4,7 @@ const { ChannelModules, LogReasons, GenerateLog, Log, ErrorEmbed } = require("..
 
 const { Guilds } = require("mongoose").models;
 
-const moment = require("moment");
+const moment = require("moment-timezone");
 
 module.exports = async (client, oldMember, newMember) => {
     let guild = newMember.guild;
