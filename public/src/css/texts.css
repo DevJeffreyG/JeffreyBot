@@ -46,3 +46,8 @@ p#changelogList br {
 .slogan {
     font-size: .5em;
 }
+
+.changelog-title {
+    font-size: 1.7em;
+    font-weight: bolder;
+}

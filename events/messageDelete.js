@@ -1,5 +1,5 @@
 const { AuditLogEvent } = require("discord.js");
-const { Config, Colores } = require("../src/resources/");
+const { Bases, Colores } = require("../src/resources/");
 const { FetchAuditLogs, GenerateLog } = require("../src/utils");
 const { Users } = require("mongoose").models;
 
@@ -27,7 +27,7 @@ module.exports = async (client, message) => {
   let user = await Users.getOrCreate({ user_id: author.id, guild_id: message.guild.id });
 
   if (user.data.cooldowns.chat_rewards) {
-    if (message.channel.id != Config.mainChannel) return; // arreglar esto ############################################
+    if (message.channel.id != Bases.owner.channels.mainChannel) return; // TODO: arreglar esto ############################################
 
     let global = user.economy.global
 

@@ -1,6 +1,6 @@
 // TODO: Mover JBNews a /dev y hacer un verdadero comando de anuncios con esta misma estructura :o
 const { Command, Categories, Embed, ErrorEmbed, Confirmation} = require("../../src/utils")
-const { Config, Colores } = require("../../src/resources")
+const { Bases, Colores } = require("../../src/resources")
 
 const command = new Command({
     name: "announce",
@@ -34,7 +34,7 @@ command.execute = async (interaction, models, params, client) => {
 
     switch (subcommand) {
         case "jbnews":
-            let jbNRole = await interaction.guild.roles.fetch(Config.jbnews);
+            let jbNRole = await interaction.guild.roles.fetch(Bases.owner.roles.jbNewsRole);
             let ch = interaction.guild.channels.cache.get(doc.getChannel("general.announcements"));
 
             if (!anuncio && !imagen) return interaction.editReply({ embeds: [new ErrorEmbed({ type: "badParams", data: { help: "Si no hay 'anuncio' debe haber una imagen." } })] });

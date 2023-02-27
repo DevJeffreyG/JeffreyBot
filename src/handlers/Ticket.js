@@ -5,7 +5,6 @@ const ErrorEmbed = require("../utils/ErrorEmbed");
 
 const { Confirmation, FindNewId, isBannedFrom } = require("../utils/functions");
 
-const Config = require("../resources/base.json");
 const Colores = require("../resources/colores.json");
 
 const { Guilds, Users } = require("mongoose").models;
@@ -41,6 +40,15 @@ class Ticket {
                 allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.EmbedLinks, PermissionsBitField.Flags.AttachFiles]
             }
         ];
+
+        this.doesntExist = new ErrorEmbed(this.interaction, {
+            type: "doesntExist",
+            data: {
+                action: "ticket",
+                missing: "Este ticket",
+                context: "este servidor"
+            }
+        })
 
         this.#setStaffPerms();
         this.#setRows()
@@ -137,7 +145,7 @@ class Ticket {
                 "¿Estás segur@ de crear un nuevo ticket de ayuda?",
                 "Las preguntas deben estar relacionadas con el servidor de Discord, nada fuera de él.",
                 "El STAFF te responderá en cuanto pueda.",
-                `Recuerda que en los canales <#${Config.infoChannel}> y <#${Config.faqChannel}> se aclaran las dudas más comúnes, si no has revisado si tu duda está ahí, revísa primero antes de hacer un ticket.`
+                `Recuerda que en los canales <#${doc.getChannel("general.information")}> y <#${doc.getChannel("general.faq")}> se aclaran las dudas más comúnes, si no has revisado si tu duda está ahí, revísa primero antes de hacer un ticket.`
             ]
 
             general.defAuthor({ text: `Ayuda general.`, title: true });
@@ -293,6 +301,8 @@ class Ticket {
         //interaction.message.channel.delete();
 
         const ticket = this.docGuild.data.tickets.find(x => x.channel_id === interaction.channel.id);
+        if(!ticket) return this.doesntExist.send();
+        
         const channel = interaction.channel;
 
         const message = await channel.messages.fetch(ticket.message_id);
@@ -342,6 +352,8 @@ class Ticket {
         if (!confirmation) return;
 
         const ticket = this.docGuild.data.tickets.find(x => x.channel_id === interaction.channel.id);
+        if(!ticket) return this.doesntExist.send();
+        
         const channel = interaction.channel;
 
         const message = await channel.messages.fetch(ticket.message_id);
@@ -389,6 +401,8 @@ class Ticket {
         if (!confirmation) return;
 
         const ticket = this.docGuild.data.tickets.find(x => x.channel_id === interaction.channel.id);
+        if(!ticket) return this.doesntExist.send();
+
         const channel = interaction.channel;
 
         const message = await channel.messages.fetch(ticket.message_id);

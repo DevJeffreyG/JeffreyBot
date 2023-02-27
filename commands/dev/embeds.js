@@ -1,6 +1,6 @@
 const { ButtonStyle, ButtonBuilder, ActionRowBuilder, time } = require("discord.js");
 const { Command, Categories, Embed, importImage } = require("../../src/utils");
-const { Colores, Config } = require("../../src/resources");
+const { Colores, Bases } = require("../../src/resources");
 
 const command = new Command({
     name: "embeds",
@@ -29,8 +29,9 @@ command.execute = async (interaction, models, params, client) => {
     let adminRolesDb = doc.getAdmins();
     let staffRolesDb = doc.getStaffs();
 
-    let jeffreyRole = interaction.guild.roles.cache.get(Config.jeffreyRole);
-    let modRole = interaction.guild.roles.cache.get(Config.modRole);
+    let jeffreyRole = interaction.guild.roles.cache.get(Bases.owner.roles.jeffreyRole);
+    let modRole = interaction.guild.roles.cache.get(Bases.owner.roles.modRole);
+    let vipRole = interaction.guild.roles.cache.get(Bases.owner.roles.vipRole);
 
     let adminRoles = interaction.guild.roles.cache.filter(role => {
         return adminRolesDb.find(savedId => savedId === role.id)
@@ -39,9 +40,8 @@ command.execute = async (interaction, models, params, client) => {
         return staffRolesDb.find(savedId => savedId === role.id)
     });
 
-    let mainChannel = Config.mainChannel;
+    let mainChannel = Bases.owner.channels.mainChannel;
     let rulesChannel = interaction.guild.channels.cache.get(doc.getChannel("general.rules"));
-    let supportChannel = interaction.guild.channels.cache.get(Config.supportChannel);
     let newsChannel = interaction.guild.channels.cache.get(doc.getChannel("general.announcements"));
     let infoChannel = interaction.guild.channels.cache.get(doc.getChannel("general.information"));
     let dsNewsChannel = interaction.guild.channels.cache.get(doc.getChannel("darkshop.events"));
@@ -50,7 +50,6 @@ command.execute = async (interaction, models, params, client) => {
     let hallOfFameChannel = interaction.guild.channels.cache.get(doc.getChannel("general.halloffame"));
 
     let ytChannel = interaction.guild.channels.cache.get(doc.getChannel("notifier.youtube_notif"));
-    let twChannel = interaction.guild.channels.cache.get(doc.getChannel("notifier.twitter_notif"));
     let tvChannel = interaction.guild.channels.cache.get(doc.getChannel("notifier.twitch_notif"));
 
     switch (embed) {
@@ -106,53 +105,53 @@ command.execute = async (interaction, models, params, client) => {
                         .setImage(niveles.attachment)
                         .defColor(Colores.verdejeffrey),
                     new Embed()
-                        .defDesc(`<@&${Config.lvl1}>
+                        .defDesc(`<@&${Bases.owner.roles.levels.lvl1}>
 • Puedes colorear tu nombre en <#524647331551772672>.
 • Adjuntar archivos y links.
 • Agregar reacciones a los mensajes.
 • Crear nuevos hilos.
 • Usar Stickers exteriores.
         
-<@&${Config.lvl10}>
+<@&${Bases.owner.roles.levels.lvl10}>
 • Cambiarse el apodo.
 • Posibilidad de conseguir un 15% más de EXP y Jeffros.
 • Compartir pantalla, o stremear un juego en los chat de voz.
 
-<@&${Config.lvl20}>
+<@&${Bases.owner.roles.levels.lvl20}>
 • 15% de descuento en la tienda (\`/shop\`).
 
-<@&${Config.lvl30}>
+<@&${Bases.owner.roles.levels.lvl30}>
 • Bono de **${Emojis.Jeffros}2.000**. Avísale al STAFF :)
 
-<@&${Config.lvl40}>
+<@&${Bases.owner.roles.levels.lvl40}>
 • Cooldown para conseguir Jeffros y EXP reducido a la mitad. (\`30s\`)
 
-<@&${Config.lvl50}>
+<@&${Bases.owner.roles.levels.lvl50}>
 • Posibilidad de conseguir un 50% más de EXP y Jeffros.
 • Colores nuevos desbloqueados en <#552580632266407957>.
 
-<@&${Config.lvl60}>
+<@&${Bases.owner.roles.levels.lvl60}>
 • Cooldown para usar el comando \`/coins\` reducido a la mitad. (\`5m\`)
 • Bono de **${Emojis.Jeffros}5.000**. Avísale al STAFF :)
 
-<@&${Config.lvl70}>
+<@&${Bases.owner.roles.levels.lvl70}>
 • Posibilidad de conseguir un 70% más de EXP y Jeffros.
 • Cooldown para conseguir Jeffros y EXP reducido a la cuarta parte. (\`15s\`).
 
-<@&${Config.lvl80}>
+<@&${Bases.owner.roles.levels.lvl80}>
 • Puedes crear invitaciones nuevas al server.
 • Bono de **${Emojis.Jeffros}6.000**. Avísale al STAFF :)
 
-<@&${Config.lvl90}>
+<@&${Bases.owner.roles.levels.lvl90}>
 • Bono de **${Emojis.Jeffros}10.000**. Avísale al STAFF :)
 • Cooldown para conseguir Jeffros y EXP reducido a la octava parte. (\`7.5s\`).
 
-<@&${Config.lvl99}>
+<@&${Bases.owner.roles.levels.lvl99}>
 • VIP Desbloqueado.
 • Acceso al servidor de pruebas de Jeffrey Bot.
 • Cooldown para usar el comando \`/coins\` reducido a la cuarta parte. (\`2.5m\`).
 
-<@&${Config.lvl100}>
+<@&${Bases.owner.roles.levels.lvl100}>
 • Cuando se abra la beta de Jeffrey Bot público, serás uno de los tomados en cuenta.
 • Rol personalizado (nombre + color personalizado).`)
                         .defColor(Colores.verde)
@@ -187,7 +186,6 @@ ${faqChannel} • Aquí se responden algunas preguntas que se hacen los usuarios
 ${dsNewsChannel} • Todas las interacciones y sucesos que se dan en la DarkShop.\n
 <#495063383528308747> • Si hay un evento en el servidor, todos sus anuncios se harán en este canal.\n
 ${ytChannel} • Aquí se anuncia la actividad de Jeffrey en YouTube.\n
-${twChannel} • Aquí se anuncia la actividad de Jeffrey en Twitter.\n
 ${tvChannel} • Aquí se anuncia la actividad de Jeffrey en Twitch.`)
                         .defColor(Colores.verde),
 
@@ -262,7 +260,7 @@ ${sugsChannel} •  Aquí se enviarán las sugerencias que hagan los usuarios (\
                     new Embed()
                         .defTitle(`Tienen cierto impacto en el server. Es más difícil conseguirlos.`)
                         .defDesc(`<@&595022419123634228> • Alguien que está boosteando el servidor, aparecerá en la lista de miembros por encima de todos menos del Staff. Tendrán VIP y consigo, sus beneficios mientras sigan boosteando.\n
-<@&529275759521431553> • Usuario que ha ascendido en el servidor, tendrá colores exclusivos y acceso anticipado a las notificaciones de Jeffrey, etc.
+${vipRole} • Usuario que ha ascendido en el servidor, tendrá colores exclusivos y acceso anticipado a las notificaciones de Jeffrey, etc.
     ➟ Puede ser comprado en la tienda del servidor \`/shop\`.\n
 <@&461259197368107020> • Personas las cuales tienen algún tipo de relación IRL con Jeffrey o7\n
 <@&460586399981109278> • Gente activa con más de 5.000 mensajes en #chat.\n
@@ -277,13 +275,9 @@ ${sugsChannel} •  Aquí se enviarán las sugerencias que hagan los usuarios (\
             let awards = importImage("awards");
             let darkjeffros = importImage("darkjeffros");
 
-            let silver = interaction.guild.emojis.cache.find(x => x.id === Config.silverAward);
-            let gold = interaction.guild.emojis.cache.find(x => x.id === Config.goldAward);
-            let platinium = interaction.guild.emojis.cache.find(x => x.id === Config.platiniumAward);
-
-            silver = client.Emojis.Tier1;
-            gold = client.Emojis.Tier2;
-            platinium = client.Emojis.Tier3;
+            let silver = client.Emojis.Tier1;
+            let gold = client.Emojis.Tier2;
+            let platinium = client.Emojis.Tier3;
 
             await interaction.channel.send({
                 embeds: [
@@ -302,6 +296,7 @@ ${sugsChannel} •  Aquí se enviarán las sugerencias que hagan los usuarios (\
 \`/coins\` • Consigue Jeffros extras en un intervalo de 10 minutos, (o menos).\n
 \`/roullete\` • Puedes conseguir EXP, Jeffros o también PERDERLOS.\n
 \`/rob\` • Puedes intentar robar Jeffros a otro usuario, pero cuidado, también los puedes perder.`)
+                        .defFooter({text: `Los canales que dan EXP y Jeffros lo dirán en su descripción!`, icon: EmojisObject.Danger.url })
                         .defColor(Colores.verde),
                     new Embed()
                         .setImage(awards.attachment)
@@ -323,9 +318,9 @@ ${platinium} • Cuesta **${Emojis.Jeffros}1.800**, se envía el mensaje a ${hal
                         .defColor(Colores.verdeclaro),
                     new Embed()
                         .defTitle(`— ¿Qué son los ${Emojis.DarkJeffros}DarkJeffros?`)
-                        .defDesc(`➟ Los DarkJeffros son otro tipo de moneda dentro del servidor, si eres menor de nivel 5 no te interesa, *¿por ahora...?*\n
-➟ Imagina a los DarkJeffros como bitcoins. (Porque es divertido)
-➟ Estos sólo se pueden conseguir al cambiarlos por Jeffros.
+                        .defDesc(`➟ Los DarkJeffros son otro tipo de moneda dentro del servidor. Si eres menor de nivel 5 no te interesa, *¿por ahora...?*\n
+➟ Imagina a los ${Emojis.DarkJeffros}DarkJeffros como bitcoins. (Porque es divertido)
+➟ Estos sólo se pueden conseguir al cambiarlos por ${Emojis.Jeffros}Jeffros.
 ➟ Toda la información que necesitas está en ${Emojis.Dark} <#836397833531818004>.`)
                         .defColor(Colores.verde),
                 ], files: [economia.file, jeffros.file, awards.file, darkjeffros.file]
@@ -571,13 +566,13 @@ Hoy ${time()}, tenemos un nuevo/mejorado sistema de moderación gracias a Jeffre
                         .setImage(req.attachment),
                     new Embed()
                         .defColor(Colores.nocolor)
-                        .defAuthor({ text: "Requisitos para mantenerte como staff", title: true })
+                        .defAuthor({ text: "Requisitos para mantenerte como STAFF", title: true })
                         .defDesc(`__Primero que todo, recuerda que esto no es nada serio y no le debes nada a nadie__.
 
 Ahora, creo que es bastante obvio que lo único que Jeffrey espera de ti es:
 
-> • No abusar de tu poder
-> • Dar un poco de señales de vida
+> • No abusar de tu poder.
+> • Dar un poco de señales de vida.
 > • Lo que te dije de primero, relájate un poco, todo esto es por diversión, ¿verdad?`)
                 ], files: [hola.file, loNuevo.file, loActualizado.file, infracciones.file, req.file]
             });

@@ -123,6 +123,7 @@
 
                             const desc = document.createElement("div")
                             desc.className = "description";
+                            desc.id = String(changelog.id);
 
                             const version = document.createElement("h1")
                             const slogan = document.createElement("p")
@@ -142,12 +143,34 @@
                             // cambios
                             changelog.changes.sort((a, b) => a.type - b.type)
                             changelog.changes.forEach(change => {
-                                const prefix = change.type === <%- Enums.ChangelogTypes.Added %> ? "➕" :
-                                change.type === <%- Enums.ChangelogTypes.Removed %> ? "➖" : "🔃"
-                                const item = document.createElement("li");
+                                let titleContainer = document.createElement("div")
+                                titleContainer.classList.add("line-container");
 
-                                const title = document.createElement("h4")
-                                title.innerText = `${prefix} ${change.title}`;
+                                let add = document.createElement("span")
+                                add.className = "material-symbols-rounded thick";
+                                add.innerText = "add_circle";
+                                add.style.color = "var(--primary)";
+
+                                let updated = document.createElement("span")
+                                updated.className = "material-symbols-rounded thick";
+                                updated.innerText = "change_circle";
+                                updated.style.color = "#2483ff"
+
+                                let removed = document.createElement("span")
+                                removed.className = "material-symbols-rounded thick";
+                                removed.innerText = "delete";
+                                removed.style.color = "#ff3333";
+
+                                const prefix = change.type === <%- Enums.ChangelogTypes.Added %> ? add :
+                                change.type === <%- Enums.ChangelogTypes.Removed %> ? removed : updated;
+                                
+                                const listItem = document.createElement("li"); 
+                                const title = document.createElement("h4")                                
+                                title.classList.add("changelog-title")
+                                title.innerText = `${change.title}`;
+
+                                titleContainer.appendChild(prefix);
+                                titleContainer.appendChild(title);
 
                                 const desc = document.createElement("p")
                                 var fetchedDesc = change.description;
@@ -158,10 +181,10 @@
 
                                 desc.innerText = fetchedDesc;
                                 
-                                item.appendChild(title);
-                                item.appendChild(desc);
+                                listItem.appendChild(titleContainer);
+                                listItem.appendChild(desc);
 
-                                changesList.appendChild(item);
+                                changesList.appendChild(listItem);
                             })
                             
                             changes.appendChild(changesList);

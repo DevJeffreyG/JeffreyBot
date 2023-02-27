@@ -2,7 +2,7 @@ const { ApplicationCommandType } = require("discord.js");
 const { ContextMenu, Categories } = require("../../src/utils");
 
 const command = new ContextMenu({
-    name: "Prompt: Dall-e",
+    name: "Generar imágenes",
     type: ApplicationCommandType.Message,
     category: Categories.Fun
 })
@@ -10,8 +10,8 @@ const command = new ContextMenu({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ephemeral: true});
 
-    const dalle = require("../../commands/fun/dalle");
-    await dalle.execute(interaction, models, {
+    const generate = require("../../commands/fun/generate");
+    await generate.execute(interaction, models, {
         descripcion: {
             value: params.message.content
         }

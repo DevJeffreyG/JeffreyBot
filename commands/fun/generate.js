@@ -4,7 +4,7 @@ const { AttachmentBuilder } = require("discord.js");
 const Cr = new craiyon.Client();
 
 const command = new Command({
-    name: "dall-e",
+    name: "generate",
     desc: "Genera imágenes que parecen shitposts con una inteligencia artificial",
     helpdesc: "Genera 9 imágenes de acuerdo a una descripción. Esta es una IA básica y lo que se genera no va a ser lo que buscas, a menos que quieras material para shitposts",
     category: Categories.Fun

@@ -35,6 +35,19 @@
     --twitter: #1D9BF0;
 }
 
+.material-symbols-rounded {
+    user-select: none;
+    pointer-events: none;
+}
+
+.material-symbols-rounded.thick {
+    font-variation-settings: 
+          'FILL' 1,
+          'wght' 700,
+          'GRAD' 200,
+          'opsz' 48 !important;
+}
+
 svg#ColoredStealth {
     fill: var(--primary);
     max-width: 512px;
@@ -127,6 +140,17 @@ body {
         box-shadow: 0 5px 15px 0px rgba(0, 0, 0, 0.6);
         transform: translatey(0px);
     }
+}
+
+.line-container {
+    display: flex;
+
+    flex-direction: row;
+    justify-content: flex-start;
+
+    align-items: center;
+
+    gap: .5rem;
 }
 
 .container {

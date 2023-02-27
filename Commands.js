@@ -12,7 +12,7 @@ class Commands {
         this.ids = [];
 
         this.route = process.env.DEV == "TRUE"
-            ? Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.slashGuildId)
+            ? Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.DEV_GUILD)
             : Routes.applicationCommands(process.env.CLIENT_ID)
 
         this.rest = new REST({ version: '10'}).setToken(process.env.TOKEN);

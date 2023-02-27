@@ -1,7 +1,7 @@
 const { ActionRowBuilder, ButtonBuilder, time, ButtonStyle, PermissionFlagsBits } = require("discord.js")
 
 const { Command, Categories, Embed, EndReasons } = require("../../src/utils")
-const { Colores, Config } = require("../../src/resources")
+const { Colores } = require("../../src/resources")
 
 const ms = require("ms");
 
@@ -26,11 +26,10 @@ command.execute = async (interaction, models, params, client) => {
     const member = usuario?.member ?? interaction.member;
 
     const badges = member.user.flags.toArray()
-    const badgesGuild = client.guilds.cache.find(x => x.id === Config.badgesServer);
     let bdgText = "";
 
     for (const badge of badges) {
-        let e = badgesGuild.emojis.cache.find(x => x.name === badge);
+        let e = client.Emojis[badge];
         bdgText += e.toString() + ", ";
     }
 

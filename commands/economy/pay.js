@@ -1,5 +1,5 @@
 const { Command, Categories, Confirmation, ErrorEmbed, Embed, Sleep } = require("../../src/utils")
-const { Config, Colores } = require("../../src/resources");
+const { Colores } = require("../../src/resources");
 
 const command = new Command({
     name: "pay",
@@ -23,17 +23,18 @@ command.addOption({
 })
 
 command.execute = async (interaction, models, params, client) => {
-    await interaction.deferReply({ephemeral: true});
+    await interaction.deferReply({ ephemeral: true });
     const { Users } = models
     const { usuario, cantidad } = params;
+    const { Emojis, EmojisObject } = client;
     const { Currency } = client.getCustomEmojis(interaction.guild.id);
 
     const author = interaction.user;
     const member = usuario.member;
     const quantity = cantidad.value;
-    
+
     const guild = client.guilds.cache.find(x => x.id === interaction.guildId);
-    
+
     // codigo
     let author_user = await Users.getOrCreate({
         user_id: author.id,
@@ -55,7 +56,7 @@ command.execute = async (interaction, models, params, client) => {
 
     let confirmation = await Confirmation("Pagar dinero", toConfirm, interaction);
 
-    if(!confirmation) return;
+    if (!confirmation) return;
 
     let notEnough = new ErrorEmbed(interaction, {
         type: "economyError",
@@ -66,25 +67,25 @@ command.execute = async (interaction, models, params, client) => {
         }
     })
 
-    if(!author_user.canBuy(quantity)) return notEnough.send();
+    if (!author_user.canBuy(quantity)) return notEnough.send();
 
-    if(author.id === member.id){
+    if (author.id === member.id) {
         let msg = await interaction.fetchReply();
         await Sleep(2000)
-        
-        let e = new Embed(msg.embeds[0])
-        .defAuthor({text: "Oye esto no está bien", icon: Config.loadingGif})
 
-        await interaction.editReply({embeds: [e]})
+        let e = new Embed(msg.embeds[0])
+            .defAuthor({ text: "Oye esto no está bien", icon: EmojisObject.Loading.url })
+
+        await interaction.editReply({ embeds: [e] })
 
         await Sleep(2000)
-        e.defAuthor({text: "Por favor, aléjate", icon: Config.errorPng})
-        .defColor(Colores.rojo)
-        .defDesc("...")
-        return interaction.editReply({embeds: [e]});
+        e.defAuthor({ text: "Por favor, aléjate", icon: EmojisObject.Error.url })
+            .defColor(Colores.rojo)
+            .defDesc("...")
+        return interaction.editReply({ embeds: [e] });
     } else
 
-    author_user.economy.global.currency -= quantity;
+        author_user.economy.global.currency -= quantity;
     await user.addCurrency(quantity);
 
     await author_user.save();
@@ -111,7 +112,7 @@ command.execute = async (interaction, models, params, client) => {
         }
     })
 
-    return interaction.followUp({content: `**${author.tag}** ➡️ **${member}**.`, embeds: [doneEmbed], allowedMentions: { parse: ["users"]}});
+    return interaction.followUp({ content: `**${author.tag}** ➡️ **${member}**.`, embeds: [doneEmbed], allowedMentions: { parse: ["users"] } });
 }
 
 module.exports = command;

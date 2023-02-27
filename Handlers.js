@@ -52,7 +52,7 @@ class Handlers {
 
         let toggledQuery = await ToggledCommands.getToggle(commandName);
 
-        if (toggledQuery /* && author.id != jeffreygID */) {
+        if (toggledQuery && !this.#isDev()) {
             let since = time(toggledQuery.since);
             return this.interaction.reply({ content: null, embeds: [new ErrorEmbed({ type: "toggledCommand", data: { commandName, since, reason: toggledQuery.reason } })], ephemeral: true });
         }

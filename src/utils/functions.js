@@ -1,6 +1,5 @@
 const { ActivityType, ButtonStyle, OverwriteType, PermissionsBitField, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, EmbedBuilder, Guild, GuildMember, CommandInteraction, BaseInteraction, Message, Client, time, hyperlink, codeBlock } = require("discord.js");
 
-const Config = require("../resources/base.json");
 const Colores = require("../resources/colores.json");
 const Cumplidos = require("../resources/cumplidos.json");
 
@@ -15,11 +14,10 @@ const moment = require('moment');
 
 /* ##### MONGOOSE ######## */
 
-const { Users, Exps, Guilds, DarkShops, Shops, Warns, DarkItems, GlobalDatas, TotalPurchases } = require("mongoose").models;
+const { Users, Guilds, DarkShops, Shops, GlobalDatas } = require("mongoose").models;
 
 // JEFFREY BOT NOTIFICATIONS
 const { google } = require("googleapis");
-const Twitter = require("twitter");
 const { ApiClient } = require("@twurple/api");
 const { ClientCredentialsAuthProvider } = require("@twurple/auth");
 const { BoostObjetives, EndReasons, ChannelModules, LogReasons } = require("./Enums");
@@ -359,10 +357,14 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
       .send({
         embeds: [
           new ErrorEmbed()
-            .defDesc("**No se pudo conseguir el role de cumpleaños**")
+            .defDesc(`**No se pudo conseguir el role de cumpleaños**\n${codeBlock("json", err)}`)
         ]
       })
   }) : null;
+
+  const staffRoles = guild.roles.cache.filter(role => {
+    return doc.getStaffs().find(x => x === role.id);
+  })
 
   const members = guild.members.cache;
   //console.log(members.values())
@@ -674,7 +676,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
     if (dayDiff >= doc.settings.functions.ticket_remind) { // si la dif se cumple con la config, recordar
       let embed = new Embed()
         .defAuthor({ text: "Recordatorio de Ticket", icon: guild.iconURL({ dynamic: true }) })
-        .defDesc(`Hay un ticket que no ha recibido atención por más de ${doc.settings.functions.ticket_remind} días (${dayDiff}d).`)
+        .defDesc(`Hay un ticket que no se ha cerrado por más de ${doc.settings.functions.ticket_remind} días (${dayDiff}d).`)
         .defField(ticket.type, `**—** Creado por ${guild.members.cache.get(ticket.created_by)}.
 **—** ${guild.channels.cache.get(ticket.channel_id)}, el ${time(ticket.creation_date)}`)
         .defColor(Colores.verde)
@@ -683,7 +685,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
         .setTarget(ChannelModules.StaffLogs)
         .setReason(LogReasons.Logger)
         .setGuild(guild)
-        .send({ embed })
+        .send({ content: `${staffRoles.toJSON().join(", ")}`, embed })
 
       ticket.last_reminded = new Date();
     }
@@ -702,7 +704,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
     if (dayDiff >= doc.settings.functions.sug_remind) { // si la dif se cumple con la config, recordar
       let embed = new Embed()
         .defAuthor({ text: "Recordatorio de sugerencia", icon: guild.iconURL({ dynamic: true }) })
-        .defDesc(`Hay una sugerencia que no ha recibido atención por más de ${doc.settings.functions.sug_remind} días (${dayDiff}d).`)
+        .defDesc(`Hay una sugerencia que no ha sido respondida por más de ${doc.settings.functions.sug_remind} días (${dayDiff}d).`)
         .defField(`ID: ${suggestion.id}`, `**—** Sugerencia por ${guild.members.cache.get(suggestion.user_id)}.
 **—** ${hyperlink("Mensaje de sugerencia", message.url)}, el ${time(suggestion.creation_date)}`)
         .defColor(Colores.verde)
@@ -711,7 +713,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
         .setTarget(ChannelModules.StaffLogs)
         .setReason(LogReasons.Logger)
         .setGuild(guild)
-        .send({ embed })
+        .send({ content: `${staffRoles.toJSON().join(", ")}}`, embed })
 
       suggestion.last_reminded = new Date();
     }
@@ -837,7 +839,7 @@ const VaultWork = function (vault, user, interaction, notCodeEmbed) { // mostrar
 const handleUploads = async function (client) {
 
   for await (const guild of client.guilds.cache.values()) {
-    if (guild.id != Config.jgServer && guild.id != Bases.dev.guild) continue;
+    if (guild.id != Bases.owner.guildId && guild.id != Bases.dev.guild) continue;
 
     const doc = await Guilds.getOrCreate(guild.id);
 
@@ -1616,9 +1618,13 @@ const UpdateCommands = async function (client) {
  * @returns {Promise<Boolean>}
  */
 const DeleteLink = async function (message) {
+  const Links = [
+    "https", "http", "www.", "discord.gg", "discord.gift"
+  ];
+
   const doc = await Guilds.getOrCreate(message.guild.id);
   const member = message.member;
-  const link = Config.Links.some(x => message.content.includes(x));
+  const link = Links.some(x => message.content.includes(x));
 
   if (!doc.moduleIsActive("automoderation.remove_links")) return false;
   if (!member.permissions.missing(PermissionsBitField.Flags.EmbedLinks).length > 0) return false;
