@@ -1,6 +1,7 @@
 const { Command, Categories, Confirmation, FindNewId, ItemActions, ItemObjetives, BoostTypes, BoostObjetives, ItemTypes, ItemEffects, ManageDarkShops } = require("../../src/utils")
 
 const { PermissionsBitField } = require("discord.js");
+const moment = require("moment-timezone");
 
 const command = new Command({
     name: "sync",
@@ -308,6 +309,7 @@ command.execUsers = async (interaction, models, params, client) => {
                     // perfil
                     finalQuery.economy.dark.currency = darkstats.djeffros;
                     finalQuery.economy.dark.accuracy = darkstats.accuracy;
+                    finalQuery.economy.dark.until = moment().add(1, "w").startOf("day").toDate();
                 }
 
                 // GLOBALDATAS

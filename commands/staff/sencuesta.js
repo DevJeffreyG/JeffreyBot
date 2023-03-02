@@ -14,7 +14,7 @@ const command = new Command({
 command.addOption({
     type: "string",
     name: "duracion",
-    desc: "La duración que va a tener la encuesta para recibir respuestas",
+    desc: "La duración que va a tener la encuesta para recibir respuestas. (1d, 30m, 15s, etc)",
     req: true
 })
 

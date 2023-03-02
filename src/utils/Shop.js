@@ -521,7 +521,7 @@ Si es eliminando, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
             this.shop.items.forEach(i => media += i.price);
             media /= this.shop.items.length;
 
-            console.log(Math.round(this.darkshopEquivalency) + this.user.economy.global.currency)
+            //console.log(Math.round(this.darkshopEquivalency) + this.user.economy.global.currency)
 
             let multidiff = Math.floor((this.isDarkShop ? Math.round(this.darkshopEquivalency) + this.user.economy.global.currency : this.user.economy.global.currency) / media);
     

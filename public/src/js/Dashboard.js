@@ -407,6 +407,7 @@ class Dashboard {
         this.#findAndSync("blackjack_bet", quantities);
         this.#findAndSync("darkshop_level", quantities);
         this.#findAndSync("percentage_skipfirewall", quantities);
+        this.#findAndSync("rob-percentage", quantities);
 
         this.#findAndSync("baseprice_darkshop", quantities);
         this.#findAndSync("currency_per_rep", quantities);
@@ -415,6 +416,11 @@ class Dashboard {
         this.#findAndSync("max_exp", quantities);
         this.#findAndSync("min_curr", quantities);
         this.#findAndSync("max_curr", quantities);
+
+        this.#findAndSync("rob-min_success", quantities);
+        this.#findAndSync("rob-max_success", quantities);;
+        this.#findAndSync("rob-min_fail", quantities);
+        this.#findAndSync("rob-max_fail", quantities);
 
         const functions = this.doc.settings.functions;
         this.#findAndSync("adjust_shop", functions);
@@ -761,12 +767,18 @@ class Dashboard {
         }, { min: 0 });
 
         let skipfirewall = this.#createNumberSelector("dsskip", {
-            title: "Probabilidad de saltarse la Firewall",
+            title: "%Probabilidad de saltarse la Firewall",
             placeholder: "Probabilidad de que el item funcione",
             id: "percentage_skipfirewall"
         }, { min: 0, max: 100 });
 
-        this.#appendChilds(min, [blackjackbet, darkshoplvl, skipfirewall]);
+        let robPerc = this.#createNumberSelector("robperc", {
+            title: "%Probabilidad de robo exitoso",
+            placeholder: "Probabilidad de que el robo funcione",
+            id: "rob-percentage"
+        }, { min: 0, max: 100 });
+
+        this.#appendChilds(min, [blackjackbet, darkshoplvl, skipfirewall, robPerc]);
 
         let bases = this.#createDivSection("bases")
         bases.classList.add("wrap")
@@ -808,7 +820,31 @@ class Dashboard {
             id: "max_curr"
         }, { min: 1 });
 
-        this.#appendChilds(bases, [basedarkshop, currperrep, minexp, maxexp, mincur, maxcur]);
+        let rob_minscs = this.#createNumberSelector("robminscs", {
+            title: "(Robar) %Mínima recompensa de éxito",
+            placeholder: "Debe ser menor que el máximo",
+            id: "rob-min_success"
+        }, { min: 1 });
+
+        let rob_maxscs = this.#createNumberSelector("robmaxscs", {
+            title: "(Robar) %Máxima recompensa de éxito",
+            placeholder: "Debe ser mayor que el mínimo",
+            id: "rob-max_success"
+        }, { min: 1 });
+
+        let rob_minfail = this.#createNumberSelector("robminfail", {
+            title: "(Robar) %Mínimo castigo de fallo",
+            placeholder: "Debe ser menor que el máximo",
+            id: "rob-min_fail"
+        }, { min: 0, max: 100 });
+
+        let rob_maxfail = this.#createNumberSelector("robmaxfail", {
+            title: "(Robar) %Máximo castigo de fallo",
+            placeholder: "Debe ser mayor que el mínimo",
+            id: "rob-max_fail"
+        }, { min: 0, min: 100 });
+
+        this.#appendChilds(bases, [basedarkshop, currperrep, minexp, maxexp, mincur, maxcur, rob_minscs, rob_maxscs, rob_minfail, rob_maxfail]);
 
         this.#appendChilds(contents, [min, bases])
     }

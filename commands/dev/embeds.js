@@ -85,7 +85,7 @@ command.execute = async (interaction, models, params, client) => {
                         .defTitle("¡Bienvenid@ al servidor de JeffreyG!")
                         .defDesc(`**—** Mira la información a continuación y las <#523159573935423509> antes de empezar tu viaje en el servidor.\n
 **Invitación al servidor:**
-> **https://discord.gg/fJvVgkN**
+> ${Emojis.Badge} • https://discord.gg/fJvVgkN
 
 **Y aquí están las redes de Jeffrey**:
 > ${Emojis.YouTube} • https://www.youtube.com/JeffreyG
@@ -296,7 +296,7 @@ ${vipRole} • Usuario que ha ascendido en el servidor, tendrá colores exclusiv
 \`/coins\` • Consigue Jeffros extras en un intervalo de 10 minutos, (o menos).\n
 \`/roullete\` • Puedes conseguir EXP, Jeffros o también PERDERLOS.\n
 \`/rob\` • Puedes intentar robar Jeffros a otro usuario, pero cuidado, también los puedes perder.`)
-                        .defFooter({text: `Los canales que dan EXP y Jeffros lo dirán en su descripción!`, icon: EmojisObject.Danger.url })
+                        .defFooter({text: `Los canales que dan EXP y Jeffros lo dirán en su descripción!`, icon: EmojisObject.Error.url })
                         .defColor(Colores.verde),
                     new Embed()
                         .setImage(awards.attachment)
@@ -321,7 +321,7 @@ ${platinium} • Cuesta **${Emojis.Jeffros}1.800**, se envía el mensaje a ${hal
                         .defDesc(`➟ Los DarkJeffros son otro tipo de moneda dentro del servidor. Si eres menor de nivel 5 no te interesa, *¿por ahora...?*\n
 ➟ Imagina a los ${Emojis.DarkJeffros}DarkJeffros como bitcoins. (Porque es divertido)
 ➟ Estos sólo se pueden conseguir al cambiarlos por ${Emojis.Jeffros}Jeffros.
-➟ Toda la información que necesitas está en ${Emojis.Dark} <#836397833531818004>.`)
+➟ Toda la información que necesitas está en ${Emojis.DarkShop} <#836397833531818004>.`)
                         .defColor(Colores.verde),
                 ], files: [economia.file, jeffros.file, awards.file, darkjeffros.file]
             });
@@ -592,7 +592,7 @@ Ahora, creo que es bastante obvio que lo único que Jeffrey espera de ti es:
                     new Embed()
                         .defTitle(`¿Qué es la DarkShop?`)
                         .defDesc(`
-**—** La DarkShop es otra tienda a parte de la normal \`/shop\`, donde podrás comprar items más atrevidos que pueden perjudicar a otros usuarios.
+**—** La DarkShop es otra tienda a parte de la normal \`/shop\`, donde podrás comprar items más atrevidos que pueden perjudicar a otros usuarios.'\n
 **—** Todos los comandos disponibles los puedes ver en la categoría de la DarkShop con \`/ayuda\`, cuando seas nivel 5.`)
                         .defColor(Colores.nocolor),
                     new Embed()
@@ -620,12 +620,15 @@ Ahora, creo que es bastante obvio que lo único que Jeffrey espera de ti es:
                     new Embed()
                         .defTitle(`¿Eso significa que...?`)
                         .defDesc(`
-**—** Inversiones. Debido a la inflación, puedes llegar incluso a comprar **${Emojis.DarkJeffros}100** por **${Emojis.Jeffros}19.048** que esos mismos **${Emojis.DarkJeffros}100** cuesten **${Emojis.Jeffros}60.000**.
-**—** Mientras más dinero tengas, muchas cosas se volverán más costosas, ten cuidado.\n
-**—** Sólo puedes cambiar **DarkJeffros** los **domingos**, y si pasa toda la semana y no los cambiaste, el próximo domingo **los perderás todos**.
-**—** Puedes usar \`/predict\` para predecir una vez por semana si es buena idea revender tus **DarkJeffros** con la inflación de **ese momento**.
-**—** Dicen que la inflación sigue un patrón, ¿será verdad...?`)
+**—** Inversiones. Debido a la inflación, puedes llegar incluso a comprar **${Emojis.DarkJeffros}100** por **${Emojis.Jeffros}19.048** que esos mismos **${Emojis.DarkJeffros}100** cuesten **${Emojis.Jeffros}60.000**.\n
+**—** Mientras más dinero tengas, muchas cosas se volverán más costosas, ten cuidado.`)
                         .defColor(Colores.nocolor),
+                    new Embed()
+                        .defTitle("Una última cosa...")
+                        .defDesc(`**—** Sólo puedes cambiar **DarkJeffros** los **domingos**, y si pasa toda la semana y no los cambiaste, el próximo domingo **los perderás todos**.\n
+**—** Puedes usar \`/predict\` para predecir una vez por semana si es buena idea revender tus **DarkJeffros** con la inflación de **ese momento**.\n
+**—** Dicen que la inflación sigue un patrón, ¿será verdad...?`)
+                        .defColor(Colores.rojo),
                     new Embed()
                         .defTitle(`Ya estás list@, ve por todas. Vuélvete el próximo TOP 1.`)
                         .defColor(Colores.verdejeffrey)

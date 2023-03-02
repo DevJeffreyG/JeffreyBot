@@ -99,10 +99,11 @@ module.exports = async (client, message) => {
     }
 
     const toMultiply = customMultiplier * multiplier;
+    let currencyToAdd, expToAdd;
 
     try {
-      var currencyToAdd = new Chance().integer({ min: minMoney, max: maxMoney }) * toMultiply
-      var expToAdd = new Chance().integer({ min: minExp, max: maxExp }) * toMultiply
+      currencyToAdd = new Chance().integer({ min: minMoney, max: maxMoney }) * toMultiply
+      expToAdd = new Chance().integer({ min: minExp, max: maxExp }) * toMultiply
     } catch (err) {
       if (err instanceof RangeError) {
         new Log(message)

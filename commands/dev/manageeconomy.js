@@ -36,7 +36,6 @@ command.addOption({
     name: "cantidad",
     desc: "N# de dinero a agregar",
     req: true,
-    min: 1,
     sub: "currency.add"
 })
 
@@ -59,7 +58,6 @@ command.addOption({
     name: "cantidad",
     desc: "N# de dinero DS a agregar",
     req: true,
-    min: 1,
     sub: "darkcurrency.add"
 })
 
