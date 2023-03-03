@@ -83,27 +83,31 @@ command.execute = async (interaction, models, params, client) => {
     const successText = replace(success.text)
     const failedText = replace(fail.text)
 
-    if (successValue === 0) robSuccess = false;
+    let embed, suggester;
+
+    if (successValue <= 0) robSuccess = false;
+
+    console.log(failedValue, successValue, robSuccess)
 
     if (!robSuccess) {
         // Fallido
-        if (failedValue === 0) return new ErrorEmbed(interaction).defDesc("**No tenías suficiente dinero como para hacer eso.**").send();
-        var suggester = getAuthor(fail);
+        if (failedValue <= 0) return new ErrorEmbed(interaction).defDesc("**No tenías suficiente dinero como para hacer eso.**").send();
+        suggester = getAuthor(fail);
 
         user.economy.global.currency -= failedValue;
 
-        var embed = new Embed()
+        embed = new Embed()
             .defColor(Colores.rojo)
             .defDesc(`${failedText}.`);
     } else {
-        var suggester = getAuthor(success);
+        suggester = getAuthor(success);
 
         user.economy.global.currency += successValue;
         victim.economy.global.currency -= successValue;
 
         await victim.save();
 
-        var embed = new Embed()
+        embed = new Embed()
             .defColor(Colores.verdejeffrey)
             .defDesc(`${successText}.`)
     }

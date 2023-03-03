@@ -5,6 +5,7 @@ const moment = require("moment-timezone");
 const Chance = require("chance");
 
 const Colores = require("../resources/colores.json");
+const { inlineCode } = require("discord.js");
 
 class Embed extends Discord.EmbedBuilder {
     /**
@@ -103,7 +104,7 @@ class Embed extends Discord.EmbedBuilder {
 
     #setup(options) {
         const client = require("../../index");
-        const { RandomCumplido } = require("./functions");
+        const { RandomCumplido, ProgressBar } = require("./functions");
         const { type, data } = options
 
         switch (type) {
@@ -171,9 +172,12 @@ class Embed extends Discord.EmbedBuilder {
                     bdString = (day != null) && (month != null) ? `**— Cumpleaños**: ${time(timestamp.toDate(), "D")}. (${time(timestamp.toDate(), "R")})` : "";
                 }
 
+                const expToGet = user.getNextLevelExp() - user.getNextLevelExp(user.economy.global.level - 1); // la exp que hay que ganar en este nivel
+                const expSoFar = user.economy.global.exp - user.getNextLevelExp(user.economy.global.level - 1); // la exp que se lleva hasta ahora
+
                 this.defAuthor({ text: `Estadísticas de ${member.user.tag}`, icon: member.guild.iconURL({ dynamic: true }) })
                     .defDesc(`**— Nivel**: ${curLvl}
-**— EXP**: ${curExp} / ${nxtLvlExp}
+**— EXP**: ${ProgressBar(expSoFar/expToGet*100, {blocks: 5})} ${inlineCode(`${curExp} / ${nxtLvlExp}`)}
 **— ${Currency.name}**: ${Currency}${actualCurrency}
 **— Puntos de reputación**: ${rep}
 ${bdString}`)
