@@ -558,111 +558,106 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
   })
 
   // buscar temp bans
-  GlobalDatas.find({
+  let tempBans = await GlobalDatas.find({
     "info.type": "temporalGuildBan",
     "info.guild_id": guild.id
-  }, (err, tempBans) => {
-    if (err) throw err;
+  });
 
-    if (tempBans) {
-      for (let i = 0; i < tempBans.length; i++) {
-        let ban = tempBans[i];
-        let userID = ban.info.userID;
-        let since = ban.info.since;
-        let realDuration = ban.info.duration;
-        let today = new Date();
+  if (tempBans) {
+    for (let i = 0; i < tempBans.length; i++) {
+      let ban = tempBans[i];
+      let userID = ban.info.userID;
+      let since = ban.info.since;
+      let realDuration = ban.info.duration;
+      let today = new Date();
 
-        if (today - since >= realDuration) {
-          // ya pasó el tiempo, unban
-          try {
-            guild.members.unban(userID);
-          } catch (err) {
-            console.log(err);
-          }
-          tempBans[i].remove();
+      if (today - since >= realDuration) {
+        // ya pasó el tiempo, unban
+        try {
+          guild.members.unban(userID);
+        } catch (err) {
+          console.log(err);
+        }
+        tempBans[i].remove();
 
-          let unBEmbed = new EmbedBuilder()
-            .setAuthor(`Unban`, guild.iconURL())
-            .setDescription(`
+        let unBEmbed = new EmbedBuilder()
+          .setAuthor(`Unban`, guild.iconURL())
+          .setDescription(`
         **—** Usuario desbaneado: **${userID}**.
         **—** Razón: **${ban.info.reason}**.
             `)
-            .setColor(Colores.verde);
+          .setColor(Colores.verde);
 
-          logs.send({ embeds: [unBEmbed] })
-          console.log("Se ha desbaneado a", userID)
-        }
+        logs.send({ embeds: [unBEmbed] })
+        console.log("Se ha desbaneado a", userID)
       }
     }
-  })
+  }
 
   // buscar encuestas
-  GlobalDatas.find({ "info.type": "temporalPoll", "info.guild_id": guild.id }, async (err, polls) => {
-    if (err) throw err;
+  let polls = await GlobalDatas.find({ "info.type": "temporalPoll", "info.guild_id": guild.id });
+  for (let i = 0; i < polls.length; i++) {
+    const poll = polls[i].info;
 
-    for (let i = 0; i < polls.length; i++) {
-      const poll = polls[i].info;
-
-      if (moment().isAfter(poll.until)) {
-        let c = guild.channels.cache.find(x => x.id === poll.channel_id);
-        let msg = await c.messages.fetch(poll.message_id);
+    if (moment().isAfter(poll.until)) {
+      let c = guild.channels.cache.find(x => x.id === poll.channel_id);
+      let msg = await c.messages.fetch(poll.message_id);
 
 
 
-        /* const reactions = msg.reactions.cache;
+      /* const reactions = msg.reactions.cache;
 
-        let reactionsInPoll = await new Promise(async (resolve, reject) => {
-          let count = {
-            no: [],
-            yes: []
+      let reactionsInPoll = await new Promise(async (resolve, reject) => {
+        let count = {
+          no: [],
+          yes: []
+        }
+
+        for (const reaction of reactions) {
+
+          let usersInThis = await reaction[1].users.fetch();
+
+          if (reaction[0] === "❌") {
+            usersInThis.forEach(async user => {
+              if (!user.bot) count.no.push(user.id)
+            });
+          } else {
+            usersInThis.forEach(async user => {
+              if (!user.bot) count.yes.push(user.id)
+            });
           }
+        }
+        resolve(count);
+      }) */
 
-          for (const reaction of reactions) {
+      const { yes, no } = poll;
 
-            let usersInThis = await reaction[1].users.fetch();
+      let textEmbed = new Embed()
+        .defColor(Colores.verdeclaro)
+        .defAuthor({ text: "La encuesta del STAFF terminó:", title: true })
+        .defDesc(poll.poll + `\n\n**LOS USUARIOS DICEN:**`)
+        .defField(`${msg.client.Emojis.Check} SÍ:`, `${yes.length}`, true)
+        .defField(`${msg.client.Emojis.Cross} NO:`, `${no.length}`, true);
 
-            if (reaction[0] === "❌") {
-              usersInThis.forEach(async user => {
-                if (!user.bot) count.no.push(user.id)
-              });
-            } else {
-              usersInThis.forEach(async user => {
-                if (!user.bot) count.yes.push(user.id)
-              });
-            }
-          }
-          resolve(count);
-        }) */
+      await msg.reactions.removeAll();
 
-        const { yes, no } = poll;
+      if (no.length === 0 && yes.length === 0) textEmbed.setFooter({ text: "TERMINÓ...! y... no... ¿votó nadie...? :(" });
 
-        let textEmbed = new Embed()
-          .defColor(Colores.verdeclaro)
-          .defAuthor({ text: "La encuesta del STAFF terminó:", title: true })
-          .defDesc(poll.poll + `\n\n**LOS USUARIOS DICEN:**`)
-          .defField(`${msg.client.Emojis.Check} SÍ:`, `${yes.length}`, true)
-          .defField(`${msg.client.Emojis.Cross} NO:`, `${no.length}`, true);
+      let replyMsg = await msg.reply({ embeds: [textEmbed] });
 
-        await msg.reactions.removeAll();
+      const row = new ActionRowBuilder()
+        .setComponents(
+          new ButtonBuilder()
+            .setLabel("Resultados")
+            .setURL(replyMsg.url)
+            .setStyle(ButtonStyle.Link)
+        )
 
-        if (no.length === 0 && yes.length === 0) textEmbed.setFooter({ text: "TERMINÓ...! y... no... ¿votó nadie...? :(" });
+      msg.edit({ components: [row] });
 
-        let replyMsg = await msg.reply({ embeds: [textEmbed] });
-
-        const row = new ActionRowBuilder()
-          .setComponents(
-            new ButtonBuilder()
-              .setLabel("Resultados")
-              .setURL(replyMsg.url)
-              .setStyle(ButtonStyle.Link)
-          )
-
-        msg.edit({ components: [row] });
-
-        polls[i].remove();
-      }
+      polls[i].remove();
     }
-  })
+  }
 
   // buscar tickets sin respuesta
   ticketReminder:
@@ -883,7 +878,7 @@ const handleUploads = async function (client) {
       // youtube
       let comentarios = ["Ha llegado el momento, chécalo para evitar que Jeffrey entre en depresión", "Dale like o comenta algo si te gustó lo suficiente :D", "Espero que nos veamos en la próxima, ¡y que no sea en 3 meses!", "BROOOO Está rebueno míralo, a lo bien.", "No sabría decir si es lamentable, espero que no, ¿por qué no lo ves para comprobarlo y me dices qué tal?"]
       let short_comentarios = ["Venga va, que es menos de un minuto chécalo."]
-      
+
       let comentario = GetRandomItem(comentarios);
       let short_comentario = GetRandomItem(short_comentarios);
 
@@ -920,7 +915,7 @@ const handleUploads = async function (client) {
               changed = true;
               noti.info.lastVideo = itemId;
 
-              if(isShort) {
+              if (isShort) {
                 bellytChannel.send({ content: `**¡NUEVO SHORT, ${ytShortsRole}!**\n\n${short_comentario}\n\n➟ https://www.youtube.com/shorts/${videoId}` });
               } else {
                 bellytChannel.send({ content: `**:fire::zap:️¡NUEVO VÍDEO, ${ytRole}!:zap:️:fire:**\n\n${comentario}\n\n➟ ${videoLink}` });
@@ -1187,39 +1182,36 @@ const AfterInfraction = async function (user, data) {
       banMember = true
 
 
-      GlobalDatas.findOne({
+      let guildBan = await GlobalDatas.findOne({
         "info.type": "temporalGuildBan",
         "info.userID": member.id,
         "info.guild_id": guild.id
-      }, (err, guildBan) => {
-        if (err) throw err;
-
-        let now = new Date();
-
-        if (!guildBan) {
-          const newBan = new GlobalDatas({
-            info: {
-              type: "temporalGuildBan",
-              userID: member.id,
-              guild_id: guild.id,
-              reason: `AutoMod. (Infringir "${rule}")`,
-              since: now,
-              duration: ms("1d")
-            }
-          });
-
-          newBan.save();
-        } else {
-          // si ya existe (how) cambiar el since
-          guildBan.info.since = now;
-          guildBan.save();
-
-        }
-
-        setTimeout(function () {
-          guild.unban(member.id)
-        }, ms("1d"));
       });
+
+      let now = new Date();
+
+      if (!guildBan) {
+        const newBan = new GlobalDatas({
+          info: {
+            type: "temporalGuildBan",
+            userID: member.id,
+            guild_id: guild.id,
+            reason: `AutoMod. (Infringir "${rule}")`,
+            since: now,
+            duration: ms("1d")
+          }
+        });
+
+        newBan.save();
+      } else {
+        // si ya existe (how) cambiar el since
+        guildBan.info.since = now;
+        guildBan.save();
+      }
+
+      setTimeout(function () {
+        guild.unban(member.id)
+      }, ms("1d"));
     } else
 
       if (totalWarns >= 2) {
