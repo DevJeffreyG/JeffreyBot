@@ -20,10 +20,8 @@ command.execute = async (interaction, models, params, client) => {
 
     const { mensajes } = params;
 
-    const total = mensajes.value;
-
+    let toremove = mensajes.value;
     let count = 0;
-    let toremove = total;
 
     while (toremove > 0) {
         console.log("-----------------------------------------")

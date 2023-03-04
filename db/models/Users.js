@@ -13,7 +13,7 @@ const Schema = new mongoose.Schema({
             rule_id: { type: Number },
             madeTicket: { type: Boolean, default: false },
             proof: { type: String, default: null },
-            date: { type: Date, default: () => { return new Date() }},
+            date: { type: Date, default: () => { return new Date() } },
             id: { type: Number, sparse: true }
         }
     ],
@@ -21,8 +21,8 @@ const Schema = new mongoose.Schema({
         {
             rule_id: { type: Number },
             madeTicket: { type: Boolean, default: false },
-            proof: { type: String, default:  null },
-            date: { type: Date, default: () => { return new Date() }},
+            proof: { type: String, default: null },
+            date: { type: Date, default: () => { return new Date() } },
             id: { type: Number, sparse: true }
         }
     ],
@@ -195,6 +195,7 @@ Schema.static("getOrCreate", async function ({ user_id, guild_id }) {
 
 Schema.method("getNextLevelExp", function (level = null) {
     if (!level) level = this.economy.global.level;
+    if (level < 0) return 0;
 
     return 10 * (level ** 2) + 50 * level + 100;
 })

@@ -80,7 +80,7 @@ ${codeBlock("javascript", data.error)}`])
                 break;
 
             case "selfRep":
-                this.#errorName("Auto rep")
+                this.#errorName("Auto Rep")
                 this.#errorAuthor(4);
                 this.#errorDesc("No puedes darte un punto de reputación a ti mismo", data)
                 break;
@@ -142,6 +142,7 @@ ${codeBlock("json", `{ FATAL ERROR, ID ${data.id}, UNKNOWN "${data.unknown}`)}`]
                 break;
 
             case "execError":
+                this.#errorName("Error en ejecución")
                 this.#errorAuthor(14)
                 this.#errorDesc("Error al ejecutar el comando", data.command ?? this.interaction?.commandName, [data.guide])
                 break;

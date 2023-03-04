@@ -43,9 +43,9 @@ class Top {
                 await this.#expTop();
                 break;
 
-            /* case "rep":
+            case "rep":
                 await this.#repTop();
-                break; */
+                break;
 
             case "warns":
                 await this.#warnsTop();
@@ -140,7 +140,7 @@ class Top {
         }
     }
 
-    /* async #repTop() {
+    async #repTop() {
         this.base.title = "Top de Reputaciones"
 
         this.users.forEach(user => {
@@ -149,7 +149,7 @@ class Top {
             if (member && !member.user.bot) {
                 let toPush = {
                     user_id: member.user.id,
-                    total: user.data.counts.reps
+                    total: user.economy.global.reputation
                 }
 
                 if(toPush.total != 0) this.#res.push(toPush)
@@ -165,14 +165,14 @@ class Top {
         // determinar el texto a agregar
         for await (const user of this.#res) {
             const txt = this.#getTxt(user, [
-                `Reputaciones: \`${user.data.counts.reps.toLocaleString("es-CO")}\``
+                `Reputaciones: \`${user.total.toLocaleString("es-CO")}\``
             ])
 
             this.top.set(user.user_id, {
                 txt
             })
         }
-    } */
+    }
 
     async #warnsTop() {
         this.base.title = "Top de Warns"
@@ -214,6 +214,9 @@ class Top {
         let textRank;
 
         switch (number) {
+            case 0:
+                textRank = `probablemente el último`;
+                break;
             case 1:
                 textRank = `🏆${number}ro`;
                 break;

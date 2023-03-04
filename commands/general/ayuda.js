@@ -20,7 +20,7 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ ephemeral: true });
     const guild = interaction.guild;
     const member = interaction.member;
-    const helpEmojiURL = client.EmojisObject.Faq.url
+    const helpEmojiURL = client.EmojisObject.Check.url
     const doc = await Guilds.getOrCreate(guild.id);
 
     // get all commands

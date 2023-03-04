@@ -1,6 +1,6 @@
 const { ApplicationCommandType, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageContextMenuCommandInteraction, Client, hyperlink, codeBlock } = require("discord.js");
 const { Colores } = require("../../src/resources");
-const { ContextMenu, Categories, Embed, Confirmation, ErrorEmbed, Log, LogReasons, ChannelModules } = require("../../src/utils");
+const { ContextMenu, Categories, Embed, Confirmation, ErrorEmbed, Log, LogReasons, ChannelModules, GetRandomItem } = require("../../src/utils");
 
 const ms = require("ms")
 
@@ -56,8 +56,8 @@ command.execute = async (interaction, models, params, client) => {
 
     const filter = (inter) => inter.user.id === interaction.user.id;
 
-    const component = await msg.awaitMessageComponent({ filter, time: ms("1m") }).catch(err => {});
-    if(!component) return;
+    const component = await msg.awaitMessageComponent({ filter, time: ms("1m") }).catch(err => { });
+    if (!component) return;
 
     component.deferUpdate();
 
@@ -65,17 +65,17 @@ command.execute = async (interaction, models, params, client) => {
     const user = await Users.getOrCreate({ user_id: interaction.user.id, guild_id: interaction.guild.id });
     const message_user = await Users.getOrCreate({ user_id: message.author.id, guild_id: interaction.guild.id });
 
-    const hall = await interaction.guild.channels.fetch(doc.getChannel("general.halloffame")).catch(err => {});
-    if(!hall) {
+    const hall = await interaction.guild.channels.fetch(doc.getChannel("general.halloffame")).catch(err => { });
+    if (!hall) {
         new Log(interaction)
-        .setReason(LogReasons.Error)
-        .setTarget(ChannelModules.StaffLogs)
-        .send({
-            embeds: [
-                new ErrorEmbed()
-                    .defDesc(`**No se pudo encontrar el canal configurado para los Awards.**`)
-            ]
-        })
+            .setReason(LogReasons.Error)
+            .setTarget(ChannelModules.StaffLogs)
+            .send({
+                embeds: [
+                    new ErrorEmbed()
+                        .defDesc(`**No se pudo encontrar el canal configurado para los Awards.**`)
+                ]
+            })
 
         return new ErrorEmbed(interaction, {
             type: "execError",
@@ -97,7 +97,7 @@ command.execute = async (interaction, models, params, client) => {
     ], interaction)
     if (!confirmation) return;
 
-    if(!user.canBuy(price)) return new ErrorEmbed(interaction, {
+    if (!user.canBuy(price)) return new ErrorEmbed(interaction, {
         type: "economyError",
         data: {
             action: "Dar Award",
@@ -108,7 +108,7 @@ command.execute = async (interaction, models, params, client) => {
 
     const hallEmbed = new Embed();
     const star = hyperlink("★", message.url);
-    var content = message.content;
+    let content = message.content;
 
     // Tiene attachments
     if (message.attachments.size !== 0) {
@@ -116,9 +116,7 @@ command.execute = async (interaction, models, params, client) => {
         content = `${message.content} ${hyperlink("archivo", firstAttachment.url)}`;
 
         hallEmbed.setImage(firstAttachment.url);
-    } else
-    // El mensaje tiene embeds
-    if (message.embeds.length != 0) { 
+    } else if (message.embeds.length != 0) { // El mensaje tiene embeds
         let firstEmbed = message.embeds[0];
 
         if (!firstEmbed.video && firstEmbed.url) { // es una imagen
@@ -138,36 +136,52 @@ command.execute = async (interaction, models, params, client) => {
 
             content = firstEmbed.description ?? incaseofField;
         }
-    }
+    } else if (message.system) content = "[ Mensaje de sistema ]";
 
-    hallEmbed.defAuthor({ text: message.author.tag, icon: message.author.displayAvatarURL() });
+    let titulos = [
+        "Una vez una fuente de sabiduría dijo:",
+        "Y entonces la verdad habló y dijo:",
+        "La verdad se dijo, y fue:",
+        "Fue cuando la verdad se alzó:"
+    ]
+
+    let text = GetRandomItem(titulos);
+
+    hallEmbed.defAuthor({ text, icon: client.EmojisObject[`Tier${tierNum}`].url });
     hallEmbed.defDesc(`${star} ${content}`);
     hallEmbed.defColor(message.member.displayHexColor);
-    hallEmbed.defFooter({text: `▸ Premio de Tier ${tierNum} por ${interaction.user === message.author ? `ellos mismos, ${interaction.user.tag}` : interaction.user.tag}`, timestamp: true});
+    hallEmbed.defFooter({ text: `Mensaje por ${message.author.tag}・Premio de Tier ${tierNum} por ${interaction.user === message.author ? `ellos mismos, ${interaction.user.tag}` : interaction.user.tag}`, icon: message.author.displayAvatarURL({ dynamic: true }) });
 
     // Pagar
-    user.economy.global.currency -= price;
-    message_user.addCurrency(gift);
-
-    await user.save();
+    if (user.user_id == message_user.user_id) {
+        user.addCurrency((-price) + gift);
+    } else {
+        user.economy.global.currency -= price;
+        message_user.addCurrency(gift);
+        await user.save();
+    }
 
     // Enviar mensaje
     try {
-        await hall.send({embeds: [hallEmbed]});
-    } catch(err) {
+        await hall.send({ embeds: [hallEmbed] });
+    } catch (err) {
         new Log(interaction)
             .setReason(LogReasons.Error)
             .setTarget(ChannelModules.StaffLogs)
-            .send({embeds: [
-                new ErrorEmbed()
-                    .defDesc(`**No se pudo enviar el mensaje al canal de los Awards.**${codeBlock("json", err)}`)
-            ]});
-        interaction.followUp({ephemeral: true, embeds: [new ErrorEmbed(interaction, {
-            type: "execError",
-            data: {
-                guide: "No pude enviar el mensaje al canal, avísale a los Administradores. El autor del mensaje sí se recibió el premio."
-            }
-        })]})
+            .send({
+                embeds: [
+                    new ErrorEmbed()
+                        .defDesc(`**No se pudo enviar el mensaje al canal de los Awards.**${codeBlock("json", err)}`)
+                ]
+            });
+        interaction.followUp({
+            ephemeral: true, embeds: [new ErrorEmbed(interaction, {
+                type: "execError",
+                data: {
+                    guide: "No pude enviar el mensaje al canal, avísale a los Administradores. El autor del mensaje sí se recibió el premio."
+                }
+            })]
+        })
     }
 
     return interaction.editReply({
