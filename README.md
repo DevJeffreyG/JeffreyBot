@@ -1,7 +1,4 @@
 <div align="center">
-
-  <!---[![LastUpdate](https://media.discordapp.net/attachments/485191462422577182/870102754004189194/itsdark.png)](https://discord.gg/fJvVgkN)--->
-  
   <a href=https://discord.gg/fJvVgkN><img src="src/resources/imgs/GitBanner.png"></a>
   
   [![JeffreyGServer](https://img.shields.io/discord/447797737216278528.svg?label=JG%20Server&logo=Discord&color=%235865F2&style=for-the-badge)](https://discord.gg/fJvVgkN)
@@ -21,4 +18,4 @@ Más información próximamente en la [nueva página web](https://jeffreybot.onr
 # Créditos
 - [Discord.JS](https://github.com/discordjs/discord.js).
 - [MongoDB (mongoose)](https://www.mongodb.com) en el backend.
-- [@Jleguim](https://github.com/Jleguim/) en algunas de las funciones.
+- 💜 [@Jleguim](https://github.com/Jleguim/) en el early-dev.

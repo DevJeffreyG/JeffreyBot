@@ -198,7 +198,7 @@ Schema.static("getOrCreate", async function ({ user_id, guild_id }) {
 })
 
 Schema.method("getNextLevelExp", function (level = null) {
-    if (!level) level = this.economy.global.level;
+    if (level === null) level = this.economy.global.level;
     if (level < 0) return 0;
 
     return 10 * (level ** 2) + 50 * level + 100;

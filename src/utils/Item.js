@@ -3,7 +3,7 @@ const moment = require("moment-timezone");
 const ms = require("ms")
 const Chance = require("chance");
 
-const { ItemTypes, ItemObjetives, ItemActions, ItemEffects, LogReasons, ChannelModules } = require("./Enums");
+const { ItemTypes, ItemObjetives, ItemActions, ItemEffects, LogReasons, ChannelModules, BoostObjetives } = require("./Enums");
 
 const { FindNewId, LimitedTime, Subscription, WillBenefit, GetRandomItem } = require("./functions");
 
@@ -483,7 +483,7 @@ class Item {
             return false;
         }
 
-        const willBenefit = await WillBenefit(this.member, [this.boost_objetive, "any"])
+        const willBenefit = await WillBenefit(this.member, [this.boost_objetive, BoostObjetives.All])
         if (willBenefit) {
             console.log("🔴 Se beneficiaría aún más")
             this.hasboost.send();

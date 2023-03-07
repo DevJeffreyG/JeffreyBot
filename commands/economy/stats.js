@@ -56,7 +56,7 @@ command.execute = async (interaction, models, params, client) => {
 
             embed
                 .defField(`— 🚀 Boost de ${boostobj} x${value}`,
-                    `▸ Hasta: ${time(moment(boost.active_until).toDate())}${disabled ? `\n▸ **Desactivado**.` : ""}`, true);
+                    `▸ Hasta: ${time(boost.active_until)} (${time(boost.active_until, "R")})${disabled ? `\n▸ **Desactivado**.` : ""}`, true);
         }
     }
 

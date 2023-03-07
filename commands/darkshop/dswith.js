@@ -34,7 +34,7 @@ command.execute = async (interaction, models, params, client) => {
         data: {
             action: "change",
             error: `No tienes tanto dinero para cambiar.
-**▸** Quieres cambiar: **${DarkCurrency}${quantity.toLocaleString("es-CO")}*`,
+**▸** Quieres cambiar: **${DarkCurrency}${quantity.toLocaleString("es-CO")}**`,
             money: usermoney,
             darkshop: true
         }

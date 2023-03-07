@@ -50,7 +50,6 @@ command.execute = async (interaction, models, params, client) => {
             try { await guild.edit({ features: interaction.guild.features.concat(GuildFeature.InvitesDisabled) }) } catch (err) { } */
 
         await interaction.editReply({ content: `${Loading} Obteniendo roles`, embeds: [] })
-        await guild.roles.fetch();
 
         // creacion de permisos denegados que va a tener cada role
         let revokedPermissions = [

@@ -22,10 +22,10 @@ module.exports = async (client, member) => {
   if(doc.moduleIsActive("functions.save_roles_onleft", doc.settings)) user.data.backup_roles.forEach(roleId => {
     const role = guild.roles.cache.find(x => x.id === roleId);
     if (role) member.roles.add(role);
-  })
 
-  user.data.backup_roles = [];
-  user.save();
+    user.data.backup_roles = [];
+    user.save();
+  })
 
   let reglasC = guild.channels.cache.get(doc.getChannel("general.rules"));
   let infoC = guild.channels.cache.get(doc.getChannel("general.information"));

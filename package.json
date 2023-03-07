@@ -13,20 +13,7 @@
     "type": "git",
     "url": "git+https://github.com/DevJeffreyG/JeffreyBot.git"
   },
-  "keywords": [
-    "discord",
-    "jeffreyg",
-    "discord",
-    "bot",
-    "discord",
-    "moderation",
-    "discord",
-    "administration",
-    "economy",
-    "fun"
-  ],
   "author": "DevJeffreyG",
-  "license": "ISC",
   "bugs": {
     "url": "https://github.com/DevJeffreyG/JeffreyBot/issues"
   },

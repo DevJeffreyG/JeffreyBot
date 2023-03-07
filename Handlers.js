@@ -185,8 +185,6 @@ class Handlers {
                 const author_info = embed.data.author.name.split(" ");
                 const tag = author_info.find(x => x.includes("#"));
 
-                await this.interaction.guild.members.fetch()
-
                 const member = this.interaction.guild.members.cache.find(x => x.user.tag === tag);
 
                 if (!this.user.hasReminderFor(member.id)) {

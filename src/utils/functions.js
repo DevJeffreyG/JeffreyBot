@@ -1587,12 +1587,13 @@ const UpdateObj = function (obj, prop, value) {
  * @param {Number} percentage En termino de porcentaje (10, 90, 100, 50, etc)
  * @param {{blocks: Number, emptyChr: String, fullChr: String}} options 
  */
-const ProgressBar = function (percentage, options = { blocks: 10, emptyChr: "⬜", fullChr: "🟩" }) {
+const ProgressBar = function (percentage, options = { max: 100, blocks: 10, emptyChr: "⬜", fullChr: "🟩" }) {
   const empty = options.emptyChr ?? "⬜";
   const full = options.fullChr ?? "🟩";
   const blocks = options.blocks ?? 10;
+  const max = options.max ?? 100;
 
-  let fullNum = Math.floor(blocks * percentage / 100);
+  let fullNum = Math.floor(blocks * percentage / max);
   let emptyNum = Math.floor(blocks - fullNum);
 
   let fullBlocks = full.repeat(fullNum)

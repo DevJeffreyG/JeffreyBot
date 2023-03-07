@@ -9,7 +9,7 @@ const Shop = require("./Shop");
 const DarkShop = require("./DarkShop");
 const Top = require("./Top");
 const Item = require("./Item");
-const RoulleteItem = require("./RouletteItem");
+const RouletteItem = require("./RouletteItem");
 const Managers = require("./Managers");
 const Blackjack = require("./Blackjack");
 const Log = require("./Log");
@@ -31,7 +31,7 @@ module.exports = {
     DarkShop,
     Top,
     Item,
-    RoulleteItem,
+    RouletteItem,
     Managers,
     Blackjack,
     Log,

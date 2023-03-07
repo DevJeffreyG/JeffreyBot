@@ -26,7 +26,7 @@ command.execute = async (interaction, models, params, client) => {
 
     const randomItem = await getRandom(rouletteItems);
     if(randomItem === -1){
-        user.delCooldown("roulette")
+        user.delCooldown(Cooldowns.Roulette)
         return interaction.editReply({content: "No me la vas a creer, pero no pude encontrar un item indicado para ti :("})
     }
     const item = await new RouletteItem(interaction, randomItem).build();

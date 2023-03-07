@@ -61,8 +61,7 @@ class Top {
         const { Currency, DarkCurrency } = this.interaction.client.getCustomEmojis(this.interaction.guild.id);
         const darkshop = new DarkShop(this.interaction.guild);
 
-        this.base.title = `Top de ${Currency.name}`
-        await this.interaction.guild.members.fetch();
+        this.base.title = `Top de ${Currency.name}`;
 
         for await (const user of this.users) {
             const member = this.interaction.guild.members.cache.get(user.user_id) ?? null;

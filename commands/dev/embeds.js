@@ -199,7 +199,7 @@ ${sugsChannel} •  Aquí se enviarán las sugerencias que hagan los usuarios (\
 
                     new Embed()
                         .defTitle(`— AutoService • Categoría que reúne los canales para personalizar tu usuario en el server.`)
-                        .defDesc(`<#1076558199638990848> • Un canal con la información que necesitas para definir tu cumpleaños en el servidor.\n
+                        .defDesc(`<#1080197287977959486> • Un canal con la información que necesitas para definir tu cumpleaños en el servidor.\n
 <#473627930396852226> • Aquí podrás obtener los roles opcionales que desbloquean más canales según tus preferencias.\n
 <#595986219364646923> • Cuando eres VIP, podrás tener más roles opcionales como parte de tus beneficios.\n
 <#524647331551772672> • Escoge el color de cómo quieres que se vea tu nombre.\n
@@ -294,7 +294,7 @@ ${vipRole} • Usuario que ha ascendido en el servidor, tendrá colores exclusiv
                         .defTitle(`— ¿Qué son los ${Emojis.Jeffros}Jeffros?`)
                         .defDesc(`➟ Los Jeffros son la moneda ficticia dentro del servidor, se consiguen al hablar en algunos canales, y con algunos comandos de Jeffrey Bot:\n
 \`/coins\` • Consigue Jeffros extras en un intervalo de 10 minutos, (o menos).\n
-\`/roullete\` • Puedes conseguir EXP, Jeffros o también PERDERLOS.\n
+\`/roulette\` • Puedes conseguir EXP, Jeffros o también PERDERLOS.\n
 \`/rob\` • Puedes intentar robar Jeffros a otro usuario, pero cuidado, también los puedes perder.`)
                         .defFooter({ text: `Los canales que dan EXP y Jeffros lo dirán en su descripción!`, icon: EmojisObject.Error.url })
                         .defColor(Colores.verde),
