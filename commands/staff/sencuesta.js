@@ -20,21 +20,21 @@ command.addOption({
 
 command.addOption({
     type: "string",
-    name: "anuncio",
-    desc: "La encuesta en sí",
+    name: "encuesta",
+    desc: "¿Cuál es la encuesta para hacerle a los usuarios?",
     req: true
 })
 
 command.execute = async (interaction, models, params, client) => {
 
     await interaction.deferReply();
-    const { duracion, anuncio } = params;
+    const { duracion, encuesta } = params;
     const { GlobalDatas, Guilds } = models;
 
     const doc = await Guilds.getOrCreate(interaction.guild.id);
 
     const duration = ms(duracion.value) || Infinity;
-    const poll = anuncio.value;
+    const poll = encuesta.value;
 
     const guild = interaction.guild;
     const channel = interaction.guild.channels.cache.get(doc.getChannel("general.announcements"));

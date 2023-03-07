@@ -50,8 +50,7 @@ command.execute = async (interaction, models, params, client) => {
     let embed = new Embed()
         .defAuthor({ text: interaction.user.tag, icon: interaction.member.displayAvatarURL() })
         .defTitle("Sugerencia")
-        .defDesc(`**—** Por: ${interaction.member}
-**—** Sugiere:
+        .defDesc(`**—** ${interaction.member} Sugiere:
 ${codeBlock(sugerencia)}
 **—** ID: \`${newId}\`.`)
         .defColor(Colores.verdejeffrey);

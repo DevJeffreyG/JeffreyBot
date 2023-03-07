@@ -3,7 +3,7 @@ const { Command, Categories, Confirmation, Log, LogReasons, ChannelModules, Erro
 
 const command = new Command({
     name: "lockdown",
-    desc: "Deshabilita temporalmente el canal donde se ejecuta el comando.",
+    desc: "Deshabilita temporalmente el canal donde se ejecuta el comando",
     category: Categories.Administration
 })
 

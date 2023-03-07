@@ -31,10 +31,10 @@ command.execute = async (interaction, models, params, client) => {
     const economy = user.economy.dark;
 
     const currency = economy?.currency.toLocaleString("es-CO") ?? "?";
-    const accuracy = economy?.accuracy ?? "?";
+    const accuracy = economy?.accuracy ?? 0;
 
     let meEmbed = new Embed()
-        .defAuthor({ text: `Estadísiticas del usuario N°${member.id}`, icon: client.EmojisObject.Dark.url })
+        .defAuthor({ text: `Estadísiticas del usuario N°${member.id}`, icon: client.EmojisObject.DarkShop.url })
         .defDesc(`**— ${DarkCurrency.name}**: **${DarkCurrency}${currency}**.
 **— Precisión**: ${ProgressBar(accuracy)} ${inlineCode(accuracy + "%")}
 **— Items**: Usa \`/dsinventory\`.`)

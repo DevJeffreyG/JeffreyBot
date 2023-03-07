@@ -17,7 +17,7 @@ command.addOption({
 command.addOption({
     type: "user",
     name: "usuario",
-    desc: "El usuario con el que vas a afectar el item (DarkShop)",
+    desc: "[DS] El usuario con el que vas a afectar el item",
     req: false
 })
 

@@ -18,7 +18,7 @@ command.addOption({
 command.addOption({
     type: "attachment",
     name: "pruebas",
-    desc: "La pruebas de que lo pasó es real",
+    desc: "Las pruebas de que el usuario infringió las reglas",
     req: true
 })
 

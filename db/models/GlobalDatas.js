@@ -58,9 +58,10 @@ Schema.static("newTempRoleDeletion", async function (data) {
                 type: "temproledeletion",
                 user_id: data.user_id,
                 guild_id: data.guild_id,
-                role_id: data.role_id,
+                role_id: data.role_id ?? null,
                 until: moment().add(data.duration, "ms").toDate(),
-                boost: data.boost ?? null
+                boost: data.boost ?? null,
+                tempRoleObjectId: data.tempRoleObjectId ?? null
             }
         }).save();
 })

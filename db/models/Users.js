@@ -79,7 +79,7 @@ const Schema = new mongoose.Schema({
         backup_roles: { type: Array },
         temp_roles: [
             {
-                role_id: { type: String, required: true },
+                role_id: { type: String },
                 active_until: { type: Date, required: true },
                 special: {
                     type: { type: Number, default: null },
@@ -140,7 +140,11 @@ const Schema = new mongoose.Schema({
                     return this.economy.dark.darkjeffros || 0;
                 }, integer: true
             },
-            accuracy: { type: Number, default: null },
+            accuracy: {
+                type: Number, default: () => {
+                    return Number((Math.random() * 10).toFixed(1))
+                }
+            },
             until: { type: Date, default: null }
         }
     }

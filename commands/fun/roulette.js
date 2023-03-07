@@ -5,7 +5,7 @@ const RouletteItem = require("../../src/utils/RouletteItem");
 
 const command = new Command({
     name: "roulette",
-    desc: "Gira la ruleta diariamente para conseguir premios o CASTIGOS",
+    desc: "Gira la ruleta para conseguir premios o CASTIGOS",
     category: Categories.Fun
 })
 

@@ -43,7 +43,7 @@ command.execute = async (interaction, models, params, client) => {
     const calculation = await darkshop.equals(inflation, toCalc);
 
     let stonksEmbed = new Embed()
-        .defAuthor({ text: `Cálculo`, icon: EmojisObject.Dark.url })
+        .defAuthor({ text: `Cálculo`, icon: EmojisObject.DarkShop.url })
         .defDesc(`📊 **— ${inflation}%**.
 **— ${DarkCurrency}${toCalc.toLocaleString('es-CO')} = ${Currency}${calculation.toLocaleString('es-CO')}**.`)
         .setColor(Colores.negro);

@@ -8,18 +8,18 @@ const command = new Command({
 
 command.addSubcommand({
     name: "warn",
-    desc: "Eliminar un warn por su id"
+    desc: "Eliminar un warn por su ID"
 })
 
 command.addSubcommand({
     name: "softwarn",
-    desc: "Eliminar un softwarn por su id"
+    desc: "Eliminar un softwarn por su ID"
 })
 
 command.addOption({
     type: "integer",
     name: "id",
-    desc: "El id del warn a eliminar",
+    desc: "El ID del warn a eliminar",
     sub: "warn",
     req: true
 })
@@ -27,7 +27,7 @@ command.addOption({
 command.addOption({
     type: "integer",
     name: "id",
-    desc: "El id del softwarn a eliminar",
+    desc: "El ID del softwarn a eliminar",
     sub: "softwarn",
     req: true
 })

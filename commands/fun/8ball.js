@@ -19,6 +19,7 @@ command.execute = async (interaction, models, params, client) => {
 
     let answer = Math.floor(Math.random() * replies.length);
     const {pregunta} = params;
+    if(pregunta.value.length == 0) return interaction.editReply({content: "No hubo una pregunta..."})
 
     let pregEmbed = new Embed()
       .defColor(Colores.verde)
@@ -26,7 +27,7 @@ command.execute = async (interaction, models, params, client) => {
       .defField("Pregunta", pregunta.value)
       .defField("Respuesta", replies[answer]);
 
-    return interaction.reply({embeds: [pregEmbed]});
+    return interaction.deferred ? interaction.editReply({embeds: [pregEmbed]}) : interaction.reply({embeds: [pregEmbed]});
 }
 
 module.exports = command;

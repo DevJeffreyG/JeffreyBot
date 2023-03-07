@@ -42,28 +42,10 @@ module.exports = async (client) => {
     client.crashChannel = await devChannels.get(Bases.dev.crashes);
     client.logChannel = await devChannels.get(Bases.dev.logs);
 
-    if(!client.mapped) {
+    if (!client.mapped) {
         const CommandsLoad = new Commands(["./commands/", "./contextmenus/"]);
         client = await CommandsLoad.map(client);
     }
-
-    new Chance().mixin({
-        "prob": function (array) {
-            let float = new Chance().floating({ min: 0, max: 1 });
-
-            const expanded = array.flatMap(i => Array(i.likelihood).fill(i));
-
-            /* console.log("⚪ Using:")
-            console.log(expanded)
-            console.log("⚪ Lenght: %s", expanded.length);
-
-            array.forEach(i => {
-                console.log(expanded.filter(x => x.item === i.item).length)
-            }) */
-
-            return expanded[Math.floor(float * expanded.length)].item;
-        }
-    })
 
     // default emojis
     let managers = await new Managers(client).prepare();
@@ -113,17 +95,21 @@ module.exports = async (client) => {
     new Log()
         .setChannel(client.logChannel)
         .setTarget(ChannelModules.ClientLogs)
-        .send({ embeds: [
-            new Embed({type: "success", data: {
-                title: "ONLINE",
-                desc: [
-                    "Jeffrey Bot está **ONLINE**",
-                    `**DEV MODE**: ${process.env.DEV === "TRUE" ? "`SÍ`" : "`NO`"}`,
-                    `**v${client.version}**`,
-                    `${time()}`
-                ]
-            }})
-        ] });
+        .send({
+            embeds: [
+                new Embed({
+                    type: "success", data: {
+                        title: "ONLINE",
+                        desc: [
+                            "Jeffrey Bot está **ONLINE**",
+                            `**DEV MODE**: ${process.env.DEV === "TRUE" ? "`SÍ`" : "`NO`"}`,
+                            `**v${client.version}**`,
+                            `${time()}`
+                        ]
+                    }
+                })
+            ]
+        });
     console.log("=================== LOGS =======================")
 
     /* YOUTUBE NOTIFACTIONS */

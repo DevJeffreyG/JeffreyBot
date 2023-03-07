@@ -43,11 +43,15 @@ connection.then(async (c) => {
   //client.on("debug", console.log)
 
   new CronJob('0 0 31 11 *', async function () { // reiniciar precios de la darkshop anualmente
-    const users = await Users.find();
+    const users = await require("mongoose").models.Users.find();
 
     users.forEach(user => {
       user.data.purchases.forEach(async (purchase, index) => {
         if (purchase.isDarkShop) {
+          console.log("🟢 Se eliminó la compra: ")
+          console.log(purchase)
+          console.log("🟢 De: %s en %s", user.user_id, user.guild_id)
+          
           user.data.purchases.splice(index, 1);
           user.markModified("data");
           await user.save();
@@ -64,8 +68,13 @@ connection.then(async (c) => {
     Errors(client);
 
   } catch (err) {
-    console.log(err)
+  console.log("🔴 Hubo un error iniciando el cliente y sus handlers")
+  console.log(err)
   }
+})
+.catch(err => {
+  console.log("🔴 Hubo un error conectandose a la base de datos")
+  console.log(err);
 })
 
 module.exports = client;

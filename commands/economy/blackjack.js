@@ -9,7 +9,7 @@ const command = new Command({
 command.addOption({
     type: "integer",
     name: "apuesta",
-    desc: "Cuánto dinero te vas a jugar",
+    desc: "¿Cuánto dinero te vas a jugar?",
     min: 1,
     req: true
 })

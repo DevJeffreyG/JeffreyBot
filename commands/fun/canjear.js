@@ -9,7 +9,7 @@ const command = new Command({
 command.addOption({
     type: "string",
     name: "llave",
-    desc: "Literalmente la llame a canjear",
+    desc: "La llave a canjear",
     req: true
 })
 

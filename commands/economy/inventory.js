@@ -37,7 +37,7 @@ command.execute = async (interaction, models, params, client) => {
 
     let itemsEmbed = new Embed()
     .defAuthor({text: `Tu inventario`, icon: interaction.member.displayAvatarURL()})
-    .setThumbnail(isDarkShop ? EmojisObject.Dark.url : interaction.guild.iconURL({dynamic: true}))
+    .setThumbnail(isDarkShop ? EmojisObject.DarkShop.url : interaction.guild.iconURL({dynamic: true}))
     .defFooter({text: `/use ID para usar un item.`})
     .setColor(isDarkShop ? Colores.negro : Colores.verde);
 

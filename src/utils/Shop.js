@@ -92,16 +92,15 @@ class Shop {
     }
 
     async buy(itemId) {
-        if(!this.doc) await this.#fetchDoc();
-        
-        const member = this.interaction.member;
-
-        let user = await Users.getOrCreate({
+        this.user = await Users.getOrCreate({
             user_id: this.interaction.user.id,
             guild_id: this.interaction.guild.id
         });
 
-        this.user = user;
+        if(!this.doc) await this.#fetchDoc();
+        
+        const member = this.interaction.member;
+
 
         const item = this.shop.findItem(itemId);
 
@@ -115,7 +114,7 @@ class Shop {
 
         if (!item) return noitem.send();
 
-        const itemPrice = this.determinePrice(user, item, true);
+        const itemPrice = this.determinePrice(this.user, item, true);
         const itemName = item.name;
 
         let toConfirm = [
@@ -129,14 +128,14 @@ class Shop {
         let confirmation = await Confirmation("Comprar item", toConfirm, this.interaction);
         if (!confirmation) return;
 
-        var price = this.determinePrice(user, item);
+        var price = this.determinePrice(this.user, item);
 
         let noMoney = new ErrorEmbed(this.interaction, {
             type: "economyError",
             data: {
                 action: "buy",
                 error: `No tienes suficientes ${this.isDarkShop ? this.Emojis.DarkCurrency.name : this.Emojis.Currency.name}`,
-                money: this.isDarkShop ? user.economy.dark.currency : user.economy.global.currency,
+                money: this.isDarkShop ? this.user.economy.dark.currency : this.user.economy.global.currency,
                 darkshop: this.isDarkShop
             }
         })
@@ -174,23 +173,23 @@ class Shop {
         // buscar si ya tiene el role que se da
         if (item.use_info.action === "add" && item.use_info.objetive === "role" && member.roles.cache.find(x => x.id === item.use_info.given)) return hasRoleToGive.send();
 
-        if (!user.canBuy(price, this.isDarkShop)) return noMoney.send();
-        if (user.hasItem(itemId, this.isDarkShop)) return hasItem.send();
+        if (!this.user.canBuy(price, this.isDarkShop)) return noMoney.send();
+        if (this.user.hasItem(itemId, this.isDarkShop)) return hasItem.send();
 
         const newUseId = FindNewId(await Users.find(), "data.inventory", "use_id");
 
         // revisar si debe agregarse interés
         if (item.interest > 0) {
             const interestFilter = x => x.isDarkShop === this.isDarkShop && x.item_id === item.id;
-            if (!user.data.purchases.find(interestFilter)) user.data.purchases.push({ isDarkShop: this.isDarkShop, item_id: item.id, quantity: 1 });
+            if (!this.user.data.purchases.find(interestFilter)) this.user.data.purchases.push({ isDarkShop: this.isDarkShop, item_id: item.id, quantity: 1 });
             else {
-                user.data.purchases.find(interestFilter).quantity++;
+                this.user.data.purchases.find(interestFilter).quantity++;
             }
         }
 
-        if (this.isDarkShop) user.economy.dark.currency -= price;
-        else user.economy.global.currency -= price;
-        user.data.inventory.push({ isDarkShop: this.isDarkShop, item_id: item.id, use_id: newUseId })
+        if (this.isDarkShop) this.user.economy.dark.currency -= price;
+        else this.user.economy.global.currency -= price;
+        this.user.data.inventory.push({ isDarkShop: this.isDarkShop, item_id: item.id, use_id: newUseId })
 
         let embed = new Embed({
             type: "success",
@@ -199,12 +198,12 @@ class Shop {
                     "Pago realizado con éxito",
                     `Compraste: \`${itemName}\` por **${this.isDarkShop ? this.Emojis.DarkCurrency : this.Emojis.Currency}${itemPrice}**`,
                     `Úsalo con \`/use ${newUseId}\``,
-                    `Ahora tienes: ${user.parseCurrency(this.Emojis, this.isDarkShop)}`
+                    `Ahora tienes: ${this.user.parseCurrency(this.Emojis, this.isDarkShop)}`
                 ]
             }
         })
 
-        await user.save();
+        await this.user.save();
         return this.interaction.editReply({ embeds: [embed] });
     }
 
@@ -272,7 +271,7 @@ class Shop {
             data: {
                 command: this.interaction.commandName,
                 guide: `Si se usa un tipo boost agregando, **debe tener**: \`role\`, \`boostobj\`, \`boosttype\`, \`boostval\` y \`duracion\`.
-Si es eliminando, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
+Si es eliminando, **sólo debe tener**: \`duracion\`.`
             }
         })
       
@@ -320,7 +319,7 @@ Si es eliminando, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
             if (!use.given && use.action == ItemActions.Add) return boostError.send();
             if (!use.boost_info.type && use.action == ItemActions.Add) return boostError.send();
             if (!use.boost_info.value && use.action == ItemActions.Add) return boostError.send();
-            if (!use.boost_info.objetive) return boostError.send();
+            if (!use.boost_info.objetive && use.action == ItemActions.Add) return boostError.send();
             if (!use.item_info.duration) return boostError.send();
         }
 
@@ -366,11 +365,12 @@ Si es eliminando, **sólo debe tener**: \`boostobj\` y \`duracion\`.`
     }
 
     async showAllItems() {
-        if(!this.doc) await this.#fetchDoc();
         this.user = await Users.getOrCreate({
             user_id: this.interaction.user.id,
             guild_id: this.interaction.guild.id
         });
+
+        if(!this.doc) await this.#fetchDoc();
 
         this.base.description = `**—** [NOT READY]: Falta el uso (\`/admin items use-info\`)\n**—** [HIDDEN]: Item desactivado (\`/admin items toggle\`)\n**—** [✅]: El item es visible y usable para cualquiera.`;
         this.base.addon = this.base.addon.substring(0, 2) + "{publicInfo} — ID: " + this.base.addon.substring(2, this.base.addon.length - 4) + `\n+ ${this.isDarkShop ? this.Emojis.DarkCurrency : this.Emojis.Currency}{item_interest}** al comprarlo.\n\n`

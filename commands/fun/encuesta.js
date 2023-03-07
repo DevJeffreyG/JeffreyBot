@@ -10,7 +10,7 @@ const command = new Command({
 command.addOption({
     type: "string",
     name: "encuesta",
-    desc: "Literalmente la encuesta",
+    desc: "La encuesta a hacer",
     req: true   
 })
 

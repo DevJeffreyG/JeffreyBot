@@ -133,12 +133,12 @@ class RouletteItem {
                         save = false
 
                         if (this.item.extra.special === ItemObjetives.Boost)
-                            await LimitedTime(this.interaction.member, this.numbers, ms(this.item.extra.duration), this.item.extra.boosttype, this.item.extra.boostobj, this.item.extra.boostvalue);
+                            await LimitedTime(this.interaction.member, null, ms(this.item.extra.duration), this.item.extra.boosttype, this.item.extra.boostobj, this.item.extra.boostvalue);
                         /* else if(this.item.extra.special === ItemTypes.Subscription)
                             await Subscription(this.interaction.member, this.numbers, ms(this.item.extra.duration), this.item.extra.subprice, this.item.extra.subname);
                          */
                         else
-                            await LimitedTime(this.interaction.member, this.numbers, ms(this.item.extra.duration))
+                            await LimitedTime(this.interaction.member, null, ms(this.item.extra.duration))
                     } else
                         this.target.push(this.numbers)
                 }

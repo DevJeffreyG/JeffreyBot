@@ -25,8 +25,8 @@ command.addSubcommand({
 })
 
 command.addSubcommand({
-    name: "autoroles",
-    desc: "Sincroniza los AutoRoles viejos y re-agregar las reacciones en caso de que se necesite"
+    name: "guild",
+    desc: "Sincroniza la información necesaria para el nuevo documento de Guild"
 })
 
 command.addSubcommand({
@@ -53,7 +53,7 @@ command.addOption({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { subcommand } = params
-    const { AutoRoles, Guilds, Legacy } = models;
+    const { Legacy } = models;
 
     switch (subcommand) {
         case "mute": {
@@ -78,53 +78,6 @@ command.execute = async (interaction, models, params, client) => {
             return interaction.editReply({ content: `${client.Emojis.Check} ${role} Sincronizado.`, allowedMentions: { parse: [] } })
         }
 
-        case "autoroles": {
-            let all = await AutoRoles.find();
-            await interaction.editReply({ content: `${client.Emojis.Loading} Sincronizando los autoroles...` });
-
-            for await (const arole of all) {
-                const doc = await Guilds.getOrCreate(arole.serverID);
-                const general = await Guilds.find();
-
-                const newId = FindNewId(general, "data.autoroles", "id")
-
-                if (doc.data.autoroles.find(x =>
-                    x.channel_id === arole.channelID &&
-                    x.message_id === arole.messageID &&
-                    x.emote === arole.emoji &&
-                    x.role_id === arole.roleID
-                )) continue
-
-                doc.data.autoroles.push({
-                    channel_id: arole.channelID,
-                    message_id: arole.messageID,
-                    emote: arole.emoji,
-                    role_id: arole.roleID,
-                    toggle_group: arole.toggleGroup == "0" ? null : arole.toggleGroup,
-                    id: newId
-                })
-
-                await doc.save();
-            }
-
-            let q = await Guilds.getOrCreate(interaction.guild.id)
-            all = q.data.autoroles; // actualizar a lo nuevo que está en la db
-            for (let i = 0; i < all.length; i++) {
-                const autorole = all[i];
-
-                let channel = await interaction.guild.channels.cache.find(x => x.id === autorole.channel_id);
-
-                if (!channel) return console.log(`🔴 No se encontró canal para el autorole ${autorole}`);
-                await channel.messages.fetch();
-                let fetched = await channel.messages.cache.find(x => x.id === autorole.message_id);
-                let emote = autorole.emote;
-
-                await fetched.react(emote);
-            }
-
-            return interaction.editReply({ content: `${client.Emojis.Check} Sincronizados.` })
-        }
-
         case "users": {
             let confirmation = await Confirmation("Continuar", [
                 "Cuando se inicie el proceso se sobreescribirán los datos existentes.",
@@ -133,6 +86,18 @@ command.execute = async (interaction, models, params, client) => {
             if (!confirmation) return;
 
             command.execUsers(confirmation, models, params, client);
+            break;
+        }
+
+        case "guild": {
+            let confirmation = await Confirmation("Continuar", [
+                "Cuando se inicie el proceso se sobreescribirán los datos existentes.",
+                "Se sobreescribirán los datos de AutoRoles, Toggle Groups y códigos de Vault.",
+                "Este proceso no se puede cancelar ni deshacer, haz una copia de seguridad antes."
+            ], interaction)
+            if (!confirmation) return;
+
+            command.execGuilds(confirmation, models, params, client);
             break;
         }
 
@@ -171,7 +136,7 @@ command.execute = async (interaction, models, params, client) => {
             let userList = [];
 
             members.forEach(member => {
-                if(member.user.bot) return;
+                if (member.user.bot) return;
                 if (legacyrole) member.roles.add(legacyrole);
 
                 let roles = [];
@@ -197,6 +162,96 @@ command.execute = async (interaction, models, params, client) => {
             return report.edit(`${client.Emojis.Check} Se ha actualizado la Legacy List.`);
         }
     }
+}
+
+command.execGuilds = async (interaction, models, params, client) => {
+    await interaction.editReply({ embeds: [], content: `${client.Emojis.Loading} Sincronizando...` })
+    const { Guilds, AutoRoles, ToggleGroups, VaultCodes, Hints } = models;
+
+    let all = await AutoRoles.find({serverID: interaction.guild.id});
+    await interaction.editReply({ content: `${client.Emojis.Loading} Sincronizando los autoroles...` });
+
+    for await (const arole of all) {
+        const doc = await Guilds.getOrCreate(arole.serverID);
+        const general = await Guilds.find();
+
+        const newId = FindNewId(general, "data.autoroles", "id")
+
+        if (doc.data.autoroles.find(x =>
+            x.channel_id === arole.channelID &&
+            x.message_id === arole.messageID &&
+            x.emote === arole.emoji &&
+            x.role_id === arole.roleID
+        )) continue
+
+        doc.data.autoroles.push({
+            channel_id: arole.channelID,
+            message_id: arole.messageID,
+            emote: arole.emoji,
+            role_id: arole.roleID,
+            toggle_group: arole.toggleGroup == "0" ? null : arole.toggleGroup,
+            id: newId
+        })
+
+        await doc.save();
+    }
+
+    let doc = await Guilds.getOrCreate(interaction.guild.id)
+    all = doc.data.autoroles; // actualizar a lo nuevo que está en la db
+    await interaction.editReply({ content: `${client.Emojis.Loading} Re-reaccionando a los AutoRoles...` });
+    for (let i = 0; i < all.length; i++) {
+        const autorole = all[i];
+
+        let channel = await interaction.guild.channels.cache.find(x => x.id === autorole.channel_id);
+
+        if (!channel){
+            console.log(`🔴 No se encontró canal para el autorole ${autorole}`);
+            continue
+        }
+        await channel.messages.fetch();
+        let fetched = await channel.messages.cache.find(x => x.id === autorole.message_id);
+        let emote = autorole.emote;
+
+        await fetched.react(emote);
+    }
+    await interaction.editReply({ content: `${client.Emojis.Loading} Sincronizando los toggle groups...` });
+
+    let alltoggleautoroles = await ToggleGroups.find({guild_id: interaction.guild.id});
+    let newToggleGroups = [];
+    alltoggleautoroles.forEach(toggle => {
+        newToggleGroups.push({
+            group_name: toggle.info.group_name,
+            id: toggle.info.group_id
+        })
+    })
+
+    doc.data.togglegroups = newToggleGroups;
+
+    await interaction.editReply({ content: `${client.Emojis.Loading} Sincronizando los código de vault...` });
+
+    let vaultcodes = await VaultCodes.find();
+    let hints = await Hints.find();
+    let newVaultCodes = [];
+
+    vaultcodes.forEach(entry => {
+        let allHints = hints.filter(x => x.codeID === String(entry.id));
+        allHints.sort((a, b) => a.num - b.num);
+
+        let newHints = allHints.map(x => x.hint);
+
+        newVaultCodes.push({
+            code: entry.code,
+            reward: entry.reward,
+            hints: newHints,
+            id: entry.id
+        })
+    })
+
+    doc.data.vault_codes = newVaultCodes;
+
+    await doc.save();
+
+    return interaction.editReply({ content: `${client.Emojis.Check} Sincronizados.` })
 }
 
 command.execUsers = async (interaction, models, params, client) => {

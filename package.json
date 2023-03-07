@@ -32,9 +32,9 @@
   },
   "homepage": "https://github.com/DevJeffreyG/JeffreyBot#readme",
   "dependencies": {
-    "@twurple/api": "^6.0.5",
-    "@twurple/auth": "^6.0.5",
-    "@twurple/common": "^6.0.5",
+    "@twurple/api": "^6.0.6",
+    "@twurple/auth": "^6.0.6",
+    "@twurple/common": "^6.0.6",
     "body-parser": "^1.20.2",
     "chance": "^1.1.11",
     "cookie-parser": "^1.4.6",
@@ -47,7 +47,7 @@
     "express-session": "^1.17.3",
     "googleapis": "^112.0.0",
     "moment-timezone": "^0.5.41",
-    "mongoose": "^7.0.0",
+    "mongoose": "^7.0.1",
     "path": "^0.12.7"
   }
 }

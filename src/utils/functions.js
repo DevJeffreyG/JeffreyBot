@@ -9,8 +9,8 @@ const InteractivePages = require("../utils/InteractivePages");
 const DarkShop = require("../utils/DarkShop");
 
 const ms = require("ms");
-
-const moment = require('moment');
+const Chance = require("chance");
+const moment = require("moment-timezone");
 
 /* ##### MONGOOSE ######## */
 
@@ -482,8 +482,17 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
     // hay roles eliminados de manera temporal
     for (const deletion of temproledeletions) {
       if (moment().isAfter(deletion.info.until)) {
-        let temproleIndex = dbUser.data.temp_roles.findIndex(x => x.special.objetive === deletion.info.boost && x.role_id === deletion.info.role_id && x.special.disabled === true)
-        member.roles.add(deletion.info.role_id)
+        let temproleIndex = dbUser.data.temp_roles.findIndex(x => {
+          if(deletion.tempRoleObjectId){
+            return x._id === deletion.tempRoleObjectId;
+          }
+          if(deletion.info.boost && x.role_id === deletion.info.role_id) {
+            return x.special.objetive === deletion.info.boost && x.role_id === deletion.info.role_id && x.special.disabled === true
+          } else {
+            return x.special.disabled === true;
+          }
+        })
+        if(deletion.info.role_id) member.roles.add(deletion.info.role_id)
 
         if (temproleIndex != -1) {
           dbUser.data.temp_roles[temproleIndex].special.disabled = false;
@@ -491,7 +500,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
           dbUser.save();
         }
 
-        deletion.remove();
+        GlobalDatas.deleteOne(deletion).exec();
       }
     }
 

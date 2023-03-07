@@ -75,8 +75,6 @@ command.execute = async (interaction, models, params, client) => {
         }
     }
 
-
-
     const successValue = Math.round(victim.economy.global.currency * successPerc);
     const failedValue = Math.round(user.economy.global.currency * failedPerc);
 

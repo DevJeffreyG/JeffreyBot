@@ -207,16 +207,16 @@ ${sugsChannel} •  Aquí se enviarán las sugerencias que hagan los usuarios (\
                         .defColor(Colores.verde),
 
                     new Embed()
+                        .defTitle(`— Tickets • Categoría que reúne la funcionalidad de los tickets.`)
+                        .defDesc(`<#1076559856930140202> • Toda la información extra que necesitas saber de los tickets.\n
+<#1076559878082011207> • Aquí puedes iniciar un nuevo ticket.`)
+                        .defColor(Colores.verde),
+
+                    new Embed()
                         .defTitle(`— Surface • Categoría que reúne los canales generales del servidor.`)
                         .defDesc(`<#${mainChannel}> • Canal principal. Puedes hablar aquí con los demás usuarios del servidor.\n
 <#485192397228081162> • Si crees que usarás muchos comandos, usa este canal para eso.\n
 <#485192438701359135> • Aquí puedes promocionarte, y hacer flood. Libérate.`)
-                        .defColor(Colores.verde),
-
-                    new Embed()
-                        .defTitle(`— Tickets • Categoría que reúne la funcionalidad de los tickets.`)
-                        .defDesc(`<#1076559856930140202> • Toda la información extra que necesitas saber de los tickets.\n
-<#1076559878082011207> • Aquí puedes iniciar un nuevo ticket.`)
                         .defColor(Colores.verde),
 
                     new Embed()
@@ -296,7 +296,7 @@ ${vipRole} • Usuario que ha ascendido en el servidor, tendrá colores exclusiv
 \`/coins\` • Consigue Jeffros extras en un intervalo de 10 minutos, (o menos).\n
 \`/roullete\` • Puedes conseguir EXP, Jeffros o también PERDERLOS.\n
 \`/rob\` • Puedes intentar robar Jeffros a otro usuario, pero cuidado, también los puedes perder.`)
-                        .defFooter({text: `Los canales que dan EXP y Jeffros lo dirán en su descripción!`, icon: EmojisObject.Error.url })
+                        .defFooter({ text: `Los canales que dan EXP y Jeffros lo dirán en su descripción!`, icon: EmojisObject.Error.url })
                         .defColor(Colores.verde),
                     new Embed()
                         .setImage(awards.attachment)
@@ -697,7 +697,7 @@ https://discord.gg/${process.env.SUPPORT_INVITE} • Servidor **exclusivo** de p
                 ], components: [ticketRow]
             });
             break;
-    
+
         case "cumple info":
             let cumple = importImage("cumple");
 
@@ -722,7 +722,7 @@ https://discord.gg/${process.env.SUPPORT_INVITE} • Servidor **exclusivo** de p
 **—** Tu cumpleaños aparecerá en tu perfil cuando usen \`/stats\`, y podrá ser recordado por otros usuarios.`)
                 ], files: [cumple.file]
             });
-        break;
+            break;
     }
 
     return interaction.editReply({

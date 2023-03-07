@@ -821,25 +821,25 @@ class Dashboard {
         }, { min: 1 });
 
         let rob_minscs = this.#createNumberSelector("robminscs", {
-            title: "(Robar) %Mínima recompensa de éxito",
+            title: "(Robar) %Mínima recompensa",
             placeholder: "Debe ser menor que el máximo",
             id: "rob-min_success"
         }, { min: 1 });
 
         let rob_maxscs = this.#createNumberSelector("robmaxscs", {
-            title: "(Robar) %Máxima recompensa de éxito",
+            title: "(Robar) %Máxima recompensa",
             placeholder: "Debe ser mayor que el mínimo",
             id: "rob-max_success"
         }, { min: 1 });
 
         let rob_minfail = this.#createNumberSelector("robminfail", {
-            title: "(Robar) %Mínimo castigo de fallo",
+            title: "(Robar) %Mínimo castigo",
             placeholder: "Debe ser menor que el máximo",
             id: "rob-min_fail"
         }, { min: 0, max: 100 });
 
         let rob_maxfail = this.#createNumberSelector("robmaxfail", {
-            title: "(Robar) %Máximo castigo de fallo",
+            title: "(Robar) %Máximo castigo",
             placeholder: "Debe ser mayor que el mínimo",
             id: "rob-max_fail"
         }, { min: 0, min: 100 });

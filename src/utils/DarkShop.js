@@ -47,7 +47,7 @@ class DarkShop {
         dsChannel?.send({
             content: dsNewsRole?.toString() ?? null, embeds: [
                 new Embed()
-                    .defAuthor({ text: "Domingo", icon: this.client.EmojisObject.Dark.url })
+                    .defAuthor({ text: "Domingo", icon: this.client.EmojisObject.DarkShop.url })
                     .defDesc(`**—** Se termina una semana, y empieza la búsqueda de beneficios.
 **—** La inflación hoy estará en **${this.baseValue}%**. Ya veremos **qué pasa en la semana...**`)
                     .defColor(Colores.negro)
@@ -161,7 +161,7 @@ class DarkShop {
             }
         }
 
-        type = new Chance().prob(check);
+        type = this.#chanceProbability(check);
         if (!type) { // custom tendencies
             let possible = [
                 Tendencies.LastMinute,
@@ -422,7 +422,7 @@ class DarkShop {
                     .setReason(LogReasons.Error)
 
                 let embed = new Embed()
-                    .defAuthor({ text: `...`, icon: this.client.EmojisObject.Dark.url })
+                    .defAuthor({ text: `...`, icon: this.client.EmojisObject.DarkShop.url })
                     .defColor(Colores.negro)
                     .defDesc(`**—** Parece que no has vendido todos tus ${this.Emojis.DarkCurrency.name}. Han sido eliminados de tu cuenta tras haber pasado una semana.`)
                     .defFooter("▸ Si crees que se trata de un error, contacta al Staff.");
@@ -602,7 +602,7 @@ class DarkShop {
             tz.now.add(1, "day").startOf("day").toDate();
 
         let stonksEmbed = new Embed()
-            .defAuthor({ text: `DarkShop: Inflación`, icon: EmojisObject.Dark.url })
+            .defAuthor({ text: `DarkShop: Inflación`, icon: EmojisObject.DarkShop.url })
             .defDesc(`**${this.Emojis.DarkCurrency}1 = ${this.Emojis.Currency}${one.toLocaleString('es-CO')}**
 
 ${stonks} **—** La inflación actual de los ${this.Emojis.DarkCurrency.name} es de un \`${inflation}%\`.
@@ -612,6 +612,27 @@ ${tz.now.day != 0 ? `**—** La inflación inicial fue \`${this.baseValue}%\`.\n
             .defColor(Colores.negro);
 
         this.interaction.reply({ embeds: [stonksEmbed] });
+    }
+
+    /**
+     * 
+     * @param {Array<{item: Tendencies, likelihood: Number}>} array 
+     * @returns {Tendencies}
+     */
+    #chanceProbability(array) {
+        let float = new Chance().floating({ min: 0, max: 1 });
+
+        const expanded = array.flatMap(i => Array(i.likelihood).fill(i));
+
+        /* console.log("⚪ Using:")
+        console.log(expanded)
+        console.log("⚪ Lenght: %s", expanded.length);
+      
+        array.forEach(i => {
+            console.log(expanded.filter(x => x.item === i.item).length)
+        }) */
+
+        return expanded[Math.floor(float * expanded.length)].item;
     }
 
 

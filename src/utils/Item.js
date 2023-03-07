@@ -1,11 +1,11 @@
-const { GuildMember, StringSelectMenuBuilder, ActionRowBuilder, BaseInteraction, CommandInteraction } = require("discord.js")
+const { GuildMember, StringSelectMenuBuilder, ActionRowBuilder, BaseInteraction, CommandInteraction, Collection } = require("discord.js")
 const moment = require("moment-timezone");
 const ms = require("ms")
 const Chance = require("chance");
 
 const { ItemTypes, ItemObjetives, ItemActions, ItemEffects, LogReasons, ChannelModules } = require("./Enums");
 
-const { FindNewId, LimitedTime, Subscription, WillBenefit } = require("./functions");
+const { FindNewId, LimitedTime, Subscription, WillBenefit, GetRandomItem } = require("./functions");
 
 const Log = require("./Log");
 const Embed = require("./Embed");
@@ -500,14 +500,14 @@ class Item {
     async #removeBoost() {
         if (!await this.#darkshopWork()) return false;
 
-        let filtered = this.victim.data.temp_roles.filter(x => x.special.objetive === this.boost_objetive);
-        const temprole = filtered[Math.floor(Math.random() * filtered.length)];
+        let filtered = this.boost_objetive ? this.victim.data.temp_roles.filter(x => x.special.objetive === this.boost_objetive) : this.victim.data.temp_roles;
+        const temprole = GetRandomItem(filtered);
 
         const role = this.interaction.guild.roles.cache.find(x => x.id === temprole.role_id);
 
-        console.log("🗨️ Eliminando el role %s a %s por %s", role.name, this.victimMember.user.tag, this.duration);
+        console.log("🗨️ Eliminando el role %s a %s por %s", role?.name, this.victimMember.user.tag, this.duration);
 
-        if (!this.victimMember.roles.cache.find(x => x === role)) {
+        if (role && !this.victimMember.roles.cache.find(x => x === role)) {
             console.log("🔴 No tiene el role que te quita el item. %s", this.victimMember.roles.cache)
             this.norole.send();
             return false;
@@ -515,7 +515,8 @@ class Item {
 
         // globaldata
         let globaldata = await GlobalDatas.newTempRoleDeletion({
-            user_id: this.victimMember.id, guild_id: this.victimMember.guild.id, role_id: role.id, duration: this.duration, boost: this.boost_objetive
+            user_id: this.victimMember.id, guild_id: this.victimMember.guild.id, role_id: role?.id, duration: this.duration, boost: this.boost_objetive,
+            tempRoleObjectId: temprole._id
         });
         if (!globaldata) {
             this.roleDeleted.send();
@@ -525,7 +526,7 @@ class Item {
         temprole.special.disabled = true;
 
         await this.victim.save();
-        this.victimMember.roles.remove(role);
+        if(role) this.victimMember.roles.remove(role);
 
         this.#removeItemFromInv()
         return true;
@@ -547,22 +548,23 @@ class Item {
             return false;
         }
 
-        const dsEvents = await this.interaction.guild.channels.fetch(this.doc.getChannel("darkshop.events"));
+        let dsEvents = await this.interaction.guild.channels.fetch(this.doc.getChannel("darkshop.events"));
+        if(dsEvents instanceof Collection) dsEvents = null;
 
         let skipped = new Embed()
-            .defAuthor({ text: `Interacción`, icon: this.interaction.client.EmojisObject.Dark.url })
+            .defAuthor({ text: `Interacción`, icon: this.interaction.client.EmojisObject.DarkShop.url })
             .defDesc(`**—** ¡**${this.interaction.user.tag}** se ha volado la Firewall  y ha usado el item \`${this.item.name}\` en **${this.victimMember.user.tag}**!`)
             .defColor(Colores.negro)
             .defFooter({ text: `${this.item.name} para ${this.victimMember.user.tag}`, timestamp: true });
 
         let success = new Embed()
-            .defAuthor({ text: `Interacción`, icon: this.interaction.client.EmojisObject.Dark.url })
+            .defAuthor({ text: `Interacción`, icon: this.interaction.client.EmojisObject.DarkShop.url })
             .defDesc(`**—** ¡**${this.interaction.user.tag}** ha usado el item \`${this.item.name}\` en **${this.victimMember.user.tag}**!`)
             .defColor(Colores.negro)
             .defFooter({ text: `${this.item.name} para ${this.victimMember.user.tag}`, timestamp: true });
 
         let fail = new Embed()
-            .defAuthor({ text: `Interacción`, icon: this.interaction.client.EmojisObject.Dark.url })
+            .defAuthor({ text: `Interacción`, icon: this.interaction.client.EmojisObject.DarkShop.url })
             .defDesc(`**—** ¡**${this.interaction.user.tag}** ha querido usar el item \`${this.item.name}\` en **${this.victimMember.user.tag}** pero NO HA FUNCIONADO!`)
             .defColor(Colores.negro)
             .defFooter({ text: `${this.item.name} para ${this.victimMember.user.tag}`, timestamp: true });
