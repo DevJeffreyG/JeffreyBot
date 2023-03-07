@@ -16,7 +16,6 @@ command.addOption({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ ephemeral: true });
     const { Guilds, Users } = models;
-    const { Emojis } = client;
     const { Currency } = client.getCustomEmojis(interaction.guild.id);
 
     const _key = params.llave.value;

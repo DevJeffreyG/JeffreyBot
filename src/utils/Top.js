@@ -76,7 +76,8 @@ class Top {
                     user_id: member.user.id,
                     currency: darkcurrency, // numero de dj que tiene
                     currencyValue: Math.round(darkcurrencyValue), // lo que valen esos dcurrency en dinero ahora mismo
-                    total: Math.round(finalQuantity) // la suma del valor de los dcurrency y el dinero
+                    total: Math.round(finalQuantity), // la suma del valor de los dcurrency y el dinero
+                    alltime: user.data.counts.normal_currency
                 }
 
                 this.#res.push(toPush)
@@ -95,7 +96,7 @@ class Top {
             if (user.currency != 0) darkshopMoney = ` (${DarkCurrency}${user.currency.toLocaleString('es-CO')}➟**${Currency}${user.currencyValue.toLocaleString('es-CO')}**)`
             else darkshopMoney = "";
 
-            const txt = this.#getTxt(user, [`${Currency}${user.total.toLocaleString('es-CO')}${darkshopMoney}`])
+            const txt = this.#getTxt(user, [`${Currency}**${user.total.toLocaleString('es-CO')}**${darkshopMoney}`, `|| Obtenido desde siempre: **${Currency}${user.alltime.toLocaleString("es-CO")}** ||`])
 
             this.top.set(user.user_id, {
                 txt
@@ -151,7 +152,7 @@ class Top {
                     total: user.economy.global.reputation
                 }
 
-                if(toPush.total != 0) this.#res.push(toPush)
+                if (toPush.total != 0) this.#res.push(toPush)
             }
         });
 

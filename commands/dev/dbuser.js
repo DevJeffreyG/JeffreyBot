@@ -25,18 +25,18 @@ command.execute = async (interaction, models, params, client) => {
     const { miembro, consulta } = params
     const { Users } = models
 
-    let query = await Users.getOrCreate({user_id: miembro.value, guild_id: miembro.member.guild.id})
+    let query = await Users.getOrCreate({ user_id: miembro.value, guild_id: miembro.member.guild.id })
     const q = consulta && consulta.value ? consulta.value.split(".") : null;
 
-    if(q && q.length >= 1){
+    if (q && q.length >= 1) {
         for (let i = 0; i < q.length; i++) {
             const queryQ = q[i];
-            
+
             query = query[queryQ]
         }
     }
 
-    interaction.editReply({content: `**${miembro.user.tag}**\n${codeBlock("json", query)}`});
+    interaction.editReply({ content: `**${miembro.user.tag}**\n${codeBlock("json", query)}` });
 }
 
 module.exports = command;

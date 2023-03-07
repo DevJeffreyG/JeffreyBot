@@ -51,7 +51,7 @@ command.execute = async (interaction, models, params, client) => {
         return interaction.editReply({ content: null, embeds: [embed] });
     } else {
         let ds = new DarkShop(interaction.guild, interaction);
-        
+
         await GlobalDatasWork(interaction.guild);
         await ds.removeDarkCurrency();
 

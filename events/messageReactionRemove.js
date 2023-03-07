@@ -11,6 +11,6 @@ module.exports = async (client, reaction, user) => {
     const message = reaction.message;
 
     const doc = await Guilds.getOrCreate(guild.id);
-    
+
     doc.workerRemoveAutoRole(message, reaction, user)
 }

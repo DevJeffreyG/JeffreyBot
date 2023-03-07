@@ -13,7 +13,7 @@ command.data
         .addStringOption(target => target
             .setName("target")
             .setDescription("Lo que va a ser cambiado si llega a ser seleccionado")
-            .setChoices( 
+            .setChoices(
                 { name: "Currency", value: String(ItemObjetives.Currency) },
                 { name: "Role", value: String(ItemObjetives.Role) },
                 { name: "TempRole", value: String(ItemObjetives.TempRole) }
@@ -71,21 +71,21 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { GlobalDatas } = models;
     const { subcommand } = params
-    const { target, value, chance, special, duration, boosttype, boostobj, boostvalue} = params[subcommand]
+    const { target, value, chance, special, duration, boosttype, boostobj, boostvalue } = params[subcommand]
 
     console.log(params)
 
-    switch(subcommand){
+    switch (subcommand) {
         case "roulette-item":
-            if(value.value.replace(/[0-9\.]/g, "").length === 0)
-                return new ErrorEmbed(interaction, { type: "badParams", data: { help: "Dios mío que uses +-*% por favor"} }).send();
+            if (value.value.replace(/[0-9\.]/g, "").length === 0)
+                return new ErrorEmbed(interaction, { type: "badParams", data: { help: "Dios mío que uses +-*% por favor" } }).send();
             if (Number(target.value) === ItemObjetives.TempRole && !duration)
                 return new ErrorEmbed(interaction, { type: "badParams", data: { help: "Si es un TempRole, 'duration' debe existir" } }).send();
 
-            if(value.value.replace(/[0-9\.]/g, "") === "%") {
+            if (value.value.replace(/[0-9\.]/g, "") === "%") {
                 let confirmation = await Confirmation("Seguro", ["100% es la cantidad que ya se tiene", "Menos de 100% se resta", "Más de 100% se empieza a subir"], interaction);
 
-                if(!confirmation) return;
+                if (!confirmation) return;
             }
 
             let extra = {
@@ -96,11 +96,11 @@ command.execute = async (interaction, models, params, client) => {
                 boostvalue: boostvalue?.value
             }
 
-            await GlobalDatas.newRouletteItem({target: Number(target.value), value: value.value, prob: chance.value, extra });
+            await GlobalDatas.newRouletteItem({ target: Number(target.value), value: value.value, prob: chance.value, extra });
             break
     }
 
-    interaction.editReply({embeds: [new Embed({type: "success"})]});
+    interaction.editReply({ embeds: [new Embed({ type: "success" })] });
 }
 
 module.exports = command;

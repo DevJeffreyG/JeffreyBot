@@ -22,14 +22,14 @@ class Modal extends ModalBuilder {
         return this
     }
 
-    addInput(options = {id, label, style, req, placeholder, min, max}) {
+    addInput(options = { id, label, style, req, placeholder, min, max }) {
         const { id, label, style, req, placeholder, min, max } = options;
-        if(!id || !label || !style) return new ErrorEmbed(this.interaction, {
+        if (!id || !label || !style) return new ErrorEmbed(this.interaction, {
             type: "badFunction",
             data: {
                 error: "NO ESTA DEFINIDO ID LABEL STYLE: MODAL"
             }
-        }).send({followup: true, ephemeral: true});
+        }).send({ followup: true, ephemeral: true });
         const input = new TextInputBuilder()
             .setCustomId(id)
             .setLabel(label)
@@ -38,8 +38,8 @@ class Modal extends ModalBuilder {
             .setRequired(req ?? null)
             .setPlaceholder(placeholder ?? null);
 
-        if(min) input.setMinLength(min)
-        if(max) input.setMaxLength(max);
+        if (min) input.setMinLength(min)
+        if (max) input.setMaxLength(max);
 
         this.addComponents(new ActionRowBuilder().addComponents(input));
         return this
@@ -47,14 +47,14 @@ class Modal extends ModalBuilder {
 
     async show() {
         return await this.interaction.showModal(this)
-        .catch(err => {
-            return new ErrorEmbed(this.interaction, {
-                type: "badFunction",
-                data: {
-                    error: err
-                }
-            }).send({followup: true, ephemeral: true});
-        });
+            .catch(err => {
+                return new ErrorEmbed(this.interaction, {
+                    type: "badFunction",
+                    data: {
+                        error: err
+                    }
+                }).send({ followup: true, ephemeral: true });
+            });
     }
 
     read() {

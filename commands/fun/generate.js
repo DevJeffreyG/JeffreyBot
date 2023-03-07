@@ -31,9 +31,9 @@ command.execute = async (interaction, models, params, client) => {
         var generated = await Cr.generate({
             prompt: descripcion.value
         })
-    } catch(err) {
+    } catch (err) {
         console.log(err);
-        return interaction.editReply({ content: "No se pudieron crear tus obras maestras por un error con el servidor :("})
+        return interaction.editReply({ content: "No se pudieron crear tus obras maestras por un error con el servidor :(" })
     }
 
 

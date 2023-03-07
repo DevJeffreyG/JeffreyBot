@@ -11,7 +11,7 @@ command.addOption({
     type: "string",
     name: "encuesta",
     desc: "La encuesta a hacer",
-    req: true   
+    req: true
 })
 
 command.execute = async (interaction, models, params, client) => {
@@ -26,12 +26,12 @@ command.execute = async (interaction, models, params, client) => {
     ]
 
     let embed = new Embed()
-    .defAuthor({text: `¡Nueva encuesta por ${interaction.user.username}!`, icon: interaction.member.displayAvatarURL()})
-    .defDesc(encuesta)
-    .defColor(Colores.verde)
-    .defFooter({text: footers[Math.floor(Math.random() * footers.length)]})
+        .defAuthor({ text: `¡Nueva encuesta por ${interaction.user.username}!`, icon: interaction.member.displayAvatarURL() })
+        .defDesc(encuesta)
+        .defColor(Colores.verde)
+        .defFooter({ text: footers[Math.floor(Math.random() * footers.length)] })
 
-    let msg = await interaction.editReply({embeds: [embed]});
+    let msg = await interaction.editReply({ embeds: [embed] });
 
     await msg.react(client.Emojis.Check);
     await msg.react("🤷");

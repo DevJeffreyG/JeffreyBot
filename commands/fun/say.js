@@ -10,7 +10,7 @@ command.addOption({
     type: "string",
     name: "mensaje",
     desc: "Lo que quieras que diga",
-    req: true   
+    req: true
 })
 
 command.execute = async (interaction, models, params, client) => {
@@ -18,7 +18,7 @@ command.execute = async (interaction, models, params, client) => {
     const mensaje = params.mensaje.value;
 
     interaction.deleteReply();
-    return interaction.channel.send({content: mensaje, allowedMentions: { parse: [] } });
+    return interaction.channel.send({ content: mensaje, allowedMentions: { parse: [] } });
 }
 
 module.exports = command;

@@ -9,11 +9,11 @@ const command = new ContextMenu({
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ ephemeral: true });
-    
+
     const stats = require("../../commands/economy/stats");
     const member = interaction.guild.members.cache.get(params.user.id)
-    
-    stats.execute(interaction, models, {usuario: {member}}, client)
+
+    stats.execute(interaction, models, { usuario: { member } }, client)
 }
 
 module.exports = command;

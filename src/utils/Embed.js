@@ -25,7 +25,7 @@ class Embed extends Discord.EmbedBuilder {
         return this
     }
 
-    defTitle(text){
+    defTitle(text) {
         this.setTitle(text)
 
         return this
@@ -53,7 +53,7 @@ class Embed extends Discord.EmbedBuilder {
         return this
     }
 
-    defFields(fields = [{up, down, inline}]) {
+    defFields(fields = [{ up, down, inline }]) {
         if (fields.length == 0) return console.error("⚠️ BAD ARRAY OF FIELDS");
         this.data.fields = [];
 
@@ -113,7 +113,7 @@ class Embed extends Discord.EmbedBuilder {
                 this.defDesc(`...${data.text}?`)
                 this.defColor(Colores.verdeclaro)
 
-                if(new Chance().bool({likelihood: data.likelihood})) this.likelihood = true;
+                if (new Chance().bool({ likelihood: data.likelihood })) this.likelihood = true;
                 else this.likelihood = false;
                 break;
 
@@ -177,14 +177,14 @@ class Embed extends Discord.EmbedBuilder {
 
                 this.defAuthor({ text: `Estadísticas de ${member.user.tag}`, icon: member.guild.iconURL({ dynamic: true }) })
                     .defDesc(`**— Nivel**: ${curLvl}
-**— EXP**: ${ProgressBar(expSoFar/expToGet*100, {blocks: 5})} ${inlineCode(`${curExp} / ${nxtLvlExp}`)}
+**— EXP**: ${ProgressBar(expSoFar / expToGet * 100, { blocks: 5 })} ${inlineCode(`${curExp} / ${nxtLvlExp}`)}
 **— ${Currency.name}**: ${Currency}${actualCurrency}
 **— Puntos de reputación**: ${rep}
 ${bdString}`)
                     .defThumbnail(member.displayAvatarURL())
                     .defColor(member.displayHexColor);
 
-                if(user.isBirthday()) this.defAuthor({ text: `Hoy es el cumpleaños de ${member.user.tag} 🎉`, icon: member.guild.iconURL({ dynamic: true })})
+                if (user.isBirthday()) this.defAuthor({ text: `Hoy es el cumpleaños de ${member.user.tag} 🎉`, icon: member.guild.iconURL({ dynamic: true }) })
 
                 break;
 

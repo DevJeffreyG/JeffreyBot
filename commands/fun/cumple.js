@@ -113,7 +113,7 @@ command.execEdit = async (interaction, models, data, client) => {
 
     let month = Number(command.data.options.find(x => x.name === "edit")
         .options.find(x => x.name === "mes")
-        .choices.findIndex(x => x.name === monthString))+1
+        .choices.findIndex(x => x.name === monthString)) + 1
 
     userBD.day = data.dia;
     userBD.month = monthString;

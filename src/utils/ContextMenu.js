@@ -5,7 +5,7 @@ class ContextMenu {
     /**
      * @param {{name, type, category}} data
      */
-    constructor(data = {name: "foo", type: 2, category: Categories.General}) {
+    constructor(data = { name: "foo", type: 2, category: Categories.General }) {
         this.data = new ContextMenuCommandBuilder()
             .setName(data.name)
             .setType(data.type)
@@ -24,8 +24,8 @@ class ContextMenu {
          * @param {Client} client 
          */
         this.execute = async (interaction, models, params, client) => {
-            await interaction.deferReply({ephemeral: true});
-            interaction.editReply({content: "Hola mundo!"});
+            await interaction.deferReply({ ephemeral: true });
+            interaction.editReply({ content: "Hola mundo!" });
         }
     }
 

@@ -34,11 +34,11 @@ command.execute = async (interaction, models, params, client) => {
     const { miembro, modulo, cooldown } = params
     const { Users } = models
 
-    const user = await Users.getOrCreate({user_id: miembro.value, guild_id: miembro.member.guild.id})
-    if(cooldown.value != "0") await user.cooldown(modulo.value, {force_cooldown: ms(cooldown.value), save: true, check: false});
+    const user = await Users.getOrCreate({ user_id: miembro.value, guild_id: miembro.member.guild.id })
+    if (cooldown.value != "0") await user.cooldown(modulo.value, { force_cooldown: ms(cooldown.value), save: true, check: false });
     else user.delCooldown(modulo.value);
 
-    interaction.editReply({content: null, embeds: [new Embed({type: "success"})]});
+    interaction.editReply({ content: null, embeds: [new Embed({ type: "success" })] });
 }
 
 module.exports = command;

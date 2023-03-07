@@ -22,40 +22,40 @@ command.addOption({
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
-    
+
     const { EmojisObject } = client
     const { ToggledCommands } = models;
     const { comando } = params;
     const toggled = comando.value;
     const reason = params.razon ? params.razon.value : "Mantenimiento";
-    
+
     let removed = new Embed()
-    .defAuthor({text: "Eliminado", icon: EmojisObject.Check.url})
-    .defDesc(`**—** Se ha eliminado el comando \`/${toggled}\`.`)
-    .defColor(Colores.verde);
-    
+        .defAuthor({ text: "Eliminado", icon: EmojisObject.Check.url })
+        .defDesc(`**—** Se ha eliminado el comando \`/${toggled}\`.`)
+        .defColor(Colores.verde);
+
     let added = new Embed()
-    .defAuthor({text: "Toggled", icon: EmojisObject.Check.url})
-    .defDesc(`**—** Se ha agregado el comando \`/${toggled}\`.`)
-    .defColor(Colores.verde);
+        .defAuthor({ text: "Toggled", icon: EmojisObject.Check.url })
+        .defDesc(`**—** Se ha agregado el comando \`/${toggled}\`.`)
+        .defColor(Colores.verde);
 
     // Comando
     ToggledCommands.findOne({
         command: toggled
     }, (err, toggle) => {
-        if(err) throw err;
+        if (err) throw err;
 
-        if(!toggle){
+        if (!toggle) {
             new ToggledCommands({
                 command: toggled,
                 reason: reason
             }).save();
 
-            return interaction.editReply({embeds: [added]})
+            return interaction.editReply({ embeds: [added] })
         } else {
             toggle.remove();
 
-            return interaction.editReply({embeds: [removed]})
+            return interaction.editReply({ embeds: [removed] })
         }
     })
 }

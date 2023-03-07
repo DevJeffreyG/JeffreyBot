@@ -37,7 +37,7 @@ module.exports = {
     Log,
     CustomEmojis,
     Modal,
-    
+
     ...Enums,
     ...Functions
 }

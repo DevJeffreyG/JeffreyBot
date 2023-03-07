@@ -526,7 +526,7 @@ class Item {
         temprole.special.disabled = true;
 
         await this.victim.save();
-        if(role) this.victimMember.roles.remove(role);
+        if (role) this.victimMember.roles.remove(role);
 
         this.#removeItemFromInv()
         return true;
@@ -549,7 +549,7 @@ class Item {
         }
 
         let dsEvents = await this.interaction.guild.channels.fetch(this.doc.getChannel("darkshop.events"));
-        if(dsEvents instanceof Collection) dsEvents = null;
+        if (dsEvents instanceof Collection) dsEvents = null;
 
         let skipped = new Embed()
             .defAuthor({ text: `Interacción`, icon: this.interaction.client.EmojisObject.DarkShop.url })

@@ -126,14 +126,14 @@ command.execute = async (interaction, models, params, client) => {
         .defDesc(`**—** Se ha eliminado el ${textInfraction} con ID "**${id.value}**".
 **—** ${textInfraction + "s"} actuales: **${infractions.length}**.`)
         .defColor(Colores.verde)
-        .defFooter({ text: `Un abrazo, el Staff.`, icon: interaction.guild.iconURL({dynamic: true}) });
+        .defFooter({ text: `Un abrazo, el Staff.`, icon: interaction.guild.iconURL({ dynamic: true }) });
 
     new Log(interaction)
         .setReason(LogReasons.Pardon)
         .setTarget(ChannelModules.ModerationLogs)
         .send({ embeds: [pardon] })
 
-    await interaction.editReply({ embeds: [new Embed({type: "success"})] });
+    await interaction.editReply({ embeds: [new Embed({ type: "success" })] });
     if (!isSoftwarn) member.send({ embeds: [memberEmbed] })
         .catch(e => {
             interaction.editReply({ embeds: [pardon, new ErrorEmbed({ type: "notSent", data: { tag: member.user.tag, error: e } })] })

@@ -208,7 +208,7 @@ ${codeBlock("javascript", data.error)}`])
 
         if (this.interaction instanceof GuildChannel) return this.sendToChannel();
         if (!this.interaction) return console.error("🔴 NO EXISTE this.interaction !!")
-        if(this.interaction instanceof Guild) console.log("🔴 INTERACTION ES DE TIPO GUILD");
+        if (this.interaction instanceof Guild) console.log("🔴 INTERACTION ES DE TIPO GUILD");
         else
 
             if (ephemeral && !followup) {

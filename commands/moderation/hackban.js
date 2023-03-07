@@ -23,21 +23,23 @@ command.addOption({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
 
-    const { usuario, razon} = params;
+    const { usuario, razon } = params;
 
     const user = usuario.value;
     const reason = razon ? razon.value : "HackBan";
-    
-    await interaction.guild.members.ban(user, {reason})
 
-    return interaction.editReply({embeds: [
-        new Embed({
-            type: "success",
-            data: {
-                desc: "Se ha baneado al usuario"
-            }
-        })
-    ]})
+    await interaction.guild.members.ban(user, { reason })
+
+    return interaction.editReply({
+        embeds: [
+            new Embed({
+                type: "success",
+                data: {
+                    desc: "Se ha baneado al usuario"
+                }
+            })
+        ]
+    })
 }
 
 module.exports = command;

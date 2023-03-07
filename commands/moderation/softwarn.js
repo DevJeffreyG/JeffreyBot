@@ -160,7 +160,7 @@ command.execute = async (interaction, models, params, client) => {
             .setTarget(ChannelModules.ModerationLogs)
             .send({ embeds: [log, proofE] })
 
-        return interaction.editReply({ embeds: [new Embed({type: "success"})], components: [] });
+        return interaction.editReply({ embeds: [new Embed({ type: "success" })], components: [] });
     })
 }
 

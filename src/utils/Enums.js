@@ -5,7 +5,7 @@ class Enum {
     /**
      * @param {Object} values Los valores del enumerador, pueden usarse los default para usar los métodos
      */
-    constructor (values) {
+    constructor(values) {
         this.values = values
     }
 
@@ -14,7 +14,7 @@ class Enum {
      * @param {String} input El valor a consultar
      * @returns String
      */
-    translate(input){
+    translate(input) {
         return Object.keys(this.values).find(key => this.values[key] === input);
     }
 
@@ -22,7 +22,7 @@ class Enum {
      * Convierte el objeto en un Array con los nombres de los enumeradores
      * @returns Array
      */
-    array(){
+    array() {
         return Object.keys(this.values);
     }
 
@@ -45,7 +45,7 @@ class Enum {
 
         let names = this.array();
 
-        for(const name of names) {
+        for (const name of names) {
             let obj = {};
             obj.name = String(name);
             obj.value = String(this.values[name]);

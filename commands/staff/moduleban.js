@@ -10,7 +10,7 @@ command.addOption({
     type: "string",
     name: "modulo",
     desc: "El módulo en el que se baneará",
-    choices: [ "Tickets", "Sugerencias" ],
+    choices: ["Tickets", "Sugerencias"],
     req: true
 })
 
@@ -26,10 +26,10 @@ command.execute = async (interaction, models, params, client) => {
 
     const { Users } = models;
     const { modulo, usuario } = params;
-    
-    const user = await Users.getOrCreate({user_id: usuario.value, guild_id: interaction.guild.id});
 
-    switch(modulo.value){
+    const user = await Users.getOrCreate({ user_id: usuario.value, guild_id: interaction.guild.id });
+
+    switch (modulo.value) {
         case "sugerencias":
             action = await user.toggleBan("suggestions");
             break;
@@ -46,7 +46,7 @@ command.execute = async (interaction, models, params, client) => {
         }
     })
 
-    return interaction.editReply({embeds: [embed]});
+    return interaction.editReply({ embeds: [embed] });
 }
 
 module.exports = command;

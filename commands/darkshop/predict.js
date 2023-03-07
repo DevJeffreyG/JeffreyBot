@@ -11,8 +11,8 @@ const command = new Command({
 })
 
 command.execute = async (interaction, models, params, client) => {
-    if(moment().day() === 0){
-        return interaction.reply({ephemeral: true, content: `${client.Emojis.Error} No es una buena idea hacer eso el domingo...`})
+    if (moment().day() === 0) {
+        return interaction.reply({ ephemeral: true, content: `${client.Emojis.Error} No es una buena idea hacer eso el domingo...` })
     }
     await interaction.deferReply();
 
@@ -20,7 +20,7 @@ command.execute = async (interaction, models, params, client) => {
 
     const user = await Users.getOrCreate({ user_id: interaction.user.id, guild_id: interaction.guild.id });
 
-    if(user.economy.dark.darkjeffros === 0) return interaction.editReply(`${client.Emojis.Error} "No tengo nada invertido, mejor espero a tener...".`)
+    if (user.economy.dark.darkjeffros === 0) return interaction.editReply(`${client.Emojis.Error} "No tengo nada invertido, mejor espero a tener...".`)
 
     const darkshop = new DarkShop(interaction.guild, interaction)
     const values = await darkshop.getAllValues();
@@ -50,7 +50,7 @@ command.execute = async (interaction, models, params, client) => {
         let left = original.slice(oIndex);
 
         if (left.length === 1) r = true; // ya no hay nada que hacer
-        else if(left.find(x => x > now)) r = false // si hay algo mejor, esperar
+        else if (left.find(x => x > now)) r = false // si hay algo mejor, esperar
         else r = true; // ya no hay nada mejor, se debe vender
     }
 
@@ -65,10 +65,12 @@ command.execute = async (interaction, models, params, client) => {
 
     let force_cooldown = moment().weekday(7).hour(0).minutes(0).seconds(0).millisecond(0).toDate();
 
-    let cool = await user.cooldown(Cooldowns.InflationPrediction, { force_cooldown, precise: true } )
-    if(cool) return interaction.editReply({content: null, embeds: [
-        new Embed({type: "cooldown", data: {cool}})
-    ]});
+    let cool = await user.cooldown(Cooldowns.InflationPrediction, { force_cooldown, precise: true })
+    if (cool) return interaction.editReply({
+        content: null, embeds: [
+            new Embed({ type: "cooldown", data: { cool } })
+        ]
+    });
 
     if (!r || !user.economy.dark?.accuracy) return interaction.editReply({
         embeds: [

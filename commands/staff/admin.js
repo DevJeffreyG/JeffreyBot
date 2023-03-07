@@ -640,7 +640,7 @@ command.vaultExec = async (interaction, models, params, client) => {
 
         case "list": {
             // TODO: Mostrar la lista de todos los códigos
-            return interaction.editReply({content: "Vuelve más tarde, esto será añadido en una actualización futura."})
+            return interaction.editReply({ content: "Vuelve más tarde, esto será añadido en una actualización futura." })
         }
     }
 }

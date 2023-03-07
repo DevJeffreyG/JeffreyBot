@@ -21,9 +21,9 @@ class Handlers {
     }
 
     async #startHandler() {
-        if(this.interaction.client.isOnLockdown && !this.#isDev()) try {
-            return await this.interaction.reply({ephemeral: true, embeds: [new ErrorEmbed().defDesc(`Jeffrey Bot está en bloqueado ahora mismo, lamentamos los inconvenientes.`)]});
-        } catch(err) {
+        if (this.interaction.client.isOnLockdown && !this.#isDev()) try {
+            return await this.interaction.reply({ ephemeral: true, embeds: [new ErrorEmbed().defDesc(`Jeffrey Bot está en bloqueado ahora mismo, lamentamos los inconvenientes.`)] });
+        } catch (err) {
             console.log(err)
         }
 
@@ -214,18 +214,18 @@ class Handlers {
             }
             case "yesPoll": {
                 let poll = await GlobalDatas.getPoll(this.interaction.message.id);
-                if(!poll) return this.interaction.reply({ephemeral: true, content: "Esta encuesta ya terminó y no puedes seguir votando"})
+                if (!poll) return this.interaction.reply({ ephemeral: true, content: "Esta encuesta ya terminó y no puedes seguir votando" })
 
                 poll.pollYes(this.interaction.user.id)
-                return this.interaction.reply({ephemeral: true, embeds: [new Embed({type: "success", data: { desc: "Se registró tu voto"}})]});
+                return this.interaction.reply({ ephemeral: true, embeds: [new Embed({ type: "success", data: { desc: "Se registró tu voto" } })] });
             }
 
             case "noPoll": {
                 let poll = await GlobalDatas.getPoll(this.interaction.message.id);
-                if(!poll) return this.interaction.reply({ephemeral: true, content: "Esta encuesta ya terminó y no puedes seguir votando"})
+                if (!poll) return this.interaction.reply({ ephemeral: true, content: "Esta encuesta ya terminó y no puedes seguir votando" })
 
                 poll.pollNo(this.interaction.user.id)
-                return this.interaction.reply({ephemeral: true, embeds: [new Embed({type: "success", data: { desc: "Se registró tu voto"}})]});
+                return this.interaction.reply({ ephemeral: true, embeds: [new Embed({ type: "success", data: { desc: "Se registró tu voto" } })] });
             }
 
             default:

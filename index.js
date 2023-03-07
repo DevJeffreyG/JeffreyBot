@@ -51,7 +51,7 @@ connection.then(async (c) => {
           console.log("🟢 Se eliminó la compra: ")
           console.log(purchase)
           console.log("🟢 De: %s en %s", user.user_id, user.guild_id)
-          
+
           user.data.purchases.splice(index, 1);
           user.markModified("data");
           await user.save();
@@ -68,13 +68,13 @@ connection.then(async (c) => {
     Errors(client);
 
   } catch (err) {
-  console.log("🔴 Hubo un error iniciando el cliente y sus handlers")
-  console.log(err)
+    console.log("🔴 Hubo un error iniciando el cliente y sus handlers")
+    console.log(err)
   }
 })
-.catch(err => {
-  console.log("🔴 Hubo un error conectandose a la base de datos")
-  console.log(err);
-})
+  .catch(err => {
+    console.log("🔴 Hubo un error conectandose a la base de datos")
+    console.log(err);
+  })
 
 module.exports = client;

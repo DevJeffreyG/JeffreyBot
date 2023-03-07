@@ -1,6 +1,7 @@
 const Discord = require("discord.js");
 
 const { Config } = require("../src/resources");
+const { Embed } = require("../src/utils");
 const { Users, Guilds } = require("mongoose").models;
 
 module.exports = async (client, member) => {
@@ -25,9 +26,9 @@ module.exports = async (client, member) => {
     if (member.pending) return;
 
     const fBye = despedidas[Math.floor(Math.random() * despedidas.length)];
-    let embed = new Discord.EmbedBuilder()
-    .setDescription(fBye)
-    .setColor("#66a0ff");
+    let embed = new Embed()
+        .defDesc(fBye)
+        .defColor("#66a0ff");
 
     // guardar los roles
     let user = await Users.getOrCreate({
@@ -35,15 +36,15 @@ module.exports = async (client, member) => {
         guild_id: member.guild.id
     });
 
-    if(doc.moduleIsActive("functions.save_roles_onleft", doc.settings)) {
+    if (doc.moduleIsActive("functions.save_roles_onleft", doc.settings)) {
         member.roles.cache.forEach(role => {
-            if(role.id != member.guild.id) user.data.backup_roles.push(role.id);
+            if (role.id != member.guild.id) user.data.backup_roles.push(role.id);
         })
 
         await user.save();
     }
 
-    if(channel) channel.send({embeds: [embed]}).then(msg => {
+    if (channel) channel.send({ embeds: [embed] }).then(msg => {
         msg.react(client.Emojis.PressF);
     });
 }

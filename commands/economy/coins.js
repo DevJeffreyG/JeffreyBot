@@ -11,7 +11,7 @@ const command = new Command({
 command.execute = async (interaction, models, params, client) => {
     const { Users } = models
     const { Currency } = client.getCustomEmojis(interaction.guild.id);
-    
+
     await interaction.deferReply();
 
     const guild = client.guilds.cache.find(x => x.id === interaction.guildId);
@@ -23,12 +23,14 @@ command.execute = async (interaction, models, params, client) => {
         guild_id: guild.id
     })
 
-    let cooldownInfo = await user.cooldown(Cooldowns.Coins, {check: false, info: true})
+    let cooldownInfo = await user.cooldown(Cooldowns.Coins, { check: false, info: true })
 
-    let cool = await user.cooldown(Cooldowns.Coins, {save: false})
-    if(cool) return interaction.editReply({content: null, embeds: [
-        new Embed({type: "cooldown", data: {cool}})
-    ]});
+    let cool = await user.cooldown(Cooldowns.Coins, { save: false })
+    if (cool) return interaction.editReply({
+        content: null, embeds: [
+            new Embed({ type: "cooldown", data: { cool } })
+        ]
+    });
 
     let money = Math.ceil(Math.random() * 20);
     let tmoney = `**${Currency}${money.toLocaleString('es-CO')}**`;
@@ -42,14 +44,14 @@ command.execute = async (interaction, models, params, client) => {
     randommember = `**${randommember.displayName}**`;
 
     let fakemoney = `${Math.ceil(Math.random() * 1000) + 999} ${Currency.name}`;
-    
+
     // buscar si tiene boost
     for (let i = 0; i < user.data.temp_roles.length; i++) {
         const temprole = user.data.temp_roles[i];
         const specialInfo = temprole.special;
-        
-        if(specialInfo.type === BoostTypes.Multiplier){
-            if((specialInfo.objetive === BoostObjetives.Currency || specialInfo.objetive === BoostObjetives.All) && !specialInfo.disabled){
+
+        if (specialInfo.type === BoostTypes.Multiplier) {
+            if ((specialInfo.objetive === BoostObjetives.Currency || specialInfo.objetive === BoostObjetives.All) && !specialInfo.disabled) {
                 money = money * Number(specialInfo.value);
                 tmoney = `**${Currency}${money.toLocaleString('es-CO')}🚀**`;
             }
@@ -67,24 +69,24 @@ command.execute = async (interaction, models, params, client) => {
     ).replace(
         new RegExp("{ FAKE MONEY }", "g"),
         `${fakemoney}`
-    ).replace(new RegExp("{ COOLDOWN }", "g"), `${cooldownInfo/60000}`);
+    ).replace(new RegExp("{ COOLDOWN }", "g"), `${cooldownInfo / 60000}`);
 
     let memberColor = member.displayHexColor;
 
     let embed = new Embed()
-    .defColor(memberColor)
-    .defDesc(`${text}.`);
+        .defColor(memberColor)
+        .defDesc(`${text}.`);
 
-    if(index.author){
+    if (index.author) {
         let rAuthor = guild.members.cache.find(x => x.id === index.author);
         let suggestor = rAuthor ? rAuthor.user.tag : "un usuario";
         let img = rAuthor ? rAuthor.displayAvatarURL() : guild.iconURL();
-        embed.defFooter({text: `• Respuesta sugerida por ${suggestor}`, icon: img})
+        embed.defFooter({ text: `• Respuesta sugerida por ${suggestor}`, icon: img })
     }
 
     await user.addCurrency(money);
-    
-    return interaction.editReply({embeds: [embed]});
+
+    return interaction.editReply({ embeds: [embed] });
 }
 
 module.exports = command;

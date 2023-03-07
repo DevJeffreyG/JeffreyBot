@@ -14,26 +14,28 @@ command.execute = async (interaction, models, params, client) => {
 
     const { GlobalDatas, Users } = models;
 
-    const user = await Users.getOrCreate({user_id: interaction.user.id, guild_id: interaction.guild.id});
+    const user = await Users.getOrCreate({ user_id: interaction.user.id, guild_id: interaction.guild.id });
     let cool = await user.cooldown(Cooldowns.Roulette)
-    if(cool) return interaction.editReply({content: null, embeds: [
-        new Embed({type: "cooldown", data: {cool}})
-    ]});
+    if (cool) return interaction.editReply({
+        content: null, embeds: [
+            new Embed({ type: "cooldown", data: { cool } })
+        ]
+    });
 
     const rouletteItems = await GlobalDatas.getRouletteItems();
 
     console.log("🟢 Items disponibles: %s", rouletteItems.length);
 
     const randomItem = await getRandom(rouletteItems);
-    if(randomItem === -1){
+    if (randomItem === -1) {
         user.delCooldown(Cooldowns.Roulette)
-        return interaction.editReply({content: "No me la vas a creer, pero no pude encontrar un item indicado para ti :("})
+        return interaction.editReply({ content: "No me la vas a creer, pero no pude encontrar un item indicado para ti :(" })
     }
     const item = await new RouletteItem(interaction, randomItem).build();
 
     await item.use()
 
-    
+
     async function getRandom(query) {
         let returnable = null;
 
@@ -50,7 +52,7 @@ command.execute = async (interaction, models, params, client) => {
             let benefit = false;
 
             if (q.extra?.special === ItemObjetives.Boost) benefit = await WillBenefit(interaction.member, [q.extra.boostobj, BoostObjetives.All])
-            
+
             returnable = selected && !benefit ? q : null
 
             if (moment(date).diff(start, "second") >= 3) returnable = benefit ? -1 : q;

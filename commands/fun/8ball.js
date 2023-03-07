@@ -18,16 +18,16 @@ command.execute = async (interaction, models, params, client) => {
     let replies = ["Sí.", "No.", "No lo sé", "Te mentiría si no.", "¿Estamos tontos?", "Obvio.", "Bastante claro que no.", "La verdad es que no.", "La verdad, sí."];
 
     let answer = Math.floor(Math.random() * replies.length);
-    const {pregunta} = params;
-    if(pregunta.value.length == 0) return interaction.editReply({content: "No hubo una pregunta..."})
+    const { pregunta } = params;
+    if (pregunta.value.length == 0) return interaction.editReply({ content: "No hubo una pregunta..." })
 
     let pregEmbed = new Embed()
-      .defColor(Colores.verde)
-      .defAuthor({text: `${interaction.user.tag}`, icon: interaction.member.displayAvatarURL()})
-      .defField("Pregunta", pregunta.value)
-      .defField("Respuesta", replies[answer]);
+        .defColor(Colores.verde)
+        .defAuthor({ text: `${interaction.user.tag}`, icon: interaction.member.displayAvatarURL() })
+        .defField("Pregunta", pregunta.value)
+        .defField("Respuesta", replies[answer]);
 
-    return interaction.deferred ? interaction.editReply({embeds: [pregEmbed]}) : interaction.reply({embeds: [pregEmbed]});
+    return interaction.deferred ? interaction.editReply({ embeds: [pregEmbed] }) : interaction.reply({ embeds: [pregEmbed] });
 }
 
 module.exports = command;

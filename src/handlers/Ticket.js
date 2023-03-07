@@ -55,12 +55,12 @@ class Ticket {
     }
 
     async handle() {
-        if(!this.docGuild) await this.#fetchDocGuild();
+        if (!this.docGuild) await this.#fetchDocGuild();
         this.user = await Users.getOrCreate({ guild_id: this.guild.id, user_id: this.userId });
 
-        if(!this.docGuild.moduleIsActive("functions.tickets")) return new ErrorEmbed(this.interaction, {type: "moduleDisabled"}).send({ephemeral: true});
+        if (!this.docGuild.moduleIsActive("functions.tickets")) return new ErrorEmbed(this.interaction, { type: "moduleDisabled" }).send({ ephemeral: true });
         if (!this.interaction.deferred) await this.interaction.deferReply({ ephemeral: true });
-        
+
         switch (this.customId) {
             case "createTicket":
                 this.#createTicket();
@@ -172,7 +172,7 @@ class Ticket {
                 const warn = this.user.warns[i];
                 const regla = doc.data.rules.find(x => x.id === warn.rule_id);
 
-                if(!regla) continue;
+                if (!regla) continue;
 
                 const label = `ID: ${warn.id} — Por: ${regla.name}`
                 let desc = regla.desc ?? regla.expl;
@@ -301,8 +301,8 @@ class Ticket {
         //interaction.message.channel.delete();
 
         const ticket = this.docGuild.data.tickets.find(x => x.channel_id === interaction.channel.id);
-        if(!ticket) return this.doesntExist.send();
-        
+        if (!ticket) return this.doesntExist.send();
+
         const channel = interaction.channel;
 
         const message = await channel.messages.fetch(ticket.message_id);
@@ -352,8 +352,8 @@ class Ticket {
         if (!confirmation) return;
 
         const ticket = this.docGuild.data.tickets.find(x => x.channel_id === interaction.channel.id);
-        if(!ticket) return this.doesntExist.send();
-        
+        if (!ticket) return this.doesntExist.send();
+
         const channel = interaction.channel;
 
         const message = await channel.messages.fetch(ticket.message_id);
@@ -401,7 +401,7 @@ class Ticket {
         if (!confirmation) return;
 
         const ticket = this.docGuild.data.tickets.find(x => x.channel_id === interaction.channel.id);
-        if(!ticket) return this.doesntExist.send();
+        if (!ticket) return this.doesntExist.send();
 
         const channel = interaction.channel;
 

@@ -89,8 +89,8 @@ ${member.roles.cache.toJSON().sort().join(", ")}`)
         // sacar la regla
         let regla = reglas.find(x => x.id === warn.rule_id)?.name ?? "Víctima de la DARKSHOP";
 
-        if(warn.rule_id != 0) warns.defField(`— ${regla} : Regla N°${warn.rule_id}`, `**— [Pruebas](${warn.proof})\n— ID: ${warn.id}**`)
-            else warns.defField(`— ${regla}`, `**— ID: ${warn.id}**`)
+        if (warn.rule_id != 0) warns.defField(`— ${regla} : Regla N°${warn.rule_id}`, `**— [Pruebas](${warn.proof})\n— ID: ${warn.id}**`)
+        else warns.defField(`— ${regla}`, `**— ID: ${warn.id}**`)
 
         hasW = true;
     });
@@ -158,7 +158,7 @@ ${member.roles.cache.toJSON().sort().join(", ")}`)
 
         try {
             await interaction.editReply({ embeds: [embeds[pagn]], components: [row] });
-        } catch(err) {
+        } catch (err) {
             console.log(err);
         }
 

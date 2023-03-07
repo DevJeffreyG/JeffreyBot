@@ -67,9 +67,9 @@ class Shop {
 
     async setup(options) {
         this.user = await Users.getOrCreate({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id });
-        
-        if(!this.doc) await this.#fetchDoc();
-        
+
+        if (!this.doc) await this.#fetchDoc();
+
         if (this.isDarkShop)
             this.base.description = `**—** Bienvenid@ a la DarkShop. Para comprar items usa \`/dsbuy #\`.\n**—** Tienes **${this.Emojis.DarkCurrency}${this.user.economy.dark.currency.toLocaleString("es-CO")}**`;
         else
@@ -97,8 +97,8 @@ class Shop {
             guild_id: this.interaction.guild.id
         });
 
-        if(!this.doc) await this.#fetchDoc();
-        
+        if (!this.doc) await this.#fetchDoc();
+
         const member = this.interaction.member;
 
 
@@ -274,8 +274,8 @@ class Shop {
 Si es eliminando, **sólo debe tener**: \`duracion\`.`
             }
         })
-      
-         let notValidCombination = new ErrorEmbed(this.interaction, {
+
+        let notValidCombination = new ErrorEmbed(this.interaction, {
             type: "execError",
             data: {
                 guide: `Si se usa un tipo item, **no puede eliminarse**.`
@@ -328,7 +328,7 @@ Si es eliminando, **sólo debe tener**: \`duracion\`.`
             if (!use.given) return roleError.send();
         }
 
-        if(use.objetive === ItemObjetives.Item) {
+        if (use.objetive === ItemObjetives.Item) {
             if (use.action === ItemActions.Remove) return notValidCombination.send();
         }
 
@@ -370,7 +370,7 @@ Si es eliminando, **sólo debe tener**: \`duracion\`.`
             guild_id: this.interaction.guild.id
         });
 
-        if(!this.doc) await this.#fetchDoc();
+        if (!this.doc) await this.#fetchDoc();
 
         this.base.description = `**—** [NOT READY]: Falta el uso (\`/admin items use-info\`)\n**—** [HIDDEN]: Item desactivado (\`/admin items toggle\`)\n**—** [✅]: El item es visible y usable para cualquiera.`;
         this.base.addon = this.base.addon.substring(0, 2) + "{publicInfo} — ID: " + this.base.addon.substring(2, this.base.addon.length - 4) + `\n+ ${this.isDarkShop ? this.Emojis.DarkCurrency : this.Emojis.Currency}{item_interest}** al comprarlo.\n\n`
@@ -437,7 +437,7 @@ Si es eliminando, **sólo debe tener**: \`duracion\`.`
     async #fetchDoc() {
         this.doc = await Guilds.getOrCreate(this.interaction.guild.id);
 
-        if(this.isDarkShop) {
+        if (this.isDarkShop) {
             this.darkshop = new DarkShop(this.interaction.guild);
             this.darkshopEquivalency = await this.darkshop.equals(null, this.user.economy.dark.currency)
         }
@@ -449,7 +449,7 @@ Si es eliminando, **sólo debe tener**: \`duracion\`.`
 
         try {
             await interactive.init(this.interaction);
-        } catch(err) {
+        } catch (err) {
             console.log(err);
         }
     }
@@ -516,25 +516,23 @@ Si es eliminando, **sólo debe tener**: \`duracion\`.`
         let precio = interestPrice;
 
         // para calmar a los mr inversiones
-        if(this.doc.settings.functions[this.isDarkShop ? "adjust_darkshop" : "adjust_shop" ]) {
+        if (this.doc.settings.functions[this.isDarkShop ? "adjust_darkshop" : "adjust_shop"]) {
             let media = 0;
             this.shop.items.forEach(i => media += i.price);
             media /= this.shop.items.length;
 
-            //console.log(Math.round(this.darkshopEquivalency) + this.user.economy.global.currency)
-
             let multidiff = Math.floor((this.isDarkShop ? Math.round(this.darkshopEquivalency) + this.user.economy.global.currency : this.user.economy.global.currency) / media);
-    
+
             //console.log("🏳️ El promedio de precios es %s", media)
             //console.log("🏳️ dinero/media = %s", multidiff)
-    
+
             if (multidiff > 100) {
-                let fix = this.isDarkShop ? multidiff / 20 : multidiff * 15;
+                let fix = this.isDarkShop ? multidiff / 20 : multidiff * 20;
                 console.log("🟩 Fixing %s with %s", precio, fix)
                 precio += fix;
             }
         }
-        
+
         let work = this.#discountsWork(user, precio);
 
         if (toString) {

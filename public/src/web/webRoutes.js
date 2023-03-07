@@ -52,7 +52,7 @@ module.exports = (app) => {
     app.get("/app-health", (req, res) => {
         let client = require("../../../index");
 
-        if(client.readyAt) return res.sendStatus(200)
+        if (client.readyAt) return res.sendStatus(200)
         return res.sendStatus(503)
     });
     app.get("/", (req, res) => { prepare("home", { req, res }) });

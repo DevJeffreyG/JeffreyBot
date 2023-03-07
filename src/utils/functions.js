@@ -1,4 +1,4 @@
-const { ActivityType, ButtonStyle, OverwriteType, PermissionsBitField, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, EmbedBuilder, Guild, GuildMember, CommandInteraction, BaseInteraction, Message, Client, time, hyperlink, codeBlock } = require("discord.js");
+const { ActivityType, ButtonStyle, OverwriteType, PermissionsBitField, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, Guild, GuildMember, CommandInteraction, BaseInteraction, Message, Client, time, hyperlink, codeBlock } = require("discord.js");
 
 const Colores = require("../resources/colores.json");
 const Cumplidos = require("../resources/cumplidos.json");
@@ -483,16 +483,16 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
     for (const deletion of temproledeletions) {
       if (moment().isAfter(deletion.info.until)) {
         let temproleIndex = dbUser.data.temp_roles.findIndex(x => {
-          if(deletion.tempRoleObjectId){
+          if (deletion.tempRoleObjectId) {
             return x._id === deletion.tempRoleObjectId;
           }
-          if(deletion.info.boost && x.role_id === deletion.info.role_id) {
+          if (deletion.info.boost && x.role_id === deletion.info.role_id) {
             return x.special.objetive === deletion.info.boost && x.role_id === deletion.info.role_id && x.special.disabled === true
           } else {
             return x.special.disabled === true;
           }
         })
-        if(deletion.info.role_id) member.roles.add(deletion.info.role_id)
+        if (deletion.info.role_id) member.roles.add(deletion.info.role_id)
 
         if (temproleIndex != -1) {
           dbUser.data.temp_roles[temproleIndex].special.disabled = false;
@@ -584,21 +584,29 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
         // ya pasó el tiempo, unban
         try {
           guild.members.unban(userID);
+          console.log("🟢 Se ha desbaneado a %s", userID)
         } catch (err) {
           console.log(err);
         }
         tempBans[i].remove();
 
-        let unBEmbed = new EmbedBuilder()
-          .setAuthor(`Unban`, guild.iconURL())
-          .setDescription(`
-        **—** Usuario desbaneado: **${userID}**.
-        **—** Razón: **${ban.info.reason}**.
+        let unBEmbed = new Embed()
+          .defAuthor({ text: `Unban`, icon: guild.iconURL() })
+          .defDesc(`
+**—** Usuario desbaneado: **${userID}**.
+**—** Razón: **${ban.info.reason}**.
             `)
-          .setColor(Colores.verde);
+          .defColor(Colores.verde);
 
-        logs.send({ embeds: [unBEmbed] })
-        console.log("Se ha desbaneado a", userID)
+        try {
+          await new Log(guild)
+            .setGuild(guild)
+            .setTarget(ChannelModules.ModerationLogs)
+            .setReason(LogReasons.Ban)
+            .send({ embeds: [unBEmbed] })
+        } catch (err) {
+          console.log(err)
+        }
       }
     }
   }

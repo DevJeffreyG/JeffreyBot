@@ -5,7 +5,7 @@ const { GlobalDatas } = require("mongoose").models;
 const fs = require("fs")
 
 class Commands {
-    constructor(paths = ["./commands/"]){
+    constructor(paths = ["./commands/"]) {
         this.paths = paths;
         this.routes = [];
         this.commands = [];
@@ -15,7 +15,7 @@ class Commands {
             ? Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.DEV_GUILD)
             : Routes.applicationCommands(process.env.CLIENT_ID)
 
-        this.rest = new REST({ version: '10'}).setToken(process.env.TOKEN);
+        this.rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
     }
 
     /**
@@ -34,20 +34,20 @@ class Commands {
         return this.client;
     }
 
-    async prepare(client, Ids = []){
+    async prepare(client, Ids = []) {
         this.client = client;
         this.ids = Ids;
 
-        if(!this.client.mapped) for await (const path of this.paths) {
+        if (!this.client.mapped) for await (const path of this.paths) {
             this.path = path;
             await this.#load()
         }
-        
+
         return new Promise(async (res, rej) => {
-            if(this.commands.length < 1) this.commands = this.client.rawCommands;
+            if (this.commands.length < 1) this.commands = this.client.rawCommands;
             let response = await this.#register()
 
-            if(response instanceof Error) rej(response)
+            if (response instanceof Error) rej(response)
             else {
                 client.mapped = true;
                 res(response)
@@ -63,17 +63,17 @@ class Commands {
         this.ids.forEach(guildId => {
             this.routes.push(Routes.applicationGuildCommands(process.env.CLIENT_ID, guildId));
         })
-      
-        for (const folder of commandsFolder) {
-          const commandFiles = fs.readdirSync(`${this.path}/${folder}`).filter(file => file.endsWith(".js"));
-      
-          for(const file of commandFiles) {
-            const command = require(`${this.path}/${folder}/${file}`);
 
-            this.client.commands.set(command.data.name, command);
-            console.log("▶️ Comando", command.data.name, "recibido, agregado a la lista")
-            this.commands.push(command.data.toJSON())
-          }
+        for (const folder of commandsFolder) {
+            const commandFiles = fs.readdirSync(`${this.path}/${folder}`).filter(file => file.endsWith(".js"));
+
+            for (const file of commandFiles) {
+                const command = require(`${this.path}/${folder}/${file}`);
+
+                this.client.commands.set(command.data.name, command);
+                console.log("▶️ Comando", command.data.name, "recibido, agregado a la lista")
+                this.commands.push(command.data.toJSON())
+            }
         }
 
         this.client.rawCommands = this.commands;
@@ -85,13 +85,13 @@ class Commands {
             console.log("⚪ Actualizando comandos para la ruta:", this.route)
             console.log("MODO DE INICIACIÓN EN DEVELOPER:", process.env.DEV);
 
-            if(process.env.DEV == "TRUE"){
+            if (process.env.DEV == "TRUE") {
                 console.log("🔄 Creando Dev Guild 🔄")
-                await GlobalDatas.newGuildCommands({route: this.route, dev: true})
+                await GlobalDatas.newGuildCommands({ route: this.route, dev: true })
 
                 // eliminar cualquier comando global
-                if(this.rest.get(Routes.applicationCommands(process.env.CLIENT_ID)))
-                    this.rest.put(Routes.applicationCommands(process.env.CLIENT_ID), {body: []})
+                if (this.rest.get(Routes.applicationCommands(process.env.CLIENT_ID)))
+                    this.rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body: [] })
 
                 this.removeGuildCommands(true)
             } else {
@@ -99,7 +99,7 @@ class Commands {
             }
 
             console.log("⚪ ACTUALIZANDO COMANDOS")
-            await this.rest.put(this.route, {body: this.commands})
+            await this.rest.put(this.route, { body: this.commands })
             console.log("🟢 APPLICATION COMMANDS ACTUALIZADOS")
             return this
         } catch (error) {
@@ -108,23 +108,23 @@ class Commands {
         return;
     }
 
-    async removeGuildCommands(dev){
+    async removeGuildCommands(dev) {
         console.log("⚪ BUSCANDO POSIBLES GUILDCOMMANDS")
         let guild_commands = await GlobalDatas.getGuildCommands();
 
         guild_commands.forEach(async q => {
             let data = q.info;
 
-            if(!dev){
+            if (!dev) {
                 console.log("🔄 Eliminando Dev Guilds 🔄")
 
-                if(!this.routes.find(x => x === data.route)){
+                if (!this.routes.find(x => x === data.route)) {
                     await GlobalDatas.removeGuildCommand(data.route);
                     await this.rest.put(data.route, { body: [] })
                 }
             }
 
-            if((this.rest.get(data.route) && data.dev != dev)){
+            if ((this.rest.get(data.route) && data.dev != dev)) {
                 console.log("🔄 Eliminando Guilds 🔄")
                 await this.rest.put(data.route, { body: [] })
 

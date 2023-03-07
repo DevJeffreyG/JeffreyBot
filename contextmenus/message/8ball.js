@@ -8,7 +8,7 @@ const command = new ContextMenu({
 })
 
 command.execute = async (interaction, models, params, client) => {
-    await interaction.deferReply({ephemeral: true});
+    await interaction.deferReply({ ephemeral: true });
 
     const generate = require("../../commands/fun/8ball");
     await generate.execute(interaction, models, {

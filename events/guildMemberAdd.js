@@ -4,7 +4,7 @@ const { time } = Discord;
 const { GenerateLog, DaysUntilToday, Embed, GetRandomItem } = require("../src/utils/");
 const { Colores, Config } = require("../src/resources");
 
-const { Users, Guilds} = require("mongoose").models;
+const { Users, Guilds } = require("mongoose").models;
 
 module.exports = async (client, member) => {
   let tag = member.user.tag;
@@ -19,7 +19,7 @@ module.exports = async (client, member) => {
   const doc = await Guilds.getOrCreate(guild.id);
 
   // cargar los roles que tenia antes
-  if(doc.moduleIsActive("functions.save_roles_onleft", doc.settings)) user.data.backup_roles.forEach(roleId => {
+  if (doc.moduleIsActive("functions.save_roles_onleft", doc.settings)) user.data.backup_roles.forEach(roleId => {
     const role = guild.roles.cache.find(x => x.id === roleId);
     if (role) member.roles.add(role);
 
@@ -46,10 +46,10 @@ module.exports = async (client, member) => {
 
   let embed = new Embed()
     .defDesc(fBienv)
-    .defFooter({text: `* Para poder hablar en el chat debes aceptar las reglas`, icon: guild.iconURL()})
+    .defFooter({ text: `* Para poder hablar en el chat debes aceptar las reglas`, icon: guild.iconURL() })
     .defColor(Colores.verde);
 
-  member.send({ embeds: [embed] }).catch(e => {});
+  member.send({ embeds: [embed] }).catch(e => { });
 
   member.guild.invites.fetch().then((invites) => {
     invites.forEach(async invite => {

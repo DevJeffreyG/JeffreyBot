@@ -61,18 +61,18 @@ command.addOption({
     sub: "darkcurrency.add"
 })
 
-command.execute = async(interaction, models, params, client) => {
+command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
 
     const { subgroup, subcommand, currency, darkcurrency } = params
 
-    switch(subgroup){
+    switch (subgroup) {
         case "currency":
-            command.execCurrency(interaction, models, {subcommand, currency}, client)
+            command.execCurrency(interaction, models, { subcommand, currency }, client)
             break;
 
         case "darkcurrency":
-            command.execDarkCurrency(interaction, models, {subcommand, darkcurrency}, client)
+            command.execDarkCurrency(interaction, models, { subcommand, darkcurrency }, client)
             break;
     }
 }
@@ -83,18 +83,18 @@ command.execCurrency = async (interaction, models, params, client) => {
     const { Users } = models
     const { Currency } = client.getCustomEmojis(interaction.guild.id);
 
-    const user = await Users.getOrCreate({user_id: usuario.value, guild_id: usuario.member.guild.id})
+    const user = await Users.getOrCreate({ user_id: usuario.value, guild_id: usuario.member.guild.id })
 
     await user.addCurrency(cantidad.value)
 
     let embed = new Embed()
-    .defAuthor({text: `¡Dinero para ti, ${usuario.member.user.tag}!`, icon: usuario.member.guild.iconURL()})
-    .defDesc(`**+${Currency}${cantidad.value.toLocaleString('es-CO')}
+        .defAuthor({ text: `¡Dinero para ti, ${usuario.member.user.tag}!`, icon: usuario.member.guild.iconURL() })
+        .defDesc(`**+${Currency}${cantidad.value.toLocaleString('es-CO')}
 — ${Currency}${user.economy.global.currency.toLocaleString('es-CO')}**`)
-    .defColor(Colores.verde)
-    .defThumbnail(usuario.member.displayAvatarURL());
+        .defColor(Colores.verde)
+        .defThumbnail(usuario.member.displayAvatarURL());
 
-    return interaction.editReply({content: null, embeds: [embed]});
+    return interaction.editReply({ content: null, embeds: [embed] });
 }
 
 command.execDarkCurrency = async (interaction, models, params, client) => {
@@ -103,19 +103,19 @@ command.execDarkCurrency = async (interaction, models, params, client) => {
     const { Users } = models
     const { DarkCurrency } = client.getCustomEmojis(interaction.guild.id);
 
-    const user = await Users.getOrCreate({user_id: usuario.value, guild_id: usuario.member.guild.id})
+    const user = await Users.getOrCreate({ user_id: usuario.value, guild_id: usuario.member.guild.id })
 
     user.economy.dark.currency += cantidad.value;
     await user.save();
 
     let embed = new Embed()
-    .defAuthor({text: `¡Dinero para ti, ${usuario.member.user.tag}!`, icon: usuario.member.guild.iconURL()})
-    .defDesc(`**+${DarkCurrency}${cantidad.value.toLocaleString('es-CO')}
+        .defAuthor({ text: `¡Dinero para ti, ${usuario.member.user.tag}!`, icon: usuario.member.guild.iconURL() })
+        .defDesc(`**+${DarkCurrency}${cantidad.value.toLocaleString('es-CO')}
 — ${DarkCurrency}${user.economy.dark.currency.toLocaleString('es-CO')}**`)
-    .defColor(Colores.verde)
-    .defThumbnail(usuario.member.displayAvatarURL());
+        .defColor(Colores.verde)
+        .defThumbnail(usuario.member.displayAvatarURL());
 
-    return interaction.editReply({content: null, embeds: [embed]});
+    return interaction.editReply({ content: null, embeds: [embed] });
 }
 
 module.exports = command;

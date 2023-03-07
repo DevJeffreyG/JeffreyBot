@@ -354,7 +354,7 @@ class Dashboard {
         let f = x => x.id === id;
         let guildItem = this.guild.roles.find(f) || this.guild.channels.find(f) || this.guild.categories.find(f);
 
-        if(!guildItem) guildItem = {
+        if (!guildItem) guildItem = {
             name: "[ ELIMINADO ]"
         };
 
@@ -364,8 +364,8 @@ class Dashboard {
         if (guildItem.color) {
             let hexColor = guildItem.color.toString(16);
 
-            if(hexColor.length < 6) hexColor = `${"0".repeat(6 - hexColor.length)}${hexColor}`;
-            
+            if (hexColor.length < 6) hexColor = `${"0".repeat(6 - hexColor.length)}${hexColor}`;
+
             d.style.borderColor = `#${hexColor}`
             d.style.backgroundColor = `#${hexColor}3d` // opactity 20%
             d.style.color = `#${hexColor}`;
@@ -504,8 +504,8 @@ class Dashboard {
             active = active ? active[p] : undefined;
         }
 
-        let listType = el.className.includes("role") ? this.guild.roles : 
-        el.className.includes("channel") ? this.guild.channels : this.guild.categories;
+        let listType = el.className.includes("role") ? this.guild.roles :
+            el.className.includes("channel") ? this.guild.channels : this.guild.categories;
 
         switch (typeof active) {
             case "boolean": // Switches
@@ -537,12 +537,12 @@ class Dashboard {
 
             case "string":
                 if (el.className.includes("drop")) {
-                    if(active.length > 0) {
+                    if (active.length > 0) {
                         el.innerHTML = "";
                         let d = this.#itemOfList(active)
                         el.appendChild(d)
                     }
-                    
+
                     let list = this.#createList(listType, el.childNodes);
                     el.append(list)
                 }
@@ -904,7 +904,7 @@ class Dashboard {
 
         this.#appendChilds(main, [saveRoles, lvlsOldRole, dayRemindSug, dayRemindTicket]);
         this.#appendChilds(shop, [shopadjust, dsadjust]);
-        
+
         this.#appendChilds(contents, [main, shop])
     }
 
@@ -1060,7 +1060,7 @@ class Dashboard {
         });
 
         this.#appendChilds(ds, [events]);
-        
+
         let logs = this.#createDivSection("logs");
         logs.classList.add("wrap")
         logs.append("Logs")
@@ -1096,7 +1096,7 @@ class Dashboard {
         });
 
         this.#appendChilds(logs, [guilds, moderation, staff, sugs, user_left]);
-        
+
         let noti = this.#createDivSection("logs");
         noti.classList.add("wrap")
         noti.append("Notifier [JeffreyG Only (WIP)]")
@@ -1315,7 +1315,7 @@ class Dashboard {
         // Cambiar el color del boton del sidebar seleccionado
         let sidebarItems = Array.from(this.sidebar.querySelectorAll("a"));
         const subpageSelected = sidebarItems.find(x => x.href.includes(this.query?.page));
-        if(subpageSelected) subpageSelected.classList.add("active");
+        if (subpageSelected) subpageSelected.classList.add("active");
         else sidebarItems.find(x => x.getAttribute("href") === `./${this.guild.id}`)?.classList.add("active");
 
         if (this.sidebar.clientHeight / subpageSelected?.offsetTop < 1.5) {
@@ -1384,7 +1384,7 @@ class Dashboard {
     #drop(classname) {
         var array = document.querySelectorAll(`.${classname}`);
         let dropList = classname.includes("role") ? this.guild.roles :
-        classname.includes("channel") ? this.guild.channels : this.guild.categories;
+            classname.includes("channel") ? this.guild.channels : this.guild.categories;
 
         for (const drop of array) {
             function translate(nodes) {
@@ -1551,7 +1551,7 @@ class Dashboard {
         // agregar secciones al sidebar
         this.sidebar = document.querySelector("div#sidebar");
 
-        const home = this.#createSidebarOption(null, "Inicio")        
+        const home = this.#createSidebarOption(null, "Inicio")
 
         this.#addSeparator(this.sidebar);
 

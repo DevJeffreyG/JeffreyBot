@@ -26,7 +26,7 @@ command.execute = async (interaction, models, params, client) => {
     if (await isBannedFrom(interaction, "SUGGESTIONS")) return new ErrorEmbed(interaction, { type: "moduleBanned" }).send();
 
     const docGuild = await Guilds.getOrCreate(interaction.guild.id);
-    if(!docGuild.moduleIsActive("functions.suggestions")) return new ErrorEmbed(interaction, {type: "moduleDisabled"}).send();
+    if (!docGuild.moduleIsActive("functions.suggestions")) return new ErrorEmbed(interaction, { type: "moduleDisabled" }).send();
 
     const newId = FindNewId(await Guilds.find(), "data.suggestions", "id"); // crear la nueva id para el ticket
 
@@ -60,7 +60,7 @@ ${codeBlock(sugerencia)}
         .setReason(LogReasons.Suggestion)
         .send({ embeds: [embed], components: [row] });
 
-    if(!msg) return;
+    if (!msg) return;
 
     await msg.react(client.Emojis.Check);
     await msg.react(client.Emojis.Cross);

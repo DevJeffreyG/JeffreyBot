@@ -243,9 +243,9 @@ class Blackjack {
         this.collector.on("collect", async (i) => {
             this.#getDeck(); // para rellenar, en caso de ser necesario
 
-            if(this.ended) try {
+            if (this.ended) try {
                 return i.update();
-            } catch(err) {
+            } catch (err) {
                 console.log(err)
             }
 

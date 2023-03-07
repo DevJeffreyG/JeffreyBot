@@ -92,7 +92,7 @@ class InteractivePages {
     }
 
     #createFirstEmbed() {
-        let pag  = this.options?.pag;
+        let pag = this.options?.pag;
 
         if (pag > this.pages.size || pag < 1 || !pag) pag = 1;
 
@@ -111,10 +111,10 @@ class InteractivePages {
     async init(interaction) {
         try {
             await interaction.deferReply();
-        } catch(err) {
+        } catch (err) {
             //console.log(`⚠ ${err}`);
         }
-        
+
         const client = interaction.client;
 
         const row = new ActionRowBuilder()
@@ -136,7 +136,7 @@ class InteractivePages {
 
         try {
             var msg = await interaction.editReply({ content: "", components: [row], embeds: [this.firstEmbed] });
-        } catch(err) {
+        } catch (err) {
             console.log(err)
             return;
         }
@@ -192,11 +192,11 @@ class InteractivePages {
                 .catch(err => console.log("... %s", err));
 
             let index = client.activeCollectors.findIndex(x => x.collector === collector && x.userid === interaction.user.id);
-            if (!isNaN(index)){
+            if (!isNaN(index)) {
                 client.activeCollectors.splice(index, 1);
             } else console.log(`🟥 NO SE ELIMINÓ DE LOS ACTIVECOLLECTORS !! {INTERACTIVE PAGES}`)
-        
-            if(r === EndReasons.OldCollector) return await interaction.deleteReply().catch(err => console.log("⚠️ %s", err))
+
+            if (r === EndReasons.OldCollector) return await interaction.deleteReply().catch(err => console.log("⚠️ %s", err))
         })
     }
 }

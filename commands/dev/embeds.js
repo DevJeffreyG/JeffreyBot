@@ -294,7 +294,7 @@ ${vipRole} • Usuario que ha ascendido en el servidor, tendrá colores exclusiv
                         .defTitle(`— ¿Qué son los ${Emojis.Jeffros}Jeffros?`)
                         .defDesc(`➟ Los Jeffros son la moneda ficticia dentro del servidor, se consiguen al hablar en algunos canales, y con algunos comandos de Jeffrey Bot:\n
 \`/coins\` • Consigue Jeffros extras en un intervalo de 10 minutos, (o menos).\n
-\`/roulette\` • Puedes conseguir EXP, Jeffros o también PERDERLOS.\n
+\`/roulette\` • Puedes conseguir Jeffros, boosts o también PERDERLOS.\n
 \`/rob\` • Puedes intentar robar Jeffros a otro usuario, pero cuidado, también los puedes perder.`)
                         .defFooter({ text: `Los canales que dan EXP y Jeffros lo dirán en su descripción!`, icon: EmojisObject.Error.url })
                         .defColor(Colores.verde),
@@ -592,7 +592,7 @@ Ahora, creo que es bastante obvio que lo único que Jeffrey espera de ti es:
                     new Embed()
                         .defTitle(`¿Qué es la DarkShop?`)
                         .defDesc(`
-**—** La DarkShop es otra tienda a parte de la normal \`/shop\`, donde podrás comprar items más atrevidos que pueden perjudicar a otros usuarios.'\n
+**—** La DarkShop es otra tienda a parte de la normal \`/shop\`, donde podrás comprar items más atrevidos que pueden perjudicar a otros usuarios.\n
 **—** Todos los comandos disponibles los puedes ver en la categoría de la DarkShop con \`/ayuda\`, cuando seas nivel 5.`)
                         .defColor(Colores.nocolor),
                     new Embed()

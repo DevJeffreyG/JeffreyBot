@@ -176,33 +176,33 @@ command.data
         addmult
             .setName("add-multi")
             .setDescription("Agregar un modificador de multiplicador. [Acumulables]")
-                    .addStringOption(modulo => modulo
-                        .setName("modulo")
-                        .setDescription("El módulo a modificar")
-                        .addChoices(...MultiplierChoices)
-                        .setRequired(true)
-                    )
-                    .addStringOption(tipo => tipo
-                        .setName("tipo")
-                        .setDescription("El tipo de requerimiento")
-                        .addChoices(...RequirementTypesChoices)
-                        .setRequired(true)
-                    )
-                    .addNumberOption(o => o
-                        .setName("modificador")
-                        .setDescription("Estos modificadores se suman al inicial, que es 1: (0 no hace nada, 1 sería el doble)")
-                        .setMinValue(0)
-                        .setRequired(true)
-                    )
-                    .addIntegerOption(lvl => lvl
-                        .setName("nivel")
-                        .setDescription("El nivel al que se aplicará este modificador")
-                        .setMinValue(1)
-                    )
-                    .addRoleOption(role => role
-                        .setName("role")
-                        .setDescription("El role que se necesita para que se aplique el modificador")
-                    )
+            .addStringOption(modulo => modulo
+                .setName("modulo")
+                .setDescription("El módulo a modificar")
+                .addChoices(...MultiplierChoices)
+                .setRequired(true)
+            )
+            .addStringOption(tipo => tipo
+                .setName("tipo")
+                .setDescription("El tipo de requerimiento")
+                .addChoices(...RequirementTypesChoices)
+                .setRequired(true)
+            )
+            .addNumberOption(o => o
+                .setName("modificador")
+                .setDescription("Estos modificadores se suman al inicial, que es 1: (0 no hace nada, 1 sería el doble)")
+                .setMinValue(0)
+                .setRequired(true)
+            )
+            .addIntegerOption(lvl => lvl
+                .setName("nivel")
+                .setDescription("El nivel al que se aplicará este modificador")
+                .setMinValue(1)
+            )
+            .addRoleOption(role => role
+                .setName("role")
+                .setDescription("El role que se necesita para que se aplique el modificador")
+            )
     )
     .addSubcommand(delmodify =>
         delmodify
@@ -232,7 +232,7 @@ command.execute = async (interaction, models, params, client) => {
         case "add-multi":
             const { modulo, modificador, tipo, nivel, role } = params[subcommand];
 
-            if(
+            if (
                 (!nivel && !role) ||
                 (Number(tipo.value) == RequirementType.Level && !nivel) ||
                 (Number(tipo.value) == RequirementType.Role && !role)
@@ -256,15 +256,17 @@ command.execute = async (interaction, models, params, client) => {
 
             await docGuild.save();
 
-            interaction.editReply({embeds: [new Embed({
-                type: "success",
-                data: {
-                    desc: [
-                        "Se ha agregado el modificador",
-                        `ID: \`${newId}\``
-                    ]
-                }
-            })]})
+            interaction.editReply({
+                embeds: [new Embed({
+                    type: "success",
+                    data: {
+                        desc: [
+                            "Se ha agregado el modificador",
+                            `ID: \`${newId}\``
+                        ]
+                    }
+                })]
+            })
             break;
 
         case "del-modif":
@@ -275,9 +277,11 @@ command.execute = async (interaction, models, params, client) => {
 
             await docGuild.save();
 
-            interaction.editReply({embeds: [new Embed({
-                type: "success"
-            })]})
+            interaction.editReply({
+                embeds: [new Embed({
+                    type: "success"
+                })]
+            })
             break;
     }
 
@@ -505,21 +509,23 @@ ${codeBlock("markdown", expl.value)}`,
 command.execCooldowns = async (interaction, models, doc, params) => {
     const { subcommand, cooldowns } = params;
     const { Guilds, Users } = models;
-    const { modulo, cooldown, tipo, modificador, nivel, role, id} = cooldowns;
+    const { modulo, cooldown, tipo, modificador, nivel, role, id } = cooldowns;
 
-    switch(subcommand) {
+    switch (subcommand) {
         case "base":
             // modulo, cooldown
             doc.settings.cooldowns[modulo.value] = cooldown.value;
 
-            interaction.editReply({embeds: [new Embed({
-                type: "success"
-            })]})
+            interaction.editReply({
+                embeds: [new Embed({
+                    type: "success"
+                })]
+            })
             break;
 
         case "modificar":
             // modulo, tipo, modificador, nivel, role
-            if(
+            if (
                 (!nivel && !role) ||
                 (Number(tipo.value) == RequirementType.Level && !nivel) ||
                 (Number(tipo.value) == RequirementType.Role && !role)
@@ -541,15 +547,17 @@ command.execCooldowns = async (interaction, models, doc, params) => {
                 id: newId
             })
 
-            interaction.editReply({embeds: [new Embed({
-                type: "success",
-                data: {
-                    desc: [
-                        "Se ha agregado el modificador",
-                        `ID: \`${newId}\``
-                    ]
-                }
-            })]})
+            interaction.editReply({
+                embeds: [new Embed({
+                    type: "success",
+                    data: {
+                        desc: [
+                            "Se ha agregado el modificador",
+                            `ID: \`${newId}\``
+                        ]
+                    }
+                })]
+            })
             break;
     }
 

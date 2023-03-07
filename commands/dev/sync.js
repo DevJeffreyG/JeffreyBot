@@ -168,7 +168,7 @@ command.execGuilds = async (interaction, models, params, client) => {
     await interaction.editReply({ embeds: [], content: `${client.Emojis.Loading} Sincronizando...` })
     const { Guilds, AutoRoles, ToggleGroups, VaultCodes, Hints } = models;
 
-    let all = await AutoRoles.find({serverID: interaction.guild.id});
+    let all = await AutoRoles.find({ serverID: interaction.guild.id });
     await interaction.editReply({ content: `${client.Emojis.Loading} Sincronizando los autoroles...` });
 
     for await (const arole of all) {
@@ -204,7 +204,7 @@ command.execGuilds = async (interaction, models, params, client) => {
 
         let channel = await interaction.guild.channels.cache.find(x => x.id === autorole.channel_id);
 
-        if (!channel){
+        if (!channel) {
             console.log(`🔴 No se encontró canal para el autorole ${autorole}`);
             continue
         }
@@ -216,7 +216,7 @@ command.execGuilds = async (interaction, models, params, client) => {
     }
     await interaction.editReply({ content: `${client.Emojis.Loading} Sincronizando los toggle groups...` });
 
-    let alltoggleautoroles = await ToggleGroups.find({guild_id: interaction.guild.id});
+    let alltoggleautoroles = await ToggleGroups.find({ guild_id: interaction.guild.id });
     let newToggleGroups = [];
     alltoggleautoroles.forEach(toggle => {
         newToggleGroups.push({

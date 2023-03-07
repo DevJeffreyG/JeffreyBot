@@ -9,7 +9,7 @@ const command = new ContextMenu({
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ ephemeral: true });
-    
+
     const stats = require("../../commands/darkshop/darkstats");
     const member = interaction.guild.members.cache.get(params.user.id)
 

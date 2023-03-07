@@ -1,5 +1,5 @@
 class Session {
-    constructor(){
+    constructor() {
     }
 
     setToken(type, token) {
@@ -9,11 +9,11 @@ class Session {
         return this;
     }
 
-    setCookies(req){
+    setCookies(req) {
         this.cookies = req.cookies;
     }
 
-    setDiscordUser(user){
+    setDiscordUser(user) {
         this.discord_user = user
     }
 

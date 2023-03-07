@@ -13,7 +13,7 @@ const Schema = new mongoose.Schema({
     timestamp: { type: Date, default: () => { return new Date() } },
 })
 
-Schema.static("create", async function(info, changes) {
+Schema.static("create", async function (info, changes) {
     try {
         await new this({
             version: info.version,
@@ -21,7 +21,7 @@ Schema.static("create", async function(info, changes) {
             changes
         }).save()
         return true;
-    } catch(err) {
+    } catch (err) {
         console.log(err)
         return false;
     }

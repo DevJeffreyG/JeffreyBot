@@ -59,35 +59,35 @@ command.execute = async (interaction, models, params, client) => {
 
     // Comando
 
-    switch(subcommand){
+    switch (subcommand) {
         case "emoji": {
             const emoji = guild.emojis.cache.find(x => x.name === name);
-            if(!emoji) return interaction.editReply({content: `No encontré ese emoji, verifica que hayas escrito bien el nombre.`});
-        
+            if (!emoji) return interaction.editReply({ content: `No encontré ese emoji, verifica que hayas escrito bien el nombre.` });
+
             let finalEmbed = new Embed()
-            .defImage(emoji.url)
-            .defAuthor({text: `Emoji: ${name}`, icon: emoji.url})
-            .defDesc(`**—** Nombre del Role: \`${name}\`.
+                .defImage(emoji.url)
+                .defAuthor({ text: `Emoji: ${name}`, icon: emoji.url })
+                .defDesc(`**—** Nombre del Role: \`${name}\`.
 **—** ID: \`${emoji.id}\`.
 **—** Es animado: \`${emoji.animated ? "Sí" : "No"}\`.
 **—** Emoji del server: \`${guild.name}\`.`)
-            .defColor(Colores.verde);
-        
-            return interaction.editReply({content: null, embeds: [finalEmbed]});
+                .defColor(Colores.verde);
+
+            return interaction.editReply({ content: null, embeds: [finalEmbed] });
         }
 
         case "role": {
             const role = guild.roles.cache.find(x => x.name === name);
-            if(!role) return interaction.editReply({content: `No encontré el rol \`${name}\` asegúrate de haberlo escrito bien.`});
-    
+            if (!role) return interaction.editReply({ content: `No encontré el rol \`${name}\` asegúrate de haberlo escrito bien.` });
+
             let finalEmbed = new Embed()
-            .defAuthor({text: `Role: ${name}`, icon: guild.iconURL()})
-            .defDesc(`**—** Nombre del Role: \`${name}\`.
+                .defAuthor({ text: `Role: ${name}`, icon: guild.iconURL() })
+                .defDesc(`**—** Nombre del Role: \`${name}\`.
 **—** ID: \`${role.id}\`.
 **—** Role del servidor: \`${guild.name}\`.`)
-            .defColor(role.hexColor);
-    
-            return interaction.editReply({content: null, embeds: [finalEmbed]});
+                .defColor(role.hexColor);
+
+            return interaction.editReply({ content: null, embeds: [finalEmbed] });
         }
     }
 }

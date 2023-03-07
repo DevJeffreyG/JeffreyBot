@@ -1,20 +1,20 @@
 const Emojis = require("../../Emojis");
 
 class Managers {
-    constructor(client){
+    constructor(client) {
         this.client = client
     }
 
-    async prepare(){
+    async prepare() {
         this.emojis = await Emojis(this.client);
 
         return this
     }
 
-    async emojis_mentionable(){
+    async emojis_mentionable() {
         let returnable = {}
-        
-        for await (const prop of Object.keys(this.emojis)){
+
+        for await (const prop of Object.keys(this.emojis)) {
             returnable[prop] = this.emojis[prop].mention
         }
 

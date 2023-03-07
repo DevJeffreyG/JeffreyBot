@@ -156,6 +156,8 @@ Schema.pre("save", function () {
 
     this.economy.dark.currency = Math.round(this.economy.dark.currency);
 
+    this.data.counts.normal_currency = Math.round(this.data.counts.normal_currency);
+
     if (this.economy.global.currency) {
         let obj = this.economy.toObject();
         delete obj.global.jeffros;

@@ -30,16 +30,16 @@ module.exports = async (client, message) => {
     }
 
     if (message.content === "~lockdown") {
-        client.isOnLockdown = true;
+      client.isOnLockdown = true;
 
-        message.reply("[DEV] Se activó el lockdown. `~lockdownoff`")
+      message.reply("[DEV] Se activó el lockdown. `~lockdownoff`")
     }
 
     if (message.content === "~lockdownoff") {
       client.isOnLockdown = false;
 
       message.reply("[DEV] Se desactivó el lockdown.")
-  }
+    }
 
     return;
   }

@@ -19,8 +19,8 @@ command.execute = async (interaction, models, params, client) => {
         type: "moduleDisabled"
     }).send();
 
-    if(user.economy.global.reputation === 0) return interaction.editReply({embeds: [ new ErrorEmbed().defDesc(`**No tienes puntos de reputación...**`)]});
-    
+    if (user.economy.global.reputation === 0) return interaction.editReply({ embeds: [new ErrorEmbed().defDesc(`**No tienes puntos de reputación...**`)] });
+
     let cool = await user.cooldown(Cooldowns.ClaimRep, { save: false });
     if (cool) return interaction.editReply({
         content: null, embeds: [
@@ -32,7 +32,7 @@ command.execute = async (interaction, models, params, client) => {
 
     let toConfirm = [
         `Se añadirán **${Currency}${value.toLocaleString("es-CO")}** a tu cuenta.`,
-        `Sólo puedes usar este comando cada ${new HumanMs(await user.cooldown(Cooldowns.ClaimRep, {info: true, check: false})).human}.`
+        `Sólo puedes usar este comando cada ${new HumanMs(await user.cooldown(Cooldowns.ClaimRep, { info: true, check: false })).human}.`
     ]
 
     let confirmation = await Confirmation("Reclamar reputación", toConfirm, interaction);

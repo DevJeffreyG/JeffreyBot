@@ -35,10 +35,10 @@ const session = new Session();
 app.Session = session;
 
 connection.then(() => {
-  
+
   webRoutes(app);
   postHandler(app);
   errorHandler(app);
-  
+
   app.listen(app.get("port"), () => console.log("🟢 Using port", app.get("port")));
 });

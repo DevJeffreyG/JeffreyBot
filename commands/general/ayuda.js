@@ -74,7 +74,7 @@ command.execute = async (interaction, models, params, client) => {
 
     for (let i = 0; i < commands.length; i++) {
         const helpCommand = commands[i];
-        if(helpCommand instanceof ContextMenu) continue;
+        if (helpCommand instanceof ContextMenu) continue;
 
         const toAdd = `▸ \`/${helpCommand.name}\`: ${helpCommand.info}${helpCommand.info.endsWith("!") || helpCommand.info.endsWith("?") ? "" : "."}\n`;
 
@@ -144,9 +144,9 @@ command.execute = async (interaction, models, params, client) => {
     if (music.description) arrayEmbeds.push(music);
     if (economy.description) arrayEmbeds.push(economy);
     if (darkshop.description) {
-        let user = await Users.getOrCreate({user_id: interaction.user.id, guild_id: guild.id})
+        let user = await Users.getOrCreate({ user_id: interaction.user.id, guild_id: guild.id })
         let validation = await ValidateDarkShop(user, interaction.user);
-        
+
         if (doc.moduleIsActive("functions.darkshop") && validation.valid) arrayEmbeds.push(darkshop);
     }
 

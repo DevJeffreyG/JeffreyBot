@@ -20,7 +20,7 @@ command.execute = async (interaction, models, params, client) => {
     const doc = await Shops.getOrCreate(interaction.guild.id);
     const shop = new Shop(doc, interaction);
 
-    return shop.setup({pag: params.pag?.value});
+    return shop.setup({ pag: params.pag?.value });
 }
 
 module.exports = command;

@@ -1,5 +1,5 @@
 // TODO: Mover JBNews a /dev y hacer un verdadero comando de anuncios con esta misma estructura :o
-const { Command, Categories, Embed, ErrorEmbed, Confirmation} = require("../../src/utils")
+const { Command, Categories, Embed, ErrorEmbed, Confirmation } = require("../../src/utils")
 const { Bases, Colores } = require("../../src/resources")
 
 const command = new Command({

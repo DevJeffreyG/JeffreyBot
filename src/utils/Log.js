@@ -162,7 +162,7 @@ class Log {
      */
     setGuild(guild) {
         this.guild = guild
-        if(!this.interaction) this.interaction = guild
+        if (!this.interaction) this.interaction = guild
         return this;
     }
 
@@ -199,9 +199,9 @@ class Log {
 
             let msg;
 
-            if(embed){
-                if(embed instanceof Embed) msg = await this.channel?.send({ content, embeds: [embed], components }).catch();
-                else if(embed instanceof ErrorEmbed) msg = await embed.send()
+            if (embed) {
+                if (embed instanceof Embed) msg = await this.channel?.send({ content, embeds: [embed], components }).catch();
+                else if (embed instanceof ErrorEmbed) msg = await embed.send()
             } else msg = await this.channel?.send({ content, embeds, components }).catch(err => {
                 this.channel = null;
             });
