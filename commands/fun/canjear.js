@@ -36,7 +36,7 @@ command.execute = async (interaction, models, params, client) => {
 
     // si llega al punto máximo de usos borrar
     if (key.config.used >= key.config.maxuses) {
-        await key.remove();
+        await key.deleteOne();
 
         interaction.deleteReply();
         return doc.save();

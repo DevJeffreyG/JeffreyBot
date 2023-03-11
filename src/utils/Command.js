@@ -202,6 +202,9 @@ class Command {
         if ((data.type === "integer" || data.type === "number")) {
             if (data.min) option.setMinValue(data.min)
             if (data.max) option.setMaxValue(data.max)
+        } else if(data.type === "string"){
+            if(data.max) option.setMaxLength(data.max)
+            if(data.min) option.setMinLength(data.min)
         }
 
         if (data.choices) {

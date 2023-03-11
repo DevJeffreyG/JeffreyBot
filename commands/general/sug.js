@@ -13,6 +13,7 @@ command.addOption({
     type: "string",
     name: "sugerencia",
     desc: "Los usuarios y el STAFF verán esta sugerencia :)",
+    max: 3000,
     req: true
 })
 

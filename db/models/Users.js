@@ -172,7 +172,7 @@ Schema.pre("save", function () {
     const nextLevel = this.getNextLevelExp(realLvl)
 
     if (expNow >= nextLevel) realLvl++;
-    if (realLvl < 0) realLvl = 0;
+    if (realLvl <= 0) realLvl = 0;
 
     // Cambio de nivel
     if (this.economy.global.level != realLvl) mongoose.models.Guilds.getOrCreate(this.guild_id).then(doc => doc.manageLevelUp(realLvl, this));

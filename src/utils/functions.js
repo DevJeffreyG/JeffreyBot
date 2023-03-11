@@ -500,7 +500,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
           dbUser.save();
         }
 
-        GlobalDatas.deleteOne(deletion).exec();
+        deletion.deleteOne();
       }
     }
 
@@ -588,7 +588,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
         } catch (err) {
           console.log(err);
         }
-        tempBans[i].remove();
+        ban.deleteOne();
 
         let unBEmbed = new Embed()
           .defAuthor({ text: `Unban`, icon: guild.iconURL() })
@@ -672,7 +672,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
 
       msg.edit({ components: [row] });
 
-      polls[i].remove();
+      polls[i].deleteOne();
     }
   }
 

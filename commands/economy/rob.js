@@ -78,14 +78,14 @@ command.execute = async (interaction, models, params, client) => {
     const successValue = Math.round(victim.economy.global.currency * successPerc);
     const failedValue = Math.round(user.economy.global.currency * failedPerc);
 
+    if (successValue <= 0) robSuccess = false;
+
     const successText = replace(success.text)
     const failedText = replace(fail.text)
 
     let embed, suggester;
 
-    if (successValue <= 0) robSuccess = false;
-
-    console.log(failedValue, successValue, robSuccess)
+    //console.log(failedValue, successValue, robSuccess)
 
     if (!robSuccess) {
         // Fallido

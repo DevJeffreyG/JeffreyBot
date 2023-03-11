@@ -81,7 +81,11 @@ command.execute = async (interaction, models, params, client) => {
         const ruleNo = doc.data.rules.find(x => x.id === rule)?.position;
         const member = usuario.member;
 
-        await collected.deferUpdate();
+        try {
+            await collected.deferUpdate();
+        } catch(err) {
+            console.log(err);
+        }
 
         if (!rule) return interaction.deleteReply();
 

@@ -40,24 +40,22 @@ command.execute = async (interaction, models, params, client) => {
         .defColor(Colores.verde);
 
     // Comando
-    ToggledCommands.findOne({
+    let toggle = await ToggledCommands.findOne({
         command: toggled
-    }, (err, toggle) => {
-        if (err) throw err;
+    });
 
-        if (!toggle) {
-            new ToggledCommands({
-                command: toggled,
-                reason: reason
-            }).save();
+    if (!toggle) {
+        new ToggledCommands({
+            command: toggled,
+            reason: reason
+        }).save();
 
-            return interaction.editReply({ embeds: [added] })
-        } else {
-            toggle.remove();
+        return interaction.editReply({ embeds: [added] })
+    } else {
+        toggle.deleteOne();
 
-            return interaction.editReply({ embeds: [removed] })
-        }
-    })
+        return interaction.editReply({ embeds: [removed] })
+    }
 }
 
 module.exports = command;

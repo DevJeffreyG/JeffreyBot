@@ -37,7 +37,8 @@ class Suggestion {
                         label: "Razón",
                         style: TextInputStyle.Paragraph,
                         req: true,
-                        placeholder: "Escribe porqué fue aprobada esta sugerencia"
+                        placeholder: "Escribe porqué fue aprobada esta sugerencia",
+                        max: 1024
                     })
                     .show();
                 break;
@@ -51,7 +52,8 @@ class Suggestion {
                         label: "Razón",
                         style: TextInputStyle.Paragraph,
                         req: true,
-                        placeholder: "Escribe porqué fue rechazada esta sugerencia"
+                        placeholder: "Escribe porqué fue rechazada esta sugerencia",
+                        max: 1024
                     })
                     .show();
                 break;
@@ -65,7 +67,8 @@ class Suggestion {
                         label: "Razón",
                         style: TextInputStyle.Paragraph,
                         req: true,
-                        placeholder: "Escribe porqué fue invalidada esta sugerencia"
+                        placeholder: "Escribe porqué fue invalidada esta sugerencia",
+                        max: 1024
                     })
                     .show();
                 break;

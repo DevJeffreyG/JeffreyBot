@@ -30,7 +30,7 @@ class ErrorEmbed extends Embed {
      */
     constructor(inter = null, options, ignorewarnings = false) {
         super()
-        if (inter && !(inter instanceof BaseInteraction) && !(inter instanceof GuildChannel)) {
+        if (inter && !(inter instanceof BaseInteraction) && !(inter instanceof GuildChannel) && !(inter instanceof Guild)) {
             options = inter;
             inter = null;
         }
