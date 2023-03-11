@@ -259,7 +259,7 @@ ${sugsChannel} •  Aquí se enviarán las sugerencias que hagan los usuarios (\
                         .defColor(Colores.verdejeffrey),
                     new Embed()
                         .defTitle(`Tienen cierto impacto en el server. Es más difícil conseguirlos.`)
-                        .defDesc(`<@&595022419123634228> • Alguien que está boosteando el servidor, aparecerá en la lista de miembros por encima de todos menos del Staff. Tendrán VIP y consigo, sus beneficios mientras sigan boosteando.\n
+                        .defDesc(`<@&595022419123634228> • Alguien que está boosteando el servidor, aparecerá en la lista de miembros por encima de todos menos del STAFF. Tendrán VIP y consigo, sus beneficios mientras sigan boosteando.\n
 ${vipRole} • Usuario que ha ascendido en el servidor, tendrá colores exclusivos y acceso anticipado a las notificaciones de Jeffrey, etc.
     ➟ Puede ser comprado en la tienda del servidor \`/shop\`.\n
 <@&461259197368107020> • Personas las cuales tienen algún tipo de relación IRL con Jeffrey o7\n
@@ -350,7 +350,7 @@ ${adminRoles.toJSON().join(", ")} • ${modRole}.
 
 ➟ ${jeffreyRole} • Es el rol de JeffreyG. Ten por seguro que si alguien tiene este rol es porque es el verdadero Jeffrey.
 
-➟ Usando el comando \`/serverinfo\` podrás ver quiénes hacen parte del equipo del Staff más cómodamente.`)
+➟ Usando el comando \`/serverinfo\` podrás ver quiénes hacen parte del equipo del STAFF más cómodamente.`)
                         .defColor(Colores.verde)
                 ], files: [staff.file, sentinels.file, guardians.file]
             });

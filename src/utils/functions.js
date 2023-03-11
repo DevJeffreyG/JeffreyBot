@@ -1246,16 +1246,16 @@ const AfterInfraction = async function (user, data) {
   // mensaje de warn normal
   // embed que se le envía al usuario por el warn
 
-  let res = true
-
-  await member.send({ embeds: arrayEmbeds })
-    .catch(e => {
-      res = false
-      interaction.editReply({ embeds: [new ErrorEmbed({ type: "notSent", data: { tag: member.user.tag, error: e } })] })
-    });
-
   if (banMember) member.ban({ reason: `AutoMod. (Infringir "${rule}")` });
-  return res
+
+  try {
+    await member.send({ embeds: arrayEmbeds })
+    return true
+  } catch (e) {
+    await interaction.editReply({ embeds: [new ErrorEmbed({ type: "notSent", data: { tag: member.user.tag, error: e } })] })
+    return false
+  }
+
   /*  else {
   const { member, rule, proof } = data;
 

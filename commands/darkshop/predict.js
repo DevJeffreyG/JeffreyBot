@@ -20,7 +20,7 @@ command.execute = async (interaction, models, params, client) => {
 
     const user = await Users.getOrCreate({ user_id: interaction.user.id, guild_id: interaction.guild.id });
 
-    if (user.economy.dark.darkjeffros === 0) return interaction.editReply(`${client.Emojis.Error} "No tengo nada invertido, mejor espero a tener...".`)
+    if (user.economy.dark.currency === 0) return interaction.editReply(`${client.Emojis.Error} "No tengo nada invertido, mejor espero a tener...".`)
 
     const darkshop = new DarkShop(interaction.guild, interaction)
     const values = await darkshop.getAllValues();

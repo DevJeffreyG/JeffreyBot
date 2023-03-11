@@ -128,18 +128,10 @@ const Schema = new mongoose.Schema({
             exp: { type: Number, required: true, default: 0, integer: true },
             level: { type: Number, required: true, default: 0, integer: true },
             reputation: { type: Number, required: true, default: 0, integer: true },
-            currency: {
-                type: Number, required: true, default: function () {
-                    return this.economy.global.jeffros || 0
-                }, integer: true
-            }
+            currency: { type: Number, required: true, default: 0, integer: true }
         },
         dark: {
-            currency: {
-                type: Number, default: function () {
-                    return this.economy.dark.darkjeffros || 0;
-                }, integer: true
-            },
+            currency: { type: Number, default: 0, integer: true },
             accuracy: {
                 type: Number, default: () => {
                     return Number((Math.random() * 10).toFixed(1))

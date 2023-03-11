@@ -30,7 +30,7 @@ class ErrorEmbed extends Embed {
      */
     constructor(inter = null, options, ignorewarnings = false) {
         super()
-        if (inter && inter instanceof BaseInteraction === false && !inter instanceof GuildChannel) {
+        if (inter && !(inter instanceof BaseInteraction) && !(inter instanceof GuildChannel)) {
             options = inter;
             inter = null;
         }
@@ -173,6 +173,7 @@ ${codeBlock("javascript", data.error)}`])
                 break;
 
             default:
+                console.log(options)
                 console.error("⚠️🔴 No existe %s como tipo de Error ❗❗", type);
         }
     }
