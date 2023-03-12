@@ -598,7 +598,7 @@ class DarkShop {
         let stonks = oldinflation <= inflation ? "📈" : "📉";
         let tz = this.getShopTimezone();
 
-        let date = tz.now.day != 0 ? (tz.hour >= 12 ? tz.now.add(1, "day").startOf("day") : tz.now.hour(12).startOf("hour")).toDate() :
+        let date = tz.now.day() != 0 ? (tz.hour >= 12 ? tz.now.add(1, "day").startOf("day") : tz.now.hour(12).startOf("hour")).toDate() :
             tz.now.add(1, "day").startOf("day").toDate();
 
         let stonksEmbed = new Embed()
@@ -608,7 +608,7 @@ class DarkShop {
 ${stonks} **—** La inflación actual de los ${this.Emojis.DarkCurrency.name} es de un \`${inflation}%\`.
 ${stonks} **—** Antes era de un \`${oldinflation}%\`: (**${this.Emojis.DarkCurrency}1 = ${this.Emojis.Currency}${(await this.oneEquals(oldinflation))?.toLocaleString("es-CO")}**).
 
-${tz.now.day != 0 ? `**—** La inflación inicial fue \`${this.baseValue}%\`.\n` : ""}**—** La inflación cambiará ${time(date, "R")}.`)
+${tz.now.day() != 0 ? `**—** La inflación inicial fue \`${this.baseValue}%\`.\n` : ""}**—** La inflación cambiará ${time(date, "R")}.`)
             .defColor(Colores.negro);
 
         this.interaction.reply({ embeds: [stonksEmbed] });

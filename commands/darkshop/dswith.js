@@ -32,7 +32,7 @@ command.execute = async (interaction, models, params, client) => {
     const notEnough = new ErrorEmbed(interaction, {
         type: "economyError",
         data: {
-            action: "change",
+            action: "dswith",
             error: `No tienes tanto dinero para cambiar.
 **▸** Quieres cambiar: **${DarkCurrency}${quantity.toLocaleString("es-CO")}**`,
             money: usermoney,

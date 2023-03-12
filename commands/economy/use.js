@@ -33,6 +33,8 @@ command.execute = async (interaction, models, params, client) => {
     });
     const inv_item = user.data.inventory.find(x => x.use_id === id.value);
 
+    console.log(inv_item)
+
     let noItem = new ErrorEmbed(interaction, {
         type: "doesntExist",
         data: {

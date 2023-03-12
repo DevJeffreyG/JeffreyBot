@@ -364,7 +364,7 @@ GuildSchema.method("addAutoRole", async function (emoteInfo, role_id, id) {
 
     if (typeof emote != "string") {
         emote = emoteInfo.id;
-        guild_emote = emoteInfo.guild.id;
+        guild_emote = emoteInfo.guild?.id;
     }
 
     let creatable = true;

@@ -1,6 +1,6 @@
 const { Command, Categories, Embed, ErrorEmbed, FindNewId, Confirmation } = require("../../src/utils")
 const { Colores } = require("../../src/resources")
-const { hyperlink, GuildEmoji } = require("discord.js")
+const { hyperlink, GuildEmoji, Collection } = require("discord.js")
 
 const command = new Command({
     name: "autoroles",
@@ -179,14 +179,24 @@ command.execute = async (interaction, models, params, client) => {
             });
 
         case "add":
+
+            if (!config.ch && !config.msg) {
+                return new ErrorEmbed(interaction, {
+                    type: "execError",
+                    data: {
+                        guide: "Falta por configurar el canal y el mensaje. `/autoroles config`"
+                    }
+                }).send();
+            }
+
             let id = emoji.value.match(/\d/g)?.join("");
             let newId = FindNewId(await Guilds.find(), "data.autoroles", "id");
 
             if (!id) id = config.guild.emojis.cache.find(x => x.name === emoji.value)?.id;
 
-            let emote = await config.guild.emojis.fetch(id).catch(err => { return null });
+            let emote = id ? await config.guild.emojis.fetch(id).catch(err => { return null }) : { id: emoji.value, guild: null };
 
-            if (!emote instanceof GuildEmoji) return new ErrorEmbed(interaction, {
+            if (emote instanceof Collection || (!emote instanceof GuildEmoji && id)) return new ErrorEmbed(interaction, {
                 type: "badParams",
                 data: {
                     help: `No encontré ese emote con id \`${id}\` en el servidor '${config.guild ?? interaction.guild}'`
@@ -328,9 +338,9 @@ command.execute = async (interaction, models, params, client) => {
                 let guildEmote = await interaction.client.guilds.fetch(autorole.guild_emote ?? interaction.guild.id).catch(err => null);
                 let emote = !isNaN(autorole.emote) ? guildEmote.emojis.cache.find(x => x.id === autorole.emote) : autorole.emote;
                 let grupo = autorole.toggle_group ? doc.getOrCreateToggleGroup(autorole.toggle_group) : "No tiene";
-                let aRole = interaction.guild.roles.cache.find(x => x.id === autorole.role_id);
-                let actualC = await interaction.guild.channels.fetch(autorole.channel_id);
-                let actualFetch = await actualC.messages.fetch(autorole.message_id);
+                let aRole = interaction.guild.roles.cache.find(x => x.id === autorole.role_id) ?? "Se eliminó";
+                let actualC = interaction.guild.channels.cache.get(autorole.channel_id) ?? "Se eliminó";
+                let actualFetch = await actualC?.messages?.fetch(autorole.message_id);
 
                 listEmbed.defField(`— ${emote}`, `▸ **ID**: ${autorole.id}.\n▸ **Toggle Grupo**: ${grupo != "No tiene" ? grupo.group_name + ", **" + grupo.id + "**" : grupo}.\n▸ ${aRole}.\n▸ ${hyperlink("Mensaje", actualFetch?.url)}`)
             }
@@ -349,7 +359,7 @@ command.execute = async (interaction, models, params, client) => {
                 let fetched = await channel?.messages.fetch(autorole.message_id).catch(err => null);
                 let emote = autorole.emote;
 
-                fetched.react(emote);
+                if (fetched) fetched.react(emote);
             }
 
             interaction.editReply({ embeds: [new Embed({ type: "success" })] });
@@ -359,12 +369,16 @@ command.execute = async (interaction, models, params, client) => {
 
     async function getConfig() {
         let ch = interaction.guild.channels.cache.find(x => x.id === doc.settings.autoroles.channel_id);
-        if (!ch) return { ch: null, msg: null }
+        if (!ch) return { ch: null, msg: null, guild: interaction.guild }
 
         await ch.messages.fetch();
         let msg = ch.messages.cache.find(x => x.id === doc.settings.autoroles.message_id);
 
-        let guild = await interaction.client.guilds.fetch(doc.settings.autoroles.guild_id) ?? interaction.guild;
+        let guild = await interaction.client.guilds.fetch(doc.settings.autoroles.guild_id).catch(err => { });
+
+        if (guild instanceof Collection || !guild) {
+            guild = interaction.guild
+        }
 
         return { ch, msg, guild };
     }
