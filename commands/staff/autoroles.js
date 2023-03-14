@@ -179,8 +179,7 @@ command.execute = async (interaction, models, params, client) => {
             });
 
         case "add":
-
-            if (!config.ch && !config.msg) {
+            if (!config.ch || !config.msg) {
                 return new ErrorEmbed(interaction, {
                     type: "execError",
                     data: {
@@ -242,10 +241,11 @@ command.execute = async (interaction, models, params, client) => {
                 return err.send();
             }
 
-            let removeChannel = interaction.guild.channels.cache.find(x => x.id === autoRole.channel_id);
-            let toRemoveFetch = await removeChannel.messages.fetch(autoRole.message_id);
+            let toRemoveFetch, toRemove;
 
-            let toRemove = await toRemoveFetch.reactions.cache.get(autoRole.emote);
+            let removeChannel = interaction.guild.channels.cache.find(x => x.id === autoRole.channel_id);
+            if (removeChannel) toRemoveFetch = await removeChannel.messages.fetch(autoRole.message_id);
+            if (toRemoveFetch) toRemove = await toRemoveFetch.reactions.cache.get(autoRole.emote);
 
             let confirm = [
                 `AutoRole con ID \`${autoRole.id}\`.`,
@@ -261,7 +261,8 @@ command.execute = async (interaction, models, params, client) => {
             let index = doc.data.autoroles.indexOf(autoRole);
             doc.data.autoroles.splice(index, 1);
             await doc.save();
-            await toRemove.remove();
+            
+            if(toRemove) await toRemove.remove();
 
             return interaction.editReply({
                 embeds: [

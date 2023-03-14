@@ -1,5 +1,6 @@
 const { Command, Categories, Confirmation, Embed } = require("../../src/utils");
 const moment = require("moment-timezone");
+const { time } = require("discord.js");
 
 const command = new Command({
     name: "cumple",
@@ -62,9 +63,10 @@ command.lock = async (interaction, models, user, client) => {
     day = userBD.day;
     month = userBD.month;
 
-    let bdString = day != null && month != null ? `${day} de ${month}` : null;
+    if (!(day != null && month != null)) return interaction.editReply(`No tienes la fecha completamente configurada, por favor hazlo antes de bloquearla.`);
 
-    if (!bdString) return interaction.editReply(`No tienes la fecha completamente configurada, por favor hazlo antes de bloquearla.`);
+    let momentBD = moment().month(month).date(day).startOf("day");
+    let bdString = time(momentBD.toDate());
 
     let toConfirm = [
         "Al bloquear tu fecha, no la podrás cambiar durante un año.",
@@ -76,6 +78,8 @@ command.lock = async (interaction, models, user, client) => {
     if (!confirmation) return;
 
     let hoy = new Date();
+    userBD.day = momentBD.date();
+    userBD.month = momentBD.month();
     userBD.locked = true;
     userBD.locked_since = hoy;
     user.save();
@@ -96,11 +100,10 @@ command.execEdit = async (interaction, models, data, client) => {
     const userBD = data.user.data.birthday;
 
     // revisar si ya pasó el año desde el lock
-    let now = new Date();
     let lockedSince = userBD.locked_since;
 
     if (moment().isAfter(moment(lockedSince).add(1, "year"))) {
-        interaction.editReply("hmmm, si estás usando este comando, ¿será para cambiar algo? he quitado el bloqueo de tu fecha de cumpleaños, reactívala cuando gustes.");
+        interaction.editReply(`${client.Emojis.Thinking} Hmmm, si estás usando este comando, ¿será para cambiar algo? he quitado el bloqueo de tu fecha de cumpleaños, reactívala cuando gustes.`);
 
         userBD.locked = false;
         userBD.locked_since = null;
@@ -113,11 +116,10 @@ command.execEdit = async (interaction, models, data, client) => {
 
     let month = Number(command.data.options.find(x => x.name === "edit")
         .options.find(x => x.name === "mes")
-        .choices.findIndex(x => x.name === monthString)) + 1
+        .choices.findIndex(x => x.name === monthString))
 
     userBD.day = data.dia;
-    userBD.month = monthString;
-    userBD.monthNumber = month;
+    userBD.month = month;
 
     await data.user.save();
 

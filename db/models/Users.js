@@ -65,8 +65,7 @@ const Schema = new mongoose.Schema({
         unlockedVaults: { type: Array },
         birthday: {
             day: { type: Number, default: null },
-            monthNumber: { type: Number, default: null },
-            month: { type: String, default: null },
+            month: { type: Number, default: null },
             locked: { type: Boolean, default: false },
             locked_since: { type: Date, default: null }
         },
@@ -168,11 +167,11 @@ Schema.pre("save", function () {
 
     // Corregir nivel actual
     const expNow = this.economy.global.exp;
-    let realLvl = Math.floor(- (25 - Math.sqrt(5 * (105 + 2 * expNow))) / 10); // solved: 10 * (level ** 2) + 50 * level + 100
+    let realLvl = Math.floor(- (25 - Math.sqrt(5 * (2 * expNow - 75))) / 10); // solved: 10 * (level ** 2) + 50 * level + 100
     const nextLevel = this.getNextLevelExp(realLvl)
 
     if (expNow >= nextLevel) realLvl++;
-    if (realLvl <= 0) realLvl = 0;
+    if (realLvl <= 0 || isNaN(realLvl)) realLvl = 0;
 
     // Cambio de nivel
     if (this.economy.global.level != realLvl) mongoose.models.Guilds.getOrCreate(this.guild_id).then(doc => doc.manageLevelUp(realLvl, this));
@@ -193,7 +192,7 @@ Schema.static("getOrCreate", async function ({ user_id, guild_id }) {
 
 Schema.method("getNextLevelExp", function (level = null) {
     if (level === null) level = this.economy.global.level;
-    if (level < 0) return 0;
+    else if (level < 0) level = 0;
 
     return 10 * (level ** 2) + 50 * level + 100;
 })
@@ -341,13 +340,13 @@ Schema.method("hasReminderFor", function (id) {
 
 Schema.method("isBirthday", function () {
     let bdDay = this.data.birthday.day;
-    let bdMonth = this.data.birthday.monthNumber;
+    let bdMonth = this.data.birthday.month;
 
     let now = new Date();
     let actualDay = now.getDate();
     let actualMonth = now.getMonth();
 
-    if ((actualDay == bdDay) && (actualMonth + 1 == bdMonth) && this.data.birthday.locked) return true;
+    if ((actualDay == bdDay) && (actualMonth == bdMonth) && this.data.birthday.locked) return true;
     return false;
 })
 

@@ -24,7 +24,7 @@ command.execute = async (interaction, models, params, client) => {
 **— Miembros totales:** ${interaction.guild.memberCount}
 **— El dueño es: ${await interaction.guild.members.fetch(interaction.guild.ownerId)}**
 **— Tiene ${interaction.guild.emojis.cache.size} emojis**
-**— Tiene ${interaction.guild.stickers.cache.size} emojis**`)
+**— Tiene ${interaction.guild.stickers.cache.size} stickers**`)
 
     let admins = "";
     adminroles.forEach(roleId => {

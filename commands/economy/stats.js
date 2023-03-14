@@ -55,7 +55,7 @@ command.execute = async (interaction, models, params, client) => {
             if (boostobj === "Currency") boostobj = client.getCustomEmojis(guild.id).Currency.name;
 
             embed
-                .defField(`— 🚀 Boost de ${boostobj} x${value}`,
+                .defField(`— 🚀 Boost de ${boostobj} x${value.toLocaleString("es-CO")}`,
                     `▸ Hasta: ${time(boost.active_until)} (${time(boost.active_until, "R")})${disabled ? `\n▸ **Desactivado**.` : ""}`, true);
         }
     }
@@ -70,7 +70,7 @@ command.execute = async (interaction, models, params, client) => {
         type: "didYouKnow",
         data: {
             text: `Si ves las estadísticas de otro usuario y tiene establecido su cumpleaños puedo recordartelo`,
-            likelihood: 5
+            likelihood: 1
         }
     })
 

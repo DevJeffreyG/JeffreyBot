@@ -162,7 +162,7 @@ class Embed extends Discord.EmbedBuilder {
 
                 if (bdData?.locked) {
                     let day = bdData.day;
-                    let month = bdData.monthNumber - 1;
+                    let month = bdData.month;
 
                     const timestamp = moment()
                         .month(month)
@@ -172,8 +172,9 @@ class Embed extends Discord.EmbedBuilder {
                     bdString = (day != null) && (month != null) ? `**— Cumpleaños**: ${time(timestamp.toDate(), "D")}. (${time(timestamp.toDate(), "R")})` : "";
                 }
 
-                const expToGet = user.getNextLevelExp() - user.getNextLevelExp(user.economy.global.level - 1); // la exp que hay que ganar en este nivel
-                const expSoFar = user.economy.global.exp - user.getNextLevelExp(user.economy.global.level - 1); // la exp que se lleva hasta ahora
+                let expDiff = user.getNextLevelExp() - user.getNextLevelExp(user.economy.global.level - 1);
+                const expToGet = expDiff == 0 ? user.getNextLevelExp() : expDiff; // la exp que hay que ganar en este nivel
+                const expSoFar = expDiff == 0 ? user.economy.global.exp : user.economy.global.exp - user.getNextLevelExp(user.economy.global.level - 1); // la exp que se lleva hasta ahora
 
                 this.defAuthor({ text: `Estadísticas de ${member.user.tag}`, icon: member.guild.iconURL({ dynamic: true }) })
                     .defDesc(`**— Nivel**: ${curLvl}

@@ -1,5 +1,6 @@
-const { Command, Categories, Confirmation, LimitedTime, WillBenefit, BoostTypes, BoostObjetives } = require("../../src/utils")
+const { Command, Categories, Confirmation, LimitedTime, WillBenefit, BoostTypes, BoostObjetives, ErrorEmbed } = require("../../src/utils")
 const ms = require("ms");
+const { codeBlock } = require("discord.js");
 
 const command = new Command({
     name: "temp",
@@ -31,10 +32,6 @@ command.data
             .setName("usuario")
             .setDescription("El usuario al que se le agregará el rol")
             .setRequired(true))
-        .addRoleOption(option => option
-            .setName("role")
-            .setDescription("El role a agregar con el boost")
-            .setRequired(true))
         .addStringOption(option => option
             .setName("tipo")
             .setDescription("El tipo de boost")
@@ -62,6 +59,10 @@ command.data
             .setName("tiempo")
             .setDescription("El tiempo que tiene que pasar para eliminar el boost: 1d, 20m, 10s, 1y...")
             .setRequired(true))
+        .addRoleOption(option => option
+            .setName("role")
+            .setDescription("El role a agregar con el boost")
+            .setRequired(false))
     )
 
 command.execute = async (interaction, models, params, client) => {
@@ -76,7 +77,17 @@ command.execute = async (interaction, models, params, client) => {
     switch (subcommand) {
         case "role":
             // llamar la funcion para hacer globaldata
-            await LimitedTime(usuario.member, role.role.id, duration);
+            try {
+                await LimitedTime(usuario.member, role.role.id, duration);
+            } catch (err) {
+                return new ErrorEmbed(interaction, {
+                    type: "discordLimitation",
+                    data: {
+                        action: "temp",
+                        help: `Algo no ha ido bien, no pude agregar el rol temporal.${codeBlock("json", err)}`
+                    }
+                }).send()
+            }
             return interaction.editReply({ content: `${client.Emojis.Check} Agregado el temp role a ${usuario.user.tag} por ${tiempo.value}` });
 
         case "boost":
@@ -99,7 +110,18 @@ command.execute = async (interaction, models, params, client) => {
             if (!confirmation) return;
 
             // llamar la funcion para hacer un globaldata y dar el role con boost
-            await LimitedTime(usuario.member, role.role.id, duration, btype, bobj, multi);
+            try {
+                await LimitedTime(usuario.member, role?.role.id, duration, btype, bobj, multi);
+            } catch (err) {
+                return new ErrorEmbed(interaction, {
+                    type: "discordLimitation",
+                    data: {
+                        action: "temp",
+                        help: `Algo no ha ido bien, no pude agregar el rol temporal.${codeBlock("json", err)}`
+                    }
+                }).send()
+            }
+
             return interaction.editReply({ content: `${client.Emojis.Check} Agregado el boost a ${usuario.user.tag} por ${tiempo.value}`, embeds: [] });
     }
 }

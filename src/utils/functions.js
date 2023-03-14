@@ -392,7 +392,19 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
         if (!temprole.isSub) {
           // sacarle el role
           console.log("🟢 Ha pasado el tiempo del temprole %s", temprole);
-          if (role) member.roles.remove(role);
+          try {
+            if (role) await member.roles.remove(role);
+          } catch (err) {
+            new Log()
+              .setGuild(guild)
+              .setReason(LogReasons.Error)
+              .setTarget(ChannelModules.StaffLogs)
+              .send({
+                embeds: [
+                  new ErrorEmbed().defDesc(`**No se pudo eliminar el role de un temprole**\n${codeBlock("json", err)}`)
+                ]
+              })
+          }
 
           // eliminar el temprole de la db
           dbUser.data.temp_roles.splice(i, 1);
@@ -764,18 +776,27 @@ const LimitedTime = async function (victimMember, roleID = 0, duration, specialT
     }
   }
 
+  try {
+    if (role) await victimMember.roles.add(role);
+  } catch (err) {
+    throw new Error(err);
+  }
+
   user.data.temp_roles.push(toPush);
   await user.save();
 
   let lastAddedIndex = user.data.temp_roles.length - 1;
-  if (role) victimMember.roles.add(role);
 
   // timeout, por si pasa el tiempo antes de que el bot pueda reiniciarse
-  if (duration <= 2147483647) setTimeout(function () {
-    if (role) victimMember.roles.remove(role);
+  if (duration <= 2147483647) setTimeout(async function () {
+    try {
+      if (role) await victimMember.roles.remove(role);
 
-    user.data.temp_roles.splice(lastAddedIndex, 1);
-    user.save()
+      user.data.temp_roles.splice(lastAddedIndex, 1);
+      await user.save();
+    } catch (err) {
+      throw new Error(err);
+    }
   }, duration);
 
   return user
@@ -1144,7 +1165,7 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
 
 /**
  * @param {*} user Mongoose User Query with one document
- * @param {Array} data Needed member, rule string, and proof object used for the infraction
+ * @param {Object} data Needed member, rule string, and proof object used for the infraction
  * @param {Boolean} [isSoftwarn=false] The infraction is a softwarn?
  */
 const AfterInfraction = async function (user, data) {
@@ -1155,6 +1176,7 @@ const AfterInfraction = async function (user, data) {
   const totalWarns = warns.length;
 
   const guild = member.guild;
+  const client = member.client;
 
   // acciones de automod
   let arrayEmbeds = [];

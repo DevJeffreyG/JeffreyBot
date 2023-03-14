@@ -187,6 +187,16 @@ class Handlers {
 
                 const member = this.interaction.guild.members.cache.find(x => x.user.tag === tag);
 
+                if(member == this.interaction.member) {
+                    return new ErrorEmbed(this.interaction, {
+                        type: "execError",
+                        data: {
+                            command: "reminder",
+                            guide: "No puedes recordarte tu mismo cumpleaños"
+                        }
+                    }).send();
+                }
+
                 if (!this.user.hasReminderFor(member.id)) {
                     let confirmation = await Confirmation("Recordar", [
                         `¿Deseas que te envíe un mensaje privado el día del cumpleaños de ${member}?`,
