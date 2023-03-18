@@ -1150,15 +1150,20 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
         client.activeCollectors.splice(index, 1);
       } else console.log(`🟥 NO SE ELIMINÓ DE LOS ACTIVECOLLECTORS !! {CONFIRMATION}`)
 
-      if (r === EndReasons.OldCollector) {
-        await interaction.deleteReply()
-        return resolve(false)
+      try {
+        if (r === EndReasons.OldCollector) {
+          await interaction.deleteReply()
+          return resolve(false)
+        }
+
+        if (i.size == 0) {
+          await interaction.editReply({ embeds: [cancelEmbed], components: [] })
+          return resolve(false)
+        }
+      } catch (err) {
+        console.log(err)
       }
 
-      if (i.size == 0) {
-        await interaction.editReply({ embeds: [cancelEmbed], components: [] })
-        return resolve(false)
-      }
     })
   })
 }

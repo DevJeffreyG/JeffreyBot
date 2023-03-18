@@ -58,9 +58,7 @@ command.execute = async (interaction, models, params, client) => {
     const economy = user.economy.dark;
 
     economy.currency -= quantity;
-    user.economy.global.currency += total;
-
-    await user.save();
+    await user.addCurrency(total);
 
     let sug = new Embed({
         type: "didYouKnow",

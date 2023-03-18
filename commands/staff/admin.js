@@ -47,10 +47,6 @@ command.data
             .addSubcommand(boostk => boostk
                 .setName("boost")
                 .setDescription("Añadir una nueva llave para canjear con recompensa de Boost")
-                .addRoleOption(option => option
-                    .setName("role")
-                    .setDescription("Role a dar")
-                    .setRequired(true))
                 .addStringOption(option => option
                     .setName("tipo")
                     .setDescription("El tipo de boost que va a ser")
@@ -73,9 +69,12 @@ command.data
                     .setDescription("Valor del boost")
                     .setMinValue(1.1)
                     .setRequired(true))
+                .addRoleOption(option => option
+                    .setName("role")
+                    .setDescription("Role a dar con el Boost"))
                 .addStringOption(option => option
                     .setName("duracion")
-                    .setDescription("Duración del role asignado: 1d, 20m, 10s, 1y"))
+                    .setDescription("Duración del Boost: 1d, 20m, 10s, 1y"))
 
             )
             .addSubcommand(remove => remove
@@ -465,7 +464,7 @@ command.keysExec = async (interaction, models, params) => {
                     boost_type,
                     boost_value,
                     boost_objetive,
-                    value: role.value,
+                    value: role?.value ?? 0,
                     duration: duracion ? ms(duracion.value) : Infinity
                 },
                 code: generatedCode,

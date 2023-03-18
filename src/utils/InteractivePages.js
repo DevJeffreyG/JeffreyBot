@@ -188,15 +188,18 @@ class InteractivePages {
 
         collector.on("end", async (i, r) => {
             row.components.forEach(c => c.setDisabled());
-            await interaction.editReply({ components: [row] })
-                .catch(err => console.log("... %s", err));
+            try {
+                await interaction.editReply({ components: [row] });
 
-            let index = client.activeCollectors.findIndex(x => x.collector === collector && x.userid === interaction.user.id);
-            if (!isNaN(index)) {
-                client.activeCollectors.splice(index, 1);
-            } else console.log(`🟥 NO SE ELIMINÓ DE LOS ACTIVECOLLECTORS !! {INTERACTIVE PAGES}`)
+                let index = client.activeCollectors.findIndex(x => x.collector === collector && x.userid === interaction.user.id);
+                if (index != -1) {
+                    client.activeCollectors.splice(index, 1);
+                } else console.log(`🟥 NO SE ELIMINÓ DE LOS ACTIVECOLLECTORS !! {INTERACTIVE PAGES}`)
 
-            if (r === EndReasons.OldCollector) return await interaction.deleteReply().catch(err => console.log("⚠️ %s", err))
+                if (r === EndReasons.OldCollector) return await interaction.deleteReply();
+            } catch (err) {
+                console.log(err)
+            }
         })
     }
 }

@@ -166,14 +166,18 @@ ${member.roles.cache.toJSON().sort().join(", ")}`)
 
     collector.on("end", async (i, r) => {
         row.components.forEach(c => c.setDisabled());
-        await interaction.editReply({ components: [row] });
+        try {
+            await interaction.editReply({ components: [row] });
 
-        let index = client.activeCollectors.findIndex(x => x.collector === collector && x.userid === interaction.user.id);
-        if (!isNaN(index)) {
-            client.activeCollectors.splice(index, 1);
-        } else console.log(`🟥 NO SE ELIMINÓ DE LOS ACTIVECOLLECTORS !! {USERINFO}`)
+            let index = client.activeCollectors.findIndex(x => x.collector === collector && x.userid === interaction.user.id);
+            if (index != -1) {
+                client.activeCollectors.splice(index, 1);
+            } else console.log(`🟥 NO SE ELIMINÓ DE LOS ACTIVECOLLECTORS !! {USERINFO}`)
 
-        if (r === EndReasons.OldCollector) return interaction.deleteReply()
+            if (r === EndReasons.OldCollector) return interaction.deleteReply()
+        } catch (err) {
+            console.log(err)
+        }
     })
 }
 

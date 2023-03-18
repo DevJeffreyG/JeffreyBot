@@ -295,14 +295,19 @@ class Blackjack {
         this.collector.on("end", async (i, r) => {
             this.row.components.forEach(c => c.setDisabled());
             this.supportRow.components.find(c => c.data.custom_id === "giveup").setDisabled();
-            await this.interaction.editReply({ components: [this.row, this.supportRow] });
 
-            let index = client.activeCollectors.findIndex(x => x.collector === this.collector && x.userid === interaction.user.id);
-            if (!isNaN(index)) {
-                client.activeCollectors.splice(index, 1);
-            } else console.log(`🟥 NO SE ELIMINÓ DE LOS ACTIVECOLLECTORS !! {BLACKJACK}`)
+            try {
+                await this.interaction.editReply({ components: [this.row, this.supportRow] });
 
-            if (r === EndReasons.OldCollector) return this.interaction.deleteReply()
+                let index = client.activeCollectors.findIndex(x => x.collector === this.collector && x.userid === interaction.user.id);
+                if (index != -1) {
+                    client.activeCollectors.splice(index, 1);
+                } else console.log(`🟥 NO SE ELIMINÓ DE LOS ACTIVECOLLECTORS !! {BLACKJACK}`)
+
+                if (r === EndReasons.OldCollector) return this.interaction.deleteReply()
+            } catch (err) {
+                console.log(err)
+            }
         })
     }
 

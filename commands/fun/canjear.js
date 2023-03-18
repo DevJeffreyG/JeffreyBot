@@ -1,4 +1,4 @@
-const { Command, Categories, LimitedTime, WillBenefit, HumanMs, ErrorEmbed, ItemObjetives, Enum, BoostTypes } = require("../../src/utils");
+const { Command, Categories, LimitedTime, WillBenefit, HumanMs, ErrorEmbed, ItemObjetives, BoostTypes } = require("../../src/utils");
 
 const command = new Command({
     name: "canjear",
@@ -57,14 +57,16 @@ command.execute = async (interaction, models, params, client) => {
 
     switch (reward.type) {
         case ItemObjetives.Currency:
-            user.economy.global.currency += Number(reward.value);
-            user.data.counts.normal_currency += Number(reward.value);
-            reply = `Se han agregado ${Currency}${Number(reward.value).toLocaleString("es-CO")} a tu cuenta.`
+            await user.addCurrency(reward.value)
+
+            reply = `Se han agregado **${Currency}${Number(reward.value).toLocaleString("es-CO")}** a tu cuenta.`
             break;
 
         case ItemObjetives.Exp:
             user.economy.global.exp += Number(reward.value);
-            reply = `Se han agregado ${Number(reward.value).toLocaleString("es-CO")} puntos de EXP a tu cuenta.`
+            reply = `Se han agregado **${Number(reward.value).toLocaleString("es-CO")}** puntos de EXP a tu cuenta.`
+
+            await user.save();
             break;
 
         case ItemObjetives.Role:
@@ -75,10 +77,10 @@ command.execute = async (interaction, models, params, client) => {
                 return interaction.editReply(`${interaction.user}, no puedes usar esta key porque ya tienes el rol que da :(`)
             }
 
-            if (isTemp) user = await LimitedTime(interaction.member, reward.value, reward.duration);
+            if (isTemp) await LimitedTime(interaction.member, reward.value, reward.duration);
             else interaction.member.roles.add(role);
 
-            reply = `Se ha agregado el role \`${role.name}\` ${isTemp ? `por ${new HumanMs(reward.duration).human}` : "permanentemente"}.`
+            reply = `Se ha agregado el role \`${role.name}\` **${isTemp ? `por ${new HumanMs(reward.duration).human}` : "permanentemente"}**.`
             break;
 
         case ItemObjetives.Boost:
@@ -94,9 +96,9 @@ command.execute = async (interaction, models, params, client) => {
             }
 
             // llamar la funcion para hacer un globaldata y dar el role con boost
-            user = await LimitedTime(interaction.member, brole.id, reward.duration, reward.boost_type, reward.boost_objetive, reward.boost_value);
+            await LimitedTime(interaction.member, brole?.id, reward.duration, reward.boost_type, reward.boost_objetive, reward.boost_value);
 
-            reply = `Se ha activado el boost ${new Enum(BoostTypes).translate(reward.boost_type) === BoostTypes.Multiplier ? "multiplicador" : "de probabilidad"} x${reward.boost_value} por ${new HumanMs(reward.duration).human}.`
+            reply = `Se ha activado el **Boost ${reward.boost_type === BoostTypes.Multiplier ? "Multiplicador" : "de probabilidad"}** **x${reward.boost_value}** por **${new HumanMs(reward.duration).human}**.`
             break;
 
         default:
@@ -107,8 +109,6 @@ command.execute = async (interaction, models, params, client) => {
     key.config.usedBy.push(interaction.user.id);
     key.config.used += 1;
     await doc.save()
-
-    await user.save();
 
     return interaction.editReply({ content: `${client.Emojis.Check} ${reply}` });
 }
