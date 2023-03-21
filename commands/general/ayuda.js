@@ -161,7 +161,8 @@ command.execute = async (interaction, models, params, client) => {
         if (isAdmin && admin.description) arrayEmbeds.push(admin);
     }
 
-    let sug = new Embed({
+    // TODO: Mejorar la ayuda especifica
+    /* let sug = new Embed({
         type: "didYouKnow",
         data: {
             text: `Puedes obtener ayuda de un comando específico usando este mismo comando:\n\`/ayuda comando:(nombre)\``,
@@ -169,7 +170,8 @@ command.execute = async (interaction, models, params, client) => {
         }
     })
 
-    if (sug.likelihood) arrayEmbeds.push(sug);
+    
+    if (sug.likelihood) arrayEmbeds.push(sug); */
 
     return interaction.editReply({ embeds: arrayEmbeds, ephemeral: true });
 }

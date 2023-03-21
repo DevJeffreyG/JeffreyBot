@@ -270,7 +270,7 @@ class Shop {
             type: "execError",
             data: {
                 command: this.interaction.commandName,
-                guide: `Si se usa un tipo boost agregando, **debe tener**: \`role\`, \`boostobj\`, \`boosttype\`, \`boostval\` y \`duracion\`.
+                guide: `Si se usa un tipo boost agregando, **debe tener**: \`boostobj\`, \`boosttype\`, \`boostval\` y \`duracion\`.
 Si es eliminando, **sólo debe tener**: \`duracion\`.`
             }
         })
@@ -316,7 +316,6 @@ Si es eliminando, **sólo debe tener**: \`duracion\`.`
 
         // boost verification
         if (use.objetive === ItemObjetives.Boost) {
-            if (!use.given && use.action == ItemActions.Add) return boostError.send();
             if (!use.boost_info.type && use.action == ItemActions.Add) return boostError.send();
             if (!use.boost_info.value && use.action == ItemActions.Add) return boostError.send();
             if (!use.boost_info.objetive && use.action == ItemActions.Add) return boostError.send();

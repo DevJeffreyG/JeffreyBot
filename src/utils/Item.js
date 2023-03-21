@@ -149,6 +149,8 @@ class Item {
     async use(id, qvictim = this.interaction.member) {
         if (!this.#verify()) return;
 
+        this.original_executor = this.user;
+
         var victim = qvictim;
 
         this.victim = victim?.id != this.user.user_id && victim ? // la victima NO puede ser el mismo usuario
@@ -189,9 +191,10 @@ class Item {
     }
 
     async #removeItemFromInv() {
-        console.log("🗑️ Eliminando %s del inventario", this.item.name)
-        this.user.data.inventory.splice(this.itemOnInventoryIndex, 1);
-        await this.user.save();
+        let originalExecutor = await Users.getOrCreate({ user_id: this.original_executor.user_id, guild_id: this.original_executor.guild_id });
+        console.log("🗑️ Eliminando %s del inventario de %s", this.item.name, this.original_executor.user_id)
+        originalExecutor.data.inventory.splice(this.itemOnInventoryIndex, 1);
+        await originalExecutor.save();
     }
 
     async #useWork() {
@@ -231,18 +234,18 @@ class Item {
     }
 
     // WARNS
-    async #addWarns() { // solo darkshop
+    async #addWarns() {
         if (!await this.#darkshopWork()) return false;
         console.log("🗨️ Agregando %s warn(s)", this.given);
 
-        const warns = this.victim.warns;
+        const warns = this.user.warns;
 
         for (let i = 0; i < this.given; i++) {
             const id = FindNewId(await Users.find(), "warns", "id");
-            this.victim.data.counts.warns += 1;
+            this.user.data.counts.warns += 1;
             warns.push({ rule_id: 0, id });
 
-            await this.victim.save()
+            await this.user.save()
         }
 
         this.#removeItemFromInv()
@@ -250,6 +253,7 @@ class Item {
     }
 
     async #removeWarns() {
+        if (!await this.#darkshopWork()) return false;
         console.log("🗨️ Eliminando %s warn(s)", this.given);
 
         const warns = this.user.warns;
@@ -272,7 +276,6 @@ class Item {
 
     // ROLES
     async #addRole() {
-        if (this.victimMember) this.member = this.victimMember;
         if (!await this.#darkshopWork()) return false;
 
         const role = this.interaction.guild.roles.cache.find(x => x.id === this.given);
@@ -300,13 +303,11 @@ class Item {
         }
 
         if (this.isTemp) {
-            let query = await LimitedTime(this.member, this.given, this.duration);
-
-            if (!this.isDarkShop) this.user = query;
+            await LimitedTime(this.member, this.given, this.duration);
         }
         if (this.isSub) {
             try {
-                this.user = await Subscription(this.member, this.given, this.duration, this.price, this.name)
+                await Subscription(this.member, this.given, this.duration, this.price, this.name)
             } catch (err) {
                 console.log(err);
 
@@ -349,24 +350,24 @@ class Item {
             return false;
         }
 
-        console.log("🗨️ Eliminando el role %s a %s por %s", role.name, this.victimMember.user.tag, this.duration);
+        console.log("🗨️ Eliminando el role %s a %s por %s", role.name, this.member.user.tag, this.duration);
 
-        if (!this.victimMember.roles.cache.find(x => x === role)) {
-            console.log("🔴 No tiene el role que quita el item. %s", this.victimMember.roles.cache)
+        if (!this.member.roles.cache.find(x => x === role)) {
+            console.log("🔴 No tiene el role que quita el item. %s", this.member.roles.cache)
             this.norole.send();
             return false;
         }
 
         // globaldata
         if (this.duration) {
-            let globaldata = await GlobalDatas.newTempRoleDeletion({ user_id: this.victimMember.id, guild_id: this.victimMember.guild.id, role_id: role.id, duration: this.duration });
+            let globaldata = await GlobalDatas.newTempRoleDeletion({ user_id: this.member.id, guild_id: this.member.guild.id, role_id: role.id, duration: this.duration });
             if (!globaldata) {
                 this.roleDeleted.send();
                 return false
             }
         }
 
-        this.victimMember.roles.remove(role);
+        this.member.roles.remove(role);
 
         this.#removeItemFromInv()
         return true;
@@ -374,6 +375,7 @@ class Item {
 
     // ITEMS
     async #addItem() {
+        if (!await this.#darkshopWork()) return false;
         const itemType = this.type
 
         switch (itemType) {
@@ -459,8 +461,9 @@ class Item {
     }
 
     async #addBoost() {
+        if (!await this.#darkshopWork()) return false;
         const role = this.interaction.guild.roles.cache.find(x => x.id === this.given);
-        if (!role) {
+        /* if (!role) {
             await new Log(this.interaction)
                 .setReason(LogReasons.Error)
                 .setTarget(ChannelModules.StaffLogs)
@@ -474,8 +477,8 @@ class Item {
             console.log("🔴 No se encontro el role %s en el servidor", this.given);
             this.notfound.send();
             return false;
-        }
-        console.log("🗨️ Agregando el role como Boost %s a %s", role.name, this.interaction.user.tag);
+        } */
+        console.log("🗨️ Agregando el role como Boost %s a %s", role?.name ?? "SIN ROL", this.interaction.user.tag);
 
         if (this.member.roles.cache.find(x => x === role)) {
             console.log("🔴 Ya tiene el role que da el item. (BOOST)")
@@ -484,14 +487,14 @@ class Item {
         }
 
         const willBenefit = await WillBenefit(this.member, [this.boost_objetive, BoostObjetives.All])
-        if (willBenefit) {
+        if (willBenefit && (this.item.use_info.effect === ItemEffects.Positive || !this.isDarkShop)) {
             console.log("🔴 Se beneficiaría aún más")
             this.hasboost.send();
             return false
         }
 
         // llamar la funcion para hacer un globaldata y dar el role con boost
-        this.user = await LimitedTime(this.interaction.member, role.id, this.duration, this.boost_type, this.boost_objetive, this.boost_value);
+        await LimitedTime(this.member, role?.id, this.duration, this.boost_type, this.boost_objetive, this.boost_value);
 
         this.#removeItemFromInv()
         return true;
@@ -500,22 +503,22 @@ class Item {
     async #removeBoost() {
         if (!await this.#darkshopWork()) return false;
 
-        let filtered = this.boost_objetive ? this.victim.data.temp_roles.filter(x => x.special.objetive === this.boost_objetive) : this.victim.data.temp_roles;
+        let filtered = this.boost_objetive ? this.user.data.temp_roles.filter(x => x.special.objetive === this.boost_objetive) : this.user.data.temp_roles;
         const temprole = GetRandomItem(filtered);
 
         const role = this.interaction.guild.roles.cache.find(x => x.id === temprole.role_id);
 
-        console.log("🗨️ Eliminando el role %s a %s por %s", role?.name, this.victimMember.user.tag, this.duration);
+        console.log("🗨️ Eliminando el role %s a %s por %s", role?.name ?? "SIN ROL", this.member.user.tag, this.duration);
 
-        if (role && !this.victimMember.roles.cache.find(x => x === role)) {
-            console.log("🔴 No tiene el role que te quita el item. %s", this.victimMember.roles.cache)
+        /* if (role && !this.member.roles.cache.find(x => x === role)) {
+            console.log("🔴 No tiene el role que te quita el item. %s", this.member.roles.cache)
             this.norole.send();
             return false;
-        }
+        } */
 
         // globaldata
         let globaldata = await GlobalDatas.newTempRoleDeletion({
-            user_id: this.victimMember.id, guild_id: this.victimMember.guild.id, role_id: role?.id, duration: this.duration, boost: this.boost_objetive,
+            user_id: this.member.id, guild_id: this.member.guild.id, role_id: role?.id, duration: this.duration, boost: this.boost_objetive,
             tempRoleObjectId: temprole._id
         });
         if (!globaldata) {
@@ -525,8 +528,8 @@ class Item {
 
         temprole.special.disabled = true;
 
-        await this.victim.save();
-        if (role) this.victimMember.roles.remove(role);
+        await this.user.save();
+        if (role) this.member.roles.remove(role);
 
         this.#removeItemFromInv()
         return true;
@@ -534,6 +537,10 @@ class Item {
 
     async #darkshopWork() {
         if (this.item.use_info.effect === ItemEffects.Positive || !this.isDarkShop) return true
+        if (this.victimMember) {
+            this.user = this.victim;
+            this.member = this.victimMember;
+        }
 
         let noVictim = new ErrorEmbed(this.interaction, {
             type: "execError",
@@ -553,21 +560,21 @@ class Item {
 
         let skipped = new Embed()
             .defAuthor({ text: `Interacción`, icon: this.interaction.client.EmojisObject.DarkShop.url })
-            .defDesc(`**—** ¡**${this.interaction.user.tag}** se ha volado la Firewall  y ha usado el item \`${this.item.name}\` en **${this.victimMember.user.tag}**!`)
+            .defDesc(`**—** ¡**${this.interaction.user.tag}** se ha volado la Firewall  y ha usado el item \`${this.item.name}\` en **${this.member.user.tag}**!`)
             .defColor(Colores.negro)
-            .defFooter({ text: `${this.item.name} para ${this.victimMember.user.tag}`, timestamp: true });
+            .defFooter({ text: `${this.item.name} para ${this.member.user.tag}`, timestamp: true });
 
         let success = new Embed()
             .defAuthor({ text: `Interacción`, icon: this.interaction.client.EmojisObject.DarkShop.url })
-            .defDesc(`**—** ¡**${this.interaction.user.tag}** ha usado el item \`${this.item.name}\` en **${this.victimMember.user.tag}**!`)
+            .defDesc(`**—** ¡**${this.interaction.user.tag}** ha usado el item \`${this.item.name}\` en **${this.member.user.tag}**!`)
             .defColor(Colores.negro)
-            .defFooter({ text: `${this.item.name} para ${this.victimMember.user.tag}`, timestamp: true });
+            .defFooter({ text: `${this.item.name} para ${this.member.user.tag}`, timestamp: true });
 
         let fail = new Embed()
             .defAuthor({ text: `Interacción`, icon: this.interaction.client.EmojisObject.DarkShop.url })
-            .defDesc(`**—** ¡**${this.interaction.user.tag}** ha querido usar el item \`${this.item.name}\` en **${this.victimMember.user.tag}** pero NO HA FUNCIONADO!`)
+            .defDesc(`**—** ¡**${this.interaction.user.tag}** ha querido usar el item \`${this.item.name}\` en **${this.member.user.tag}** pero NO HA FUNCIONADO!`)
             .defColor(Colores.negro)
-            .defFooter({ text: `${this.item.name} para ${this.victimMember.user.tag}`, timestamp: true });
+            .defFooter({ text: `${this.item.name} para ${this.member.user.tag}`, timestamp: true });
 
         // como el efecto es negativo, hay que revisar la firewall
         const firewallItem = this.shop.items.find(x => x.use_info.item_info.type === ItemTypes.Firewall)
@@ -596,21 +603,21 @@ class Item {
                 await this.victim.save();
 
                 // enviar embed
-                dsEvents?.send({ embeds: [fail] })
+                dsEvents?.send({ content: `**${this.interaction.user.tag}** ➡️ **${this.member}**.`, embeds: [fail], allowedMentions: { parse: ["users"] } })
 
                 await this.#removeItemFromInv() // como es fallido, no llega al codigo base para que se elimine el item
                 return false;
             } else { // se salta la firewall
                 console.log("🟢 Se ha saltado la Firewall")
-                dsEvents?.send({ embeds: [skipped] })
+                dsEvents?.send({ content: `**${this.interaction.user.tag}** ➡️ **${this.member}**.`, embeds: [skipped], allowedMentions: { parse: ["users"] } })
                 return true
             }
         } else { // no tiene firewall
             if (this.victim.economy.global.level >= this.doc.settings.quantities.darkshop_level) {
-                dsEvents?.send({ embeds: [success] })
+                dsEvents?.send({ content: `**${this.interaction.user.tag}** ➡️ **${this.member}**.`, embeds: [success], allowedMentions: { parse: ["users"] } })
                 return true
             } else { // ni siquiera es parte de la red de la darkshop
-                dsEvents?.send({ embeds: [fail] })
+                dsEvents?.send({ content: `**${this.interaction.user.tag}** ➡️ **${this.member}**.`, embeds: [fail], allowedMentions: { parse: ["users"] } })
 
                 return false // para que no se elimine el item
             }

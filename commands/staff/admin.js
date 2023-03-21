@@ -268,7 +268,7 @@ command.data
                     .addNumberOption(option => option
                         .setName("boostval")
                         .setDescription("Valor del boost (si es un boost)")
-                        .setMinValue(1.1)
+                        .setMinValue(0.01)
                     )
                     .addIntegerOption(option =>
                         option.setName("cantidad")

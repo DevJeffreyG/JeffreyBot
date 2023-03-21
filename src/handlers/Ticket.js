@@ -195,7 +195,7 @@ class Ticket {
             if (warnCollector.values[0] == "cancel") return warnCollector.editReply({ content: "Cancelado.", components: [] });
             let selectedWarn = this.user.warns.find(x => x.id === Number(warnCollector.values[0]));
 
-            if (selectedWarn.proof === "na") return warnCollector.editReply({ content: `⚠️ El **warn**" con ID: \`${selectedWarn.id}\`, lo tienes gracias a que **alguien te lo dio por la DarkShop**, no podemos ayudarte.\n\n**Si crees que se trata de un error, contacta directamente al Staff.**`, embeds: [], components: [] });
+            if (selectedWarn.proof === "na") return warnCollector.editReply({ content: `⚠️ El **warn**" con ID: \`${selectedWarn.id}\`, lo tienes gracias a que **alguien te lo dio por la DarkShop**, no podemos ayudarte.\n\n**Si crees que se trata de un error, contacta directamente al STAFF.**`, embeds: [], components: [] });
 
             toConfirm = [
                 `Crear un nuevo ticket para el warn con id \`${selectedWarn.id}\`.`,

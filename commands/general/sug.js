@@ -24,10 +24,9 @@ command.execute = async (interaction, models, params, client) => {
     const { Guilds } = models;
     const sugerencia = params.sugerencia.value;
 
-    if (await isBannedFrom(interaction, "SUGGESTIONS")) return new ErrorEmbed(interaction, { type: "moduleBanned" }).send();
-
     const docGuild = await Guilds.getOrCreate(interaction.guild.id);
     if (!docGuild.moduleIsActive("functions.suggestions")) return new ErrorEmbed(interaction, { type: "moduleDisabled" }).send();
+    if (await isBannedFrom(interaction, "SUGGESTIONS")) return new ErrorEmbed(interaction, { type: "moduleBanned" }).send();
 
     const newId = FindNewId(await Guilds.find(), "data.suggestions", "id"); // crear la nueva id para el ticket
 

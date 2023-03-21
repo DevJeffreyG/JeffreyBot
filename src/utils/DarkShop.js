@@ -424,8 +424,9 @@ class DarkShop {
                 let embed = new Embed()
                     .defAuthor({ text: `...`, icon: this.client.EmojisObject.DarkShop.url })
                     .defColor(Colores.negro)
-                    .defDesc(`**—** Parece que no has vendido todos tus ${this.Emojis.DarkCurrency.name}. Han sido eliminados de tu cuenta tras haber pasado una semana.`)
-                    .defFooter("▸ Si crees que se trata de un error, contacta al Staff.");
+                    .defDesc(`**—** Parece que no has recuperado todos tus ${this.Emojis.DarkCurrency.name}. Han sido eliminados de tu cuenta tras haber pasado una semana.
+**—** Siempre ten un ojo en la **inflación** con \`/inflacion\` y **recupera tu inversión** con \`/dswith\` en el transcurso de la semana.`)
+                    .defFooter("▸ Si crees que se trata de un error, contacta al STAFF.");
 
                 memberDJ?.send({ embeds: [embed] })
                     .catch(error => {

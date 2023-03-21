@@ -737,7 +737,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
         .setTarget(ChannelModules.StaffLogs)
         .setReason(LogReasons.Logger)
         .setGuild(guild)
-        .send({ content: `${staffRoles.toJSON().join(", ")}}`, embed })
+        .send({ content: `${staffRoles.toJSON().join(", ")}`, embed })
 
       suggestion.last_reminded = new Date();
     }

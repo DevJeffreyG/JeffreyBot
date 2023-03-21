@@ -33,7 +33,7 @@ command.execute = async (interaction, models, params, client) => {
     let embed = new Embed()
         .defAuthor({ text: "Hola:", icon: client.EmojisObject.Hola.url })
         .defDesc(final)
-        .defFooter({ text: "Este es un mensaje directamente del staff del servidor." })
+        .defFooter({ text: "Este es un mensaje directamente del STAFF del servidor." })
         .defColor(Colores.verde);
 
     try {

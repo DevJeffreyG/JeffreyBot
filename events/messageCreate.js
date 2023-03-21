@@ -48,8 +48,6 @@ module.exports = async (client, message) => {
   const guild = message.guild;
   const author = message.author;
 
-  await GlobalDatasWork(guild, true); // verificar si existen BOOSTS.
-
   // buscar usuario
   const user = await Users.getOrCreate({
     user_id: author.id,
@@ -128,6 +126,8 @@ module.exports = async (client, message) => {
         expToAdd = 0;
       }
     }
+
+    await GlobalDatasWork(guild, true); // verificar si existen BOOSTS.
 
     // TempRoles
     for (let i = 0; i < user.data.temp_roles.length; i++) {

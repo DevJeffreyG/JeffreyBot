@@ -52,8 +52,9 @@ command.execute = async (interaction, models, params, client) => {
 
         if (specialInfo.type === BoostTypes.Multiplier) {
             if ((specialInfo.objetive === BoostObjetives.Currency || specialInfo.objetive === BoostObjetives.All) && !specialInfo.disabled) {
-                money = money * Number(specialInfo.value);
-                tmoney = `**${Currency}${money.toLocaleString('es-CO')}🚀**`;
+                let prevMoney = money;
+                money = Number((money * Number(specialInfo.value)).toFixed(2));
+                tmoney = prevMoney < money ? `**${Currency}${money.toLocaleString('es-CO')}🚀**` : `**${Currency}${money.toLocaleString('es-CO')}😟**`;
             }
         }
     }
