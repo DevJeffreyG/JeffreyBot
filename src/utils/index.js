@@ -15,6 +15,7 @@ const Blackjack = require("./Blackjack");
 const Log = require("./Log");
 const CustomEmojis = require("./CustomEmojis");
 const Modal = require("./Modal");
+const Collector = require("./Collector");
 
 const Enums = require("./Enums");
 const Functions = require("./functions");
@@ -37,6 +38,7 @@ module.exports = {
     Log,
     CustomEmojis,
     Modal,
+    Collector,
 
     ...Enums,
     ...Functions

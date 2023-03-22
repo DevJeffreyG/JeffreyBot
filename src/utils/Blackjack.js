@@ -9,6 +9,7 @@ const { Colores } = require("../resources");
 
 const Users = require("../../db/models/Users");
 const Guilds = require("../../db/models/Guilds");
+const Collector = require("./Collector");
 
 /**
  * TY UnbelievaBoat 💚 !
@@ -209,16 +210,9 @@ class Blackjack {
     }
 
     async #collectorWork(message) {
-        const client = this.client;
         const interaction = this.interaction;
 
         const filter = async i => {
-            try {
-                if (!i.deferred) await i.deferUpdate()
-            } catch (err) {
-                //console.log("⚠️ %s", err)
-            };
-
             return i.user.id === interaction.user.id &&
                 (i.customId === "hit" || i.customId === "stand" ||
                     i.customId === "double" || i.customId === "split" ||
@@ -226,19 +220,19 @@ class Blackjack {
                 i.message.id === message.id;
         }
 
-        this.collector = message.createMessageComponentCollector({ filter, time: ms("10m") });
-
-        const active = client.activeCollectors.find(y => {
-            let x = y.collector;
-            return x.channelId === this.collector.channelId && x.interactionType === this.collector.interactionType && y.userid === interaction.user.id
-        });
-        if (active) {
+        this.collector = new Collector(this.interaction, { filter, time: ms("10m") }, true);
+        this.collector.onActive(() => {
             this.interaction.followUp({ ephemeral: true, content: "Ya estás en un juego de Blackjack, terminalo antes de iniciar otro." });
-            this.collector.stop();
+            this.collector.raw().stop();
             return this.interaction.deleteReply()
-            //active.collector.stop(EndReasons.OldCollector);
-        }
-        client.activeCollectors.push({ collector: this.collector, userid: interaction.user.id })
+        }).onEnd(() => {
+            this.row.components.forEach(c => c.setDisabled());
+            this.supportRow.components.find(c => c.data.custom_id === "giveup").setDisabled();
+
+            this.interaction.editReply({ components: [this.row, this.supportRow] });
+        }).handle();
+
+        this.collector = this.collector.raw();
 
         this.collector.on("collect", async (i) => {
             this.#getDeck(); // para rellenar, en caso de ser necesario
@@ -289,24 +283,6 @@ class Blackjack {
                 this.interaction.editReply({
                     components: [this.row, this.supportRow]
                 })
-            }
-        })
-
-        this.collector.on("end", async (i, r) => {
-            this.row.components.forEach(c => c.setDisabled());
-            this.supportRow.components.find(c => c.data.custom_id === "giveup").setDisabled();
-
-            try {
-                await this.interaction.editReply({ components: [this.row, this.supportRow] });
-
-                let index = client.activeCollectors.findIndex(x => x.collector === this.collector && x.userid === interaction.user.id);
-                if (index != -1) {
-                    client.activeCollectors.splice(index, 1);
-                } else console.log(`🟥 NO SE ELIMINÓ DE LOS ACTIVECOLLECTORS !! {BLACKJACK}`)
-
-                if (r === EndReasons.OldCollector) return this.interaction.deleteReply()
-            } catch (err) {
-                console.log(err)
             }
         })
     }

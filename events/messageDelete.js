@@ -1,6 +1,6 @@
 const { AuditLogEvent } = require("discord.js");
 const { Bases, Colores } = require("../src/resources/");
-const { FetchAuditLogs, GenerateLog } = require("../src/utils");
+const { FetchAuditLogs, GenerateLog, EndReasons } = require("../src/utils");
 const { Users } = require("mongoose").models;
 
 module.exports = async (client, message) => {
@@ -45,4 +45,18 @@ module.exports = async (client, message) => {
 
     console.log(global.currency, global.exp, author.username);
   }
+
+  let filteredCollectors = client.activeCollectors.filter(x => {
+    return x.channelid == message.channel.id
+  });
+
+  filteredCollectors.forEach(async collector => {
+    try {
+      await collector.manager.interaction.fetchReply();
+    } catch (err) {
+      console.log("🔴 Se eliminará el Collector porque ya no existe el mensaje")
+      collector.manager.raw().stop(EndReasons.Deleted);
+    }
+  })
+
 }

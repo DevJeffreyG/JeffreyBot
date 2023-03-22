@@ -9,7 +9,6 @@ const InteractivePages = require("../utils/InteractivePages");
 const DarkShop = require("../utils/DarkShop");
 
 const ms = require("ms");
-const Chance = require("chance");
 const moment = require("moment-timezone");
 
 /* ##### MONGOOSE ######## */
@@ -20,10 +19,11 @@ const { Users, Guilds, DarkShops, Shops, GlobalDatas } = require("mongoose").mod
 const { google } = require("googleapis");
 const { ApiClient } = require("@twurple/api");
 const { ClientCredentialsAuthProvider } = require("@twurple/auth");
-const { BoostObjetives, EndReasons, ChannelModules, LogReasons } = require("./Enums");
+const { BoostObjetives, ChannelModules, LogReasons } = require("./Enums");
 const Log = require("./Log");
 const { Bases } = require("../resources");
 const Commands = require("../../Commands");
+const Collector = require("./Collector");
 
 /* ##### MONGOOSE ######## */
 const RandomCumplido = function (force = null) {
@@ -1106,27 +1106,17 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
 
   return new Promise(async (resolve, reject) => {
     const filter = async i => {
-      try {
-        if (!i.deferred) await i.deferUpdate()
-      } catch (err) {
-        //console.log("⚠️ %s", err)
-      };
-
       return i.user.id === interaction.user.id &&
         (i.customId === "confirmAction" || i.customId === "cancelAction") &&
         i.message.id === msg.id;
     }
 
-    const collector = interaction.channel.createMessageComponentCollector({ filter, time: ms("1m"), max: 1 });
-
-    const active = client.activeCollectors.find(y => {
-      let x = y.collector;
-      return x.channelId === collector.channelId && x.interactionType === collector.interactionType && y.userid === interaction.user.id
-    });
-
-    if (active) await active.collector.stop(EndReasons.OldCollector);
-
-    client.activeCollectors.push({ collector, userid: interaction.user.id })
+    const collector = new Collector(interaction, { filter, max: 1 }).onEnd((collected, reason) => {
+      if (collected.size == 0) {
+        interaction.editReply({ embeds: [cancelEmbed], components: [] })
+        return resolve(false)
+      }
+    }).raw();
 
     collector.on("collect", async i => {
       if (i.customId === "confirmAction") {
@@ -1134,36 +1124,14 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
           .defColor(Colores.verde)
           .defAuthor({ text: `${toConfirm}, continuando...`, icon: client.EmojisObject.Loading.url });
 
-        await i.editReply({ embeds: [confirmation], components: [] });
+        await interaction.editReply({ embeds: [confirmation], components: [] });
 
         return resolve(interaction);
       } else {
-        await i.editReply({ embeds: [cancelEmbed], components: [] });
+        await interaction.editReply({ embeds: [cancelEmbed], components: [] });
 
         return resolve(false);
       }
-    })
-
-    collector.on("end", async (i, r) => {
-      let index = client.activeCollectors.findIndex(x => x.collector === collector && x.userid === interaction.user.id);
-      if (!isNaN(index)) {
-        client.activeCollectors.splice(index, 1);
-      } else console.log(`🟥 NO SE ELIMINÓ DE LOS ACTIVECOLLECTORS !! {CONFIRMATION}`)
-
-      try {
-        if (r === EndReasons.OldCollector) {
-          await interaction.deleteReply()
-          return resolve(false)
-        }
-
-        if (i.size == 0) {
-          await interaction.editReply({ embeds: [cancelEmbed], components: [] })
-          return resolve(false)
-        }
-      } catch (err) {
-        console.log(err)
-      }
-
     })
   })
 }

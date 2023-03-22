@@ -138,14 +138,17 @@ module.exports = async (client, message) => {
 
       if (specialInfo.type === BoostTypes.Multiplier) {
         if (specialInfo.objetive === BoostObjetives.Currency) {
+          console.log("🚀 Boost de Dinero");
           currencyToAdd *= Number(specialInfo.value);
         }
 
         if (specialInfo.objetive === BoostObjetives.Exp) {
+          console.log("🚀 Boost de EXP");
           expToAdd *= Number(specialInfo.value);
         }
 
         if (specialInfo.objetive === BoostObjetives.All) {
+          console.log("🚀 Boost de Todo");
           currencyToAdd *= Number(specialInfo.value)
           expToAdd *= Number(specialInfo.value)
         }
@@ -154,6 +157,8 @@ module.exports = async (client, message) => {
 
     await user.addCurrency(currencyToAdd)
     user.economy.global.exp += expToAdd;
+
+    console.log("🟢 %s ganó %s EXP y %s %s en #%s", author.tag, expToAdd, currencyToAdd, client.getCustomEmojis(guild.id).Currency.name, message.channel.name);
 
     user.data.lastGained.currency = currencyToAdd;
     user.data.lastGained.exp = expToAdd;

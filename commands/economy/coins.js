@@ -72,10 +72,8 @@ command.execute = async (interaction, models, params, client) => {
         `${fakemoney}`
     ).replace(new RegExp("{ COOLDOWN }", "g"), `${cooldownInfo / 60000}`);
 
-    let memberColor = member.displayHexColor;
-
     let embed = new Embed()
-        .defColor(memberColor)
+        .defColor(member.displayHexColor)
         .defDesc(`${text}.`);
 
     if (index.author) {

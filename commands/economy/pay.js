@@ -55,7 +55,6 @@ command.execute = async (interaction, models, params, client) => {
     ];
 
     let confirmation = await Confirmation("Pagar dinero", toConfirm, interaction);
-
     if (!confirmation) return;
 
     let notEnough = new ErrorEmbed(interaction, {
@@ -111,7 +110,7 @@ command.execute = async (interaction, models, params, client) => {
             desc: description
         }
     })
-
+    interaction.editReply({ embeds: [new Embed({ type: "success" })] });
     return interaction.followUp({ content: `**${author.tag}** ➡️ **${member}**.`, embeds: [doneEmbed], allowedMentions: { parse: ["users"] } });
 }
 
