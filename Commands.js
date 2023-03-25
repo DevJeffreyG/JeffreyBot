@@ -119,14 +119,14 @@ class Commands {
                 console.log("🔄 Eliminando Dev Guilds 🔄")
 
                 if (!this.routes.find(x => x === data.route)) {
-                    await GlobalDatas.removeGuildCommand(data.route);
                     await this.rest.put(data.route, { body: [] }).catch(err => console.log(err));
+                    await GlobalDatas.removeGuildCommand(data.route);
                 }
             }
 
             if ((this.rest.get(data.route) && data.dev != dev)) {
                 console.log("🔄 Eliminando Guilds 🔄")
-                await this.rest.put(data.route, { body: [] })
+                await this.rest.put(data.route, { body: [] }).catch(err => console.log(err));
 
                 // eliminar globaldata
                 await GlobalDatas.removeGuildCommand(data.route);
