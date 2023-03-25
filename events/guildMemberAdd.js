@@ -2,7 +2,7 @@ const Discord = require("discord.js");
 
 const { time } = Discord;
 const { GenerateLog, DaysUntilToday, Embed, GetRandomItem } = require("../src/utils/");
-const { Colores, Config } = require("../src/resources");
+const { Colores } = require("../src/resources");
 
 const { Users, Guilds } = require("mongoose").models;
 

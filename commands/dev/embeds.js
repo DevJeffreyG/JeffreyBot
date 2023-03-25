@@ -108,14 +108,15 @@ command.execute = async (interaction, models, params, client) => {
                         .defDesc(`<@&${Bases.owner.roles.levels.lvl1}>
 • Puedes colorear tu nombre en <#524647331551772672>.
 • Adjuntar archivos y links.
+• Usar Stickers y Emotes exteriores.
 • Agregar reacciones a los mensajes.
 • Crear nuevos hilos.
-• Usar Stickers exteriores.
         
 <@&${Bases.owner.roles.levels.lvl10}>
 • Cambiarse el apodo.
 • Posibilidad de conseguir un 15% más de EXP y Jeffros.
 • Compartir pantalla, o stremear un juego en los chat de voz.
+• Usar la Soundboard.
 
 <@&${Bases.owner.roles.levels.lvl20}>
 • 15% de descuento en la tienda (\`/shop\`).

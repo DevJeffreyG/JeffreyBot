@@ -17,7 +17,7 @@ command.addOption({
 
 command.execute = async (interaction, models, params, client) => {
     if (moment().day() != 0) {
-        return interaction.reply({ ephemeral: true, content: `${client.Emojis.Error} NO puedes invertir más hasta que sea domingo.` })
+        return interaction.reply({ ephemeral: true, embeds: [new ErrorEmbed().defDesc("**No** puedes invertir hasta que sea domingo.")] });
     }
     await interaction.deferReply();
     const { Users } = models;

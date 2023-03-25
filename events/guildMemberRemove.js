@@ -1,6 +1,3 @@
-const Discord = require("discord.js");
-
-const { Config } = require("../src/resources");
 const { Embed } = require("../src/utils");
 const { Users, Guilds } = require("mongoose").models;
 

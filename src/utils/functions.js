@@ -1,4 +1,4 @@
-const { ActivityType, ButtonStyle, OverwriteType, PermissionsBitField, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, Guild, GuildMember, CommandInteraction, BaseInteraction, Message, Client, time, hyperlink, codeBlock } = require("discord.js");
+const { ActivityType, ButtonStyle, OverwriteType, PermissionsBitField, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, Guild, GuildMember, CommandInteraction, BaseInteraction, Message, Client, time, hyperlink, codeBlock, PresenceUpdateStatus } = require("discord.js");
 
 const Colores = require("../resources/colores.json");
 const Cumplidos = require("../resources/cumplidos.json");
@@ -1566,7 +1566,7 @@ const ActivityWork = async function (client) {
   let type = ActivityType[acttype] ?? ActivityType.Playing;
   let activity = act.value.replace("{ USUARIOS }", client.totalMembers);
 
-  return client.user.setActivity({ name: activity, type })
+  return client.user.setPresence({ activities: [{ name: activity, type }], status: client.isOnLockdown ? PresenceUpdateStatus.Idle : PresenceUpdateStatus.Online })
 }
 
 const UpdateObj = function (obj, prop, value) {

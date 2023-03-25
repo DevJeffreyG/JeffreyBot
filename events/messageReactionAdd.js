@@ -1,6 +1,3 @@
-const { codeBlock, hyperlink } = require("discord.js");
-const { Log, ChannelModules, LogReasons, ErrorEmbed } = require("../src/utils");
-
 const { GlobalDatas, Guilds } = require("mongoose").models;
 
 module.exports = async (client, reaction, user) => {

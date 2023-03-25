@@ -286,7 +286,7 @@ class Item {
                 .send({
                     embeds: [
                         new ErrorEmbed()
-                            .defDesc(`${this.interaction.client.Emojis.Error} \`ITEM ${this.itemId}\`: **No se encontró el role ${this.given} en el servidor.**`)
+                            .defDesc(`\`ITEM ${this.itemId}\`: **No se encontró el role ${this.given} en el servidor.**`)
                     ]
                 });
 
@@ -317,7 +317,7 @@ class Item {
                     .send({
                         embeds: [
                             new ErrorEmbed()
-                                .defDesc(`${this.interaction.client.Emojis.Error} \`ITEM ${this.itemId}\`: **Las suscripciones aún no están terminadas en la versión 2.0.0.**`)
+                                .defDesc(`\`ITEM ${this.itemId}\`: **Las suscripciones aún no están terminadas en la versión 2.0.0.**`)
                         ]
                     });
 
@@ -341,7 +341,7 @@ class Item {
                 .send({
                     embeds: [
                         new ErrorEmbed()
-                            .defDesc(`${this.interaction.client.Emojis.Error} \`ITEM ${this.itemId}\`: **No se encontró el role ${this.given} en el servidor.**`)
+                            .defDesc(`\`ITEM ${this.itemId}\`: **No se encontró el role ${this.given} en el servidor.**`)
                     ]
                 });
 

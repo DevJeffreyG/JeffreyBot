@@ -1,5 +1,4 @@
-const { GenerateLog, FetchAuditLogs, GetChangesAndCreateFields } = require("../src/utils/");
-const { Colores } = require("../src/resources");
+const { FetchAuditLogs, GetChangesAndCreateFields } = require("../src/utils/");
 
 const { AuditLogEvent } = require("discord.js");
 

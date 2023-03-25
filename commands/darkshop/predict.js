@@ -1,4 +1,4 @@
-const { Command, Categories, Embed, DarkShop, GetRandomItem, Cooldowns } = require("../../src/utils")
+const { Command, Categories, Embed, DarkShop, GetRandomItem, Cooldowns, ErrorEmbed } = require("../../src/utils")
 const { Colores } = require("../../src/resources")
 
 const Chance = require("chance")
@@ -12,7 +12,7 @@ const command = new Command({
 
 command.execute = async (interaction, models, params, client) => {
     if (moment().day() === 0) {
-        return interaction.reply({ ephemeral: true, content: `${client.Emojis.Error} No es una buena idea hacer eso el domingo...` })
+        return interaction.reply({ ephemeral: true, embeds: [new ErrorEmbed().defDesc("No es buena idea hacer eso el domingo.")] })
     }
     await interaction.deferReply();
 
@@ -20,7 +20,7 @@ command.execute = async (interaction, models, params, client) => {
 
     const user = await Users.getOrCreate({ user_id: interaction.user.id, guild_id: interaction.guild.id });
 
-    if (user.economy.dark.currency === 0) return interaction.editReply(`${client.Emojis.Error} "No tengo nada invertido, mejor espero a tener...".`)
+    if (user.economy.dark.currency === 0) return interaction.editReply({ embeds: [new ErrorEmbed().defDesc("No tienes nada invertido, mejor esperar al domingo y usar `/dschange`.")] })
 
     const darkshop = new DarkShop(interaction.guild, interaction)
     const values = await darkshop.getAllValues();

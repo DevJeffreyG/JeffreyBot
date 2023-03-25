@@ -1,4 +1,4 @@
-const { Command, Categories, Confirmation, Embed } = require("../../src/utils");
+const { Command, Categories, Confirmation, Embed, ErrorEmbed } = require("../../src/utils");
 const moment = require("moment-timezone");
 const { time } = require("discord.js");
 
@@ -51,7 +51,7 @@ command.execute = async (interaction, models, params, client) => {
             break;
 
         case "lock":
-            if (user.data.birthday.locked) return interaction.editReply(`${client.Emojis.Error} Aún no ha pasado un año, no puedes continuar.`);
+            if (user.data.birthday.locked) return interaction.editReply({ embeds: [new ErrorEmbed().defDesc("Aún no ha pasado un año, no puedes continuar.")] });
             command.lock(interaction, models, user, client)
             break;
     }
@@ -63,7 +63,7 @@ command.lock = async (interaction, models, user, client) => {
     day = userBD.day;
     month = userBD.month;
 
-    if (!(day != null && month != null)) return interaction.editReply(`No tienes la fecha completamente configurada, por favor hazlo antes de bloquearla.`);
+    if (!(day != null && month != null)) return interaction.editReply({ embeds: [new ErrorEmbed().defDesc("No tienes la fecha completamente configurada, hazlo antes de intentar bloquearla.")] });
 
     let momentBD = moment().month(month).date(day).startOf("day");
     let bdString = time(momentBD.toDate());
@@ -110,7 +110,7 @@ command.execEdit = async (interaction, models, data, client) => {
         await data.user.save();
     }
 
-    if (userBD.locked) return interaction.editReply({ content: `${client.Emojis.Error} Aún no ha pasado un año, no puedes continuar.` });
+    if (userBD.locked) return interaction.editReply({ embeds: [new ErrorEmbed().defDesc("Aún no ha pasado un año, no puedes continuar.")] });
 
     let monthString = data.mes.charAt(0).toUpperCase() + data.mes.slice(1);
 

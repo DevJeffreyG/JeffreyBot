@@ -1,7 +1,5 @@
 const { Bases } = require("../src/resources");
 
-const Chance = require("chance");
-
 const { Collection, Client, time } = require("discord.js");
 
 const Managers = require("../src/utils/Managers");
@@ -19,7 +17,7 @@ const CronJob = require("cron").CronJob;
  * @param {Client} client 
  */
 module.exports = async (client) => {
-    client.isOnLockdown = false;
+    client.isOnLockdown = process.env.INIT_LOCKDOWN == "FALSE" ? false : true;
     client.invites = [];
     client.logsFetched = {};
     client.activeCollectors = [];
