@@ -9,30 +9,30 @@ const command = new Command({
 command.execute = async (interaction, models, params, client) => {
   let start = Date.now();
   try {
-    interaction.reply(`${client.Emojis.Loading} Ping...`).then(() => {
-      let diff = (Date.now() - start);
-      let API = (client.ws.ping).toFixed(2)
+    await interaction.reply(`${client.Emojis.Loading} Ping...`);
 
-      let embed = new Embed()
-        .defAuthor({ text: `🔔 Pong!`, title: true })
-        .defField("📶 Ping", `${diff}ms`)
-        .defField("💻 API", `${API}ms`)
+    let diff = (Date.now() - start);
+    let API = (client.ws.ping).toFixed(2)
 
-      switch (true) {
-        case diff >= 180:
-          embed.setColor(Colores.rojooscuro)
-          break;
+    let embed = new Embed()
+      .defAuthor({ text: `🔔 Pong!`, title: true })
+      .defField("📶 Ping", `${diff}ms`)
+      .defField("💻 API", `${API}ms`)
 
-        case diff >= 120:
-          embed.setColor(Colores.rojo)
-          break;
+    switch (true) {
+      case diff >= 180:
+        embed.setColor(Colores.rojooscuro)
+        break;
 
-        default:
-          embed.setColor(Colores.verde)
-      }
+      case diff >= 120:
+        embed.setColor(Colores.rojo)
+        break;
 
-      return interaction.editReply({ content: null, embeds: [embed] });
-    });
+      default:
+        embed.setColor(Colores.verde)
+    }
+
+    return await interaction.editReply({ content: null, embeds: [embed] });
   } catch (err) {
     console.log(err)
   }
