@@ -195,7 +195,7 @@ command.execute = async (interaction, models, params, client) => {
 
             let emote = id ? await config.guild.emojis.fetch(id).catch(err => { return null }) : { id: emoji.value, guild: null };
 
-            if (emote instanceof Collection || (!emote instanceof GuildEmoji && id)) return new ErrorEmbed(interaction, {
+            if (emote instanceof Collection || (!emote instanceof GuildEmoji && id) || !emote) return new ErrorEmbed(interaction, {
                 type: "badParams",
                 data: {
                     help: `No encontré ese emote con id \`${id}\` en el servidor '${config.guild ?? interaction.guild}'`
@@ -244,8 +244,8 @@ command.execute = async (interaction, models, params, client) => {
             let toRemoveFetch, toRemove;
 
             let removeChannel = interaction.guild.channels.cache.find(x => x.id === autoRole.channel_id);
-            if (removeChannel) toRemoveFetch = await removeChannel.messages.fetch(autoRole.message_id);
-            if (toRemoveFetch) toRemove = await toRemoveFetch.reactions.cache.get(autoRole.emote);
+            if (removeChannel) toRemoveFetch = await removeChannel.messages.fetch(autoRole.message_id).catch(err => console.log(err)) ?? null;
+            if (toRemoveFetch) toRemove = toRemoveFetch.reactions.cache.get(autoRole.emote) ?? null;
 
             let confirm = [
                 `AutoRole con ID \`${autoRole.id}\`.`,
@@ -261,8 +261,8 @@ command.execute = async (interaction, models, params, client) => {
             let index = doc.data.autoroles.indexOf(autoRole);
             doc.data.autoroles.splice(index, 1);
             await doc.save();
-            
-            if(toRemove) await toRemove.remove();
+
+            if (toRemove) await toRemove.remove();
 
             return interaction.editReply({
                 embeds: [
@@ -325,7 +325,7 @@ command.execute = async (interaction, models, params, client) => {
         }
 
         case "list": {
-            let notExists = new ErrorEmbed(interaction, { type: "doesntExist", data: { action: "get autoroles", missing: "AutoRoles" } });
+            let notExists = new ErrorEmbed(interaction, { type: "doesntExist", data: { action: "autoroles list", missing: "AutoRoles" } });
             const autoroles = doc.data.autoroles;
             if (autoroles.length == 0)
                 return notExists.send();
@@ -341,7 +341,7 @@ command.execute = async (interaction, models, params, client) => {
                 let grupo = autorole.toggle_group ? doc.getOrCreateToggleGroup(autorole.toggle_group) : "No tiene";
                 let aRole = interaction.guild.roles.cache.find(x => x.id === autorole.role_id) ?? "Se eliminó";
                 let actualC = interaction.guild.channels.cache.get(autorole.channel_id) ?? "Se eliminó";
-                let actualFetch = await actualC?.messages?.fetch(autorole.message_id);
+                let actualFetch = await actualC?.messages?.fetch(autorole.message_id).catch(err => { console.log(err) }) ?? null;
 
                 listEmbed.defField(`— ${emote}`, `▸ **ID**: ${autorole.id}.\n▸ **Toggle Grupo**: ${grupo != "No tiene" ? grupo.group_name + ", **" + grupo.id + "**" : grupo}.\n▸ ${aRole}.\n▸ ${hyperlink("Mensaje", actualFetch?.url)}`)
             }
@@ -351,7 +351,8 @@ command.execute = async (interaction, models, params, client) => {
 
         case "sync": {
             let syncQuery = doc.data.autoroles;
-            if (syncQuery?.length == 0) return interaction.editReply(`Lo siento, no he encontrado autoroles en este servidor.`);
+            let notExists = new ErrorEmbed(interaction, { type: "doesntExist", data: { action: "autoroles sync", missing: "AutoRoles" } });
+            if (syncQuery?.length == 0) return notExists.send();
 
             for (let i = 0; i < syncQuery.length; i++) {
                 const autorole = syncQuery[i];
