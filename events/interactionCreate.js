@@ -21,9 +21,9 @@ module.exports = async (client, interaction) => {
   }
 
   client.lastInteraction = interaction;
-  const guild = interaction.guild;
+  /* const guild = interaction.guild;
 
-  await GlobalDatasWork(guild);
+  await GlobalDatasWork(guild, true); */
 
   new Handlers(interaction);
 }

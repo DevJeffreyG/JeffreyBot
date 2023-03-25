@@ -30,7 +30,7 @@ command.execute = async (interaction, models, params, client) => {
         embed.setColor(Colores.verde)
     }
 
-    interaction.editReply({ content: null, embeds: [embed] });
+    return interaction.editReply({ content: null, embeds: [embed] });
   });
 }
 

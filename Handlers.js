@@ -27,9 +27,6 @@ class Handlers {
             console.log(err)
         }
 
-        this.doc = await Guilds.getOrCreate(this.interaction.guild.id);
-        this.user = await Users.getOrCreate({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id })
-
         if (this.interaction.customId?.toUpperCase().includes("TICKET")) this.ticket = new Ticket(this.interaction);
         if (this.interaction.customId?.toUpperCase().includes("SUGGESTION")) this.suggestion = new Suggestion(this.interaction);
         if (this.interaction.customId?.toUpperCase().includes("KILL") && this.#isDev()) {
@@ -51,6 +48,8 @@ class Handlers {
 
             return;
         }
+
+        this.user = await Users.getOrCreate({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id })/*  */
 
         switch (this.interaction.type) {
             case InteractionType.ApplicationCommand:
@@ -137,7 +136,7 @@ class Handlers {
         }
 
         try {
-            this.#executeCommand(this.interaction, models, params, this.client)
+            await this.#executeCommand(this.interaction, models, params, this.client)
         } catch (err) {
             console.log(err)
         }
@@ -270,6 +269,8 @@ class Handlers {
         console.log(`-------- ${interaction.commandName} • por ${interaction.user.id} • en ${interaction.guild.name} (${interaction.guild.id}) ----------`)
 
         try {
+            this.doc = await Guilds.getOrCreate(this.interaction.guild.id);
+
             if (!this.executedCommand) throw new Error(`Se quiso ejecutar un comando pero no se encontró mappeado. ${interaction.commandName}`)
             if (this.executedCommand.category === Categories.DarkShop) {
                 if (!this.doc.moduleIsActive("functions.darkshop")) return new ErrorEmbed(interaction, {
