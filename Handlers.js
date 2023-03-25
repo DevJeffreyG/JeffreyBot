@@ -41,7 +41,7 @@ class Handlers {
                     this.client.destroy();
                     process.exit(0);
                 } else {
-                    this.interaction.deleteReply();
+                    await this.interaction.deleteReply();
                 }
             } catch (err) {
                 console.log(err)
