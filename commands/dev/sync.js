@@ -19,6 +19,13 @@ command.addSubcommand({
     desc: "Sincronizar los usuarios viejos con la nueva forma de Jeffrey Bot 2.x.x"
 })
 
+command.addOption({
+    type: "string",
+    name: "guild",
+    desc: "El servidor a sincronizar",
+    sub: "users"
+})
+
 command.addSubcommand({
     name: "shops",
     desc: "Sincronizar las viejas tiendas (Normal & DarkShop) con la nueva forma de Jeffrey Bot 2.x.x"
@@ -259,12 +266,13 @@ command.execUsers = async (interaction, models, params, client) => {
 
     const { Users, TotalPurchases, DarkStats, Exps, Jeffros, Purchases, WonCodes, GlobalDatas } = models;
 
-    const guildToSearch = interaction.guild.id;
+    const guildToSearch = params["users"].guild?.value ?? interaction.guild.id;
 
     await interaction.guild.members.fetch();
     let members = interaction.guild.members.cache;
 
-    members.forEach(async (member) => {
+    for await (const arr of members) {
+        const member = arr[1]; // Collection
         let user_id = member.user.id;
 
         let totalpurchases = await TotalPurchases.find({ userID: user_id }); // interés
@@ -274,9 +282,8 @@ command.execUsers = async (interaction, models, params, client) => {
         let purchases = await Purchases.find({ userID: user_id }); // inventario de tienda normal
         let vaults = await WonCodes.find({ userID: user_id });
 
-        await Users.findOneAndDelete({ guild_id: interaction.guild.id, user_id: user_id }).then(q => {
-            if (q) console.log("Se ha eliminado:", q);
-        });
+        let deleteQ = await Users.findOneAndDelete({ guild_id: interaction.guild.id, user_id: user_id });
+        console.log("Se ha eliminado:", deleteQ);
 
         const newUser = new Users({
             guild_id: interaction.guild.id,
@@ -467,8 +474,7 @@ command.execUsers = async (interaction, models, params, client) => {
                     .then((res) => console.log("Se ha guardado el nuevo documento para", interaction.guild.members.cache.find(x => x.id === res.user_id).user.tag))
                     .catch(err => console.log(err));
             })
-
-    });
+    }
 
     return interaction.editReply({ content: `${client.Emojis.Check} Sincronizado.`, allowedMentions: { parse: [] } })
 }
