@@ -30,8 +30,9 @@ class Handlers {
         if (this.interaction.customId?.toUpperCase().includes("TICKET")) this.ticket = new Ticket(this.interaction);
         if (this.interaction.customId?.toUpperCase().includes("SUGGESTION")) this.suggestion = new Suggestion(this.interaction);
         if (this.interaction.customId?.toUpperCase().includes("KILL") && this.#isDev()) {
+            await this.interaction.deferReply({ ephemeral: true }).catch(err => {});
             try {
-                await this.interaction.deferReply({ ephemeral: true })
+
                 const killInfo = this.interaction.customId.split("-");
                 const timestamp = Number(killInfo[1]);
                 const clientId = killInfo[2];
@@ -49,7 +50,7 @@ class Handlers {
             return;
         }
 
-        this.user = await Users.getOrCreate({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id })/*  */
+        this.user = await Users.getOrCreate({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id })
 
         switch (this.interaction.type) {
             case InteractionType.ApplicationCommand:

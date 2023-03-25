@@ -108,7 +108,7 @@ command.execute = async (interaction, models, params, client) => {
                         .defDesc(`<@&${Bases.owner.roles.levels.lvl1}>
 • Puedes colorear tu nombre en <#524647331551772672>.
 • Adjuntar archivos y links.
-• Usar Stickers y Emotes exteriores.
+• Usar Stickers exteriores.
 • Agregar reacciones a los mensajes.
 • Crear nuevos hilos.
         
