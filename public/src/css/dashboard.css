@@ -1,0 +1,346 @@
+dashboard {
+    display: flex;
+    height: calc(100vh - var(--navh));
+}
+
+/*
+    =============
+    = CONTAINER =
+    =============
+*/
+
+.container.sidebar {
+    justify-content: flex-start;
+
+    width: calc(100% - var(--sidebarw));
+    max-height: 100%;
+
+    overflow-y: scroll;
+}
+
+.container #contents {
+    display: flex;
+    flex-direction: column;
+
+    justify-content: flex-start;
+    align-items: center;
+
+    width: 90%;
+    /* height: calc(100% - var(--navh) - 2.5rem - 1.25rem*2); */
+
+    gap: .5em;
+    padding-bottom: calc(5rem);
+    
+    border-radius: 30px ;
+
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+#contents h1 {
+    margin: 0;
+}
+
+/*
+    ===========
+    = SIDEBAR =
+    ===========
+*/
+
+dashboard .sidebar-wrap {
+    position: relative;
+    height: calc(100%);
+    width: var(--sidebarw);
+
+    box-sizing: border-box;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    padding: .3em;
+ 
+    background-color: var(--bg-black);
+}
+
+dashboard #sidebar {
+    display: flex;
+    box-sizing: border-box;
+
+    flex-direction: column;
+
+    padding: .3em;
+    margin-bottom: 50px;
+}
+
+dashboard #copyright {
+    position: sticky;
+    background-color: inherit;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: inherit;
+    height: 50px;
+
+    bottom: -.3em;
+    left: -.3em;
+}
+
+dashboard #sidebar .title {
+    height: fit-content;
+    margin: .9rem auto .9rem .9rem;
+    font-size: 1.6em;
+}
+
+dashboard #sidebar a {
+    font-size: 1em;
+    border-radius: 12px;
+
+    min-height: 20px;
+    padding: 1em;
+    margin: .2em;
+
+    cursor: default;
+
+    transition: all .1s;
+}
+
+dashboard #sidebar a:hover {
+    background-color: var(--bg-darker);
+    cursor: pointer;
+    text-decoration: none;
+}
+
+dashboard #sidebar a#title:hover {
+    background-color: inherit;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+dashboard #sidebar a.active {
+    background-color: var(--bg-darker);
+}
+
+dashboard #sidebar a.active:hover {
+    background-color: var(--bg-color);
+}
+
+/*
+    ===========
+    = CONFIGS =
+    ===========
+*/
+
+.wrap {
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+}
+
+.wrap.join {
+    gap: 0;
+    width: 95%;
+
+    padding: 1em 0;
+
+    background-color: var(--bg-black);
+}
+
+.section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+
+    justify-content: flex-start;
+
+    border-radius: 15px;
+    gap: .5rem;
+}
+
+.section > * {
+    width: 100%;
+    height: auto;
+
+    align-items: center;
+}
+
+.section .item {
+    box-sizing: border-box;
+
+    padding: 2rem;
+    border-radius: 15px;
+
+    width: 95%;
+    background-color: var(--bg-black);
+}
+
+.wrap.join .item {
+    width: 100%;
+    border-radius: 0;
+}
+
+.item > div, .item > input {
+    margin-left: auto;
+}
+
+/*
+=========
+= BOOLS =
+=========
+*/
+
+.bool-selector {
+    display: flex;
+    max-height: 110px;
+
+    font-size: 40px;
+}
+
+/*
+===========
+= NUMBERS =
+===========
+*/
+
+.number-selector {
+    display: flex;
+    max-height: 110px;
+
+    font-size: 40px;
+}
+
+.item input {
+    width: 30%;
+    padding: .4rem;
+    
+    border: solid 2px var(--dark);
+    
+    border-radius: 10px;
+    
+    transition: all 50ms ease;
+}
+
+
+.item input:focus {
+    outline: solid 2px var(--primary);
+}
+
+/*
+=========
+= ROLES =
+=========
+*/
+
+.role-selector, .channel-selector {
+    display: flex;
+    min-height: 110px;
+
+    font-size: 40px;
+}
+
+.role-drop, .channel-drop, .category-drop {
+    position: relative;
+    
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: .05em;
+
+    cursor: pointer;
+
+    min-height: 1.1em;
+    width: 45%;
+    padding: .2em;
+    padding-right: calc(.2em + 30px);
+
+    box-sizing: border-box;
+
+    background-color: rgba(51, 51, 51, 0.5);
+    border-radius: 10px;
+}
+
+#plus-icon {
+    position: absolute;
+    height: fit-content !important;
+    top: 25%;
+    right: .3em;
+}
+
+.role-drop > div, .channel-drop > div, .category-drop > div {
+    user-select: none;
+    height: 80%;
+    font-size: .45em;
+    width: fit-content;
+
+    padding: .1em .5em;
+    border-radius: 10px;
+    
+    background-color: var(--semitrans);
+    border: solid 1px transparent;
+}
+
+.role-drop > div::before {
+    content: "@";
+    margin-right: .1em;
+}
+
+.channel-drop > div::before, .category-drop > div::before {
+    content: "#";
+    margin-right: .1em;
+}
+
+/*
+===========================
+= LISTAS (ROLES, CANALES) =
+===========================
+*/
+
+.item-list.active {
+    transform: translateY(0px);
+    visibility: visible;
+    opacity: 1;
+    filter: none;
+}
+
+.item-list {
+    filter: blur(2px);
+    visibility: hidden;
+    opacity: 0;
+    
+    position: absolute;
+    z-index: 10;
+    display: flex;
+
+    top: 100%;
+    transform: translateY(10px);
+    
+    flex-direction: column;
+    align-items: center;
+
+    background-color: var(--bg-black);
+    height: 400px;
+    width: 100%;
+
+    overflow-y: auto;
+
+    border-radius: 0 0 10px 10px;
+    transition: all 100ms ease;
+}
+
+.item-list li {
+    font-size: .5em;
+    
+    display: flex;
+    flex-direction: row;
+    
+    height: auto;
+    width: 90%;
+
+    padding: .5em;
+    border-radius: 10px;
+
+    transition: background 50ms ease;
+}
+
+.item-list li:hover {
+    background-color: var(--semitrans);
+}

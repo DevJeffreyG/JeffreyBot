@@ -1,0 +1,54 @@
+<%- include("loading") %>
+<%- include("favicon") %>
+    <%- include("nav") %>
+
+        <script>
+            const head = document.querySelector("head");
+            const homeLogo = document.querySelector("#logo");
+            const loginButton = document.querySelector("#login-btt");
+            const sessionManager = document.querySelector(".session-manager");
+            const jumpUp = document.querySelector("#jumpUp");
+
+            jumpUp?.addEventListener("click", () => {
+                window.location.replace("#")
+            })
+
+            homeLogo.addEventListener("click", (target) => {
+                window.location.href = "/"
+            })
+
+            window.addEventListener("scroll", revealWork);
+
+            loginButton?.addEventListener("click", () => { window.location.replace("/login") });
+
+            sessionManager?.addEventListener("click", () => {
+                const menu = document.querySelector("div#manager");
+                const arrow = document.querySelector("span#arrow");
+                arrow.innerText === "arrow_drop_down" ? arrow.innerText = "arrow_drop_up" : arrow.innerText = "arrow_drop_down";
+                menu.classList.toggle("active");
+            })
+
+            const logout = document.querySelector("#logout");
+            logout?.addEventListener("click", () => {
+                window.location.replace("/logout")
+            })
+
+            const viewport = document.createElement("meta")
+            viewport.name = "viewport"
+            viewport.content = "width=1024, initial-scale=1.0"
+            //viewport.content = "width=device-width, initial-scale=1.0"
+
+            head.appendChild(viewport);
+
+            function revealWork() {
+                var reveals = document.querySelectorAll(".reveal");
+                for (let i = 0; i < reveals.length; i++) {
+                    const revElement = reveals[i];
+                    let windowHeight = window.innerHeight;
+                    let revealTop = revElement.getBoundingClientRect().top;
+                    let revealPoint = 150;
+                    if (revealTop < windowHeight - revealPoint) revElement.classList.add("active")
+                    else if (!revElement.classList.contains("keep")) revElement.classList.remove("active");
+                }
+            }
+        </script>

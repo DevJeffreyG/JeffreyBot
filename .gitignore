@@ -1,3 +1,6 @@
+# batch
+admin.bat
+
 # Logs
 logs
 *.log
@@ -103,4 +106,8 @@ dist
 # TernJS port file
 .tern-port
 .env
+
+# Dev
+commands/layout.txt
+package-lock.json
 admin.bat

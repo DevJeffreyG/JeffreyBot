@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeffrey Bot - Colored Stealth</title>
+    <script src="https://cdn.jsdelivr.net/gh/dixonandmoe/rellax@master/rellax.min.js"></script>
+</head>
+
+<body class="dark">
+    <%- include("../../src/partials/index") %>
+
+        <h1 class="rellax-title">Colored Stealth</h1>
+        <div class="rellax-container first">
+            <img src="../../src/imgs/CSBanner.png"
+                alt="CS_Banner">
+        </div>
+
+        <div class="container bg after-rellax">
+            <div class="card reveal left keep">
+                <div id="logo">
+                    <%- include("../../src/svg/coloredstealth.svg") %>
+                </div>
+                <div class="description">
+                    <h1 id="title">¿Qué es Colored Stealth?</h1>
+                    <p id="content">
+                        Colored Stealth es el nombre en clave de un proyecto a manos de <a class="link-show"
+                            href="/creator/jeffreyg">JeffreyG</a>
+                        que tiene el fin de recopilar los productos/proyectos distribuidos por su creador al público.
+                    </p>
+                </div>
+            </div>
+            <div class="card dark reveal right keep">
+                <div class="description">
+                    <h1 id="title">Jeffrey Bot x Colored Stealth</h1>
+                    <p id="content">
+                        Jeffrey Bot inició como un proyecto personal de JeffreyG con el fin de administrar su servidor
+                        de Discord.
+                    </p>
+                    <p id="content">
+                        Luego con el tiempo se decidió que sería un buena idea iniciar el proceso para que Jeffrey Bot
+                        esté disponible al público en el futuro. Y así se volvió parte de 'Colored Stealth'.
+                    </p>
+                </div>
+                <div id="logo">
+                    <img src="/src/imgs/jb_logo.png" alt="Jeffrey Bot Logo">
+                </div>
+            </div>
+            <div class="card nologo reveal left keep">
+                <h1 id="title">¿Cuándo será público finalmente?</h1>
+                <p id="content">
+                    No está claro... y por eso, "Jeffrey Bot siempre está en desarrollo".
+                </p>
+                <p id="content">
+                    Se necesita reescribir casi toda la base de Jeffrey Bot pues, no fue pensado como un proyecto tan
+                    grande.
+                </p>
+            </div>
+        </div>
+        <div class="container after-rellax">
+            <div class="card reveal right keep dark">
+                <h1 id="title">¿Más información pronto...?
+            </div>
+        </div>
+
+        <script>
+            var rellax = new Rellax(".rellax-container", {
+                speed: -9
+            })
+        </script>
+
+        <%- include("../../src/partials/footer") %>
+</body>
+
+</html>

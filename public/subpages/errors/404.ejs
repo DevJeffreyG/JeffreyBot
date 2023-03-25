@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oops - Error 404</title>
+</head>
+
+<body>
+    <%- include("../../src/partials/favicon") %> 
+    <%- include("../../src/partials/styles") %>
+        <%- include("../../src/partials/loading") %>
+
+            <div class="container error">
+                <h1>404</h1>
+                <p>Sólo veo una pared delante, no pude encontrar esa URL.</p>
+                <p>Esta página sigue en desarrollo, puede que esté disponible después.</p>
+                <br>
+                <a class="link-show" href="/">Volver al Inicio</a>
+            </div>
+</body>
+
+</html>

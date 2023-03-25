@@ -1,0 +1,82 @@
+<link rel="stylesheet" href="../css/footer.css">
+<footer>
+    <div class="left">
+        <div id="brand">
+            <h2 class="no-margin">Jeffrey Bot</h2 class="no-margin">
+            <p>Tu bot de Discord multifuncional de confianza.</p>
+        </div>
+        <div id="copyright">
+            <label id="copyright"></label>
+        </div>
+    </div>
+    <div class="right">
+        <div>
+            <p class="title">Funciones</p>
+            <ul>
+                <li><a href="/functions/moderation">Moderación</a></li>
+                <li><a href="/functions/admin">Administración</a></li>
+                <li><a href="/functions/fun">Diversión</a></li>
+                <li><a href="/functions/social">Social</a></li>
+                <li><a href="/functions/economy">Economía</a></li>
+            </ul>
+        </div>
+        <div id="jeffreyg">
+            <p class="title">Desarrollo</p>
+            <ul>
+                <li><a href="/creator/">Acerca de Colored Stealth</a></li>
+                <li><a href="/creator/jeffreyg">Acerca de JeffreyG</a></li>
+                <li><a href="/creator/projects">Otros proyectos</a></li>
+            </ul>
+            <div id="social">
+                <a href="/creator/discord" draggable="false" target="_blank">
+                    <%- include("../svg/discord.svg") %>
+                </a>
+                <a href="/creator/youtube" draggable="false" target="_blank">
+                    <%- include("../svg/youtube.svg") %>
+                </a>
+                <a href="/creator/twitter" draggable="false" target="_blank">
+                    <%- include("../svg/twitter.svg") %>
+                </a>
+            </div>
+        </div>
+        <div id="jeffreybot">
+            <p class="title">Jeffrey Bot</p>
+            <ul>
+                <li><a href="/status" target="_blank">Status</a></li>
+                <li><a href="/#about">Acerca de Jeffrey Bot</a></li>
+                <li><a href="/changelog" target="">Cambios en el bot</a></li>
+                <li><a href="/tos" target="_blank">Condiciones de servicio</a></li>
+                <li><a href="/privacy" target="_blank">Política de privacidad</a></li>
+                <li><a href="/community" target="_blank">Aportes de la comunidad</a></li>
+            </ul>
+            <div id="social">
+                <!-- <a href="/support/discord" draggable="false" target="_blank">
+                    <%- include("../svg/discord.svg") %>
+                </a> -->
+                <a href="/support/github" draggable="false" target="_blank">
+                    <%- include("../svg/github.svg") %>
+                </a>
+            </div>
+        </div>
+        <div>
+            <span id="jumpUp" class="simplistic-button material-symbols-rounded">
+                keyboard_double_arrow_up
+            </span>
+        </div>
+    </div>
+</footer>
+
+<script>
+    const classed = document.querySelectorAll(".first");
+
+    if (classed.length > 0) {
+        const footer = document.querySelector("footer");
+        footer.classList.add("first");
+    }
+
+    const scrollTop = document.querySelector("#jumpUp");
+    scrollTop.onclick = () => { window.scroll({ top: 0, behavior: "smooth" }) }
+</script>
+
+<script src="../js/Switches.js"></script>
+<script src="../js/DropDowns.js"></script>

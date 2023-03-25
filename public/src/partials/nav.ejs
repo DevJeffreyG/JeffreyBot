@@ -1,0 +1,47 @@
+<%- include("./styles.ejs") %>
+
+<nav>
+    <div class="left" id="logo">
+        <img src="/src/imgs/nobg_jb_logo.png"
+            alt="Jeffrey Bot Logo" class="logo">
+        <p>Jeffrey Bot</p>
+    </div>
+    <div class="right">
+        <div id="account">
+            <% if(session.cookies.user) {%>
+                <script>
+                    const avatarUrl = "https://cdn.discordapp.com/avatars/<%-session.cookies.user.id%>/<%-session.cookies.user.avatar%>.png";
+                    const username = "<%-session.cookies.user.username%>";
+                </script>
+
+                <div class="session-manager">
+                    <img id="session-user" src="" alt="" />
+                    <span id="arrow" class="material-symbols-rounded">
+                        arrow_drop_down
+                    </span>
+                </div>
+                <script>
+                    const img = document.querySelector("img#session-user");
+                    img.src = avatarUrl;
+                    img.setAttribute("src", avatarUrl);
+                    img.setAttribute("alt", username);
+                </script>
+                <%} else {%>
+                    <div class="button" id="login-btt">Entra con Discord</div>
+                    <% } %>
+        </div>
+    </div>
+</nav>
+<% if(session.cookies.user) {%>
+<div id="manager" style="margin-top: var(--navh);">
+    <h1>Jeffrey Bot</h1>
+    <a href="/dashboard/">Dashboard</a>
+    <a href="/changelog">Últimos Cambios</a>
+    <% if(Bases.devIds.find(x => session.discord_user?.id)) {%>
+        <div class="line"></div>
+        <a href="/changelog?show-panel=true">Admin: Changelog</a>
+    <%}%>
+    <div class="line"></div>
+    <div id="logout">Cerrar sesión</div>
+</div>
+<% } %> 

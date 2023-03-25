@@ -1,0 +1,139 @@
+nav {
+    position: absolute;
+
+    display: flex;
+
+    width: 100%;
+    height: var(--navh);
+
+    background-color: var(--bg-darker);
+    
+    top: 0;
+    z-index: 1;
+}
+
+nav p {
+    line-height: var(--navh);
+    font-size: calc(var(--navh) - 50px);
+}
+
+nav * {
+    max-width: 100%;
+    max-height: var(--navh);
+}
+
+nav a {
+    color: var(--text-color);
+    text-decoration: none !important;
+}
+
+nav .left,
+nav .right {
+    display: flex;
+    cursor: pointer;
+
+    padding: 0 15px;
+
+    flex-direction: row;
+    align-items: center;
+
+    vertical-align: middle;
+}
+
+nav .right {
+    cursor: auto;
+    margin-left: auto;
+}
+
+nav .left *,
+nav .right * {
+    padding: 0 5px;
+
+    transition: .1s ease-in-out;
+}
+
+nav .left:hover * {
+    color: var(--primary) !important;
+}
+
+nav #session-user {
+
+    object-fit: cover;
+
+    overflow: hidden;
+    border-radius: 50%;
+
+    height: calc(var(--navh) / 2);
+    width: calc(var(--navh) / 2);
+
+}
+
+nav .session-manager {
+    display: flex;
+    align-items: center;
+}
+
+nav .session-manager:hover {
+    cursor: pointer;
+}
+
+div#manager {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-20px);
+
+    display: flex;
+    
+    flex-direction: column;
+    
+    background-color: var(--bg-black);
+    position: absolute;
+    right: 10px;
+
+    width: 200px;
+    height: 50vh;
+
+    padding: 10px;
+
+    border-radius: 15px;
+    box-shadow: -5px 5px 30px rgba(210, 255, 151, 0.05);
+
+    filter: blur(2px);
+    transition: all 0.2s ease-in-out;
+    z-index: -1;
+}
+
+div#manager.active {
+    opacity: 1;
+    filter: none;
+    visibility: visible;
+    transform: translateY(0px);
+    z-index: 5;
+}
+
+div#manager > * {
+    color: var(--semitrans);
+    text-decoration: none;
+    z-index: 3;
+    margin: 0 5px;
+    padding: 15px 10px;
+
+    border-radius: 10px;
+    transition: all 0.15s ease-in-out;
+}
+
+div#manager > *:hover {
+    cursor: pointer;
+    background-color: black;
+    color: var(--secondary);
+}
+
+div#manager h1 {
+    cursor: initial !important;
+    background-color: transparent !important;
+    font-size: 20px;
+
+    padding: 5px 10px;
+
+    color: var(--primary) !important;
+}
