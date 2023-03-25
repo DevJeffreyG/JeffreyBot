@@ -5,7 +5,7 @@ const ms = require("ms")
 
 const cookieParser = require('cookie-parser');
 const bodyParser = require("body-parser");
-const expressSession = require('express-session');
+const expressSession = require('cookie-session');
 
 // express
 const app = express();

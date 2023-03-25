@@ -120,7 +120,7 @@ class Commands {
 
                 if (!this.routes.find(x => x === data.route)) {
                     await GlobalDatas.removeGuildCommand(data.route);
-                    await this.rest.put(data.route, { body: [] })
+                    await this.rest.put(data.route, { body: [] }).catch(err => console.log(err));
                 }
             }
 
