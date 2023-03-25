@@ -9,6 +9,9 @@
     "server": "node server.js",
     "devcls": "nodemon ."
   },
+  "engines": {
+    "node": "18.2.0"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/DevJeffreyG/JeffreyBot.git"
