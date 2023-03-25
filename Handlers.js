@@ -32,6 +32,25 @@ class Handlers {
 
         if (this.interaction.customId?.toUpperCase().includes("TICKET")) this.ticket = new Ticket(this.interaction);
         if (this.interaction.customId?.toUpperCase().includes("SUGGESTION")) this.suggestion = new Suggestion(this.interaction);
+        if (this.interaction.customId?.toUpperCase().includes("KILL") && this.#isDev()) {
+            try {
+                await this.interaction.deferReply({ ephemeral: true })
+                const killInfo = this.interaction.customId.split("-");
+                const timestamp = Number(killInfo[1]);
+                const clientId = killInfo[2];
+                if (this.client.readyTimestamp === timestamp && this.client.user.id === clientId) {
+                    await this.interaction.editReply({ content: "Destruyendo cliente." })
+                    this.client.destroy();
+                    process.exit(0);
+                } else {
+                    this.interaction.deleteReply();
+                }
+            } catch (err) {
+                console.log(err)
+            }
+
+            return;
+        }
 
         switch (this.interaction.type) {
             case InteractionType.ApplicationCommand:
@@ -187,7 +206,7 @@ class Handlers {
 
                 const member = this.interaction.guild.members.cache.find(x => x.user.tag === tag);
 
-                if(member == this.interaction.member) {
+                if (member == this.interaction.member) {
                     return new ErrorEmbed(this.interaction, {
                         type: "execError",
                         data: {
