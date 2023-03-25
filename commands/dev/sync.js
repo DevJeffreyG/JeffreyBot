@@ -365,6 +365,7 @@ command.execUsers = async (interaction, models, params, client) => {
 
                 if (jeffros) {
                     finalQuery.economy.global.currency = jeffros.jeffros;
+                    finalQuery.data.counts.normal_currency = jeffros.jeffros;
                 }
 
                 if (darkstats) {
