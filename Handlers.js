@@ -21,6 +21,7 @@ class Handlers {
     }
 
     async #startHandler() {
+        if (!this.interaction.inGuild()) return interaction.reply({ ephemeral: true, embeds: [new ErrorEmbed().defDesc("No puedes usar esto en mensajes directos.")] });
         if (this.interaction.client.isOnLockdown && !this.#isDev()) try {
             return await this.interaction.reply({ ephemeral: true, embeds: [new ErrorEmbed().defDesc(`Jeffrey Bot está en bloqueado ahora mismo, lamentamos los inconvenientes.`)] });
         } catch (err) {
@@ -30,7 +31,7 @@ class Handlers {
         if (this.interaction.customId?.toUpperCase().includes("TICKET")) this.ticket = new Ticket(this.interaction);
         if (this.interaction.customId?.toUpperCase().includes("SUGGESTION")) this.suggestion = new Suggestion(this.interaction);
         if (this.interaction.customId?.toUpperCase().includes("KILL") && this.#isDev()) {
-            await this.interaction.deferReply({ ephemeral: true }).catch(err => {});
+            await this.interaction.deferReply({ ephemeral: true }).catch(err => { });
             try {
 
                 const killInfo = this.interaction.customId.split("-");
