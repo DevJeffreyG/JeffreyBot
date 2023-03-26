@@ -18,7 +18,7 @@ const { Users, Guilds, DarkShops, Shops, GlobalDatas } = require("mongoose").mod
 // JEFFREY BOT NOTIFICATIONS
 const { google } = require("googleapis");
 const { ApiClient } = require("@twurple/api");
-const { ClientCredentialsAuthProvider } = require("@twurple/auth");
+const { AppTokenAuthProvider  } = require("@twurple/auth");
 const { BoostObjetives, ChannelModules, LogReasons } = require("./Enums");
 const Log = require("./Log");
 const { Bases } = require("../resources");
@@ -968,7 +968,7 @@ const handleUploads = async function (client) {
       let saludo = GetRandomItem(saludos);
       const streamLink = `https://twitch.tv/${config.twitch_username}`;
 
-      const authProvider = new ClientCredentialsAuthProvider(process.env.TWITCH_CLIENT, process.env.TWITCH_SECRET);
+      const authProvider = new AppTokenAuthProvider (process.env.TWITCH_CLIENT, process.env.TWITCH_SECRET);
       const apiClient = new ApiClient({ authProvider });
 
       let streaming = await isStreaming(config.twitch_username);
