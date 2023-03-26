@@ -243,6 +243,7 @@ let resetWork = (log) => {
 }
 
 const FetchAuditLogs = async function (client, guild, types) {
+  if(!guild) return console.log("🔴 No se especificó guild")
   return new Promise(async (resolve, reject) => {
     let toReturn = [];
 

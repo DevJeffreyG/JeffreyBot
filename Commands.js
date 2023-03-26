@@ -93,9 +93,9 @@ class Commands {
                 if (this.rest.get(Routes.applicationCommands(process.env.CLIENT_ID)))
                     this.rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body: [] })
 
-                this.removeGuildCommands(true)
+                await this.removeGuildCommands(true)
             } else {
-                this.removeGuildCommands(false)
+                await this.removeGuildCommands(false)
             }
 
             console.log("⚪ ACTUALIZANDO COMANDOS")
