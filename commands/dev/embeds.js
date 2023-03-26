@@ -531,8 +531,6 @@ Hoy ${time()}, tenemos un nuevo/mejorado sistema de moderación gracias a Jeffre
 
 [ADMIN] \`/config\` • Configuración del bot: las reglas, el link a la Dashboard (donde se configura TODO el bot), cooldowns y modificadores.
 
-[ADMIN] \`/announce\` • Diferentes tipos de anuncios.
-
 [ADMIN] \`/lockdown\` • Bloquear el canal donde se ejecuta, evitando que los usuarios lo vean o puedan escribir.
 
 [ADMIN] \`/temp\` • Agregar roles temporales a un usuario: ya sean boosts, simplemente role temporal.`),
