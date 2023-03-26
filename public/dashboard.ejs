@@ -136,6 +136,7 @@
                                         var g = '<%- guildId %>';
 
                                         function initDashboard(data) {
+                                            console.log(data)
                                             if (data.guild.code) {
                                                 window.location.replace("/dashboard/")
                                                 window.open(`/invite/?guildId=${g}`, '_blank').focus();
@@ -155,7 +156,8 @@
                                         }
 
                                             <%
-                                            var cached = req.session.fetchedGuilds?.find(x => x.guild.id === guildId);
+                                            let cached = req.cookies[`fetchedGuild-${guildId}`];
+                                            let guildObj = session.guilds?.find(x => x.id == guildId);
                                             if(!cached) {
                                             %>
                                                 fetch("/api/get-guild", {
@@ -166,8 +168,16 @@
                                                     .then(obj => {
                                                         initDashboard(obj);
                                                     })
-                                            <%} else { %>
+                                            <%} else if(guildObj.channels) {
+                                                let channelsObj = guildObj?.channels;
+                                                cached = { guild: guildObj, channels: channelsObj }
+                                                //console.log(cached)
+                                            %>
                                                 initDashboard(<%- JSON.stringify(cached) %>);
+                                            <%} else {
+                                                res.clearCookie(`fetchedGuild-${guildId}`);
+                                            %>
+                                                window.location.replace("/logout")
                                             <%}%>
                                     </script>
                                 </dashboard>

@@ -1,11 +1,9 @@
 require("dotenv").config();
 const express = require("express");
 const path = require("path");
-const ms = require("ms")
 
 const cookieParser = require('cookie-parser');
 const bodyParser = require("body-parser");
-const expressSession = require('cookie-session');
 
 // express
 const app = express();
@@ -18,12 +16,6 @@ app.set("views", app.get("root"));
 app.use(express.static(app.get("root")));
 app.use(express.static(path.join(__dirname, "/public/src")));
 app.use(cookieParser());
-app.use(expressSession({
-  secret: process.env.TOKEN,
-  resave: false,
-  saveUninitialized: true,
-  cookie: { maxAge: ms("1d") }
-}));
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json());
 

@@ -2,7 +2,7 @@ const { Bases } = require("../src/resources/");
 const { Log, ChannelModules, LogReasons, Cooldowns, BoostTypes, BoostObjetives, Multipliers, RequirementType, ErrorEmbed, UpdateCommands, DeleteLink } = require("../src/utils");
 
 const { GlobalDatasWork } = require("../src/utils/");
-const { ChannelType, codeBlock, Client, Message } = require("discord.js");
+const { ChannelType, codeBlock, Client, Message, ActionRowBuilder, ButtonBuilder, ButtonStyle, time } = require("discord.js");
 const Chance = require("chance");
 
 const { Users, Guilds } = require("mongoose").models;
@@ -39,6 +39,21 @@ module.exports = async (client, message) => {
       client.isOnLockdown = false;
 
       message.reply("[DEV] Se desactivó el lockdown.")
+    }
+
+    if (message.content === "~ping") {
+      message.reply({
+        content: `**v${client.version}** ${time(client.readyAt)} (${time(client.readyAt, "R")}) Pong!`,
+        components: [
+          new ActionRowBuilder()
+            .setComponents(
+              new ButtonBuilder()
+                .setCustomId(`KILL-${client.readyTimestamp}-${client.user.id}`)
+                .setStyle(ButtonStyle.Danger)
+                .setLabel("Kill")
+            )
+        ]
+      })
     }
 
     return;

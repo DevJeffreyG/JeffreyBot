@@ -62,6 +62,10 @@ module.exports = (app) => {
     app.get("/logout", (req, res) => {
         res.clearCookie("user");
 
+        for (const key of Object.entries(req.cookies)) {
+            if (key.includes("fetchedGuild")) res.clearCookie(key);
+        }
+
         app.Session = new Session();
         session = app.Session;
         res.redirect("/")
@@ -155,10 +159,9 @@ module.exports = (app) => {
                 status_code: 400
             })
 
-        req.session.cookie.maxAge = ms("5m");
+        res.cookie(`fetchedGuild-${guild.id}`, guild.name, { maxAge: ms("5m") });
 
-        if (!Array.isArray(req.session.fetchedGuilds)) req.session.fetchedGuilds = [];
-        req.session.fetchedGuilds.push({ guild, channels });
+        session.addGuildInfo(guild, channels);
 
         res.send({ guild, channels });
     })

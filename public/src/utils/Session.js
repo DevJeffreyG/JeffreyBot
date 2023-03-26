@@ -24,6 +24,17 @@ class Session {
     setDashboard(dashboard) {
         this.dashboard = dashboard;
     }
+
+    addGuildInfo(guild, channels) {
+        let existing = this.guilds.findIndex(x => x.id == guild.id);
+
+        if (existing != -1) {
+            this.guilds[existing] = guild;
+            this.guilds[existing].channels = channels;
+        } else {
+            this.guilds.push({ guild, "guild.channels": channels });
+        }
+    }
 }
 
 module.exports = Session

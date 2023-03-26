@@ -1,6 +1,6 @@
 const { Bases } = require("../src/resources");
 
-const { Collection, Client, time, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const { Collection, Client, time } = require("discord.js");
 
 const Managers = require("../src/utils/Managers");
 const CustomEmojis = require("../src/utils/CustomEmojis");
@@ -106,15 +106,6 @@ module.exports = async (client) => {
                         ]
                     }
                 })
-            ],
-            components: [
-                new ActionRowBuilder()
-                    .setComponents(
-                        new ButtonBuilder()
-                            .setCustomId(`KILL-${client.readyTimestamp}-${client.user.id}`)
-                            .setStyle(ButtonStyle.Danger)
-                            .setLabel("Kill")
-                    )
             ]
         });
     console.log("=================== LOGS =======================")
