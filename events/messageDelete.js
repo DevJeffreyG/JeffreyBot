@@ -23,7 +23,7 @@ module.exports = async (client, message) => {
     })
   }
 
-  if (author) {
+  if (author && message.guild) {
 
     let user = await Users.getOrCreate({ user_id: author.id, guild_id: message.guild.id });
 

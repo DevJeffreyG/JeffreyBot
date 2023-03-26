@@ -1,6 +1,6 @@
 {
   "name": "jeffreybot",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "description": "A multi-function Discord.JS bot",
   "main": "index.js",
   "scripts": {
