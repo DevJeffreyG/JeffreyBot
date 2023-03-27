@@ -316,7 +316,6 @@ Si es eliminando, **sólo debe tener**: \`duracion\`.`
 
         // boost verification
         if (use.objetive === ItemObjetives.Boost) {
-            console.log(use.boost_info.type, use.boost_info.value, use.boost_info.objetive, use.item_info.duration)
             if (!use.boost_info.type && use.action == ItemActions.Add) return boostError.send();
             if (!use.boost_info.value && use.action == ItemActions.Add) return boostError.send();
             if (!use.boost_info.objetive && use.action == ItemActions.Add) return boostError.send();

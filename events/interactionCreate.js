@@ -10,7 +10,7 @@ const Handlers = require("../Handlers");
  * @returns 
  */
 module.exports = async (client, interaction) => {
-  if (!client.fetchedGuilds.find(x => x === interaction.guild.id) && interaction.inGuild()) {
+  if (!client.fetchedGuilds.find(x => x === interaction.guild?.id) && interaction.inGuild()) {
     await client.guilds.fetch(interaction.guild.id);
     await interaction.guild.channels.fetch();
     await interaction.guild.roles.fetch();

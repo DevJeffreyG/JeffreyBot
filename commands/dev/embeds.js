@@ -114,21 +114,21 @@ command.execute = async (interaction, models, params, client) => {
         
 <@&${Bases.owner.roles.levels.lvl10}>
 • Cambiarse el apodo.
-• Posibilidad de conseguir un 15% más de EXP y Jeffros.
+• Posibilidad de conseguir un **15%** más de **EXP** y **Jeffros**.
 • Compartir pantalla, o stremear un juego en los chat de voz.
 • Usar la Soundboard.
 
 <@&${Bases.owner.roles.levels.lvl20}>
-• 15% de descuento en la tienda (\`/shop\`).
+• **15% de descuento** en la tienda (\`/shop\`).
 
 <@&${Bases.owner.roles.levels.lvl30}>
 • Bono de **${Emojis.Jeffros}2.000**. Avísale al STAFF :)
 
 <@&${Bases.owner.roles.levels.lvl40}>
-• Cooldown para conseguir Jeffros y EXP reducido a la mitad. (\`30s\`)
+• Cooldown para conseguir **Jeffros** y **EXP** reducido a la mitad. (\`30s\`)
 
 <@&${Bases.owner.roles.levels.lvl50}>
-• Posibilidad de conseguir un 50% más de EXP y Jeffros.
+• Posibilidad de conseguir un **50%** más de **EXP** y **Jeffros**.
 • Colores nuevos desbloqueados en <#552580632266407957>.
 
 <@&${Bases.owner.roles.levels.lvl60}>
@@ -136,25 +136,25 @@ command.execute = async (interaction, models, params, client) => {
 • Bono de **${Emojis.Jeffros}5.000**. Avísale al STAFF :)
 
 <@&${Bases.owner.roles.levels.lvl70}>
-• Posibilidad de conseguir un 70% más de EXP y Jeffros.
-• Cooldown para conseguir Jeffros y EXP reducido a la cuarta parte. (\`15s\`).
+• Posibilidad de conseguir un **70%** más de **EXP** y **Jeffros**.
+• Cooldown para conseguir **Jeffros** y **EXP** reducido a la cuarta parte. (\`15s\`).
 
 <@&${Bases.owner.roles.levels.lvl80}>
-• Puedes crear invitaciones nuevas al server.
+• Puedes crear **invitaciones nuevas** al server.
+• **25% de descuento** en la tienda (\`/shop\`).
 • Bono de **${Emojis.Jeffros}6.000**. Avísale al STAFF :)
 
 <@&${Bases.owner.roles.levels.lvl90}>
 • Bono de **${Emojis.Jeffros}10.000**. Avísale al STAFF :)
-• Cooldown para conseguir Jeffros y EXP reducido a la octava parte. (\`7.5s\`).
+• Cooldown para conseguir **Jeffros** y **EXP** reducido a la octava parte. (\`7.5s\`).
 
 <@&${Bases.owner.roles.levels.lvl99}>
-• VIP Desbloqueado.
-• Acceso al servidor de pruebas de Jeffrey Bot.
+• **VIP** Desbloqueado.
 • Cooldown para usar el comando \`/coins\` reducido a la cuarta parte. (\`2.5m\`).
 
 <@&${Bases.owner.roles.levels.lvl100}>
 • Cuando se abra la beta de Jeffrey Bot público, serás uno de los tomados en cuenta.
-• Rol personalizado (nombre + color personalizado).`)
+• Rol personalizado **(nombre + color personalizado)**.`)
                         .defColor(Colores.verde)
                 ], files: [niveles.file]
             });
