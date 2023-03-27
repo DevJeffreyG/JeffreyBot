@@ -561,6 +561,7 @@ command.execShops = async (interaction, models, params, client) => {
     console.log("================")
     console.log("🖤 DARKSHOP ITEMS")
     for (const item of darkItems) {
+        if(!darkshop) break;
         const use = darkUses.find(x => x.itemID === item.id.toString());
 
         console.log("🌟 Item: %s", item)

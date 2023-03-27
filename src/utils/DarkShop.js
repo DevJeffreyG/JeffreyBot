@@ -519,6 +519,8 @@ class DarkShop {
             }
         }
 
+        if(!oldinflation) oldinflation = 0;
+
         return { inflation, oldinflation }
     }
 

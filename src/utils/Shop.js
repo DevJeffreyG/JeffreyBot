@@ -296,7 +296,7 @@ Si es eliminando, **sólo debe tener**: \`duracion\`.`
 
         const use = item.use_info;
 
-        use.action = params.accion.value;
+        use.action = Number(params.accion.value);
         use.objetive = Number(params.objetivo.value);
 
         use.given = (
@@ -310,12 +310,13 @@ Si es eliminando, **sólo debe tener**: \`duracion\`.`
         use.item_info.duration = (use.objetive == ItemObjetives.Role ||
             use.objetive == ItemObjetives.Boost) && params.duracion?.value ? ms(params.duracion?.value) : null
 
-        use.boost_info.type = ItemObjetives.Boost ? params.boosttype?.value : null
-        use.boost_info.value = ItemObjetives.Boost ? params.boostval?.value : null
-        use.boost_info.objetive = ItemObjetives.Boost ? params.boostobj?.value : null
+        use.boost_info.type = use.objetive === ItemObjetives.Boost ? params.boosttype?.value : null
+        use.boost_info.value = use.objetive === ItemObjetives.Boost ? params.boostval?.value : null
+        use.boost_info.objetive = use.objetive === ItemObjetives.Boost ? params.boostobj?.value : null
 
         // boost verification
         if (use.objetive === ItemObjetives.Boost) {
+            console.log(use.boost_info.type, use.boost_info.value, use.boost_info.objetive, use.item_info.duration)
             if (!use.boost_info.type && use.action == ItemActions.Add) return boostError.send();
             if (!use.boost_info.value && use.action == ItemActions.Add) return boostError.send();
             if (!use.boost_info.objetive && use.action == ItemActions.Add) return boostError.send();
@@ -417,7 +418,7 @@ Si es eliminando, **sólo debe tener**: \`duracion\`.`
         return this.interaction.editReply({ embeds: [new Embed({ type: "success" })] });
     }
 
-    async toggleItem(itemId, duration) {
+    async toggleItem(itemId, duration = "50y") {
         let item = this.shop.findItem(itemId, false)
 
         if (item.disabled) {
@@ -425,7 +426,7 @@ Si es eliminando, **sólo debe tener**: \`duracion\`.`
             item.disabled_until = null
         } else {
             item.disabled = true
-            item.disabled_until = moment().add(ms(duration), "ms");
+            item.disabled_until = moment().add(ms(duration ?? "50y"), "ms");
         }
 
         await this.shop.save();
