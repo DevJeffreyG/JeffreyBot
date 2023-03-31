@@ -1411,6 +1411,8 @@ const FindNewId = function (generalQuery, specificQuery, toCheck) {
   let idsNow = []; // ids en uso actualmente
   let newId = 1;
 
+  if(!Array.isArray(generalQuery)) generalQuery = [generalQuery];
+
   for (let i = 0; i < generalQuery.length; i++) {
     const document = generalQuery[i];
 

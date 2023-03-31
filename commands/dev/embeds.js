@@ -409,7 +409,7 @@ ${adminRoles.toJSON().join(", ")} • ${modRole}.
                 .defDesc(`\`I.\` Spam será: la promoción de ti mismo o de alguien más, sólo hazlo si este aporta a la conversación.\n
 \`II.\` Flood será: muchos mensajes, un solo mensaje que ocupe mucho espacio. **No es** flood enviar una imagen, vídeo o GIF. **Pero sí lo es** enviar muchos seguidos que __no aportan nada a la conversación__.\n
 \`III.\` NSFW (Not Safe for Work) será: gore, pornografía, contenido que pueda incomodar a los usuarios, o cualquier contenido que literalmente no pueda ser visto en el trabajo.\n
-\`IV.\` Mantener un ambiente agradable será: el buen ambiente de las conversaciones (ej: los temas), y uso del correcto uso de los canales. Por ejemplo, sería mal visto que los usuarios estén charlando y que empieces a usar muchos comandos en medio.`)
+\`IV.\` Mantener un ambiente agradable será: el buen ambiente de las conversaciones (ej: los temas), y del correcto uso de los canales. Por ejemplo, sería mal visto que los usuarios estén charlando y que empieces a usar muchos comandos en medio.`)
                 .defColor(Colores.verde);
             let regla2 = new Embed()
                 .defTitle(`Regla N°2: No molestes a los demás usuarios ni siquiera en los mensajes privados. No incomodes faltando el respeto hacia alguien que no tienes confianza.`)

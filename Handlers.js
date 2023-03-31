@@ -31,18 +31,16 @@ class Handlers {
         if (this.interaction.customId?.toUpperCase().includes("TICKET")) this.ticket = new Ticket(this.interaction);
         if (this.interaction.customId?.toUpperCase().includes("SUGGESTION")) this.suggestion = new Suggestion(this.interaction);
         if (this.interaction.customId?.toUpperCase().includes("KILL") && this.#isDev()) {
-            await this.interaction.deferReply({ ephemeral: true }).catch(err => { });
             try {
-
                 const killInfo = this.interaction.customId.split("-");
                 const timestamp = Number(killInfo[1]);
                 const clientId = killInfo[2];
                 if (this.client.readyTimestamp === timestamp && this.client.user.id === clientId) {
+                    await this.interaction.deferReply({ ephemeral: true }).catch(err => { });
+                    console.log("DESTRUYENDO! %s", timestamp)
                     await this.interaction.editReply({ content: "Destruyendo cliente." })
                     this.client.destroy();
                     process.exit(0);
-                } else {
-                    await this.interaction.deleteReply();
                 }
             } catch (err) {
                 console.log(err)

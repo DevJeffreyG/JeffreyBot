@@ -322,11 +322,13 @@ command.execReglas = async (interaction, models, doc, params) => {
     switch (subcommand) {
         case "add": {
             const newId = FindNewId(await Guilds.find(), "data.rules", "id");
+            const newPos = FindNewId(doc, "data.rules", "position");
             let confirm = [
                 `Nombre: **${nombre.value}**.`,
                 `Y como explicación sería:
 ${codeBlock("markdown", expl.value)}`,
-                `ID & Posición: \`${newId}\`.`
+                `ID: \`${newId}\`.`,
+                `Posición: \`${newPos}\`.`
             ]
 
             let confirmation = await Confirmation("Agregar regla", confirm, interaction);
@@ -335,7 +337,7 @@ ${codeBlock("markdown", expl.value)}`,
             doc.data.rules.push({
                 name: nombre.value,
                 expl: expl.value,
-                position: newId,
+                position: newPos,
                 id: newId
             });
 
