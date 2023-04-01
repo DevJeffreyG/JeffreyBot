@@ -174,7 +174,7 @@ command.execute = async (interaction, models, params, client) => {
                         .defColor(Colores.verdeclaro),
 
                     new Embed()
-                        .defTitle(`— Chapter One • Categoría que reúne toda la información básica del servidor`)
+                        .defTitle(`<#485190940638838804> • Categoría que reúne toda la información básica del servidor`)
                         .defDesc(`${rulesChannel} • Las reglas que debes seguir al usar el servidor.\n
 ${infoChannel} • Este canal, aquí se encuentra la información del servidor: roles, canales, niveles, etc.\n
 <#836397833531818004> • Aquí se explica cómo funciona la DarkShop, cómo usarla y demás.\n
@@ -182,7 +182,7 @@ ${faqChannel} • Aquí se responden algunas preguntas que se hacen los usuarios
                         .defColor(Colores.verde),
 
                     new Embed()
-                        .defTitle(`— Megaphone • Categoría que reúne todos los canales de anuncios.`)
+                        .defTitle(`<#1080191362047148173> • Categoría que reúne todos los canales de anuncios.`)
                         .defDesc(`${newsChannel} • Todos los anuncios hechos hacia todos en el servidor por parte del STAFF.\n
 ${dsNewsChannel} • Todas las interacciones y sucesos que se dan en la DarkShop.\n
 <#495063383528308747> • Si hay un evento en el servidor, todos sus anuncios se harán en este canal.\n
@@ -191,7 +191,7 @@ ${tvChannel} • Aquí se anuncia la actividad de Jeffrey en Twitch.`)
                         .defColor(Colores.verde),
 
                     new Embed()
-                        .defTitle(`— Community • Categoría que reúne todo lo que pasa en la comunidad.`)
+                        .defTitle(`<#1080191505744015360> • Categoría que reúne todo lo que pasa en la comunidad.`)
                         .defDesc(`${hallOfFameChannel} • Aquí se enviarán los mensajes que los usuarios premien con los “Awards”.\n
 ${sugsChannel} •  Aquí se enviarán las sugerencias que hagan los usuarios (\`/sug\`), donde los demás pueden reaccionar si están de acuerdo o no, y el STAFF darte una respuesta.\n
 <#548968993034338304> • Capturas de pantalla en su mayoría, momentos en el servidor que el STAFF quiere atesorar.\n
@@ -199,34 +199,32 @@ ${sugsChannel} •  Aquí se enviarán las sugerencias que hagan los usuarios (\
                         .defColor(Colores.verde),
 
                     new Embed()
-                        .defTitle(`— AutoService • Categoría que reúne los canales para personalizar tu usuario en el server.`)
+                        .defTitle(`<#1080191674619277353> • Categoría que reúne los canales para personalizar tu usuario en el server.`)
                         .defDesc(`<#1080197287977959486> • Un canal con la información que necesitas para definir tu cumpleaños en el servidor.\n
-<#473627930396852226> • Aquí podrás obtener los roles opcionales que desbloquean más canales según tus preferencias.\n
-<#595986219364646923> • Cuando eres VIP, podrás tener más roles opcionales como parte de tus beneficios.\n
 <#524647331551772672> • Escoge el color de cómo quieres que se vea tu nombre.\n
 <#552580632266407957> • Más colores, pero no públicos para todos.`)
                         .defColor(Colores.verde),
 
                     new Embed()
-                        .defTitle(`— Tickets • Categoría que reúne la funcionalidad de los tickets.`)
+                        .defTitle(`<#919010692940570704> • Categoría que reúne la funcionalidad de los tickets.`)
                         .defDesc(`<#1076559856930140202> • Toda la información extra que necesitas saber de los tickets.\n
 <#1076559878082011207> • Aquí puedes iniciar un nuevo ticket.`)
                         .defColor(Colores.verde),
 
                     new Embed()
-                        .defTitle(`— Surface • Categoría que reúne los canales generales del servidor.`)
+                        .defTitle(`<#447802508585336843> • Categoría que reúne los canales generales del servidor.`)
                         .defDesc(`<#${mainChannel}> • Canal principal. Puedes hablar aquí con los demás usuarios del servidor.\n
 <#485192397228081162> • Si crees que usarás muchos comandos, usa este canal para eso.\n
 <#485192438701359135> • Aquí puedes promocionarte, y hacer flood. Libérate.`)
                         .defColor(Colores.verde),
 
                     new Embed()
-                        .defTitle(`— Arcade`)
+                        .defTitle(`<#843166805492760606>`)
                         .defDesc(`— Categoría que reúne todos los bots de diversión y los separa por canales. Para ver información de cada canal, revisa su descripción.`)
                         .defColor(Colores.nocolor),
 
                     new Embed()
-                        .defTitle(`— Archives`)
+                        .defTitle(`<#1080193420603174992>`)
                         .defDesc(`— Categoría que reúne los archivados del servidor, canales en los que ya no se puede escribir, pero si ver sus recuerdos.`)
                         .defColor(Colores.nocolor),
                 ], files: [canales.file]
@@ -245,15 +243,10 @@ ${sugsChannel} •  Aquí se enviarán las sugerencias que hagan los usuarios (\
                         .defTitle(`Se obtienen sin esfuerzo alguno.`)
                         .defDesc(`<@&460966148704436235> • Todos aquellos que hayan aceptado las reglas tendrán este rol.\n
 <@&447821238631530498> • Todos los Bots del server tendrán este rol.\n
-<@&460242238555815946> • ¡Suscriptores que quieren recibir notificaciones de YouTube de Jeffrey en Discord!
-    ➟ Consíguelo en <#473627930396852226> (y otros más).\n
-<@&573308631018110986> • Personas dentro del server que quieren estar al tanto de las novedades de Jeffrey Bot.
-    ➟ Consíguelo en <#473627930396852226>.\n
-<@&779783625398812673> • Personas que tienen acceso a la DarkShop y desean recibir menciones de eventos de la inflación e información de la DarkShop en general.
-    ➟ Consíguelo en <#473627930396852226>.\n
-<@&461302293464219658> • Personas que se la pasan bien en el servidor y es bueno con los demás.\n
-<@&461553370277347328> • Persona de confianza para Jeffrey.\n
-<@&508385695929466881> • Persona que ha ayudado al desarrollo de Jeffrey Bot de alguna forma. 💚`)
+<@&460242238555815946> <@&1083884414938919012> <@&1083884260991172608> • ¡Suscriptores que quieren recibir notificaciones de **YouTube, Shorts o Twitch** de Jeffrey en Discord!\n
+<@&573308631018110986> • Personas dentro del server que quieren estar al tanto de las novedades de Jeffrey Bot.\n
+<@&779783625398812673> • Personas que tienen acceso a la DarkShop y desean recibir menciones de eventos de la inflación e información de la DarkShop en general.`)
+                        .defFooter({ text: `Algunos roles se consiguen en la sección "Canales y roles" arriba del todo.`, icon: client.EmojisObject.Error.url })
                         .defColor(Colores.verde),
                     new Embed()
                         .setImage(especiales.attachment)
@@ -262,9 +255,12 @@ ${sugsChannel} •  Aquí se enviarán las sugerencias que hagan los usuarios (\
                         .defTitle(`Tienen cierto impacto en el server. Es más difícil conseguirlos.`)
                         .defDesc(`<@&595022419123634228> • Alguien que está boosteando el servidor, aparecerá en la lista de miembros por encima de todos menos del STAFF. Tendrán VIP y consigo, sus beneficios mientras sigan boosteando.\n
 ${vipRole} • Usuario que ha ascendido en el servidor, tendrá colores exclusivos y acceso anticipado a las notificaciones de Jeffrey, etc.
-    ➟ Puede ser comprado en la tienda del servidor \`/shop\`.\n
-<@&461259197368107020> • Personas las cuales tienen algún tipo de relación IRL con Jeffrey o7\n
-<@&460586399981109278> • Gente activa con más de 5.000 mensajes en #chat.\n
+    ➟ Puede ser comprado en la tienda del servidor (\`/shop\`), antes de llegar al <@&${Bases.owner.roles.levels.lvl99}>.\n
+<@&461302293464219658> • Personas que se la pasan bien en el servidor y es bueno con los demás.\n
+<@&461553370277347328> • Persona de confianza para Jeffrey.\n
+<@&508385695929466881> • Persona que ha ayudado al desarrollo de Jeffrey Bot de alguna forma. 💚\n
+<@&461259197368107020> • Personas las cuales tienen algún tipo de relación IRL con Jeffrey :saluting_face:\n
+<@&460586399981109278> • Gente activa con más de 5.000 mensajes en <#447802627187539968>.\n
 <@&460517579941740544> • Personas que lleva mucho tiempo dentro del servidor, o está desde tiempos inmemorables, o simplemente estaba en el servidor viejo (...) este rol es muy extraño.\n`)
                         .defColor(Colores.verdeclaro)
                 ], files: [basicos.file, especiales.file]
@@ -304,8 +300,8 @@ ${vipRole} • Usuario que ha ascendido en el servidor, tendrá colores exclusiv
                         .defColor(Colores.verdeclaro),
                     new Embed()
                         .defTitle(`— ¿Qué son los Awards?`)
-                        .defDesc(`➟ Son los premios. Si un mensaje de gusta tanto que quieres darle un premio, puedes hacerlo haciendo click derecho > aplicaciones > Dar Award
-➟ En móvil es lo mismo, pero manteniendo presionado un mensaje.`)
+                        .defDesc(`➟ Si un mensaje de gusta tanto que quieres darle un premio, puedes hacerlo haciendo click derecho > aplicaciones > Dar Award
+➟ En teléfonos es lo mismo, pero manteniendo presionado un mensaje.`)
                         .defColor(Colores.verde),
                     new Embed()
                         .defDesc(`${silver} • Cuesta **${Emojis.Jeffros}100**, se envía el mensaje a ${hallOfFameChannel} y ya está.
@@ -608,8 +604,8 @@ Ahora, creo que es bastante obvio que lo único que Jeffrey espera de ti es:
                     new Embed()
                         .defTitle(`¿Cómo funciona la inflación?`)
                         .defDesc(`**— La inflación cambia __¡¡TODOS LOS DÍAS!!__**
-**—** Los domingos irá del -5% al 5%.
-**—** El resto de días puede oscilar del **-200%** al **200%**. La inflación cambiará dos veces al día entre semanas: usa \`/inflacion\` para saber cuando será el próximo cambio.
+**—** Los domingos será del **-5%** al **5%**.
+**—** El resto de días puede oscilar del **-200%** al **200%**. La inflación cambiará **dos veces al día** entre semanas: usa \`/inflacion\` para saber cuando será el próximo cambio.
 **—** Cuando la inflación está en su pico **${Emojis.DarkJeffros}1** = **${Emojis.Jeffros}600**, mientras que cuando toca fondo **${Emojis.DarkJeffros}1** = **${Emojis.Jeffros}66,67**.`)
                         .defFooter({ text: "Aunque hayan decimales, los cambios siempre se redondearán", icon: EmojisObject.Error.url })
                         .defColor(Colores.nocolor),
@@ -645,10 +641,10 @@ Ahora, creo que es bastante obvio que lo único que Jeffrey espera de ti es:
                         .defColor(Colores.verdejeffrey),
                     new Embed()
                         .defTitle("Bienvenid@ a los VIPs")
-                        .defDesc(`**—** Ahora que eres VIP, tienes algunos beneficios sobre los demás usuarios:\n
-<#552580632266407957> • Colores especiales, colores extras con los que puedes colorear tu nombre.\n
-<#595986219364646923> • Roles exclusivos de VIPs, ¡notificaciones de vídeos nuevos de Jeffrey antes de tiempo!\n
-🚀 • Obtienes 100% más de lo que obtendrías normalmente hablando en los canales.\n
+                        .defDesc(`**—** Ahora que eres **VIP**, tienes algunos beneficios **sobre los demás usuarios**:\n
+<#552580632266407957> • **Colores especiales, colores extras** con los que puedes colorear tu nombre.\n
+☄️ • **Roles exclusivos de VIPs** arriba del todo, en **Canales y roles**.\n
+🚀 • Obtienes **100% más** de lo que obtendrías normalmente hablando en los canales.\n
 https://discord.gg/${process.env.SUPPORT_INVITE} • Servidor **exclusivo** de pruebas de Jeffrey Bot.`)
                         .defColor(Colores.nocolor)
                 ], files: [info.file]
@@ -668,10 +664,10 @@ https://discord.gg/${process.env.SUPPORT_INVITE} • Servidor **exclusivo** de p
                         .defDesc(`**—** Los Tickets son la forma que tienes de comunicarte de forma privada con el STAFF.`),
                     new Embed()
                         .defTitle("Tipos de Tickets")
-                        .defDesc(`**Dudas / Problemas**: Si necesitas ayuda con algo del servidor y requieres de ayuda directa del STAFF usa este ticket.
-**Reportes**: Si tienes algún problema con alguien, crees que es un peligro para el servidor, usa este ticket.
-**Warn injusto**: Si crees que el warn que te dieron fue injustificado, usa este ticket.
-**Jeffrey Bot**: Reportar bugs, problemas con Jeffrey Bot, etc. Usa este ticket.`)
+                        .defDesc(`**• Dudas / Problemas**: Si necesitas ayuda con algo del servidor y requieres de ayuda directa del STAFF usa este ticket.\n
+**• Reportes**: Si tienes algún problema con alguien, crees que es un peligro para el servidor, usa este ticket.\n
+**• Warn injusto**: Si crees que el warn que te dieron fue injustificado, usa este ticket.\n
+**• Jeffrey Bot**: Reportar bugs, problemas con Jeffrey Bot, etc. Usa este ticket.`)
                         .defColor(Colores.nocolor)
                 ], files: [tickets.file]
             })
@@ -691,7 +687,8 @@ https://discord.gg/${process.env.SUPPORT_INVITE} • Servidor **exclusivo** de p
                 embeds: [
                     new Embed()
                         .defAuthor({ text: "NUEVO TICKET", title: true })
-                        .defDesc("¿Necesitas ayuda? ¿Alguna duda? ¿Warn injusto?\nPulsa el botón de aquí abajo para crear un ticket para hablar directamente con el STAFF.")
+                        .defDesc(`**—** ¿Necesitas ayuda? ¿Alguna duda? ¿Warn injusto?\n
+**•** Pulsa el botón de aquí abajo para crear un ticket para **hablar directamente con el STAFF**.`)
                         .defColor(Colores.verdeclaro)
                 ], components: [ticketRow]
             });
