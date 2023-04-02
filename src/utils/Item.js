@@ -486,7 +486,7 @@ class Item {
             return false;
         }
 
-        const willBenefit = await WillBenefit(this.member, [this.boost_objetive, BoostObjetives.All])
+        const willBenefit = await WillBenefit(this.member, [this.boost_objetive, "any"])
         if (willBenefit && (this.item.use_info.effect === ItemEffects.Positive || !this.isDarkShop)) {
             console.log("🔴 Se beneficiaría aún más")
             this.hasboost.send();
