@@ -395,7 +395,7 @@ GuildSchema.method("addAutoRole", async function (emoteInfo, role_id, id) {
 
 GuildSchema.method("workerAddAutoRole", function (message, reaction, user) {
     const Log = require('../../src/utils/Log');
-    
+
     const reactions = message.reactions.cache;
     const guild = message.guild;
     const reactor = guild.members.cache.get(user.id);
@@ -437,8 +437,10 @@ GuildSchema.method("workerAddAutoRole", function (message, reaction, user) {
                     let oldM = oldC.messages.cache.get(toggledAutorole.message_id);
 
                     const f = !isNaN(oldEmote) ? x => x.emoji.id === oldEmote : x => x.emoji.name === oldEmote;
-                    let reactions = oldM.reactions.cache.find(f);
-                    reactions.users.remove(user.id);
+                    if (oldM) {
+                        let reactions = oldM.reactions.cache.find(f);
+                        reactions.users.remove(user.id);
+                    }
 
                     continue oldReaction;
                 }
@@ -446,26 +448,26 @@ GuildSchema.method("workerAddAutoRole", function (message, reaction, user) {
         }
     }
 
-        reactor.roles.add(role)
+    reactor.roles.add(role)
         .then(() => console.log(`💬 Se agregó por AUTOROLES ${role.name} a ${reactor.user.tag}`))
         .catch(err => {
             return new Log()
-            .setGuild(guild)
-            .setTarget(ChannelModules.StaffLogs)
-            .setReason(LogReasons.Error)
-            .send({
-                embeds: [
-                    new ErrorEmbed()
-                        .defDesc(`Hubo un error agregando un ${hyperlink("AutoRole", message.url)} a ${user.tag}:${codeBlock("json", err)}`)
-                ]
-            });
+                .setGuild(guild)
+                .setTarget(ChannelModules.StaffLogs)
+                .setReason(LogReasons.Error)
+                .send({
+                    embeds: [
+                        new ErrorEmbed()
+                            .defDesc(`Hubo un error agregando un ${hyperlink("AutoRole", message.url)} a ${user.tag}:${codeBlock("json", err)}`)
+                    ]
+                });
         })
-    
+
 });
 
 GuildSchema.method("workerRemoveAutoRole", function (message, reaction, user) {
     const Log = require('../../src/utils/Log');
-    
+
     const reactions = message.reactions.cache;
     const guild = message.guild;
     const reactor = guild.members.cache.get(user.id);
@@ -482,19 +484,19 @@ GuildSchema.method("workerRemoveAutoRole", function (message, reaction, user) {
     const role = guild.roles.cache.find(x => x.id === autorole.role_id);
     if (reactions.find(x => x.emoji === reaction.emoji)) {
         reactor.roles.remove(role)
-        .then(() => console.log(`💬 Se eliminó por AUTOROLES ${role.name} a ${reactor.user.tag}`))
-        .catch(err => {
-            return new Log()
-            .setGuild(guild)
-            .setTarget(ChannelModules.StaffLogs)
-            .setReason(LogReasons.Error)
-            .send({
-                embeds: [
-                    new ErrorEmbed()
-                        .defDesc(`Hubo un error eliminando un ${hyperlink("AutoRole", message.url)} a ${user.tag}:${codeBlock("json", err)}`)
-                ]
-            });
-        })
+            .then(() => console.log(`💬 Se eliminó por AUTOROLES ${role.name} a ${reactor.user.tag}`))
+            .catch(err => {
+                return new Log()
+                    .setGuild(guild)
+                    .setTarget(ChannelModules.StaffLogs)
+                    .setReason(LogReasons.Error)
+                    .send({
+                        embeds: [
+                            new ErrorEmbed()
+                                .defDesc(`Hubo un error eliminando un ${hyperlink("AutoRole", message.url)} a ${user.tag}:${codeBlock("json", err)}`)
+                        ]
+                    });
+            })
     }
 });
 

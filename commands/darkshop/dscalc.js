@@ -3,7 +3,7 @@ const { Colores } = require("../../src/resources")
 
 const command = new Command({
     name: "dscalc",
-    desc: "Determina automáticamente cuantos dinero tienes invertido tienes actualmente",
+    desc: "Determina automáticamente cuánto dinero tienes invertido actualmente",
     category: Categories.DarkShop
 })
 

@@ -100,7 +100,7 @@ command.execute = async (interaction, models, params, client) => {
     } else {
         suggester = getAuthor(success);
 
-        user.economy.global.currency += successValue;
+        user.addCurrency(successValue);
         victim.economy.global.currency -= successValue;
 
         await victim.save();
