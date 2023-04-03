@@ -54,7 +54,7 @@ module.exports = async (client, message) => {
 
   filteredCollectors.forEach(async collector => {
     try {
-      await collector.manager.interaction.fetchReply();
+      await collector.manager.interaction.fetchReply().then(x => console.log(x));
     } catch (err) {
       console.log("🔴 Se eliminará el Collector porque ya no existe el mensaje")
       collector.manager.raw().stop(EndReasons.Deleted);

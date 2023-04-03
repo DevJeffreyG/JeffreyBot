@@ -26,14 +26,15 @@ class Collector {
     handle() {
         const active = this.client.activeCollectors.find(y => {
             let x = y.collector;
-            return x.channelId === this.collector.channelId && x.interactionType === this.collector.interactionType && y.userid === this.interaction.user.id
+            return y.commandName === this.interaction.commandName && x.channelId === this.collector.channelId && x.interactionType === this.collector.interactionType && y.userid === this.interaction.user.id
         });
         if (active && !this.evalOnActive) this.defaultOnActive(active);
         else if (active) {
+            console.log(active)
             this.evalOnActive();
         }
 
-        this.client.activeCollectors.push({ manager: this, collector: this.collector, userid: this.interaction.user.id, channelid: this.interaction.channel.id });
+        this.client.activeCollectors.push({ manager: this, collector: this.collector, userid: this.interaction.user.id, channelid: this.interaction.channel.id, commandName: this.interaction.commandName });
 
         this.collector.on("collect", async i => {
             try {

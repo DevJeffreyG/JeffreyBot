@@ -245,7 +245,7 @@ class Blackjack {
 
             switch (i.customId) {
                 case "hit":
-                    this.#hit();
+                    await this.#hit();
 
                     await this.#generateEmbed();
                     this.interaction.editReply({
@@ -254,10 +254,10 @@ class Blackjack {
                     })
                     break;
                 case "stand":
-                    this.#stand();
+                    await this.#stand();
                     break;
                 case "double":
-                    this.#double();
+                    await this.#double();
                     break;
                 case "split":
                     this.#split();
@@ -287,7 +287,7 @@ class Blackjack {
         })
     }
 
-    #hit() {
+    async #hit() {
         console.log("🟢 %s ha pedido otra carta", this.interaction.user.tag)
 
         let card = this.#borrowCards(1);
@@ -299,10 +299,10 @@ class Blackjack {
         console.log(this.player_hand) */
 
         if (valor > 21) return this.endgame(false, EndReasons.Over21);
-        if (valor === 21) return this.#stand();
+        if (valor === 21) return await this.#stand();
     }
 
-    #stand() {
+    async #stand() {
         console.log("🟢 %s se ha plantado", this.interaction.user.tag)
 
         let hit = true;
@@ -342,21 +342,21 @@ class Blackjack {
         let dealerVal = this.#checkValue(this.dealer_hand);
         let playerVal = this.#checkValue();
 
-        if (dealerVal > 21 && playerVal < 21) this.endgame(true)
-        else if (dealerVal > 21 && playerVal <= 21) this.endgame(true)
-        else if (playerVal > dealerVal && dealerVal < 21) this.endgame(true)
-        else if (playerVal === dealerVal) this.endgame(-1)
-        else this.endgame(false);
+        if (dealerVal > 21 && playerVal < 21) await this.endgame(true)
+        else if (dealerVal > 21 && playerVal <= 21) await this.endgame(true)
+        else if (playerVal > dealerVal && dealerVal < 21) await this.endgame(true)
+        else if (playerVal === dealerVal) await this.endgame(-1)
+        else await this.endgame(false);
     }
 
-    #double() {
+    async #double() {
         console.log("🟢 %s ha doblado decidió doblar su apuesta", this.interaction.user.tag);
 
         this.bet *= 2
 
         this.#hit();
 
-        if (!this.ended) this.#stand();
+        if (!this.ended) await this.#stand();
     }
 
     #split() {
@@ -492,8 +492,17 @@ class Blackjack {
                 await this.user.addCount("blackjack", 1, false);
             }
 
+        if (this.collector) this.collector.stop()
+        else {
+            if (reason === EndReasons.Blackjack) {
+                this.row.components.forEach(c => c.setDisabled());
+                this.supportRow.components.find(c => c.data.custom_id === "giveup").setDisabled();
+
+                this.interaction.editReply({ components: [this.row, this.supportRow] });
+            }
+        }
+
         await this.interaction.editReply({ embeds: [this.embed] })
-        this.collector.stop()
 
         if (save) await this.user.save();
         return this;
