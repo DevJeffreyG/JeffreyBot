@@ -949,17 +949,18 @@ const handleUploads = async function (client) {
           const itemId = item.id;
           const videoId = item.contentDetails.upload.videoId;
           const videoLink = `https://www.youtube.com/watch?v=${videoId}`;
+          const shortLink = `https://www.youtube.com/shorts/${videoId}`;
 
           if (noti.info.lastVideo === itemId) return; // ya se envió la noti
           else {
-            fetch(`https://www.youtube.com/shorts/${videoId}`).then(res => {
-              let isShort = res.status === 200 ? true : false;
+            fetch(shortLink).then(res => {
+              let isShort = res.url === shortLink ? true : false;
 
               changed = true;
               noti.info.lastVideo = itemId;
 
               if (isShort) {
-                bellytChannel.send({ content: `**¡NUEVO SHORT, ${ytShortsRole}!**\n\n${short_comentario}\n\n➟ https://www.youtube.com/shorts/${videoId}` });
+                bellytChannel.send({ content: `**¡NUEVO SHORT, ${ytShortsRole}!**\n\n${short_comentario}\n\n➟ ${shortLink}` });
               } else {
                 bellytChannel.send({ content: `**:fire::zap:️¡NUEVO VÍDEO, ${ytRole}!:zap:️:fire:**\n\n${comentario}\n\n➟ ${videoLink}` });
               }
