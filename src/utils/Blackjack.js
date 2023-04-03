@@ -248,7 +248,7 @@ class Blackjack {
                     await this.#hit();
 
                     await this.#generateEmbed();
-                    this.interaction.editReply({
+                    if(!this.ended) this.interaction.editReply({
                         embeds: [this.embed],
                         components: [this.row, this.supportRow]
                     })
@@ -298,7 +298,7 @@ class Blackjack {
         /* console.log("🟢 Las nuevas cartas son:")
         console.log(this.player_hand) */
 
-        if (valor > 21) return this.endgame(false, EndReasons.Over21);
+        if (valor > 21) return await this.endgame(false, EndReasons.Over21);
         if (valor === 21) return await this.#stand();
     }
 
