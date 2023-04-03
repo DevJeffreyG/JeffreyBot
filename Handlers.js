@@ -168,11 +168,6 @@ class Handlers {
                 break;
 
             case "bjHelp": {
-                let error = false;
-                try {
-                    await this.interaction.deferReply({ ephemeral: true });
-                } catch (err) { error = true }
-
                 const Emojis = this.interaction.client.Emojis;
 
                 let e = new Embed()
@@ -184,15 +179,19 @@ class Handlers {
                     .defField("Dividir", `**—** Sólo se puede usar cuando tus dos primeras cartas tienen el mismo número o letra: las separas en dos manos con la misma apuesta y se agrega una más a cada una.`)
                     .defField("Rendirse", `**—** Sólo te puedes rendir si has jugado menos de 2 veces por partida. Pierdes **lo que se pueda** de la mitad de tu apuesta.`)
                     .defField("Valores de las cartas", `**—** Los ases (${Emojis["1C"]}${Emojis["1H"]}${Emojis["1S"]}${Emojis["1D"]}) pueden valer **1** u **11** dependiendo si este hace que la mano se pase de **21**.
-    **—** Las cartas que tienen números tienen ese mismo valor.
-    **—** ${Emojis.JC}${Emojis.QC}${Emojis.KC} y demás valen **10**.`)
+**—** Las cartas que tienen números tienen ese mismo valor.
+**—** ${Emojis.JC}${Emojis.QC}${Emojis.KC} y demás valen **10**.`)
                     .defField("El turno de Jeffrey Bot", `**—** Cuando sea el momento de jugar de Jeffrey Bot tomará una carta hasta que llegue a 17 o más.`)
                     .defField("Resultados", `**—** Si las primeras cartas que te tocan dan como resultado **21** ganas automáticamente, sin excepciones.
-    **—** Si te pasas de **21** pierdes, sin excepciones.
-    **—** Si el valor de la mano de Jeffrey Bot es la misma que la tuya se termina el juego como empate y no pierdes nada de lo apostado.
-    **—** Si el valor de la mano de Jeffrey Bot es 21 o menor y mayor que la tuya, pierdes.`);
+**—** Si te pasas de **21** pierdes, sin excepciones.
+**—** Si el valor de la mano de Jeffrey Bot es la misma que la tuya se termina el juego como empate y no pierdes nada de lo apostado.
+**—** Si el valor de la mano de Jeffrey Bot es 21 o menor y mayor que la tuya, pierdes.`);
 
-                return error ? this.interaction.followUp({ embeds: [e], ephemeral: true }) : this.interaction.editReply({ embeds: [e] })
+                try {
+                    return await this.interaction.reply({ embeds: [e], ephemeral: true });
+                } catch (err) {
+                    console.log(err)
+                }
             }
             case "rememberBirthday": {
                 if (!this.interaction.deferred) await this.interaction.deferReply({ ephemeral: true }).catch(err => console.log(err));

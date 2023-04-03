@@ -492,17 +492,13 @@ class Blackjack {
                 await this.user.addCount("blackjack", 1, false);
             }
 
-        await this.interaction.editReply({ embeds: [this.embed] })
-        if (this.collector) this.collector.stop()
-        else {
-            if (reason === EndReasons.Blackjack) {
-                this.row.components.forEach(c => c.setDisabled());
-                this.supportRow.components.find(c => c.data.custom_id === "giveup").setDisabled();
-
-                this.interaction.editReply({ components: [this.row, this.supportRow] });
-            }
+        if (reason === EndReasons.Blackjack) {
+            this.row.components.forEach(c => c.setDisabled());
+            this.supportRow.components.find(c => c.data.custom_id === "giveup").setDisabled();
         }
 
+        await this.interaction.editReply({ embeds: [this.embed], components: [this.row, this.supportRow] })
+        if (this.collector) this.collector.stop()
 
         if (save) await this.user.save();
         return this;

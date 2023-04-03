@@ -118,7 +118,7 @@ command.execute = async (interaction, models, params, client) => {
         });
 
     return interaction.editReply({ embeds: [embed] });
-    r
+    
     function getAuthor(obj) {
         if (!obj.author) return false;
 
