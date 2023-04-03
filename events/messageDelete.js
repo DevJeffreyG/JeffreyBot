@@ -49,7 +49,7 @@ module.exports = async (client, message) => {
   }
 
   let filteredCollectors = client.activeCollectors.filter(x => {
-    return x.channelid == message.channel.id
+    return x.channelid === message.channel.id
   });
 
   filteredCollectors.forEach(async collector => {

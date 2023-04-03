@@ -18,7 +18,7 @@ const { Users, Guilds, DarkShops, Shops, GlobalDatas } = require("mongoose").mod
 // JEFFREY BOT NOTIFICATIONS
 const { google } = require("googleapis");
 const { ApiClient } = require("@twurple/api");
-const { AppTokenAuthProvider  } = require("@twurple/auth");
+const { AppTokenAuthProvider } = require("@twurple/auth");
 const { BoostObjetives, ChannelModules, LogReasons } = require("./Enums");
 const Log = require("./Log");
 const { Bases } = require("../resources");
@@ -243,7 +243,7 @@ let resetWork = (log) => {
 }
 
 const FetchAuditLogs = async function (client, guild, types) {
-  if(!guild) return console.log("🔴 No se especificó guild")
+  if (!guild) return console.log("🔴 No se especificó guild")
   return new Promise(async (resolve, reject) => {
     let toReturn = [];
 
@@ -683,7 +683,11 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
             .setStyle(ButtonStyle.Link)
         )
 
-      msg.edit({ components: [row] });
+      try {
+        msg.edit({ components: [row] });
+      } catch(err) {
+        console.log(err)
+      }
 
       polls[i].deleteOne();
     }
@@ -969,7 +973,7 @@ const handleUploads = async function (client) {
       let saludo = GetRandomItem(saludos);
       const streamLink = `https://twitch.tv/${config.twitch_username}`;
 
-      const authProvider = new AppTokenAuthProvider (process.env.TWITCH_CLIENT, process.env.TWITCH_SECRET);
+      const authProvider = new AppTokenAuthProvider(process.env.TWITCH_CLIENT, process.env.TWITCH_SECRET);
       const apiClient = new ApiClient({ authProvider });
 
       let streaming = await isStreaming(config.twitch_username);
@@ -1049,7 +1053,7 @@ const isBannedFrom = async function (interaction, query) {
       response = null;
   }
 
-  if (response == null) return `COULD'T DETERMINE BANNED FROM '${query.toUpperCase()}'`;
+  if (response === null) return `COULD'T DETERMINE BANNED FROM '${query.toUpperCase()}'`;
   else
     return response;
 }
@@ -1113,7 +1117,7 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
     }
 
     const collector = new Collector(interaction, { filter, max: 1 }).onEnd((collected, reason) => {
-      if (collected.size == 0) {
+      if (collected.size === 0) {
         interaction.editReply({ embeds: [cancelEmbed], components: [] })
         return resolve(false)
       }
@@ -1334,7 +1338,7 @@ const DaysUntilToday = async function (date) {
 }
 
 /**
- * 
+ * @deprecated
  * @param {*} user The user's document inside the database
  * @param {*} item The item's object inside the database
  * @param {Boolean} [returnString=false] The function returns an String with the original price and the new one?
@@ -1394,6 +1398,42 @@ const DeterminePrice = async function (user, item, returnString, isDarkShop) {
 }
 
 /**
+ * Balance de precios para todos los usuarios
+ * @param {Guild} guild 
+ */
+const FindAverage = async function (guild) {
+  //const doc_guild = await Guilds.getOrCreate(guild.id);
+  const users = await Users.find({ guild_id: guild.id });
+  const darkshop = new DarkShop(guild);
+
+  let top = [];
+
+  for await (const user of users) {
+    // agregar la cantidad de darkcurrency
+    const member = guild.members.cache.get(user.user_id);
+
+    if (member && !member.user.bot) {
+      let darkcurrency = user.economy.dark?.currency ?? 0;
+      let darkcurrencyValue = await darkshop.equals(null, darkcurrency) ?? 0;
+      let finalQuantity = Math.round(darkcurrencyValue + user.economy.global.currency);
+
+      if (finalQuantity > 0 || (finalQuantity === 0 && !top.find(x => x.money === 0))) top.push({
+        member,
+        money: finalQuantity
+      })
+    }
+  }
+
+  let sum = 0;
+
+  top.forEach(info => {
+    sum += info.money;
+  })
+
+  return sum / top.length;
+}
+
+/**
  * 
  * @param {*} generalQuery Mongoose documents
  * @param {String} specificQuery The data inside that document 
@@ -1411,7 +1451,7 @@ const FindNewId = function (generalQuery, specificQuery, toCheck) {
   let idsNow = []; // ids en uso actualmente
   let newId = 1;
 
-  if(!Array.isArray(generalQuery)) generalQuery = [generalQuery];
+  if (!Array.isArray(generalQuery)) generalQuery = [generalQuery];
 
   for (let i = 0; i < generalQuery.length; i++) {
     const document = generalQuery[i];
@@ -1712,5 +1752,6 @@ module.exports = {
   UpdateObj,
   ProgressBar,
   UpdateCommands,
-  DeleteLink
+  DeleteLink,
+  FindAverage
 }

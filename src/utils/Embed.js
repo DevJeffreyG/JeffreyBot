@@ -54,7 +54,7 @@ class Embed extends Discord.EmbedBuilder {
     }
 
     defFields(fields = [{ up, down, inline }]) {
-        if (fields.length == 0) return console.error("⚠️ BAD ARRAY OF FIELDS");
+        if (fields.length === 0) return console.error("⚠️ BAD ARRAY OF FIELDS");
         this.data.fields = [];
 
         fields.forEach(field => {
@@ -125,7 +125,7 @@ class Embed extends Discord.EmbedBuilder {
                     const sep = data?.separator ?? "▸"
                     const desc = data.desc;
 
-                    if (typeof desc == "string") this.defDesc(`${sep} ${desc}.`)
+                    if (typeof desc === "string") this.defDesc(`${sep} ${desc}.`)
                     else {
                         let t = ""
                         desc.forEach(item => {
@@ -173,8 +173,8 @@ class Embed extends Discord.EmbedBuilder {
                 }
 
                 let expDiff = user.getNextLevelExp() - user.getNextLevelExp(user.economy.global.level - 1);
-                const expToGet = expDiff == 0 ? user.getNextLevelExp() : expDiff; // la exp que hay que ganar en este nivel
-                const expSoFar = expDiff == 0 ? user.economy.global.exp : user.economy.global.exp - user.getNextLevelExp(user.economy.global.level - 1); // la exp que se lleva hasta ahora
+                const expToGet = expDiff === 0 ? user.getNextLevelExp() : expDiff; // la exp que hay que ganar en este nivel
+                const expSoFar = expDiff === 0 ? user.economy.global.exp : user.economy.global.exp - user.getNextLevelExp(user.economy.global.level - 1); // la exp que se lleva hasta ahora
 
                 this.defAuthor({ text: `Estadísticas de ${member.user.tag}`, icon: member.guild.iconURL({ dynamic: true }) })
                     .defDesc(`**— Nivel**: ${curLvl}

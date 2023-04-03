@@ -4,7 +4,7 @@ module.exports = async (client, messages) => {
     let filteredCollectors = [];
     messages.forEach(message => {
         filteredCollectors = filteredCollectors.concat(client.activeCollectors.filter(x => {
-            return x.channelid == message.channel.id && !filteredCollectors.find(y => x == y);
+            return x.channelid === message.channel.id && !filteredCollectors.find(y => x === y);
         }));
     });
 

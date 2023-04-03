@@ -192,7 +192,7 @@ class Ticket {
             if (!warnCollector) return this.interaction.editReply({ content: "Cancelado.", components: [] });
 
             await warnCollector.deferUpdate();
-            if (warnCollector.values[0] == "cancel") return warnCollector.editReply({ content: "Cancelado.", components: [] });
+            if (warnCollector.values[0] === "cancel") return warnCollector.editReply({ content: "Cancelado.", components: [] });
             let selectedWarn = this.user.warns.find(x => x.id === Number(warnCollector.values[0]));
 
             if (!selectedWarn.proof) return warnCollector.editReply({ content: `⚠️ El **warn**" con ID: \`${selectedWarn.id}\`, lo tienes gracias a que **alguien te lo dio por la DarkShop**, no podemos ayudarte.\n\n**Si crees que se trata de un error, contacta directamente al STAFF.**`, embeds: [], components: [] });
@@ -232,7 +232,7 @@ class Ticket {
 
             await softwarnCollector.deferUpdate();
 
-            if (softwarnCollector.values[0] == "cancel") return softwarnCollector.editReply({ content: "Cancelado.", components: [] });
+            if (softwarnCollector.values[0] === "cancel") return softwarnCollector.editReply({ content: "Cancelado.", components: [] });
 
             let selectedSoftWarn = user.softwarns.find(x => x.id === Number(softwarnCollector.values[0]));
 

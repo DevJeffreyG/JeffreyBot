@@ -19,7 +19,7 @@ command.execute = async (interaction, models, params, client) => {
 
     let answer = Math.floor(Math.random() * replies.length);
     const { pregunta } = params;
-    if (pregunta.value.length == 0) return interaction.editReply({ content: "No hubo una pregunta..." })
+    if (pregunta.value.length === 0) return interaction.editReply({ content: "No hubo una pregunta..." })
 
     let pregEmbed = new Embed()
         .defColor(Colores.verde)

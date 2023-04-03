@@ -1,6 +1,5 @@
-const { DarkShops } = require("mongoose").models;
 const { CommandInteraction } = require("discord.js");
-const { Colores, Emojis } = require("../resources");
+const { Colores } = require("../resources");
 const DarkShop = require("./DarkShop");
 const InteractivePages = require("./InteractivePages");
 
@@ -80,7 +79,7 @@ class Top {
                     alltime: user.data.counts.normal_currency
                 }
 
-                this.#res.push(toPush)
+                if(toPush.total > 0) this.#res.push(toPush);
             }
         }
 

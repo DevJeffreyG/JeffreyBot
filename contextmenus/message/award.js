@@ -153,7 +153,7 @@ command.execute = async (interaction, models, params, client) => {
     hallEmbed.defFooter({ text: `Mensaje por ${message.author.tag}・Premio de Tier ${tierNum} por ${interaction.user === message.author ? `ellos mismos, ${interaction.user.tag}` : interaction.user.tag}`, icon: message.author.displayAvatarURL({ dynamic: true }) });
 
     // Pagar
-    if (user.user_id == message_user.user_id) {
+    if (user.user_id === message_user.user_id) {
         user.addCurrency((-price) + gift);
     } else {
         user.economy.global.currency -= price;

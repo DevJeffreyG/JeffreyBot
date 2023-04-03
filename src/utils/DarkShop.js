@@ -316,7 +316,7 @@ class DarkShop {
 
             for (let i = 0; i < duration; i++) {
                 let decVal;
-                if (!minRemoval || !maxRemoval || minRemoval == 0 || maxRemoval == 0) thr = true;
+                if (!minRemoval || !maxRemoval || minRemoval === 0 || maxRemoval === 0) thr = true;
 
                 const removalThr = !thr ? new Chance().floating({ min: minRemoval, max: maxRemoval, fixed: 2 }) : null;
 
@@ -348,7 +348,7 @@ class DarkShop {
 
             for (let i = 0; i < duration; i++) {
                 let incVal;
-                if (!minAdd || !maxAdd || minAdd == 0 || maxAdd == 0) thr = true;
+                if (!minAdd || !maxAdd || minAdd === 0 || maxAdd === 0) thr = true;
 
                 const addThr = !thr ? new Chance().floating({ min: minAdd, max: maxAdd, fixed: 2 }) : null;
 

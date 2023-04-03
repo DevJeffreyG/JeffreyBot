@@ -33,7 +33,7 @@ class HumanMs {
         this.returnable = [];
         this.prep.forEach(r => {
             if (r.value < 0) r.value += 60;
-            if (r.value == 1) this.returnable.push(`1 ${r.key}`)
+            if (r.value === 1) this.returnable.push(`1 ${r.key}`)
             else this.returnable.push(`${r.value} ${r.key}s`)
         });
     }

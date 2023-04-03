@@ -26,7 +26,7 @@ class Session {
     }
 
     addGuildInfo(guild, channels) {
-        let existing = this.guilds.findIndex(x => x.id == guild.id);
+        let existing = this.guilds.findIndex(x => x.id === guild.id);
 
         if (existing != -1) {
             this.guilds[existing] = guild;

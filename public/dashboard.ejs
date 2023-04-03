@@ -157,7 +157,7 @@
 
                                             <%
                                             let cached = req.cookies[`fetchedGuild-${guildId}`];
-                                            let guildObj = session.guilds?.find(x => x.id == guildId);
+                                            let guildObj = session.guilds?.find(x => x.id === guildId);
                                             if(!cached) {
                                             %>
                                                 fetch("/api/get-guild", {

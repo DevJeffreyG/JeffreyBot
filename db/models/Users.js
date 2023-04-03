@@ -287,10 +287,10 @@ Schema.method("cooldown", async function (modulo, options = { force_cooldown: nu
 
     const cooldown = force_cooldown ?? (modifier ? baseCooldown * modifier?.multiplier : baseCooldown);
 
-    if (check == undefined) check = true;
-    if (save == undefined) save = true;
-    if (precise == undefined) precise = false;
-    if (log == undefined) log = false;
+    if (check === undefined) check = true;
+    if (save === undefined) save = true;
+    if (precise === undefined) precise = false;
+    if (log === undefined) log = false;
 
     if (!info && log) console.log("⚠️ Se está usando el cooldown %s", precise ? cooldown : new HumanMs(cooldown).human)
 
@@ -346,7 +346,7 @@ Schema.method("isBirthday", function () {
     let actualDay = now.getDate();
     let actualMonth = now.getMonth();
 
-    if ((actualDay == bdDay) && (actualMonth == bdMonth) && this.data.birthday.locked) return true;
+    if ((actualDay === bdDay) && (actualMonth === bdMonth) && this.data.birthday.locked) return true;
     return false;
 })
 

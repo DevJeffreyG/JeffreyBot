@@ -17,7 +17,7 @@ const CronJob = require("cron").CronJob;
  * @param {Client} client 
  */
 module.exports = async (client) => {
-    client.isOnLockdown = process.env.INIT_LOCKDOWN == "FALSE" ? false : true;
+    client.isOnLockdown = process.env.INIT_LOCKDOWN === "FALSE" ? false : true;
     client.invites = [];
     client.logsFetched = {};
     client.activeCollectors = [];

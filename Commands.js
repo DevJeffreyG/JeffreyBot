@@ -11,7 +11,7 @@ class Commands {
         this.commands = [];
         this.ids = [];
 
-        this.route = process.env.DEV == "TRUE"
+        this.route = process.env.DEV === "TRUE"
             ? Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.DEV_GUILD)
             : Routes.applicationCommands(process.env.CLIENT_ID)
 
@@ -85,7 +85,7 @@ class Commands {
             console.log("⚪ Actualizando comandos para la ruta:", this.route)
             console.log("MODO DE INICIACIÓN EN DEVELOPER:", process.env.DEV);
 
-            if (process.env.DEV == "TRUE") {
+            if (process.env.DEV === "TRUE") {
                 console.log("🔄 Creando Dev Guild 🔄")
                 await GlobalDatas.newGuildCommands({ route: this.route, dev: true })
 
@@ -142,7 +142,7 @@ class Commands {
     /* async #addPerms(guild, client) {
         const { Guilds } = models
         let actualPermissions;
-        const commandList = process.env.DEV == "TRUE" ? guild.commands.cache : client.application.commands.cache
+        const commandList = process.env.DEV === "TRUE" ? guild.commands.cache : client.application.commands.cache
         
         commandList.forEach(async comm => {
             //console.log(comm)
@@ -176,7 +176,7 @@ class Commands {
 
             await guild.roles.fetch();
 
-            if(query.length == 0){ // buscar roles con "Admin", si no hay, owner.
+            if(query.length === 0){ // buscar roles con "Admin", si no hay, owner.
                 let adminroles = guild.roles.cache.filter(x => x.permissions.has("ADMINISTRATOR") && !x.tags).toJSON();
 
                 if(adminroles.length === 0) permissions.push({ // no hay roles con Admin

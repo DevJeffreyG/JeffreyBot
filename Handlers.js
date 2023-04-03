@@ -204,7 +204,7 @@ class Handlers {
 
                 const member = this.interaction.guild.members.cache.find(x => x.user.tag === tag);
 
-                if (member == this.interaction.member) {
+                if (member === this.interaction.member) {
                     return new ErrorEmbed(this.interaction, {
                         type: "execError",
                         data: {

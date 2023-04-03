@@ -327,7 +327,7 @@ command.execute = async (interaction, models, params, client) => {
         case "list": {
             let notExists = new ErrorEmbed(interaction, { type: "doesntExist", data: { action: "autoroles list", missing: "AutoRoles" } });
             const autoroles = doc.data.autoroles;
-            if (autoroles.length == 0)
+            if (autoroles.length === 0)
                 return notExists.send();
 
             let listEmbed = new Embed()
@@ -352,7 +352,7 @@ command.execute = async (interaction, models, params, client) => {
         case "sync": {
             let syncQuery = doc.data.autoroles;
             let notExists = new ErrorEmbed(interaction, { type: "doesntExist", data: { action: "autoroles sync", missing: "AutoRoles" } });
-            if (syncQuery?.length == 0) return notExists.send();
+            if (syncQuery?.length === 0) return notExists.send();
 
             for (let i = 0; i < syncQuery.length; i++) {
                 const autorole = syncQuery[i];

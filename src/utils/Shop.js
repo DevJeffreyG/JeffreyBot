@@ -5,7 +5,7 @@ const ms = require("ms");
 const models = require('mongoose').models
 
 const { Users, Shops, Guilds } = models;
-const { FindNewId, Confirmation } = require("./functions")
+const { FindNewId, Confirmation, FindAverage } = require("./functions")
 const InteractivePages = require("./InteractivePages");
 const { Colores, Emojis } = require("../resources");
 const ErrorEmbed = require("./ErrorEmbed");
@@ -300,15 +300,15 @@ Si es eliminando, **sólo debe tener**: \`duracion\`.`
         use.objetive = Number(params.objetivo.value);
 
         use.given = (
-            use.objetive == ItemObjetives.Role ||
-            use.objetive == ItemObjetives.Boost
+            use.objetive === ItemObjetives.Role ||
+            use.objetive === ItemObjetives.Boost
         ) ? params.role?.value : params.cantidad?.value;
 
         use.effect = this.isDarkShop ? params.efecto?.value : null;
 
         use.item_info.type = params.especial?.value ?? use.item_info.type;
-        use.item_info.duration = (use.objetive == ItemObjetives.Role ||
-            use.objetive == ItemObjetives.Boost) && params.duracion?.value ? ms(params.duracion?.value) : null
+        use.item_info.duration = (use.objetive === ItemObjetives.Role ||
+            use.objetive === ItemObjetives.Boost) && params.duracion?.value ? ms(params.duracion?.value) : null
 
         use.boost_info.type = use.objetive === ItemObjetives.Boost ? params.boosttype?.value : null
         use.boost_info.value = use.objetive === ItemObjetives.Boost ? params.boostval?.value : null
@@ -316,9 +316,9 @@ Si es eliminando, **sólo debe tener**: \`duracion\`.`
 
         // boost verification
         if (use.objetive === ItemObjetives.Boost) {
-            if (!use.boost_info.type && use.action == ItemActions.Add) return boostError.send();
-            if (!use.boost_info.value && use.action == ItemActions.Add) return boostError.send();
-            if (!use.boost_info.objetive && use.action == ItemActions.Add) return boostError.send();
+            if (!use.boost_info.type && use.action === ItemActions.Add) return boostError.send();
+            if (!use.boost_info.value && use.action === ItemActions.Add) return boostError.send();
+            if (!use.boost_info.objetive && use.action === ItemActions.Add) return boostError.send();
             if (!use.item_info.duration) return boostError.send();
         }
 
@@ -435,6 +435,7 @@ Si es eliminando, **sólo debe tener**: \`duracion\`.`
 
     async #fetchDoc() {
         this.doc = await Guilds.getOrCreate(this.interaction.guild.id);
+        this.average = await FindAverage(this.interaction.guild);
 
         if (this.isDarkShop) {
             this.darkshop = new DarkShop(this.interaction.guild);
@@ -520,10 +521,10 @@ Si es eliminando, **sólo debe tener**: \`duracion\`.`
             this.shop.items.forEach(i => media += i.price);
             media /= this.shop.items.length;
 
-            let multidiff = Math.floor((this.isDarkShop ? Math.round(this.darkshopEquivalency) + this.user.economy.global.currency : this.user.economy.global.currency) / media);
+            let multidiff = Math.floor(this.average / media);
 
-            //console.log("🏳️ El promedio de precios es %s", media)
-            //console.log("🏳️ dinero/media = %s", multidiff)
+            console.log("🏳️ El promedio de precios es %s", media)
+            console.log("🏳️ dinero/media = %s", multidiff)
 
             if (multidiff > 100) {
                 let fix = this.isDarkShop ? multidiff / 20 : multidiff * 20;

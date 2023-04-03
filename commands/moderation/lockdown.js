@@ -76,7 +76,7 @@ command.execute = async (interaction, models, params, client) => {
         })
 
         let admitedRoles = guild.roles.cache.filter(x => {
-            if (staffRoles.find(y => x.id == y) || adminRoles.find(y => x.id === y)) return x;
+            if (staffRoles.find(y => x.id === y) || adminRoles.find(y => x.id === y)) return x;
         })
 
         roles.forEach(role => {

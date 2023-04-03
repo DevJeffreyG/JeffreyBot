@@ -196,7 +196,7 @@ command.execGuilds = async (interaction, models, params, client) => {
             message_id: arole.messageID,
             emote: arole.emoji,
             role_id: arole.roleID,
-            toggle_group: arole.toggleGroup == "0" ? null : arole.toggleGroup,
+            toggle_group: arole.toggleGroup === "0" ? null : arole.toggleGroup,
             id: newId
         })
 

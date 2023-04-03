@@ -234,8 +234,8 @@ command.execute = async (interaction, models, params, client) => {
 
             if (
                 (!nivel && !role) ||
-                (Number(tipo.value) == RequirementType.Level && !nivel) ||
-                (Number(tipo.value) == RequirementType.Role && !role)
+                (Number(tipo.value) === RequirementType.Level && !nivel) ||
+                (Number(tipo.value) === RequirementType.Role && !role)
             ) return new ErrorEmbed(interaction, {
                 type: "badParams",
                 data: {
@@ -529,8 +529,8 @@ command.execCooldowns = async (interaction, models, doc, params) => {
             // modulo, tipo, modificador, nivel, role
             if (
                 (!nivel && !role) ||
-                (Number(tipo.value) == RequirementType.Level && !nivel) ||
-                (Number(tipo.value) == RequirementType.Role && !role)
+                (Number(tipo.value) === RequirementType.Level && !nivel) ||
+                (Number(tipo.value) === RequirementType.Role && !role)
             ) return new ErrorEmbed(interaction, {
                 type: "badParams",
                 data: {

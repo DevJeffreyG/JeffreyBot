@@ -9,7 +9,7 @@ module.exports = async (client, oldMessage, message) => {
   if (!member) return;
 
   if (member.user.bot) return;
-  if (message.channel.type == "DM") return;
+  if (message.channel.type === "DM") return;
   if (member.user.bot) return;
   if (message.content.startsWith(prefix)) return;
 

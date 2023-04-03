@@ -89,7 +89,10 @@ command.execute = async (interaction, models, params, client) => {
 
     if (!robSuccess) {
         // Fallido
-        if (failedValue <= 0) return new ErrorEmbed(interaction).defDesc("**No tenías suficiente dinero como para hacer eso.**").send();
+        if (failedValue <= 0) {
+            await user.save();
+            return new ErrorEmbed(interaction).defDesc("**No tenías suficiente dinero como para hacer eso.**").send();
+        }
         suggester = getAuthor(fail);
 
         user.economy.global.currency -= failedValue;

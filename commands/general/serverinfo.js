@@ -30,7 +30,7 @@ command.execute = async (interaction, models, params, client) => {
     adminroles.forEach(roleId => {
         let r = interaction.guild.roles.cache.find(x => x.id === roleId);
         if (!r) return;
-        if (r.members.map(user => user).length == 0) return;
+        if (r.members.map(user => user).length === 0) return;
 
         admins += r.members.map(user => user);
         serverembed.defField(`— @${r.name}`, admins);
@@ -40,7 +40,7 @@ command.execute = async (interaction, models, params, client) => {
     staffroles.forEach(roleId => {
         let r = interaction.guild.roles.cache.find(x => x.id === roleId);
         if (!r) return;
-        if (r.members.map(user => user).length == 0) return;
+        if (r.members.map(user => user).length === 0) return;
 
         mods += r.members.map(user => user);
         serverembed.defField(`— @${r.name}`, mods);

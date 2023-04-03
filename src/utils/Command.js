@@ -185,9 +185,9 @@ class Command {
     }
 
     #setPerms() {
-        if (this.category == Categories.Administration) this.data.setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
-        if (this.category == Categories.Staff || this.category == Categories.Moderation) this.data.setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages);
-        if (this.category == Categories.Developer) {
+        if (this.category === Categories.Administration) this.data.setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
+        if (this.category === Categories.Staff || this.category === Categories.Moderation) this.data.setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages);
+        if (this.category === Categories.Developer) {
             this.data.setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
             this.dev = true;
         }

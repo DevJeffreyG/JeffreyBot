@@ -709,7 +709,7 @@ function generateCode() {
     for (let i = 0; i < 19; i++) {
         // ABCD-EFGH-IJKL-MNOP
         // 0123 5678 9101112 14151617
-        if (generatedCode.length == 4 || generatedCode.length == 9 || generatedCode.length == 14) generatedCode += "-"
+        if (generatedCode.length === 4 || generatedCode.length === 9 || generatedCode.length === 14) generatedCode += "-"
         else {
             generatedCode += chr.charAt(Math.floor(Math.random() * chr.length));
         }

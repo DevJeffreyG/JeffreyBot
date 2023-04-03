@@ -330,13 +330,13 @@ GuildSchema.method("manageLevelUp", async function (level, userDoc) {
 
 GuildSchema.method("getCooldown", function (modulo, toString = false) {
     const base = this.settings.cooldowns[modulo];
-    const modifiers = this.settings.modifiers.filter(x => x.module == modulo && x.type == ModifierType.Cooldown);
+    const modifiers = this.settings.modifiers.filter(x => x.module === modulo && x.type === ModifierType.Cooldown);
 
     return toString ? { base, modifiers } : { base: ms(base), modifiers };
 })
 
 GuildSchema.method("getMultipliers", function (modulo) {
-    return this.settings.modifiers.filter(x => x.module == modulo && x.type === ModifierType.Multiplier);
+    return this.settings.modifiers.filter(x => x.module === modulo && x.type === ModifierType.Multiplier);
 })
 
 GuildSchema.method("getVaultCode", function (code) {
