@@ -492,6 +492,7 @@ class Blackjack {
                 await this.user.addCount("blackjack", 1, false);
             }
 
+        await this.interaction.editReply({ embeds: [this.embed] })
         if (this.collector) this.collector.stop()
         else {
             if (reason === EndReasons.Blackjack) {
@@ -502,7 +503,6 @@ class Blackjack {
             }
         }
 
-        await this.interaction.editReply({ embeds: [this.embed] })
 
         if (save) await this.user.save();
         return this;

@@ -93,6 +93,7 @@ command.execute = async (interaction, models, params, client) => {
         suggester = getAuthor(fail);
 
         user.economy.global.currency -= failedValue;
+        await user.save();
 
         embed = new Embed()
             .defColor(Colores.rojo)
@@ -116,7 +117,6 @@ command.execute = async (interaction, models, params, client) => {
             icon: typeof suggester != "boolean" ? suggester.displayAvatarURL({ dynamic: true }) : interaction.guild.iconURL({ dynamic: true })
         });
 
-    await user.save();
     return interaction.editReply({ embeds: [embed] });
     r
     function getAuthor(obj) {
