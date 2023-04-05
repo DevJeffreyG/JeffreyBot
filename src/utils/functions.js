@@ -685,7 +685,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
 
       try {
         msg.edit({ components: [row] });
-      } catch(err) {
+      } catch (err) {
         console.log(err)
       }
 
@@ -953,8 +953,8 @@ const handleUploads = async function (client) {
 
           if (noti.info.lastVideo === itemId) return; // ya se envió la noti
           else {
-            fetch(shortLink).then(res => {
-              let isShort = res.url === shortLink ? true : false;
+            fetch(shortLink, { redirect: "manual" }).then(res => {
+              let isShort = res.headers.get("Location") === videoLink ? false : true;
 
               changed = true;
               noti.info.lastVideo = itemId;
