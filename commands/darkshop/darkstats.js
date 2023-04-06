@@ -21,7 +21,7 @@ command.execute = async (interaction, models, params, client) => {
     const { usuario } = params;
     const { DarkCurrency } = client.getCustomEmojis(interaction.guild.id);
 
-    const guild = client.guilds.cache.find(x => x.id === interaction.guildId);
+    const guild = interaction.guild;
 
     // codigo
     const member = usuario?.member ?? interaction.member;
@@ -37,7 +37,7 @@ command.execute = async (interaction, models, params, client) => {
         .defAuthor({ text: `Estadísiticas del usuario N°${member.id}`, icon: client.EmojisObject.DarkShop.url })
         .defDesc(`**— ${DarkCurrency.name}**: **${DarkCurrency}${currency}**.
 **— Precisión**: ${ProgressBar(accuracy, { max: 80 })} ${inlineCode(accuracy + "%")}
-**— Items**: Usa \`/dsinventory\`.`)
+**— Items**: Usa ${client.mentionCommand("dsinventory")}.`)
         .defThumbnail(member.displayAvatarURL({ dynamic: true }))
         .defColor(Colores.negro);
 

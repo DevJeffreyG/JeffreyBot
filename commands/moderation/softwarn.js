@@ -37,7 +37,7 @@ command.execute = async (interaction, models, params, client) => {
         type: "errorFetch",
         data: {
             type: "reglas",
-            guide: `NO se encontraron reglas agregadas a la base de datos, usa \`/config\` para ello.`
+            guide: `NO se encontraron reglas agregadas a la base de datos, usa ${client.mentionCommand("config reglas")} para ello.`
         }
     })
 
@@ -118,7 +118,7 @@ command.execute = async (interaction, models, params, client) => {
             data: {
                 action: "add softwarn",
                 existing: `El softwarn para la regla N°${ruleNo}`,
-                context: "los softwarns del usuario, **procede con `/warn`**"
+                context: `los softwarns del usuario, **procede con ${client.mentionCommand("warn")}**`
             }
         })
 

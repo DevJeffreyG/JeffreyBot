@@ -487,7 +487,7 @@ ${codeBlock("markdown", expl.value)}`,
             let embed = new Embed()
                 .defAuthor({ text: "Lista de reglas", title: true })
                 .defFooter({ text: `Hay ${doc.data.rules.length} regla(s)`, icon: interaction.guild.iconURL({ dynamic: true }) })
-                .defDesc("Usa los comandos en `/config reglas` para administrar lo que ves aquí.")
+                .defDesc(`Usa los comandos en ${client.mentionCommand("config reglas")} para administrar lo que ves aquí.`)
                 .defColor(Colores.verde);
 
             for (const rule of doc.data.rules) {

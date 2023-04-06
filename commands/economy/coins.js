@@ -1,4 +1,4 @@
-const { Command, Categories, Embed, BoostTypes, BoostObjetives, Cooldowns, GetRandomItem } = require("../../src/utils");
+const { Command, Categories, Embed, BoostTypes, BoostObjetives, Cooldowns, GetRandomItem, FindAverage } = require("../../src/utils");
 
 const { Config, Responses } = require("../../src/resources/");
 
@@ -9,7 +9,7 @@ const command = new Command({
 });
 
 command.execute = async (interaction, models, params, client) => {
-    const { Users } = models
+    const { Users, Guilds } = models
     const { Currency } = client.getCustomEmojis(interaction.guild.id);
 
     await interaction.deferReply();
@@ -23,6 +23,8 @@ command.execute = async (interaction, models, params, client) => {
         guild_id: guild.id
     })
 
+    const doc = await Guilds.getOrCreate(interaction.guild.id)
+
     let cooldownInfo = await user.cooldown(Cooldowns.Coins, { check: false, info: true })
 
     let cool = await user.cooldown(Cooldowns.Coins, { save: false })
@@ -32,7 +34,12 @@ command.execute = async (interaction, models, params, client) => {
         ]
     });
 
-    let money = Math.ceil(Math.random() * 20);
+    let average = await FindAverage(guild);
+    let maximum = 20;
+
+    if (doc.settings.functions["adjust_coins"] && (average - maximum) > 10000) maximum = average*0.1;
+
+    let money = Math.ceil(Math.random() * maximum);
     let tmoney = `**${Currency}${money.toLocaleString('es-CO')}**`;
     let randommember = guild.members.cache.random();
 

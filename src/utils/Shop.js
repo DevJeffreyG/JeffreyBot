@@ -71,9 +71,9 @@ class Shop {
         if (!this.doc) await this.#fetchDoc();
 
         if (this.isDarkShop)
-            this.base.description = `**—** Bienvenid@ a la DarkShop. Para comprar items usa \`/dsbuy #\`.\n**—** Tienes **${this.Emojis.DarkCurrency}${this.user.economy.dark.currency.toLocaleString("es-CO")}**`;
+            this.base.description = `**—** Bienvenid@ a la DarkShop. Para comprar items usa ${this.client.mentionCommand("dsbuy")}.\n**—** Tienes **${this.Emojis.DarkCurrency}${this.user.economy.dark.currency.toLocaleString("es-CO")}**`;
         else
-            this.base.description = `**—** ¡Bienvenid@ a la tienda! para comprar items usa \`/buy #\`.\n**—** Tienes **${this.Emojis.Currency}${this.user.economy.global.currency.toLocaleString("es-CO")}**`;
+            this.base.description = `**—** ¡Bienvenid@ a la tienda! para comprar items usa ${this.client.mentionCommand("buy")}.\n**—** Tienes **${this.Emojis.Currency}${this.user.economy.global.currency.toLocaleString("es-CO")}**`;
 
         this.shop.items.forEach((item, index) => {
             var price = this.determinePrice(this.user, item, true);
@@ -238,7 +238,7 @@ class Shop {
             data: {
                 desc: [
                     "Se ha agregado el item",
-                    `No será visible hasta que se agregue el uso: \`/admin items use-info\``,
+                    `No será visible hasta que se agregue el uso: ${client.mentionCommand("admin items use-info")}`,
                     `ID: \`${newId}\``
                 ]
             }
@@ -371,7 +371,7 @@ Si es eliminando, **sólo debe tener**: \`duracion\`.`
 
         if (!this.doc) await this.#fetchDoc();
 
-        this.base.description = `**—** [NOT READY]: Falta el uso (\`/admin items use-info\`)\n**—** [HIDDEN]: Item desactivado (\`/admin items toggle\`)\n**—** [✅]: El item es visible y usable para cualquiera.`;
+        this.base.description = `**—** [NOT READY]: Falta el uso (${this.client.mentionCommand("admin items use-info")})\n**—** [HIDDEN]: Item desactivado (${this.client.mentionCommand("admin items toggle")})\n**—** [✅]: El item es visible y usable para cualquiera.`;
         this.base.addon = this.base.addon.substring(0, 2) + "{publicInfo} — ID: " + this.base.addon.substring(2, this.base.addon.length - 4) + `\n+ ${this.isDarkShop ? this.Emojis.DarkCurrency : this.Emojis.Currency}{item_interest}** al comprarlo.\n\n`
 
         this.shop.items.forEach((item, index) => {
@@ -380,7 +380,7 @@ Si es eliminando, **sólo debe tener**: \`duracion\`.`
             else if (item.disabled) publicInfo = "[HIDDEN] ";
             else publicInfo = "[✅] ";
 
-            var price = this.determinePrice(this.user, item, true, false);
+            var price = this.determinePrice(this.user, item, true, false, true);
 
             this.items.set(item.id, {
                 item_name: item.name,
@@ -504,8 +504,12 @@ Si es eliminando, **sólo debe tener**: \`duracion\`.`
         }
     }
 
-    determinePrice(user, item, toString = false) {
+    determinePrice(user, item, toString = false, noAdjustments = false) {
         const originalPrice = item.price;
+
+        if(noAdjustments) {
+            return toString ? originalPrice.toLocaleString("es-CO") : originalPrice;
+        }
 
         // nuevo precio a partir de interés
         const interest = item.interest;

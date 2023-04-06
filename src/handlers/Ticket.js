@@ -200,7 +200,7 @@ class Ticket {
             toConfirm = [
                 `Crear un nuevo ticket para el warn con id \`${selectedWarn.id}\`.`,
                 `Regla N°${doc.data.rules.find(x => x.id === selectedWarn.rule_id).position} (${doc.data.rules.find(x => x.id === selectedWarn.rule_id).name}).`,
-                `Las pruebas dadas por el STAFF las puedes ver usando \`/warns id: ${selectedWarn.id}\`.`
+                `Las pruebas dadas por el STAFF las puedes ver usando ${client.mentionCommand("warns")}.`
             ];
             general.defAuthor({ text: `Apelar WARN.`, title: true });
             giveDetails = "Explica ¿por qué crees que la acción de moderación es injusta o debe quitarse?"
@@ -241,7 +241,7 @@ class Ticket {
             toConfirm = [
                 `Crear un nuevo ticket para el softwarn con id \`${selectedSoftWarn.id}\`.`,
                 `Regla N°${selectedSoftWarn.rule_id} (${Reglas[selectedSoftWarn.rule_id].regla}).`,
-                `Las pruebas dadas por el STAFF las puedes ver usando \`/warns id: ${selectedSoftWarn.id}\`.`
+                `Las pruebas dadas por el STAFF las puedes ver usando ${client.mentionCommand("warns")}.`
             ];
             general.defAuthor({ text: `Apelar SOFTWARN.`, title: true });
             giveDetails = "Explica ¿por qué crees que la acción de moderación es injusta o debe quitarse?"

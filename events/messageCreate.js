@@ -125,7 +125,7 @@ module.exports = async (client, message) => {
           .send({
             embeds: [
               new ErrorEmbed()
-                .defDesc(`No se ha podido agregar ni EXP ni ${client.getCustomEmojis(guild.id).Currency.name}. Mínimos y máximos deben ser menores y mayores los unos con los otros. \`/config dashboard\`.`)
+                .defDesc(`No se ha podido agregar ni EXP ni ${client.getCustomEmojis(guild.id).Currency.name}. Mínimos y máximos deben ser menores y mayores los unos con los otros. ${client.mentionCommand("config dashboard")}.`)
                 .defFields([
                   { up: "Min Money", down: String(minMoney), inline: true },
                   { up: "Max Money", down: String(maxMoney), inline: true },

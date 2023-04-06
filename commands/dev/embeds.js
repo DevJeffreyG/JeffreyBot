@@ -177,6 +177,7 @@ command.execute = async (interaction, models, params, client) => {
                         .defTitle(`<#485190940638838804> • Categoría que reúne toda la información básica del servidor`)
                         .defDesc(`${rulesChannel} • Las reglas que debes seguir al usar el servidor.\n
 ${infoChannel} • Este canal, aquí se encuentra la información del servidor: roles, canales, niveles, etc.\n
+<id:customize> • Personaliza los canales que quieres ver, y los roles que desees.\n
 <#836397833531818004> • Aquí se explica cómo funciona la DarkShop, cómo usarla y demás.\n
 ${faqChannel} • Aquí se responden algunas preguntas que se hacen los usuarios al estar en el servidor.`)
                         .defColor(Colores.verde),
@@ -245,8 +246,8 @@ ${sugsChannel} •  Aquí se enviarán las sugerencias que hagan los usuarios (\
 <@&447821238631530498> • Todos los Bots del server tendrán este rol.\n
 <@&460242238555815946> <@&1083884414938919012> <@&1083884260991172608> • ¡Suscriptores que quieren recibir notificaciones de **YouTube, Shorts o Twitch** de Jeffrey en Discord!\n
 <@&573308631018110986> • Personas dentro del server que quieren estar al tanto de las novedades de Jeffrey Bot.\n
-<@&779783625398812673> • Personas que tienen acceso a la DarkShop y desean recibir menciones de eventos de la inflación e información de la DarkShop en general.`)
-                        .defFooter({ text: `Algunos roles se consiguen en la sección "Canales y roles" arriba del todo.`, icon: client.EmojisObject.Error.url })
+<@&779783625398812673> • Personas que tienen acceso a la DarkShop y desean recibir menciones de eventos de la inflación e información de la DarkShop en general.\n
+_**${client.Emojis.Error} Algunos roles se consiguen en la sección <id:customize> arriba del todo.**_`)
                         .defColor(Colores.verde),
                     new Embed()
                         .setImage(especiales.attachment)
@@ -643,7 +644,7 @@ Ahora, creo que es bastante obvio que lo único que Jeffrey espera de ti es:
                         .defTitle("Bienvenid@ a los VIPs")
                         .defDesc(`**—** Ahora que eres **VIP**, tienes algunos beneficios **sobre los demás usuarios**:\n
 <#552580632266407957> • **Colores especiales, colores extras** con los que puedes colorear tu nombre.\n
-☄️ • **Roles exclusivos de VIPs** arriba del todo, en **Canales y roles**.\n
+☄️ • **Roles exclusivos de VIPs** arriba del todo, en <id:customize>.\n
 🚀 • Obtienes **100% más** de lo que obtendrías normalmente hablando en los canales.\n
 https://discord.gg/${process.env.SUPPORT_INVITE} • Servidor **exclusivo** de pruebas de Jeffrey Bot.`)
                         .defColor(Colores.nocolor)

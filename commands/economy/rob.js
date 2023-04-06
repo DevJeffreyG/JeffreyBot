@@ -52,13 +52,13 @@ command.execute = async (interaction, models, params, client) => {
         failedPerc = new Chance().floating({ min: min_fail, max: max_fail, fixed: 2 }) / 100;
     } catch (err) {
         if (err instanceof RangeError) {
-            new Log(message)
+            new Log(interaction)
                 .setReason(LogReasons.Error)
                 .setTarget(ChannelModules.StaffLogs)
                 .send({
                     embeds: [
                         new ErrorEmbed()
-                            .defDesc(`No se ha podido determinar recompensas o castigos. Mínimos y máximos deben ser menores y mayores los unos con los otros. \`/config dashboard\`.`)
+                            .defDesc(`No se ha podido determinar recompensas o castigos. Mínimos y máximos deben ser menores y mayores los unos con los otros. ${client.mentionCommand("config dashboard")}.`)
                             .defFields([
                                 { up: "Min Success", down: String(min_success), inline: true },
                                 { up: "Max Money", down: String(max_success), inline: true },

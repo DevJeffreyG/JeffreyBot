@@ -13,7 +13,11 @@ command.execute = async (interaction, models, params, client) => {
     const stats = require("../../commands/economy/stats");
     const member = interaction.guild.members.cache.get(params.user.id)
 
-    stats.execute(interaction, models, { usuario: { member } }, client)
+    try {
+        await stats.execute(interaction, models, { usuario: { member } }, client)
+    } catch (err) {
+        console.log(err);
+    }
 }
 
 module.exports = command;

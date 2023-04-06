@@ -15,6 +15,7 @@ module.exports = async (client, interaction) => {
     await interaction.guild.channels.fetch();
     await interaction.guild.roles.fetch();
     await interaction.guild.members.fetch();
+    await interaction.guild.commands.fetch();
 
     client.fetchedGuilds.push(interaction.guild.id)
     console.log("💚 %s fetched!", interaction.guild.name)

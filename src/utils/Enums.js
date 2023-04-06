@@ -37,18 +37,19 @@ class Enum {
     }
 
     /**
-     * Convierte los datos en un array de forma: [{name: nombre, value: valor}]
+     * Convierte los datos en un array de forma.
+     * #### Predeterminado: [{name: nombre, value: valor}]
      * @returns Array
      */
-    complexArray() {
+    complexArray(first = "name", second = "value") {
         let arr = [];
 
         let names = this.array();
 
         for (const name of names) {
             let obj = {};
-            obj.name = String(name);
-            obj.value = String(this.values[name]);
+            obj[first] = String(name);
+            obj[second] = String(this.values[name]);
 
             arr.push(obj)
         }

@@ -73,7 +73,7 @@ command.execute = async (interaction, models, params, client) => {
     let sug = new Embed({
         type: "didYouKnow",
         data: {
-            text: `Una vez a la semana puedes usar \`/predict\` para intentar adivinar si es buena idea vender tu inversión en ese momento`,
+            text: `Una vez a la semana puedes usar ${client.mentionCommand("predict")} para intentar adivinar si es buena idea vender tu inversión en ese momento`,
             likelihood: 20
         }
     })

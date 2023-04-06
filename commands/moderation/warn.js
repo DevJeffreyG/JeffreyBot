@@ -1,4 +1,4 @@
-const { Command, Categories, Embed, ErrorEmbed, Confirmation, FindNewId, AfterInfraction, Log, LogReasons, ChannelModules } = require("../../src/utils")
+const { Command, Categories, Embed, ErrorEmbed, Confirmation, FindNewId, AfterInfraction, Log, LogReasons, ChannelModules, Collector } = require("../../src/utils")
 const { Colores } = require("../../src/resources/");
 const { StringSelectMenuBuilder, ActionRowBuilder, AttachmentBuilder } = require("discord.js")
 
@@ -38,7 +38,7 @@ command.execute = async (interaction, models, params, client) => {
         type: "errorFetch",
         data: {
             type: "reglas",
-            guide: `NO se encontraron reglas agregadas a la base de datos, usa \`/config\` para ello.`
+            guide: `NO se encontraron reglas agregadas a la base de datos, usa ${client.mentionCommand("config reglas")} para ello.`
         }
     })
 
@@ -74,18 +74,12 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.editReply({ content: "**¿Qué regla infringió?**", components: [row] })
 
     const filter = (inter) => inter.isStringSelectMenu() && inter.user.id === interaction.user.id;
-    const collector = interaction.channel.createMessageComponentCollector({ filter, max: "1" });
+    const collector = new Collector(interaction, { filter, max: 1 }).raw();
 
     collector.on("collect", async (collected) => {
         const rule = Number(collected.values[0]) ?? collected.values[0];
         const ruleNo = doc.data.rules.find(x => x.id === rule)?.position;
         const member = usuario.member;
-
-        try {
-            await collected.deferUpdate();
-        } catch(err) {
-            console.log(err);
-        }
 
         if (!rule) return interaction.deleteReply();
 

@@ -76,7 +76,9 @@ command.execute = async (interaction, models, params, client) => {
         const helpCommand = commands[i];
         if (helpCommand instanceof ContextMenu) continue;
 
-        const toAdd = `▸ \`/${helpCommand.name}\`: ${helpCommand.info}${helpCommand.info.endsWith("!") || helpCommand.info.endsWith("?") ? "" : "."}\n`;
+        let slashMention = client.mentionCommand(helpCommand.name);
+
+        const toAdd = `▸ ${slashMention}: ${helpCommand.info}${helpCommand.info.endsWith("!") || helpCommand.info.endsWith("?") ? "" : "."}\n`;
 
         switch (helpCommand.category) {
             case Categories.General:

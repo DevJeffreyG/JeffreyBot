@@ -194,6 +194,7 @@ const GuildSchema = new Schema({
         functions: {
             adjust_shop: { type: Boolean, default: true },
             adjust_darkshop: { type: Boolean, default: true },
+            adjust_coins: { type: Boolean, default: false },
             levels_deleteOldRole: { type: Boolean, default: false },
             save_roles_onleft: { type: Boolean, default: true },
             sug_remind: { type: Number, default: 7, integer: true },

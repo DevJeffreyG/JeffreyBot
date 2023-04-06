@@ -114,11 +114,17 @@ class Commands {
 
         guild_commands.forEach(async q => {
             let data = q.info;
+            let getRequest = false;
+            try {
+                getRequest = await this.rest.get(data.route);
+            } catch (err) {
+                console.log(err)
+            }
 
             if (!dev) {
                 console.log("🔄 Eliminando Dev Guilds 🔄")
 
-                if (!this.routes.find(x => x === data.route)) {
+                if (!this.routes.find(x => x === data.route) && getRequest) {
                     this.rest.put(data.route, { body: [] })
                         .then(async () => {
                             await GlobalDatas.removeGuildCommand(data.route);
@@ -126,7 +132,7 @@ class Commands {
                 }
             }
 
-            if ((this.rest.get(data.route) && data.dev != dev)) {
+            if ((getRequest && data.dev != dev)) {
                 console.log("🔄 Eliminando Guilds 🔄")
                 this.rest.put(data.route, { body: [] })
                     .then(async () => {

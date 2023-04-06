@@ -31,12 +31,12 @@ command.execute = async (interaction, models, params, client) => {
 
     let removed = new Embed()
         .defAuthor({ text: "Eliminado", icon: EmojisObject.Check.url })
-        .defDesc(`**—** Se ha eliminado el comando \`/${toggled}\`.`)
+        .defDesc(`**—** Se ha eliminado el comando ${client.mentionCommand(toggled)}.`)
         .defColor(Colores.verde);
 
     let added = new Embed()
         .defAuthor({ text: "Toggled", icon: EmojisObject.Check.url })
-        .defDesc(`**—** Se ha agregado el comando \`/${toggled}\`.`)
+        .defDesc(`**—** Se ha agregado el comando ${client.mentionCommand(toggled)}.`)
         .defColor(Colores.verde);
 
     // Comando

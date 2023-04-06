@@ -1,4 +1,4 @@
-const { BaseInteraction, InteractionType, time, CommandInteraction, MessageComponentInteraction, ModalSubmitInteraction, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction, DiscordAPIError } = require("discord.js");
+const { BaseInteraction, InteractionType, time, CommandInteraction, MessageComponentInteraction, ModalSubmitInteraction, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction, DiscordAPIError, chatInputApplicationCommandMention } = require("discord.js");
 
 const { Ticket, Suggestion } = require("./src/handlers/");
 const { Bases, Colores } = require("./src/resources");
@@ -21,6 +21,20 @@ class Handlers {
     }
 
     async #startHandler() {
+        this.client.mentionCommand = (format) => {
+            const args = format.split(" ");
+            const name = args[0];
+            const sub = args[1];
+            const inside = args[2];
+
+            let command = this.client.application.commands.cache.find(x => x.name === name) ?? this.interaction.guild.commands.cache.find(x => x.name === name);
+            if(!command) return `/${name}`;
+    
+            if(inside) return chatInputApplicationCommandMention(name, sub, inside, command.id)
+            else if(sub) return chatInputApplicationCommandMention(name, sub, command.id)
+            else return chatInputApplicationCommandMention(name, command.id)
+        }
+
         if (!this.interaction.inGuild() && !this.#isDev()) return interaction.reply({ ephemeral: true, embeds: [new ErrorEmbed().defDesc("No puedes usar esto en mensajes directos.")] });
         if (this.interaction.client.isOnLockdown && !this.#isDev()) try {
             return await this.interaction.reply({ ephemeral: true, embeds: [new ErrorEmbed().defDesc(`Jeffrey Bot está en bloqueado ahora mismo, lamentamos los inconvenientes.`)] });

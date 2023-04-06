@@ -425,6 +425,7 @@ class Dashboard {
         const functions = this.doc.settings.functions;
         this.#findAndSync("adjust_shop", functions);
         this.#findAndSync("adjust_darkshop", functions);
+        this.#findAndSync("adjust_coins", functions);
 
         this.#findAndSync("levels_deleteOldRole", functions);
         this.#findAndSync("save_roles_onleft", functions);
@@ -888,9 +889,9 @@ class Dashboard {
         }, { min: 1 });
 
         // ECONOMIA
-        let shop = this.#createDivSection("shop");
-        shop.classList.add("wrap")
-        shop.append("Tiendas")
+        let money = this.#createDivSection("money");
+        money.classList.add("wrap")
+        money.append("Economía")
 
         let shopadjust = this.#createBoolSelector("adjshop", {
             title: "Ajustar precios de la tienda",
@@ -902,10 +903,15 @@ class Dashboard {
             id: "adjust_darkshop"
         });
 
-        this.#appendChilds(main, [saveRoles, lvlsOldRole, dayRemindSug, dayRemindTicket]);
-        this.#appendChilds(shop, [shopadjust, dsadjust]);
+        let coinsadjust = this.#createBoolSelector("adjds", {
+            title: "Ajustar recompensas de /coins",
+            id: "adjust_coins"
+        });
 
-        this.#appendChilds(contents, [main, shop])
+        this.#appendChilds(main, [saveRoles, lvlsOldRole, dayRemindSug, dayRemindTicket]);
+        this.#appendChilds(money, [shopadjust, dsadjust, coinsadjust]);
+
+        this.#appendChilds(contents, [main, money])
     }
 
     async #rolesHandler() {

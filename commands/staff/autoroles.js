@@ -183,7 +183,7 @@ command.execute = async (interaction, models, params, client) => {
                 return new ErrorEmbed(interaction, {
                     type: "execError",
                     data: {
-                        guide: "Falta por configurar el canal y el mensaje. `/autoroles config`"
+                        guide: `Falta por configurar el canal y el mensaje. ${client.mentionCommand("autoroles config")}`
                     }
                 }).send();
             }
@@ -312,7 +312,7 @@ command.execute = async (interaction, models, params, client) => {
             autoRole.toggle_group = toggleGroupId;
             await doc.save();
 
-            return interaction.editReply({ content: `${client.Emojis.Check} AutoRole \`${autoRole.id}\` toggled para **${toggleGroup.group_name}**!\nPuedes cambiar el nombre del Toggle Group con \`/autoroles edit_toggle\``, embeds: [], components: [] });
+            return interaction.editReply({ content: `${client.Emojis.Check} AutoRole \`${autoRole.id}\` toggled para **${toggleGroup.group_name}**!\nPuedes cambiar el nombre del Toggle Group con ${client.mentionCommand("autoroles edit_toggle")}`, embeds: [], components: [] });
         }
 
         case "edit_toggle": {

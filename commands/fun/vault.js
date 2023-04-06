@@ -62,7 +62,7 @@ command.execute = async (interaction, models, params, client) => {
         "Stop",
         "¿{{ CODE }}? Ehhh, no.",
         "¡Las puertas se abrieron! Ahora sal de la bóveda.",
-        "¿Por qué no mejor usas `/coins`?",
+        `¿Por qué no mejor usas ${client.mentionCommand("coins")}?`,
         "No sirve",
         "¿Estás determinado?",
         "No es tan díficil. ¿O sí?",
@@ -75,7 +75,8 @@ command.execute = async (interaction, models, params, client) => {
         "Deja de intentarlo",
         "Ve a dormir, anda",
         "¿Y este random?",
-        "Hazte un favor y vete"
+        "Hazte un favor y vete",
+        `Seguro que con ${client.mentionCommand("roulette")} te va mejor, anda`
     ];
 
     let reply = nope[Math.floor(Math.random() * nope.length)];

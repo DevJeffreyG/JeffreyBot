@@ -116,7 +116,7 @@ class Top {
                     total: user.economy.global.exp
                 }
 
-                this.#res.push(toPush)
+                if(toPush.total > 0) this.#res.push(toPush)
             }
         });
 

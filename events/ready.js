@@ -1,6 +1,6 @@
 const { Bases } = require("../src/resources");
 
-const { Collection, Client, time } = require("discord.js");
+const { Collection, Client, time, chatInputApplicationCommandMention } = require("discord.js");
 
 const Managers = require("../src/utils/Managers");
 const CustomEmojis = require("../src/utils/CustomEmojis");
@@ -49,6 +49,7 @@ module.exports = async (client) => {
     let managers = await new Managers(client).prepare();
     client.EmojisObject = managers.emojis;
     client.Emojis = await managers.emojis_mentionable();
+    await client.application.commands.fetch();
 
     // para cada guild fetchear(?
     let guilds = await client.guilds.fetch();

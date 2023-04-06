@@ -1641,7 +1641,13 @@ const ProgressBar = function (percentage, options = { max: 100, blocks: 10, empt
   const max = options.max ?? 100;
 
   let fullNum = Math.floor(blocks * percentage / max);
+  if(fullNum < 0) fullNum = 0;
+
   let emptyNum = Math.floor(blocks - fullNum);
+  if(emptyNum < 0) emptyNum = 0;
+  
+  if(fullNum > blocks) fullNum = blocks;
+  if(emptyNum > blocks) emptyNum = blocks;
 
   let fullBlocks = full.repeat(fullNum)
   let emptyBlocks = empty.repeat(emptyNum)
