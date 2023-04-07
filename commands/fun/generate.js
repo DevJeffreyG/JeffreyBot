@@ -1,6 +1,8 @@
-const { Command, Categories, FilePages } = require("../../src/utils")
+const { Command, Categories, FilePages, Embed, GetRandomItem } = require("../../src/utils")
 const craiyon = require("craiyon");
+const ms = require("ms")
 const { AttachmentBuilder } = require("discord.js");
+const { Colores } = require("../../src/resources");
 const Cr = new craiyon.Client();
 
 const command = new Command({
@@ -21,11 +23,33 @@ command.execute = async (interaction, models, params, client) => {
     if (!interaction.deferred) await interaction.deferReply();
 
     const { descripcion } = params;
-    const { Emojis } = client;
 
     console.log("⚪ Prompt: %s", descripcion.value)
 
-    interaction.editReply({ content: `${Emojis.Loading} Creando obras maestras...? No, no esperes mucho.` });
+    let masterpieces = () => {
+        let msgs = [
+            "Creando obras maestras...? No, no esperes mucho.",
+            "Creando contenido directito de las fauces del infierno.",
+            "Las amalgamas se están juntando...",
+            "Ya casi estamos ahí, sólo espera un poco más.",
+            "Lo veo y no lo creo...",
+            "Esto es increíble, tienes que verlo.",
+            "Ya casi están tus obras.",
+            "No te imaginarías nunca lo que vas a ver.",
+            "Algo me dice que esto es nuevo..."
+        ];
+
+        interaction.editReply({
+            embeds: [
+                new Embed()
+                    .defAuthor({ text: GetRandomItem(msgs), icon: client.EmojisObject.Loading.url })
+                    .defColor(Colores.verde)
+            ]
+        }).catch(err => console.log(err));
+    }
+    
+    masterpieces();
+    let interval = setInterval(masterpieces, ms("15s"))
 
     try {
         var generated = await Cr.generate({
@@ -33,11 +57,18 @@ command.execute = async (interaction, models, params, client) => {
         })
     } catch (err) {
         console.log(err);
-        return interaction.editReply({ content: "No se pudieron crear tus obras maestras por un error con el servidor :(" })
+        return interaction.editReply({ content: "No se pudieron crear tus obras maestras por un error con el servidor :(", embeds: [] }).catch(err => console.log(err))
     }
 
+    clearInterval(interval)
 
-    interaction.editReply({ content: `${Emojis.Loading} Guardando los resultados...` });
+    interaction.editReply({
+        embeds: [
+            new Embed()
+                .defAuthor({ text: "Guardando los resultados...", icon: client.EmojisObject.Loading.url })
+                .defColor(Colores.verde)
+        ]
+    }).catch(err => console.log(err));
 
     const images = generated.images;
     const files = [];
@@ -49,7 +80,11 @@ command.execute = async (interaction, models, params, client) => {
     }
 
     let interactive = new FilePages(files)
-    interactive.init(interaction);
+    try {
+        await interactive.init(interaction);
+    } catch(err) {
+        console.log(err)
+    }
 }
 
 module.exports = command

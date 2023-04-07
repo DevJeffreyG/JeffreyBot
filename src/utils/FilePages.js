@@ -11,8 +11,6 @@ class FilePages {
     }
 
     async init(interaction) {
-        const client = interaction.client;
-
         const row = new ActionRowBuilder()
             .addComponents(
                 new ButtonBuilder()
@@ -28,7 +26,7 @@ class FilePages {
 
         if (this.files.length === 1) row.components.forEach(c => c.setDisabled()); // no tiene más de una pagina
 
-        let msg = await interaction.editReply({ content: "", components: [row], files: [this.files[0]] });
+        let msg = await interaction.editReply({ content: "", components: [row], files: [this.files[0]], embeds: [] });
 
         const filter = async i => {
             return i.user.id === interaction.user.id &&

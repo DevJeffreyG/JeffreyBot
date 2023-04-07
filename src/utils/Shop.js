@@ -531,9 +531,10 @@ Si es eliminando, **sólo debe tener**: \`duracion\`.`
             console.log("🏳️ dinero/media = %s", multidiff)
 
             if (multidiff > 100) {
-                let fix = this.isDarkShop ? multidiff / 20 : multidiff * 20;
+                let fix = this.isDarkShop ? multidiff / 50 : multidiff * 0.5;
                 console.log("🟩 Fixing %s with %s", precio, fix)
-                precio += fix;
+                //console.log(this.average*0.1, "es el maximo")
+                precio *= fix;
             }
         }
 
