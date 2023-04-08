@@ -18,13 +18,9 @@ command.addOption({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
 
-    const { Users } = models;
     const { apuesta } = params;
 
-    let user = await Users.getOrCreate({
-        user_id: interaction.user.id,
-        guild_id: interaction.guild.id
-    });
+    let user = params.getUser();
 
     let notEnough = new ErrorEmbed(interaction, {
         type: "economyError",
@@ -54,7 +50,7 @@ command.execute = async (interaction, models, params, client) => {
     } else if (cool) return interaction.editReply({ embeds: [new Embed({ type: "cooldown", data: { cool } })] })
 
     const bj = new Blackjack(interaction, 4);
-    bj.start(apuesta.value);
+    bj.start(apuesta.value, user, params.getDoc());
 
     //interaction.deleteReply();
 }

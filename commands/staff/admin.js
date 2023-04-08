@@ -409,9 +409,8 @@ command.keysExec = async (interaction, models, params) => {
     const { role, tipo, cantidad, objetivo, valor, duracion, usos, id } = keys;
 
     // generar nueva key
-    let keysq = await Guilds.find();
-    const generatedID = FindNewId(keysq, "data.keys", "id");
-    const doc = await Guilds.getOrCreate(interaction.guild.id)
+    const generatedID = FindNewId(await Guilds.find(), "data.keys", "id");
+    const doc = params.getDoc();
 
     // code
     let generatedCode = generateCode()
@@ -510,7 +509,7 @@ command.vaultExec = async (interaction, models, params, client) => {
     const { codigo, pista, recompensa } = vault;
     const { Currency } = client.getCustomEmojis(interaction.guild.id)
 
-    const doc = await Guilds.getOrCreate(interaction.guild.id)
+    const doc = params.getDoc();
 
     switch (subcommand) {
         case "add": {

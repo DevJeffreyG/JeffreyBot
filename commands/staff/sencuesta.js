@@ -29,9 +29,9 @@ command.execute = async (interaction, models, params, client) => {
 
     await interaction.deferReply();
     const { duracion, encuesta } = params;
-    const { GlobalDatas, Guilds } = models;
+    const { GlobalDatas } = models;
 
-    const doc = await Guilds.getOrCreate(interaction.guild.id);
+    const doc = params.getDoc();
 
     const duration = ms(duracion.value) || Infinity;
     const poll = encuesta.value;

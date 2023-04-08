@@ -18,9 +18,7 @@ command.execute = async (interaction, models, params, client) => {
         }
     });
 
-    const { Guilds } = models;
-
-    const doc = await Guilds.getOrCreate(interaction.guild.id);
+    const doc = params.getDoc();
 
     const guild = interaction.guild;
     const Loading = client.Emojis.Loading;

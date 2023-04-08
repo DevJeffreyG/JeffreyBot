@@ -24,7 +24,7 @@ command.execute = async (interaction, models, params, client) => {
     const { Guilds } = models;
     const sugerencia = params.sugerencia.value;
 
-    const docGuild = await Guilds.getOrCreate(interaction.guild.id);
+    const docGuild = params.getDoc();
     if (!docGuild.moduleIsActive("functions.suggestions")) return new ErrorEmbed(interaction, { type: "moduleDisabled" }).send();
     if (await isBannedFrom(interaction, "SUGGESTIONS")) return new ErrorEmbed(interaction, { type: "moduleBanned" }).send();
 

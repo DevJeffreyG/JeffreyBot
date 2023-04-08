@@ -9,9 +9,7 @@ const command = new Command({
 })
 
 command.execute = async (interaction, models, params, client) => {
-    const { Guilds } = models;
-
-    const guild = await Guilds.getById(interaction.guild.id);
+    const guild = params.getDoc();
     const adminroles = guild.getAdmins();
     const staffroles = guild.getStaffs();
 

@@ -16,13 +16,12 @@ command.addOption({
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
-    const { Users } = models;
     const { cantidad } = params
     const { DarkCurrency, Currency } = client.getCustomEmojis(interaction.guild.id);
 
     // codigo
     const quantity = cantidad.value;
-    const user = await Users.getOrCreate({ user_id: interaction.user.id, guild_id: interaction.guild.id });
+    const user = params.getUser();
 
     const darkshop = new DarkShop(interaction.guild);
 

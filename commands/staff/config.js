@@ -220,7 +220,7 @@ command.execute = async (interaction, models, params, client) => {
     const { Guilds } = models;
     const { subcommand, subgroup } = params;
 
-    const docGuild = await Guilds.getOrCreate(interaction.guild.id);
+    const docGuild = params.getDoc();
 
     switch (subcommand) {
         case "dashboard":
@@ -510,7 +510,7 @@ ${codeBlock("markdown", expl.value)}`,
 
 command.execCooldowns = async (interaction, models, doc, params) => {
     const { subcommand, cooldowns } = params;
-    const { Guilds, Users } = models;
+    const { Guilds } = models;
     const { modulo, cooldown, tipo, modificador, nivel, role, id } = cooldowns;
 
     switch (subcommand) {

@@ -18,17 +18,21 @@ command.addOption({
 command.execute = async (interaction, models, params, client) => {
 
     const { usuario } = params;
-    const { Users, Guilds } = models;
+    const { Users } = models;
     const { Currency } = client.getCustomEmojis(interaction.guild.id);
 
     const victimMember = usuario.member;
 
-    if (victimMember === interaction.member) return interaction.reply({ ephemeral: true, content: "No es un buena idea robarte a ti mismo." })
+    if (victimMember === interaction.member) return interaction.reply({
+        ephemeral: true, embeds: [
+            new ErrorEmbed().defDesc("No es un buena idea robarte a ti mismo.")
+        ]
+    })
 
     await interaction.deferReply();
 
-    const doc = await Guilds.getOrCreate(interaction.guild.id);
-    const user = await Users.getOrCreate({ user_id: interaction.user.id, guild_id: interaction.guild.id });
+    const doc = params.getDoc();
+    const user = params.getUser();
     const victim = await Users.getOrCreate({ user_id: victimMember.id, guild_id: interaction.guild.id });
 
     let cool = await user.cooldown(Cooldowns.Rob, { save: false })
@@ -121,7 +125,7 @@ command.execute = async (interaction, models, params, client) => {
         });
 
     return interaction.editReply({ embeds: [embed] });
-    
+
     function getAuthor(obj) {
         if (!obj.author) return false;
 
@@ -137,6 +141,9 @@ command.execute = async (interaction, models, params, client) => {
         ).replace(
             new RegExp("{ MEMBER }", "g"),
             `**${victimMember.displayName}**`
+        ).replace(
+            new RegExp("{ FAKE MONEY }", "g"),
+            `${Math.ceil(Math.random() * 50).toLocaleString("es-CO")} ${Currency.name}`
         )
     }
 }

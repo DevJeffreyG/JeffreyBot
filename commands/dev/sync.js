@@ -178,8 +178,8 @@ command.execGuilds = async (interaction, models, params, client) => {
     let all = await AutoRoles.find({ serverID: interaction.guild.id });
     await interaction.editReply({ content: `${client.Emojis.Loading} Sincronizando los autoroles...` });
 
+    const doc = params.getDoc();
     for await (const arole of all) {
-        const doc = await Guilds.getOrCreate(arole.serverID);
         const general = await Guilds.find();
 
         const newId = FindNewId(general, "data.autoroles", "id")
@@ -203,7 +203,6 @@ command.execGuilds = async (interaction, models, params, client) => {
         await doc.save();
     }
 
-    let doc = await Guilds.getOrCreate(interaction.guild.id)
     all = doc.data.autoroles; // actualizar a lo nuevo que está en la db
     await interaction.editReply({ content: `${client.Emojis.Loading} Re-reaccionando a los AutoRoles...` });
     for (let i = 0; i < all.length; i++) {

@@ -21,7 +21,7 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ ephemeral: true });
 
     const { message } = params;
-    const { Guilds, Users } = models;
+    const { Users } = models;
 
     const { Tier1, Tier2, Tier3 } = client.Emojis;
     const CustomEmojis = client.getCustomEmojis(interaction.guild.id);
@@ -61,8 +61,8 @@ command.execute = async (interaction, models, params, client) => {
 
     component.deferUpdate();
 
-    const doc = await Guilds.getOrCreate(interaction.guild.id);
-    const user = await Users.getOrCreate({ user_id: interaction.user.id, guild_id: interaction.guild.id });
+    const doc = params.getDoc();
+    const user = params.getUser();
     const message_user = await Users.getOrCreate({ user_id: message.author.id, guild_id: interaction.guild.id });
 
     const hall = await interaction.guild.channels.fetch(doc.getChannel("general.halloffame")).catch(err => { });

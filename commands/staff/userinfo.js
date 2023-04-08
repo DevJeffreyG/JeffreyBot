@@ -21,7 +21,7 @@ command.addOption({
 command.execute = async (interaction, models, params, client) => {
     if (!interaction.deferred) await interaction.deferReply();
 
-    const { Guilds, Users } = models;
+    const { Users } = models;
     const { usuario } = params;
     const member = usuario?.member ?? interaction.member;
 
@@ -66,7 +66,7 @@ ${member.roles.cache.toJSON().sort().join(", ")}`)
         .defThumbnail(member.displayAvatarURL())
         .defColor(Colores.verde)
 
-    const doc = await Guilds.getOrCreate(interaction.guild.id)
+    const doc = params.getDoc();
     const reglas = doc.data.rules;
 
     const userd = await Users.getOrCreate({ user_id: member.id, guild_id: interaction.guild.id })

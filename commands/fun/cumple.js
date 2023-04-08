@@ -40,10 +40,9 @@ command.addOption({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ ephemeral: true });
 
-    const { Users } = models;
     const { subcommand } = params;
 
-    const user = await Users.getOrCreate({ user_id: interaction.user.id, guild_id: interaction.guild.id });
+    const user = params.getUser();
     switch (subcommand) {
         case "edit":
             const { edit } = params;

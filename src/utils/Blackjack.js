@@ -7,8 +7,6 @@ const Embed = require("./Embed");
 const ErrorEmbed = require("./ErrorEmbed");
 const { Colores } = require("../resources");
 
-const Users = require("../../db/models/Users");
-const Guilds = require("../../db/models/Guilds");
 const Collector = require("./Collector");
 
 /**
@@ -389,17 +387,14 @@ class Blackjack {
         return obj ? { value: returnable, soft: returnable === asValue && asValue != valor } : returnable;
     }
 
-    async start(bet) {
+    async start(bet, user, doc) {
         this.played = 0;
         this.bet = bet;
         this.ended = false;
 
-        this.user = await Users.getOrCreate({
-            user_id: this.interaction.user.id,
-            guild_id: this.interaction.guild.id
-        });
+        this.user = user;
+        this.doc = doc;
 
-        this.doc = await Guilds.getOrCreate(this.interaction.guild.id);
         if (this.bet < this.doc.settings.quantities.blackjack_bet) {
             return new ErrorEmbed(this.interaction, {
                 type: "execError",

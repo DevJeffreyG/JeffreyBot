@@ -10,7 +10,7 @@ const command = new Command({
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
-    const { Users, Shops, DarkShops } = models
+    const { Shops, DarkShops } = models
     const { darkshop } = params;
 
     const { EmojisObject } = client;
@@ -18,10 +18,7 @@ command.execute = async (interaction, models, params, client) => {
     const isDarkShop = darkshop?.value ?? false;
 
     // codigo
-    const user = await Users.getOrCreate({
-        user_id: interaction.user.id,
-        guild_id: interaction.guild.id
-    });
+    const user = params.getUser();
 
     const shop = isDarkShop ?
         await DarkShops.getOrNull(interaction.guild.id) :

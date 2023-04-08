@@ -15,12 +15,12 @@ command.addOption({
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ ephemeral: true });
-    const { Guilds, Users } = models;
     const { Currency } = client.getCustomEmojis(interaction.guild.id);
 
     const _key = params.llave.value;
 
-    const doc = await Guilds.getOrCreate(interaction.guild.id);
+    const doc = params.getDoc();
+    const user = params.getUser();
     const key = doc.data.keys.find(x => x.code === _key);
 
     const error = new ErrorEmbed(interaction, {
@@ -41,11 +41,6 @@ command.execute = async (interaction, models, params, client) => {
         interaction.deleteReply();
         return doc.save();
     }
-
-    const user = await Users.getOrCreate({
-        user_id: interaction.user.id,
-        guild_id: interaction.guild.id
-    });
 
     // revisar que no lo haya usado antes
     if (key.config.usedBy.find(x => x === interaction.user.id)) {

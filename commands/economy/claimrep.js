@@ -8,12 +8,11 @@ const command = new Command({
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
-
-    const { Users, Guilds } = models;
+    
     const { Currency } = client.getCustomEmojis(interaction.guild.id);
 
-    const guild = await Guilds.getOrCreate(interaction.guild.id);
-    const user = await Users.getOrCreate({ user_id: interaction.user.id, guild_id: interaction.guild.id });
+    const guild = params.getDoc();
+    const user = params.getUser();
 
     if (!guild.moduleIsActive("functions.rep_to_currency")) return new ErrorEmbed(interaction, {
         type: "moduleDisabled"

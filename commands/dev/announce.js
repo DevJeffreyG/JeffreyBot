@@ -26,11 +26,10 @@ command.data
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
 
-    const { Guilds } = models;
     const { subcommand } = params;
     const { titulo, anuncio, imagen } = params[subcommand];
 
-    const doc = await Guilds.getOrCreate(interaction.guild.id)
+    const doc = params.getDoc();
 
     switch (subcommand) {
         case "jbnews":

@@ -26,7 +26,7 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ ephemeral: true });
     const { Users } = models
     const { usuario, cantidad } = params;
-    const { Emojis, EmojisObject } = client;
+    const { EmojisObject } = client;
     const { Currency } = client.getCustomEmojis(interaction.guild.id);
 
     const author = interaction.user;
@@ -36,10 +36,7 @@ command.execute = async (interaction, models, params, client) => {
     const guild = client.guilds.cache.find(x => x.id === interaction.guildId);
 
     // codigo
-    let author_user = await Users.getOrCreate({
-        user_id: author.id,
-        guild_id: guild.id
-    });
+    let author_user = params.getUser();
 
     const user = await Users.getOrCreate({
         user_id: member.id,

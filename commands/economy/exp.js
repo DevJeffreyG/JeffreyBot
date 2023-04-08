@@ -17,17 +17,13 @@ command.addOption({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
 
-    const { Users, Guilds } = models;
     const { dinero } = params;
     const { Currency } = client.getCustomEmojis(interaction.guild.id);
 
-    const guild = await Guilds.getOrCreate(interaction.guild.id);
+    const guild = params.getDoc();
+    const user = params.getUser();
     if (!guild.moduleIsActive("functions.currency_to_exp")) return new ErrorEmbed(interaction, { type: "moduleDisabled" }).send();
 
-    const user = await Users.getOrCreate({
-        user_id: interaction.user.id,
-        guild_id: interaction.guild.id
-    });
 
     if (!user.canBuy(dinero.value)) return new ErrorEmbed(interaction, {
         type: "economyError",

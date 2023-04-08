@@ -380,7 +380,7 @@ Si es eliminando, **sólo debe tener**: \`duracion\`.`
             else if (item.disabled) publicInfo = "[HIDDEN] ";
             else publicInfo = "[✅] ";
 
-            var price = this.determinePrice(this.user, item, true, false, true);
+            let price = this.determinePrice(this.user, item, true, true);
 
             this.items.set(item.id, {
                 item_name: item.name,

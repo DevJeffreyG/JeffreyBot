@@ -24,11 +24,11 @@ command.addOption({
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
-    const { Guilds, Users } = models;
+    const { Users } = models;
     const { usuario, pruebas } = params;
 
     // revisar que estén las reglas activadas
-    const doc = await Guilds.getOrCreate(interaction.guild.id);
+    const doc = params.getDoc();
 
     let selectMenu = new StringSelectMenuBuilder()
         .setCustomId("selectRule")

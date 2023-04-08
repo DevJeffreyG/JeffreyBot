@@ -18,7 +18,6 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ ephemeral: true })
 
     const { id } = params;
-    const { Users, Guilds } = models;
     const member = interaction.member;
 
     let error = new Embed()
@@ -26,7 +25,7 @@ command.execute = async (interaction, models, params, client) => {
         .defAuthor({ text: `${member.user.tag}`, icon: member.displayAvatarURL() })
         .defDesc(`No tienes warns.`);
 
-    const user = await Users.getOrCreate({ user_id: member.id, guild_id: interaction.guild.id })
+    const user = params.getUser();
 
     const warns = user.warns;
     const softwarns = user.softwarns;
@@ -47,7 +46,7 @@ command.execute = async (interaction, models, params, client) => {
 
     if (id) warnsE.defAuthor({ text: `Para la ID: ${id.value}`, title: true });
 
-    const doc = await Guilds.getOrCreate(interaction.guild.id)
+    const doc = params.getDoc();
     const reglas = doc.data.rules;
 
     // foreach

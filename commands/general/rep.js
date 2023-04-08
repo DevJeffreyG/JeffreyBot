@@ -17,8 +17,8 @@ command.addOption({
 
 
 command.execute = async (interaction, models, params, client) => {
-    const guild = client.guilds.cache.find(x => x.id === interaction.guildId);
-    const author = guild.members.cache.find(x => x.id === interaction.user.id);
+    const guild = interaction.guild;
+    const author = interaction.user;
 
     const { usuario } = params;
     const { Users } = models;
@@ -28,7 +28,7 @@ command.execute = async (interaction, models, params, client) => {
     if (member.id === author.id) return new ErrorEmbed(interaction, { type: "selfRep", data: member }).send({ ephemeral: true })
 
     const user = await Users.getOrCreate({ user_id: member.id, guild_id: guild.id });
-    const user_author = await Users.getOrCreate({ user_id: author.id, guild_id: guild.id });
+    const user_author = params.getUser();
 
     let cool = await user_author.cooldown(Cooldowns.Rep);
 

@@ -28,10 +28,10 @@ class Handlers {
             const inside = args[2];
 
             let command = this.client.application.commands.cache.find(x => x.name === name) ?? this.interaction.guild.commands.cache.find(x => x.name === name);
-            if(!command) return `/${name}`;
-    
-            if(inside) return chatInputApplicationCommandMention(name, sub, inside, command.id)
-            else if(sub) return chatInputApplicationCommandMention(name, sub, command.id)
+            if (!command) return `\`/${name}\``;
+
+            if (inside) return chatInputApplicationCommandMention(name, sub, inside, command.id)
+            else if (sub) return chatInputApplicationCommandMention(name, sub, command.id)
             else return chatInputApplicationCommandMention(name, command.id)
         }
 
@@ -64,6 +64,7 @@ class Handlers {
         }
 
         this.user = await Users.getOrCreate({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id })
+        this.doc = await Guilds.getOrCreate(this.interaction.guild.id);
 
         switch (this.interaction.type) {
             case InteractionType.ApplicationCommand:
@@ -102,6 +103,12 @@ class Handlers {
         // empezar los params que sí serán usados
         const sub = params["subcommand"];
         const group = params["subgroup"];
+
+        params["mongoose_user_doc"] = this.user;
+        params["mongoose_guild_doc"] = this.doc;
+
+        params["getDoc"] = () => { return params["mongoose_guild_doc"] }
+        params["getUser"] = () => { return params["mongoose_user_doc"] }
 
         if (sub) params[sub] = {}
         if (group) {
@@ -173,8 +180,8 @@ class Handlers {
     }
 
     async componentHandler() {
-        this.ticket?.handle();
-        this.suggestion?.handle();
+        this.ticket?.handle(this.user, this.doc);
+        this.suggestion?.handle(this.user, this.doc);
 
         switch (this.interaction.customId) {
             case "deleteMessage":
@@ -282,8 +289,6 @@ class Handlers {
         console.log(`-------- ${interaction.commandName} • por ${interaction.user.id} • en ${interaction.guild.name} (${interaction.guild.id}) ----------`)
 
         try {
-            this.doc = await Guilds.getOrCreate(this.interaction.guild.id);
-
             if (!this.executedCommand) throw new Error(`Se quiso ejecutar un comando pero no se encontró mappeado. ${interaction.commandName}`)
             if (this.executedCommand.category === Categories.DarkShop) {
                 if (!this.doc.moduleIsActive("functions.darkshop")) return new ErrorEmbed(interaction, {

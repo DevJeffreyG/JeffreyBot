@@ -12,9 +12,9 @@ const command = new Command({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
 
-    const { GlobalDatas, Users } = models;
+    const { GlobalDatas } = models;
 
-    const user = await Users.getOrCreate({ user_id: interaction.user.id, guild_id: interaction.guild.id });
+    const user = params.getUser();
     let cool = await user.cooldown(Cooldowns.Roulette)
     if (cool) return interaction.editReply({
         content: null, embeds: [
@@ -31,7 +31,7 @@ command.execute = async (interaction, models, params, client) => {
         user.delCooldown(Cooldowns.Roulette)
         return interaction.editReply({ content: "No me la vas a creer, pero no pude encontrar un item indicado para ti :(" })
     }
-    const item = await new RouletteItem(interaction, randomItem).build();
+    const item = await new RouletteItem(interaction, randomItem).build(params.getUser());
 
     await item.use()
 

@@ -19,11 +19,10 @@ command.addOption({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ ephemeral: true });
 
-    const { Guilds } = models;
     const { Emojis, EmojisObject } = client;
 
     const embed = params.embed.value;
-    const doc = await Guilds.getOrCreate(interaction.guild.id);
+    const doc = params.getDoc();
 
     // Variables
     let adminRolesDb = doc.getAdmins();

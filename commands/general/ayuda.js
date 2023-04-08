@@ -13,15 +13,13 @@ command.addOption({
 });
 
 command.execute = async (interaction, models, params, client) => {
-    const { Guilds, Users } = models;
     const { comando } = params;
     if (comando) return command.execGetHelp(interaction, comando, client);
 
     await interaction.deferReply({ ephemeral: true });
-    const guild = interaction.guild;
     const member = interaction.member;
     const helpEmojiURL = client.EmojisObject.Check.url
-    const doc = await Guilds.getOrCreate(guild.id);
+    const doc = params.getDoc();
 
     // get all commands
     const commands = client.commands.map(slash => slash);
@@ -146,7 +144,7 @@ command.execute = async (interaction, models, params, client) => {
     if (music.description) arrayEmbeds.push(music);
     if (economy.description) arrayEmbeds.push(economy);
     if (darkshop.description) {
-        let user = await Users.getOrCreate({ user_id: interaction.user.id, guild_id: guild.id })
+        let user = params.getUser();
         let validation = await ValidateDarkShop(user, interaction.user);
 
         if (doc.moduleIsActive("functions.darkshop") && validation.valid) arrayEmbeds.push(darkshop);

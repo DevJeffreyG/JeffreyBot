@@ -7,7 +7,7 @@ const { Confirmation, FindNewId, isBannedFrom } = require("../utils/functions");
 
 const Colores = require("../resources/colores.json");
 
-const { Guilds, Users } = require("mongoose").models;
+const { Guilds } = require("mongoose").models;
 
 const ms = require("ms");
 const Log = require("../utils/Log");
@@ -54,9 +54,9 @@ class Ticket {
         this.#setRows()
     }
 
-    async handle() {
-        if (!this.docGuild) await this.#fetchDocGuild();
-        this.user = await Users.getOrCreate({ guild_id: this.guild.id, user_id: this.userId });
+    async handle(user, doc) {
+        this.docGuild = doc;
+        this.user = user;
 
         if (!this.docGuild.moduleIsActive("functions.tickets")) return new ErrorEmbed(this.interaction, { type: "moduleDisabled" }).send({ ephemeral: true });
         if (!this.interaction.deferred) await this.interaction.deferReply({ ephemeral: true });
@@ -497,10 +497,6 @@ class Ticket {
         timeout = setTimeout(() => {
             map.delete(this.userId)
         }, ticketCooldown)
-    }
-
-    async #fetchDocGuild() {
-        this.docGuild = await Guilds.getById(this.interaction.guild.id);
     }
 }
 

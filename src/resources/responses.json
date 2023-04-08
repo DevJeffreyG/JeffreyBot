@@ -258,6 +258,10 @@
             {
                 "author": null,
                 "text": "Estafaste a { MEMBER } por { MONEY }, le falta calle"
+            },
+            {
+                "author": null,
+                "text": "{ MEMBER } te da { FAKE MONEY } de limosna, pero le robas { MONEY } en su lugar"
             }
         ],
         "fail": [

@@ -1,6 +1,6 @@
 const { Command, Categories, Embed, BoostTypes, BoostObjetives, Cooldowns, GetRandomItem, FindAverage } = require("../../src/utils");
 
-const { Config, Responses } = require("../../src/resources/");
+const { Responses } = require("../../src/resources/");
 
 const command = new Command({
     name: "coins",
@@ -9,21 +9,15 @@ const command = new Command({
 });
 
 command.execute = async (interaction, models, params, client) => {
-    const { Users, Guilds } = models
     const { Currency } = client.getCustomEmojis(interaction.guild.id);
 
     await interaction.deferReply();
 
-    const guild = client.guilds.cache.find(x => x.id === interaction.guildId);
-    const author = client.users.cache.find(x => x.id === interaction.user.id);
-    const member = guild.members.cache.find(x => x.id === interaction.user.id);
+    const guild = interaction.guild;
+    const member = interaction.member;
 
-    const user = await Users.getOrCreate({
-        user_id: author.id,
-        guild_id: guild.id
-    })
-
-    const doc = await Guilds.getOrCreate(interaction.guild.id)
+    const user = params.getUser();
+    const doc = params.getDoc();
 
     let cooldownInfo = await user.cooldown(Cooldowns.Coins, { check: false, info: true })
 
@@ -34,23 +28,27 @@ command.execute = async (interaction, models, params, client) => {
         ]
     });
 
-    let average = await FindAverage(guild);
     let maximum = 20;
+    let fakeAdd = 999;
 
-    if (doc.settings.functions["adjust_coins"] && (average - maximum) > 10000) maximum = average*0.1;
+    if (doc.settings.functions["adjust_coins"]) {
+        let average = await FindAverage(guild);
+        fakeAdd = average * 0.5;
+        if ((average - maximum) > 10000) maximum = average * 0.1;
+    }
 
     let money = Math.ceil(Math.random() * maximum);
     let tmoney = `**${Currency}${money.toLocaleString('es-CO')}**`;
     let randommember = guild.members.cache.random();
 
-    while (randommember.user.id === author.id) { // el randommember NO puede ser el mismo usuario
+    while (randommember.user.id === member.id) { // el randommember NO puede ser el mismo usuario
         console.log("'/coins', Es el mismo usuario, buscar otro random")
         randommember = guild.members.cache.random()
     }
 
     randommember = `**${randommember.displayName}**`;
 
-    let fakemoney = `${Math.ceil(Math.random() * 1000) + 999} ${Currency.name}`;
+    let fakemoney = `${Math.round(Math.ceil(Math.random() * 1000) + fakeAdd).toLocaleString("es-CO")} ${Currency.name}`;
 
     // buscar si tiene boost
     for (let i = 0; i < user.data.temp_roles.length; i++) {

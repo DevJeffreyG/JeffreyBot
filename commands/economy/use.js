@@ -24,13 +24,9 @@ command.addOption({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { id, usuario } = params
-    const { Users } = models
 
     // codigo
-    const user = await Users.getOrCreate({
-        guild_id: interaction.guild.id,
-        user_id: interaction.user.id
-    });
+    const user = params.getUser();
     const inv_item = user.data.inventory.find(x => x.use_id === id.value);
 
     console.log(inv_item)
@@ -46,7 +42,7 @@ command.execute = async (interaction, models, params, client) => {
 
     if (!inv_item) return noItem.send();
 
-    const item = await new Item(interaction, inv_item.item_id, inv_item.isDarkShop).build();
+    const item = await new Item(interaction, inv_item.item_id, inv_item.isDarkShop).build(params.getUser(), params.getDoc());
     return item.use(id.value, usuario?.member)
 }
 

@@ -1,5 +1,3 @@
-const { Users, Guilds } = require("mongoose").models;
-
 const { MessageComponentInteraction, TextInputStyle, ModalSubmitInteraction, codeBlock, time, hyperlink } = require("discord.js");
 const { Colores } = require("../resources");
 const { ErrorEmbed, Modal, Log, Embed, ChannelModules, LogReasons } = require("../utils");
@@ -16,9 +14,9 @@ class Suggestion {
             .defId(this.interaction.customId);
     }
 
-    async handle() {
-        this.user = await Users.getOrCreate({ guild_id: this.interaction.guild.id, user_id: this.interaction.user.id });
-        this.doc = await Guilds.getOrCreate(this.interaction.guild.id);
+    async handle(user, doc) {
+        this.user = user;
+        this.doc = doc;
 
         let staffRoles = this.doc.getStaffs();
 

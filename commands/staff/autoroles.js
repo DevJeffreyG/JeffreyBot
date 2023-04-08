@@ -108,7 +108,7 @@ command.execute = async (interaction, models, params, client) => {
     const { subcommand } = params;
     const { canal, mensaje, server, emoji, role, autorole, toggle, nuevo } = params[subcommand];
 
-    const doc = await Guilds.getOrCreate(interaction.guild.id);
+    const doc = params.getDoc();
     let config = await getConfig();
 
     switch (subcommand) {

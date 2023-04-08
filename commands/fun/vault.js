@@ -17,18 +17,14 @@ command.addOption({
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ ephemeral: true });
-    const { Guilds, Users } = models;
     const { EmojisObject } = client;
     const { Currency } = client.getCustomEmojis(interaction.guild.id);
 
     const code = params.codigo ? params.codigo.value : null;
 
-    let doc = await Guilds.getOrCreate(interaction.guild.id)
+    let doc = params.getDoc();
+    const user = params.getUser();
     const vault = doc.data.vault_codes;
-    const user = await Users.getOrCreate({
-        user_id: interaction.user.id,
-        guild_id: interaction.guild.id
-    });
 
     if (!code) { // quiere pistas
         const isACode = true || new chance().bool({ likelihood: 80 });

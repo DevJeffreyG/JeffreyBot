@@ -62,12 +62,9 @@ class RouletteItem {
         })
     }
 
-    async build() {
+    async build(user) {
         let interaction = this.interaction;
-        this.user = await Users.getOrCreate({
-            user_id: interaction.user.id,
-            guild_id: interaction.guild.id
-        });
+        this.user = user;
 
         this.numbers = this.item.value.match(/[0-9\.]/g).join("");
         this.nonumbers = this.item.value.replace(/[0-9\.]/g, "");

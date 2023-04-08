@@ -20,13 +20,12 @@ command.execute = async (interaction, models, params, client) => {
         return interaction.reply({ ephemeral: true, embeds: [new ErrorEmbed().defDesc("**No** puedes invertir hasta que sea domingo.")] });
     }
     await interaction.deferReply();
-    const { Users } = models;
     const { cantidad } = params
     const { DarkCurrency, Currency } = client.getCustomEmojis(interaction.guild.id);
 
     // codigo
     const quantity = cantidad.value;
-    const user = await Users.getOrCreate({ user_id: interaction.user.id, guild_id: interaction.guild.id });
+    const user = params.getUser();
 
     let money = user.economy.global.currency;
 
