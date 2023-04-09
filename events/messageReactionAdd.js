@@ -15,19 +15,11 @@ module.exports = async (client, reaction, user) => {
 
   // ENCUESTAS
   let poll = await GlobalDatas.findOne({
-    "info.type": "temporalPoll",
+    type: "temporalPoll",
     "info.guild_id": guild.id,
     "info.message_id": message.id
   });
 
-  const reactionfilter = x => x.emoji.id === client.EmojisObject.Check.id || x.emoji.id === client.EmojisObject.Cross.id;
-
   if (!poll) return;
-  if (!reactionfilter(reaction)) return reaction.users.remove(user);
-
-  const reactionToFind = reaction.emoji.id === client.EmojisObject.Cross.id ? client.EmojisObject.Check.id : client.EmojisObject.Cross.id;
-
-  const reactionToDelete = message.reactions.cache.find(x => x.emoji.id === reactionToFind);
-
-  reactionToDelete.users.remove(user);
+  return reaction.users.remove(user);
 }

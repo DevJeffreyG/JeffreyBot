@@ -53,7 +53,7 @@ command.execute = async (interaction, models, params, client) => {
 
     if (every < ms("5m") || isNaN(every)) return new ErrorEmbed(interaction, {
         type: "badParams", data: {
-            help: "El tiempo debe ser mayor a 5 minutos"
+            help: "El tiempo debe ser mayor o igual a 5 minutos"
         }
     }).send();
 

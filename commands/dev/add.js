@@ -1,4 +1,4 @@
-const { Command, Categories, ItemObjetives, Embed, BoostTypes, BoostObjetives, ErrorEmbed, Confirmation } = require("../../src/utils")
+const { Command, Categories, ItemObjetives, Embed, BoostTypes, BoostObjetives, ErrorEmbed, Confirmation, FindNewId } = require("../../src/utils")
 
 const command = new Command({
     name: "add",
@@ -69,7 +69,7 @@ command.data
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
-    const { GlobalDatas } = models;
+    const { RouletteItems } = models;
     const { subcommand } = params
     const { target, value, chance, special, duration, boosttype, boostobj, boostvalue } = params[subcommand]
 
@@ -96,7 +96,7 @@ command.execute = async (interaction, models, params, client) => {
                 boostvalue: boostvalue?.value
             }
 
-            await GlobalDatas.newRouletteItem({ target: Number(target.value), value: value.value, prob: chance.value, extra });
+            await RouletteItems.new({ target: Number(target.value), value: value.value, prob: chance.value, extra }, FindNewId(await RouletteItems.getAll(), "", "id"));
             break
     }
 

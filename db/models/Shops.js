@@ -2,7 +2,6 @@ const mongoose = require('mongoose')
 
 const Schema = mongoose.Schema
 
-
 const ShopsSchema = new Schema({
     guild_id: { type: String, required: true },
     items: [

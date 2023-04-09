@@ -213,10 +213,11 @@ Schema.method("addCount", async function (module, count = 1, save = true) {
     if (save) return await this.save();
 })
 
-Schema.method("addCurrency", async function (count) {
+Schema.method("addCurrency", async function (count, save = true) {
     this.economy.global.currency += count;
     this.data.counts.normal_currency += count;
-    return await this.save();
+    if (save) await this.save();
+    return this;
 })
 
 Schema.method("addRep", async function (count) {

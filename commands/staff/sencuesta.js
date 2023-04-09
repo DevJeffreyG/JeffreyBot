@@ -1,4 +1,4 @@
-const { Command, Categories, Embed, importImage, FindNewId, GetRandomItem } = require("../../src/utils")
+const { Command, Categories, Embed, importImage, FindNewId, GetRandomItem, ErrorEmbed } = require("../../src/utils")
 const { Colores } = require("../../src/resources")
 
 const ms = require("ms");
@@ -14,7 +14,7 @@ const command = new Command({
 command.addOption({
     type: "string",
     name: "duracion",
-    desc: "La duración que va a tener la encuesta para recibir respuestas. (1d, 30m, 15s, etc)",
+    desc: "La duración que va a tener la encuesta para recibir respuestas. (1d, 30m, etc)",
     req: true
 })
 
@@ -38,8 +38,14 @@ command.execute = async (interaction, models, params, client) => {
 
     const guild = interaction.guild;
     const channel = interaction.guild.channels.cache.get(doc.getChannel("general.announcements"));
-    const timestamp = duration != Infinity ? moment().add(duration, "ms").toDate() : null;
+    const timestamp = duration > ms("1m") && !isNaN(duration) ? moment().add(duration, "ms").toDate() : null;
     const image = importImage("vota");
+
+    if (!timestamp) return new ErrorEmbed(interaction, {
+        type: "badParams", data: {
+            help: "La duración debe ser mayor o igual a 1 minuto"
+        }
+    }).send();
 
     let imgEmbed = new Embed()
         .setImage(image.attachment)
@@ -58,12 +64,8 @@ command.execute = async (interaction, models, params, client) => {
         .defField("Encuesta:", poll)
         .defColor(Colores.verdeclaro)
         .defFooter({ text: footer })
-
-    if (timestamp) {
-        embed.setTimestamp(timestamp);
-        embed.defField("Vota hasta...", `${time(timestamp)} (${time(timestamp, "R")})`)
-    }
-    else embed.defFooter({ text: `Vota aquí abajo ⬇️` })
+        .setTimestamp(timestamp)
+        .defField("Vota hasta...", `${time(timestamp)} (${time(timestamp, "R")})`);
 
     const row = new ActionRowBuilder()
         .addComponents(
@@ -77,14 +79,13 @@ command.execute = async (interaction, models, params, client) => {
                 .setStyle(ButtonStyle.Danger),
         )
 
-    let msg = timestamp ? await channel.send({ embeds: [imgEmbed, embed], files: [image.file], components: [row] }) :
-        await channel.send({ embeds: [imgEmbed, embed], files: [image.file] });
+    let msg = await channel.send({ embeds: [imgEmbed, embed], files: [image.file], components: [row] })
     //let msg = await channel.send({embeds: [embed]});
-    let pollId = FindNewId(await GlobalDatas.find({ "info.type": "temporalPoll", "info.guild_id": guild.id }), "info", "id");
+    let pollId = FindNewId(await GlobalDatas.find({ type: "temporalPoll", "info.guild_id": guild.id }), "info", "id");
 
     await new GlobalDatas({
+        type: "temporalPoll",
         info: {
-            type: "temporalPoll",
             poll,
             guild_id: guild.id,
             channel_id: channel.id,
@@ -106,11 +107,6 @@ command.execute = async (interaction, models, params, client) => {
             })
         ]
     })
-
-    if (!timestamp) {
-        await msg.react(client.Emojis.Check);
-        await msg.react(client.Emojis.Cross);
-    }
 }
 
 module.exports = command;

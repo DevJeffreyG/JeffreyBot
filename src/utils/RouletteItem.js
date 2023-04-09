@@ -107,6 +107,8 @@ class RouletteItem {
         console.log("🟢 Números:", this.numbers)
         console.log("🟢 No-Números:", this.nonumbers)
 
+        this.user.addCount("roulette", 1, false);
+
         switch (this.target.constructor) {
             case GuildMemberRoleManager:
                 if (this.nonumbers === '-') this.target.remove(this.numbers)
@@ -150,8 +152,7 @@ class RouletteItem {
                 }
                 else if (this.nonumbers === "+") {
                     this.nonumbers = "Se agregaron";
-                    this.user.addCurrency(this.numbers);
-                    save = false;
+                    this.user.addCurrency(this.numbers, false);
                 }
                 else if (this.nonumbers === "*") this.user.economy.global.currency *= this.numbers;
                 else if (this.nonumbers === "%") {
@@ -171,8 +172,6 @@ class RouletteItem {
         if (save) await this.user.save().catch(e => console.log(e));
 
         await this.interaction.editReply({ embeds: [response] })
-        await this.user.addCount("roulette");
-
         return this;
     }
 }

@@ -612,7 +612,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
 
   // buscar temp bans
   let tempBans = await GlobalDatas.find({
-    "info.type": "temporalGuildBan",
+    type: "temporalGuildBan",
     "info.guild_id": guild.id
   });
 
@@ -656,40 +656,13 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
   }
 
   // buscar encuestas
-  let polls = await GlobalDatas.find({ "info.type": "temporalPoll", "info.guild_id": guild.id });
+  let polls = await GlobalDatas.find({ type: "temporalPoll", "info.guild_id": guild.id });
   for (let i = 0; i < polls.length; i++) {
     const poll = polls[i].info;
 
     if (moment().isAfter(poll.until)) {
       let c = guild.channels.cache.find(x => x.id === poll.channel_id);
       let msg = await c.messages.fetch(poll.message_id);
-
-
-
-      /* const reactions = msg.reactions.cache;
-
-      let reactionsInPoll = await new Promise(async (resolve, reject) => {
-        let count = {
-          no: [],
-          yes: []
-        }
-
-        for (const reaction of reactions) {
-
-          let usersInThis = await reaction[1].users.fetch();
-
-          if (reaction[0] === "❌") {
-            usersInThis.forEach(async user => {
-              if (!user.bot) count.no.push(user.id)
-            });
-          } else {
-            usersInThis.forEach(async user => {
-              if (!user.bot) count.yes.push(user.id)
-            });
-          }
-        }
-        resolve(count);
-      }) */
 
       const { yes, no } = poll;
 
@@ -922,13 +895,13 @@ const handleUploads = async function (client) {
     // revisar si existe el globaldata
     let interval = ms("30s");
     let noti = await GlobalDatas.findOne({
-      "info.type": "bellNotification"
+      type: "bellNotification"
     });
 
     if (!noti) {
       const newNotification = new GlobalDatas({
-        info: {
-          type: "bellNotification",
+        type: "bellNotification",
+        info: {          
           lastVideo: null,
           lastTweet: null,
           lastLive: null
@@ -937,7 +910,7 @@ const handleUploads = async function (client) {
 
       await newNotification.save();
       noti = await GlobalDatas.findOne({
-        "info.type": "bellNotification"
+        type: "bellNotification"
       });
     }
 
@@ -1234,8 +1207,7 @@ const AfterInfraction = async function (user, data) {
 
 
       let guildBan = await GlobalDatas.findOne({
-        "info.type": "temporalGuildBan",
-        "info.userID": member.id,
+        type: "temporalGuildBan",
         "info.guild_id": guild.id
       });
 
@@ -1243,9 +1215,9 @@ const AfterInfraction = async function (user, data) {
 
       if (!guildBan) {
         const newBan = new GlobalDatas({
+          type: "temporalGuildBan",
           info: {
-            type: "temporalGuildBan",
-            userID: member.id,
+            user_id: member.id,
             guild_id: guild.id,
             reason: `AutoMod. (Infringir "${rule}")`,
             since: now,
@@ -1638,6 +1610,8 @@ const ActivityWork = async function (client) {
   } else {
     act = activities.info.list.find(x => x.id === activities.info.fixed)
   }
+
+  if(!act) return;
 
   let acttype = act.type?.charAt(0).toUpperCase() + act.type?.slice(1);
   let type = ActivityType[acttype] ?? ActivityType.Playing;

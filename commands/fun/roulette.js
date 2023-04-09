@@ -12,17 +12,17 @@ const command = new Command({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
 
-    const { GlobalDatas } = models;
+    const { RouletteItems } = models;
 
     const user = params.getUser();
-    let cool = await user.cooldown(Cooldowns.Roulette)
+    let cool = await user.cooldown(Cooldowns.Roulette, { save: false })
     if (cool) return interaction.editReply({
         content: null, embeds: [
             new Embed({ type: "cooldown", data: { cool } })
         ]
     });
 
-    const rouletteItems = await GlobalDatas.getRouletteItems();
+    const rouletteItems = await RouletteItems.getAll();
 
     console.log("🟢 Items disponibles: %s", rouletteItems.length);
 
@@ -35,7 +35,6 @@ command.execute = async (interaction, models, params, client) => {
 
     await item.use()
 
-
     async function getRandom(query) {
         let returnable = null;
 
@@ -43,7 +42,7 @@ command.execute = async (interaction, models, params, client) => {
 
         while (!returnable) {
             let date = new Date()
-            let q = new Chance().pickone(query).info;
+            let q = new Chance().pickone(query);
 
             //console.log("⚪ Checking %s", q.prob)
             let selected = new Chance().bool({ likelihood: q.prob });

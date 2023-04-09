@@ -32,14 +32,12 @@ command.execute = async (interaction, models, params, client) => {
         .defAuthor({ text: `Ayuda: /globaldata`, title: true })
         .defColor(Colores.verdeclaro)
         .defField(`▸ temporalGuildBan`, `**—** Información de un TempBan en el servidor.`)
-        .defField(`▸ temporalPoll`, `**—** Información de una encuesta en el servidor.`)
+        .defField(`▸ temporalPoll`, `**—** Información de una encuesta del STAFF en un servidor.`)
         .defField(`▸ guildcommands`, `**—** Información de dónde están los SlashCommands para los Guilds (toggle entre el modo developer).`)
-        .defField(`▸ rouletteItem`, `**—** Un item que puede salir en la ruleta`)
+        .defField(`▸ clientActivities`, `**—** Lista de todas las actividades del cliente`)
 
     if (tipo?.value) {
-        let q = await GlobalDatas.find({
-            "info.type": tipo.value
-        });
+        let q = await GlobalDatas.getAll(tipo.value);
 
         interaction.editReply({ embeds: [new Embed({ type: "success", data: { title: "Revisa la consola" } })] })
 
