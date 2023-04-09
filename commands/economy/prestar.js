@@ -1,4 +1,4 @@
-const { Command, Categories, Confirmation, HumanMs, ErrorEmbed, FindNewId, Embed } = require("../../src/utils");
+const { Command, Categories, Confirmation, HumanMs, ErrorEmbed, FindNewId, Embed, GetRandomItem } = require("../../src/utils");
 const ms = require("ms");
 const moment = require("moment-timezone");
 
@@ -36,7 +36,7 @@ command.addOption({
 command.addOption({
     type: "string",
     name: "tiempo",
-    desc: "Cada cuánto vas a cobrar intereses (1d, 1m, 1y, etc)",
+    desc: "Cada cuánto vas a cobrar intereses (1d, 5m, 1y, etc)",
     req: true
 })
 
@@ -50,6 +50,8 @@ command.execute = async (interaction, models, params, client) => {
     const user = params.getUser();
     const lend_user = await Users.getOrCreate({ user_id: usuario.value, guild_id: interaction.guild.id });
     const every = ms(tiempo.value)
+
+    if (interaction.user === usuario.user) return new ErrorEmbed(interaction).defDesc("Por mucho que quieras prestarte dinero, no es conveniente.").send();
 
     if (every < ms("5m") || isNaN(every)) return new ErrorEmbed(interaction, {
         type: "badParams", data: {
@@ -82,7 +84,7 @@ command.execute = async (interaction, models, params, client) => {
         `Le pagarás un **${interes.value}%** de lo que le debas a ${interaction.member} cada ${new HumanMs(every).human}.`,
         `Será un préstamo inicial de **${Currency}${toLend.toLocaleString("es-CO")}**`,
         `Para pagar tu deuda usa ${client.mentionCommand("pay")}.`,
-        `Te llegará un mensaje de directo cada vez que se te cobren los intereses.`
+        `Te llegará un mensaje de directo **CADA VEZ** que se te cobren los intereses.`
     ];
     let existingDebt = lend_user.data.debts.find(x => x.user === interaction.user.id)
     if (existingDebt) {
@@ -107,7 +109,26 @@ command.execute = async (interaction, models, params, client) => {
 
     const lendConfirmation = await Confirmation("Aceptar préstamo", lendUserConfirmations, interaction, usuario.user);
     if (!lendConfirmation) return;
-    await interaction.editReply({ content: null, embeds: [new Embed({ type: "success" })] });
+
+    const messenger = interaction.member;
+    const lendMember = usuario.member;
+    const deuda = `**${Currency}${toLend.toLocaleString("es-CO")}**`
+
+    let possibleDescriptions = [
+        `${messenger} le prestó ${deuda} a ${lendMember}`,
+        `${lendMember} ahora le debe ${deuda} a ${messenger}`,
+        `${deuda} fueron prestados a ${lendMember} por ${messenger}`
+    ];
+
+    let description = GetRandomItem(possibleDescriptions);
+
+    let doneEmbed = new Embed({
+        type: "success",
+        data: {
+            desc: description
+        }
+    })
+    await interaction.editReply({ content: null, embeds: [doneEmbed] });
 
     user.economy.global.currency -= toLend;
     lend_user.addCurrency(toLend);
