@@ -35,7 +35,7 @@ class InteractivePages {
         this.base.author_icon = this.base.author_icon ?? null;
         this.base.color = this.base.color ?? Colores.nocolor;
         this.base.description = this.base.description ?? "";
-        this.base.footer = this.base.footer ?? null;
+        this.base.footer = this.base.footer ?? `Página {ACTUAL} de {TOTAL}`;
         this.base.footer_icon = this.base.footer_icon ?? null;
     }
 

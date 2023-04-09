@@ -1,4 +1,4 @@
-const { Command, Categories, Embed, ErrorEmbed, FindNewId, Confirmation, Shop, ItemTypes, ItemObjetives, ItemActions, BoostTypes, BoostObjetives, ItemEffects } = require("../../src/utils")
+const { Command, Categories, Embed, ErrorEmbed, FindNewId, Confirmation, Shop, ItemTypes, ItemObjetives, ItemActions, BoostTypes, BoostObjetives, ItemEffects, InteractivePages } = require("../../src/utils")
 const { Colores } = require("../../src/resources")
 
 const ms = require("ms");
@@ -637,8 +637,23 @@ command.vaultExec = async (interaction, models, params, client) => {
         }
 
         case "list": {
-            // TODO: Mostrar la lista de todos los códigos
-            return interaction.editReply({ content: "Vuelve más tarde, esto será añadido en una actualización futura." })
+            let items = new Map();
+            for (const vault of doc.data.vault_codes) {
+                items.set(vault.id, {
+                    code: vault.code,
+                    reward: vault.reward.toLocaleString("es-CO"),
+                    hints: vault.hints.join("; "),
+                    id: vault.id
+                })
+            }
+
+            const interactive = new InteractivePages({
+                title: "Lista de códigos",
+                color: Colores.verde,
+                addon: `**— {code}**\n**Premio: ${Currency}{reward}**\n**Pistas:** \`\`\`{hints}\`\`\`\n**ID:** {id}\n\n`
+            }, items, 3)
+
+            return interactive.init(interaction);
         }
     }
 }

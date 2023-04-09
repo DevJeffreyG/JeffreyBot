@@ -1,6 +1,6 @@
-const { Command, Categories, Embed, ErrorEmbed, FindNewId, Confirmation } = require("../../src/utils")
+const { Command, Categories, Embed, ErrorEmbed, FindNewId, Confirmation, InteractivePages } = require("../../src/utils")
 const { Colores } = require("../../src/resources")
-const { hyperlink, GuildEmoji, Collection } = require("discord.js")
+const { hyperlink, Collection, Emoji } = require("discord.js")
 
 const command = new Command({
     name: "autoroles",
@@ -194,11 +194,19 @@ command.execute = async (interaction, models, params, client) => {
             if (!id) id = config.guild.emojis.cache.find(x => x.name === emoji.value)?.id;
 
             let emote = id ? await config.guild.emojis.fetch(id).catch(err => { return null }) : { id: emoji.value, guild: null };
+            let noemoji = false;
 
-            if (emote instanceof Collection || (!emote instanceof GuildEmoji && id) || !emote) return new ErrorEmbed(interaction, {
+            try {
+                emote instanceof Emoji ? await config.msg.react(emote) : await config.msg.react(emote.id);
+            } catch (err) {
+                console.log(err)
+                noemoji = true;
+            }
+
+            if (emote instanceof Collection || noemoji) return new ErrorEmbed(interaction, {
                 type: "badParams",
                 data: {
-                    help: `No encontré ese emote con id \`${id}\` en el servidor '${config.guild ?? interaction.guild}'`
+                    help: `No encontré ese emote (${emote instanceof Emoji ? emote : emote.id}) en el servidor '${config.guild ?? interaction.guild}'`
                 }
             }).send();
 
@@ -212,8 +220,6 @@ command.execute = async (interaction, models, params, client) => {
             })
 
             if (!q) return notadded.send();
-
-            await config.msg.react(emote);
 
             return interaction.editReply({
                 content: null, embeds: [
@@ -325,28 +331,36 @@ command.execute = async (interaction, models, params, client) => {
         }
 
         case "list": {
-            let notExists = new ErrorEmbed(interaction, { type: "doesntExist", data: { action: "autoroles list", missing: "AutoRoles" } });
-            const autoroles = doc.data.autoroles;
-            if (autoroles.length === 0)
-                return notExists.send();
+            let items = new Map();
 
-            let listEmbed = new Embed()
-                .defAuthor({ text: `Lista de autoroles`, icon: interaction.guild.iconURL() })
-                .defColor(Colores.verde);
+            for await (x of doc.data.autoroles) {
+                let guildEmote = await interaction.client.guilds.fetch(x.guild_emote ?? interaction.guild.id).catch(err => null);
+                let emote = !isNaN(x.emote) ? guildEmote.emojis.cache.find(x => x.id === x.emote) : x.emote;
+                let grupo = x.toggle_group ? doc.getOrCreateToggleGroup(x.toggle_group) : "No tiene";
+                let aRole = interaction.guild.roles.cache.find(x => x.id === x.role_id) ?? "Se eliminó";
+                let actualC = interaction.guild.channels.cache.get(x.channel_id) ?? "Se eliminó";
+                let actualFetch = await actualC?.messages?.fetch(x.message_id).catch(err => { console.log(err) }) ?? null;
 
-            for (let i = 0; i < autoroles.length; i++) {
-                const autorole = autoroles[i];
-                let guildEmote = await interaction.client.guilds.fetch(autorole.guild_emote ?? interaction.guild.id).catch(err => null);
-                let emote = !isNaN(autorole.emote) ? guildEmote.emojis.cache.find(x => x.id === autorole.emote) : autorole.emote;
-                let grupo = autorole.toggle_group ? doc.getOrCreateToggleGroup(autorole.toggle_group) : "No tiene";
-                let aRole = interaction.guild.roles.cache.find(x => x.id === autorole.role_id) ?? "Se eliminó";
-                let actualC = interaction.guild.channels.cache.get(autorole.channel_id) ?? "Se eliminó";
-                let actualFetch = await actualC?.messages?.fetch(autorole.message_id).catch(err => { console.log(err) }) ?? null;
+                let mensaje = hyperlink("Mensaje", actualFetch?.url);
 
-                listEmbed.defField(`— ${emote}`, `▸ **ID**: ${autorole.id}.\n▸ **Toggle Grupo**: ${grupo != "No tiene" ? grupo.group_name + ", **" + grupo.id + "**" : grupo}.\n▸ ${aRole}.\n▸ ${hyperlink("Mensaje", actualFetch?.url)}`)
+                items.set(x.id, {
+                    emote,
+                    id: x.id,
+                    toggle: grupo,
+                    role: aRole,
+                    mensaje
+                })
             }
 
-            return interaction.editReply({ embeds: [listEmbed] });
+            const interactive = new InteractivePages({
+                title: "Lista de AutoRoles",
+                author_icon: interaction.guild.iconURL({ dynamic: true }),
+                color: Colores.verde,
+                addon: `**— {emote}**\n▸ **ID**: {id}.\n▸ **Toggle**: {toggle}.\n▸ {role}.\n▸ {mensaje}\n\n`
+            }, items, 3)
+
+            interactive.init(interaction);
+            break;
         }
 
         case "sync": {

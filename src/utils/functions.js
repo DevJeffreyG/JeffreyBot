@@ -1,4 +1,4 @@
-const { ActivityType, ButtonStyle, OverwriteType, PermissionsBitField, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, Guild, GuildMember, CommandInteraction, BaseInteraction, Message, Client, time, hyperlink, codeBlock, PresenceUpdateStatus } = require("discord.js");
+const { ActivityType, ButtonStyle, OverwriteType, PermissionsBitField, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, Guild, GuildMember, CommandInteraction, BaseInteraction, Message, Client, time, hyperlink, codeBlock, PresenceUpdateStatus, User } = require("discord.js");
 
 const Colores = require("../resources/colores.json");
 const Cumplidos = require("../resources/cumplidos.json");
@@ -24,6 +24,7 @@ const Log = require("./Log");
 const { Bases } = require("../resources");
 const Commands = require("../../Commands");
 const Collector = require("./Collector");
+const HumanMs = require("./HumanMs");
 
 /* ##### MONGOOSE ######## */
 const RandomCumplido = function (force = null) {
@@ -348,6 +349,7 @@ const GenerateLog = async function (guild, options = {
  */
 const GlobalDatasWork = async function (guild, justTempRoles = false) {
   const { Emojis, EmojisObject } = guild.client;
+  const { Currency } = guild.client.getCustomEmojis(guild.id);
   const doc = await Guilds.getOrCreate(guild.id);
 
   const bdRole = doc.getRoleByModule("birthday") ? await guild.roles.fetch(doc.getRoleByModule("birthday")).catch(err => {
@@ -382,6 +384,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
     let birthday = dbUser?.data.birthday.locked;
     let birthday_reminders = dbUser?.getBirthdayReminders() ?? [];
     let temproledeletions = await GlobalDatas.getTempRoleDeletions(member.id, guild.id) ?? [];
+    let debts = dbUser?.data.debts ?? [];
 
     for (let i = 0; i < temp_roles.length; i++) {
       const temprole = temp_roles[i];
@@ -468,6 +471,8 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
       }
     }
 
+    if (justTempRoles) return;
+
     birthdayIf:
     if (birthday) {
       if (!doc.moduleIsActive("functions.birthdays")) break birthdayIf;
@@ -551,9 +556,35 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
         dbUser.save();
       }
     }
-  }
 
-  if (justTempRoles) return;
+    for (const debt of debts) {
+      if (moment().isAfter(debt.pay_in)) {
+        // cobrar intereses y actualizar la fecha
+        let topay = Math.round(debt.debt * (debt.interest / 100));
+        let memberToPay = guild.members.cache.get(debt.user);
+        debt.pay_in = moment().add(debt.every, "ms");
+        dbUser.economy.global.currency -= topay;
+        let userToPay = await Users.getOrCreate({ user_id: memberToPay.id, guild_id: guild.id });
+        userToPay.addCurrency(topay);
+
+        try {
+          member.send({
+            embeds: [
+              new Embed()
+                .defColor(Colores.verde)
+                .defTitle(`Intereses del ${debt.interest}% cada ${new HumanMs(debt.every).human}`)
+                .defDesc(`**—** Se te cobró **${Currency}${topay.toLocaleString("es-CO")}** por el préstamo que tienes pendiente con ${memberToPay}.
+**—** Usa \`/pay\` para pagarle los **${Currency}${debt.debt.toLocaleString("es-CO")}** que le debes.`)
+            ]
+          })
+        } catch (err) {
+          console.log(err)
+        }
+
+        dbUser.save();
+      }
+    }
+  }
 
   // buscar items deshabilitados temporalmente
   Shops.getOrCreate(guild.id).then((shop) => {
@@ -1061,12 +1092,13 @@ const isBannedFrom = async function (interaction, query) {
 
 /**
  * 
- * @param {String} toConfirm What is trying to be confirmed
- * @param {Array} dataToConfirm The text that will apear on the embed separated by "▸"
- * @param {CommandInteraction} interaction The Discord.JS Interaction that triggers the command
+ * @param {String} toConfirm Lo que se está confirmando
+ * @param {Array} dataToConfirm El texto que aparece separado por "▸"
+ * @param {CommandInteraction} interaction La interacción que ejecuta esta confirmación
+ * @param {User} user El usuario que usará esta confirmación
  * @returns {Promise<BaseInteraction | false>} Discord.JS Message if the confirmation is positive, if not, returns false
  */
-const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
+const Confirmation = async function (toConfirm, dataToConfirm, interaction, user = interaction.user) {
   const client = interaction.client;
 
   let DescriptionString = "";
@@ -1106,13 +1138,14 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
         .setEmoji(client.EmojisObject.Cross.id)
     )
 
-  let msg = await interaction.editReply({ content: null, embeds, components: [row] }).catch(err => { console.log(err) }); // enviar mensaje de confirmación
+  // enviar mensaje de confirmación
+  let msg = await interaction.editReply({ embeds, components: [row] }).catch(err => { console.log(err) });
 
   if (!msg) return null;
 
   return new Promise(async (resolve, reject) => {
     const filter = async i => {
-      return i.user.id === interaction.user.id &&
+      return i.user.id === user.id &&
         (i.customId === "confirmAction" || i.customId === "cancelAction") &&
         i.message.id === msg.id;
     }
@@ -1134,7 +1167,7 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
 
         return resolve(interaction);
       } else {
-        await interaction.editReply({ embeds: [cancelEmbed], components: [] });
+        await interaction.editReply({ content: null, embeds: [cancelEmbed], components: [] });
 
         return resolve(false);
       }
@@ -1641,13 +1674,13 @@ const ProgressBar = function (percentage, options = { max: 100, blocks: 10, empt
   const max = options.max ?? 100;
 
   let fullNum = Math.floor(blocks * percentage / max);
-  if(fullNum < 0) fullNum = 0;
+  if (fullNum < 0) fullNum = 0;
 
   let emptyNum = Math.floor(blocks - fullNum);
-  if(emptyNum < 0) emptyNum = 0;
-  
-  if(fullNum > blocks) fullNum = blocks;
-  if(emptyNum > blocks) emptyNum = blocks;
+  if (emptyNum < 0) emptyNum = 0;
+
+  if (fullNum > blocks) fullNum = blocks;
+  if (emptyNum > blocks) emptyNum = blocks;
 
   let fullBlocks = full.repeat(fullNum)
   let emptyBlocks = empty.repeat(emptyNum)

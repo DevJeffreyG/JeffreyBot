@@ -120,7 +120,18 @@ const Schema = new mongoose.Schema({
                     return 0
                 }
             }
-        }
+        },
+        debts: [
+            {
+                user: { type: String, required: true },
+                debt: { type: Number, required: true, integer: true },
+                interest: { type: Number, required: true },
+                pay_in: { type: Date, required: true },
+                every: { type: Number, required: true },
+                since: { type: Date, default: () => { return new Date(); } },
+                id: { type: Number, required: true, sparse: true }
+            }
+        ]
     },
     economy: {
         global: {

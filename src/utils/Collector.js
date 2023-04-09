@@ -30,7 +30,7 @@ class Collector {
         });
         if (active && !this.evalOnActive) this.defaultOnActive(active);
         else if (active) {
-            console.log(active)
+            //console.log(active);
             this.evalOnActive();
         }
 

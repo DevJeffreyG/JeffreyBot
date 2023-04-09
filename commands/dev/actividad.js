@@ -1,4 +1,4 @@
-const { Command, Categories, Embed, FindNewId, ActivityWork } = require("../../src/utils")
+const { Command, Categories, Embed, FindNewId, ActivityWork, InteractivePages } = require("../../src/utils")
 const { Colores } = require("../../src/resources")
 
 const command = new Command({
@@ -88,17 +88,27 @@ command.execute = async (interaction, models, params, client) => {
             break;
 
         case "list":
-            let e = new Embed()
-                .defAuthor({ text: "Lista de actividades", title: true })
-                .defColor(Colores.verde);
+            let items = new Map();
 
             for (const act of activities.info.list) {
                 const { value } = act;
                 let actId = act.id;
 
-                e.defField(value, `Tipo: ${act.type ?? "playing"}\nID: ${actId}`);
+                items.set(actId, {
+                    id: actId,
+                    tipo: act.type ?? "playing",
+                    value
+                })
             }
-            return interaction.editReply({ embeds: [e] })
+
+            const interactive = new InteractivePages({
+                title: "Lista de actividades",
+                author_icon: interaction.guild.iconURL({dynamic: true}),
+                color: Colores.verde,
+                addon: `**{value}**\n▸ Tipo: {tipo}\n▸ ID: {id}\n\n`
+            }, items, 3)
+
+            return interactive.init(interaction);
 
         case "set":
             let i = activities.info.list.find(x => x.id === id.value)

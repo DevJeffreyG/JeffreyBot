@@ -1,6 +1,6 @@
 const { codeBlock, messageLink, hyperlink } = require("discord.js");
 const { Colores } = require("../../src/resources");
-const { Command, Categories, ErrorEmbed, Confirmation, FindNewId, Embed, ChannelModules, Log, LogReasons, Cooldowns, Enum, ModifierType, RequirementType, Multipliers } = require("../../src/utils")
+const { Command, Categories, ErrorEmbed, Confirmation, FindNewId, Embed, ChannelModules, Log, LogReasons, Cooldowns, Enum, ModifierType, RequirementType, Multipliers, InteractivePages } = require("../../src/utils")
 
 const command = new Command({
     name: "config",
@@ -484,11 +484,7 @@ ${codeBlock("markdown", expl.value)}`,
         }
 
         case "list": {
-            let embed = new Embed()
-                .defAuthor({ text: "Lista de reglas", title: true })
-                .defFooter({ text: `Hay ${doc.data.rules.length} regla(s)`, icon: interaction.guild.iconURL({ dynamic: true }) })
-                .defDesc(`Usa los comandos en ${client.mentionCommand("config reglas")} para administrar lo que ves aquí.`)
-                .defColor(Colores.verde);
+            let items = new Map();
 
             for (const rule of doc.data.rules) {
                 let name = rule.name;
@@ -497,13 +493,25 @@ ${codeBlock("markdown", expl.value)}`,
                 let pos = rule.position;
                 let id = rule.id;
 
-                embed.defField(`— ${name}`, `**▸ Explicación**: \`${expl}\`
-**▸ Descripción**: \`${desc}\`
-**▸ Posición**: \`${pos}\`.
-**▸ ID**: \`${id}\`.`)
+                items.set(id, {
+                    name,
+                    expl,
+                    desc,
+                    pos,
+                    id
+                })
             }
 
-            return interaction.editReply({ embeds: [embed] })
+            const interactive = new InteractivePages({
+                title: "Lista de reglas",
+                footer: `Hay ${doc.data.rules.length} regla(s) | Pagina {ACTUAL} de {TOTAL}`,
+                color: Colores.verde,
+                footer_icon: interaction.guild.iconURL({ dynamic: true }),
+                description: `Usa los comandos en ${interaction.client.mentionCommand("config reglas")} para administrar lo que ves aquí.`,
+                addon: `**— {name}**\n**▸ Explicación**: {expl}\n**▸ Descripción**: {desc}\n**▸ Posición**: {pos}\n**▸ ID**: {id}\n\n`
+            }, items, 3);
+
+            return interactive.init(interaction);
         }
     }
 }
