@@ -10,12 +10,12 @@ const command = new ContextMenu({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ ephemeral: true });
 
+    params["descripcion"] = {
+        value: params.message.content
+    }
+
     const generate = require("../../commands/fun/generate");
-    await generate.execute(interaction, models, {
-        descripcion: {
-            value: params.message.content
-        }
-    }, client)
+    await generate.execute(interaction, models, params, client)
 
     interaction.followUp({ ephemeral: true, content: `La entrada tomada del mensaje fue \`${params.message.content}\`.` })
 }

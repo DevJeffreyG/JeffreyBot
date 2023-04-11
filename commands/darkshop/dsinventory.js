@@ -10,11 +10,7 @@ command.execute = async (interaction, models, params, client) => {
     // codigo
     let command = require("../economy/inventory");
 
-    params = {
-        darkshop: {
-            value: true
-        }
-    }
+    params["darkshop"] = { value: true }
 
     return command.execute(interaction, models, params, client)
 }

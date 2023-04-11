@@ -21,6 +21,7 @@ class Handlers {
     }
 
     async #startHandler() {
+        this.params = {}
         this.client.mentionCommand = (format) => {
             const args = format.split(" ");
             const name = args[0];
@@ -66,6 +67,12 @@ class Handlers {
         this.user = await Users.getOrCreate({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id })
         this.doc = await Guilds.getOrCreate(this.interaction.guild.id);
 
+        this.params["mongoose_user_doc"] = this.user;
+        this.params["mongoose_guild_doc"] = this.doc;
+
+        this.params["getDoc"] = () => { return this.params["mongoose_guild_doc"] }
+        this.params["getUser"] = () => { return this.params["mongoose_user_doc"] }
+
         switch (this.interaction.type) {
             case InteractionType.ApplicationCommand:
                 if (this.interaction.isChatInputCommand()) return this.slashHandler();
@@ -91,7 +98,7 @@ class Handlers {
         }
 
         // params
-        const params = {};
+        const params = this.params;
 
         params["subcommand"] = this.interaction.options.getSubcommand(false); // guarda el subcomando que se está ejecutando
         params["subgroup"] = this.interaction.options.getSubcommandGroup(false); // guarda el grupo de subcomandos
@@ -103,12 +110,6 @@ class Handlers {
         // empezar los params que sí serán usados
         const sub = params["subcommand"];
         const group = params["subgroup"];
-
-        params["mongoose_user_doc"] = this.user;
-        params["mongoose_guild_doc"] = this.doc;
-
-        params["getDoc"] = () => { return params["mongoose_guild_doc"] }
-        params["getUser"] = () => { return params["mongoose_user_doc"] }
 
         if (sub) params[sub] = {}
         if (group) {
@@ -167,10 +168,10 @@ class Handlers {
         const commandName = this.interaction.commandName;
         this.executedCommand = this.client.commands.get(commandName);
 
-        const params = {
-            user: this.interaction.targetUser,
-            message: this.interaction.targetMessage
-        }
+        const params = this.params;
+
+        params["user"] = this.interaction.targetUser;
+        params["message"] = this.interaction.targetMessage;
 
         try {
             this.#executeCommand(this.interaction, models, params, this.client)

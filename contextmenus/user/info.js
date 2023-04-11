@@ -13,8 +13,10 @@ command.execute = async (interaction, models, params, client) => {
     const userinfo = require("../../commands/staff/userinfo");
     const member = interaction.guild.members.cache.get(params.user.id)
 
+    params["usuario"] = member;
+
     try {
-        await userinfo.execute(interaction, models, { usuario: { member } }, client)
+        await userinfo.execute(interaction, models, params, client)
     } catch (err) {
         console.log(err);
     }

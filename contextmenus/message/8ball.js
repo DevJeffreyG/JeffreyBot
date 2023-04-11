@@ -10,12 +10,12 @@ const command = new ContextMenu({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ ephemeral: true });
 
+    params["pregunta"] = {
+        value: params.message.content
+    }
+
     const generate = require("../../commands/fun/8ball");
-    await generate.execute(interaction, models, {
-        pregunta: {
-            value: params.message.content
-        }
-    }, client)
+    await generate.execute(interaction, models, params, client)
 }
 
 module.exports = command;

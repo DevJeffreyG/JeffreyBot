@@ -8,7 +8,7 @@ const command = new Command({
 
 command.execute = async (interaction, models, params, client) => {
     const darkshop = new DarkShop(interaction.guild, interaction)
-    darkshop.inflationEmbed();
+    await darkshop.inflationEmbed();
 }
 
 module.exports = command;
