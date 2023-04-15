@@ -104,6 +104,8 @@ class RouletteItem {
         let response = null;
         //let value = this.#valueWork();
 
+        this.user.addCount("roulette", 1, false);
+
         console.log("🟢 Números:", this.numbers)
         console.log("🟢 No-Números:", this.nonumbers)
 

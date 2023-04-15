@@ -30,6 +30,8 @@ command.execute = async (interaction, models, params, client) => {
 
     for (const badge of badges) {
         let e = client.Emojis[badge];
+        if (!e) continue;
+
         bdgText += e.toString() + ", ";
     }
 

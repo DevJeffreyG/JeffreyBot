@@ -13,7 +13,7 @@ command.execute = async (interaction, models, params, client) => {
     const stats = require("../../commands/darkshop/darkstats");
     const member = interaction.guild.members.cache.get(params.user.id)
 
-    params["usuario"] = member;
+    params["usuario"] =  { member };
 
     try {
         await stats.execute(interaction, models, params, client)
