@@ -483,8 +483,8 @@ class Blackjack {
                     count: 1
                 })
 
-                this.user.addCurrency(this.bet)
-                await this.user.addCount("blackjack", 1, false);
+                this.user.addCount("blackjack", 1, false);
+                await this.user.addCurrency(this.bet)
             }
 
         if (reason === EndReasons.Blackjack) {

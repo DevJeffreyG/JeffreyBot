@@ -342,12 +342,9 @@ Schema.method("isBirthday", function () {
     let bdDay = this.data.birthday.day;
     let bdMonth = this.data.birthday.month;
 
-    let now = new Date();
-    let actualDay = now.getDate();
-    let actualMonth = now.getMonth();
+    let now = moment();
 
-    if ((actualDay === bdDay) && (actualMonth === bdMonth) && this.data.birthday.locked) return true;
-    return false;
+    return (now.day() === bdDay) && (now.month() === bdMonth) && this.data.birthday.locked;
 })
 
 module.exports = mongoose.model('Users', Schema)

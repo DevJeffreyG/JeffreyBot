@@ -104,6 +104,8 @@ class RouletteItem {
         let response = null;
         //let value = this.#valueWork();
 
+        this.user.addCount("roulette", 1, false);
+
         console.log("🟢 Números:", this.numbers)
         console.log("🟢 No-Números:", this.nonumbers)
 
@@ -149,9 +151,9 @@ class RouletteItem {
                     this.user.economy.global.currency -= this.numbers;
                 }
                 else if (this.nonumbers === "+") {
-                    this.nonumbers = "Se agregaron";
-                    this.user.addCurrency(this.numbers);
                     save = false;
+                    this.nonumbers = "Se agregaron";
+                    await this.user.addCurrency(this.numbers);
                 }
                 else if (this.nonumbers === "*") this.user.economy.global.currency *= this.numbers;
                 else if (this.nonumbers === "%") {
@@ -171,7 +173,6 @@ class RouletteItem {
         if (save) await this.user.save().catch(e => console.log(e));
 
         await this.interaction.editReply({ embeds: [response] })
-        await this.user.addCount("roulette");
 
         return this;
     }

@@ -15,7 +15,7 @@ command.execute = async (interaction, models, params, client) => {
     const { GlobalDatas } = models;
 
     const user = params.getUser();
-    let cool = await user.cooldown(Cooldowns.Roulette)
+    let cool = await user.cooldown(Cooldowns.Roulette, { save: false })
     if (cool) return interaction.editReply({
         content: null, embeds: [
             new Embed({ type: "cooldown", data: { cool } })
