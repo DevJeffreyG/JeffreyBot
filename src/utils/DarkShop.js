@@ -519,7 +519,7 @@ class DarkShop {
             }
         }
 
-        if(!oldinflation) oldinflation = 0;
+        if (!oldinflation) oldinflation = 0;
 
         return { inflation, oldinflation }
     }
@@ -601,8 +601,9 @@ class DarkShop {
         let stonks = oldinflation <= inflation ? "📈" : "📉";
         let tz = this.getShopTimezone();
 
-        let date = tz.now.day() != 0 ? (tz.hour >= 12 ? tz.now.add(1, "day").startOf("day") : tz.now.hour(12).startOf("hour")).toDate() :
-            tz.now.add(1, "day").startOf("day").toDate();
+        let copyTz = tz.now.clone();
+        let date = copyTz.day() != 0 ? (tz.hour >= 12 ? copyTz.add(1, "day").startOf("day") : copyTz.hour(12).startOf("hour")).toDate() :
+            copyTz.add(1, "day").startOf("day").toDate();
 
         let stonksEmbed = new Embed()
             .defAuthor({ text: `DarkShop: Inflación`, icon: EmojisObject.DarkShop.url })
