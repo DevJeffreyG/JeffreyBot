@@ -1,6 +1,8 @@
-const moment = require("moment-timezone")
-
 class HumanMs {
+    /**
+     * 
+     * @param {import("moment-timezone").Moment} data
+     */
     constructor(data) {
         this.data = data;
         this.human = this.#convert(this.data);

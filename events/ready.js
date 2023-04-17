@@ -26,6 +26,7 @@ module.exports = async (client) => {
     client.wonBlackjack = [];
     client.totalMembers = 0;
     client.CustomEmojis = new Map();
+    client.slashCooldowns = new Map();
     client.rawCommands = [];
     client.commands = new Collection();
     client.mapped = false; // Si ya se cargaron los comandos al client

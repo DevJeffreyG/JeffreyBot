@@ -843,7 +843,7 @@ class Dashboard {
             title: "(Robar) %Máximo castigo",
             placeholder: "Debe ser mayor que el mínimo",
             id: "rob-max_fail"
-        }, { min: 0, min: 100 });
+        }, { min: 0, max: 100 });
 
         this.#appendChilds(bases, [basedarkshop, currperrep, minexp, maxexp, mincur, maxcur, rob_minscs, rob_maxscs, rob_minfail, rob_maxfail]);
 
