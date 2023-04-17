@@ -2,7 +2,12 @@ const { BaseInteraction, InteractionType, time, CommandInteraction, MessageCompo
 
 const { Ticket, Suggestion } = require("./src/handlers/");
 const { Bases, Colores } = require("./src/resources");
-const { ErrorEmbed, Embed, Categories, ValidateDarkShop, Confirmation } = require("./src/utils");
+const { ErrorEmbed, Embed, Categories, ValidateDarkShop, Confirmation, HumanMs } = require("./src/utils");
+
+const ms = require("ms");
+const moment = require("moment-timezone");
+
+const slashCooldown = ms("5s");
 
 const models = require("mongoose").models;
 const { ToggledCommands, Users, Guilds, GlobalDatas } = models;
@@ -16,6 +21,7 @@ class Handlers {
     constructor(interaction, init = true) {
         this.interaction = interaction
         this.client = this.interaction.client;
+        this.slashCooldowns = this.client.slashCooldowns;
 
         if (init) return this.#startHandler();
     }
@@ -303,7 +309,31 @@ class Handlers {
             if (this.executedCommand.category === Categories.Developer) {
                 if (!this.#isDev()) return interaction.reply({ ephemeral: true, content: "No puedes usar este comando porque no eres desarrollador de Jeffrey Bot" })
             }
+
+            if (this.slashCooldowns.get(interaction.commandName)) {
+                let until = moment(this.slashCooldowns.get(interaction.commandName)).add(slashCooldown, "ms");
+
+                return interaction.reply({
+                    embeds: [
+                        new Embed({
+                            type: "cooldown",
+                            data: {
+                                cool: {
+                                    mention: time(until.toDate(), "R"),
+                                    text: new HumanMs(until).left()
+                                }
+                            }
+                        })
+                    ]
+                })
+            }
+
             try {
+                this.slashCooldowns.set(interaction.commandName, new Date())
+
+                setTimeout(() => {
+                    this.slashCooldowns.delete(interaction.commandName);
+                }, slashCooldown)
                 await this.executedCommand.execute(interaction, models, params, client);
             } catch (err) {
                 console.log("🔴 No se pudo ejecutar el comando")
@@ -331,6 +361,7 @@ class Handlers {
         }) : new ErrorEmbed(this.interaction, { type: "badCommand", data: { commandName: this.interaction.commandName, error } });
 
         try {
+            this.slashCooldowns.delete(this.interaction.commandName);
             return await help.send()
             //await interaction.reply({ content: null, embeds: [help], ephemeral: true });
         } catch (err) {

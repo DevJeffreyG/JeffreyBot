@@ -56,7 +56,7 @@ command.execute = async (interaction, models, params, client) => {
         .defDesc(`**${Currency}${user.economy.global.currency.toLocaleString("es-CO")}** ➡️ **${DarkCurrency}${total.toLocaleString("es-CO")}**`)
         .defColor(Colores.verdejeffrey)
 
-    if (!darkcurrency && total != 0 && !inflacion) embeds.push(allConversion)
+    if (!darkcurrency && total > 0 && !inflacion) embeds.push(allConversion)
 
     return interaction.editReply({ embeds });
 }

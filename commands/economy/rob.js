@@ -80,7 +80,7 @@ command.execute = async (interaction, models, params, client) => {
     }
 
     const successValue = Math.round(victim.economy.global.currency * successPerc);
-    const failedValue = Math.round(user.economy.global.currency * failedPerc);
+    const failedValue = Math.round(victim.economy.global.currency * failedPerc);
 
     if (successValue <= 0) robSuccess = false;
 
@@ -95,7 +95,7 @@ command.execute = async (interaction, models, params, client) => {
         // Fallido
         if (failedValue <= 0) {
             await user.save();
-            return new ErrorEmbed(interaction).defDesc("**No tenías suficiente dinero como para hacer eso.**").send();
+            return new ErrorEmbed(interaction).defDesc("**No tenía suficiente dinero como para robarle.**").send();
         }
         suggester = getAuthor(fail);
 
