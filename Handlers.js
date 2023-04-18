@@ -95,7 +95,7 @@ class Handlers {
     async slashHandler() {
         const commandName = this.interaction.commandName;
         this.executedCommand = this.client.commands.get(commandName);
-        this.identifierCooldown = Number(this.interaction.user.id) + Number(this.interaction.commandId);
+        this.identifierCooldown = BigInt(this.interaction.user.id) + BigInt(this.interaction.commandId);
 
         let toggledQuery = await ToggledCommands.getToggle(commandName);
 
