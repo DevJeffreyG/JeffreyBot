@@ -3,7 +3,7 @@ const { Command, Categories, Embed, importImage } = require("../../src/utils");
 const { Colores, Bases } = require("../../src/resources");
 
 const command = new Command({
-    name: "embeds",
+    name: "dev-embeds",
     desc: "Enviar embeds defaults para el servidor de JeffreyG",
     category: Categories.Developer
 })

@@ -901,7 +901,7 @@ const handleUploads = async function (client) {
     if (!noti) {
       const newNotification = new GlobalDatas({
         type: "bellNotification",
-        info: {          
+        info: {
           lastVideo: null,
           lastTweet: null,
           lastLive: null
@@ -1112,7 +1112,7 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction, user
     )
 
   // enviar mensaje de confirmación
-  let msg = await interaction.editReply({ embeds, components: [row] }).catch(err => { console.log(err) });
+  let msg = await interaction.editReply({ embeds, components: [row] }).catch(err => { throw err });
 
   if (!msg) return null;
 
@@ -1611,7 +1611,7 @@ const ActivityWork = async function (client) {
     act = activities.info.list.find(x => x.id === activities.info.fixed)
   }
 
-  if(!act) return;
+  if (!act) return;
 
   let acttype = act.type?.charAt(0).toUpperCase() + act.type?.slice(1);
   let type = ActivityType[acttype] ?? ActivityType.Playing;

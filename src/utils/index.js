@@ -16,6 +16,7 @@ const Log = require("./Log");
 const CustomEmojis = require("./CustomEmojis");
 const Modal = require("./Modal");
 const Collector = require("./Collector");
+const CustomEmbed = require("./CustomEmbed");
 
 const Enums = require("./Enums");
 const Functions = require("./functions");
@@ -39,6 +40,7 @@ module.exports = {
     CustomEmojis,
     Modal,
     Collector,
+    CustomEmbed,
 
     ...Enums,
     ...Functions

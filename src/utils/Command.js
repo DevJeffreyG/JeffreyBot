@@ -88,7 +88,7 @@ class Command {
         return returnable;
     }
 
-    async addEach(data = { filter: null, type: "string", name: "foo", desc: "bar", req: false }) {
+    addEach(data = { filter: null, type: "string", name: "foo", desc: "bar", req: false }) {
         const options = data.filter ? this.data.options.filter(x => x.name === data.filter && x instanceof SlashCommandSubcommandGroupBuilder) : this.data.options;
         options.forEach(option => {
             if (option instanceof SlashCommandSubcommandGroupBuilder) {
@@ -102,7 +102,7 @@ class Command {
         })
     }
 
-    async addOption(data = { type: "string", name: "foo", desc: "bar", req: false, sub: null, choices: [] }) {
+    addOption(data = { type: "string", name: "foo", desc: "bar", req: false, sub: null, choices: [] }) {
         this.#warning();
         if (!(data.type && data.name && data.desc)) return console.error("No están todos los datos para crear una opción:", this.data, data)
 
@@ -152,7 +152,7 @@ class Command {
         }
     }
 
-    async addSubcommand(data = { name: "foo", desc: "bar", group: null }) {
+    addSubcommand(data = { name: "foo", desc: "bar", group: null }) {
         this.#warning();
         if (!(data.name && data.desc)) return console.error("No están todos los datos para crear un subcommand:", this.data, data)
 
@@ -173,7 +173,7 @@ class Command {
             )
     }
 
-    async addSubcommandGroup(data = { name: "foo", desc: "bar" }) {
+    addSubcommandGroup(data = { name: "foo", desc: "bar" }) {
         this.#warning();
         if (!(data.name && data.desc)) return console.error("No están todos los datos para crear un subcommandgroup:", this.data, data)
 
@@ -182,6 +182,24 @@ class Command {
                 .setName(data.name)
                 .setDescription(data.desc)
         )
+    }
+
+    /**
+     * 
+     * @param {Array<String>} paths Array de Strings que contienen la ubicación a la cual se agregarán las opciones
+     * @param {Array} options 
+     */
+    addOptionsTo(paths, options) {
+        for (const path of paths) {
+            let arrayPath = path.split(" ")
+            let subcommand = this.data.options;
+
+            arrayPath.forEach(i => {
+                subcommand = subcommand.find(x => x.name === i).options;
+            })
+
+            subcommand.push(...options)
+        }
     }
 
     #setPerms() {
@@ -202,9 +220,9 @@ class Command {
         if ((data.type === "integer" || data.type === "number")) {
             if (data.min) option.setMinValue(data.min)
             if (data.max) option.setMaxValue(data.max)
-        } else if(data.type === "string"){
-            if(data.max) option.setMaxLength(data.max)
-            if(data.min) option.setMinLength(data.min)
+        } else if (data.type === "string") {
+            if (data.max) option.setMaxLength(data.max)
+            if (data.min) option.setMinLength(data.min)
         }
 
         if (data.choices) {
