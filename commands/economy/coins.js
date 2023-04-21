@@ -50,6 +50,8 @@ command.execute = async (interaction, models, params, client) => {
 
     let fakemoney = `${Math.round(Math.ceil(Math.random() * 1000) + fakeAdd).toLocaleString("es-CO")} ${Currency.name}`;
 
+    let prevMoney = money;
+    
     // buscar si tiene boost
     for (let i = 0; i < user.data.temp_roles.length; i++) {
         const temprole = user.data.temp_roles[i];
@@ -57,7 +59,6 @@ command.execute = async (interaction, models, params, client) => {
 
         if (specialInfo.type === BoostTypes.Multiplier) {
             if ((specialInfo.objetive === BoostObjetives.Currency || specialInfo.objetive === BoostObjetives.All) && !specialInfo.disabled) {
-                let prevMoney = money;
                 money = Number((money * Number(specialInfo.value)).toFixed(2));
                 tmoney = prevMoney < money ? `**${Currency}${money.toLocaleString('es-CO')}🚀**` : `**${Currency}${money.toLocaleString('es-CO')}😟**`;
             }

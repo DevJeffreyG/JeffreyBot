@@ -172,6 +172,12 @@ ${codeBlock("javascript", data.error)}`])
                 this.#errorDesc("No puedes usar eso", "No tienes los permisos necesarios.")
                 break;
 
+            case "badConfig":
+                this.#errorName("Mala configuración")
+                this.#errorAuthor(19)
+                this.#errorDesc("Hay un error en la configuración del bot", "Avísa a los administradores")
+                break;
+
             default:
                 console.log(options)
                 console.error("⚠️🔴 No existe %s como tipo de Error ❗❗", type);

@@ -13,12 +13,13 @@ class HumanMs {
             día: Math.trunc(c / 86400000),
             hora: Math.trunc(c / 3600000) % 24,
             minuto: Math.trunc(c / 60000) % 60,
-            segundo: Math.trunc(c / 1000) % 60
+            segundo: Math.trunc(c / 1000) % 60,
+            milisegundo: c % 1000
         }
 
         this.prep = [];
         for (let key in conv) {
-            if (conv[key] != 0) this.prep.push({ key, value: conv[key] });
+            if ((conv[key] != 0 && key != "milisegundo") || (key === "milisegundo" && this.prep.length == 0)) this.prep.push({ key, value: conv[key] });
         }
 
         this.#toHuman();
