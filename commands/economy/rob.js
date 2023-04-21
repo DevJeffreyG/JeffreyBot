@@ -65,8 +65,8 @@ command.execute = async (interaction, models, params, client) => {
                             .defDesc(`No se ha podido determinar recompensas o castigos. Mínimos y máximos deben ser menores y mayores los unos con los otros. ${client.mentionCommand("config dashboard")}.`)
                             .defFields([
                                 { up: "Min Success", down: String(min_success), inline: true },
-                                { up: "Max Money", down: String(max_success), inline: true },
-                                { up: "||                             ||", down: String(" ") },
+                                { up: "Max Success", down: String(max_success), inline: true },
+                                { up: "|| Soy un separador ||", down: String(" ") },
                                 { up: "Min Fail", down: String(min_fail), inline: true },
                                 { up: "Max Fail", down: String(max_fail), inline: true }
                             ])
@@ -74,13 +74,14 @@ command.execute = async (interaction, models, params, client) => {
                     ]
                 });
 
-            successPerc = 0;
-            failedPerc = 0;
+            return new ErrorEmbed(interaction, { type: "badConfig" }).send().catch(err => console.error);
         }
     }
 
     const successValue = Math.round(victim.economy.global.currency * successPerc);
-    const failedValue = Math.round(victim.economy.global.currency * failedPerc);
+    const failedValue = Math.round(user.economy.global.currency * failedPerc);
+
+    const minRequired = Math.round(victim.economy.global.currency * min_success / 100);
 
     if (successValue <= 0) robSuccess = false;
 
@@ -91,12 +92,16 @@ command.execute = async (interaction, models, params, client) => {
 
     //console.log(failedValue, successValue, robSuccess)
 
+    if (user.economy.global.currency < minRequired) {
+        await user.save();
+        return new ErrorEmbed(interaction)
+            .defDesc("**No tenías suficiente dinero como para robarle.**")
+            .defFooter({ text: `Necesitas al menos ${minRequired.toLocaleString("es-CO")} ${Currency.name} en tu cuenta.` })
+            .send();
+    }
+
+    // Fallido
     if (!robSuccess) {
-        // Fallido
-        if (failedValue <= 0) {
-            await user.save();
-            return new ErrorEmbed(interaction).defDesc("**No tenía suficiente dinero como para robarle.**").send();
-        }
         suggester = getAuthor(fail);
 
         user.economy.global.currency -= failedValue;
