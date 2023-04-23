@@ -18,6 +18,7 @@ class Suggestion {
         this.user = user;
         this.doc = doc;
 
+        if (!this.doc) return;
         let staffRoles = this.doc.getStaffs();
 
         if (!this.interaction.member.roles.cache.hasAny(...staffRoles)) return new ErrorEmbed(this.interaction, { type: "notPerms" }).send({ ephemeral: true })

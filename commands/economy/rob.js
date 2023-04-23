@@ -92,7 +92,7 @@ command.execute = async (interaction, models, params, client) => {
 
     //console.log(failedValue, successValue, robSuccess)
 
-    if (user.economy.global.currency < minRequired) {
+    if (user.economy.global.currency < minRequired && victim.economy.global.currency < 0) {
         await user.save();
         return new ErrorEmbed(interaction)
             .defDesc("**No tenías suficiente dinero como para robarle.**")

@@ -230,8 +230,10 @@ class Handlers {
 
                 const author_info = embed.data.author.name.split(" ");
                 const tag = author_info.find(x => x.includes("#"));
+                const disc = tag.split("#")[1];
 
-                const member = this.interaction.guild.members.cache.find(x => x.user.tag === tag);
+                const member = this.interaction.guild.members.cache.find(x => x.user.discriminator === disc && x.user.tag.includes(tag));
+                if(!member) return this.interaction.deleteReply();
 
                 if (member === this.interaction.member) {
                     return new ErrorEmbed(this.interaction, {
@@ -290,7 +292,7 @@ class Handlers {
     }
 
     async modalHandler() {
-        this.suggestion?.handle();
+        this.suggestion?.handle(this.params.getUser(), this.params.getDoc());
     }
 
     async #executeCommand(interaction, models, params, client) {
