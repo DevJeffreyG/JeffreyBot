@@ -290,7 +290,7 @@ class Handlers {
     }
 
     async modalHandler() {
-        this.suggestion?.handle();
+        this.suggestion?.handle(this.params.getUser(), this.params.getDoc());
     }
 
     async #executeCommand(interaction, models, params, client) {
