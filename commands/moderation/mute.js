@@ -1,6 +1,7 @@
-const { Command, Categories, Embed, ErrorEmbed, } = require("../../src/utils")
+const { Command, Categories, Embed } = require("../../src/utils")
 const ms = require("ms");
 const { codeBlock } = require("discord.js");
+const { DiscordLimitationError } = require("../../src/errors");
 
 const command = new Command({
     name: "mute",
@@ -41,13 +42,7 @@ command.execute = async (interaction, models, params, client) => {
     try {
         await user.timeout(ms(timeout), reason)
     } catch (err) {
-        return new ErrorEmbed(interaction, {
-            type: "discordLimitation",
-            data: {
-                action: "timeout",
-                help: `No pude expulsar temporalmente a este usuario:\n${codeBlock(err)}`
-            }
-        }).send();
+        throw new DiscordLimitationError(interaction, "timeout", ["Hubo un error intentando expulsar temporalmente a este usuario", codeBlock(err)]);
     }
 
     return interaction.editReply({

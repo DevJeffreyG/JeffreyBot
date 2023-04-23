@@ -1,5 +1,6 @@
 const { Command, Categories, Embed, ErrorEmbed } = require("../../src/utils")
 const { Colores } = require("../../src/resources")
+const { DMNotSentError } = require("../../src/errors/")
 
 const command = new Command({
     name: "dmuser",
@@ -49,7 +50,7 @@ command.execute = async (interaction, models, params, client) => {
             ]
         })
     } catch (e) {
-        interaction.editReply({ embeds: [new ErrorEmbed({ type: "notSent", data: { tag: usuario.user.tag, error: e } })] })
+        throw new DMNotSentError(interaction, usuario.member, e);
     }
 
 }

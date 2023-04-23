@@ -23,7 +23,7 @@ command.execute = async (interaction, models, params, client) => {
     const doc = await Shops.getOrCreate(interaction.guild.id);
     const shop = new Shop(doc, interaction);
 
-    return shop.buy(id.value)
+    return await shop.buy(id.value)
 }
 
 module.exports = command;

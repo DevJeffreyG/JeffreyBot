@@ -1,3 +1,4 @@
+const { BadCommandError, DoesntExistsError } = require("../../src/errors");
 const { Command, Categories, LimitedTime, WillBenefit, HumanMs, ErrorEmbed, ItemObjetives, BoostTypes } = require("../../src/utils");
 
 const command = new Command({
@@ -23,16 +24,7 @@ command.execute = async (interaction, models, params, client) => {
     const user = params.getUser();
     const key = doc.data.keys.find(x => x.code === _key);
 
-    const error = new ErrorEmbed(interaction, {
-        type: "doesntExist",
-        data: {
-            action: "redeem",
-            missing: `La llave \`${_key}\``,
-            context: "este servidor"
-        }
-    })
-
-    if (!key) return error.send();
+    if (!key) throw new DoesntExistsError(interaction, `La llave \`${_key}\``, "este servidor");
 
     // si llega al punto máximo de usos borrar
     if (key.config.used >= key.config.maxuses) {
@@ -97,7 +89,7 @@ command.execute = async (interaction, models, params, client) => {
             break;
 
         default:
-            return interaction.editReply({ embeds: [new ErrorEmbed({ type: "commandError", data: { id: key.id, unknown: reward.type } })] })
+            throw new BadCommandError(interaction, `${reward.type} no existe`);
     }
 
     // loggear que fue usado porque aún existe (lol)

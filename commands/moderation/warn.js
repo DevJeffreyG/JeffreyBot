@@ -1,6 +1,7 @@
 const { Command, Categories, Embed, ErrorEmbed, Confirmation, FindNewId, AfterInfraction, Log, LogReasons, ChannelModules, Collector } = require("../../src/utils")
 const { Colores } = require("../../src/resources/");
-const { StringSelectMenuBuilder, ActionRowBuilder, AttachmentBuilder } = require("discord.js")
+const { StringSelectMenuBuilder, ActionRowBuilder, AttachmentBuilder, DiscordAPIError } = require("discord.js");
+const { DMNotSentError, FetchError } = require("../../src/errors");
 
 const command = new Command({
     name: "warn",
@@ -34,15 +35,8 @@ command.execute = async (interaction, models, params, client) => {
         .setCustomId("selectRule")
         .setPlaceholder("Selecciona la regla infringida");
 
-    let norules = new ErrorEmbed(interaction, {
-        type: "errorFetch",
-        data: {
-            type: "reglas",
-            guide: `NO se encontraron reglas agregadas a la base de datos, usa ${client.mentionCommand("config reglas")} para ello.`
-        }
-    })
-
-    if (doc.data.rules?.length === 0) return norules.send();
+    if (doc.data.rules?.length === 0)
+        throw new FetchError(interaction, "reglas", ["No se encontraron reglas registradas", `Para agregar reglas usa ${client.mentionCommand("config reglas")}`])
 
     const prueba = new AttachmentBuilder()
         .setFile(pruebas.attachment)
@@ -173,9 +167,8 @@ command.execute = async (interaction, models, params, client) => {
             .setTarget(ChannelModules.ModerationLogs)
             .send({ embeds: [log, proofE] })
 
-        return after ?
-            interaction.editReply({ embeds: [new Embed({ type: "success" })], components: [] }) :
-            interaction.followUp({ embeds: [new Embed({ type: "success" })], components: [] });
+        await interaction.followUp({ embeds: [new Embed({ type: "success" })], components: [] });
+        if (after instanceof DiscordAPIError) new DMNotSentError(interaction, member, after).send().catch(e => console.error(e));
     })
 }
 

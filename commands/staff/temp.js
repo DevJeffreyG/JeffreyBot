@@ -1,6 +1,7 @@
-const { Command, Categories, Confirmation, LimitedTime, WillBenefit, BoostTypes, BoostObjetives, ErrorEmbed } = require("../../src/utils")
+const { Command, Categories, Confirmation, LimitedTime, WillBenefit, BoostTypes, BoostObjetives } = require("../../src/utils")
 const ms = require("ms");
 const { codeBlock } = require("discord.js");
+const { DiscordLimitationError } = require("../../src/errors");
 
 const command = new Command({
     name: "temp",
@@ -80,13 +81,11 @@ command.execute = async (interaction, models, params, client) => {
             try {
                 await LimitedTime(usuario.member, role.role.id, duration);
             } catch (err) {
-                return new ErrorEmbed(interaction, {
-                    type: "discordLimitation",
-                    data: {
-                        action: "temp",
-                        help: `Algo no ha ido bien, no pude agregar el rol temporal.${codeBlock("json", err)}`
-                    }
-                }).send()
+                throw new DiscordLimitationError(interaction, "temp", [
+                    `Algo no ha ido bien`,
+                    `No se pudo agregar el role temporal`,
+                    codeBlock("json", err)
+                ])
             }
             return interaction.editReply({ content: `${client.Emojis.Check} Agregado el temp role a ${usuario.user.tag} por ${tiempo.value}` });
 
@@ -113,13 +112,11 @@ command.execute = async (interaction, models, params, client) => {
             try {
                 await LimitedTime(usuario.member, role?.role.id, duration, btype, bobj, multi);
             } catch (err) {
-                return new ErrorEmbed(interaction, {
-                    type: "discordLimitation",
-                    data: {
-                        action: "temp",
-                        help: `Algo no ha ido bien, no pude agregar el rol temporal.${codeBlock("json", err)}`
-                    }
-                }).send()
+                throw new DiscordLimitationError(interaction, "temp", [
+                    `Algo no ha ido bien`,
+                    `No se pudo agregar el role temporal`,
+                    codeBlock("json", err)
+                ])
             }
 
             return interaction.editReply({ content: `${client.Emojis.Check} Agregado el boost a ${usuario.user.tag} por ${tiempo.value}`, embeds: [] });

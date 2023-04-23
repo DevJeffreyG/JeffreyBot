@@ -1,5 +1,6 @@
 const { Command, Categories, ErrorEmbed, Embed, MemberHasAnyRole, isDeveloper, ContextMenu, ValidateDarkShop } = require("../../src/utils");
 const { Colores } = require("../../src/resources/");
+const { CommandNotFoundError } = require("../../src/errors/");
 
 const command = new Command({
     name: "ayuda",
@@ -180,14 +181,7 @@ command.execGetHelp = async (interaction, commandHelp, client) => {
     await interaction.deferReply();
     let comando = client.commands.get(commandHelp.value)
 
-    if (!comando) return interaction.editReply({
-        embeds: [
-            new ErrorEmbed({
-                type: "commandNotFound",
-                data: commandHelp.value,
-            })
-        ]
-    })
+    if (!comando) throw new CommandNotFoundError(interaction, commandHelp.value);
 
     return comando.getHelp(interaction);
 }

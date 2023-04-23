@@ -1,5 +1,5 @@
 const { MessageComponentInteraction, ModalBuilder, TextInputBuilder, ActionRowBuilder, ModalSubmitInteraction } = require("discord.js");
-const ErrorEmbed = require("./ErrorEmbed");
+const { BadCommandError } = require("../errors");
 
 class Modal extends ModalBuilder {
     /**
@@ -24,12 +24,10 @@ class Modal extends ModalBuilder {
 
     addInput(options = { id, label, style, req, placeholder, min, max }) {
         const { id, label, style, req, placeholder, min, max } = options;
-        if (!id || !label || !style) return new ErrorEmbed(this.interaction, {
-            type: "badFunction",
-            data: {
-                error: "NO ESTA DEFINIDO ID LABEL STYLE: MODAL"
-            }
-        }).send({ followup: true, ephemeral: true });
+        if (!id || !label || !style)
+            throw new BadCommandError(this.interaction, "No están definidos: id, label, stype en el Modal")
+                .setEphemeral(true)
+                .setFollowUp(true);
         const input = new TextInputBuilder()
             .setCustomId(id)
             .setLabel(label)
@@ -48,12 +46,9 @@ class Modal extends ModalBuilder {
     async show() {
         return await this.interaction.showModal(this)
             .catch(err => {
-                return new ErrorEmbed(this.interaction, {
-                    type: "badFunction",
-                    data: {
-                        error: err
-                    }
-                }).send({ followup: true, ephemeral: true });
+                throw new BadCommandError(this.interaction, err)
+                    .setEphemeral(true)
+                    .setFollowUp(true);
             });
     }
 

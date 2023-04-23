@@ -25,6 +25,7 @@ const { Bases } = require("../resources");
 const Commands = require("../../Commands");
 const Collector = require("./Collector");
 const HumanMs = require("./HumanMs");
+const { DMNotSentError } = require("../errors");
 
 /* ##### MONGOOSE ######## */
 const RandomCumplido = function (force = null) {
@@ -1255,30 +1256,11 @@ const AfterInfraction = async function (user, data) {
   if (banMember) member.ban({ reason: `AutoMod. (Infringir "${rule}")` });
 
   try {
-    await member.send({ embeds: arrayEmbeds })
-    return true
+    await member.send({ embeds: arrayEmbeds });
+    return true;
   } catch (e) {
-    await interaction.editReply({ embeds: [new ErrorEmbed({ type: "notSent", data: { tag: member.user.tag, error: e } })] })
-    return false
+    return e;
   }
-
-  /*  else {
-  const { member, rule, proof } = data;
-
-  let warnedEmbed = new Embed()
-    .defAuthor(`¡Cuidado! (Softwarn)`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
-    .defDesc(`
-**—** Esto es sólo un llamado de atención.
-**—** Por infringir la regla: **${rule}**.
-**—** [Pruebas](${proof.url})`)
-    .defColor(Colores.rojo)
-    .defFooter({text: `Si vuelves a cometer esta misma falla serás warneado, ten cuidado.`, icon: 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png'});
-
-  member.send({ embeds: [warnedEmbed] })
-    .catch(e => {
-      interaction.editReply({ embeds: [new ErrorEmbed({ type: "notSent", data: { tag: member.user.tag, error: e } })] })
-    });
-} */
 }
 
 /**

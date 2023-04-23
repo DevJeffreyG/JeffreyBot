@@ -1,4 +1,5 @@
-const { Command, Categories, ErrorEmbed, Embed, DarkShop } = require("../../src/utils")
+const { EconomyError } = require("../../src/errors");
+const { Command, Categories, Embed, DarkShop } = require("../../src/utils")
 
 const command = new Command({
     name: "dswith",
@@ -28,17 +29,6 @@ command.execute = async (interaction, models, params, client) => {
     const usermoney = user.economy.dark.currency;
     const total = Math.round(await darkshop.equals(null, quantity));
 
-    const notEnough = new ErrorEmbed(interaction, {
-        type: "economyError",
-        data: {
-            action: "dswith",
-            error: `No tienes tanto dinero para cambiar.
-**▸** Quieres cambiar: **${DarkCurrency}${quantity.toLocaleString("es-CO")}**`,
-            money: usermoney,
-            darkshop: true
-        }
-    })
-
     const embeds = [];
 
     const success = new Embed({
@@ -52,7 +42,11 @@ command.execute = async (interaction, models, params, client) => {
     })
     embeds.push(success);
 
-    if (quantity > usermoney) return notEnough.send();
+    if (quantity > usermoney)
+        throw new EconomyError(interaction, [
+            "No tienes tanto dinero para cambiar",
+            `Quieres cambiar: **${DarkCurrency}${quantity.toLocaleString("es-CO")}**`
+        ], usermoney, true)
 
     const economy = user.economy.dark;
 

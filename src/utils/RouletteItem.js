@@ -5,6 +5,7 @@ const { LimitedTime } = require("./functions");
 const { ItemObjetives, ItemTypes } = require("./Enums");
 const Embed = require("./Embed");
 const ErrorEmbed = require("./ErrorEmbed");
+const { AlreadyExistsError } = require("../errors");
 
 const { Users } = require("mongoose").models;
 
@@ -52,14 +53,6 @@ class RouletteItem {
                 footer: `Había un ${this.item.prob}% de probabilidad de que esta fuera tu recompensa`
             }
         });
-        this.hasRole = new ErrorEmbed(this.interaction, {
-            type: "alreadyExists",
-            data: {
-                action: "add role",
-                existing: roleMention(this.numbers),
-                context: "este usuario"
-            }
-        })
     }
 
     async build(user) {
@@ -129,7 +122,7 @@ class RouletteItem {
                     this.target.splice(i, 1);
                 } else if (this.nonumbers === '+') {
                     if (temproles) {
-                        if (this.interaction.member.roles.cache.find(x => x.id === this.numbers)) return this.hasRole.send();
+                        if (this.interaction.member.roles.cache.find(x => x.id === this.numbers)) throw new AlreadyExistsError(this.interaction, roleMention(this.numbers), "este usuario");
                         response = this.addedTemp;
                         save = false
 

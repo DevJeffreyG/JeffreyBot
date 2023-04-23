@@ -1,6 +1,7 @@
 // TODO: hacer un verdadero comando de anuncios con esta misma estructura :o
 const { Command, Categories, Embed, ErrorEmbed, Confirmation } = require("../../src/utils")
 const { Bases, Colores } = require("../../src/resources")
+const { BadParamsError } = require("../../src/errors")
 
 const command = new Command({
     name: "announce",
@@ -36,7 +37,7 @@ command.execute = async (interaction, models, params, client) => {
             let jbNRole = await interaction.guild.roles.fetch(Bases.owner.roles.jbNewsRole);
             let ch = interaction.guild.channels.cache.get(doc.getChannel("general.announcements"));
 
-            if (!anuncio && !imagen) return interaction.editReply({ embeds: [new ErrorEmbed({ type: "badParams", data: { help: "Si no hay 'anuncio' debe haber una imagen." } })] });
+            if (!anuncio && !imagen) throw new BadParamsError(interaction, "Si no hay `anuncio` debe haber una imagen.")
             if (titulo) title = titulo.value;
             else title = "¡Novedades de Jeffrey Bot!"
 
@@ -58,6 +59,7 @@ command.execute = async (interaction, models, params, client) => {
             }
 
             let toConfirm = [
+                `Se enviará un mensaje a ${ch}, mencionando a ${jbNRole}`,
                 "El anuncio se verá como lo ves aquí:",
                 embed
             ]

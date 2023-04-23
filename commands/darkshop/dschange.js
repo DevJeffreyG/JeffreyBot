@@ -1,3 +1,4 @@
+const { EconomyError } = require("../../src/errors");
 const { Command, Categories, ErrorEmbed, Embed, DarkShop } = require("../../src/utils")
 const moment = require("moment-timezone");
 
@@ -34,17 +35,6 @@ command.execute = async (interaction, models, params, client) => {
 
     const total = Math.round(one * quantity);
 
-    const notEnough = new ErrorEmbed(interaction, {
-        type: "economyError",
-        data: {
-            action: "dschange",
-            error: `No tienes tanto dinero para cambiar.
-**▸** Inflación: **${DarkCurrency}1** = **${Currency}${one.toLocaleString("es-CO")}**
-**▸** Necesitas: **${Currency}${total.toLocaleString("es-CO")}**`,
-            money
-        }
-    })
-
     const embeds = [];
 
     const success = new Embed({
@@ -58,7 +48,11 @@ command.execute = async (interaction, models, params, client) => {
     })
     embeds.push(success);
 
-    if (total > money) return notEnough.send();
+    if (total > money) throw new EconomyError(interaction, [
+        "No tienes tanto dinero para cambiar.",
+        `Inflación: **${DarkCurrency}1** = **${Currency}${one.toLocaleString("es-CO")}**`,
+        `Necesitas: **${Currency}${total.toLocaleString("es-CO")}**`
+    ], money)
 
     const economy = user.economy.dark;
 

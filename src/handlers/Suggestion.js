@@ -1,6 +1,7 @@
 const { MessageComponentInteraction, TextInputStyle, ModalSubmitInteraction, codeBlock, time, hyperlink } = require("discord.js");
 const { Colores } = require("../resources");
 const { ErrorEmbed, Modal, Log, Embed, ChannelModules, LogReasons } = require("../utils");
+const { FetchError, ModuleDisabledError, PermissionError } = require("../errors");
 
 class Suggestion {
     /**
@@ -18,18 +19,17 @@ class Suggestion {
         this.user = user;
         this.doc = doc;
 
-        if (!this.doc) return;
         let staffRoles = this.doc.getStaffs();
 
-        if (!this.interaction.member.roles.cache.hasAny(...staffRoles)) return new ErrorEmbed(this.interaction, { type: "notPerms" }).send({ ephemeral: true })
-        if (!this.doc.moduleIsActive("functions.suggestions")) return new ErrorEmbed(this.interaction, { type: "moduleDisabled" }).send({ ephemeral: true });
-        if (this.interaction instanceof ModalSubmitInteraction) return this.#modalHandler();
+        if (!this.interaction.member.roles.cache.hasAny(...staffRoles)) throw new PermissionError(this.interaction);
+        if (!this.doc.moduleIsActive("functions.suggestions")) throw new ModuleDisabledError(interaction);
+        if (this.interaction instanceof ModalSubmitInteraction) return await this.#modalHandler();
 
         //if (!this.interaction.deferred) await this.interaction.deferReply({ ephemeral: true });
 
         switch (this.interaction.customId) {
             case "acceptSuggestion": {
-                this.modal
+                await this.modal
                     .defTitle("Aceptar sugerencia")
                     .addInput({
                         id: "reasonInput",
@@ -44,7 +44,7 @@ class Suggestion {
             }
 
             case "denySuggestion": {
-                this.modal
+                await this.modal
                     .defTitle("Denegar sugerencia")
                     .addInput({
                         id: "reasonInput",
@@ -59,7 +59,7 @@ class Suggestion {
             }
 
             case "invalidateSuggestion": {
-                this.modal
+                await this.modal
                     .defTitle("Invalidar sugerencia")
                     .addInput({
                         id: "reasonInput",
@@ -76,18 +76,15 @@ class Suggestion {
     }
 
     async #modalHandler() {
-        const suggestionNotFound = new ErrorEmbed(this.interaction, {
-            type: "errorFetch",
-            data: {
-                type: "suggestion",
-                guide: "Eso no debió pasar... no encontré esa sugerencia en la base de datos"
-            }
-        })
+        const suggestionNotFound = new FetchError(this.interaction, "sugerencia", [
+            "Eso no debió pasar...", "No encontré esa sugerencia en la base de datos"
+        ])
+        .setEphemeral(true);
 
         const suggestion = this.doc.data.suggestions.find(x => x.message_id === this.interaction.message.id);
         if (!suggestion) {
-            this.interaction.message.edit({ components: [] })
-            return suggestionNotFound.send({ ephemeral: true })
+            await this.interaction.message.edit({ components: [] })
+            throw suggestionNotFound;
         }
 
         const suggesterRole = await this.interaction.guild.roles.fetch(this.doc.getRoleByModule("suggester_role"));

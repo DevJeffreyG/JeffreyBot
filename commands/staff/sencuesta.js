@@ -4,6 +4,7 @@ const { Colores } = require("../../src/resources")
 const ms = require("ms");
 const moment = require("moment-timezone");
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, time } = require("discord.js");
+const { BadParamsError } = require("../../src/errors");
 
 const command = new Command({
     name: "sencuesta",
@@ -41,11 +42,7 @@ command.execute = async (interaction, models, params, client) => {
     const timestamp = duration > ms("1m") && !isNaN(duration) ? moment().add(duration, "ms").toDate() : null;
     const image = importImage("vota");
 
-    if (!timestamp) return new ErrorEmbed(interaction, {
-        type: "badParams", data: {
-            help: "La duración debe ser mayor o igual a 1 minuto"
-        }
-    }).send();
+    if (!timestamp) throw new BadParamsError(interaction, "La duración debe ser mayor o igual a 1 minuto");
 
     let imgEmbed = new Embed()
         .setImage(image.attachment)

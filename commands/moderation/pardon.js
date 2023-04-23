@@ -1,5 +1,6 @@
-const { Command, Categories, Embed, ErrorEmbed, Confirmation, Log, LogReasons, ChannelModules } = require("../../src/utils")
+const { Command, Categories, Embed, Confirmation, Log, LogReasons, ChannelModules } = require("../../src/utils")
 const { Colores } = require("../../src/resources");
+const { DMNotSentError, FetchError, DoesntExistsError } = require("../../src/errors");
 const command = new Command({
     name: "pardon",
     desc: "Eliminar un softwarn o un warn por su id",
@@ -41,14 +42,6 @@ command.execute = async (interaction, models, params, client) => {
     const isSoftwarn = subcommand === "softwarn";
     const textInfraction = isSoftwarn ? "Softwarn" : "Warn";
 
-    let notfound = new ErrorEmbed(interaction, {
-        type: "errorFetch",
-        data: {
-            type: "id infraction",
-            guide: `NO existe el __**${textInfraction}**__ con id \`${id.value}\``
-        }
-    })
-
     let idsNow = []; // ids en uso actualmente para el tipo de infraccion a quitar
     let users = await Users.find();
 
@@ -76,7 +69,8 @@ command.execute = async (interaction, models, params, client) => {
 
     let idFound = idsNow.find(x => x.id === id.value);
 
-    if (!idFound) return notfound.send();
+    if (!idFound)
+        throw new DoesntExistsError(interaction, `NO existe el __**${textInfraction}**__ con id \`${id.value}\``);
 
     // si hay una id, proseguir
     let user = await Users.getOrCreate({
@@ -84,15 +78,9 @@ command.execute = async (interaction, models, params, client) => {
         guild_id: interaction.guild.id
     });
 
-    let nomember = new ErrorEmbed(interaction, {
-        type: "errorFetch",
-        data: {
-            type: "usuario",
-            guide: "El usuario con esta infracción ya no está en el servidor, no se puede eliminar"
-        }
-    })
-    const member = interaction.guild.members.cache.find(x => x.id === user.user_id)
-    if (!member) return nomember.send();
+    const member = interaction.guild.members.cache.get(user.user_id)
+    if (!member) 
+        throw new FetchError(interaction, "usuario", ["El usuario con esta infracción ya no está en el servidor", "No se podrá eliminar hasta que vuelva"])
 
     let toConfirm = [
         `¿Estás segur@ de eliminar el ${textInfraction} al miembro ${member}?`,
@@ -133,11 +121,12 @@ command.execute = async (interaction, models, params, client) => {
         .setTarget(ChannelModules.ModerationLogs)
         .send({ embeds: [pardon] })
 
-    await interaction.editReply({ embeds: [new Embed({ type: "success" })] });
-    if (!isSoftwarn) member.send({ embeds: [memberEmbed] })
-        .catch(e => {
-            interaction.editReply({ embeds: [pardon, new ErrorEmbed({ type: "notSent", data: { tag: member.user.tag, error: e } })] })
-        });
+    await interaction.followUp({ embeds: [new Embed({ type: "success" })] });
+    try {
+        if (!isSoftwarn) await member.send({ embeds: [memberEmbed] })
+    } catch (e) {
+        throw new DMNotSentError(interaction, member, e)
+    }
 
 }
 

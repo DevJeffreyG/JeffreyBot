@@ -1,5 +1,6 @@
-const { Command, Categories, ErrorEmbed, Embed, Cooldowns } = require("../../src/utils")
+const { Command, Categories, ErrorEmbed, Embed, Cooldowns, GetRandomItem } = require("../../src/utils")
 const { Colores } = require("../../src/resources");
+const { SelfExec } = require("../../src/errors");
 
 const command = new Command({
     name: "rep",
@@ -25,7 +26,7 @@ command.execute = async (interaction, models, params, client) => {
 
     const member = usuario.member;
 
-    if (member.id === author.id) return new ErrorEmbed(interaction, { type: "selfRep", data: member }).send({ ephemeral: true })
+    if (member.id === author.id) throw new SelfExec(interaction);
 
     const user = await Users.getOrCreate({ user_id: member.id, guild_id: guild.id });
     const user_author = params.getUser();
@@ -40,12 +41,19 @@ command.execute = async (interaction, models, params, client) => {
 
     await user.addRep(1)
 
+    const messages = [
+        "Deben de ser buenos",
+        "Seguro no están tramando nada",
+        "¡Qué buenos que son!",
+        "Lo merecerán, eso está claro"
+    ];
+
     return interaction.reply({
         content: `${author} ➡️ ${member} ✨`, embeds: [
             new Embed()
                 .defAuthor({ text: "☄️ +Rep", title: true })
                 .defDesc(`**¡${author} le ha dado un punto de reputación a ${member}!**
-__✨ Deben de ser buenos ✨__`)
+__✨ ${GetRandomItem(messages)} ✨__`)
                 .defColor(Colores.verde)
                 .defThumbnail(member.displayAvatarURL())
         ]

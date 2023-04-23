@@ -1,4 +1,5 @@
-const { Command, Categories, Item, ErrorEmbed } = require("../../src/utils")
+const { DoesntExistsError } = require("../../src/errors")
+const { Command, Categories, Item } = require("../../src/utils")
 
 const command = new Command({
     name: "use",
@@ -29,18 +30,7 @@ command.execute = async (interaction, models, params, client) => {
     const user = params.getUser();
     const inv_item = user.data.inventory.find(x => x.use_id === id.value);
 
-    console.log(inv_item)
-
-    let noItem = new ErrorEmbed(interaction, {
-        type: "doesntExist",
-        data: {
-            action: "use",
-            missing: `Item con ID de uso \`${id.value}\``,
-            context: "tu inventario"
-        }
-    });
-
-    if (!inv_item) return noItem.send();
+    if (!inv_item) throw new DoesntExistsError(interaction, `Item con ID de uso \`${id.value}\``, "tu inventario");
 
     const item = await new Item(interaction, inv_item.item_id, inv_item.isDarkShop).build(params.getUser(), params.getDoc());
     return item.use(id.value, usuario?.member)

@@ -1,4 +1,6 @@
-const { Command, Categories, Embed, ErrorEmbed } = require("../../src/utils")
+const { codeBlock } = require("discord.js");
+const { DiscordLimitationError } = require("../../src/errors");
+const { Command, Categories, Embed } = require("../../src/utils")
 
 const command = new Command({
     name: "unban",
@@ -40,12 +42,10 @@ command.execute = async (interaction, models, params, client) => {
             ]
         })
     } catch (err) {
-        return new ErrorEmbed(interaction, {
-            type: "execError",
-            data: {
-                guide: "No se encontró a ese usuario baneado."
-            }
-        }).send();
+        throw new DiscordLimitationError(interaction, "ban", [
+            "No se pudo banear a este usuario",
+            codeBlock(err)
+        ])
     }
 
 }

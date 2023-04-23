@@ -1,6 +1,7 @@
 const { Command, Categories, Confirmation, HumanMs, ErrorEmbed, FindNewId, Embed, GetRandomItem } = require("../../src/utils");
 const ms = require("ms");
 const moment = require("moment-timezone");
+const { BadParamsError, EconomyError } = require("../../src/errors");
 
 const command = new Command({
     name: "prestar",
@@ -53,22 +54,11 @@ command.execute = async (interaction, models, params, client) => {
 
     if (interaction.user === usuario.user) return new ErrorEmbed(interaction).defDesc("Por mucho que quieras prestarte dinero, no es conveniente.").send();
 
-    if (every < ms("5m") || isNaN(every)) return new ErrorEmbed(interaction, {
-        type: "badParams", data: {
-            help: "El tiempo debe ser mayor o igual a 5 minutos"
-        }
-    }).send();
+    if (every < ms("5m") || isNaN(every)) throw new BadParamsError(interaction, "El tiempo debe ser mayor o igual a 5 minutos");
 
     const toLend = dinero.value;
 
-    if (!user.canBuy(toLend)) return new ErrorEmbed(interaction, {
-        type: "economyError",
-        data: {
-            action: "prestar",
-            error: "No tienes suficiente dinero",
-            money: user.economy.global.currency
-        }
-    }).send();
+    if (!user.canBuy(toLend)) throw new EconomyError(interaction, "No tienes tanto dinero", user.economy.global.currency)
 
     const authorConfirmation = await Confirmation("Prestar dinero", [
         `Le prestarás **${Currency}${toLend.toLocaleString("es-CO")}** a ${usuario.member}.`,
@@ -95,7 +85,7 @@ command.execute = async (interaction, models, params, client) => {
 
         lend_user.markModified("data");
 
-        lendUserConfirmations[1] = `Se agregará a lo que le debes a ${interaction.member} **${Currency}${toLend.toLocaleString("es-CO")}**.`;
+        lendUserConfirmations[1] = `Se agregará **${Currency}${toLend.toLocaleString("es-CO")}** a lo que le debes a ${interaction.member}.`;
     } else {
         lend_user.data.debts.push({
             user: interaction.user.id,

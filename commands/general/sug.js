@@ -1,7 +1,8 @@
 const { ButtonStyle, ActionRowBuilder, ButtonBuilder } = require("discord.js");
-const { Command, Categories, isBannedFrom, FindNewId, Embed, ErrorEmbed, Log, ChannelModules, LogReasons } = require("../../src/utils");
+const { Command, Categories, isBannedFrom, FindNewId, Embed, Log, ChannelModules, LogReasons } = require("../../src/utils");
 const { Colores } = require("../../src/resources");
 const { codeBlock } = require("discord.js");
+const { ModuleBannedError, ModuleDisabledError } = require("../../src/errors");
 
 const command = new Command({
     name: "sug",
@@ -25,8 +26,8 @@ command.execute = async (interaction, models, params, client) => {
     const sugerencia = params.sugerencia.value;
 
     const docGuild = params.getDoc();
-    if (!docGuild.moduleIsActive("functions.suggestions")) return new ErrorEmbed(interaction, { type: "moduleDisabled" }).send();
-    if (await isBannedFrom(interaction, "SUGGESTIONS")) return new ErrorEmbed(interaction, { type: "moduleBanned" }).send();
+    if (!docGuild.moduleIsActive("functions.suggestions")) throw new ModuleDisabledError(interaction);
+    if (await isBannedFrom(interaction, "SUGGESTIONS")) throw new ModuleBannedError(interaction);
 
     const newId = FindNewId(await Guilds.find(), "data.suggestions", "id"); // crear la nueva id para el ticket
 

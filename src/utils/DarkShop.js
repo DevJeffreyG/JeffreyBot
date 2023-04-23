@@ -10,6 +10,7 @@ const Embed = require("./Embed");
 const { Colores } = require("../resources");
 const Log = require("./Log");
 const ErrorEmbed = require("./ErrorEmbed");
+const { GetRandomItem } = require("./functions");
 
 class DarkShop {
     /**
@@ -44,11 +45,20 @@ class DarkShop {
         const dsChannel = await this.guild.channels.fetch(this.guilddoc.getDarkShopChannel("events"));
         const dsNewsRole = await this.guild.roles.fetch(this.guilddoc.getRoleByModule("darkshop_news"))
 
+        const messages = [
+            "Se termina una semana, y empieza la búsqueda de beneficios.",
+            "Me pregunto qué pasará esta semana...",
+            "Veamos quiénes son l@s valientes.",
+            "Una nueva semana está entre nosotros, veamos qué hacen.",
+            "Finalmente, ¿te atreverás a hacer algo esta semana?",
+            "La semana pasada fue interesante, seguro esta lo es más."
+        ];
+
         dsChannel?.send({
             content: dsNewsRole?.toString() ?? null, embeds: [
                 new Embed()
                     .defAuthor({ text: "Domingo", icon: this.client.EmojisObject.DarkShop.url })
-                    .defDesc(`**—** Se termina una semana, y empieza la búsqueda de beneficios.
+                    .defDesc(`**—** ${GetRandomItem(messages)}
 **—** La inflación hoy estará en **${this.baseValue}%**. Ya veremos **qué pasa en la semana...**`)
                     .defColor(Colores.negro)
             ]
@@ -431,14 +441,7 @@ class DarkShop {
                 memberDJ?.send({ embeds: [embed] })
                     .catch(error => {
                         ErrorLogger.send({
-                            embed: new ErrorEmbed(this.interaction, {
-                                type: "notSent",
-                                data: {
-                                    tag: memberDJ.user.tag,
-                                    error,
-                                    guildId: this.guild.id
-                                }
-                            })
+                            embed: new DMNotSentError(this.interaction, memberDJ, error).embed
                         })
                     })
 

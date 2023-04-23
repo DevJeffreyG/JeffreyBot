@@ -1,6 +1,7 @@
 const { Command, Categories, Embed, ErrorEmbed, Confirmation, FindNewId, Log, LogReasons, ChannelModules } = require("../../src/utils")
 const { Colores } = require("../../src/resources/");
-const { ActionRowBuilder, AttachmentBuilder, StringSelectMenuBuilder } = require("discord.js")
+const { ActionRowBuilder, AttachmentBuilder, StringSelectMenuBuilder } = require("discord.js");
+const { AlreadyExistsError, FetchError } = require("../../src/errors");
 const command = new Command({
     name: "softwarn",
     desc: "Controla las advertencias hechas a un usuario",
@@ -33,15 +34,8 @@ command.execute = async (interaction, models, params, client) => {
         .setCustomId("selectRule")
         .setPlaceholder("Selecciona la regla infringida");
 
-    let norules = new ErrorEmbed(interaction, {
-        type: "errorFetch",
-        data: {
-            type: "reglas",
-            guide: `NO se encontraron reglas agregadas a la base de datos, usa ${client.mentionCommand("config reglas")} para ello.`
-        }
-    })
-
-    if (doc.data.rules?.length === 0) return norules.send();
+    if (doc.data.rules?.length === 0) 
+        throw new FetchError(interaction, "reglas", ["No se encontraron reglas registradas", `Para agregar reglas usa ${client.mentionCommand("config reglas")}`])
 
     const prueba = new AttachmentBuilder()
         .setFile(pruebas.attachment)
@@ -113,16 +107,7 @@ command.execute = async (interaction, models, params, client) => {
             }
         });
 
-        let alreadyWarned = new ErrorEmbed(interaction, {
-            type: "alreadyExists",
-            data: {
-                action: "add softwarn",
-                existing: `El softwarn para la regla N°${ruleNo}`,
-                context: `los softwarns del usuario, **procede con ${client.mentionCommand("warn")}**`
-            }
-        })
-
-        if (hasSoft) return alreadyWarned.send();
+        if (hasSoft) return new AlreadyExistsError(interaction, `El softwarn para la regla N°${ruleNo}`, `los softwarns del usuario, **procede con ${client.mentionCommand("warn")}**`).send().catch(e => console.error(e));
 
         // guardar el nuevo attachment para evitar que se pierda
         let msg = await interaction.followUp({ content: `⚠️ Este mensaje se usará para tener la imagen de las pruebas, si se elimina se perderá.`, files: [prueba.attachment] });

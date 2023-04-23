@@ -1,3 +1,4 @@
+const { ModuleDisabledError } = require("../../src/errors");
 const { Command, Categories, Confirmation, Embed, ErrorEmbed, HumanMs, Cooldowns } = require("../../src/utils")
 
 const command = new Command({
@@ -14,9 +15,7 @@ command.execute = async (interaction, models, params, client) => {
     const guild = params.getDoc();
     const user = params.getUser();
 
-    if (!guild.moduleIsActive("functions.rep_to_currency")) return new ErrorEmbed(interaction, {
-        type: "moduleDisabled"
-    }).send();
+    if (!guild.moduleIsActive("functions.rep_to_currency")) throw new ModuleDisabledError(interaction);
 
     if (user.economy.global.reputation === 0) return interaction.editReply({ embeds: [new ErrorEmbed().defDesc(`**No tienes puntos de reputación...**`)] });
 

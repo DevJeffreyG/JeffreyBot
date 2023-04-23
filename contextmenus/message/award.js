@@ -2,7 +2,8 @@ const { ApplicationCommandType, ActionRowBuilder, ButtonBuilder, ButtonStyle, Me
 const { Colores } = require("../../src/resources");
 const { ContextMenu, Categories, Embed, Confirmation, ErrorEmbed, Log, LogReasons, ChannelModules, GetRandomItem } = require("../../src/utils");
 
-const ms = require("ms")
+const ms = require("ms");
+const { EconomyError, FetchError, ExecutionError } = require("../../src/errors");
 
 const command = new ContextMenu({
     name: "Dar Award",
@@ -77,12 +78,11 @@ command.execute = async (interaction, models, params, client) => {
                 ]
             })
 
-        return new ErrorEmbed(interaction, {
-            type: "execError",
-            data: {
-                guide: "No hay un canal de premios configurado, avísale a los Administradores."
-            }
-        }).send()
+        throw new FetchError(interaction, "canal", [
+            "No hay ningún canal de premios configurado",
+            "No se puede enviar el mensaje",
+            "Avísa a los Administradores"
+        ])
     }
 
     const tierNum = component.customId.slice(-1)
@@ -97,14 +97,7 @@ command.execute = async (interaction, models, params, client) => {
     ], interaction)
     if (!confirmation) return;
 
-    if (!user.canBuy(price)) return new ErrorEmbed(interaction, {
-        type: "economyError",
-        data: {
-            action: "Dar Award",
-            error: "No tienes suficiente dinero",
-            money: user.economy.global.currency
-        }
-    }).send();
+    if (!user.canBuy(price)) throw new EconomyError(interaction, "No tienes tanto dinero", user.economy.global.currency);
 
     const hallEmbed = new Embed();
     const star = hyperlink("★", message.url);
@@ -174,14 +167,13 @@ command.execute = async (interaction, models, params, client) => {
                         .defDesc(`**No se pudo enviar el mensaje al canal de los Awards.**${codeBlock("json", err)}`)
                 ]
             });
-        interaction.followUp({
-            ephemeral: true, embeds: [new ErrorEmbed(interaction, {
-                type: "execError",
-                data: {
-                    guide: "No pude enviar el mensaje al canal, avísale a los Administradores. El autor del mensaje sí se recibió el premio."
-                }
-            })]
-        })
+
+        new ExecutionError(interaction, [
+            "No se pudo enviar el mensaje al canal",
+            "El autor del mensaje **sí** recibió el precio",
+            "Avísa a los Administradores"
+        ]).send({ ephemeral: true, followup: true })
+        .catch(e => console.error(e))
     }
 
     return interaction.editReply({

@@ -1,5 +1,6 @@
 const { ChannelType, PermissionsBitField, OverwriteType } = require("discord.js");
-const { Command, Categories, Confirmation, Log, LogReasons, ChannelModules, ErrorEmbed } = require("../../src/utils")
+const { Command, Categories, Confirmation, Log, LogReasons, ChannelModules, ErrorEmbed } = require("../../src/utils");
+const { DiscordLimitationError } = require("../../src/errors");
 
 const command = new Command({
     name: "lockdown",
@@ -10,13 +11,10 @@ const command = new Command({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ ephemeral: true });
 
-    const discordError = new ErrorEmbed(interaction, {
-        type: "discordLimitation",
-        data: {
-            action: "edit channel",
-            help: `No pude editar el canal por un problema con Discord. Verifica que Jeffrey Bot tenga acceso a este canal en los permisos.`
-        }
-    });
+    const discordError = new DiscordLimitationError(interaction, "editar canal", [
+        "No pude editar el canal por un problema con Discord",
+        "Verifica que Jeffrey Bot tenga acceso a este canal en los permisos"
+    ])
 
     const doc = params.getDoc();
 
@@ -25,7 +23,7 @@ command.execute = async (interaction, models, params, client) => {
 
     let locked = doc.data.locked_channels;
 
-    if (locked.find(x => x.channel_id === interaction.channel.id)) return unlock(); // togglear si ya está en lockdown
+    if (locked.find(x => x.channel_id === interaction.channel.id)) return await unlock(); // togglear si ya está en lockdown
 
     let confirmation = await Confirmation("Lockdown", [
         `Se ocultará ${interaction.channel} para TODOS los roles del servidor, incluyendo el role @everyone.`,
@@ -40,7 +38,7 @@ command.execute = async (interaction, models, params, client) => {
         return interaction.editReply({ content: `${client.Emojis.Check} Listo` })
     } catch (err) {
         console.log(err);
-        return discordError.send();
+        throw discordError;
     }
 
     async function lock() {
@@ -161,7 +159,7 @@ command.execute = async (interaction, models, params, client) => {
         await channel.edit({ permissionOverwrites: oldPermissions, reason: `[BULK] Se terminó el lockdown (${interaction.user.tag})` })
             .catch(err => {
                 console.log(err)
-                return discordError.send();
+                throw discordError;
             })
 
         // eliminar el original perms

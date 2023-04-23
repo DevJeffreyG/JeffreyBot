@@ -1,4 +1,5 @@
-const { Command, Categories, Confirmation, ErrorEmbed, Embed, Cooldowns, HumanMs } = require("../../src/utils");
+const { EconomyError, ModuleDisabledError } = require("../../src/errors");
+const { Command, Categories, Confirmation, Embed, Cooldowns, HumanMs } = require("../../src/utils");
 const command = new Command({
     name: "exp",
     desc: "Transforma tu dinero en experiencia para tu perfil",
@@ -22,18 +23,9 @@ command.execute = async (interaction, models, params, client) => {
 
     const guild = params.getDoc();
     const user = params.getUser();
-    if (!guild.moduleIsActive("functions.currency_to_exp")) return new ErrorEmbed(interaction, { type: "moduleDisabled" }).send();
+    if (!guild.moduleIsActive("functions.currency_to_exp")) throw new ModuleDisabledError(interaction);
 
-
-    if (!user.canBuy(dinero.value)) return new ErrorEmbed(interaction, {
-        type: "economyError",
-        data: {
-            action: "currency to exp",
-            error: "No tienes tanto dinero.",
-            money: user.economy.global.currency,
-            darkshop: false
-        }
-    }).send()
+    if (!user.canBuy(dinero.value)) throw new EconomyError(interaction, "No tienes tanto dinero", user.economy.global.currency)
 
     let cool = await user.cooldown(Cooldowns.CurrencyToExp, { save: false });
     if (cool) return interaction.editReply({ embeds: [new Embed({ type: "cooldown", data: { cool } })] });

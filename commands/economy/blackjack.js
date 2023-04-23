@@ -1,4 +1,5 @@
-const { Command, Categories, Blackjack, ErrorEmbed, Embed, Cooldowns } = require("../../src/utils")
+const { EconomyError } = require("../../src/errors");
+const { Command, Categories, Blackjack, Embed, Cooldowns } = require("../../src/utils")
 
 const command = new Command({
     name: "blackjack",
@@ -22,16 +23,8 @@ command.execute = async (interaction, models, params, client) => {
 
     let user = params.getUser();
 
-    let notEnough = new ErrorEmbed(interaction, {
-        type: "economyError",
-        data: {
-            action: "blackjack",
-            error: `No tienes tanto dinero para apostar.`,
-            money: user.economy.global.currency
-        }
-    })
-
-    if (user.economy.global.currency < apuesta.value) return notEnough.send();
+    if (user.economy.global.currency < apuesta.value) 
+        throw new EconomyError(interaction, "No tienes tanto dinero para apostar", user.economy.global.currency)
     let winCounts = client.wonBlackjack.find(x => x.user === interaction.user.id && x.guild === interaction.guild.id)
 
     //console.log("Ha ganado %s en esta sesión", winCounts)
@@ -50,9 +43,7 @@ command.execute = async (interaction, models, params, client) => {
     } else if (cool) return interaction.editReply({ embeds: [new Embed({ type: "cooldown", data: { cool } })] })
 
     const bj = new Blackjack(interaction, 4);
-    bj.start(apuesta.value, user, params.getDoc());
-
-    //interaction.deleteReply();
+    await bj.start(apuesta.value, user, params.getDoc());
 }
 
 module.exports = command

@@ -8,6 +8,7 @@ const ErrorEmbed = require("./ErrorEmbed");
 const { Colores } = require("../resources");
 
 const Collector = require("./Collector");
+const { ExecutionError } = require("../errors");
 
 /**
  * TY UnbelievaBoat 💚 !
@@ -246,7 +247,7 @@ class Blackjack {
                     await this.#hit();
 
                     await this.#generateEmbed();
-                    if(!this.ended) this.interaction.editReply({
+                    if (!this.ended) this.interaction.editReply({
                         embeds: [this.embed],
                         components: [this.row, this.supportRow]
                     })
@@ -395,15 +396,10 @@ class Blackjack {
         this.user = user;
         this.doc = doc;
 
-        if (this.bet < this.doc.settings.quantities.blackjack_bet) {
-            return new ErrorEmbed(this.interaction, {
-                type: "execError",
-                data: {
-                    command: this.interaction.commandName,
-                    guide: `La apuesta debe ser **${this.Emojis.Currency}${this.doc.settings.quantities.blackjack_bet.toLocaleString("es-CO")}** o mayor.`
-                }
-            }).send()
-        }
+        if (this.bet < this.doc.settings.quantities.blackjack_bet)
+            throw new ExecutionError(this.interaction,
+                `La apuesta debe ser mayor a **${this.Emojis.Currency}${this.doc.settings.quantities.blackjack_bet.toLocaleString("es-CO")}**`
+            )
 
         console.log("🟢 Hay %s cartas en la baraja", this.deck.length)
 

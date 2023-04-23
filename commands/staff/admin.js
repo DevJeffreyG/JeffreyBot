@@ -2,6 +2,8 @@ const { Command, Categories, Embed, ErrorEmbed, FindNewId, Confirmation, Shop, I
 const { Colores } = require("../../src/resources")
 
 const ms = require("ms");
+const { AlreadyExistsError, DoesntExistsError } = require("../../src/errors");
+const { SlashCommandIntegerOption } = require("discord.js");
 
 const command = new Command({
     name: "admin",
@@ -376,7 +378,12 @@ command.data
             )
     )
 
-command.addEach({ filter: "keys", type: "integer", name: "usos", desc: "Los usos máximos permitidos en el servidor para esta llave", min: 1 });
+command.addOptionsTo(["keys dinero", "keys exp", "keys role", "keys boost"], [
+    new SlashCommandIntegerOption()
+        .setName("usos")
+        .setDescription("Los usos máximos permitidos en el servidor para esta llave")
+        .setMinValue(1)
+])
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
@@ -476,20 +483,8 @@ command.keysExec = async (interaction, models, params) => {
         case "remove":
             let i = doc.data.keys.findIndex(x => x.id === id.value);
 
-            if (i === -1) {
-                let e = new ErrorEmbed(interaction, {
-                    type: "doesntExist",
-                    data: {
-                        action: "remove key",
-                        missing: `La llave con ID \`${id.value}\``,
-                        context: "este servidor"
-                    }
-                })
-
-                return e.send();
-            } else
-
-                doc.data.keys.splice(i, 1)
+            if (i === -1) throw new DoesntExistsError(interaction, `La llave con ID \`${id.value}\``, "este servidor");
+            doc.data.keys.splice(i, 1)
             await doc.save();
 
             return interaction.editReply({ embeds: [new Embed({ type: "success", data: { desc: "Se ha eliminado la llave" } })] });
@@ -516,15 +511,8 @@ command.vaultExec = async (interaction, models, params, client) => {
             const id = FindNewId(await Guilds.find(), "data.vault_codes", "id");
             const code = codigo.value.toUpperCase();
 
-            let exists = new ErrorEmbed(interaction, {
-                type: "alreadyExists",
-                data: {
-                    action: "add code",
-                    existing: code,
-                    context: "el Vault de este servidor"
-                }
-            })
-            if (doc.getVaultCode(code)) return exists.send();
+            if (doc.getVaultCode(code))
+                throw new AlreadyExistsError(interaction, code, "el Vault de este servidor");
 
             doc.data.vault_codes.push({
                 code,
@@ -550,16 +538,7 @@ command.vaultExec = async (interaction, models, params, client) => {
         case "remove": {
             const id = codigo.value;
             const vaultCode = doc.getVaultCodeById(id);
-
-            let notexists = new ErrorEmbed(interaction, {
-                type: "doesntExist",
-                data: {
-                    action: "remove code",
-                    missing: `El código con ID \`${id}\``,
-                    context: "el Vault de este servidor"
-                }
-            })
-            if (!vaultCode) return notexists.send();
+            if (!vaultCode) throw new DoesntExistsError(interaction, `El código con ID \`${id}\``, "el Vault de este servidor");
 
             let confirm = [
                 `Código con ID \`${vaultCode.id}\` : "**${vaultCode.code}**".`,
@@ -702,15 +681,15 @@ command.itemsExec = async (interaction, models, params, client) => {
 
     switch (subcommand) {
         case "use-info":
-            return _shop.editUse(items)
+            return await _shop.editUse(items)
 
         case "toggle":
-            return _shop.toggleItem(id.value, duracion?.value);
+            return await _shop.toggleItem(id.value, duracion?.value);
 
         case "name":
         case "desc":
         case "price":
-            return _shop.editItem(items, subcommand)
+            return await _shop.editItem(items, subcommand)
     }
 
 }

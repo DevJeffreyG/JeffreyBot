@@ -1,6 +1,7 @@
 const { time } = require("discord.js")
-const { Command, Categories, ErrorEmbed, Embed } = require("../../src/utils")
+const { Command, Categories, Embed } = require("../../src/utils")
 const { Colores } = require("../../src/resources");
+const { FetchError } = require("../../src/errors");
 
 const command = new Command({
     name: "inventory",
@@ -24,14 +25,6 @@ command.execute = async (interaction, models, params, client) => {
         await DarkShops.getOrNull(interaction.guild.id) :
         await Shops.getOrCreate(interaction.guild.id);
 
-    let noItems = new ErrorEmbed(interaction, {
-        type: "errorFetch",
-        data: {
-            type: "items",
-            guide: "No hay items en tu cuenta"
-        }
-    })
-
     let itemsEmbed = new Embed()
         .defAuthor({ text: `Tu inventario`, icon: interaction.member.displayAvatarURL() })
         .setThumbnail(isDarkShop ? EmojisObject.DarkShop.url : interaction.guild.iconURL({ dynamic: true }))
@@ -44,7 +37,8 @@ command.execute = async (interaction, models, params, client) => {
         if (f) itemsEmbed.defField(`— ${real_item.name}`, `**▸ Activo**: ${item.active ? `Sí, desde ${time(item.active_since)}` : "No"}.\n**▸ ID**: \`${item.use_id}\`.`)
     });
 
-    if (user.data.inventory.filter(x => x.isDarkShop === isDarkShop).length === 0 || !itemsEmbed.data.fields) return noItems.send();
+    if (user.data.inventory.filter(x => x.isDarkShop === isDarkShop).length === 0 || !itemsEmbed.data.fields) 
+        throw new FetchError(interaction, "items", ["No hay items en tu inventario para mostrar", `Compra items usando ${client.mentionCommand("buy")}`]);
 
     return interaction.editReply({ embeds: [itemsEmbed] });
 }

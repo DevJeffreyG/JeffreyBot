@@ -3,7 +3,8 @@ const moment = require("moment-timezone");
 const ms = require("ms")
 const Chance = require("chance");
 
-const { ItemTypes, ItemObjetives, ItemActions, ItemEffects, LogReasons, ChannelModules, BoostObjetives } = require("./Enums");
+const { ItemTypes, ItemObjetives, ItemActions, ItemEffects, LogReasons, ChannelModules } = require("./Enums");
+const { BadCommandError, AlreadyExistsError, DoesntExistsError, FetchError, ExecutionError } = require("../errors");
 
 const { FindNewId, LimitedTime, Subscription, WillBenefit, GetRandomItem } = require("./functions");
 
@@ -35,64 +36,20 @@ class Item {
     #embeds() {
         let interaction = this.interaction;
 
-        this.notfound = new ErrorEmbed(interaction, {
-            type: "execError",
-            data: {
-                guide: `Algo no ha ido bien, no puedes usar este item ahora mismo. Dile a los administradores que revisen el uso del item con ID: \`${this.itemId}\`.`
-            }
-        })
+        this.notfound = new ExecutionError(interaction, [
+            "Algo no ha ido bien, no puede usar este item ahora mismo",
+            `Dile a los administradores que revisen el uso del item con ID: \`${this.itemId}\``
+        ])
 
-        this.nowarns = new ErrorEmbed(interaction, {
-            type: "errorFetch",
-            data: {
-                type: "warns",
-                guide: "No existen warns vinculados al usuario",
-            }
-        })
+        this.nowarns = new FetchError(interaction, "warns", ["Este usuario no tiene warns"]);
 
-        this.hasrole = new ErrorEmbed(interaction, {
-            type: "alreadyExists",
-            data: {
-                action: "add role",
-                existing: "El role que da este item",
-                context: "el destino"
-            }
-        })
+        this.hasrole = new AlreadyExistsError(interaction, "El role que da este item", "el destino");
+        this.hasboost = new AlreadyExistsError(interaction, "El boost que da este item (te beneficia aún más)", "el destino");
 
-        this.hasboost = new ErrorEmbed(interaction, {
-            type: "alreadyExists",
-            data: {
-                action: "add boost",
-                existing: "El boost que da este item (te beneficia aún más)",
-                context: "el destino"
-            }
-        })
+        this.norole = new DoesntExistsError(interaction, "El role que quita este item", "el destino");
 
-        this.norole = new ErrorEmbed(interaction, {
-            type: "doesntExist",
-            data: {
-                action: "remove role",
-                missing: "El role que quita este item",
-                context: "el destino"
-            }
-        })
-
-        this.actived = new ErrorEmbed(interaction, {
-            type: "execError",
-            data: {
-                command: this.interaction.commandName,
-                guide: "Este item ya está activo"
-            }
-        })
-
-        this.roleDeleted = new ErrorEmbed(interaction, {
-            type: "execError",
-            data: {
-                command: this.interaction.commandName,
-                guide: "Ya se ha eliminado temporalmente este rol"
-            }
-        })
-
+        this.actived = new ExecutionError(interaction, "Ya está activado este item");
+        this.roleDeleted = new ExecutionError(interaction, "Ya se ha eliminado temporalmente este rol");
     }
 
     async build(user, doc) {
@@ -104,12 +61,14 @@ class Item {
 
         this.item = this.shop.findItem(this.itemId, false);
 
-        this.#itemInfo()
+        this.#itemInfo();
 
         return this
     }
 
     #itemInfo() {
+        this.#verify();
+
         // leer el uso y qué hace el item
         this.info = this.item.use_info;
 
@@ -147,7 +106,7 @@ class Item {
      * @returns 
      */
     async use(id, qvictim = this.interaction.member) {
-        if (!this.#verify()) return;
+        if (!this.#verify()) return false;
 
         this.original_executor = this.user;
 
@@ -260,7 +219,7 @@ class Item {
 
         if (warns?.length === 0) {
             console.log("🔴 NO tiene warns por eliminar.")
-            this.nowarns.send();
+            this.nowarns.send().catch(e => console.error(e));
             return false;
         }
 
@@ -291,14 +250,14 @@ class Item {
                 });
 
             console.log("🔴 No se encontro el role %s en el servidor", this.given);
-            this.notfound.send();
+            this.notfound.send().catch(e => console.error(e));
             return false;
         }
         console.log("🗨️ Agregando el role %s a %s", role.name, this.member.user.tag);
 
         if (this.member.roles.cache.find(x => x === role)) {
             console.log("🔴 Ya tiene el role que da el item.")
-            this.hasrole.send();
+            this.hasrole.send().catch(e => console.error(e));;
             return false;
         }
 
@@ -321,7 +280,7 @@ class Item {
                         ]
                     });
 
-                this.notfound.send();
+                this.notfound.send().catch(e => console.error(e));
                 return false;
             }
         }
@@ -346,7 +305,7 @@ class Item {
                 });
 
             console.log("🔴 No se encontro el role %s en el servidor", this.given);
-            this.notfound.send();
+            this.notfound.send().catch(e => console.error(e));
             return false;
         }
 
@@ -354,7 +313,7 @@ class Item {
 
         if (!this.member.roles.cache.find(x => x === role)) {
             console.log("🔴 No tiene el role que quita el item. %s", this.member.roles.cache)
-            this.norole.send();
+            this.norole.send().catch(e => console.error(e));
             return false;
         }
 
@@ -362,7 +321,7 @@ class Item {
         if (this.duration) {
             let globaldata = await GlobalDatas.newTempRoleDeletion({ user_id: this.member.id, guild_id: this.member.guild.id, role_id: role.id, duration: this.duration });
             if (!globaldata) {
-                this.roleDeleted.send();
+                this.roleDeleted.send().catch(e => console.error(e));
                 return false
             }
         }
@@ -463,33 +422,18 @@ class Item {
     async #addBoost() {
         if (!await this.#darkshopWork()) return false;
         const role = this.interaction.guild.roles.cache.find(x => x.id === this.given);
-        /* if (!role) {
-            await new Log(this.interaction)
-                .setReason(LogReasons.Error)
-                .setTarget(ChannelModules.StaffLogs)
-                .send({
-                    embeds: [
-                        new ErrorEmbed()
-                            .defDesc(`${this.interaction.client.Emojis.Error} \`ITEM ${this.itemId}\`: **No se encontró el role ${this.given} en el servidor.**`)
-                    ]
-                });
-
-            console.log("🔴 No se encontro el role %s en el servidor", this.given);
-            this.notfound.send();
-            return false;
-        } */
         console.log("🗨️ Agregando el role como Boost %s a %s", role?.name ?? "SIN ROL", this.interaction.user.tag);
 
         if (this.member.roles.cache.find(x => x === role)) {
             console.log("🔴 Ya tiene el role que da el item. (BOOST)")
-            this.hasrole.send();
+            this.hasrole.send().catch(e => console.error(e));
             return false;
         }
 
         const willBenefit = await WillBenefit(this.member, [this.boost_objetive, "any"])
         if (willBenefit && (this.item.use_info.effect === ItemEffects.Positive || !this.isDarkShop)) {
             console.log("🔴 Se beneficiaría aún más")
-            this.hasboost.send();
+            this.hasboost.send().catch(e => console.error(e));;
             return false
         }
 
@@ -522,7 +466,7 @@ class Item {
             tempRoleObjectId: temprole._id
         });
         if (!globaldata) {
-            this.roleDeleted.send();
+            this.roleDeleted.send().catch(e => console.error(e));
             return false
         }
 
@@ -542,16 +486,9 @@ class Item {
             this.member = this.victimMember;
         }
 
-        let noVictim = new ErrorEmbed(this.interaction, {
-            type: "execError",
-            data: {
-                command: this.interaction.commandName,
-                guide: `¡Para poder usar este item **DEBE** aplicarse en __otro__ usuario!`
-            }
-        })
-
         if (!this.victim) {
-            noVictim.send()
+            new ExecutionError(this.interaction, "¡Para poder usar este item **DEBE** usarse en __otro__ usuario!")
+                .send().catch(e => console.error(e));
             return false;
         }
 
@@ -629,7 +566,7 @@ class Item {
 
         if (this.itemInv.active) {
             console.log("🔴 Ya está activo el item desde %s", moment(this.itemInv.active_since).format("DD [de] MMM (YYYY), HH:mm:ss"))
-            this.actived.send();
+            this.actived.send().catch(e => console.error(e));
             return false
         }
 
@@ -641,29 +578,16 @@ class Item {
     }
 
     #verify() {
-        if (!this.item) {
-            let bad = new ErrorEmbed(this.interaction, {
-                type: "badCommand",
-                data: {
-                    commandName: this.interaction.commandName,
-                    error: "ReferenceError: this.item is not defined"
-                }
-            })
-            console.log("🟥 NO EXISTE ESE ITEM, VERIFICA LA ID");
-            bad.send();
-            return false;
-        }
+        if (!this.item) throw new BadCommandError(this.interaction, "this.item no está definido");
+        if (!this.info) return; // Aun no se ha fetcheado
 
         if (!this.action || this.disabled) {
-            let noUse = new ErrorEmbed(this.interaction, {
-                type: "execError",
-                data: {
-                    command: this.interaction.commandName,
-                    guide: "Los administradores no han agregado un uso para este item"
-                }
-            })
-
-            noUse.send()
+            new FetchError(this.interaction, `Item ${this.itemId}`, [
+                "Los administradores no han agregado un uso para este item",
+                "No lo podrás usar hasta que lo tenga"
+            ])
+                .send()
+                .catch(e => console.error(e));
             return false;
         }
 

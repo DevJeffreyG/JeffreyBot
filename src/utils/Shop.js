@@ -7,12 +7,12 @@ const models = require('mongoose').models
 const { Users, Shops, Guilds } = models;
 const { FindNewId, Confirmation, FindAverage } = require("./functions")
 const InteractivePages = require("./InteractivePages");
-const { Colores, Emojis } = require("../resources");
-const ErrorEmbed = require("./ErrorEmbed");
+const { Colores } = require("../resources");
 const Embed = require("./Embed");
 const { ItemObjetives, ItemTypes, ItemActions } = require("./Enums");
 const HumanMs = require("./HumanMs");
 const DarkShop = require("./DarkShop");
+const { AlreadyExistsError, DoesntExistsError, EconomyError, BadParamsError } = require("../errors");
 
 /**
  * Taken from [tutmonda](https://github.com/Jleguim/tutmonda-project) 💜
@@ -56,13 +56,7 @@ class Shop {
             }
         })
 
-        this.noitem = new ErrorEmbed(this.interaction, {
-            type: "errorFetch",
-            data: {
-                type: "item",
-                guide: `No encontré el item con esa Id en la ${this.isDarkShop ? "DarkShop" : "tienda"}`
-            }
-        })
+        this.noitem = new DoesntExistsError(this.interaction, `El item con esa ID`, `la ${this.isDarkShop ? "DarkShop" : "tienda"} de este servidor`);
     }
 
     async setup(options) {
@@ -104,15 +98,7 @@ class Shop {
 
         const item = this.shop.findItem(itemId);
 
-        let noitem = new ErrorEmbed(this.interaction, {
-            type: "execError",
-            data: {
-                command: this.interaction.commandName,
-                guide: `El item con la ID \`${itemId}\` NO existe.`
-            }
-        })
-
-        if (!item) return noitem.send();
+        if (!item) throw this.noitem;
 
         const itemPrice = this.determinePrice(this.user, item, true);
         const itemName = item.name;
@@ -130,51 +116,18 @@ class Shop {
 
         var price = this.determinePrice(this.user, item);
 
-        let noMoney = new ErrorEmbed(this.interaction, {
-            type: "economyError",
-            data: {
-                action: "buy",
-                error: `No tienes suficientes ${this.isDarkShop ? this.Emojis.DarkCurrency.name : this.Emojis.Currency.name}`,
-                money: this.isDarkShop ? this.user.economy.dark.currency : this.user.economy.global.currency,
-                darkshop: this.isDarkShop
-            }
-        })
-
-        let hasItem = new ErrorEmbed(this.interaction, {
-            type: "alreadyExists",
-            data: {
-                action: "buy",
-                existing: itemName,
-                context: "tu inventario"
-            }
-        })
-
-        let doesntHaveRole = new ErrorEmbed(this.interaction, {
-            type: "doesntExist",
-            data: {
-                action: "buy",
-                missing: `<@&${item.req_role}>`,
-                context: "en tu usuario"
-            }
-        })
-
-        let hasRoleToGive = new ErrorEmbed(this.interaction, {
-            type: "alreadyExists",
-            data: {
-                action: "buy",
-                existing: `<@&${item.use_info.given}>`,
-                context: "tu perfil"
-            }
-        })
-
         // role requerido
-        if (item.req_role && !member.roles.cache.find(x => x.id === item.req_role)) return doesntHaveRole.send();
+        if (item.req_role && !member.roles.cache.get(item.req_role))
+            throw new DoesntExistsError(this.interaction, `<@&${item.req_role}>`, "tu usuario")
 
-        // buscar si ya tiene el role que se da
-        if (item.use_info.action === "add" && item.use_info.objetive === "role" && member.roles.cache.find(x => x.id === item.use_info.given)) return hasRoleToGive.send();
-
-        if (!this.user.canBuy(price, this.isDarkShop)) return noMoney.send();
-        if (this.user.hasItem(itemId, this.isDarkShop)) return hasItem.send();
+        if (!this.user.canBuy(price, this.isDarkShop))
+            throw new EconomyError(
+                this.interaction,
+                `No tienes tantos ${this.isDarkShop ? this.Emojis.DarkCurrency.name : this.Emojis.Currency.name}`,
+                this.isDarkShop ? this.user.economy.dark.currency : this.user.economy.global.currency,
+                this.isDarkShop
+            )
+        if (this.user.hasItem(itemId, this.isDarkShop)) throw new AlreadyExistsError(this.interaction, itemName, "tu inventario");
 
         const newUseId = FindNewId(await Users.find(), "data.inventory", "use_id");
 
@@ -209,7 +162,7 @@ class Shop {
 
     async removeItem(itemId) {
         const index = this.shop.findItemIndex(itemId);
-        if (!index) return this.noitem.send();
+        if (!index) throw this.noitem;
 
         console.log("🗑️ Eliminando %s de la tienda e inventarios del Guild %s", this.shop.findItem(itemId), this.interaction.guild.id)
 
@@ -258,39 +211,16 @@ class Shop {
     }
 
     async editUse(params) {
-        let roleError = new ErrorEmbed(this.interaction, {
-            type: "execError",
-            data: {
-                command: this.interaction.commandName,
-                guide: `Si se usa un tipo role, **debe tener**: \`role\`.`
-            }
-        })
+        const roleError = new BadParamsError(this.interaction, "Si se usa un tipo Role, **debe tener**: `role`");
+        const boostError = new BadParamsError(this.interaction, [
+            "Si se usa un tipo Boost __agregando__, **debe tener**: `boostobj`, `boosttype`, `boostval` y `duracion`",
+            "Si es __eliminando__, **sólo debe tener**: `duracion`"
+        ])
+        const notValidCombination = new BadParamsError(this.interaction, "Si se usa un tipo Item, **no puede eliminarse**");
+        const dsError = new BadParamsError(this.interaction, "Si el item es de la DarkShop, **debe tener**: `efecto`");
 
-        let boostError = new ErrorEmbed(this.interaction, {
-            type: "execError",
-            data: {
-                command: this.interaction.commandName,
-                guide: `Si se usa un tipo boost agregando, **debe tener**: \`boostobj\`, \`boosttype\`, \`boostval\` y \`duracion\`.
-Si es eliminando, **sólo debe tener**: \`duracion\`.`
-            }
-        })
-
-        let notValidCombination = new ErrorEmbed(this.interaction, {
-            type: "execError",
-            data: {
-                guide: `Si se usa un tipo item, **no puede eliminarse**.`
-            }
-        })
-
-        let dsError = new ErrorEmbed(this.interaction, {
-            type: "execError",
-            data: {
-                command: this.interaction.commandName,
-                guide: `Si el item es de la DarkShop, **debe tener**: \`efecto\`.`
-            }
-        })
         const item = this.shop.findItem(params.id.value, false);
-        if (!item) return this.noitem.send();
+        if (!item) throw this.noitem;
 
         item.reply = params.reply?.value ?? item.reply;
 
@@ -316,25 +246,24 @@ Si es eliminando, **sólo debe tener**: \`duracion\`.`
 
         // boost verification
         if (use.objetive === ItemObjetives.Boost) {
-            if (!use.boost_info.type && use.action === ItemActions.Add) return boostError.send();
-            if (!use.boost_info.value && use.action === ItemActions.Add) return boostError.send();
-            if (!use.boost_info.objetive && use.action === ItemActions.Add) return boostError.send();
-            if (!use.item_info.duration) return boostError.send();
+            if (!use.boost_info.type && use.action === ItemActions.Add) throw boostError;
+            if (!use.boost_info.value && use.action === ItemActions.Add) throw boostError;
+            if (!use.boost_info.objetive && use.action === ItemActions.Add) throw boostError;
+            if (!use.item_info.duration) throw boostError;
         }
 
         // role verification
         if (use.objetive === ItemObjetives.Role) {
-            if (!use.given) return roleError.send();
+            if (!use.given) throw roleError;
         }
 
         if (use.objetive === ItemObjetives.Item) {
-            if (use.action === ItemActions.Remove) return notValidCombination.send();
+            if (use.action === ItemActions.Remove) throw notValidCombination;
         }
 
         // ds verification
-
         if (this.isDarkShop) {
-            if (!use.effect) return dsError.send();
+            if (!use.effect) throw dsError;
         }
 
         await this.shop.save();
@@ -342,10 +271,8 @@ Si es eliminando, **sólo debe tener**: \`duracion\`.`
     }
 
     async editItem(params, subcommand) {
-
-
         const item = this.shop.findItem(params.id.value, false);
-        if (!item) return this.noitem.send();
+        if (!item) throw this.noitem;
 
         switch (subcommand) {
             case "name":
@@ -507,7 +434,7 @@ Si es eliminando, **sólo debe tener**: \`duracion\`.`
     determinePrice(user, item, toString = false, noAdjustments = false) {
         const originalPrice = item.price;
 
-        if(noAdjustments) {
+        if (noAdjustments) {
             return toString ? originalPrice.toLocaleString("es-CO") : originalPrice;
         }
 

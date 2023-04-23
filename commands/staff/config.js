@@ -1,6 +1,7 @@
 const { codeBlock, messageLink, hyperlink } = require("discord.js");
 const { Colores } = require("../../src/resources");
-const { Command, Categories, ErrorEmbed, Confirmation, FindNewId, Embed, ChannelModules, Log, LogReasons, Cooldowns, Enum, ModifierType, RequirementType, Multipliers, InteractivePages } = require("../../src/utils")
+const { Command, Categories, Confirmation, FindNewId, Embed, ChannelModules, Log, LogReasons, Cooldowns, Enum, ModifierType, RequirementType, Multipliers, InteractivePages } = require("../../src/utils");
+const { BadParamsError, AlreadyExistsError, DoesntExistsError } = require("../../src/errors");
 
 const command = new Command({
     name: "config",
@@ -236,12 +237,8 @@ command.execute = async (interaction, models, params, client) => {
                 (!nivel && !role) ||
                 (Number(tipo.value) === RequirementType.Level && !nivel) ||
                 (Number(tipo.value) === RequirementType.Role && !role)
-            ) return new ErrorEmbed(interaction, {
-                type: "badParams",
-                data: {
-                    help: "Debe haber un nivel o un role, y este debe coincidir con el tipo"
-                }
-            }).send();
+            )
+                throw new BadParamsError(interaction, ["Debe haber un nivel o un role", "De acuerdo al tipo elegido"]);
 
             const newId = FindNewId(await Guilds.find(), "settings.modifiers", "id");
 
@@ -360,10 +357,7 @@ ${codeBlock("markdown", expl.value)}`,
             })
         }
         case "remove": {
-            if (!regla) return new ErrorEmbed(interaction, {
-                type: "doesntExist",
-                data: { action: `remove regla`, missing: `Regla con ID ${id.value}` }
-            }).send();
+            if (!regla) throw new DoesntExistsError(interaction, `Regla con ID \`${id.value}\``);
 
             let confirm = [
                 `Regla con ID: \`${regla.id}\`.`,
@@ -424,14 +418,8 @@ ${codeBlock("markdown", expl.value)}`,
 
         case "pos": {
             // revisar que no haya una regla con esa posicion
-            if (doc.data.rules.find(x => x.position === pos.value)) return new ErrorEmbed(interaction, {
-                type: "alreadyExists",
-                data: {
-                    action: "reglas pos",
-                    existing: "Una regla con esa posición",
-                    context: "este servidor"
-                }
-            }).send();
+            if (doc.data.rules.find(x => x.position === pos.value)) 
+                throw new AlreadyExistsError(interaction, "Una regla con esa posición", "este servidor");
 
             regla.position = pos.value;
             await doc.save();
@@ -539,12 +527,8 @@ command.execCooldowns = async (interaction, models, doc, params) => {
                 (!nivel && !role) ||
                 (Number(tipo.value) === RequirementType.Level && !nivel) ||
                 (Number(tipo.value) === RequirementType.Role && !role)
-            ) return new ErrorEmbed(interaction, {
-                type: "badParams",
-                data: {
-                    help: "Debe haber un nivel o un role, y este debe coincidir con el tipo"
-                }
-            }).send();
+            )
+                throw new BadParamsError(interaction, ["Debe haber un nivel o un role", "De acuerdo al tipo elegido"]);
 
             const newId = FindNewId(await Guilds.find(), "settings.modifiers", "id");
 

@@ -1,3 +1,4 @@
+const { BadParamsError } = require("../../src/errors");
 const { Command, Categories, ItemObjetives, Embed, BoostTypes, BoostObjetives, ErrorEmbed, Confirmation, FindNewId } = require("../../src/utils")
 
 const command = new Command({
@@ -73,14 +74,12 @@ command.execute = async (interaction, models, params, client) => {
     const { subcommand } = params
     const { target, value, chance, special, duration, boosttype, boostobj, boostvalue } = params[subcommand]
 
-    console.log(params)
-
     switch (subcommand) {
         case "roulette-item":
             if (value.value.replace(/[0-9\.]/g, "").length === 0)
-                return new ErrorEmbed(interaction, { type: "badParams", data: { help: "Dios mío que uses +-*% por favor" } }).send();
+                throw new BadParamsError(interaction, "Dios mío que uses +-*% por favor");
             if (Number(target.value) === ItemObjetives.TempRole && !duration)
-                return new ErrorEmbed(interaction, { type: "badParams", data: { help: "Si es un TempRole, 'duration' debe existir" } }).send();
+                throw new BadParamsError(interaction, "Si es un TempRole, `duration` debe existir")
 
             if (value.value.replace(/[0-9\.]/g, "") === "%") {
                 let confirmation = await Confirmation("Seguro", ["100% es la cantidad que ya se tiene", "Menos de 100% se resta", "Más de 100% se empieza a subir"], interaction);

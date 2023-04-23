@@ -1,6 +1,7 @@
 const { Command, Categories, Embed, GetRandomItem, Cooldowns, ErrorEmbed, Log, LogReasons, ChannelModules } = require("../../src/utils")
 const Chance = require("chance");
 const { Responses, Colores } = require("../../src/resources");
+const BadSetupError = require("../../src/errors/BadSetupError");
 
 const command = new Command({
     name: "rob",
@@ -74,7 +75,7 @@ command.execute = async (interaction, models, params, client) => {
                     ]
                 });
 
-            return new ErrorEmbed(interaction, { type: "badConfig" }).send().catch(err => console.error);
+            throw new BadSetupError(interaction);
         }
     }
 

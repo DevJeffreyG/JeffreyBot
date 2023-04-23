@@ -1,7 +1,6 @@
 const { ButtonStyle, ActionRowBuilder, ButtonBuilder, PermissionsBitField, time, MessageComponentInteraction, StringSelectMenuBuilder } = require("discord.js");
 
 const Embed = require("../utils/Embed");
-const ErrorEmbed = require("../utils/ErrorEmbed");
 
 const { Confirmation, FindNewId, isBannedFrom } = require("../utils/functions");
 
@@ -12,6 +11,7 @@ const { Guilds } = require("mongoose").models;
 const ms = require("ms");
 const Log = require("../utils/Log");
 const { ChannelModules } = require("../utils/Enums");
+const { DoesntExistsError, ModuleBannedError, ModuleDisabledError } = require("../errors");
 
 const ticketCooldown = ms("1m");
 const activeCreatingTicket = new Map();
@@ -41,14 +41,7 @@ class Ticket {
             }
         ];
 
-        this.doesntExist = new ErrorEmbed(this.interaction, {
-            type: "doesntExist",
-            data: {
-                action: "ticket",
-                missing: "Este ticket",
-                context: "este servidor"
-            }
-        })
+        this.doesntExist = new DoesntExistsError(interaction, "Este ticket", "este servidor");
 
         this.#setStaffPerms();
         this.#setRows()
@@ -58,24 +51,24 @@ class Ticket {
         this.docGuild = doc;
         this.user = user;
 
-        if (!this.docGuild.moduleIsActive("functions.tickets")) return new ErrorEmbed(this.interaction, { type: "moduleDisabled" }).send({ ephemeral: true });
+        if (!this.docGuild.moduleIsActive("functions.tickets")) throw new ModuleDisabledError(interaction).setEphemeral(true);
         if (!this.interaction.deferred) await this.interaction.deferReply({ ephemeral: true });
 
         switch (this.customId) {
             case "createTicket":
-                this.#createTicket();
+                await this.#createTicket();
                 break;
 
             case "resolveTicket":
-                this.#resolveTicket();
+                await this.#resolveTicket();
                 break;
 
             case "closeTicket":
-                this.#closeTicket();
+                await this.#closeTicket();
                 break;
 
             case "reopenTicket":
-                this.#reopenTicket();
+                await this.#reopenTicket();
                 break;
         }
     }
@@ -84,7 +77,7 @@ class Ticket {
         const doc = this.docGuild;
 
         // baneado de crear tickets
-        if (await isBannedFrom(this.interaction, "TICKETS")) return new ErrorEmbed(this.interaction, { type: "moduleBanned" }).send();
+        if (await isBannedFrom(this.interaction, "TICKETS")) throw new ModuleBannedError(this.interaction);
 
         // tiene cooldown
         if (activeCreatingTicket.has(this.interaction.user.id)) return this.interaction.editReply(`Alto ahí velocista, por favor espera ${ms((ticketCooldown) - (new Date().getTime() - activeCreatingTicket.get(this.interaction.user.id)))} antes de volver a darle al botón.`);
@@ -301,7 +294,7 @@ class Ticket {
         //interaction.message.channel.delete();
 
         const ticket = this.docGuild.data.tickets.find(x => x.channel_id === interaction.channel.id);
-        if (!ticket) return this.doesntExist.send();
+        if (!ticket) throw this.doesntExist;
 
         const channel = interaction.channel;
 
@@ -352,7 +345,7 @@ class Ticket {
         if (!confirmation) return;
 
         const ticket = this.docGuild.data.tickets.find(x => x.channel_id === interaction.channel.id);
-        if (!ticket) return this.doesntExist.send();
+        if (!ticket) throw this.doesntExist;
 
         const channel = interaction.channel;
 
@@ -401,7 +394,7 @@ class Ticket {
         if (!confirmation) return;
 
         const ticket = this.docGuild.data.tickets.find(x => x.channel_id === interaction.channel.id);
-        if (!ticket) return this.doesntExist.send();
+        if (!ticket) throw this.doesntExist;
 
         const channel = interaction.channel;
 

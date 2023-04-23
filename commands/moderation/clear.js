@@ -1,4 +1,5 @@
-const { Command, Categories, Embed, ErrorEmbed, Log, LogReasons, ChannelModules } = require("../../src/utils")
+const { DiscordLimitationError } = require("../../src/errors");
+const { Command, Categories, Embed, Log, LogReasons, ChannelModules } = require("../../src/utils")
 const moment = require("moment-timezone");
 
 const command = new Command({
@@ -58,14 +59,8 @@ command.execute = async (interaction, models, params, client) => {
         }
     }
 
-    let dayserror = new ErrorEmbed(interaction, {
-        type: "discordLimitation",
-        data: {
-            action: "bulkdelete mensajes viejos",
-            help: "Sólo puedo eliminar mensajes que sean menores de 14 días"
-        }
-    })
-    if (count === 0) return dayserror.send();
+    if (count === 0)
+        throw new DiscordLimitationError(interaction, "Bulk Delete", "Sólo puedo eliminar mensajes que hayan sido enviados hace menos de 14 días.")
 
     new Log(interaction)
         .setReason(LogReasons.MsgClear)

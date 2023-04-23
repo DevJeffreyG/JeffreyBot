@@ -1,5 +1,6 @@
-const { Command, Categories, Confirmation, ErrorEmbed, Embed, Sleep, GetRandomItem } = require("../../src/utils")
+const { Command, Categories, Confirmation, Embed, Sleep, GetRandomItem } = require("../../src/utils")
 const { Colores } = require("../../src/resources");
+const { EconomyError } = require("../../src/errors");
 
 const command = new Command({
     name: "pay",
@@ -86,16 +87,7 @@ command.execute = async (interaction, models, params, client) => {
     let confirmation = await Confirmation("Pagar dinero", toConfirm, interaction);
     if (!confirmation) return;
 
-    let notEnough = new ErrorEmbed(interaction, {
-        type: "economyError",
-        data: {
-            action: "pay",
-            error: "No tienes suficiente dinero",
-            money: author_user.economy.global.currency
-        }
-    })
-
-    if (!author_user.canBuy(quantity)) return notEnough.send();
+    if (!author_user.canBuy(quantity)) throw new EconomyError(interaction, "No tienes tanto dinero", author_user.economy.global.currency);
 
     if (author.id === recieverMember.id) {
         let msg = await interaction.fetchReply();

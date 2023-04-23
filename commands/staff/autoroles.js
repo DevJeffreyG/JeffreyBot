@@ -1,6 +1,7 @@
-const { Command, Categories, Embed, ErrorEmbed, FindNewId, Confirmation, InteractivePages } = require("../../src/utils")
+const { Command, Categories, Embed, FindNewId, Confirmation, InteractivePages } = require("../../src/utils")
 const { Colores } = require("../../src/resources")
 const { hyperlink, Collection, Emoji } = require("discord.js")
+const { BadParamsError, DoesntExistsError, FetchError, InsuficientSetupError } = require("../../src/errors")
 
 const command = new Command({
     name: "autoroles",
@@ -124,31 +125,23 @@ command.execute = async (interaction, models, params, client) => {
                 return interaction.editReply({ embeds: [e] });
             }
 
-            const noch = new ErrorEmbed(interaction, {
-                type: "errorFetch",
-                data: {
-                    type: "CHANNEL",
-                    guide: `¡No está el canal definido! Asígnalo con este mismo comando.`
-                }
-            })
-
             if (canal) ch = canal.channel;
             else ch = interaction.guild.channels.cache.find(x => x.id === doc.settings.autoroles.channel_id);
 
-            if (!ch) return noch.send();
-
-            const nomsg = new ErrorEmbed(interaction, {
-                type: "errorFetch",
-                data: {
-                    type: "MESSAGE ID",
-                    guide: `El mensaje con ID \`${mensaje?.value ?? '0'}\` NO existe en el canal ${ch}!`
-                }
-            })
+            if (!ch)
+                throw new FetchError(interaction, "canal", [
+                    "No hay ningún canal configurado", `Usa ${client.mentionCommand("autoroles config")}`
+                ])
 
             if (mensaje) {
                 await ch.messages.fetch();
                 msg = ch.messages.cache.find(x => x.id === mensaje.value);
-                if (!msg) return nomsg.send();
+                if (!msg)
+                    throw new FetchError(interaction, "mensaje", [
+                        `No se encontró el mensaje (\`${mensaje?.value ?? '0'}\`) en el canal ${ch}`,
+                        `Usa ${client.mentionCommand("autoroles config")}`
+                    ])
+
             } else msg = ch.messages.cache.find(x => x.id === doc.settings.autoroles.message_id);
 
             if (server) {
@@ -179,14 +172,11 @@ command.execute = async (interaction, models, params, client) => {
             });
 
         case "add":
-            if (!config.ch || !config.msg) {
-                return new ErrorEmbed(interaction, {
-                    type: "execError",
-                    data: {
-                        guide: `Falta por configurar el canal y el mensaje. ${client.mentionCommand("autoroles config")}`
-                    }
-                }).send();
-            }
+            if (!config.ch || !config.msg)
+                throw new InsuficientSetupError(interaction, "canal y mensaje", [
+                    "Falta configurar el canal y/o mensaje",
+                    `Usa ${client.mentionCommand("autoroles config")}`
+                ]);
 
             let id = emoji.value.match(/\d/g)?.join("");
             let newId = FindNewId(await Guilds.find(), "data.autoroles", "id");
@@ -203,23 +193,14 @@ command.execute = async (interaction, models, params, client) => {
                 noemoji = true;
             }
 
-            if (emote instanceof Collection || noemoji) return new ErrorEmbed(interaction, {
-                type: "badParams",
-                data: {
-                    help: `No encontré ese emote (${emote instanceof Emoji ? emote : emote.id}) en el servidor '${config.guild ?? interaction.guild}'`
-                }
-            }).send();
+            if (emote instanceof Collection || noemoji)
+                throw new BadParamsError(interaction, [
+                    `No encontré el emote ${emote instanceof Emoji ? emote : emote.id} en el servidor '${config.guild ?? interaction.guild}'`,
+                    `Usa ${client.mentionCommand("autoroles config")} para verificar tu configuración`
+                ])
 
             let q = await doc.addAutoRole(emote, role.value, newId);
-
-            const notadded = new ErrorEmbed(interaction, {
-                type: "badParams",
-                data: {
-                    help: "No se pueden repetir emotes o roles por mensaje"
-                }
-            })
-
-            if (!q) return notadded.send();
+            if (!q) throw new BadParamsError(interaction, "No se pueden repetir emotes o roles por mensaje");
 
             return interaction.editReply({
                 content: null, embeds: [
@@ -234,18 +215,7 @@ command.execute = async (interaction, models, params, client) => {
 
         case "remove": {
             const autoRole = doc.getAutoRole(autorole.value)
-            if (!autoRole) {
-                let err = new ErrorEmbed(interaction, {
-                    type: "doesntExist",
-                    data: {
-                        action: "remove autorole",
-                        missing: `El AutoRole ID \`${autorole.value}\``,
-                        context: "la base de datos"
-                    }
-                });
-
-                return err.send();
-            }
+            if (!autoRole) throw new DoesntExistsError(interaction, `El AutoRole ID \`${autorole.value}\``, "este servidor")
 
             let toRemoveFetch, toRemove;
 
@@ -290,30 +260,7 @@ command.execute = async (interaction, models, params, client) => {
             const toggleGroup = doc.getOrCreateToggleGroup(toggleGroupId)
             const autoRole = doc.getAutoRole(autoroleId)
 
-            if (!autoRole) {
-                return new ErrorEmbed(interaction,
-                    {
-                        type: "doesntExist",
-                        data: {
-                            action: "toggle",
-                            missing: `El AutoRole con ID \`${autoroleId}\``,
-                            context: "este servidor"
-                        }
-                    }).send()
-            }
-
-            /* // revisar que no haya autoroles con ese mismo toggle id en otro canal
-            let error = new ErrorEmbed(interaction,
-                {
-                    type: "alreadyExists",
-                    data: {
-                        action: "toggle autorole",
-                        existing: `AutoRole con Toggle Group ID \`${toggleGroupId}\``,
-                        context: "otro canal y/o mensaje"
-                    }
-                })
-            if (doc.data.autoroles.find(x => x.toggle_group === toggleGroupId && x.message_id != autoRole.message_id))
-                return error.send(); */
+            if (!autoRole) throw new DoesntExistsError(interaction, `El AutoRole ID \`${autoroleId}\``, "este servidor")
 
             autoRole.toggle_group = toggleGroupId;
             await doc.save();
@@ -335,9 +282,9 @@ command.execute = async (interaction, models, params, client) => {
 
             for await (x of doc.data.autoroles) {
                 let guildEmote = await interaction.client.guilds.fetch(x.guild_emote ?? interaction.guild.id).catch(err => null);
-                let emote = !isNaN(x.emote) ? guildEmote.emojis.cache.find(x => x.id === x.emote) : x.emote;
+                let emote = !isNaN(x.emote) ? guildEmote.emojis.cache.get(x.emote) : x.emote;
                 let grupo = x.toggle_group ? doc.getOrCreateToggleGroup(x.toggle_group) : "No tiene";
-                let aRole = interaction.guild.roles.cache.find(x => x.id === x.role_id) ?? "Se eliminó";
+                let aRole = interaction.guild.roles.cache.get(x.role_id) ?? "Se eliminó el role";
                 let actualC = interaction.guild.channels.cache.get(x.channel_id) ?? "Se eliminó";
                 let actualFetch = await actualC?.messages?.fetch(x.message_id).catch(err => { console.log(err) }) ?? null;
 
@@ -365,8 +312,7 @@ command.execute = async (interaction, models, params, client) => {
 
         case "sync": {
             let syncQuery = doc.data.autoroles;
-            let notExists = new ErrorEmbed(interaction, { type: "doesntExist", data: { action: "autoroles sync", missing: "AutoRoles" } });
-            if (syncQuery?.length === 0) return notExists.send();
+            if (syncQuery?.length === 0) throw new DoesntExistsError(interaction, `AutoRoles`);
 
             for (let i = 0; i < syncQuery.length; i++) {
                 const autorole = syncQuery[i];
