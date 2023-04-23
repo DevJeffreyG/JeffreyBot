@@ -35,7 +35,8 @@ module.exports = async (client) => {
 **—** Tipo de componente: \`${client.lastInteraction?.componentType}\`
 **—** CustomId: \`${client.lastInteraction?.customId}\`
 **—** ID: \`${client.lastInteraction?.id}\`
-**—** ${time(client.lastInteraction?.createdAt)}`
+**—** ${time(client.lastInteraction?.createdAt)}
+**—** **v${client.version}**`
     }
 
     process.on('uncaughtException', err => {
