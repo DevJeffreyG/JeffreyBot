@@ -615,7 +615,7 @@ ${stonks} **—** Antes era de un \`${oldinflation}%\`: (**${this.Emojis.DarkCur
 ${tz.now.day() != 0 ? `**—** La inflación inicial fue \`${this.baseValue}%\`.\n` : ""}**—** La inflación cambiará ${time(date, "R")}.`)
             .defColor(Colores.negro);
 
-        this.interaction.reply({ embeds: [stonksEmbed] });
+        await this.interaction.reply({ embeds: [stonksEmbed] });
     }
 
     /**
