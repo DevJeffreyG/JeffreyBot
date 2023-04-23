@@ -4,6 +4,10 @@ const { Ticket, Suggestion } = require("./src/handlers/");
 const { Bases, Colores } = require("./src/resources");
 const { ErrorEmbed, Embed, Categories, ValidateDarkShop, Confirmation, HumanMs } = require("./src/utils");
 
+const { CommandNotFoundError, ToggledCommandError, DiscordLimitationError, BadCommandError, SelfExec, ModuleDisabledError } = require("./src/errors/");
+
+const JeffreyBotError = require("./src/errors/JeffreyBotError");
+
 const ms = require("ms");
 const moment = require("moment-timezone");
 
@@ -35,7 +39,10 @@ class Handlers {
             const inside = args[2];
 
             let command = this.client.application.commands.cache.find(x => x.name === name) ?? this.interaction.guild.commands.cache.find(x => x.name === name);
-            if (!command) return `\`/${name}\``;
+            if (!command) {
+                console.error("🔴 No se encontró el comando %s", format)
+                return `\`/${name}\``;
+            }
 
             if (inside) return chatInputApplicationCommandMention(name, sub, inside, command.id)
             else if (sub) return chatInputApplicationCommandMention(name, sub, command.id)
@@ -79,19 +86,27 @@ class Handlers {
         this.params["getDoc"] = () => { return this.params["mongoose_guild_doc"] }
         this.params["getUser"] = () => { return this.params["mongoose_user_doc"] }
 
-        switch (this.interaction.type) {
-            case InteractionType.ApplicationCommand:
-                if (this.interaction.isChatInputCommand()) return this.slashHandler();
-                if (this.interaction.isContextMenuCommand()) return this.contextMenuHandler();
+        try {
+            switch (this.interaction.type) {
+                case InteractionType.ApplicationCommand:
+                    if (this.interaction.isChatInputCommand()) return await this.slashHandler();
+                    if (this.interaction.isContextMenuCommand()) return await this.contextMenuHandler();
 
-            case InteractionType.MessageComponent:
-                return this.componentHandler();
+                case InteractionType.MessageComponent:
+                    return await this.componentHandler();
 
-            case InteractionType.ModalSubmit:
-                return this.modalHandler();
+                case InteractionType.ModalSubmit:
+                    return await this.modalHandler();
+            }
+        } catch (err) {
+            this.#handleError(err)
+                .catch(e => console.error(e));
         }
     }
 
+    /**
+     * Handler de Slash Commands
+     */
     async slashHandler() {
         const commandName = this.interaction.commandName;
         this.executedCommand = this.client.commands.get(commandName);
@@ -99,10 +114,7 @@ class Handlers {
 
         let toggledQuery = await ToggledCommands.getToggle(commandName);
 
-        if (toggledQuery && !this.#isDev()) {
-            let since = time(toggledQuery.since);
-            return this.interaction.reply({ content: null, embeds: [new ErrorEmbed({ type: "toggledCommand", data: { commandName, since, reason: toggledQuery.reason } })], ephemeral: true });
-        }
+        if (toggledQuery && !this.#isDev()) throw new ToggledCommandError(this.interaction, toggledQuery);
 
         // params
         const params = this.params;
@@ -164,13 +176,12 @@ class Handlers {
             if (typeof params[prop] === 'undefined') params[prop] = {}
         }
 
-        try {
-            await this.#executeCommand(this.interaction, models, params, this.client)
-        } catch (err) {
-            console.log(err)
-        }
+        await this.#executeCommand(this.interaction, models, params, this.client)
     }
 
+    /**
+     * Handler de Context Menus
+     */
     async contextMenuHandler() {
         const commandName = this.interaction.commandName;
         this.executedCommand = this.client.commands.get(commandName);
@@ -180,16 +191,16 @@ class Handlers {
         params["user"] = this.interaction.targetUser;
         params["message"] = this.interaction.targetMessage;
 
-        try {
-            this.#executeCommand(this.interaction, models, params, this.client)
-        } catch (err) {
-            console.log(err)
-        }
+        await this.#executeCommand(this.interaction, models, params, this.client)
+
     }
 
+    /**
+     * Handler de componentes de mensajes (Botones)
+     */
     async componentHandler() {
-        this.ticket?.handle(this.user, this.doc);
-        this.suggestion?.handle(this.user, this.doc);
+        await this.ticket?.handle(this.user, this.doc);
+        await this.suggestion?.handle(this.user, this.doc);
 
         switch (this.interaction.customId) {
             case "deleteMessage":
@@ -216,11 +227,7 @@ class Handlers {
 **—** Si el valor de la mano de Jeffrey Bot es la misma que la tuya se termina el juego como empate y no pierdes nada de lo apostado.
 **—** Si el valor de la mano de Jeffrey Bot es 21 o menor y mayor que la tuya, pierdes.`);
 
-                try {
-                    return await this.interaction.reply({ embeds: [e], ephemeral: true });
-                } catch (err) {
-                    console.log(err)
-                }
+                return await this.interaction.reply({ embeds: [e], ephemeral: true });
             }
             case "rememberBirthday": {
                 if (!this.interaction.deferred) await this.interaction.deferReply({ ephemeral: true }).catch(err => console.log(err));
@@ -235,15 +242,8 @@ class Handlers {
                 const member = this.interaction.guild.members.cache.find(x => x.user.discriminator === disc && x.user.tag.includes(tag));
                 if(!member) return this.interaction.deleteReply();
 
-                if (member === this.interaction.member) {
-                    return new ErrorEmbed(this.interaction, {
-                        type: "execError",
-                        data: {
-                            command: "reminder",
-                            guide: "No puedes recordarte tu mismo cumpleaños"
-                        }
-                    }).send();
-                }
+                if (member === this.interaction.member)
+                    throw new SelfExec(this.interaction);
 
                 if (!this.user.hasReminderFor(member.id)) {
                     let confirmation = await Confirmation("Recordar", [
@@ -291,82 +291,73 @@ class Handlers {
         }
     }
 
+    /**
+     * Handler de Modals
+     */
     async modalHandler() {
-        this.suggestion?.handle(this.params.getUser(), this.params.getDoc());
+        await this.suggestion?.handle(this.params.getUser(), this.params.getDoc());
     }
 
     async #executeCommand(interaction, models, params, client) {
-        console.log(`-------- ${interaction.commandName} • por ${interaction.user.id} • en ${interaction.guild.name} (${interaction.guild.id}) ----------`)
+        console.log(`-------- ${interaction.commandName} • por ${interaction.user.tag} (${interaction.user.id}) • en ${interaction.guild.name} (${interaction.guild.id}) ----------`)
 
-        try {
-            if (!this.executedCommand) throw new Error(`Se quiso ejecutar un comando pero no se encontró mappeado. ${interaction.commandName}`)
-            if (this.executedCommand.category === Categories.DarkShop) {
-                if (!this.doc.moduleIsActive("functions.darkshop")) return new ErrorEmbed(interaction, {
-                    type: "moduleDisabled"
-                }).send({ ephemeral: true });
-                // filtro de nivel 5
-                let validation = await ValidateDarkShop(this.user, interaction.user);
-                if (!validation.valid) return interaction.reply({ embeds: [validation.embed] })
-            }
-
-            if (this.executedCommand.category === Categories.Developer) {
-                if (!this.#isDev()) return interaction.reply({ ephemeral: true, content: "No puedes usar este comando porque no eres desarrollador de Jeffrey Bot" })
-            }
-
-            if (this.slashCooldowns.get(this.identifierCooldown)) {
-                let until = moment(this.slashCooldowns.get(this.identifierCooldown)).add(slashCooldown, "ms")
-
-                return interaction.reply({
-                    embeds: [
-                        new Embed({
-                            type: "cooldown",
-                            data: {
-                                cool: {
-                                    mention: time(until.toDate(), "R"),
-                                    text: new HumanMs(until).left()
-                                }
-                            }
-                        })
-                    ]
-                })
-            }
-
-            try {
-                this.slashCooldowns.set(this.identifierCooldown, new Date())
-
-                setTimeout(() => {
-                    this.slashCooldowns.delete(this.identifierCooldown);
-                }, slashCooldown)
-                await this.executedCommand.execute(interaction, models, params, client);
-            } catch (err) {
-                console.log("🔴 No se pudo ejecutar el comando")
-                console.log(err)
-
-                try {
-                    this.#sendErrorEmbed(err);
-                } catch (err) { }
-            }
-        } catch (error) {
-            console.error(error);
-            try {
-                this.#sendErrorEmbed(error);
-            } catch (err) { }
+        if (!this.executedCommand) throw new CommandNotFoundError(interaction);
+        if (this.executedCommand.category === Categories.DarkShop) {
+            if (!this.doc.moduleIsActive("functions.darkshop")) 
+                throw new ModuleDisabledError(interaction);
+            // filtro de nivel 5
+            let validation = await ValidateDarkShop(this.user, interaction.user);
+            if (!validation.valid) return interaction.reply({ embeds: [validation.embed] })
         }
+
+        if (this.executedCommand.category === Categories.Developer) {
+            if (!this.#isDev()) return interaction.reply({ ephemeral: true, content: "No puedes usar este comando porque no eres desarrollador de Jeffrey Bot" })
+        }
+
+        if (this.slashCooldowns.get(this.identifierCooldown)) {
+            let until = moment(this.slashCooldowns.get(this.identifierCooldown)).add(slashCooldown, "ms")
+
+            return interaction.reply({
+                embeds: [
+                    new Embed({
+                        type: "cooldown",
+                        data: {
+                            cool: {
+                                mention: time(until.toDate(), "R"),
+                                text: new HumanMs(until).left()
+                            }
+                        }
+                    })
+                ]
+            })
+        }
+
+        this.slashCooldowns.set(this.identifierCooldown, new Date())
+
+        setTimeout(() => {
+            this.slashCooldowns.delete(this.identifierCooldown);
+        }, slashCooldown)
+
+        await this.executedCommand.execute(interaction, models, params, client);
     }
 
-    async #sendErrorEmbed(error) {
-        let help = error instanceof DiscordAPIError ? new ErrorEmbed(this.interaction, {
-            type: "discordLimitation",
-            data: {
-                action: `/${this.interaction.commandName}`,
-                help: error
-            }
-        }) : new ErrorEmbed(this.interaction, { type: "badCommand", data: { commandName: this.interaction.commandName, error } });
+    /**
+     * 
+     * @param {JeffreyBotError | Error} error 
+     * @returns 
+     */
+    async #handleError(error) {
+        this.slashCooldowns.delete(this.identifierCooldown);
 
         try {
-            this.slashCooldowns.delete(this.identifierCooldown);
-            return await help.send()
-            //await interaction.reply({ content: null, embeds: [help], ephemeral: true });
+            console.log("🔴 No se pudo ejecutar el comando: %s", error.name)
+            if (error instanceof JeffreyBotError) {
+                return await error.send();
+            } else if (error instanceof DiscordAPIError) {
+                return await new DiscordLimitationError(this.interaction, `${this.interaction.commandName}`, error).send();
+            } else {
+                return await new BadCommandError(this.interaction, error).send();
+            }
         } catch (err) {
             console.log("⚠️ Un comando quiso ser usado y Discord no respondió:", this.client.lastInteraction)
             console.log(err);

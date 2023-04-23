@@ -4,29 +4,9 @@ const { BaseInteraction, GuildChannel, codeBlock, Guild } = require("discord.js"
 
 class ErrorEmbed extends Embed {
     /**
+     * ### Creación de un ErrorEmbed
      * @param {BaseInteraction | GuildChannel} inter - La interacción principal dada
-     * @param {Object} options La configuración de este ErrorEmbed {type, data}
-     * @param {string} options.type ### El tipo de ErrorEmbed que va a ser
-     * - commandNotFound
-     * - toggledCommand
-     * - badCommand
-     * - badFunction
-     * - selfRep
-     * - insuficientSetup
-     * - commandError
-     * - notSent
-     * - badParams
-     * - alreadyExists
-     * - doesntExist
-     * - errorFetch
-     * - discordLimitation
-     * - economyError
-     * - execError
-     * - moduleBanned
-     * - moduleDisabled
-     * - notPerms
-     * @param {string} options.data - La información que tiene este tipo
-     * @description Creación de un ErrorEmbed
+     * @param {{type: string, data: string}} options La configuración de este ErrorEmbed
      */
     constructor(inter = null, options, ignorewarnings = false) {
         super()
@@ -59,120 +39,106 @@ class ErrorEmbed extends Embed {
         }
 
         switch (type) {
-            case "commandNotFound":
+            case "CommandNotFound":
                 this.#errorName("No existe")
                 this.#errorAuthor(1);
                 this.#errorDesc("No se pudo encontrar el comando", `(\`/${data}\`)`)
                 this.defFooter({ text: `Usa el comando /ayuda para ver todos los comandos del bot` })
                 break;
 
-            case "toggledCommand":
+            case "ToggledCommand":
                 this.#errorName("Comando deshabilitado")
                 this.#errorAuthor(2);
                 this.#errorDesc("Este comando está deshabilitado", `(\`/${data.commandName ?? this.interaction?.commandName}\`)`, [`**${data.reason}** desde ${data.since}`])
                 break;
 
-            case "badCommand":
+            case "BadCommand":
                 this.#errorName("Error en el codigo")
                 this.#errorAuthor(3);
-                this.#errorDesc("Hubo un error ejecutando este comando", `(\`/${data.commandName ?? this.interaction?.commandName}\`)`, ["Avisa a JeffreyG.", `**Y también dile que...**
+                this.#errorDesc("Hubo un error ejecutando este comando", `(\`${data.commandName ?? this.interaction?.commandName}\`)`, ["Avisa a JeffreyG.", `**Y también dile que...**
 ${codeBlock("javascript", data.error)}`])
                 break;
 
-            case "selfRep":
-                this.#errorName("Auto Rep")
+            case "SelfExec":
+                this.#errorName("Auto Command")
                 this.#errorAuthor(4);
-                this.#errorDesc("No puedes darte un punto de reputación a ti mismo", data)
+                this.#errorDesc("No puedes usar esto en ti mismo", this.interaction.member)
                 break;
 
-            case "insuficientSetup":
+            case "InsuficientSetup":
                 this.#errorName("No se ha configurado")
                 this.#errorAuthor(5);
-                this.#errorDesc("No se puede usar esta funcionalidad sin antes configurar el bot", `\`${data.needed.toUpperCase()}\``, [`Un administrador del servidor tiene que usar el comando \`/setup\` primero.`, `O el comando \`/config\` en su defecto.`])
-                this.defFooter({ text: `Si aún no lo han hecho, muéstrales este mensaje.` });
+                this.#errorDesc("Hay que configurar el bot antes", `\`${data.needed.toUpperCase()}\``, data.guide ?? [`Un administrador del servidor tiene que usar el comando ${this.client.mentionCommand("setup")} primero.`, `O el comando ${this.client.mentionCommand("config")} en su defecto.`])
+                if(!data.guide) this.defFooter({ text: `Si aún no lo han hecho, muéstrales este mensaje.` });
                 break;
 
-            case "commandError":
-                this.#errorName("Error de comando")
-                this.#errorAuthor(6);
-                this.#errorDesc("Podrías usar este comando, pero Jeffrey es tonto", `\`${data.id}\``, [`**▸ También dile que...**
-${codeBlock("json", `{ FATAL ERROR, ID ${data.id}, UNKNOWN "${data.unknown}`)}`])
-                break;
-
-            case "notSent":
+            case "DMNotSent":
                 this.#errorName("No se envió")
                 this.#errorAuthor(7);
                 this.#errorDesc("No pude enviar el mensaje al usuario por privado", data.tag, [data.error])
                 break;
 
-            case "badParams":
+            case "BadParams":
                 this.#errorName("Mala ejecución")
                 this.#errorAuthor(8)
-                this.#errorDesc("No puedes ejecutar ese comando así", data.help)
+                this.#errorDesc("No puedes ejecutar ese comando así", data.commandName, data.help)
                 break;
 
-            case "alreadyExists":
+            case "AlreadyExists":
                 this.#errorName("Ya existe")
                 this.#errorAuthor(9)
-                this.#errorDesc("No se pudo completar la acción", data.action, [`${data.existing} ya existe en ${data.context ?? "este medio"}.`])
+                this.#errorDesc("No se pudo completar la acción", data.commandName, [`${data.existing} ya existe en ${data.context ?? "este medio"}.`])
                 break;
 
-            case "doesntExist":
+            case "DoesntExists":
                 this.#errorName("No existe")
                 this.#errorAuthor(10)
-                this.#errorDesc("No se pudo completar la acción", data.action, [`${data.missing} no existe en ${data.context ?? "este medio"}.`])
+                this.#errorDesc("No se pudo completar la acción", data.commandName, [`${data.missing} no existe en ${data.context ?? "este medio"}.`])
                 break;
 
-            case "errorFetch":
+            case "FetchError":
                 this.#errorName("No encontrado")
                 this.#errorAuthor(11)
-                this.#errorDesc("No se pudo obtener la información", data.type, [data.guide])
+                this.#errorDesc("No se pudo obtener la información", data.type, data.guide)
                 break;
 
-            case "discordLimitation":
+            case "DiscordLimitation":
                 this.#errorName("Límite de Discord")
                 this.#errorAuthor(12)
-                this.#errorDesc("Discord no me deja hacer eso", data.action, [data.help])
+                this.#errorDesc("Discord no me deja hacer eso", data.action, data.help)
                 break;
 
-            case "economyError":
-                this.#errorName("Mala transacción")
+            case "EconomyError":
+                this.#errorName("Error económico")
                 this.#errorAuthor(13)
-                this.#errorDesc("Error en la transacción", data.action, [data.error, `Tienes: **${data.darkshop ? DarkCurrency : Currency}${data.money.toLocaleString('es-CO')}**`])
+                this.#errorDesc("Error en la transacción", data.commandName, [...data.error, `Tienes: **${data.darkshop ? DarkCurrency : Currency}${data.money.toLocaleString('es-CO')}**`])
                 break;
 
-            case "execError":
+            case "ExecutionError":
                 this.#errorName("Error en ejecución")
                 this.#errorAuthor(14)
-                this.#errorDesc("Error al ejecutar el comando", data.command ?? this.interaction?.commandName, [data.guide])
+                this.#errorDesc("Error al ejecutar el comando", data.command ?? this.interaction?.commandName, data.guide)
                 break;
 
-            case "moduleBanned":
+            case "ModuleBanned":
                 this.#errorName("Baneado")
                 this.#errorAuthor(15)
                 this.#errorDesc("Has sido limitado por los administradores", "No puedes usar este comando/funcionalidad")
                 break;
 
-            case "moduleDisabled":
+            case "ModuleDisabled":
                 this.#errorName("Deshabilitado")
                 this.#errorAuthor(16)
                 this.#errorDesc("No puedes usar eso", "los administradores han deshabilitado esta funcionalidad.")
                 break;
 
-            case "badFunction":
-                this.#errorName("Error en el codigo")
-                this.#errorAuthor(17);
-                this.#errorDesc("Jeffrey es tonto, y por eso hubo un error ejecutando esta función", `(\`${this.interaction.type}\`)`, ["Por favor, avísale de su grado de inservibilidad.", `**Y también dile que...**
-${codeBlock("javascript", data.error)}`])
-                break;
-
-            case "notPerms":
+            case "PermissionError":
                 this.#errorName("Denegado")
                 this.#errorAuthor(18)
                 this.#errorDesc("No puedes usar eso", "No tienes los permisos necesarios.")
                 break;
 
-            case "badConfig":
+            case "BadSetup":
                 this.#errorName("Mala configuración")
                 this.#errorAuthor(19)
                 this.#errorDesc("Hay un error en la configuración del bot", "Avísa a los administradores")
@@ -202,9 +168,10 @@ ${codeBlock("javascript", data.error)}`])
     #errorDesc(desc, principal, more = []) {
         this.defDesc(`**— ${desc} ▸ ${principal}**`);
         let d = this.description;
-
         more.forEach(data => {
             d += `\n▸ ${data}`
+            console.log(data)
+            if (!data.endsWith(".") && !(data.endsWith(":") || data.endsWith("!") || data.endsWith("```") || data.endsWith("?"))) d += `.`;
         })
 
         this.defDesc(d);
