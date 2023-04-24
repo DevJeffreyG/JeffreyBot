@@ -214,7 +214,7 @@ class Top {
 
         switch (number) {
             case 0:
-                textRank = `probablemente el último`;
+                textRank = `último`;
                 break;
             case 1:
                 textRank = `🏆${number}ro`;

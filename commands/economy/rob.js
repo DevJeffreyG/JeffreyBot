@@ -93,12 +93,13 @@ command.execute = async (interaction, models, params, client) => {
 
     //console.log(failedValue, successValue, robSuccess)
 
-    if (user.economy.global.currency < minRequired && victim.economy.global.currency < 0) {
+    if ((user.economy.global.currency < minRequired) || (minRequired < 0)) {
         await user.save();
-        return new ErrorEmbed(interaction)
+        let e = new ErrorEmbed(interaction)
             .defDesc("**No tenías suficiente dinero como para robarle.**")
-            .defFooter({ text: `Necesitas al menos ${minRequired.toLocaleString("es-CO")} ${Currency.name} en tu cuenta.` })
-            .send();
+
+        if(minRequired > 0) e.defFooter({ text: `Necesitas al menos ${minRequired.toLocaleString("es-CO")} ${Currency.name} en tu cuenta.` });
+        return e.send();
     }
 
     // Fallido
