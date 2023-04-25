@@ -2,6 +2,7 @@ const { CustomElements } = require("mongoose").models;
 const { CommandInteraction } = require("discord.js");
 const Embed = require("./Embed");
 const { FindNewId } = require("./functions");
+const { DoesntExistsError } = require("../errors");
 
 class CustomEmbed extends Embed {
     constructor(params) {
@@ -12,6 +13,7 @@ class CustomEmbed extends Embed {
     /**
      * Guarda el Embed a la base de datos del servidor donde se haga la Interaction
      * @param {CommandInteraction} interaction 
+     * @returns {Promise<CommandInteraction>}
      */
     async save(interaction) {
         this.doc = await CustomElements.getOrCreate(interaction.guild.id);
@@ -21,19 +23,89 @@ class CustomEmbed extends Embed {
         this.doc.addEmbed(this.raw(), id);
         await this.doc.save();
 
-        return interaction.editReply({
+        return await interaction.editReply({
             embeds: [
                 new Embed({
                     type: "success",
                     data: {
                         desc: [
-                            `Se ha creado el Embed. Usa ${interaction.client.mentionCommand("embeds basic edit")} para hacerle cambios`,
+                            `Se ha creado el Embed. Usa ${interaction.client.mentionCommand("elements embeds edit")} para hacerle cambios`,
                             `ID: ${id}`
                         ]
                     }
                 })
             ]
         })
+    }
+
+    /**
+     * Reemplaza este CustomEmbed con otro en la base de datos
+     * @param {Integer} id La Id del Embed a editar
+     * @param {CommandInteraction} interaction 
+     * @returns {Promise<CommandInteraction>}
+     */
+    async replace(id, interaction) {
+        this.doc = await CustomElements.getOrCreate(interaction.guild.id);
+        let cstmEmbed = this.doc.getEmbed(id);
+        let embed = this.raw();
+
+        if (embed.author || embed.title) {
+            cstmEmbed.title = embed.author?.name ?? embed.title;
+            cstmEmbed.icon = embed.author?.icon_url;
+        }
+
+        if (embed.description) cstmEmbed.desc = embed.description;
+        if (embed.timestamp) cstmEmbed.time = true;
+        if (embed.footer) {
+            cstmEmbed.footer = embed.footer.text;
+            cstmEmbed.footer_icon = embed.footer.icon_url;
+        }
+
+        if (embed.color) cstmEmbed.color = embed.color;
+
+        await this.doc.save();
+
+        return interaction.editReply({
+            embeds: [
+                new Embed({
+                    type: "success",
+                    data: {
+                        desc: [
+                            `Se ha editado el Embed. Usa ${interaction.client.mentionCommand("elements embeds edit")} para hacerle cambios`,
+                            `ID: ${id}`
+                        ]
+                    }
+                })
+            ]
+        })
+    }
+
+    /**
+     * Elimina un Embed en la base de datos
+     * @param {Integer} id La Id del Embed a eliminar
+     * @param {CommandInteraction} interaction 
+     * @returns {Promise<CommandInteraction>}
+     */
+    async delete(id, interaction) {
+        this.doc = await CustomElements.getOrCreate(interaction.guild.id);
+
+        try {
+            this.doc.deleteEmbed(id);
+            await this.doc.save();
+
+            return interaction.editReply({
+                embeds: [
+                    new Embed({
+                        type: "success",
+                        data: {
+                            desc: `Se ha eliminado el Embed`
+                        }
+                    })
+                ]
+            })
+        } catch (err) {
+            throw new DoesntExistsError(interaction, `El Embed con ID \`${id}\``, "este servidor");
+        }
     }
 
     #creation(params) {

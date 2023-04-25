@@ -1,6 +1,6 @@
-const { BaseInteraction, InteractionType, time, CommandInteraction, MessageComponentInteraction, ModalSubmitInteraction, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction, DiscordAPIError, chatInputApplicationCommandMention } = require("discord.js");
+const { BaseInteraction, InteractionType, time, CommandInteraction, MessageComponentInteraction, ModalSubmitInteraction, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction, DiscordAPIError, chatInputApplicationCommandMention, ActionRowBuilder } = require("discord.js");
 
-const { Ticket, Suggestion } = require("./src/handlers/");
+const { Ticket, Suggestion, Button } = require("./src/handlers/");
 const { Bases, Colores } = require("./src/resources");
 const { ErrorEmbed, Embed, Categories, ValidateDarkShop, Confirmation, HumanMs } = require("./src/utils");
 
@@ -58,6 +58,7 @@ class Handlers {
 
         if (this.interaction.customId?.toUpperCase().includes("TICKET")) this.ticket = new Ticket(this.interaction);
         if (this.interaction.customId?.toUpperCase().includes("SUGGESTION")) this.suggestion = new Suggestion(this.interaction);
+        if (this.interaction.customId?.toUpperCase().includes("BUTTON")) this.button = new Button(this.interaction);
         if (this.interaction.customId?.toUpperCase().includes("KILL") && this.#isDev()) {
             try {
                 const killInfo = this.interaction.customId.split("-");
@@ -201,6 +202,7 @@ class Handlers {
     async componentHandler() {
         await this.ticket?.handle(this.user, this.doc);
         await this.suggestion?.handle(this.user, this.doc);
+        await this.button?.handle();
 
         switch (this.interaction.customId) {
             case "deleteMessage":
@@ -240,7 +242,7 @@ class Handlers {
                 const disc = tag.split("#")[1];
 
                 const member = this.interaction.guild.members.cache.find(x => x.user.discriminator === disc && x.user.tag.includes(tag));
-                if(!member) return this.interaction.deleteReply();
+                if (!member) return this.interaction.deleteReply();
 
                 if (member === this.interaction.member)
                     throw new SelfExec(this.interaction);
@@ -303,7 +305,7 @@ class Handlers {
 
         if (!this.executedCommand) throw new CommandNotFoundError(interaction);
         if (this.executedCommand.category === Categories.DarkShop) {
-            if (!this.doc.moduleIsActive("functions.darkshop")) 
+            if (!this.doc.moduleIsActive("functions.darkshop"))
                 throw new ModuleDisabledError(interaction);
             // filtro de nivel 5
             let validation = await ValidateDarkShop(this.user, interaction.user);
@@ -352,10 +354,12 @@ class Handlers {
         try {
             console.log("🔴 No se pudo ejecutar el comando: %s", error.name)
             if (error instanceof JeffreyBotError) {
+                if (error instanceof BadCommandError) console.error(error)
                 return await error.send();
             } else if (error instanceof DiscordAPIError) {
-                return await new DiscordLimitationError(this.interaction, `${this.interaction.commandName}`, error).send();
+                return await new DiscordLimitationError(this.interaction, `${this.interaction.commandName ?? this.interaction.customId ?? "execute"}`, error.message).send();
             } else {
+                console.error(error)
                 return await new BadCommandError(this.interaction, error).send();
             }
         } catch (err) {

@@ -9,21 +9,17 @@ class BadCommandError extends JeffreyBotError {
      * @param {String} error El Error que se mostrará en el Embed
      */
     constructor(interaction, errorMsg) {
-        super(interaction)
+        super(interaction, errorMsg)
         this.name = "BadCommand"
-        
-        let error = new JeffreyBotError(interaction, errorMsg)
 
         this.embed = new ErrorEmbed(interaction, {
             type: this.name,
             data: {
                 commandName: interaction,
-                error,
+                error: this.message,
                 guildId: interaction.guildId
             }
         })
-
-        console.error(error.stack)
     }
 }
 

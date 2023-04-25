@@ -168,9 +168,8 @@ ${codeBlock("javascript", data.error)}`])
     #errorDesc(desc, principal, more = []) {
         this.defDesc(`**— ${desc} ▸ ${principal}**`);
         let d = this.description;
-        more.forEach(data => {
+        if(Array.isArray(more)) more.forEach(data => {
             d += `\n▸ ${data}`
-            console.log(data)
             if (!data.endsWith(".") && !(data.endsWith(":") || data.endsWith("!") || data.endsWith("```") || data.endsWith("?"))) d += `.`;
         })
 

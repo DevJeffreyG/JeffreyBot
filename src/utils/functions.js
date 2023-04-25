@@ -1077,10 +1077,13 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction, user
 
   let DescriptionString = "";
   let egEmbed = null;
+  let egButton = null;
 
   dataToConfirm.forEach(data => {
     if (data instanceof Embed) {
       egEmbed = data;
+    } else if (data instanceof ButtonBuilder) {
+      egButton = data;
     } else
       DescriptionString += `\`▸\` ${data}\n`;
   });
@@ -1098,6 +1101,16 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction, user
     .defColor(Colores.negro);
 
   // componentes
+  let components = [];
+  if (egButton) {
+    components.push(
+      new ActionRowBuilder()
+        .addComponents(
+          egButton
+        )
+    )
+  }
+
   const row = new ActionRowBuilder()
     .addComponents(
       new ButtonBuilder()
@@ -1112,9 +1125,10 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction, user
         .setEmoji(client.EmojisObject.Cross.id)
     )
 
-  // enviar mensaje de confirmación
-  let msg = await interaction.editReply({ embeds, components: [row] }).catch(err => { throw err });
+  components.push(row)
 
+  // enviar mensaje de confirmación
+  let msg = await interaction.editReply({ embeds, components });
   if (!msg) return null;
 
   return new Promise(async (resolve, reject) => {
