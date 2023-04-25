@@ -49,7 +49,7 @@ class RouletteItem {
         this.success = new Embed({
             type: "success", data: {
                 title: "Canjeado",
-                desc: `**${this.nonumbers}** ${this.frontend_numbers} a ${this.frontend_target}`,
+                desc: `**${this.nonumbers}** ${this.frontend_numbers} ➡️ ${this.frontend_target}`,
                 footer: `Había un ${this.item.prob}% de probabilidad de que esta fuera tu recompensa`
             }
         });
@@ -149,7 +149,10 @@ class RouletteItem {
                     this.nonumbers = "Se agregaron";
                     this.user.addCurrency(this.numbers, false);
                 }
-                else if (this.nonumbers === "*") this.user.economy.global.currency *= this.numbers;
+                else if (this.nonumbers === "*") {
+                    this.nonumbers = "Se multiplicó por"
+                    this.user.economy.global.currency *= this.numbers;
+                }
                 else if (this.nonumbers === "%") {
                     this.nonumbers = "Se sacó el";
                     this.frontend_numbers = `**${this.numbers.toLocaleString("es-CO")}%**`;

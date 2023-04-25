@@ -220,10 +220,8 @@ class Blackjack {
         }
 
         this.collector = new Collector(this.interaction, { filter, time: ms("10m") }, true);
-        this.collector.onActive(() => {
+        this.collector.onActive(async () => {
             this.interaction.followUp({ ephemeral: true, embeds: [new ErrorEmbed().defDesc("Ya estás en un juego de Blackjack, terminalo antes de iniciar otro.")] });
-            this.collector.raw().stop();
-            return this.interaction.deleteReply()
         }).onEnd(() => {
             this.row.components.forEach(c => c.setDisabled());
             this.supportRow.components.find(c => c.data.custom_id === "giveup").setDisabled();
@@ -426,11 +424,10 @@ class Blackjack {
 
         let msg = await this.interaction.editReply({ embeds: [this.embed], components: [this.row, this.supportRow] });
 
+        await this.#collectorWork(msg);
+
         // revisar que no gane instantaneamente
         if (this.#checkValue() === 21) return this.endgame(true, EndReasons.Blackjack);
-
-        return this.#collectorWork(msg);
-
     }
 
     async endgame(won = false, reason = null) {
