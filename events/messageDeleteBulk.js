@@ -1,6 +1,8 @@
-const { EndReasons } = require("../src/utils");
+const { EndReasons, FetchThisGuild } = require("../src/utils");
 
-module.exports = async (client, messages) => {
+module.exports = async (client, messages, channel) => {
+    if (!client.isThisFetched(channel.guild.id)) await FetchThisGuild(client, channel.guild);
+
     let filteredCollectors = [];
     messages.forEach(message => {
         filteredCollectors = filteredCollectors.concat(client.activeCollectors.filter(x => {

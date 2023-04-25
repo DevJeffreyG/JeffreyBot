@@ -1,5 +1,5 @@
 const { Colores } = require("../src/resources");
-const { GenerateLog, DeleteLink } = require("../src/utils/functions");
+const { GenerateLog, DeleteLink, FetchThisGuild } = require("../src/utils/functions");
 const { codeBlock } = require("discord.js");
 
 module.exports = async (client, oldMessage, message) => {
@@ -13,7 +13,9 @@ module.exports = async (client, oldMessage, message) => {
   if (member.user.bot) return;
   if (message.content.startsWith(prefix)) return;
 
-  GenerateLog(message.guild, {
+  if (!client.isThisFetched(message.guild.id)) await FetchThisGuild(client, message.guild);
+
+  await GenerateLog(message.guild, {
     header: `Se ha editado un mensaje`,
     footer: `${member.user.tag}`,
     description: [

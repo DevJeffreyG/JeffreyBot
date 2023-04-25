@@ -1,7 +1,9 @@
-const { Embed } = require("../src/utils");
+const { Embed, FetchThisGuild } = require("../src/utils");
 const { Users, Guilds } = require("mongoose").models;
 
 module.exports = async (client, member) => {
+    if (!client.isThisFetched(member.guild.id)) await FetchThisGuild(client, member.guild);
+
     const doc = await Guilds.getOrCreate(member.guild.id);
     let channel = member.guild.channels.cache.get(doc.getLogChannel("user_left"));
     let tag = member.user.tag;

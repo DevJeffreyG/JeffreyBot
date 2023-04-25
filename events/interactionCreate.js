@@ -1,6 +1,6 @@
 const { Client } = require("discord.js");
 
-const { GlobalDatasWork } = require("../src/utils");
+const { FetchThisGuild } = require("../src/utils");
 const Handlers = require("../Handlers");
 
 /**
@@ -10,16 +10,7 @@ const Handlers = require("../Handlers");
  * @returns 
  */
 module.exports = async (client, interaction) => {
-  if (!client.fetchedGuilds.find(x => x === interaction.guild?.id) && interaction.inGuild()) {
-    await client.guilds.fetch(interaction.guild.id);
-    await interaction.guild.channels.fetch();
-    await interaction.guild.roles.fetch();
-    await interaction.guild.members.fetch();
-    await interaction.guild.commands.fetch();
-
-    client.fetchedGuilds.push(interaction.guild.id)
-    console.log("💚 %s fetched!", interaction.guild.name)
-  }
+  if (!client.isThisFetched(interaction.guild.id) && interaction.inGuild()) await FetchThisGuild(client, interaction.guild);c
 
   client.lastInteraction = interaction;
   /* const guild = interaction.guild;

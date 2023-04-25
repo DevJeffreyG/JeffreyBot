@@ -1,3 +1,5 @@
+const { FetchThisGuild } = require("../src/utils");
+
 const { GlobalDatas, Guilds } = require("mongoose").models;
 
 module.exports = async (client, reaction, user) => {
@@ -7,6 +9,8 @@ module.exports = async (client, reaction, user) => {
   const guild = reaction.message.guild;
   const channel = reaction.message.channel;
   const message = await channel.messages.fetch(reaction.message.id);
+
+  if (!client.isThisFetched(guild.id)) await FetchThisGuild(client, guild);
 
   // AUTOROLES
   const doc = await Guilds.getOrCreate(guild.id);

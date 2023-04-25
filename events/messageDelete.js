@@ -1,15 +1,16 @@
 const { AuditLogEvent } = require("discord.js");
 const { Bases, Colores } = require("../src/resources/");
-const { FetchAuditLogs, GenerateLog, EndReasons } = require("../src/utils");
+const { FetchAuditLogs, GenerateLog, EndReasons, FetchThisGuild } = require("../src/utils");
 const { Users } = require("mongoose").models;
 
 module.exports = async (client, message) => {
+  if (!client.isThisFetched(message.guild.id)) await FetchThisGuild(client, message.guild);
   const author = message.author;
   const logs = await FetchAuditLogs(client, message.guild, [AuditLogEvent.MessageDelete, AuditLogEvent.MessageBulkDelete]);
   if (logs) {
     let info = logs[0]
 
-    GenerateLog(message.guild, {
+    await GenerateLog(message.guild, {
       header: `Se ha eliminado un mensaje`,
       footer: `Eliminado por ${info?.executor.tag ?? "un usuario"}`,
       description: [

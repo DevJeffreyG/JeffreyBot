@@ -1,7 +1,6 @@
-const { codeBlock, hyperlink } = require("discord.js");
-const { Log, ChannelModules, LogReasons, ErrorEmbed } = require("../src/utils");
+const { FetchThisGuild } = require("../src/utils");
 
-const { Guilds } = require("mongoose").models;;
+const { Guilds } = require("mongoose").models;
 
 module.exports = async (client, reaction, user) => {
     if (user.bot) return;
@@ -9,6 +8,8 @@ module.exports = async (client, reaction, user) => {
 
     const guild = reaction.message.guild;
     const message = reaction.message;
+
+    if (!client.isThisFetched(guild.id)) await FetchThisGuild(client, guild);
 
     const doc = await Guilds.getOrCreate(guild.id);
 

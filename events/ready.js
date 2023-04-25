@@ -31,6 +31,23 @@ module.exports = async (client) => {
     client.commands = new Collection();
     client.mapped = false; // Si ya se cargaron los comandos al client
     client.getCustomEmojis = (guildid) => { return client.CustomEmojis.get(guildid) };
+    client.isThisFetched = (guildid) => { return client.fetchedGuilds.find(x => x === guildid) ? true : false }
+    client.mentionCommand = (format) => {
+        const args = format.split(" ");
+        const name = args[0];
+        const sub = args[1];
+        const inside = args[2];
+
+        let command = client.application.commands.cache.find(x => x.name === name);
+        if (!command) {
+            console.error("🔴 No se encontró el comando %s", format)
+            return `\`/${name}\``;
+        }
+
+        if (inside) return chatInputApplicationCommandMention(name, sub, inside, command.id)
+        else if (sub) return chatInputApplicationCommandMention(name, sub, command.id)
+        else return chatInputApplicationCommandMention(name, command.id)
+    }
 
     client.devGuild = await client.guilds.fetch(Bases.dev.guild)
         .catch(err => console.log("⚠️ DEV GUILD NOT FOUND!", err))

@@ -25,7 +25,6 @@ const { Bases } = require("../resources");
 const Commands = require("../../Commands");
 const Collector = require("./Collector");
 const HumanMs = require("./HumanMs");
-const { DMNotSentError } = require("../errors");
 
 /* ##### MONGOOSE ######## */
 const RandomCumplido = function (force = null) {
@@ -337,7 +336,7 @@ const GenerateLog = async function (guild, options = {
       .setReason(logReason)
       .send({ embeds: [embed] })
   } catch (err) {
-    console.log(err);
+    console.log("🔴 No se envió el Log a %s: %s", guild.name, err.name);
   }
 
 }
@@ -1732,6 +1731,22 @@ ${codeBlock(message.content)}`)
 
 }
 
+/**
+ * @param {Client} client 
+ * @param {Guild} guild 
+ */
+const FetchThisGuild = async function (client, guild) {
+  await client.guilds.fetch(guild.id);
+  await guild.channels.fetch();
+  await guild.roles.fetch();
+  await guild.members.fetch();
+  await guild.commands.fetch();
+
+  client.fetchedGuilds.push(guild.id);
+
+  console.log("💚 %s fetched!", guild.name)
+}
+
 module.exports = {
   GetChangesAndCreateFields,
   FetchAuditLogs,
@@ -1763,5 +1778,6 @@ module.exports = {
   ProgressBar,
   UpdateCommands,
   DeleteLink,
-  FindAverage
+  FindAverage,
+  FetchThisGuild
 }

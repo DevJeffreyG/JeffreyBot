@@ -1,6 +1,6 @@
 const { time, codeBlock } = require("discord.js");
 const { Colores } = require("../src/resources");
-const { ChannelModules, LogReasons, GenerateLog, Log, ErrorEmbed } = require("../src/utils");
+const { ChannelModules, LogReasons, GenerateLog, Log, ErrorEmbed, FetchThisGuild } = require("../src/utils");
 
 const { Guilds } = require("mongoose").models;
 
@@ -8,6 +8,8 @@ const moment = require("moment-timezone");
 
 module.exports = async (client, oldMember, newMember) => {
     let guild = newMember.guild;
+    if (!client.isThisFetched(guild.id)) await FetchThisGuild(client, guild);
+
     const doc = await Guilds.getOrCreate(guild.id);
 
     const oldTimeout = oldMember.communicationDisabledUntil ?? new Date();
@@ -41,7 +43,7 @@ module.exports = async (client, oldMember, newMember) => {
 
     if (!moment(newTimeout).isSame(moment(oldTimeout))) {
         if (moment(newTimeout).isAfter(moment())) { // timeout
-            GenerateLog(guild, {
+            await GenerateLog(guild, {
                 logType: ChannelModules.ModerationLogs,
                 logReason: LogReasons.TimeOut,
                 header: `Se ha muteado un usuario`,
@@ -53,7 +55,7 @@ module.exports = async (client, oldMember, newMember) => {
             });
         } else { // se quito el timeout
 
-            GenerateLog(guild, {
+            await GenerateLog(guild, {
                 logType: ChannelModules.ModerationLogs,
                 logReason: LogReasons.TimeOut,
                 header: `Se ha desmuteado un usuario`,

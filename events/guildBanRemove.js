@@ -1,10 +1,11 @@
 const { Colores } = require("../src/resources");
-const { GenerateLog, ChannelModules, LogReasons } = require("../src/utils/");
+const { GenerateLog, ChannelModules, LogReasons, FetchThisGuild } = require("../src/utils/");
 
 module.exports = async (client, ban) => {
     const guild = ban.guild;
+    if (!client.isThisFetched(guild.id)) await FetchThisGuild(client, guild);
 
-    GenerateLog(guild, {
+    await GenerateLog(guild, {
         logType: ChannelModules.ModerationLogs,
         logReason: LogReasons.Ban,
         header: `Se ha desbaneado un usuario`,

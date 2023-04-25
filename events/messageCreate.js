@@ -1,5 +1,5 @@
 const { Bases } = require("../src/resources/");
-const { Log, ChannelModules, LogReasons, Cooldowns, BoostTypes, BoostObjetives, Multipliers, RequirementType, ErrorEmbed, UpdateCommands, DeleteLink } = require("../src/utils");
+const { Log, ChannelModules, LogReasons, Cooldowns, BoostTypes, BoostObjetives, Multipliers, RequirementType, ErrorEmbed, UpdateCommands, DeleteLink, FetchThisGuild } = require("../src/utils");
 
 const { GlobalDatasWork } = require("../src/utils/");
 const { ChannelType, codeBlock, Client, Message, ActionRowBuilder, ButtonBuilder, ButtonStyle, time } = require("discord.js");
@@ -58,6 +58,8 @@ module.exports = async (client, message) => {
 
     return;
   }
+
+  if (!client.isThisFetched(message.guild.id)) await FetchThisGuild(client, message.guild);
 
   const doc = await Guilds.getOrCreate(message.guild.id);
   const guild = message.guild;

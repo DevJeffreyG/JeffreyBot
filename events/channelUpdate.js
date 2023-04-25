@@ -1,8 +1,9 @@
-const { FetchAuditLogs, GetChangesAndCreateFields } = require("../src/utils/");
+const { FetchAuditLogs, GetChangesAndCreateFields, FetchThisGuild } = require("../src/utils/");
 
 const { AuditLogEvent } = require("discord.js");
 
 module.exports = async (client, oldchannel, channel) => {
+    if (!client.isThisFetched(channel.guild.id)) await FetchThisGuild(client, channel.guild);
     const guild = channel.guild;
 
     const logs = await FetchAuditLogs(client, guild, [AuditLogEvent.ChannelUpdate, AuditLogEvent.ChannelOverwriteUpdate]);
@@ -28,7 +29,7 @@ module.exports = async (client, oldchannel, channel) => {
 
     let fields = await GetChangesAndCreateFields(logs);
 
-    /* GenerateLog(channel.guild, {
+    /* await GenerateLog(channel.guild, {
         header: `Se ha actualizado ${type}`,
         description: [
             `${channel}`,

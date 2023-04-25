@@ -1,7 +1,8 @@
-const { GenerateLog } = require("../src/utils/");
+const { GenerateLog, FetchThisGuild } = require("../src/utils/");
 const { Colores } = require("../src/resources");
 
 module.exports = async (client, channel) => {
+    if (!client.isThisFetched(channel.guild.id)) await FetchThisGuild(client, channel.guild);
     let type;
     switch (channel.type) {
         case "GUILD_TEXT":
@@ -20,7 +21,7 @@ module.exports = async (client, channel) => {
             type = "un canal";
     }
 
-    GenerateLog(channel.guild, {
+    await GenerateLog(channel.guild, {
         header: `Se ha creado ${type}`,
         description: [
             `${channel}`,

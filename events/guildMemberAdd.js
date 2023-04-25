@@ -1,7 +1,7 @@
 const Discord = require("discord.js");
 
 const { time } = Discord;
-const { GenerateLog, DaysUntilToday, Embed, GetRandomItem } = require("../src/utils/");
+const { GenerateLog, DaysUntilToday, Embed, GetRandomItem, FetchThisGuild } = require("../src/utils/");
 const { Colores } = require("../src/resources");
 
 const { Users, Guilds } = require("mongoose").models;
@@ -9,6 +9,8 @@ const { Users, Guilds } = require("mongoose").models;
 module.exports = async (client, member) => {
   let tag = member.user.tag;
   const guild = member.guild;
+
+  if (!client.isThisFetched(guild.id)) await FetchThisGuild(client, guild);
 
   // crear usuario nuevo
   const user = await Users.getOrCreate({
@@ -54,7 +56,7 @@ module.exports = async (client, member) => {
   member.guild.invites.fetch().then((invites) => {
     invites.forEach(async invite => {
       if (invite.uses != client.invites[invite.code]) {
-        GenerateLog(guild, {
+        await GenerateLog(guild, {
           header: "Nuevo miembro en el servidor",
           description: [
             `${member} el ${time(member.joinedAt)}.`,
