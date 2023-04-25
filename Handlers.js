@@ -32,22 +32,6 @@ class Handlers {
 
     async #startHandler() {
         this.params = {}
-        this.client.mentionCommand = (format) => {
-            const args = format.split(" ");
-            const name = args[0];
-            const sub = args[1];
-            const inside = args[2];
-
-            let command = this.client.application.commands.cache.find(x => x.name === name) ?? this.interaction.guild.commands.cache.find(x => x.name === name);
-            if (!command) {
-                console.error("🔴 No se encontró el comando %s", format)
-                return `\`/${name}\``;
-            }
-
-            if (inside) return chatInputApplicationCommandMention(name, sub, inside, command.id)
-            else if (sub) return chatInputApplicationCommandMention(name, sub, command.id)
-            else return chatInputApplicationCommandMention(name, command.id)
-        }
 
         if (!this.interaction.inGuild() && !this.#isDev()) return interaction.reply({ ephemeral: true, embeds: [new ErrorEmbed().defDesc("No puedes usar esto en mensajes directos.")] });
         if (this.interaction.client.isOnLockdown && !this.#isDev()) try {
@@ -318,6 +302,14 @@ class Handlers {
 
         if (this.slashCooldowns.get(this.identifierCooldown)) {
             let until = moment(this.slashCooldowns.get(this.identifierCooldown)).add(slashCooldown, "ms")
+            let cooldownLeft = new HumanMs(until).left(true);
+            let c_data = [];
+
+            for(const prop in cooldownLeft) {
+                c_data.push(cooldownLeft[prop])
+            }
+
+            if(c_data.at(-1) != 0 && c_data.at(-2) === 0) console.log("⚪ Con %sms de Cooldown", cooldownLeft.milisegundo);
 
             return interaction.reply({
                 embeds: [
@@ -330,7 +322,8 @@ class Handlers {
                             }
                         }
                     })
-                ]
+                ],
+                ephemeral: true
             })
         }
 
