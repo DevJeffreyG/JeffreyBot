@@ -28,10 +28,9 @@ class Collector {
             let x = y.collector;
             return y.commandName === this.interaction.commandName && x.channelId === this.collector.channelId && x.interactionType === this.collector.interactionType && y.userid === this.interaction.user.id
         });
-        if (active && !this.evalOnActive) this.defaultOnActive(active);
-        else if (active) {
-            console.log(active)
-            this.evalOnActive();
+        if (active) {
+            if (this.evalOnActive) this.evalOnActive();
+            this.defaultOnActive(active);
         }
 
         this.client.activeCollectors.push({ manager: this, collector: this.collector, userid: this.interaction.user.id, channelid: this.interaction.channel.id, commandName: this.interaction.commandName });
@@ -44,7 +43,8 @@ class Collector {
             };
         });
 
-        this.collector.once("end", async (collected, reason) => {
+        this.collector.on("end", async (collected, reason) => {
+            console.log("ENDED")
             let index = this.client.activeCollectors.findIndex(x => x.collector === this.collector && x.userid === this.interaction.user.id);
             if (index != -1) {
                 this.client.activeCollectors.splice(index, 1);
@@ -58,7 +58,7 @@ class Collector {
                 if (reason === EndReasons.Deleted) return;
                 if (this.evalOnEnd) this.evalOnEnd(collected, reason);
             } catch (err) {
-                console.log(err)
+                console.log("Error %s", err)
             }
 
         })

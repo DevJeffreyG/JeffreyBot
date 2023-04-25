@@ -50,7 +50,7 @@ command.execute = async (interaction, models, params, client) => {
     } else if (cool) return interaction.editReply({ embeds: [new Embed({ type: "cooldown", data: { cool } })] })
 
     const bj = new Blackjack(interaction, 4);
-    bj.start(apuesta.value, user, params.getDoc());
+    await bj.start(apuesta.value, user, params.getDoc());
 
     //interaction.deleteReply();
 }
