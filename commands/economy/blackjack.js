@@ -23,24 +23,15 @@ command.execute = async (interaction, models, params, client) => {
 
     let user = params.getUser();
 
-    if (user.economy.global.currency < apuesta.value) 
+    if (user.economy.global.currency < apuesta.value)
         throw new EconomyError(interaction, "No tienes tanto dinero para apostar", user.economy.global.currency)
     let winCounts = client.wonBlackjack.find(x => x.user === interaction.user.id && x.guild === interaction.guild.id)
 
-    //console.log("Ha ganado %s en esta sesión", winCounts)
-
     let cool = await user.cooldown(Cooldowns.Blackjack, { info: true })
-
-    console.log(cool)
-
-    if (winCounts?.count === 5) {
-        cool = await user.cooldown(Cooldowns.Blackjack, { instant: true })
-        console.log(cool)
-        if (cool) {
-            winCounts.count = 0;
-            return interaction.editReply({ embeds: [new Embed({ type: "cooldown", data: { cool } })] })
-        }
-    } else if (cool) return interaction.editReply({ embeds: [new Embed({ type: "cooldown", data: { cool } })] })
+    if (cool) {
+        if(winCounts) winCounts.count = 0;
+        return interaction.editReply({ embeds: [new Embed({ type: "cooldown", data: { cool } })] })
+    }
 
     const bj = new Blackjack(interaction, 4);
     await bj.start(apuesta.value, user, params.getDoc());

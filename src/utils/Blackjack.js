@@ -2,7 +2,7 @@ const { CommandInteraction, ActionRowBuilder, ButtonBuilder, ButtonStyle } = req
 const Chance = require("chance");
 const ms = require("ms");
 
-const { CardType, EndReasons } = require("./Enums");
+const { CardType, EndReasons, Cooldowns } = require("./Enums");
 const Embed = require("./Embed");
 const ErrorEmbed = require("./ErrorEmbed");
 const { Colores } = require("../resources");
@@ -475,6 +475,8 @@ class Blackjack {
                     guild: this.interaction.guild.id,
                     count: 1
                 })
+
+                if (countQ?.count === 5) await this.user.cooldown(Cooldowns.Blackjack, { save: false });
 
                 this.user.addCount("blackjack", 1, false);
                 await this.user.addCurrency(this.bet)
