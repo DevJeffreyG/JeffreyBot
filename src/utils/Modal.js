@@ -1,10 +1,11 @@
-const { MessageComponentInteraction, ModalBuilder, TextInputBuilder, ActionRowBuilder, ModalSubmitInteraction } = require("discord.js");
+const { MessageComponentInteraction, ModalBuilder, TextInputBuilder, ActionRowBuilder, ModalSubmitInteraction, CommandInteraction, TextInputStyle } = require("discord.js");
 const { BadCommandError } = require("../errors");
+const JeffreyBotError = require("../errors/JeffreyBotError");
 
 class Modal extends ModalBuilder {
     /**
      * 
-     * @param {MessageComponentInteraction | ModalSubmitInteraction} interaction 
+     * @param {CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction} interaction 
      */
     constructor(interaction) {
         super()
@@ -22,10 +23,11 @@ class Modal extends ModalBuilder {
         return this
     }
 
-    addInput(options = { id, label, style, req, placeholder, min, max }) {
+    addInput(options = { id: string, label: string, style: TextInputStyle, req: Boolean, placeholder: string, min: 0, max: Infinity }) {
+        if(this.data.components?.length > 5) return console.error("🔴 No puedes agregar más Inputs")
         const { id, label, style, req, placeholder, min, max } = options;
         if (!id || !label || !style)
-            throw new BadCommandError(this.interaction, "No están definidos: id, label, stype en el Modal")
+            throw new BadCommandError(this.interaction, "No están definidos: id, label, style en el Modal")
                 .setEphemeral(true)
                 .setFollowUp(true);
         const input = new TextInputBuilder()
@@ -33,7 +35,7 @@ class Modal extends ModalBuilder {
             .setLabel(label)
             .setStyle(style)
 
-            .setRequired(req ?? null)
+            .setRequired(req ?? false)
             .setPlaceholder(placeholder ?? null);
 
         if (min) input.setMinLength(min)
@@ -44,9 +46,11 @@ class Modal extends ModalBuilder {
     }
 
     async show() {
+        if(!this.data.custom_id || !this.data.title)
+            throw new BadCommandError(this.interaction, new JeffreyBotError(null, "Falta CustomId o título en el Modal"))
         return await this.interaction.showModal(this)
             .catch(err => {
-                throw new BadCommandError(this.interaction, err)
+                throw new BadCommandError(this.interaction, err.message)
                     .setEphemeral(true)
                     .setFollowUp(true);
             });

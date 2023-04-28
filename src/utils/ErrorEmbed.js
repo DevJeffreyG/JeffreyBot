@@ -56,7 +56,7 @@ class ErrorEmbed extends Embed {
                 this.#errorName("Error en el codigo")
                 this.#errorAuthor(3);
                 this.#errorDesc("Hubo un error ejecutando este comando", `(\`${data.commandName ?? this.interaction?.commandName}\`)`, ["Avisa a JeffreyG.", `**Y también dile que...**
-${codeBlock("javascript", data.error)}`])
+${codeBlock("json", data.error)}`])
                 break;
 
             case "SelfExec":
@@ -69,7 +69,7 @@ ${codeBlock("javascript", data.error)}`])
                 this.#errorName("No se ha configurado")
                 this.#errorAuthor(5);
                 this.#errorDesc("Hay que configurar el bot antes", `\`${data.needed.toUpperCase()}\``, data.guide ?? [`Un administrador del servidor tiene que usar el comando ${this.client.mentionCommand("setup")} primero.`, `O el comando ${this.client.mentionCommand("config")} en su defecto.`])
-                if(!data.guide) this.defFooter({ text: `Si aún no lo han hecho, muéstrales este mensaje.` });
+                if (!data.guide) this.defFooter({ text: `Si aún no lo han hecho, muéstrales este mensaje.` });
                 break;
 
             case "DMNotSent":
@@ -168,7 +168,7 @@ ${codeBlock("javascript", data.error)}`])
     #errorDesc(desc, principal, more = []) {
         this.defDesc(`**— ${desc} ▸ ${principal}**`);
         let d = this.description;
-        if(Array.isArray(more)) more.forEach(data => {
+        if (Array.isArray(more)) more.forEach(data => {
             d += `\n▸ ${data}`
             if (!data.endsWith(".") && !(data.endsWith(":") || data.endsWith("!") || data.endsWith("```") || data.endsWith("?"))) d += `.`;
         })
@@ -206,9 +206,9 @@ ${codeBlock("javascript", data.error)}`])
             try {
                 await this.interaction.reply({ content: null, embeds: [this], components: [], ephemeral: true });
             } catch (replyerr) {
+                console.log(replyerr);
                 console.log("🔴 NO se envió el ErrorEmbed!")
             }
-            console.log(err);
         }
     }
 

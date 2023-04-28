@@ -14,7 +14,7 @@ command.execute = async (interaction, models, params, client) => {
     if (moment().day() === 0) {
         return interaction.reply({ ephemeral: true, embeds: [new ErrorEmbed().defDesc("No es buena idea hacer eso el domingo.")] })
     }
-    await interaction.deferReply();
+    await interaction.deferReply({ephemeral: true});
 
     const user = params.getUser();
 
@@ -54,7 +54,7 @@ command.execute = async (interaction, models, params, client) => {
 
     if (new Chance().bool({ likelihood: 0.001 })) {
         console.log("🟥 0.001% de invertir el resultado anterior")
-        guessCorrect = false
+        guessCorrectly = false
         r = r ? false : true;
     }
 

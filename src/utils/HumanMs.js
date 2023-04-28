@@ -8,7 +8,7 @@ class HumanMs {
         this.human = this.#convert(this.data);
     }
 
-    #convert(c) {
+    #convert(c, obj = false) {
         let conv = {
             día: Math.trunc(c / 86400000),
             hora: Math.trunc(c / 3600000) % 24,
@@ -24,12 +24,12 @@ class HumanMs {
 
         this.#toHuman();
 
-        return this.returnable.join(" ");
+        return obj ? conv : this.returnable.join(" ");
     }
 
-    left() {
+    left(object = false) {
         let left = this.data.diff(new Date());
-        return this.#convert(left);
+        return this.#convert(left, object);
     }
 
     #toHuman() {

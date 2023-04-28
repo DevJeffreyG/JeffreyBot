@@ -151,7 +151,11 @@ class Log {
         let { content, embeds, components, embed } = options;
 
         return new Promise(async (res, rej) => {
-            if (!this.#fetched) await this.#fetch();
+            try {
+                if (!this.#fetched) await this.#fetch()
+            } catch (err) {
+                rej(err)
+            }
             if (!this.enabled) res(null);
 
             let msg;

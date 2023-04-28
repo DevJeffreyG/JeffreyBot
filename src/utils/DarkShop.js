@@ -9,8 +9,9 @@ const { Tendencies, Enum, ChannelModules, LogReasons } = require("./Enums");
 const Embed = require("./Embed");
 const { Colores } = require("../resources");
 const Log = require("./Log");
-const ErrorEmbed = require("./ErrorEmbed");
-const { GetRandomItem } = require("./functions");
+const GetRandomItem = (array) => {
+    return array[Math.floor(Math.random() * array.length)];
+}
 
 class DarkShop {
     /**

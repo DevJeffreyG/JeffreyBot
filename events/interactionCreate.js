@@ -10,7 +10,7 @@ const Handlers = require("../Handlers");
  * @returns 
  */
 module.exports = async (client, interaction) => {
-  if (!client.isThisFetched(interaction.guild.id) && interaction.inGuild()) await FetchThisGuild(client, interaction.guild);c
+  if (!client.isThisFetched(interaction.guild.id) && interaction.inGuild()) await FetchThisGuild(client, interaction.guild);
 
   client.lastInteraction = interaction;
   /* const guild = interaction.guild;
