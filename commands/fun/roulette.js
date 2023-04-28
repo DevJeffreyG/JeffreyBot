@@ -2,6 +2,7 @@ const { Command, Categories, ItemObjetives, BoostObjetives, WillBenefit, Embed, 
 const Chance = require("chance");
 const moment = require("moment-timezone");
 const RouletteItem = require("../../src/utils/RouletteItem");
+const { Colores } = require("../../src/resources");
 
 const command = new Command({
     name: "roulette",
@@ -22,30 +23,54 @@ command.execute = async (interaction, models, params, client) => {
         ]
     });
 
+    const notSelected = new Map();
     const rouletteItems = await RouletteItems.getAll();
 
     console.log("🟢 Items disponibles: %s", rouletteItems.length);
 
     const randomItem = await getRandom(rouletteItems);
+
+    let avoidedItems = new Embed()
+        .defTitle("La ruleta siguió su paso por estos items antes de detenerse:")
+        .defColor(Colores.verde);
+
+    for (const [i, item_avoided] of notSelected.entries()) {
+        const roulttItem = new RouletteItem(interaction, item_avoided).build(user);
+        let info = roulttItem.info();
+        avoidedItems.defDesc(`${avoidedItems.data.description ?? ""}\n\`${i}\` **▸** ${info.text} (${info.likelihood}%)`)
+    }
+
     if (randomItem === -1) {
         user.delCooldown(Cooldowns.Roulette)
         return interaction.editReply({ content: "No me la vas a creer, pero no pude encontrar un item indicado para ti :(" })
     }
-    const item = await new RouletteItem(interaction, randomItem).build(params.getUser());
+    const item = new RouletteItem(interaction, randomItem).build(user);
 
     await item.use()
+
+    if (notSelected.size > 0) {
+        await interaction.followUp({
+            ephemeral: true, embeds: [
+                avoidedItems
+            ]
+        })
+    }
 
     async function getRandom(query) {
         let returnable = null;
 
         let start = new Date()
+        let i = 0;
 
         while (!returnable) {
+            i++
             let date = new Date()
             let q = new Chance().pickone(query);
 
             //console.log("⚪ Checking %s", q.prob)
             let selected = new Chance().bool({ likelihood: q.prob });
+            if (!selected) notSelected.set(i, q);
+
             //console.log(selected ? "🟢 Selected" : "🔴 Negative");
 
             let benefit = false;

@@ -1,4 +1,4 @@
-const { Command, Categories, Confirmation, Embed, FindNewId } = require("../../src/utils")
+const { Command, Categories, Confirmation, Embed, FindNewId, ItemObjetives } = require("../../src/utils")
 
 const { PermissionsBitField } = require("discord.js");
 const moment = require("moment-timezone");
@@ -138,6 +138,7 @@ command.execute = async (interaction, models, params, client) => {
                 } else if (type === "lastExpJeffros") {
                     actual.deleteOne();
                 } else if (type === "rouletteItem") {
+                    if(newInfo.target === ItemObjetives.TempRole) newInfo.target = ItemObjetives.Boost;
                     if (!(await RouletteItems.findOne(newInfo)))
                         await RouletteItems.new(newInfo, FindNewId(await RouletteItems.getAll(), "", "id"));
                 }

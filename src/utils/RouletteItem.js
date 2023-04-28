@@ -2,7 +2,7 @@ const { GuildMemberRoleManager, roleMention } = require("discord.js");
 const ms = require("ms")
 
 const { LimitedTime } = require("./functions");
-const { ItemObjetives, ItemTypes } = require("./Enums");
+const { ItemObjetives, ItemTypes, BoostObjetives } = require("./Enums");
 const Embed = require("./Embed");
 const ErrorEmbed = require("./ErrorEmbed");
 const { AlreadyExistsError } = require("../errors");
@@ -55,8 +55,12 @@ class RouletteItem {
         });
     }
 
-    async build(user) {
-        let interaction = this.interaction;
+    /**
+     * Genera la información necesaria para empezar con el Item
+     * @param {Users} user 
+     * @returns {this}
+     */
+    build(user) {
         this.user = user;
 
         this.numbers = this.item.value.match(/[0-9\.]/g).join("");
@@ -73,11 +77,7 @@ class RouletteItem {
 
                 break;
 
-            case ItemObjetives.Role:
-                this.target = interaction.member.roles;
-                break;
-
-            case ItemObjetives.TempRole:
+            case ItemObjetives.Boost:
                 this.target = this.user.data.temp_roles;
                 break;
 
@@ -113,7 +113,7 @@ class RouletteItem {
                 break;
 
             case Array:
-                let temproles = Number(this.item.target) === ItemObjetives.TempRole;
+                let temproles = Number(this.item.target) === ItemObjetives.Boost;
                 if (this.nonumbers === '-') {
                     response = temproles ? this.removedTemp : this.success;
                     let i = this.target.findIndex(x => x === this.numbers)
@@ -122,17 +122,10 @@ class RouletteItem {
                     this.target.splice(i, 1);
                 } else if (this.nonumbers === '+') {
                     if (temproles) {
-                        if (this.interaction.member.roles.cache.find(x => x.id === this.numbers)) throw new AlreadyExistsError(this.interaction, roleMention(this.numbers), "este usuario");
                         response = this.addedTemp;
                         save = false
 
-                        if (this.item.extra.special === ItemObjetives.Boost)
-                            await LimitedTime(this.interaction.member, null, ms(this.item.extra.duration), this.item.extra.boosttype, this.item.extra.boostobj, this.item.extra.boostvalue);
-                        /* else if(this.item.extra.special === ItemTypes.Subscription)
-                            await Subscription(this.interaction.member, this.numbers, ms(this.item.extra.duration), this.item.extra.subprice, this.item.extra.subname);
-                         */
-                        else
-                            await LimitedTime(this.interaction.member, null, ms(this.item.extra.duration))
+                        await LimitedTime(this.interaction.member, null, ms(this.item.extra.duration), this.item.extra.boosttype, this.item.extra.boostobj, this.item.extra.boostvalue);
                     } else
                         this.target.push(this.numbers)
                 }
@@ -171,6 +164,62 @@ class RouletteItem {
 
         await this.interaction.editReply({ embeds: [response] })
         return this;
+    }
+
+    /**
+     * Saca la información del item User-Friendly
+     * @returns
+     */
+    info() {
+        const { Currency } = this.interaction.client.getCustomEmojis(this.interaction.guild.id);
+
+        let translated = {
+            action: null,
+            quantity: this.numbers,
+            likelihood: this.item.prob,
+            text: null,
+            boost: {
+                value: null,
+                objetive: null
+            }
+        };
+
+        switch (this.nonumbers) {
+            case "+":
+                translated.action = "Agrega"
+                break;
+            case "-":
+                translated.action = "Resta"
+                break;
+            case "*":
+                translated.action = "Multiplica"
+                break;
+            case "%":
+                translated.action = "Saca el"
+                break;
+        }
+
+        switch (Number(this.item.target)) {
+            case ItemObjetives.Currency:
+                if (this.nonumbers === "%") {
+                    translated.text = `${translated.action} **${translated.quantity.toLocaleString("es-CO")}%** a **${Currency}${this.target.toLocaleString("es-CO")}**`;
+                } else if (this.nonumbers === "*") {
+                    translated.text = `${translated.action} por **${translated.quantity.toLocaleString("es-CO")}** a **${Currency}${this.target.toLocaleString("es-CO")}**`;
+                } else {
+                    translated.text = `${translated.action} **${Currency}${translated.quantity.toLocaleString("es-CO")}** a **${Currency}${this.target.toLocaleString("es-CO")}**`;
+                }
+                break;
+            case ItemObjetives.Boost:
+                translated.boost = {
+                    value: this.item.extra.boostvalue,
+                    objetive: this.item.extra.boostobj === BoostObjetives.Currency ? Currency.name :
+                        this.item.extra.boostobj === BoostObjetives.Exp ? "EXP" : "Todo"
+                }
+                translated.text = `${translated.action} **Un Boost de x${translated.boost.value.toLocaleString("es-CO")} para ${translated.boost.objetive}**`
+                break;
+        }
+
+        return translated;
     }
 }
 

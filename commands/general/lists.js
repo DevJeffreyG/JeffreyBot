@@ -1,5 +1,5 @@
 const { Colores } = require("../../src/resources");
-const { Command, Categories, Cooldowns, Enum, InteractivePages, ModifierType, RequirementType, Shop } = require("../../src/utils");
+const { Command, Categories, Cooldowns, Enum, InteractivePages, ModifierType, RequirementType, Shop, RouletteItem } = require("../../src/utils");
 
 const command = new Command({
     name: "lists",
@@ -23,13 +23,18 @@ command.data
             .setName("descuentos")
             .setDescription("Lista de los descuentos en las tiendas en este servidor")
     )
+    .addSubcommand(sub =>
+        sub
+            .setName("roulette")
+            .setDescription("Lista de todos los items de la Ruleta")
+    )
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ ephemeral: true });
 
     const user = params.getUser();
     const doc = params.getDoc();
-    const { Shops } = models;
+    const { Shops, RouletteItems } = models;
     const { subcommand } = params;
 
     switch (subcommand) {
@@ -54,7 +59,7 @@ command.execute = async (interaction, models, params, client) => {
                 footer_icon: interaction.guild.iconURL({ dynamic: true })
             }, items, 5)
 
-            interactive.init(interaction)
+            await interactive.init(interaction)
             break;
         }
 
@@ -82,12 +87,12 @@ command.execute = async (interaction, models, params, client) => {
 
             const interactive = new InteractivePages({
                 title: "Lista de modidificadores",
-                author_icon: interaction.guild.iconURL({dynamic: true}),
+                author_icon: interaction.guild.iconURL({ dynamic: true }),
                 color: Colores.verde,
                 addon: `**— {tipo}**\n**▸ {guide}: {valor}**\n**▸ Necesita ({req_type}):** \`{requirement}\`\n||**▸ ID: {id}**||\n\n`
             }, items, 5)
 
-            interactive.init(interaction);
+            await interactive.init(interaction);
             break;
         }
 
@@ -95,7 +100,7 @@ command.execute = async (interaction, models, params, client) => {
             let items = new Map();
             let shop = await Shops.getOrCreate(interaction.guild.id)
 
-            for(discount of shop.discounts) {
+            for (discount of shop.discounts) {
                 items.set(discount.id, {
                     level: discount.level.toLocaleString("es-CO"),
                     discount: discount.discount,
@@ -105,12 +110,36 @@ command.execute = async (interaction, models, params, client) => {
 
             const interactive = new InteractivePages({
                 title: "Lista de descuentos",
-                author_icon: interaction.guild.iconURL({dynamic: true}),
+                author_icon: interaction.guild.iconURL({ dynamic: true }),
                 color: Colores.verde,
                 addon: `**— ID: {id}**\n**▸ Nivel:** {level}\n**▸ Descuento:** {discount}%\n\n`
             }, items, 5)
 
-            interactive.init(interaction);
+            await interactive.init(interaction);
+            break;
+        }
+
+        case "roulette": {
+            let items = new Map();
+            let roulleteItems = await RouletteItems.getAll();
+
+            for(const item of roulleteItems) {
+                const itemObj = new RouletteItem(interaction, item).build(user).info();
+                items.set(item.id, {
+                    text: itemObj.text,
+                    prop: itemObj.likelihood.toLocaleString("es-CO"),
+                    id: item.id
+                })
+            }
+
+            const interactive = new InteractivePages({
+                title: "Lista de Items de la Ruleta",
+                author_icon: client.user.displayAvatarURL({ dynamic: true }),
+                color: Colores.verde,
+                addon: `**▸** {text}\n**▸** Probabilidad del **{prop}%** para que salga\n\n`
+            }, items, 5)
+
+            await interactive.init(interaction);
             break;
         }
     }

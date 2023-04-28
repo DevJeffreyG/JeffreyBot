@@ -4,7 +4,6 @@ const Schema = new mongoose.Schema({
     value: { type: String, required: true },
     prob: { type: Number, required: true },
     extra: {
-        special: { type: Number, default: null },
         duration: { type: String, default: null },
         boosttype: { type: Number, default: null },
         boostobj: { type: Number, default: null },
@@ -19,7 +18,6 @@ Schema.static("new", async function (data, id) {
     let newExtra = {};
 
     console.log(extra)
-
 
     for(prop in extra) {
         let isNaN = extra[prop].toString() === "NaN";
