@@ -1,5 +1,5 @@
 const { CustomElements } = require("mongoose").models;
-const { CommandInteraction } = require("discord.js");
+const { CommandInteraction, codeBlock } = require("discord.js");
 const Embed = require("./Embed");
 const { FindNewId } = require("./functions");
 const { DoesntExistsError } = require("../errors");
@@ -49,7 +49,7 @@ class CustomEmbed extends Embed {
         let cstmEmbed = this.doc.getEmbed(id);
         let embed = this.raw();
 
-        if(!cstmEmbed)
+        if (!cstmEmbed)
             throw new DoesntExistsError(interaction, `El Embed con ID \`${id}\``, "este servidor");
 
         if (embed.author || embed.title) {
@@ -124,7 +124,11 @@ class CustomEmbed extends Embed {
 
         if (titulo) this.defAuthor({ text: titulo, icon: icono, title: icon ? false : true })
         if (foo) this.defFooter({ text: foo, icon: fooicon, timestamp: tiempo ?? false })
-        if (colorEmbed) this.defColor(typeof colorEmbed === "number" ? colorEmbed : "#" + colorEmbed)
+        try {
+            if (colorEmbed) this.defColor(colorEmbed)
+        } catch (err) {
+            this.defColor("#000000")
+        }
         if (descr) this.defDesc(descr)
     }
 }

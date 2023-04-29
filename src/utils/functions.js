@@ -1733,13 +1733,14 @@ ${codeBlock(message.content)}`)
 
 /**
  * @param {Client} client 
- * @param {Guild} guild 
+ * @param {Guild | String} guild 
  */
 const FetchThisGuild = async function (client, guild) {
-  await client.guilds.fetch(guild.id);
+  await client.guilds.fetch(guild.id ?? guild);
   await guild.channels.fetch();
   await guild.roles.fetch();
   await guild.members.fetch();
+  await guild.emojis.fetch();
   await guild.commands.fetch();
 
   client.fetchedGuilds.push(guild.id);
