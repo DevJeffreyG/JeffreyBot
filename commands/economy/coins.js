@@ -1,4 +1,4 @@
-const { Command, Categories, Embed, BoostTypes, BoostObjetives, Cooldowns, GetRandomItem, FindAverage } = require("../../src/utils");
+const { Command, Categories, Embed, BoostTypes, BoostObjetives, Cooldowns, GetRandomItem, FindAverage, BoostWork } = require("../../src/utils");
 
 const { Responses } = require("../../src/resources/");
 
@@ -31,8 +31,8 @@ command.execute = async (interaction, models, params, client) => {
     let maximum = 20;
     let fakeAdd = 999;
 
-    if (doc.settings.functions["adjust_coins"]) {
-        let average = await FindAverage(guild);
+    if (doc.settings.functions.adjust.coins) {
+        const average = doc.data.average_currency;
         fakeAdd = average * 0.5;
         if ((average - maximum) > 10000) maximum = average * 0.1;
     }
@@ -50,19 +50,11 @@ command.execute = async (interaction, models, params, client) => {
 
     let fakemoney = `${Math.round(Math.ceil(Math.random() * 1000) + fakeAdd).toLocaleString("es-CO")} ${Currency.name}`;
 
-    let prevMoney = money;
-    
     // buscar si tiene boost
-    for (let i = 0; i < user.data.temp_roles.length; i++) {
-        const temprole = user.data.temp_roles[i];
-        const specialInfo = temprole.special;
-
-        if (specialInfo.type === BoostTypes.Multiplier) {
-            if ((specialInfo.objetive === BoostObjetives.Currency || specialInfo.objetive === BoostObjetives.All) && !specialInfo.disabled) {
-                money = Number((money * Number(specialInfo.value)).toFixed(2));
-                tmoney = prevMoney < money ? `**${Currency}${money.toLocaleString('es-CO')}🚀**` : `**${Currency}${money.toLocaleString('es-CO')}😟**`;
-            }
-        }
+    const boost = BoostWork(user);
+    if (boost.changed) {
+        money = Number((money * Number(boost.multiplier.currency_value)).toFixed(2));
+        tmoney = `**${Currency}${money.toLocaleString('es-CO')}${boost.emojis.currency}**`
     }
 
     let index = GetRandomItem(Responses.coins);

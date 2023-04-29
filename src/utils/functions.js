@@ -19,7 +19,7 @@ const { Users, Guilds, DarkShops, Shops, GlobalDatas } = require("mongoose").mod
 const { google } = require("googleapis");
 const { ApiClient } = require("@twurple/api");
 const { AppTokenAuthProvider } = require("@twurple/auth");
-const { BoostObjetives, ChannelModules, LogReasons } = require("./Enums");
+const { BoostObjetives, ChannelModules, LogReasons, BoostTypes } = require("./Enums");
 const Log = require("./Log");
 const { Bases } = require("../resources");
 const Commands = require("../../Commands");
@@ -472,6 +472,10 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
     }
 
     if (justTempRoles) return;
+
+    // Ajustar el promedio
+    let average = await FindAverage(guild)
+    doc.data.average_currency = average;
 
     birthdayIf:
     if (birthday) {
@@ -1748,6 +1752,48 @@ const FetchThisGuild = async function (client, guild) {
   console.log("💚 %s fetched!", guild.name)
 }
 
+/**
+ * 
+ * @param {Users} user Mongoose Document
+ * @returns 
+ */
+const BoostWork = function (user) {
+  let boost = {
+    changed: false,
+    multiplier: {
+      currency_value: 1,
+      exp_value: 1
+    },
+    emojis: {
+      currency: "🚀",
+      exp: "🚀"
+    }
+  }
+
+  for (const userboost of user.data.temp_roles) {
+    boost.changed = true;
+    const boostinfo = userboost.special;
+
+    if (boostinfo.type === BoostTypes.Multiplier) {
+      switch (boostinfo.objetive) {
+        case BoostObjetives.All:
+        case BoostObjetives.Currency:
+          boost.multiplier.currency_value *= boostinfo.value;
+          break;
+        case BoostObjetives.All:
+        case BoostObjetives.Exp:
+          boost.multiplier.exp_value *= boostinfo.value;
+          break;
+      }
+    }
+  }
+
+  if(boost.multiplier.currency_value <= 1 && boost.changed) boost.emojis.currency = "😟";
+  if(boost.multiplier.exp_value <= 1 && boost.changed) boost.emojis.exp = "😟";
+
+  return boost;
+}
+
 module.exports = {
   GetChangesAndCreateFields,
   FetchAuditLogs,
@@ -1780,5 +1826,6 @@ module.exports = {
   UpdateCommands,
   DeleteLink,
   FindAverage,
-  FetchThisGuild
+  FetchThisGuild,
+  BoostWork
 }
