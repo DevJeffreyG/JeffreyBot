@@ -31,14 +31,14 @@ command.execute = async (interaction, models, params, client) => {
     const filter = (inter) => inter.isStringSelectMenu() && inter.user.id === interaction.user.id;
     const collector = new Collector(interaction, { filter, max: 1 }).raw();
 
-    collector.on("collect", (i) => {
+    collector.on("collect", async (i) => {
         const cooldownSelected = i.values[0];
 
         if(cooldownSelected === "cancel") return interaction.deleteReply();
 
         user.delCooldown(cooldownSelected);
 
-        return interaction.editReply({ content: null, embeds: [new Embed({ type: "success" })], components: [] });
+        return await interaction.deleteReply();
     })
 }
 

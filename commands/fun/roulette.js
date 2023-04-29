@@ -42,8 +42,10 @@ command.execute = async (interaction, models, params, client) => {
 
     if (randomItem === -1) {
         user.delCooldown(Cooldowns.Roulette)
-        return interaction.editReply({ content: "No me la vas a creer, pero no pude encontrar un item indicado para ti :(" })
+        await interaction.deleteReply()
+        return await interaction.followUp({ ephemeral: true, content: "No me la vas a creer, pero no pude encontrar un item indicado para ti :(" })
     }
+    
     const item = new RouletteItem(interaction, randomItem).build(user);
 
     await item.use()
@@ -61,6 +63,7 @@ command.execute = async (interaction, models, params, client) => {
 
         let start = new Date()
         let i = 0;
+        if(query.length === 0) return -1;
 
         while (!returnable) {
             i++

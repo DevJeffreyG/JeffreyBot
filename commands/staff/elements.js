@@ -178,10 +178,15 @@ command.execute = async (interaction, models, params, client) => {
                     title = "Lista de Embeds";
 
                     for (embed of custom.embeds) {
+                        let buttons = "";
+                        embed.buttonids.forEach(x =>{
+                            buttons += `\n- \`${x.id}\` ${x.isAutoRole ? "**(AutoRole)**" : ""}`
+                        })
+
                         items.set(embed.id, {
                             show: embed.title ?? embed.desc,
                             linkedType: "Botones",
-                            linked: embed.buttonids?.join(", "),
+                            linked: buttons,
                             id: embed.id
                         })
                     }
@@ -194,7 +199,7 @@ command.execute = async (interaction, models, params, client) => {
 
                     for (button of custom.buttons) {
                         items.set(button.id, {
-                            show: button.texto,
+                            show: button.texto ?? button.emoji,
                             linkedType: "Embeds",
                             linked: button.embedids?.join(", "),
                             id: button.id
@@ -209,7 +214,7 @@ command.execute = async (interaction, models, params, client) => {
                 title,
                 author_icon: interaction.guild.iconURL({ dynamic: true }),
                 color: Colores.verde,
-                addon: `**— {show}**\n**▸ (IDs) {linkedType} vínculados: {linked}**\n**▸ ID: {id}**\n\n`
+                addon: `**— {show}**\n**▸ (IDs) {linkedType} vínculados**: {linked}\n**▸ Element ID: {id}**\n\n`
             }, items, 5)
             return interactive.init(interaction);
         }

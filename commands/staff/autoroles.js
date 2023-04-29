@@ -223,7 +223,10 @@ command.execute = async (interaction, models, params, client) => {
             for await (x of doc.data.autoroles) {
                 let guildEmote = await interaction.client.guilds.fetch(x.guild_emote ?? interaction.guild.id).catch(err => null);
                 let emote = (!isNaN(x.emote) ? guildEmote.emojis.cache.get(x.emote) : x.emote) ?? "No tiene";
-                let grupo = x.toggle_group ? doc.getOrCreateToggleGroup(x.toggle_group) : "No tiene";
+                
+                let toggleGroup = x.toggle_group ? doc.getOrCreateToggleGroup(x.toggle_group) : null;
+                let grupo = x.toggle_group ? `${toggleGroup.group_name} (\`${toggleGroup.id}\`)` : "No tiene";
+                
                 let aRole = interaction.guild.roles.cache.get(x.role_id) ?? "Se eliminó el role";
                 let nombre = x.name;
 
