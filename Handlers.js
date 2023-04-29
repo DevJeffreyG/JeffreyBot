@@ -1,8 +1,8 @@
-const { BaseInteraction, InteractionType, time, CommandInteraction, MessageComponentInteraction, ModalSubmitInteraction, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction, DiscordAPIError, chatInputApplicationCommandMention, ActionRowBuilder } = require("discord.js");
+const { BaseInteraction, InteractionType, time, CommandInteraction, MessageComponentInteraction, ModalSubmitInteraction, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction, DiscordAPIError, chatInputApplicationCommandMention, ActionRowBuilder, codeBlock } = require("discord.js");
 
 const { Ticket, Suggestion, Button } = require("./src/handlers/");
 const { Bases, Colores } = require("./src/resources");
-const { ErrorEmbed, Embed, Categories, ValidateDarkShop, Confirmation, HumanMs } = require("./src/utils");
+const { ErrorEmbed, Embed, Categories, ValidateDarkShop, Confirmation, HumanMs, Modal, CustomEmbed } = require("./src/utils");
 
 const { CommandNotFoundError, ToggledCommandError, DiscordLimitationError, BadCommandError, SelfExec, ModuleDisabledError } = require("./src/errors/");
 
@@ -282,6 +282,39 @@ class Handlers {
      */
     async modalHandler() {
         await this.suggestion?.handle(this.params.getUser(), this.params.getDoc());
+
+        const recieved = new Modal(this.interaction).read();
+        const customId = this.interaction.customId.split("-")[0];
+
+        switch (customId) {
+            case "createCustomEmbed": {
+                await this.interaction.deferReply({ ephemeral: true })
+
+                const newEmbed = new CustomEmbed(recieved)
+                let confirmation = await Confirmation("Nuevo Embed", [
+                    "El Embed se verá así:",
+                    newEmbed
+                ], this.interaction).catch(err => {
+                    if (err instanceof DiscordAPIError) {
+                        throw new DiscordLimitationError(this.interaction, "enviar Embed", [
+                            "No se podría enviar tu Embed",
+                            "Verifica que el Embed tenga sentido y pueda ser creado",
+                            codeBlock("js", err)
+                        ])
+                    }
+                })
+
+                if (!confirmation) return;
+                return await newEmbed.save(this.interaction);
+            }
+
+            case "editCustomEmbed": {
+                const id = Number(this.interaction.customId.split("-")[1]);
+                await this.interaction.deferReply({ ephemeral: true })
+
+                return await new CustomEmbed(recieved).replace(id, this.interaction)
+            }
+        }
     }
 
     async #executeCommand(interaction, models, params, client) {
@@ -305,11 +338,11 @@ class Handlers {
             let cooldownLeft = new HumanMs(until).left(true);
             let c_data = [];
 
-            for(const prop in cooldownLeft) {
+            for (const prop in cooldownLeft) {
                 c_data.push(cooldownLeft[prop])
             }
 
-            if(c_data.at(-1) != 0 && c_data.at(-2) === 0) console.log("⚪ Con %sms de Cooldown", cooldownLeft.milisegundo);
+            if (c_data.at(-1) != 0 && c_data.at(-2) === 0) console.log("⚪ Con %sms de Cooldown", cooldownLeft.milisegundo);
 
             return interaction.reply({
                 embeds: [

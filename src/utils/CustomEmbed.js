@@ -49,6 +49,9 @@ class CustomEmbed extends Embed {
         let cstmEmbed = this.doc.getEmbed(id);
         let embed = this.raw();
 
+        if(!cstmEmbed)
+            throw new DoesntExistsError(interaction, `El Embed con ID \`${id}\``, "este servidor");
+
         if (embed.author || embed.title) {
             cstmEmbed.title = embed.author?.name ?? embed.title;
             cstmEmbed.icon = embed.author?.icon_url;
@@ -65,13 +68,13 @@ class CustomEmbed extends Embed {
 
         await this.doc.save();
 
-        return interaction.editReply({
+        return await interaction.editReply({
             embeds: [
                 new Embed({
                     type: "success",
                     data: {
                         desc: [
-                            `Se ha editado el Embed. Usa ${interaction.client.mentionCommand("elements embeds edit")} para hacerle cambios`,
+                            `Se ha editado el Embed. Usa ${interaction.client.mentionCommand("elements send")} para enviarlo`,
                             `ID: ${id}`
                         ]
                     }
@@ -93,7 +96,7 @@ class CustomEmbed extends Embed {
             this.doc.deleteEmbed(id);
             await this.doc.save();
 
-            return interaction.editReply({
+            return await interaction.editReply({
                 embeds: [
                     new Embed({
                         type: "success",

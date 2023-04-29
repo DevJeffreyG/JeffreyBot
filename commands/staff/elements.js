@@ -1,5 +1,5 @@
-const { SlashCommandStringOption, SlashCommandBooleanOption, SlashCommandAttachmentOption, ButtonStyle, SlashCommandIntegerOption, DiscordAPIError, codeBlock, ActionRowBuilder } = require("discord.js");
-const { Command, Categories, CustomEmbed, Confirmation, InteractivePages, CustomButton } = require("../../src/utils");
+const { SlashCommandStringOption, ButtonStyle, SlashCommandIntegerOption, DiscordAPIError, codeBlock, ActionRowBuilder, TextInputStyle } = require("discord.js");
+const { Command, Categories, CustomEmbed, Confirmation, InteractivePages, CustomButton, Modal } = require("../../src/utils");
 const { Colores } = require("../../src/resources");
 const { DiscordLimitationError } = require("../../src/errors");
 
@@ -87,43 +87,6 @@ command.addOptionsTo(["embeds edit", "buttons edit", "embeds del", "buttons del"
         .setRequired(true)
 ])
 
-command.addOptionsTo(["embeds create", "embeds edit"], [
-    new SlashCommandStringOption()
-        .setName("title")
-        .setDescription("Texto que se muestra arriba del todo")
-        .setMaxLength(256)
-        .setMinLength(1),
-    new SlashCommandStringOption()
-        .setName("icon")
-        .setDescription("Imagen que se muestra a la izquierda del título (URL)")
-        .setMinLength(1),
-    new SlashCommandStringOption()
-        .setName("desc")
-        .setDescription("La descripción de este Embed")
-        .setMinLength(1)
-        .setMaxLength(4096),
-    new SlashCommandStringOption()
-        .setName("color")
-        .setDescription("El color Hex de este Embed")
-        .setMinLength(1)
-        .setMaxLength(6),
-    new SlashCommandStringOption()
-        .setName("footer")
-        .setDescription("Texto que se muestra abajo del Embed")
-        .setMinLength(1)
-        .setMaxLength(2048),
-    new SlashCommandStringOption()
-        .setName("footer_icon")
-        .setDescription("Imagen que se muestra a la izquierda del footer (URL)")
-        .setMinLength(1),
-    new SlashCommandBooleanOption()
-        .setName("time")
-        .setDescription("Mostrar la fecha en el momento que se envíe este Embed"),
-    new SlashCommandAttachmentOption()
-        .setName("img")
-        .setDescription("Adjunta una imagen al Embed")
-])
-
 command.addOptionsTo(["buttons create", "buttons edit"], [
     new SlashCommandStringOption()
         .setName("texto")
@@ -156,11 +119,10 @@ command.addOptionsTo(["buttons create", "buttons edit"], [
 ])
 
 command.execute = async (interaction, models, params, client) => {
-    await interaction.deferReply();
-
     const { subgroup, subcommand } = params;
     const { CustomElements } = models;
 
+    if (subcommand && !subgroup) await interaction.deferReply();
     const custom = await CustomElements.getOrCreate(interaction.guild.id);
 
     switch (subcommand) {
@@ -177,13 +139,11 @@ command.execute = async (interaction, models, params, client) => {
 
                 if (button) {
                     let buttonObj = new CustomButton(button, interaction);
-                    if(!buttonObj.data.url) buttonObj.setCustomId(`BUTTON-${interaction.guild.id}-${bId}`);
+                    if (!buttonObj.data.url) buttonObj.setCustomId(`BUTTON-${interaction.guild.id}-${bId}`);
 
                     row.addComponents(buttonObj);
                 }
             }
-
-            console.log(row)
 
             if (row.components.length > 0) components.push(row);
 
@@ -251,41 +211,32 @@ command.execute = async (interaction, models, params, client) => {
 command.execEmbeds = async (interaction, models, params, client) => {
     const { subcommand, embeds } = params;
 
-    try {
-        switch (subcommand) {
-            case "create": {
-                const newEmbed = new CustomEmbed(embeds)
-                let confirmation = await Confirmation("Nuevo Embed", [
-                    "El Embed se verá así:",
-                    newEmbed
-                ], interaction)
+    const modal = new Modal(interaction)
+        .defId("createCustomEmbed")
+        .defTitle("Crear Embed")
+        .addInput({ id: "title", label: "El título", placeholder: "Texto que se muestra arriba del todo", style: TextInputStyle.Short })
+        .addInput({ id: "icon", label: "URL Icono", placeholder: "Imagen que se muesta a la izquierda del título", style: TextInputStyle.Short })
+        .addInput({ id: "desc", label: "La descripción", placeholder: "Texto que sale en la descripción de este Embed", style: TextInputStyle.Paragraph })
+        .addInput({ id: "color", label: "El color del Embed (#HEX)", placeholder: "#00ff00, #ff0000, #f0f0f0, #fff", style: TextInputStyle.Short })
+        .addInput({ id: "footer", label: "El footer", placeholder: "Texto que se muestra debajo del Embed", style: TextInputStyle.Short });
 
-                if (!confirmation) return;
-                return await newEmbed.save(interaction);
-            }
-            case "edit": {
-                let { id } = embeds;
-
-                return new CustomEmbed(embeds).replace(id.value, interaction)
-            }
-            case "del": {
-                let { id } = embeds;
-
-                return new CustomEmbed().delete(id.value, interaction);
-            }
+    switch (subcommand) {
+        case "create": {
+            await modal.show()
+            break;
         }
-
-    } catch (err) {
-        if (err instanceof DiscordAPIError) {
-            throw new DiscordLimitationError(interaction, "enviar Embed", [
-                "No se podría enviar tu Embed",
-                "Verifica que el Embed tenga sentido y pueda ser creado",
-                codeBlock("js", err)
-            ])
+        case "edit": {
+            let { id } = embeds;
+            modal.defId("editCustomEmbed-" + id.value);
+            await modal.show()
+            break;
         }
-
-        throw err;
+        case "del": {
+            let { id } = embeds;
+            return await new CustomEmbed().delete(id.value, interaction);
+        }
     }
+
 }
 
 command.execButtons = async (interaction, models, params, client) => {
@@ -322,7 +273,7 @@ command.execButtons = async (interaction, models, params, client) => {
 
     } catch (err) {
         if (err instanceof DiscordAPIError) {
-            throw new DiscordLimitationError(interaction, "enviar Embed", [
+            throw new DiscordLimitationError(interaction, "Enviar Embed", [
                 "No se podría enviar tu Botón",
                 "Verifica que el Botón tenga sentido y pueda ser creado",
                 codeBlock("js", err)

@@ -62,18 +62,30 @@ class CustomButton extends ButtonBuilder {
 
         await this.doc.save();
 
+        let embeds = [
+            new Embed({
+                type: "success",
+                data: {
+                    desc: [
+                        `Se ha editado el Botón. Usa ${this.interaction.client.mentionCommand("elements buttons link")} para vincularlo a un Embed`,
+                        `ID: ${id}`
+                    ]
+                }
+            })
+        ]
+
+        let sug = new Embed({
+            type: "didYouKnow",
+            data: {
+                text: `Para eliminar todos los Embeds vinculados de un Embed, sólo basta con escribir cualquier cosa que no sea un número`,
+                likelihood: 25
+            }
+        })
+    
+        if (sug.likelihood) embeds.push(sug);
+
         return this.interaction.editReply({
-            embeds: [
-                new Embed({
-                    type: "success",
-                    data: {
-                        desc: [
-                            `Se ha editado el Botón. Usa ${this.interaction.client.mentionCommand("elements buttons link")} para vincularlo a un Embed`,
-                            `ID: ${id}`
-                        ]
-                    }
-                })
-            ]
+            embeds
         })
     }
 
@@ -146,7 +158,6 @@ class CustomButton extends ButtonBuilder {
     }
 
     raw() {
-        console.log(this.data)
         return this.data;
     }
 
@@ -180,7 +191,14 @@ class CustomButton extends ButtonBuilder {
             this.setCustomId("placeholder");
 
             if (linkEmbed) {
-                this.linked = Array.isArray(linkEmbed) ? linkEmbed : linkEmbed.split(",").map(Number);
+                this.linked = Array.isArray(linkEmbed) ? linkEmbed : null;
+                if(!this.linked) {
+                    this.linked = [];
+                    linkEmbed.split(",").forEach(x => {
+                        let y = Number(x);
+                        if(!isNaN(y)) this.linked.push(y);
+                    });
+                }
 
                 if (this.data.style === ButtonStyle.Link && this.linked.length > 0)
                     throw new BadParamsError(this.interaction, [

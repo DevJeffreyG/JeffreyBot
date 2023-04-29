@@ -9,9 +9,6 @@ const Schema = mongoose.Schema({
             desc: { type: String },
             color: { type: Number },
             footer: { type: String },
-            footer_icon: { type: String },
-            time: { type: Boolean },
-            img: { type: String },
             id: { type: Number, required: true, sparse: true },
             buttonids: [{ type: Number }]
         }
