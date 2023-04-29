@@ -23,6 +23,11 @@ class Modal extends ModalBuilder {
         return this
     }
 
+    /**
+     * 
+     * @param {*} options 
+     * @returns {this}
+     */
     addInput(options = { id: string, label: string, style: TextInputStyle, req: Boolean, placeholder: string, min: 0, max: Infinity }) {
         if(this.data.components?.length > 5) return console.error("🔴 No puedes agregar más Inputs")
         const { id, label, style, req, placeholder, min, max } = options;

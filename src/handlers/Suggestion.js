@@ -79,7 +79,7 @@ class Suggestion {
         const suggestionNotFound = new FetchError(this.interaction, "sugerencia", [
             "Eso no debió pasar...", "No encontré esa sugerencia en la base de datos"
         ])
-        .setEphemeral(true);
+            .setEphemeral(true);
 
         const suggestion = this.doc.data.suggestions.find(x => x.message_id === this.interaction.message.id);
         if (!suggestion) {
@@ -105,7 +105,7 @@ class Suggestion {
                     .defFooter({ text: "Aprobada", icon: this.interaction.client.EmojisObject.Check.url, timestamp: true })
                     .defColor(Colores.verdeclaro);
 
-                this.interaction.message.edit({ embeds: [newembed] });
+                await this.interaction.message.edit({ embeds: [newembed] });
 
                 embed
                     .defAuthor({ text: "¡Se ha aprobado tu sugerencia!", icon: this.interaction.client.EmojisObject.Check.url })
@@ -131,7 +131,7 @@ ${codeBlock(suggestion.suggestion)}`)
 
                     embed.defDesc(embed.data.description + `**—** Nos tomamos la libertad de agregarte un role como forma de agradecimiento 😉`);
                 }
-                this.interaction.reply({ ephemeral: true, content: "Se ha aceptado la sugerencia, se ha enviado un mensaje al usuario y se le ha dado el rol de colaborador." });
+                await this.interaction.reply({ ephemeral: true, content: "Se ha aceptado la sugerencia, se ha enviado un mensaje al usuario y se le ha dado el rol de colaborador." });
                 break;
             }
 
@@ -144,7 +144,7 @@ ${codeBlock(suggestion.suggestion)}`)
                     .defFooter({ text: "Rechazada", icon: this.interaction.client.EmojisObject.Cross.url, timestamp: true })
                     .defColor(Colores.rojo);
 
-                this.interaction.message.edit({ embeds: [newembed] });
+                await this.interaction.message.edit({ embeds: [newembed] });
 
                 embed
                     .defAuthor({ text: "¡Gracias por el interés!", icon: this.interaction.client.EmojisObject.Cross.url })
@@ -154,7 +154,7 @@ ${codeBlock(suggestion.suggestion)}
                     .defColor(Colores.rojo)
                     .defFooter({ text: this.interaction.guild.name, icon: this.interaction.guild.iconURL({ dynamic: true }), timestamp: true });
 
-                this.interaction.reply({ ephemeral: true, content: "Se ha rechazado la sugerencia, se ha enviado un mensaje al usuario informándole." });
+                await this.interaction.reply({ ephemeral: true, content: "Se ha rechazado la sugerencia, se ha enviado un mensaje al usuario informándole." });
                 break;
             }
 
@@ -167,7 +167,7 @@ ${codeBlock(suggestion.suggestion)}
                     .defFooter({ text: "Inválida", icon: this.interaction.client.EmojisObject.Error.url, timestamp: true })
                     .defColor(Colores.rojo)
 
-                this.interaction.message.edit({ embeds: [newembed] });
+                await this.interaction.message.edit({ embeds: [newembed] });
 
                 embed
                     .defAuthor({ text: "¡Gracias por el interés!", icon: this.interaction.client.EmojisObject.Error.url })
@@ -178,7 +178,7 @@ ${codeBlock(suggestion.suggestion)}
                     .defColor(Colores.rojo)
                     .defFooter({ text: this.interaction.guild.name, icon: this.interaction.guild.iconURL({ dynamic: true }), timestamp: true });
 
-                this.interaction.reply({ ephemeral: true, content: "Se ha invalidado la sugerencia, se ha enviado un mensaje al usuario informándole." });
+                await this.interaction.reply({ ephemeral: true, content: "Se ha invalidado la sugerencia, se ha enviado un mensaje al usuario informándole." });
                 break;
             }
         }
