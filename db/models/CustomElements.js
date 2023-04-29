@@ -9,8 +9,13 @@ const Schema = mongoose.Schema({
             desc: { type: String },
             color: { type: Number },
             footer: { type: String },
+            buttonids: [
+                {
+                    id: { type: Number },
+                    isAutoRole: { type: Boolean, default: false }
+                }
+            ],
             id: { type: Number, required: true, sparse: true },
-            buttonids: [{ type: Number }]
         }
     ],
     buttons: [
@@ -71,9 +76,9 @@ Schema.method("addButton", function (button, id, embedIds = []) {
     let buttonToPush = {};
 
     buttonToPush.id = id;
-    buttonToPush.embedIds = embedIds;
+    buttonToPush.embedids = embedIds;
 
-    if (button.emoji) buttonToPush.emoji = button.id ?? button.name;
+    if (button.emoji) buttonToPush.emoji = button.emoji.id ?? button.emoji.name;
     if (button.label) buttonToPush.texto = button.label;
     if (button.style) buttonToPush.style = button.style;
 

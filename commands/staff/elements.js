@@ -1,7 +1,7 @@
 const { SlashCommandStringOption, ButtonStyle, SlashCommandIntegerOption, DiscordAPIError, codeBlock, ActionRowBuilder, TextInputStyle } = require("discord.js");
 const { Command, Categories, CustomEmbed, Confirmation, InteractivePages, CustomButton, Modal } = require("../../src/utils");
 const { Colores } = require("../../src/resources");
-const { DiscordLimitationError } = require("../../src/errors");
+const { DiscordLimitationError, DoesntExistsError } = require("../../src/errors");
 
 const command = new Command({
     name: "elements",
@@ -120,26 +120,42 @@ command.addOptionsTo(["buttons create", "buttons edit"], [
 
 command.execute = async (interaction, models, params, client) => {
     const { subgroup, subcommand } = params;
-    const { CustomElements } = models;
+    const { CustomElements, Guilds } = models;
 
     if (subcommand && !subgroup) await interaction.deferReply();
     const custom = await CustomElements.getOrCreate(interaction.guild.id);
+    const doc = await Guilds.getOrCreate(interaction.guild.id);
 
     switch (subcommand) {
         case "send": {
             let { id } = params[subcommand];
 
             let dbEmbed = custom.getEmbed(id.value)
+            if (!dbEmbed)
+                throw new DoesntExistsError(interaction, `El Embed con ID \`${id.value}\``, "este servidor");
+
             let embed = new CustomEmbed(dbEmbed)
             let components = [];
             let row = new ActionRowBuilder();
 
-            for (const bId of dbEmbed.buttonids) {
-                const button = custom.getButton(bId);
+            for (const linked of dbEmbed.buttonids) {
+                const bId = linked.id;
+                let button = custom.getButton(bId);
+
+                if (linked.isAutoRole) {
+                    let autorole = doc.getAutoRole(bId);
+                    let emote = autorole.emote;
+                    button = {
+                        texto: autorole.name,
+                        emote,
+                        style: ButtonStyle.Primary,
+                        autorole: true
+                    }
+                }
 
                 if (button) {
                     let buttonObj = new CustomButton(button, interaction);
-                    if (!buttonObj.data.url) buttonObj.setCustomId(`BUTTON-${interaction.guild.id}-${bId}`);
+                    if (!buttonObj.data.url) buttonObj.setCustomId(`BUTTON-${bId}-${linked.isAutoRole}`);
 
                     row.addComponents(buttonObj);
                 }
@@ -241,6 +257,7 @@ command.execEmbeds = async (interaction, models, params, client) => {
 
 command.execButtons = async (interaction, models, params, client) => {
     const { subcommand, buttons } = params;
+    await interaction.deferReply();
 
     try {
         switch (subcommand) {
@@ -272,13 +289,11 @@ command.execButtons = async (interaction, models, params, client) => {
         }
 
     } catch (err) {
-        if (err instanceof DiscordAPIError) {
-            throw new DiscordLimitationError(interaction, "Enviar Embed", [
-                "No se podría enviar tu Botón",
-                "Verifica que el Botón tenga sentido y pueda ser creado",
-                codeBlock("js", err)
-            ])
-        }
+        if (err instanceof DiscordAPIError) throw new DiscordLimitationError(interaction, "Enviar Botón", [
+            "No se podría enviar tu Botón",
+            "Verifica que el Botón tenga sentido y pueda ser creado",
+            codeBlock("js", err)
+        ])
 
         throw err;
     }

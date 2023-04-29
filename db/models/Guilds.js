@@ -49,11 +49,10 @@ const GuildSchema = new Schema({
         ],
         autoroles: [
             {
-                channel_id: { type: String, required: true },
-                message_id: { type: String, required: true },
-                guild_emote: { type: String, default: null },
-                emote: { type: String, required: true },
+                name: { type: String, required: true },
                 role_id: { type: String, required: true },
+                emote: { type: String },
+                guild_emote: { type: String, default: null },
                 toggle_group: { type: Number, default: null },
                 id: { type: Number, sparse: true }
             }
@@ -333,7 +332,7 @@ GuildSchema.method("getCooldown", function (modulo, toString = false) {
     const base = this.settings.cooldowns[modulo];
     const modifiers = this.settings.modifiers.filter(x => x.module === modulo && x.type === ModifierType.Cooldown);
 
-    if(!base) return null
+    if (!base) return null
 
     return toString ? { base, modifiers } : { base: ms(base), modifiers };
 })
@@ -359,148 +358,23 @@ GuildSchema.method("getOrCreateToggleGroup", function (id) {
     return q;
 })
 
-GuildSchema.method("addAutoRole", async function (emoteInfo, role_id, id) {
+GuildSchema.method("addAutoRole", async function (name, role_id, emoteInfo, id) {
     let emote = emoteInfo;
     let guild_emote = null;
-    let channel_id = this.settings.autoroles.channel_id;
-    let message_id = this.settings.autoroles.message_id;
 
-    if (typeof emote != "string") {
+    if (emote && typeof emote != "string") {
         emote = emoteInfo.id;
         guild_emote = emoteInfo.guild?.id;
     }
 
-    let creatable = true;
-    this.data.autoroles.forEach(auto => {
-        let sameEmote = auto.emote === emote ? true : false;
-        let sameRole = auto.role_id === role_id ? true : false;
-        let sameMsg = auto.message_id === message_id ? true : false;
-
-        creatable = sameMsg ?
-            sameEmote || sameRole ? false : true
-            : true;
-
-        if (!creatable) return false;
-    })
-
-    if (!creatable) return null;
-
     this.data.autoroles.push({
-        channel_id,
-        message_id,
         guild_emote,
         emote,
+        name,
         role_id,
         id
     });
     return await this.save();
-});
-
-GuildSchema.method("workerAddAutoRole", function (message, reaction, user) {
-    const Log = require('../../src/utils/Log');
-
-    const reactions = message.reactions.cache;
-    const guild = message.guild;
-    const reactor = guild.members.cache.get(user.id);
-    const autoroles = this.data.autoroles;
-    let emoji = reaction.emoji.id ?? reaction.emoji.name
-
-    const autorole = autoroles.find(x =>
-        x.emote === emoji &&
-        x.message_id === message.id
-    )
-
-    if (!autorole) {
-        if (autoroles.find(x => x.message_id === message.id)) {
-            return reactions.find(x => x.emoji === reaction.emoji).remove(reactor);
-        }
-
-        return;
-    }
-
-    const role = guild.roles.cache.find(x => x.id === autorole.role_id);
-    if (autorole.toggle_group) {
-        // buscar si existen más toggles
-        const sameGroup = autoroles.filter(x => x.toggle_group === autorole.toggle_group);
-
-        if (sameGroup.length > 1) {
-            // hay varios toggles.
-            // revisar si ha reaccionado con algún otro autorole con ese toggle.
-
-            oldReaction:
-            for (let i = 0; i < sameGroup.length; i++) {
-                const toggledAutorole = sameGroup[i];
-
-                const oldRole = guild.roles.cache.find(x => x.id === toggledAutorole.role_id);
-                const oldEmote = toggledAutorole.emote;
-
-                if (reactor.roles.cache.find(x => x === oldRole) && oldRole != role) {
-                    // * el role se elimina en workerRemoveAutoRole
-                    let oldC = guild.channels.cache.find(x => x.id === toggledAutorole.channel_id);
-                    let oldM = oldC.messages.cache.get(toggledAutorole.message_id);
-
-                    const f = !isNaN(oldEmote) ? x => x.emoji.id === oldEmote : x => x.emoji.name === oldEmote;
-                    if (oldM) {
-                        let reactions = oldM.reactions.cache.find(f);
-                        reactions.users.remove(user.id);
-                    }
-
-                    continue oldReaction;
-                }
-            }
-        }
-    }
-
-    reactor.roles.add(role)
-        .then(() => console.log(`💬 Se agregó por AUTOROLES ${role.name} a ${reactor.user.tag}`))
-        .catch(err => {
-            return new Log()
-                .setGuild(guild)
-                .setTarget(ChannelModules.StaffLogs)
-                .setReason(LogReasons.Error)
-                .send({
-                    embeds: [
-                        new ErrorEmbed()
-                            .defDesc(`Hubo un error agregando un ${hyperlink("AutoRole", message.url)} a ${user.tag}:${codeBlock("json", err)}`)
-                    ]
-                });
-        })
-
-});
-
-GuildSchema.method("workerRemoveAutoRole", function (message, reaction, user) {
-    const Log = require('../../src/utils/Log');
-
-    const reactions = message.reactions.cache;
-    const guild = message.guild;
-    const reactor = guild.members.cache.get(user.id);
-    const autoroles = this.data.autoroles;
-    let emoji = reaction.emoji.id ?? reaction.emoji.name
-
-    const autorole = autoroles.find(x =>
-        x.emote === emoji &&
-        x.message_id === message.id
-    )
-
-    if (!autorole) return;
-
-    const role = guild.roles.cache.find(x => x.id === autorole.role_id);
-    if (reactions.find(x => x.emoji === reaction.emoji)) {
-        reactor.roles.remove(role)
-            .then(() => console.log(`💬 Se eliminó por AUTOROLES ${role.name} a ${reactor.user.tag}`))
-            .catch(err => {
-                return new Log()
-                    .setGuild(guild)
-                    .setTarget(ChannelModules.StaffLogs)
-                    .setReason(LogReasons.Error)
-                    .send({
-                        embeds: [
-                            new ErrorEmbed()
-                                .defDesc(`Hubo un error eliminando un ${hyperlink("AutoRole", message.url)} a ${user.tag}:${codeBlock("json", err)}`)
-                        ]
-                    });
-            })
-    }
 });
 
 GuildSchema.method("getAdmins", function () {

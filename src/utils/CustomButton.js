@@ -7,7 +7,7 @@ const { BadParamsError, DiscordLimitationError, DoesntExistsError } = require(".
 class CustomButton extends ButtonBuilder {
     /**
      * 
-     * @param {*} params 
+     * @param {{ texto: string, emoji: string, style: ButtonStyle, link: string, embedids: Array<number> }} params 
      * @param {CommandInteraction | null} interaction 
      */
     constructor(params, interaction = null) {
@@ -81,7 +81,7 @@ class CustomButton extends ButtonBuilder {
                 likelihood: 25
             }
         })
-    
+
         if (sug.likelihood) embeds.push(sug);
 
         return this.interaction.editReply({
@@ -122,21 +122,22 @@ class CustomButton extends ButtonBuilder {
      * @param {Integer} buttonId El Botón que se va a vincular
      * @param {Integer} embedId El Embed donde se va a vincular
      * @param {CommandInteraction} interaction 
+     * @param {Boolean} autorole Es un AutoRole?
      */
-    async linkWork(buttonId, embedId, interaction) {
+    async linkWork(buttonId, embedId, interaction, autorole = false) {
         this.doc = await CustomElements.getOrCreate(interaction.guild.id);
 
         const embed = this.doc.getEmbed(embedId);
         if (!embed)
             throw new DoesntExistsError(interaction, `El Embed con ID \`${embedId}\``, "este servidor");
 
-        if (embed.buttonids?.find(x => x === buttonId)) {
+        if (embed.buttonids?.find(x => x.id === buttonId && x.isAutoRole === autorole)) {
             let confirmation = await Confirmation("Desvincular Botón", [
                 "A partir de ahora, cuando se envíe este Embed no se incluirá el Botón"
             ], interaction)
 
             if (!confirmation) return;
-            embed.splice(embed.buttonids.findIndex(x => x === buttonId), 1);
+            embed.splice(embed.buttonids.findIndex(x => x.id === buttonId && x.isAutoRole === autorole), 1);
         } else {
             let confirmation = await Confirmation("Vincular Botón", [
                 "Se pondrá este botón abajo del Embed al enviarse a partir de ahora"
@@ -150,7 +151,7 @@ class CustomButton extends ButtonBuilder {
                     "Para continuar, desvincula un botón antes (usando este mismo comando)"
                 ])
 
-            embed.buttonids.push(buttonId);
+            embed.buttonids.push({ id: buttonId, isAutoRole: autorole });
         }
 
         await this.doc.save();
@@ -162,7 +163,7 @@ class CustomButton extends ButtonBuilder {
     }
 
     #creation(params) {
-        const { texto, emoji, style, link, embedids } = params;
+        const { texto, emoji, style, link, embedids, autorole } = params;
 
         const text = texto?.value ?? texto;
         const emote = emoji?.value ?? emoji;
@@ -173,6 +174,10 @@ class CustomButton extends ButtonBuilder {
         if (text) this.setLabel(text)
         if (emote) this.setEmoji(emote)
         if (sty) this.setStyle(Number(sty))
+        else this.setStyle(ButtonStyle.Secondary);
+
+        if (!emote && !text)
+            throw new BadParamsError(this.interaction, "El Botón tiene que tener al menos texto o un emote");
 
         if (this.data.style === ButtonStyle.Link) {
             if (url) this.setURL(url)
@@ -192,11 +197,11 @@ class CustomButton extends ButtonBuilder {
 
             if (linkEmbed) {
                 this.linked = Array.isArray(linkEmbed) ? linkEmbed : null;
-                if(!this.linked) {
+                if (!this.linked) {
                     this.linked = [];
                     linkEmbed.split(",").forEach(x => {
                         let y = Number(x);
-                        if(!isNaN(y)) this.linked.push(y);
+                        if (!isNaN(y)) this.linked.push(y);
                     });
                 }
 
@@ -211,7 +216,8 @@ class CustomButton extends ButtonBuilder {
                         "Baja la cantidad"
                     ])
             } else {
-                throw new BadParamsError(this.interaction, "Debes vincular al menos un Embed para mostrar si no es de tipo Link")
+                if (!autorole)
+                    throw new BadParamsError(this.interaction, "Debes vincular al menos un Embed para mostrar si no es de tipo Link")
             }
         }
     }

@@ -186,7 +186,7 @@ class Handlers {
     async componentHandler() {
         await this.ticket?.handle(this.user, this.doc);
         await this.suggestion?.handle(this.user, this.doc);
-        await this.button?.handle();
+        await this.button?.handle(this.doc);
 
         switch (this.interaction.customId) {
             case "deleteMessage":
@@ -296,7 +296,7 @@ class Handlers {
                     newEmbed
                 ], this.interaction).catch(err => {
                     if (err instanceof DiscordAPIError) {
-                        throw new DiscordLimitationError(this.interaction, "enviar Embed", [
+                        throw new DiscordLimitationError(this.interaction, "Enviar Embed", [
                             "No se podría enviar tu Embed",
                             "Verifica que el Embed tenga sentido y pueda ser creado",
                             codeBlock("js", err)

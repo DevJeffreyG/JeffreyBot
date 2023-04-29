@@ -44,7 +44,6 @@ class Collector {
         });
 
         this.collector.on("end", async (collected, reason) => {
-            console.log("ENDED")
             let index = this.client.activeCollectors.findIndex(x => x.collector === this.collector && x.userid === this.interaction.user.id);
             if (index != -1) {
                 this.client.activeCollectors.splice(index, 1);
