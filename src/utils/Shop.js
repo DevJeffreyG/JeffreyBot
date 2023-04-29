@@ -447,7 +447,7 @@ class Shop {
         let precio = interestPrice;
 
         // para calmar a los mr inversiones
-        if (this.doc.settings.functions[this.isDarkShop ? "adjust_darkshop" : "adjust_shop"]) {
+        if (this.doc.settings.functions.adjust[this.isDarkShop ? "darkshop" : "shop"]) {
             let media = 0;
             this.shop.items.forEach(i => media += i.price);
             media /= this.shop.items.length;

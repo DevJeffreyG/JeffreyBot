@@ -113,7 +113,8 @@ const GuildSchema = new Schema({
                     }
                 ]
             }
-        ]
+        ],
+        average_currency: { type: String, default: 0 }
     },
     settings: {
         active_modules: {
@@ -191,9 +192,11 @@ const GuildSchema = new Schema({
 
         },
         functions: {
-            adjust_shop: { type: Boolean, default: true },
-            adjust_darkshop: { type: Boolean, default: true },
-            adjust_coins: { type: Boolean, default: false },
+            adjust: {
+                shop: { type: Boolean, default: true },
+                darkshop: { type: Boolean, default: true },
+                coins: { type: Boolean, default: false },
+            },
             levels_deleteOldRole: { type: Boolean, default: false },
             save_roles_onleft: { type: Boolean, default: true },
             sug_remind: { type: Number, default: 7, integer: true },
@@ -272,6 +275,15 @@ const GuildSchema = new Schema({
         }
     }
 });
+
+GuildSchema.pre("save", function() {
+    if (this.settings.functions.adjust) {
+        let obj = this.settings.functions.toObject();
+        delete obj.adjust_shop, obj.adjust_darkshop, obj.adjust_coins;
+
+        this.settings.functions = obj;
+    }
+})
 
 GuildSchema.static("getOrCreate", async function (id) {
     return await this.findOne({

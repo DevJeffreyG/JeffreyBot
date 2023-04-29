@@ -423,9 +423,9 @@ class Dashboard {
         this.#findAndSync("rob-max_fail", quantities);
 
         const functions = this.doc.settings.functions;
-        this.#findAndSync("adjust_shop", functions);
-        this.#findAndSync("adjust_darkshop", functions);
-        this.#findAndSync("adjust_coins", functions);
+        this.#findAndSync("adjust-shop", functions);
+        this.#findAndSync("adjust-darkshop", functions);
+        this.#findAndSync("adjust-coins", functions);
 
         this.#findAndSync("levels_deleteOldRole", functions);
         this.#findAndSync("save_roles_onleft", functions);
@@ -895,17 +895,17 @@ class Dashboard {
 
         let shopadjust = this.#createBoolSelector("adjshop", {
             title: "Ajustar precios de la tienda",
-            id: "adjust_shop"
+            id: "adjust-shop"
         });
 
         let dsadjust = this.#createBoolSelector("adjds", {
             title: "Ajustar precios de la DarkShop",
-            id: "adjust_darkshop"
+            id: "adjust-darkshop"
         });
 
         let coinsadjust = this.#createBoolSelector("adjds", {
             title: "Ajustar recompensas de /coins",
-            id: "adjust_coins"
+            id: "adjust-coins"
         });
 
         this.#appendChilds(main, [saveRoles, lvlsOldRole, dayRemindSug, dayRemindTicket]);
