@@ -282,6 +282,12 @@ class Blackjack {
                 })
             }
         })
+
+        this.collector.on("end", async () => {
+            if (!this.ended) {
+                await this.endgame(false, EndReasons.TimeOut);
+            }
+        })
     }
 
     async #hit() {
@@ -452,7 +458,12 @@ class Blackjack {
                     this.embed
                         .defDesc(`Perdiste **${this.Emojis.Currency}${this.bet.toLocaleString("es-CO")}** al rendirte.`)
                         .defColor(Colores.rojooscuro)
+                } else if (reason === EndReasons.TimeOut) {
+                    this.embed
+                        .defDesc(`Perdiste **${this.Emojis.Currency}${this.bet.toLocaleString("es-CO")}** porque pasó mucho tiempo.`)
+                        .defColor(Colores.rojooscuro)
                 }
+
                 this.user.economy.global.currency -= this.bet;
 
                 console.log("🔴 %s perdió %s %s en el Blackjack", this.interaction.user.tag, this.bet.toLocaleString("es-CO"), this.Emojis.Currency.name);

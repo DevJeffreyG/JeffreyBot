@@ -161,13 +161,15 @@ const BoostObjetives = new Enum({
  * - GaveUp
  * - Blackjack
  * - Deleted
+ * - TimeOut
  */
 const EndReasons = new Enum({
     OldCollector: 1,
     Over21: 2,
     GaveUp: 3,
     Blackjack: 4,
-    Deleted: 5
+    Deleted: 5,
+    TimeOut: 6
 }).values
 
 /**
