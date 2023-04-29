@@ -1,5 +1,5 @@
 const { Bases } = require("../src/resources/");
-const { Log, ChannelModules, LogReasons, Cooldowns, BoostTypes, BoostObjetives, Multipliers, RequirementType, ErrorEmbed, UpdateCommands, DeleteLink, FetchThisGuild } = require("../src/utils");
+const { Log, ChannelModules, LogReasons, Cooldowns, BoostTypes, BoostObjetives, Multipliers, RequirementType, ErrorEmbed, UpdateCommands, DeleteLink, FetchThisGuild, BoostWork } = require("../src/utils");
 
 const { GlobalDatasWork } = require("../src/utils/");
 const { ChannelType, codeBlock, Client, Message, ActionRowBuilder, ButtonBuilder, ButtonStyle, time } = require("discord.js");
@@ -144,32 +144,20 @@ module.exports = async (client, message) => {
       }
     }
 
-    await GlobalDatasWork(guild, true); // verificar si existen BOOSTS.
+    if(doc.toAdjust("chat_rewards")) {
+      let average = doc.data.average_currency;
 
-    // TempRoles
-    for (let i = 0; i < user.data.temp_roles.length; i++) {
-      const temprole = user.data.temp_roles[i];
-      const specialInfo = temprole.special;
-
-      if (specialInfo.disabled) continue;
-
-      if (specialInfo.type === BoostTypes.Multiplier) {
-        if (specialInfo.objetive === BoostObjetives.Currency) {
-          console.log("🚀 Boost de Dinero");
-          currencyToAdd *= Number(specialInfo.value);
-        }
-
-        if (specialInfo.objetive === BoostObjetives.Exp) {
-          console.log("🚀 Boost de EXP");
-          expToAdd *= Number(specialInfo.value);
-        }
-
-        if (specialInfo.objetive === BoostObjetives.All) {
-          console.log("🚀 Boost de Todo");
-          currencyToAdd *= Number(specialInfo.value)
-          expToAdd *= Number(specialInfo.value)
-        }
+      if(average / currencyToAdd > 10000) {
+        currencyToAdd += Math.round(average * 0.001);
       }
+    }
+
+    await GlobalDatasWork(guild, true); // verificar si existen BOOSTS.
+    const boost = BoostWork(user);
+
+    if(boost.changed) {
+      currencyToAdd *= boost.multiplier.currency_value;
+      expToAdd *= boost.multiplier.exp_value;
     }
 
     await user.addCurrency(currencyToAdd)

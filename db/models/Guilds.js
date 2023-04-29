@@ -193,9 +193,12 @@ const GuildSchema = new Schema({
         },
         functions: {
             adjust: {
-                shop: { type: Boolean, default: true },
-                darkshop: { type: Boolean, default: true },
+                shop: { type: Boolean, default: false },
+                darkshop: { type: Boolean, default: false },
                 coins: { type: Boolean, default: false },
+                chat_rewards: { type: Boolean, default: false },
+                claim_rep: { type: Boolean, default: false },
+                roulette: { type: Boolean, default: false },
             },
             levels_deleteOldRole: { type: Boolean, default: false },
             save_roles_onleft: { type: Boolean, default: true },
@@ -276,7 +279,7 @@ const GuildSchema = new Schema({
     }
 });
 
-GuildSchema.pre("save", function() {
+GuildSchema.pre("save", function () {
     if (this.settings.functions.adjust) {
         let obj = this.settings.functions.toObject();
         delete obj.adjust_shop, obj.adjust_darkshop, obj.adjust_coins;
@@ -492,6 +495,10 @@ GuildSchema.method("getEmoji", function (query) {
     }
 
     return general;
+})
+
+GuildSchema.method("toAdjust", function (query) {
+    return this.settings.functions.adjust[query];
 })
 
 module.exports = mongoose.model('Guilds', GuildSchema);

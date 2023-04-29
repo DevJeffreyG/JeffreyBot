@@ -16,6 +16,8 @@ command.execute = async (interaction, models, params, client) => {
     const { RouletteItems } = models;
 
     const user = params.getUser();
+    const doc = params.getDoc();
+
     let cool = await user.cooldown(Cooldowns.Roulette, { save: false })
     if (cool) return interaction.editReply({
         content: null, embeds: [
@@ -46,7 +48,7 @@ command.execute = async (interaction, models, params, client) => {
         return await interaction.followUp({ ephemeral: true, content: "No me la vas a creer, pero no pude encontrar un item indicado para ti :(" })
     }
     
-    const item = new RouletteItem(interaction, randomItem).build(user);
+    const item = new RouletteItem(interaction, randomItem).build(user, doc);
 
     await item.use()
 

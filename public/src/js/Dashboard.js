@@ -426,6 +426,9 @@ class Dashboard {
         this.#findAndSync("adjust-shop", functions);
         this.#findAndSync("adjust-darkshop", functions);
         this.#findAndSync("adjust-coins", functions);
+        this.#findAndSync("adjust-chat_rewards", functions);
+        this.#findAndSync("adjust-claim_rep", functions);
+        this.#findAndSync("adjust-roulette", functions);
 
         this.#findAndSync("levels_deleteOldRole", functions);
         this.#findAndSync("save_roles_onleft", functions);
@@ -903,13 +906,28 @@ class Dashboard {
             id: "adjust-darkshop"
         });
 
-        let coinsadjust = this.#createBoolSelector("adjds", {
+        let chatrwadjust = this.#createBoolSelector("adjchat", {
+            title: "Ajustar el dinero dado al hablar",
+            id: "adjust-chat_rewards"
+        });
+
+        let coinsadjust = this.#createBoolSelector("adjcoins", {
             title: "Ajustar recompensas de /coins",
             id: "adjust-coins"
         });
 
+        let claimrepadjust = this.#createBoolSelector("adjrep", {
+            title: "Ajustar recompensas de /claimrep",
+            id: "adjust-claim_rep"
+        });
+
+        let rouletteadjust = this.#createBoolSelector("adjrllt", {
+            title: "Ajustar recompensas de /roulette",
+            id: "adjust-roulette"
+        });
+
         this.#appendChilds(main, [saveRoles, lvlsOldRole, dayRemindSug, dayRemindTicket]);
-        this.#appendChilds(money, [shopadjust, dsadjust, coinsadjust]);
+        this.#appendChilds(money, [shopadjust, dsadjust, chatrwadjust, coinsadjust, claimrepadjust, rouletteadjust]);
 
         this.#appendChilds(contents, [main, money])
     }

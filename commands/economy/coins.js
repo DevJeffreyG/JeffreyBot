@@ -31,7 +31,7 @@ command.execute = async (interaction, models, params, client) => {
     let maximum = 20;
     let fakeAdd = 999;
 
-    if (doc.settings.functions.adjust.coins) {
+    if (doc.toAdjust("coins")) {
         const average = doc.data.average_currency;
         fakeAdd = average * 0.5;
         if ((average - maximum) > 10000) maximum = average * 0.1;

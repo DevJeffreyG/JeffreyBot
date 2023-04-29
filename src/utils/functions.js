@@ -1776,20 +1776,24 @@ const BoostWork = function (user) {
 
     if (boostinfo.type === BoostTypes.Multiplier) {
       switch (boostinfo.objetive) {
-        case BoostObjetives.All:
         case BoostObjetives.Currency:
           boost.multiplier.currency_value *= boostinfo.value;
           break;
-        case BoostObjetives.All:
+
         case BoostObjetives.Exp:
           boost.multiplier.exp_value *= boostinfo.value;
+          break;
+
+        case BoostObjetives.All:
+          boost.multiplier.exp_value *= boostinfo.value;
+          boost.multiplier.currency_value *= boostinfo.value;
           break;
       }
     }
   }
 
-  if(boost.multiplier.currency_value <= 1 && boost.changed) boost.emojis.currency = "😟";
-  if(boost.multiplier.exp_value <= 1 && boost.changed) boost.emojis.exp = "😟";
+  if (boost.multiplier.currency_value <= 1 && boost.changed) boost.emojis.currency = "😟";
+  if (boost.multiplier.exp_value <= 1 && boost.changed) boost.emojis.exp = "😟";
 
   return boost;
 }

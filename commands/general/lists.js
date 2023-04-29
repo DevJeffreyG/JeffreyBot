@@ -124,7 +124,7 @@ command.execute = async (interaction, models, params, client) => {
             let roulleteItems = await RouletteItems.getAll();
 
             for(const item of roulleteItems) {
-                const itemObj = new RouletteItem(interaction, item).build(user).info();
+                const itemObj = new RouletteItem(interaction, item).build(user, doc).info();
                 items.set(item.id, {
                     text: itemObj.text,
                     prop: itemObj.likelihood.toLocaleString("es-CO"),

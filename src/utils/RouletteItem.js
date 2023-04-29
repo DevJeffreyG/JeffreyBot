@@ -2,19 +2,15 @@ const { GuildMemberRoleManager, roleMention } = require("discord.js");
 const ms = require("ms")
 
 const { LimitedTime } = require("./functions");
-const { ItemObjetives, ItemTypes, BoostObjetives } = require("./Enums");
+const { ItemObjetives, BoostObjetives } = require("./Enums");
 const Embed = require("./Embed");
-const ErrorEmbed = require("./ErrorEmbed");
-const { AlreadyExistsError } = require("../errors");
 
-const { Users } = require("mongoose").models;
+const { Users, Guilds } = require("mongoose").models;
 
 class RouletteItem {
     constructor(interaction, globalinfo) {
-        console.log(globalinfo)
         this.interaction = interaction;
         this.item = globalinfo;
-
     }
 
     #embeds() {
@@ -55,13 +51,25 @@ class RouletteItem {
         });
     }
 
+    #adjust() {
+        if (this.doc.toAdjust("roulette")) {
+            this.numbers = Number(this.numbers);
+
+            let average = this.doc.data.average_currency;
+            if (average / this.numbers > 1000)
+                this.numbers *= Math.round(average / (average / this.numbers));
+        }
+    }
+
     /**
      * Genera la información necesaria para empezar con el Item
      * @param {Users} user 
+     * @param {Guilds} doc 
      * @returns {this}
      */
-    build(user) {
+    build(user, doc) {
         this.user = user;
+        this.doc = doc;
 
         this.numbers = this.item.value.match(/[0-9\.]/g).join("");
         this.nonumbers = this.item.value.replace(/[0-9\.]/g, "");
@@ -74,7 +82,6 @@ class RouletteItem {
 
                 this.frontend_target = `**${Currency}${this.target.toLocaleString("es-CO")}**`;
                 this.frontend_numbers = `**${Currency}${this.numbers.toLocaleString("es-CO")}**`;
-
                 break;
 
             case ItemObjetives.Boost:
@@ -135,10 +142,12 @@ class RouletteItem {
                 this.numbers = Number(this.numbers);
 
                 if (this.nonumbers === "-") {
+                    this.#adjust();
                     this.nonumbers = "Se descontaron";
                     this.user.economy.global.currency -= this.numbers;
                 }
                 else if (this.nonumbers === "+") {
+                    this.#adjust();
                     this.nonumbers = "Se agregaron";
                     this.user.addCurrency(this.numbers, false);
                 }
@@ -186,9 +195,15 @@ class RouletteItem {
 
         switch (this.nonumbers) {
             case "+":
+                this.#adjust();
+                translated.quantity = this.numbers;
+
                 translated.action = "Agrega"
                 break;
             case "-":
+                this.#adjust();
+                translated.quantity = this.numbers;
+
                 translated.action = "Resta"
                 break;
             case "*":

@@ -1,5 +1,5 @@
 const { ModuleDisabledError } = require("../../src/errors");
-const { Command, Categories, Confirmation, Embed, ErrorEmbed, HumanMs, Cooldowns } = require("../../src/utils")
+const { Command, Categories, Confirmation, Embed, ErrorEmbed, HumanMs, Cooldowns, BoostWork } = require("../../src/utils")
 
 const command = new Command({
     name: "claimrep",
@@ -9,7 +9,7 @@ const command = new Command({
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
-    
+
     const { Currency } = client.getCustomEmojis(interaction.guild.id);
 
     const guild = params.getDoc();
@@ -26,10 +26,17 @@ command.execute = async (interaction, models, params, client) => {
         ]
     });
 
-    let value = user.economy.global.reputation * guild.settings.quantities.currency_per_rep;
+    let perRep = guild.settings.quantities.currency_per_rep;
+    if (guild.toAdjust("claim_rep")) {
+        if (guild.data.average_currency / perRep > 1000)
+            perRep += Math.round(guild.data.average_currency * 0.01);
+    }
+
+    const boost = BoostWork(user);
+    let value = user.economy.global.reputation * perRep * boost.multiplier.currency_value;
 
     let toConfirm = [
-        `Se añadirán **${Currency}${value.toLocaleString("es-CO")}** a tu cuenta.`,
+        `Se añadirán **${Currency}${value.toLocaleString("es-CO")}${boost.changed ? boost.emojis.currency : ""}** a tu cuenta.`,
         `Sólo puedes usar este comando cada ${new HumanMs(await user.cooldown(Cooldowns.ClaimRep, { info: true, check: false })).human}.`
     ]
 
