@@ -412,7 +412,6 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
 
           // eliminar el temprole de la db
           dbUser.data.temp_roles.splice(i, 1);
-          dbUser.save();
         } else { // es una suscripción
           // TODO: REWORK NEEDED
           return console.log("REWORK DE LAS SUBS")
@@ -471,7 +470,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
       }
     }
 
-    if (justTempRoles) return;
+    if (justTempRoles) return await dbUser.save();
 
     // Ajustar el promedio
     let average = await FindAverage(guild)
@@ -519,7 +518,6 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
         if (temproleIndex != -1) {
           dbUser.data.temp_roles[temproleIndex].special.disabled = false;
           dbUser.markModified("data")
-          dbUser.save();
         }
 
         deletion.deleteOne();
@@ -554,10 +552,8 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
           })
 
         reminder_info.reminded = true;
-        dbUser.save();
       } else if (!birthday_query?.isBirthday() && reminder_info.reminded) {
         reminder_info.reminded = false;
-        dbUser.save();
       }
     }
 
@@ -585,9 +581,10 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
           console.log(err)
         }
 
-        dbUser.save();
       }
     }
+
+    dbUser.save();
   }
 
   // buscar items deshabilitados temporalmente

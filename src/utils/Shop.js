@@ -85,16 +85,26 @@ class Shop {
         return this.#prepareInit(options);
     }
 
-    async buy(itemId) {
+    /**
+     * 
+     * @param {Number} itemId La ID del Item a comprar
+     * @param {Discord.User} user El usuario que va a recibir el item
+     * @returns {Promise<Discord.CommandInteraction>}
+     */
+    async buy(itemId, user) {
         this.user = await Users.getOrCreate({
             user_id: this.interaction.user.id,
             guild_id: this.interaction.guild.id
         });
 
+        const inventoryUser = user ? await Users.getOrCreate({
+            user_id: user.id,
+            guild_id: this.interaction.guild.id
+        }) : this.user;
+
         if (!this.doc) await this.#fetchDoc();
 
         const member = this.interaction.member;
-
 
         const item = this.shop.findItem(itemId);
 
@@ -104,7 +114,7 @@ class Shop {
         const itemName = item.name;
 
         let toConfirm = [
-            `¿Deseas comprar el item \`${itemName}\`?`,
+            `¿Deseas comprar el item \`${itemName}\`${user ? ` a ${user}` : ""}?`,
             `Pagarás **${this.isDarkShop ? this.Emojis.DarkCurrency : this.Emojis.Currency}${itemPrice}**.`,
             `Esta compra no se puede devolver.`
         ]
@@ -142,22 +152,25 @@ class Shop {
 
         if (this.isDarkShop) this.user.economy.dark.currency -= price;
         else this.user.economy.global.currency -= price;
-        this.user.data.inventory.push({ isDarkShop: this.isDarkShop, item_id: item.id, use_id: newUseId })
+
+        inventoryUser.data.inventory.push({ isDarkShop: this.isDarkShop, item_id: item.id, use_id: newUseId })
 
         let embed = new Embed({
             type: "success",
             data: {
                 desc: [
                     "Pago realizado con éxito",
-                    `Compraste: \`${itemName}\` por **${this.isDarkShop ? this.Emojis.DarkCurrency : this.Emojis.Currency}${itemPrice}**`,
-                    `Úsalo con \`/use ${newUseId}\``,
+                    `Compraste: \`${itemName}\` por **${this.isDarkShop ? this.Emojis.DarkCurrency : this.Emojis.Currency}${itemPrice}**${user ? ` para ${user}` : ""}`,
+                    user ? `Se usa con \`/use ${newUseId}\``: `Úsalo con \`/use ${newUseId}\``,
                     `Ahora tienes: ${this.user.parseCurrency(this.Emojis, this.isDarkShop)}`
                 ]
             }
         })
 
+        if (user) await inventoryUser.save();
         await this.user.save();
-        return this.interaction.editReply({ embeds: [embed] });
+
+        return await this.interaction.editReply({ embeds: [embed] });
     }
 
     async removeItem(itemId) {
@@ -191,7 +204,7 @@ class Shop {
             data: {
                 desc: [
                     "Se ha agregado el item",
-                    `No será visible hasta que se agregue el uso: ${client.mentionCommand("admin items use-info")}`,
+                    `No será visible hasta que se agregue el uso: ${this.client.mentionCommand("admin items use-info")}`,
                     `ID: \`${newId}\``
                 ]
             }

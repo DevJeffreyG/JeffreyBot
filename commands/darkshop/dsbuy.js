@@ -14,16 +14,22 @@ command.addOption({
     req: true
 })
 
+command.addOption({
+    type: "user",
+    name: "user",
+    desc: "El usuario al que le vas a comprar este item"
+})
+
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { DarkShops } = models
-    const { id } = params
+    const { id, user } = params
 
     // codigo
     const doc = await DarkShops.getOrNull(interaction.guild.id);
     const shop = new Shop(doc, interaction, true);
 
-    return shop.buy(id.value)
+    return shop.buy(id.value, user?.user)
 }
 
 module.exports = command;
