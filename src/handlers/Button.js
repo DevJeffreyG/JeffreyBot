@@ -27,7 +27,10 @@ class Button {
             for (const embedId of button.embedids) {
                 const embed = elements.getEmbed(embedId)
 
-                embeds.push(new CustomEmbed(embed))
+                embeds.push(
+                    new CustomEmbed(this.interaction)
+                    .create(embed)
+                )
 
                 let row = new ActionRowBuilder();
 
@@ -49,7 +52,7 @@ class Button {
                         }
                     }
 
-                    const buttonObj = new CustomButton(innerbutton, this.interaction)
+                    const buttonObj = new CustomButton(this.interaction).create(innerbutton)
 
                     if (!buttonObj.data.url)
                         buttonObj.setCustomId(customId);

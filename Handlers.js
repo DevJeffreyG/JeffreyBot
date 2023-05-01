@@ -290,7 +290,7 @@ class Handlers {
             case "createCustomEmbed": {
                 await this.interaction.deferReply({ ephemeral: true })
 
-                const newEmbed = new CustomEmbed(recieved)
+                const newEmbed = new CustomEmbed(this.interaction).create(recieved)
                 let confirmation = await Confirmation("Nuevo Embed", [
                     "El Embed se verá así:",
                     newEmbed
@@ -305,14 +305,14 @@ class Handlers {
                 })
 
                 if (!confirmation) return;
-                return await newEmbed.save(this.interaction);
+                return await newEmbed.save();
             }
 
             case "editCustomEmbed": {
                 const id = Number(this.interaction.customId.split("-")[1]);
                 await this.interaction.deferReply({ ephemeral: true })
 
-                return await new CustomEmbed(recieved).replace(id, this.interaction)
+                return await new CustomEmbed(this.interaction).create(recieved).replace(id)
             }
         }
     }

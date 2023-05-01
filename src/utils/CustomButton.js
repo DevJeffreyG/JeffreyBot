@@ -6,15 +6,12 @@ const { BadParamsError, DiscordLimitationError, DoesntExistsError } = require(".
 
 class CustomButton extends ButtonBuilder {
     /**
-     * 
-     * @param {{ texto: string, emoji: string, style: ButtonStyle, link: string, embedids: Array<number> }} params 
      * @param {CommandInteraction | null} interaction 
      */
-    constructor(params, interaction = null) {
+    constructor(interaction = null) {
         super();
         this.linked = null;
         this.interaction = interaction;
-        if (params) this.#creation(params);
     }
 
     /**
@@ -49,10 +46,17 @@ class CustomButton extends ButtonBuilder {
      * @param {Integer} id La Id del Botón a editar
      * @returns {Promise<CommandInteraction>}
      */
-    async replace(id) {
+    async replace(id, params) {
         this.doc = await CustomElements.getOrCreate(this.interaction.guild.id);
-        let cstmButton = this.doc.getButton(id);
-        let button = this.raw();
+        let cstmButton = this.doc.getButton(id)
+        let buttonObj = new CustomButton(this.interaction).create(cstmButton);
+        let button = new CustomButton(this.interaction).create({
+            texto: params.texto?.value ?? buttonObj.data.label,
+            emoji: params.emoji?.value ?? buttonObj.data.emoji?.id ?? buttonObj.data.emoji?.name,
+            style: params.style?.value ?? buttonObj.data.style,
+            link: params.link?.value ?? buttonObj.data.url,
+            embedids: params.embedids?.value ?? cstmButton.embedids
+        }).raw();
 
         if (button.label) cstmButton.texto = button.label;
         if (button.emoji) cstmButton.emoji = button.emoji.id ?? button.emoji.name;
@@ -62,47 +66,34 @@ class CustomButton extends ButtonBuilder {
 
         await this.doc.save();
 
-        let embeds = [
-            new Embed({
-                type: "success",
-                data: {
-                    desc: [
-                        `Se ha editado el Botón. Usa ${this.interaction.client.mentionCommand("elements buttons link")} para vincularlo a un Embed`,
-                        `ID: ${id}`
-                    ]
-                }
-            })
-        ]
-
-        let sug = new Embed({
-            type: "didYouKnow",
-            data: {
-                text: `Para eliminar todos los Embeds vinculados de un Embed, sólo basta con escribir cualquier cosa que no sea un número`,
-                likelihood: 25
-            }
-        })
-
-        if (sug.likelihood) embeds.push(sug);
-
         return this.interaction.editReply({
-            embeds
+            embeds: [
+                new Embed({
+                    type: "success",
+                    data: {
+                        desc: [
+                            `Se ha editado el Botón. Usa ${this.interaction.client.mentionCommand("elements buttons link")} para vincularlo a un Embed`,
+                            `ID: ${id}`
+                        ]
+                    }
+                })
+            ]
         })
     }
 
     /**
      * Elimina un Botón en la base de datos
      * @param {Integer} id La Id del Botón a eliminar
-     * @param {CommandInteraction} interaction 
      * @returns {Promise<CommandInteraction>}
      */
-    async delete(id, interaction) {
-        this.doc = await CustomElements.getOrCreate(interaction.guild.id);
+    async delete(id) {
+        this.doc = await CustomElements.getOrCreate(this.interaction.guild.id);
 
         try {
             this.doc.deleteButton(id);
             await this.doc.save();
 
-            return interaction.editReply({
+            return this.interaction.editReply({
                 embeds: [
                     new Embed({
                         type: "success",
@@ -113,7 +104,7 @@ class CustomButton extends ButtonBuilder {
                 ]
             })
         } catch (err) {
-            throw new DoesntExistsError(interaction, `El Botón con ID \`${id}\``, "este servidor");
+            throw new DoesntExistsError(this.interaction, `El Botón con ID \`${id}\``, "este servidor");
         }
     }
 
@@ -121,32 +112,31 @@ class CustomButton extends ButtonBuilder {
      * 
      * @param {Integer} buttonId El Botón que se va a vincular
      * @param {Integer} embedId El Embed donde se va a vincular
-     * @param {CommandInteraction} interaction 
      * @param {Boolean} autorole Es un AutoRole?
      */
-    async linkWork(buttonId, embedId, interaction, autorole = false) {
-        this.doc = await CustomElements.getOrCreate(interaction.guild.id);
+    async linkWork(buttonId, embedId, autorole = false) {
+        this.doc = await CustomElements.getOrCreate(this.interaction.guild.id);
 
         const embed = this.doc.getEmbed(embedId);
         if (!embed)
-            throw new DoesntExistsError(interaction, `El Embed con ID \`${embedId}\``, "este servidor");
+            throw new DoesntExistsError(this.interaction, `El Embed con ID \`${embedId}\``, "este servidor");
 
         if (embed.buttonids?.find(x => x.id === buttonId && x.isAutoRole === autorole)) {
             let confirmation = await Confirmation("Desvincular Botón", [
                 "A partir de ahora, cuando se envíe este Embed no se incluirá el Botón"
-            ], interaction)
+            ], this.interaction)
 
             if (!confirmation) return;
             embed.splice(embed.buttonids.findIndex(x => x.id === buttonId && x.isAutoRole === autorole), 1);
         } else {
             let confirmation = await Confirmation("Vincular Botón", [
                 "Se pondrá este botón abajo del Embed al enviarse a partir de ahora"
-            ], interaction)
+            ], this.interaction)
 
             if (!confirmation);
 
             if (embed.buttonids.length === 5)
-                throw new DiscordLimitationError(interaction, ">5 Botones", [
+                throw new DiscordLimitationError(this.interaction, ">5 Botones", [
                     "No pueden haber más de 5 botones por mensaje",
                     "Para continuar, desvincula un botón antes (usando este mismo comando)"
                 ])
@@ -155,14 +145,17 @@ class CustomButton extends ButtonBuilder {
         }
 
         await this.doc.save();
-        return await interaction.editReply({ embeds: [new Embed({ type: "success" })] })
+        return await this.interaction.editReply({ embeds: [new Embed({ type: "success" })] })
     }
 
     raw() {
         return this.data;
     }
 
-    #creation(params) {
+    /**
+     * @param {{ texto: string, emoji: string, style: ButtonStyle, link: string, embedids: Array<number> }} params 
+     */
+    create(params) {
         const { texto, emoji, style, link, embedids, autorole } = params;
 
         const text = texto?.value ?? texto;
@@ -220,6 +213,8 @@ class CustomButton extends ButtonBuilder {
                     throw new BadParamsError(this.interaction, "Debes vincular al menos un Embed para mostrar si no es de tipo Link")
             }
         }
+
+        return this
     }
 }
 

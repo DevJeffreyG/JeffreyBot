@@ -251,7 +251,7 @@ command.execute = async (interaction, models, params, client) => {
         }
 
         case "link": {
-            await new CustomButton().linkWork(autorole.value, embed.value, interaction, true);
+            await new CustomButton(interaction).linkWork(autorole.value, embed.value, true);
             break;
         }
     }
