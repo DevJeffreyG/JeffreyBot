@@ -16,10 +16,11 @@ command.addOption({
 
 command.execute = async (interaction, models, params, client) => {
     if (!interaction.deferred) await interaction.deferReply();
-    const { Users } = models
+    const { Users, CustomElements } = models
     const { usuario } = params;
 
     const guild = interaction.guild;
+    const custom = await CustomElements.getOrCreate(guild.id);
 
     // codigo
     const selectedUser = usuario?.member && usuario?.member.id != interaction.member.id;
@@ -57,6 +58,15 @@ command.execute = async (interaction, models, params, client) => {
                 .defField(`— 🚀 Boost de ${boostobj} x${value.toLocaleString("es-CO")}`,
                     `▸ Hasta: ${time(boost.active_until)} (${time(boost.active_until, "R")})${disabled ? `\n▸ **Desactivado**.` : ""}`, true);
         }
+    }
+
+    let achievements = user.getAchievements();
+    let trophies = user.getTrophies();
+
+    for (const trophy of trophies) {
+        const info = custom.getTrophy(trophy.achievement);
+
+        embed.defField(`🏆 — "${info.name}"`, `▸ ${info.desc}\n||▸ Desbloqueado: ${time(trophy.date)}||`, true)
     }
 
     let components = [];

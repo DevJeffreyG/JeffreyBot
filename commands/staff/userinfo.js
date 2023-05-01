@@ -21,9 +21,19 @@ command.addOption({
 command.execute = async (interaction, models, params, client) => {
     if (!interaction.deferred) await interaction.deferReply();
 
-    const { Users } = models;
+    const { Users, CustomElements } = models;
     const { usuario } = params;
+
     const member = usuario?.member ?? interaction.member;
+
+    const doc = params.getDoc();
+    const userd = await Users.getOrCreate({ user_id: member.id, guild_id: interaction.guild.id })
+    const custom = await CustomElements.getOrCreate(interaction.guild.id);
+
+    const reglas = doc.data.rules;
+    const warnsd = userd.warns;
+    const softwarnsd = userd.softwarns;
+    const trophies = userd.getTrophies();
 
     const badges = member.user.flags.toArray()
     let bdgText = "";
@@ -68,14 +78,6 @@ ${member.roles.cache.toJSON().sort().join(", ")}`)
         .defThumbnail(member.displayAvatarURL())
         .defColor(Colores.verde)
 
-    const doc = params.getDoc();
-    const reglas = doc.data.rules;
-
-    const userd = await Users.getOrCreate({ user_id: member.id, guild_id: interaction.guild.id })
-
-    const warnsd = userd.warns;
-    const softwarnsd = userd.softwarns;
-
     const warns = new Embed()
         .defAuthor({ text: `Warns de ${member.user.username}`, icon: member.displayAvatarURL() })
         .defColor(Colores.verde)
@@ -84,6 +86,16 @@ ${member.roles.cache.toJSON().sort().join(", ")}`)
         .defAuthor({ text: `Softwarns de ${member.user.username}`, icon: member.displayAvatarURL() })
 
         .defColor(Colores.verde)
+
+    const trophiesEmbed = new Embed()
+        .defAuthor({ text: `Trofeos de ${member.user.username}`, icon: member.displayAvatarURL() })
+        .defColor(Colores.verde);
+
+    for (const trophy of trophies) {
+        const info = custom.getTrophy(trophy.achievement);
+
+        trophiesEmbed.defField(`🏆 — "${info.name}"`, `▸ ${info.desc}\n▸ Desbloqueado: ${time(trophy.date)}\n▸ ID: \`${trophy.id}\``, true)
+    }
 
     // foreach
     let [hasW, hasSW] = [false, false];
@@ -108,28 +120,37 @@ ${member.roles.cache.toJSON().sort().join(", ")}`)
     if (!hasW) warns.defDesc(`**— Bastante silencio por aquí...**`)
     if (!hasSW) softwarns.defDesc(`**— Bastante silencio por aquí...**`)
 
-    const embeds = [user, server, warns, softwarns];
+    const embeds = [user, server, warns, softwarns, trophiesEmbed];
 
     // interactive
     const row = new ActionRowBuilder()
         .addComponents(
             new ButtonBuilder()
-                .setCustomId("back")
-                .setEmoji("⬅️")
-                .setStyle(ButtonStyle.Primary)
-                .setDisabled(true),
-            new ButtonBuilder()
-                .setCustomId("next")
-                .setEmoji("➡️")
+                .setCustomId("0")
+                .setLabel("Usuario")
                 .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+                .setCustomId("1")
+                .setLabel("Servidor")
+                .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+                .setCustomId("2")
+                .setLabel("Warns")
+                .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+                .setCustomId("3")
+                .setLabel("Softwarns")
+                .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+                .setCustomId("4")
+                .setLabel("Trofeos")
+                .setStyle(ButtonStyle.Primary)
         )
 
     let msg = await interaction.editReply({ components: [row], embeds: [user] });
 
     const filter = async i => {
-        return i.user.id === interaction.user.id &&
-            (i.customId === "back" || i.customId === "next") &&
-            i.message.id === msg.id;
+        return i.user.id === interaction.user.id && i.message.id === msg.id;
     }
 
     const collector = new Collector(interaction, { filter }).onEnd(() => {
@@ -137,16 +158,8 @@ ${member.roles.cache.toJSON().sort().join(", ")}`)
         interaction.editReply({ components: [row] });
     }).raw();
 
-    let pagn = 0;
     collector.on("collect", async i => {
-        if (i.customId === "back") pagn--;
-        else pagn++;
-
-        if (pagn === 0) row.components[0].setDisabled();
-        else row.components[0].setDisabled(false);
-
-        if (pagn === embeds.length - 1) row.components[1].setDisabled();
-        else row.components[1].setDisabled(false);
+        const pagn = Number(i.customId);
 
         try {
             await interaction.editReply({ embeds: [embeds[pagn]], components: [row] });

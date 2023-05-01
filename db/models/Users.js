@@ -131,6 +131,14 @@ const Schema = new mongoose.Schema({
                 since: { type: Date, default: () => { return new Date(); } },
                 id: { type: Number, required: true, sparse: true }
             }
+        ],
+        achievements: [
+            {
+                achievement: { type: Number, required: true },
+                date: { type: Date, default: () => { return new Date() } },
+                isTrophy: { type: Boolean, default: false },
+                id: { type: Number, required: true, sparse: true }
+            }
         ]
     },
     economy: {
@@ -340,6 +348,14 @@ Schema.method("delCooldown", function (modulo, options = { save: true }) {
 
 Schema.method("getBoosts", function () {
     return this.data.temp_roles.filter(x => x.special.type);
+})
+
+Schema.method("getAchievements", function () {
+    return this.data.achievements.filter(x => !x.isTrophy);
+})
+
+Schema.method("getTrophies", function () {
+    return this.data.achievements.filter(x => x.isTrophy);
 })
 
 Schema.method("getBirthdayReminders", function () {

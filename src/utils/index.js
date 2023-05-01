@@ -18,6 +18,7 @@ const Modal = require("./Modal");
 const Collector = require("./Collector");
 const CustomEmbed = require("./CustomEmbed");
 const CustomButton = require("./CustomButton");
+const CustomTrophy = require("./CustomTrophy");
 
 const Enums = require("./Enums");
 const Functions = require("./functions");
@@ -43,6 +44,7 @@ module.exports = {
     Collector,
     CustomEmbed,
     CustomButton,
+    CustomTrophy,
 
     ...Enums,
     ...Functions

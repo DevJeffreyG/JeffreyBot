@@ -13,7 +13,7 @@ const moment = require("moment-timezone");
 
 /* ##### MONGOOSE ######## */
 
-const { Users, Guilds, DarkShops, Shops, GlobalDatas } = require("mongoose").models;
+const { Users, Guilds, DarkShops, Shops, GlobalDatas, CustomElements } = require("mongoose").models;
 
 // JEFFREY BOT NOTIFICATIONS
 const { google } = require("googleapis");
@@ -351,6 +351,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
   const { Emojis, EmojisObject } = guild.client;
   const { Currency } = guild.client.getCustomEmojis(guild.id);
   const doc = await Guilds.getOrCreate(guild.id);
+  const customDoc = await CustomElements.getOrCreate(guild.id);
 
   const bdRole = doc.getRoleByModule("birthday") ? await guild.roles.fetch(doc.getRoleByModule("birthday")).catch(err => {
     new Log()
@@ -472,9 +473,66 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
 
     if (justTempRoles) return await dbUser.save();
 
-    // Ajustar el promedio
-    let average = await FindAverage(guild)
-    doc.data.average_currency = average;
+    // Actualizar lista de Trofeos y Achievements
+    let trophyList = customDoc.trophies;
+    for (const trophy of trophyList) {
+
+      let grant = true;
+      const reqList = trophy.req;
+      const givenList = trophy.given;
+
+      if (dbUser.getTrophies().find(x => x.achievement === trophy.id)) grant = false;
+
+      requirements:
+      for (const prop of Object.keys(reqList)) {
+        if (!grant) break requirements;
+        const value = reqList[prop];
+        if (!value) continue requirements;
+
+        switch (prop) {
+          case "role":
+            if (!member.roles.cache.get(value)) grant = false;
+            break;
+        }
+      }
+
+      if (!grant) continue;
+
+      given:
+      for (const prop of Object.keys(givenList)) {
+        const value = givenList[prop];
+        if (!value) continue given;
+
+        switch (prop) {
+          case "role":
+            member.roles.add(value)
+              .catch(err => console.log(err));
+            break;
+        }
+      }
+
+      // añadirlo a la lista de achievements
+      let id = FindNewId(await Users.find(), "data.achievements", "id");
+      dbUser.data.achievements.push({
+        achievement: trophy.id,
+        isTrophy: true,
+        id
+      })
+
+      try {
+        if(isDeveloper(member)) await member.send({
+          embeds: [
+            new Embed()
+              .defTitle(`Desbloqueaste un Trofeo en ${guild.name}`)
+              .defColor(Colores.verdejeffrey)
+              .defDesc(`**"${trophy.name}"**\n**—** ${trophy.desc}`)
+              .defFooter({ text: "Se mostrará en tu perfil al usar /stats", icon: guild.iconURL({ dynamic: true }) })
+          ]
+        })
+      } catch (err) {
+        console.log(err)
+      }
+    }
 
     birthdayIf:
     if (birthday) {
@@ -584,8 +642,12 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
     }
 
     dbUser.save()
-    .catch(err => console.log(err));
+      .catch(err => console.log(err));
   }
+
+  // Ajustar el promedio
+  let average = await FindAverage(guild)
+  doc.data.average_currency = average;
 
   // buscar items deshabilitados temporalmente
   Shops.getOrCreate(guild.id).then((shop) => {

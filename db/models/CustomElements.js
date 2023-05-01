@@ -27,6 +27,19 @@ const Schema = mongoose.Schema({
             embedids: [{ type: Number }],
             id: { type: Number, required: true, sparse: true }
         }
+    ],
+    trophies: [
+        {
+            name: { type: String, required: true },
+            desc: { type: String },
+            given: {
+                role: { type: String }
+            },
+            req: {
+                role: { type: String }
+            },
+            id: { type: Number, required: true, sparse: true }
+        }
     ]
 });
 
@@ -95,6 +108,25 @@ Schema.method("deleteButton", function (id) {
 
     if (index != -1) {
         this.buttons.splice(index, 1)
+        return this;
+    } else {
+        throw index;
+    }
+})
+
+Schema.method("addTrophy", function (trophy, id) {
+    this.trophies.push({ ...trophy, id });
+})
+
+Schema.method("getTrophy", function (id) {
+    return this.trophies.find(x => x.id === id);
+})
+
+Schema.method("deleteTrophy", function (id) {
+    let index = this.trophies.findIndex(x => x === this.getTrophy(id));
+
+    if (index != -1) {
+        this.trophies.splice(index, 1)
         return this;
     } else {
         throw index;
