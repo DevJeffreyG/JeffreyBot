@@ -548,7 +548,6 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
             console.log("⚠️ Se eliminará el recordatorio")
 
             dbUser.data.birthday_reminders.splice(dbUser.getBirthdayReminders().findIndex(x => x === reminder), 1)
-            dbUser.save();
           })
 
         reminder_info.reminded = true;
@@ -584,7 +583,8 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
       }
     }
 
-    dbUser.save();
+    dbUser.save()
+    .catch(err => console.log(err));
   }
 
   // buscar items deshabilitados temporalmente

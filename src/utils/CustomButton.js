@@ -49,6 +49,10 @@ class CustomButton extends ButtonBuilder {
     async replace(id, params) {
         this.doc = await CustomElements.getOrCreate(this.interaction.guild.id);
         let cstmButton = this.doc.getButton(id)
+
+        if (!cstmButton)
+            throw new DoesntExistsError(this.interaction, `El Botón con ID \`${id}\``, "este servidor");
+
         let buttonObj = new CustomButton(this.interaction).create(cstmButton);
         let button = new CustomButton(this.interaction).create({
             texto: params.texto?.value ?? buttonObj.data.label,
@@ -58,15 +62,12 @@ class CustomButton extends ButtonBuilder {
             embedids: params.embedids?.value ?? cstmButton.embedids
         }).raw();
 
-        if (button.label) cstmButton.texto = button.label;
-        if (button.emoji) cstmButton.emoji = button.emoji.id ?? button.emoji.name;
-        if (button.style) cstmButton.style = button.style;
-        if (button.url) cstmButton.link = button.url;
-        if (this.linked && cstmButton.style != ButtonStyle.Link) cstmButton.embedids = this.linked;
+        let index = this.doc.buttons.findIndex(x => x.id === id);
+        this.doc.buttons[index] = { ...button, id };
 
         await this.doc.save();
 
-        return this.interaction.editReply({
+        return await this.interaction.editReply({
             embeds: [
                 new Embed({
                     type: "success",
@@ -93,7 +94,7 @@ class CustomButton extends ButtonBuilder {
             this.doc.deleteButton(id);
             await this.doc.save();
 
-            return this.interaction.editReply({
+            return await this.interaction.editReply({
                 embeds: [
                     new Embed({
                         type: "success",
