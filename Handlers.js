@@ -62,6 +62,8 @@ class Handlers {
             return;
         }
 
+        this.identifierCooldown = BigInt(this.interaction.user.id) + BigInt(this.interaction.commandId);
+
         this.user = await Users.getOrCreate({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id })
         this.doc = await Guilds.getOrCreate(this.interaction.guild.id);
 
@@ -95,7 +97,6 @@ class Handlers {
     async slashHandler() {
         const commandName = this.interaction.commandName;
         this.executedCommand = this.client.commands.get(commandName);
-        this.identifierCooldown = BigInt(this.interaction.user.id) + BigInt(this.interaction.commandId);
 
         let toggledQuery = await ToggledCommands.getToggle(commandName);
 
