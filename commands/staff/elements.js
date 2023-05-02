@@ -1,5 +1,5 @@
 const { SlashCommandStringOption, ButtonStyle, SlashCommandIntegerOption, DiscordAPIError, codeBlock, ActionRowBuilder, TextInputStyle, SlashCommandRoleOption } = require("discord.js");
-const { Command, Categories, CustomEmbed, Confirmation, InteractivePages, CustomButton, Modal, CustomTrophy } = require("../../src/utils");
+const { Command, Categories, CustomEmbed, Confirmation, InteractivePages, CustomButton, Modal, CustomTrophy, Embed } = require("../../src/utils");
 const { Colores } = require("../../src/resources");
 const { DiscordLimitationError, DoesntExistsError } = require("../../src/errors");
 
@@ -79,9 +79,13 @@ command.data
             .setName("del")
             .setDescription("Elimina un Trofeo")
         )
-        .addSubcommand(dar => dar
-            .setName("dar")
-            .setDescription("Da manualmente un Trofeo a un usuario")
+        .addSubcommand(toggle => toggle
+            .setName("toggle")
+            .setDescription("Habilita / Deshabilita un Trofeo")
+        )
+        .addSubcommand(manual => manual
+            .setName("manual")
+            .setDescription("Da/elimina manualmente un Trofeo a un usuario")
             .addIntegerOption(o => o
                 .setName("id")
                 .setDescription("La ID del Trofeo")
@@ -90,7 +94,7 @@ command.data
             )
             .addUserOption(o => o
                 .setName("user")
-                .setDescription("El usuario al que se va a agregar el Trofeo")
+                .setDescription("El usuario al que se va a administrar el Trofeo")
                 .setRequired(true)
             )
         )
@@ -119,7 +123,7 @@ command.data
         )
     )
 
-command.addOptionsTo(["embeds edit", "botones edit", "embeds del", "botones del", "trofeos del", "trofeos edit", "trofeos req", "trofeos dado"], [
+command.addOptionsTo(["embeds edit", "botones edit", "embeds del", "botones del", "trofeos del", "trofeos edit", "trofeos toggle", "trofeos req", "trofeos dado"], [
     new SlashCommandIntegerOption()
         .setName("id")
         .setDescription("La ID del elemento a editar")
@@ -180,6 +184,8 @@ command.execute = async (interaction, models, params, client) => {
     if (subcommand && !subgroup) await interaction.deferReply();
     const custom = await CustomElements.getOrCreate(interaction.guild.id);
     const doc = await Guilds.getOrCreate(interaction.guild.id);
+
+    params.customDoc = custom;
 
     switch (subcommand) {
         case "send": {
@@ -377,7 +383,7 @@ command.execButtons = async (interaction, models, params, client) => {
 }
 
 command.execTrophies = async (interaction, models, params, client) => {
-    const { subcommand, trofeos } = params;
+    const { subcommand, trofeos, customDoc } = params;
 
     switch (subcommand) {
         case "create": {
@@ -399,6 +405,23 @@ command.execTrophies = async (interaction, models, params, client) => {
             const { id } = trofeos;
 
             return await new CustomTrophy(interaction).delete(id.value);
+        }
+
+        case "toggle": {
+            await interaction.deferReply();
+            const { id } = trofeos;
+
+            return await new CustomTrophy(interaction).toggle(id.value);
+        }
+
+        case "manual": {
+            await interaction.deferReply();
+            const { id, user } = trofeos;
+
+            let granted = await new CustomTrophy(interaction).manual(id.value, user.member);
+
+            if (!granted) return await interaction.editReply({ embeds: [new Embed({ type: "success", data: { desc: "Se eliminó el Trofeo" } })] })
+            return await interaction.editReply({ embeds: [new Embed({ type: "success", data: { desc: "Se agregó el Trofeo" } })] })
         }
     }
 }

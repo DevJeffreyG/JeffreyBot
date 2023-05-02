@@ -38,6 +38,7 @@ const Schema = mongoose.Schema({
             req: {
                 role: { type: String }
             },
+            enabled: { type: Boolean, default: false },
             id: { type: Number, required: true, sparse: true }
         }
     ]

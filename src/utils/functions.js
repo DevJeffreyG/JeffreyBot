@@ -25,6 +25,7 @@ const { Bases } = require("../resources");
 const Commands = require("../../Commands");
 const Collector = require("./Collector");
 const HumanMs = require("./HumanMs");
+const CustomTrophy = require("./CustomTrophy");
 
 /* ##### MONGOOSE ######## */
 const RandomCumplido = function (force = null) {
@@ -476,61 +477,11 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
     // Actualizar lista de Trofeos y Achievements
     let trophyList = customDoc.trophies;
     for (const trophy of trophyList) {
-
-      let grant = true;
-      const reqList = trophy.req;
-      const givenList = trophy.given;
-
-      if (dbUser.getTrophies().find(x => x.achievement === trophy.id)) grant = false;
-
-      requirements:
-      for (const prop of Object.keys(reqList)) {
-        if (!grant) break requirements;
-        const value = reqList[prop];
-        if (!value) continue requirements;
-
-        switch (prop) {
-          case "role":
-            if (!member.roles.cache.get(value)) grant = false;
-            break;
-        }
-      }
-
-      if (!grant) continue;
-
-      given:
-      for (const prop of Object.keys(givenList)) {
-        const value = givenList[prop];
-        if (!value) continue given;
-
-        switch (prop) {
-          case "role":
-            member.roles.add(value)
-              .catch(err => console.log(err));
-            break;
-        }
-      }
-
-      // añadirlo a la lista de achievements
-      let id = FindNewId(await Users.find(), "data.achievements", "id");
-      dbUser.data.achievements.push({
-        achievement: trophy.id,
-        isTrophy: true,
-        id
-      })
-
       try {
-        if(isDeveloper(member)) await member.send({
-          embeds: [
-            new Embed()
-              .defTitle(`Desbloqueaste un Trofeo en ${guild.name}`)
-              .defColor(Colores.verdejeffrey)
-              .defDesc(`**"${trophy.name}"**\n**—** ${trophy.desc}`)
-              .defFooter({ text: "Se mostrará en tu perfil al usar /stats", icon: guild.iconURL({ dynamic: true }) })
-          ]
-        })
+        let newId = FindNewId(await Users.find(), "data.achievements", "id");
+        await new CustomTrophy(guild).manage(trophy.id, member, newId);
       } catch (err) {
-        console.log(err)
+        console.log(err);
       }
     }
 
