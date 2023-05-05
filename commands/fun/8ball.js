@@ -11,7 +11,8 @@ command.addOption({
     type: "string",
     name: "pregunta",
     desc: "¿Qué deseas saber?",
-    req: true
+    req: true,
+    min: 1
 })
 
 command.execute = async (interaction, models, params, client) => {
@@ -19,7 +20,6 @@ command.execute = async (interaction, models, params, client) => {
 
     let answer = Math.floor(Math.random() * replies.length);
     const { pregunta } = params;
-    if (pregunta.value.length === 0) return interaction.editReply({ content: "No hubo una pregunta..." })
 
     let pregEmbed = new Embed()
         .defColor(Colores.verde)

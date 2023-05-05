@@ -1,7 +1,7 @@
-const { Command, Categories, Confirmation, LimitedTime, WillBenefit, BoostTypes, BoostObjetives } = require("../../src/utils")
+const { Command, Categories, Confirmation, LimitedTime, WillBenefit, BoostTypes, BoostObjetives, Embed, HumanMs } = require("../../src/utils")
 const ms = require("ms");
 const { codeBlock } = require("discord.js");
-const { DiscordLimitationError } = require("../../src/errors");
+const { DiscordLimitationError, BadParamsError } = require("../../src/errors");
 
 const command = new Command({
     name: "temp",
@@ -73,7 +73,9 @@ command.execute = async (interaction, models, params, client) => {
 
     const { usuario, role, tiempo, tipo, objetivo, valor } = params[subcommand];
 
-    const duration = ms(tiempo.value) || Infinity;
+    const duration = ms(tiempo.value);
+    if (duration < ms("1s") || isNaN(duration))
+        throw new BadParamsError(interaction, "El tiempo debe ser mayor o igual a 1 segundo");
 
     switch (subcommand) {
         case "role":
@@ -87,8 +89,16 @@ command.execute = async (interaction, models, params, client) => {
                     codeBlock("json", err)
                 ])
             }
-            return interaction.editReply({ content: `${client.Emojis.Check} Agregado el temp role a ${usuario.user.tag} por ${tiempo.value}` });
 
+            return interaction.editReply({
+                embeds: [
+                    new Embed({
+                        type: "success", data: {
+                            desc: `Agregado el Rol Temporal a **${usuario.user.tag}** por ${new HumanMs(duration).human}`
+                        }
+                    })
+                ]
+            })
         case "boost":
             let btype = tipo.value;
             let bobj = objetivo.value;
@@ -119,7 +129,15 @@ command.execute = async (interaction, models, params, client) => {
                 ])
             }
 
-            return interaction.editReply({ content: `${client.Emojis.Check} Agregado el boost a ${usuario.user.tag} por ${tiempo.value}`, embeds: [] });
+            return interaction.editReply({
+                embeds: [
+                    new Embed({
+                        type: "success", data: {
+                            desc: `Agregado el Boost a **${usuario.user.tag}** por ${new HumanMs(duration).human}`
+                        }
+                    })
+                ]
+            })
     }
 }
 

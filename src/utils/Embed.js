@@ -13,6 +13,7 @@ class Embed extends Discord.EmbedBuilder {
      */
     constructor(options) {
         if (options instanceof Discord.Embed) return super(options.data)
+        else if (options instanceof Embed) return super(options.raw());
         else super()
         if (options) this.#setup(options)
     }
@@ -35,7 +36,7 @@ class Embed extends Discord.EmbedBuilder {
      * @returns {this}
      */
     defDesc(desc = " ") {
-        if (!desc >= 1) return console.error("🔴 NO SE CAMBIÓ LA DESCRIPCIÓN, ESTÁ VACÍA")
+        if (desc < 1 && desc) return console.error("🔴 NO SE CAMBIÓ LA DESCRIPCIÓN, ESTÁ VACÍA")
         this.setDescription(desc)
         this.description = desc;
         return this

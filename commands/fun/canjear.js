@@ -1,5 +1,5 @@
 const { BadCommandError, DoesntExistsError } = require("../../src/errors");
-const { Command, Categories, LimitedTime, WillBenefit, HumanMs, ErrorEmbed, ItemObjetives, BoostTypes } = require("../../src/utils");
+const { Command, Categories, LimitedTime, WillBenefit, HumanMs, ErrorEmbed, ItemObjetives, BoostTypes, Embed } = require("../../src/utils");
 
 const command = new Command({
     name: "canjear",
@@ -36,7 +36,7 @@ command.execute = async (interaction, models, params, client) => {
 
     // revisar que no lo haya usado antes
     if (key.config.usedBy.find(x => x === interaction.user.id)) {
-        return interaction.editReply({ content: `${interaction.user}, ya has usado esta key, no puedes volverla a usar :(` });
+        return interaction.editReply({ content: `${interaction.user}, ya has usado esta llave, no puedes volverla a usar :(` });
     }
 
     const reward = key.reward;
@@ -97,7 +97,15 @@ command.execute = async (interaction, models, params, client) => {
     key.config.used += 1;
     await doc.save()
 
-    return interaction.editReply({ content: `${client.Emojis.Check} ${reply}` });
+    return interaction.editReply({
+        embeds: [
+            new Embed({
+                type: "success", data: {
+                    desc: reply
+                }
+            })
+        ]
+    });
 }
 
 module.exports = command;

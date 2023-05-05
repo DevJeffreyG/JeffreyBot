@@ -25,7 +25,7 @@ class Modal extends ModalBuilder {
 
     /**
      * 
-     * @param {*} options 
+     * @param {{id: string, label: string, style: TextInputStyle, req: boolean, placeholder: string, min: Number, max: Number}} options 
      * @returns {this}
      */
     addInput(options = { id: string, label: string, style: TextInputStyle, req: Boolean, placeholder: string, min: 0, max: Infinity }) {
@@ -41,7 +41,7 @@ class Modal extends ModalBuilder {
             .setStyle(style)
 
             .setRequired(req ?? false)
-            .setPlaceholder(placeholder ?? null);
+            .setPlaceholder(placeholder ?? "");
 
         if (min) input.setMinLength(min)
         if (max) input.setMaxLength(max);
