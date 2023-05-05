@@ -1,6 +1,7 @@
 const { time, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 
-const { Command, Categories, Embed, Enum, BoostObjetives } = require("../../src/utils")
+const { Command, Categories, Embed, Enum, BoostObjetives, Collector } = require("../../src/utils");
+const { Colores } = require("../../src/resources");
 
 const command = new Command({
     name: "stats",
@@ -28,7 +29,8 @@ command.execute = async (interaction, models, params, client) => {
 
     let user = await Users.getOrCreate({ user_id: member.id, guild_id: guild.id });
 
-    const row = new ActionRowBuilder()
+    const row = new ActionRowBuilder();
+    const bdrow = new ActionRowBuilder()
         .addComponents(
             new ButtonBuilder()
                 .setLabel("Recuérdame este cumpleaños")
@@ -44,9 +46,43 @@ command.execute = async (interaction, models, params, client) => {
         }
     })
 
+    let boostEmbed = new Embed(embed)
+        .defColor(Colores.verdeclaro)
+        .defAuthor({ text: `Boosts de ${member.user.tag}`, icon: member.guild.iconURL({ dynamic: true }) })
+        .defDesc(null)
+
+    let trophiesEmbed = new Embed(embed)
+        .defAuthor({ text: `Trofeos de ${member.user.tag}`, icon: member.guild.iconURL({ dynamic: true }) })
+        .defColor(Colores.verde)
+        .defDesc(null)
+
+    let embeds = {
+        "stats": embed,
+        "boosts": boostEmbed,
+        "trophies": trophiesEmbed
+    }
+
     let boosts = user.getBoosts();
+    let trophies = user.getTrophies();
+
+    if (boosts?.length > 0 || trophies?.length > 0) row.addComponents(
+        new ButtonBuilder()
+            .setLabel("Estadísticas")
+            .setEmoji("📊")
+            .setStyle(ButtonStyle.Primary)
+            .setCustomId("stats")
+    );
 
     if (boosts?.length > 0) {
+
+        row.addComponents(
+            new ButtonBuilder()
+                .setLabel("Boosts")
+                .setEmoji("🚀")
+                .setStyle(ButtonStyle.Success)
+                .setCustomId("boosts")
+        )
+
         for (const boost of boosts) {
             const { type, objetive, value, disabled } = boost.special;
 
@@ -54,26 +90,34 @@ command.execute = async (interaction, models, params, client) => {
             if (boostobj === "All") boostobj = "Todo"
             if (boostobj === "Currency") boostobj = client.getCustomEmojis(guild.id).Currency.name;
 
-            embed
-                .defField(`— 🚀 Boost de ${boostobj} x${value.toLocaleString("es-CO")}`,
+            boostEmbed
+                .defField(`🚀 — Boost de ${boostobj} x${value.toLocaleString("es-CO")}`,
                     `▸ Hasta: ${time(boost.active_until)} (${time(boost.active_until, "R")})${disabled ? `\n▸ **Desactivado**.` : ""}`, true);
         }
     }
 
-    let achievements = user.getAchievements();
-    let trophies = user.getTrophies();
+    if (trophies?.length > 0) {
+        row.addComponents(
+            new ButtonBuilder()
+                .setLabel("Trofeos")
+                .setEmoji("🏆")
+                .setStyle(ButtonStyle.Success)
+                .setCustomId("trophies")
+        )
 
-    for (const trophy of trophies) {
-        const info = custom.getTrophy(trophy.achievement);
+        for (const trophy of trophies) {
+            const info = custom.getTrophy(trophy.element_id);
 
-        embed.defField(`🏆 — "${info.name}"`, `▸ ${info.desc}\n||▸ Desbloqueado: ${time(trophy.date)}||`, true)
+            trophiesEmbed.defField(`🏆 — "${info.name}"`, `▸ ${info.desc}\n▸ Desbloqueado: ${time(trophy.date)}`, true)
+        }
     }
 
     let components = [];
-    if (selectedUser && user.data.birthday.locked) components.push(row)
+    if (row.components.length > 0) components.push(row)
+    if (selectedUser && user.data.birthday.locked) components.push(bdrow)
 
-    let embeds = [];
-    embeds.push(embed);
+    let firstEmbeds = [];
+    firstEmbeds.push(embed);
 
     let sug = new Embed({
         type: "didYouKnow",
@@ -83,9 +127,31 @@ command.execute = async (interaction, models, params, client) => {
         }
     })
 
-    if (sug.likelihood && !selectedUser) embeds.push(sug);
+    if (sug.likelihood && !selectedUser) firstEmbeds.push(sug);
 
-    return interaction.editReply({ embeds, components });
+    if (components.length === 0) return interaction.editReply({ embeds: firstEmbeds });
+
+    let msg = await interaction.editReply({ embeds: firstEmbeds, components });
+
+    const filter = async i => {
+        return i.user.id === interaction.user.id && i.message.id === msg.id;
+    }
+
+    const collector = new Collector(interaction, { filter }).onEnd(() => {
+        row.components.forEach(c => c.setDisabled());
+        interaction.editReply({ components: [row] });
+    }).raw();
+
+    collector.on("collect", async i => {
+        const selectedEmbed = i.customId;
+
+        try {
+            await interaction.editReply({ embeds: [embeds[selectedEmbed]], components });
+        } catch (err) {
+            console.log(err);
+        }
+
+    });
 }
 
 module.exports = command;
