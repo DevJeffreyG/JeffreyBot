@@ -92,7 +92,7 @@ ${member.roles.cache.toJSON().sort().join(", ")}`)
         .defColor(Colores.verde);
 
     for (const trophy of trophies) {
-        const info = custom.getTrophy(trophy.achievement);
+        const info = custom.getTrophy(trophy.element_id);
 
         trophiesEmbed.defField(`🏆 — "${info.name}"`, `▸ ${info.desc}\n▸ Desbloqueado: ${time(trophy.date)}\n▸ ID: \`${trophy.id}\``, true)
     }

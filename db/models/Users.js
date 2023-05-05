@@ -114,6 +114,12 @@ const Schema = new mongoose.Schema({
                     return 0
                 }
             },
+            dark_currency: {
+                type: Number, default: function () {
+                    if (this.economy.dark.currency) return this.economy.dark.currency
+                    return 0
+                }
+            },
             warns: {
                 type: Number, default: function () {
                     if (this.warns) return this.warns.length
@@ -132,11 +138,10 @@ const Schema = new mongoose.Schema({
                 id: { type: Number, required: true, sparse: true }
             }
         ],
-        achievements: [
+        trophies: [
             {
-                achievement: { type: Number, required: true },
+                element_id: { type: Number, required: true },
                 date: { type: Date, default: () => { return new Date() } },
-                isTrophy: { type: Boolean, default: false },
                 id: { type: Number, required: true, sparse: true }
             }
         ]
@@ -167,6 +172,7 @@ Schema.pre("save", function () {
     this.economy.dark.currency = Math.round(this.economy.dark.currency);
 
     this.data.counts.normal_currency = Math.round(this.data.counts.normal_currency);
+    this.data.counts.dark_currency = Math.round(this.data.counts.dark_currency);
 
     if (this.economy.global.currency) {
         let obj = this.economy.toObject();
@@ -196,7 +202,6 @@ Schema.pre("save", function () {
     if (this.economy.global.level != realLvl) mongoose.models.Guilds.getOrCreate(this.guild_id).then(doc => doc.manageLevelUp(realLvl, this));
 
     this.economy.global.level = realLvl // la ecuacion se toma como si la exp ahora fuese la exp necesaria para el siguiente nivel
-
 })
 
 Schema.static("getOrCreate", async function ({ user_id, guild_id }) {
@@ -221,10 +226,17 @@ Schema.method("addCount", async function (module, count = 1, save = true) {
     if (save) return await this.save();
 })
 
+Schema.method("getCount", function (module) {
+    return this.data.counts[module]
+})
+
 Schema.method("addCurrency", async function (count, save = true) {
     this.economy.global.currency += count;
     this.data.counts.normal_currency += count;
     if (save) await this.save();
+
+    console.log("🗨 %s tiene %s Currency", this.user_id, this.economy.global.currency);
+
     return this;
 })
 
@@ -350,12 +362,8 @@ Schema.method("getBoosts", function () {
     return this.data.temp_roles.filter(x => x.special.type);
 })
 
-Schema.method("getAchievements", function () {
-    return this.data.achievements.filter(x => !x.isTrophy);
-})
-
 Schema.method("getTrophies", function () {
-    return this.data.achievements.filter(x => x.isTrophy);
+    return this.data.trophies;
 })
 
 Schema.method("getBirthdayReminders", function () {

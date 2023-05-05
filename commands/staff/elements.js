@@ -1,5 +1,5 @@
-const { SlashCommandStringOption, ButtonStyle, SlashCommandIntegerOption, DiscordAPIError, codeBlock, ActionRowBuilder, TextInputStyle, SlashCommandRoleOption } = require("discord.js");
-const { Command, Categories, CustomEmbed, Confirmation, InteractivePages, CustomButton, Modal, CustomTrophy, Embed } = require("../../src/utils");
+const { SlashCommandStringOption, ButtonStyle, SlashCommandIntegerOption, DiscordAPIError, codeBlock, ActionRowBuilder, TextInputStyle, SlashCommandRoleOption, ButtonBuilder } = require("discord.js");
+const { Command, Categories, CustomEmbed, Confirmation, InteractivePages, CustomButton, Modal, CustomTrophy, Embed, FindNewId } = require("../../src/utils");
 const { Colores } = require("../../src/resources");
 const { DiscordLimitationError, DoesntExistsError } = require("../../src/errors");
 
@@ -384,13 +384,16 @@ command.execButtons = async (interaction, models, params, client) => {
 
 command.execTrophies = async (interaction, models, params, client) => {
     const { subcommand, trofeos, customDoc } = params;
+    const { CustomElements } = models;
 
     switch (subcommand) {
         case "create": {
             await interaction.deferReply();
 
             const trophy = new CustomTrophy(interaction).create(trofeos);
-            return await trophy.save();
+
+            const id = FindNewId(await CustomElements.find(), "trophies", "id")
+            return await trophy.save(id);
         }
 
         case "edit": {
@@ -402,6 +405,12 @@ command.execTrophies = async (interaction, models, params, client) => {
 
         case "del": {
             await interaction.deferReply();
+
+            let confirmation = await Confirmation("Eliminar Trofeo", [
+                "Se eliminará este Trofeo de todos los perfiles de los usuarios"
+            ], interaction);
+            if (!confirmation) return;
+
             const { id } = trofeos;
 
             return await new CustomTrophy(interaction).delete(id.value);
@@ -422,6 +431,33 @@ command.execTrophies = async (interaction, models, params, client) => {
 
             if (!granted) return await interaction.editReply({ embeds: [new Embed({ type: "success", data: { desc: "Se eliminó el Trofeo" } })] })
             return await interaction.editReply({ embeds: [new Embed({ type: "success", data: { desc: "Se agregó el Trofeo" } })] })
+        }
+
+        case "req": {
+            const { id } = trofeos;
+            return await interaction.reply({
+                embeds: [
+                    new Embed()
+                        .defTitle("Editar requerimentos del Trofeo " + id.value)
+                        .defColor(Colores.verdeclaro)
+                        .defField("🔁 — Totales", "La cantidad total **(de todos los tiempos)** que se debe de tener de cierta cosa")
+                        .defField("🕓 — Momento", "La cantidad que se tiene **en ese momento** de cierta cosa")
+                ], components: [
+                    new ActionRowBuilder()
+                        .setComponents(
+                            new ButtonBuilder()
+                                .setCustomId("reqtrophies1-" + id.value)
+                                .setLabel("Totales")
+                                .setEmoji("🔁")
+                                .setStyle(ButtonStyle.Primary),
+                            new ButtonBuilder()
+                                .setCustomId("reqtrophies2-" + id.value)
+                                .setLabel("Momento")
+                                .setEmoji("🕓")
+                                .setStyle(ButtonStyle.Primary),
+                        )
+                ]
+            })
         }
     }
 }

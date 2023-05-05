@@ -474,11 +474,11 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
 
     if (justTempRoles) return await dbUser.save();
 
-    // Actualizar lista de Trofeos y Achievements
+    // Actualizar lista de Trofeos
     let trophyList = customDoc.trophies;
     for (const trophy of trophyList) {
       try {
-        let newId = FindNewId(await Users.find(), "data.achievements", "id");
+        let newId = FindNewId(await Users.find(), "data.trophies", "id");
         await new CustomTrophy(guild).manage(trophy.id, member, newId);
       } catch (err) {
         console.log(err);

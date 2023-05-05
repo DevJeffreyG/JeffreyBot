@@ -36,7 +36,14 @@ const Schema = mongoose.Schema({
                 role: { type: String }
             },
             req: {
-                role: { type: String }
+                role: { type: String },
+                totals: {
+                    warns: { type: Number },
+                    currency: { type: Number },
+                    darkcurrency: { type: Number },
+                    blackjack: { type: Number },
+                    roulette: { type: Number }
+                }
             },
             enabled: { type: Boolean, default: false },
             id: { type: Number, required: true, sparse: true }

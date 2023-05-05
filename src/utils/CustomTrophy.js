@@ -1,6 +1,5 @@
 const { CustomElements, Users } = require("mongoose").models;
 const { CommandInteraction, ModalSubmitInteraction, GuildMember, Guild } = require("discord.js");
-const { FindNewId, Confirmation } = require("./functions");
 const Embed = require("./Embed");
 const { BadParamsError, DoesntExistsError, DMNotSentError } = require("../errors");
 const { Colores } = require("../resources");
@@ -14,9 +13,8 @@ class CustomTrophy {
         this.interaction = interaction;
     }
 
-    async save() {
+    async save(id) {
         this.doc = await CustomElements.getOrCreate(this.interaction.guild.id);
-        const id = FindNewId(await CustomElements.find(), "trophies", "id")
 
         this.doc.addTrophy(this, id)
         await this.doc.save()
@@ -74,19 +72,14 @@ class CustomTrophy {
     async delete(id) {
         this.doc = await CustomElements.getOrCreate(this.interaction.guild.id);
 
-        let confirmation = await Confirmation("Eliminar Trofeo", [
-            "Se eliminará este Trofeo de todos los perfiles de los usuarios"
-        ], this.interaction);
-        if (!confirmation) return;
-
         try {
             const users = await Users.find({ guild_id: this.interaction.guild.id });
             let count = 0;
             for await (const user of users) {
-                let index = user.data.achievements.findIndex(x => x.isTrophy && x.achievement === id);
+                let index = user.data.trophies.findIndex(x => x.element_id === id);
                 if (index === -1) continue;
                 count++
-                user.data.achievements.splice(index, 1);
+                user.data.trophies.splice(index, 1);
 
                 await user.save();
             }
@@ -105,6 +98,7 @@ class CustomTrophy {
                 ]
             })
         } catch (err) {
+            console.log(err);
             throw new DoesntExistsError(this.interaction, `El Trofeo con ID \`${id}\``, "este servidor");
         }
     }
@@ -148,7 +142,7 @@ class CustomTrophy {
         const reqList = trophy.req;
         const givenList = trophy.given;
 
-        if (dbUser.getTrophies().find(x => x.achievement === trophy.id)) grant = false;
+        if (dbUser.getTrophies().find(x => x.element_id === trophy.id)) grant = false;
         if (!trophy.enabled) grant = false;
 
         requirements:
@@ -161,6 +155,32 @@ class CustomTrophy {
                 case "role":
                     if (!member.roles.cache.get(value)) grant = false;
                     break;
+                case "totals":
+                    totalLoop:
+                    for (const totalprop of Object.keys(value)) {
+                        if (!grant) break totalLoop;
+
+                        const totalValue = value[totalprop];
+                        if (!totalValue) continue totalLoop;
+
+                        let moduleCount = "";
+
+                        switch (totalprop) {
+                            case "currency":
+                                moduleCount = "normal_currency"
+                                break;
+                            case "darkcurrency":
+                                moduleCount = "dark_currency"
+                                break;
+                            case "warns":
+                            case "blackjack":
+                            case "roulette":
+                                moduleCount = totalprop;
+                                break;
+                        }
+
+                        if (dbUser.getCount(moduleCount) < totalValue) grant = false;
+                    }
             }
         }
 
@@ -179,17 +199,17 @@ class CustomTrophy {
             }
         }
 
-        // añadirlo a la lista de achievements
-        dbUser.data.achievements.push({
-            achievement: trophy.id,
-            isTrophy: true,
+        // añadirlo a la lista de trophies
+        dbUser.data.trophies.push({
+            element_id: trophy.id,
             id: newId
         })
 
         await dbUser.save();
 
         try {
-            await this.#sendDM(member, trophy);
+            console.log("digamos que le mandé el dm a %s", member.user.username);
+            // TODO: await this.#sendDM(member, trophy);
         } catch (err) {
             console.log(err);
         }
@@ -206,23 +226,25 @@ class CustomTrophy {
     async manual(id, member) {
         this.doc = await CustomElements.getOrCreate(this.interaction.guild.id);
         const trophy = this.doc.getTrophy(id);
-        const f = x => x.achievement === trophy.id;
+        if (!trophy)
+            throw new DoesntExistsError(this.interaction, `El Trofeo con ID \`${id}\``, "este servidor");
+
+        const f = x => x.element_id === trophy.id;
 
         let dbUser = await Users.getOrCreate({ user_id: member.id, guild_id: member.guild.id });
         let granted;
 
         // Ya tiene el Trofeo
         if (dbUser.getTrophies().find(f)) {
-            let index = dbUser.data.achievements.findIndex(f);
+            let index = dbUser.data.trophies.findIndex(f);
 
-            dbUser.data.achievements.splice(index, 1)
+            dbUser.data.trophies.splice(index, 1)
             granted = false;
         } else {
             // No lo tiene
 
-            dbUser.data.achievements.push({
-                achievement: trophy.id,
-                isTrophy: true,
+            dbUser.data.trophies.push({
+                element_id: trophy.id,
                 id
             })
             granted = true;
@@ -236,6 +258,23 @@ class CustomTrophy {
 
         await dbUser.save();
         return granted;
+    }
+
+    async changeTotalReq(id, data) {
+        this.doc = await CustomElements.getOrCreate(this.interaction.guild.id);
+        const trophy = this.doc.getTrophy(id);
+        if (!trophy)
+            throw new DoesntExistsError(this.interaction, `El Trofeo con ID \`${id}\``, "este servidor");
+
+        for (const prop of Object.keys(data)) {
+            const value = data[prop];
+
+            if (!value) continue;
+            trophy.req.totals[prop] = value;
+        }
+
+        await this.doc.save()
+        return await this.interaction.editReply({ embeds: [new Embed({ type: "success" })] });
     }
 
     /**

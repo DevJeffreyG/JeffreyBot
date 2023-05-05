@@ -1,8 +1,8 @@
-const { BaseInteraction, InteractionType, time, CommandInteraction, MessageComponentInteraction, ModalSubmitInteraction, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction, DiscordAPIError, chatInputApplicationCommandMention, ActionRowBuilder, codeBlock } = require("discord.js");
+const { BaseInteraction, InteractionType, time, CommandInteraction, MessageComponentInteraction, ModalSubmitInteraction, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction, DiscordAPIError, chatInputApplicationCommandMention, ActionRowBuilder, codeBlock, TextInputStyle } = require("discord.js");
 
 const { Ticket, Suggestion, Button } = require("./src/handlers/");
 const { Bases, Colores } = require("./src/resources");
-const { ErrorEmbed, Embed, Categories, ValidateDarkShop, Confirmation, HumanMs, Modal, CustomEmbed } = require("./src/utils");
+const { ErrorEmbed, Embed, Categories, ValidateDarkShop, Confirmation, HumanMs, Modal, CustomEmbed, CustomTrophy } = require("./src/utils");
 
 const { CommandNotFoundError, ToggledCommandError, DiscordLimitationError, BadCommandError, SelfExec, ModuleDisabledError } = require("./src/errors/");
 
@@ -62,7 +62,7 @@ class Handlers {
             return;
         }
 
-        this.identifierCooldown = BigInt(this.interaction.user.id) + BigInt(this.interaction.commandId);
+        this.identifierCooldown = BigInt(this.interaction.user.id) + BigInt(this.interaction.commandId ?? 1);
 
         this.user = await Users.getOrCreate({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id })
         this.doc = await Guilds.getOrCreate(this.interaction.guild.id);
@@ -189,7 +189,10 @@ class Handlers {
         await this.suggestion?.handle(this.user, this.doc);
         await this.button?.handle(this.doc);
 
-        switch (this.interaction.customId) {
+        const splittedId = this.interaction.customId.split("-");
+        const { Currency, DarkCurrency } = this.client.getCustomEmojis(this.interaction.guild.id);
+
+        switch (splittedId[0]) {
             case "deleteMessage":
                 this.interaction.message.delete();
                 break;
@@ -272,6 +275,19 @@ class Handlers {
                 poll.pollNo(this.interaction.user.id)
                 return this.interaction.reply({ ephemeral: true, embeds: [new Embed({ type: "success", data: { desc: "Se registró tu voto" } })] });
             }
+            case "reqtrophies1": {
+                const trophyId = splittedId[1];
+                await new Modal(this.interaction)
+                    .defId("changeReqTrophy1-" + String(trophyId))
+                    .defTitle("Requerimentos totales: " + trophyId)
+                    .addInput({ id: "warns", label: "Warns", placeholder: "Escribe un número entero", style: TextInputStyle.Short })
+                    .addInput({ id: "currency", label: Currency.name, placeholder: "Escribe un número entero", style: TextInputStyle.Short })
+                    .addInput({ id: "darkcurrency", label: DarkCurrency.name, placeholder: "Escribe un número entero", style: TextInputStyle.Short })
+                    .addInput({ id: "blackjack", label: "Blackjacks ganados", placeholder: "Escribe un número entero", style: TextInputStyle.Short })
+                    .addInput({ id: "roulette", label: "Roulettes jugados", placeholder: "Escribe un número entero", style: TextInputStyle.Short })
+                    .show();
+                break;
+            }
 
             default:
             //console.log("No hay acciones para el botón con customId", this.interaction.customId);
@@ -285,7 +301,8 @@ class Handlers {
         await this.suggestion?.handle(this.params.getUser(), this.params.getDoc());
 
         const recieved = new Modal(this.interaction).read();
-        const customId = this.interaction.customId.split("-")[0];
+        const splittedId = this.interaction.customId.split("-");
+        const customId = splittedId[0];
 
         switch (customId) {
             case "createCustomEmbed": {
@@ -310,10 +327,17 @@ class Handlers {
             }
 
             case "editCustomEmbed": {
-                const id = Number(this.interaction.customId.split("-")[1]);
+                const id = Number(splittedId[1]);
                 await this.interaction.deferReply({ ephemeral: true })
 
                 return await new CustomEmbed(this.interaction).create(recieved).replace(id)
+            }
+
+            case "changeReqTrophy1": {
+                const id = Number(splittedId[1]);
+                await this.interaction.deferReply({ ephemeral: true })
+
+                return await new CustomTrophy(this.interaction).changeTotalReq(id, recieved);
             }
         }
     }
