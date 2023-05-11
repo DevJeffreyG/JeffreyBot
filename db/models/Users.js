@@ -4,6 +4,7 @@ const moment = require("moment-timezone")
 const HumanMs = require("../../src/utils/HumanMs")
 const { time } = require('discord.js')
 const { RequirementType } = require('../../src/utils/Enums')
+const { integerValidator } = require('../Validators')
 
 const Schema = new mongoose.Schema({
     guild_id: { type: String, required: true },
@@ -106,31 +107,31 @@ const Schema = new mongoose.Schema({
             rob: { type: Date, default: null },
         },
         counts: { // all time
-            roulette: { type: Number, default: 0 },
-            blackjack: { type: Number, default: 0 },
+            roulette: { type: Number, default: 0, validate: integerValidator },
+            blackjack: { type: Number, default: 0, validate: integerValidator },
             normal_currency: {
                 type: Number, default: function () {
-                    if (this.economy.global.currency) return this.economy.global.currency
+                    if (this.economy.global.currency && this.economy.global.currency > 0) return this.economy.global.currency
                     return 0
-                }
+                }, validate: integerValidator
             },
             dark_currency: {
                 type: Number, default: function () {
                     if (this.economy.dark.currency) return this.economy.dark.currency
                     return 0
-                }
+                }, validate: integerValidator
             },
             warns: {
                 type: Number, default: function () {
                     if (this.warns) return this.warns.length
                     return 0
-                }
+                }, validate: integerValidator
             }
         },
         debts: [
             {
                 user: { type: String, required: true },
-                debt: { type: Number, required: true, integer: true },
+                debt: { type: Number, required: true, validate: integerValidator },
                 interest: { type: Number, required: true },
                 pay_in: { type: Date, required: true },
                 every: { type: Number, required: true },
@@ -148,13 +149,13 @@ const Schema = new mongoose.Schema({
     },
     economy: {
         global: {
-            exp: { type: Number, required: true, default: 0, integer: true },
-            level: { type: Number, required: true, default: 0, integer: true },
-            reputation: { type: Number, required: true, default: 0, integer: true },
-            currency: { type: Number, required: true, default: 0, integer: true }
+            exp: { type: Number, required: true, default: 0, validate: integerValidator },
+            level: { type: Number, required: true, default: 0, validate: integerValidator },
+            reputation: { type: Number, required: true, default: 0, validate: integerValidator },
+            currency: { type: Number, required: true, default: 0, validate: integerValidator }
         },
         dark: {
-            currency: { type: Number, default: 0, integer: true },
+            currency: { type: Number, default: 0, validate: integerValidator },
             accuracy: {
                 type: Number, default: () => {
                     return Number((Math.random() * 10).toFixed(1))
@@ -165,7 +166,7 @@ const Schema = new mongoose.Schema({
     }
 })
 
-Schema.pre("save", function () {
+Schema.pre("validate", function () {
     this.economy.global.currency = Math.round(this.economy.global.currency);
     this.economy.global.exp = Math.round(this.economy.global.exp);
 
@@ -173,7 +174,9 @@ Schema.pre("save", function () {
 
     this.data.counts.normal_currency = Math.round(this.data.counts.normal_currency);
     this.data.counts.dark_currency = Math.round(this.data.counts.dark_currency);
+})
 
+Schema.pre("save", function () {
     if (this.economy.global.currency) {
         let obj = this.economy.toObject();
         delete obj.global.jeffros;

@@ -54,7 +54,7 @@ command.data
         .addNumberOption(option => option
             .setName("valor")
             .setDescription("Valor del boost")
-            .setMinValue(1.1)
+            .setMinValue(0.01)
             .setRequired(true))
         .addStringOption(option => option
             .setName("tiempo")

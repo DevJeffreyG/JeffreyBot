@@ -5,6 +5,7 @@ const ms = require("ms");
 const { ModifierType, ChannelModules, LogReasons } = require('../../src/utils/Enums');
 
 const ErrorEmbed = require('../../src/utils/ErrorEmbed');
+const { integerValidator } = require('../Validators');
 
 const Schema = mongoose.Schema;
 
@@ -162,24 +163,24 @@ const GuildSchema = new Schema({
             blackjack_bet: { type: Number, default: 1000 },
             darkshop_level: { type: Number, default: 5 },
             percentage_skipfirewall: { type: Number, default: 100 },
-            min_exp: { type: Number, default: 5, integer: true },
-            max_exp: { type: Number, default: 35, integer: true },
-            min_curr: { type: Number, default: 5, integer: true },
-            max_curr: { type: Number, default: 15, integer: true },
-            baseprice_darkshop: { type: Number, default: 200, integer: true },
-            currency_per_rep: { type: Number, default: 500, integer: true },
+            min_exp: { type: Number, default: 5, validate: integerValidator },
+            max_exp: { type: Number, default: 35, validate: integerValidator },
+            min_curr: { type: Number, default: 5, validate: integerValidator },
+            max_curr: { type: Number, default: 15, validate: integerValidator },
+            baseprice_darkshop: { type: Number, default: 200, validate: integerValidator },
+            currency_per_rep: { type: Number, default: 500, validate: integerValidator },
             awards: {
                 tier1: {
-                    price: { type: Number, default: 100, integer: true },
-                    gift: { type: Number, default: 0, integer: true }
+                    price: { type: Number, default: 100, validate: integerValidator },
+                    gift: { type: Number, default: 0, validate: integerValidator }
                 },
                 tier2: {
-                    price: { type: Number, default: 500, integer: true },
-                    gift: { type: Number, default: 100, integer: true }
+                    price: { type: Number, default: 500, validate: integerValidator },
+                    gift: { type: Number, default: 100, validate: integerValidator }
                 },
                 tier3: {
-                    price: { type: Number, default: 1800, integer: true },
-                    gift: { type: Number, default: 700, integer: true }
+                    price: { type: Number, default: 1800, validate: integerValidator },
+                    gift: { type: Number, default: 700, validate: integerValidator }
                 },
             },
             rob: {
@@ -202,8 +203,8 @@ const GuildSchema = new Schema({
             },
             levels_deleteOldRole: { type: Boolean, default: false },
             save_roles_onleft: { type: Boolean, default: true },
-            sug_remind: { type: Number, default: 7, integer: true },
-            ticket_remind: { type: Number, default: 7, integer: true },
+            sug_remind: { type: Number, default: 7, validate: integerValidator },
+            ticket_remind: { type: Number, default: 7, validate: integerValidator },
         },
         cooldowns: {
             coins: { type: String, default: "10m" },

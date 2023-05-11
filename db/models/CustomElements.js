@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { positiveValidator, integerValidator } = require("../Validators");
 
 const Schema = mongoose.Schema({
     guild_id: { type: String, required: true },
@@ -38,11 +39,15 @@ const Schema = mongoose.Schema({
             req: {
                 role: { type: String },
                 totals: {
-                    warns: { type: Number },
-                    currency: { type: Number },
-                    darkcurrency: { type: Number },
-                    blackjack: { type: Number },
-                    roulette: { type: Number }
+                    warns: { type: Number, min: positiveValidator, validate: integerValidator },
+                    currency: { type: Number, min: positiveValidator, validate: integerValidator },
+                    darkcurrency: { type: Number, min: positiveValidator, validate: integerValidator },
+                    blackjack: { type: Number, min: positiveValidator, validate: integerValidator },
+                    roulette: { type: Number, min: positiveValidator, validate: integerValidator }
+                },
+                moment: {
+                    currency: { type: Number, validate: integerValidator },
+                    darkcurrency: { type: Number, min: positiveValidator },
                 }
             },
             enabled: { type: Boolean, default: false },
