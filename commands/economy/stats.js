@@ -1,3 +1,4 @@
+const moment = require("moment-timezone");
 const { time, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 
 const { Command, Categories, Embed, Enum, BoostObjetives, Collector } = require("../../src/utils");
@@ -83,6 +84,12 @@ command.execute = async (interaction, models, params, client) => {
                 .setCustomId("boosts")
         )
 
+        boosts.sort((a, b) => {
+            if (moment(a.active_until).isAfter(b.active_until)) return -1;
+            else if (moment(a.active_until).isBefore(b.active_until)) return 1;
+            return 0;
+        })
+
         for (const boost of boosts) {
             const { type, objetive, value, disabled } = boost.special;
 
@@ -90,9 +97,14 @@ command.execute = async (interaction, models, params, client) => {
             if (boostobj === "All") boostobj = "Todo"
             if (boostobj === "Currency") boostobj = client.getCustomEmojis(guild.id).Currency.name;
 
-            boostEmbed
-                .defField(`🚀 — Boost de ${boostobj} x${value.toLocaleString("es-CO")}`,
-                    `▸ Hasta: ${time(boost.active_until)} (${time(boost.active_until, "R")})${disabled ? `\n▸ **Desactivado**.` : ""}`, true);
+            if (!boostEmbed.data.fields || boostEmbed.data.fields.length <= 20) {
+                boostEmbed
+                    .defField(`🚀 — Boost de ${boostobj} x${value.toLocaleString("es-CO")}`,
+                        `▸ Hasta: ${time(boost.active_until)} (${time(boost.active_until, "R")})${disabled ? `\n▸ **Desactivado**.` : ""}`, true);
+            } else {
+                boostEmbed.defField("🚀🏆 — ...", `Y unos ${boosts.length - 20} más.`)
+                break;
+            }
         }
     }
 
@@ -105,10 +117,21 @@ command.execute = async (interaction, models, params, client) => {
                 .setCustomId("trophies")
         )
 
+        trophies.sort((a, b) => {
+            if (moment(a.date).isAfter(b.date)) return -1;
+            else if (moment(a.date).isBefore(b.date)) return 1;
+            return 0;
+        })
+
         for (const trophy of trophies) {
             const info = custom.getTrophy(trophy.element_id);
 
-            trophiesEmbed.defField(`🏆 — "${info.name}"`, `▸ ${info.desc}\n▸ Desbloqueado: ${time(trophy.date)}`, true)
+            if (!trophiesEmbed.data.fields || trophiesEmbed.data.fields.length <= 20) {
+                trophiesEmbed.defField(`🏆 — "${info.name}"`, `▸ ${info.desc}\n▸ Desbloqueado: ${time(trophy.date)}`, true)
+            } else {
+                trophiesEmbed.defField("🏆 — ...", `Y unos ${trophies.length - 20} más.`)
+                break;
+            }
         }
     }
 
