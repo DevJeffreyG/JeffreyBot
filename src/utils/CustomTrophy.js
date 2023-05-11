@@ -3,6 +3,7 @@ const { CommandInteraction, ModalSubmitInteraction, GuildMember, Guild } = requi
 const Embed = require("./Embed");
 const { BadParamsError, DoesntExistsError, DMNotSentError } = require("../errors");
 const { Colores } = require("../resources");
+const { Error } = require("mongoose");
 
 class CustomTrophy {
     /**
@@ -145,6 +146,8 @@ class CustomTrophy {
         if (dbUser.getTrophies().find(x => x.element_id === trophy.id)) grant = false;
         if (!trophy.enabled) grant = false;
 
+        let entered = false;
+
         requirements:
         for (const prop of Object.keys(reqList)) {
             if (!grant) break requirements;
@@ -153,6 +156,7 @@ class CustomTrophy {
 
             switch (prop) {
                 case "role":
+                    entered = true;
                     if (!member.roles.cache.get(value)) grant = false;
                     break;
                 case "totals":
@@ -162,7 +166,7 @@ class CustomTrophy {
 
                         const totalValue = value[totalprop];
                         if (!totalValue) continue totalLoop;
-
+                        entered = true;
                         let moduleCount = "";
 
                         switch (totalprop) {
@@ -181,10 +185,35 @@ class CustomTrophy {
 
                         if (dbUser.getCount(moduleCount) < totalValue) grant = false;
                     }
+                    break;
+                case "moment":
+                    momentLoop:
+                    for (const momentprop of Object.keys(value)) {
+                        if (!grant) break momentLoop;
+
+                        const momentValue = value[momentprop];
+                        if (!momentValue) continue momentLoop;
+                        entered = true;
+
+                        switch (momentprop) {
+                            case "currency":
+                                if (momentValue < 0) {
+                                    if (dbUser.economy.global.currency > momentValue) grant = false;
+                                } else {
+                                    if (dbUser.economy.global.currency < momentValue) grant = false;
+                                }
+                                break;
+                            case "darkcurrency":
+                                if (dbUser.economy.dark.currency < momentValue) grant = false;
+                                break;
+                        }
+                    }
+                    break;
+
             }
         }
 
-        if (!grant) return grant;
+        if (!grant || !entered) return false;
 
         given:
         for (const prop of Object.keys(givenList)) {
@@ -261,6 +290,14 @@ class CustomTrophy {
     }
 
     async changeTotalReq(id, data) {
+        return await this.#changeReq(id, data, "total");
+    }
+
+    async changeMomentReq(id, data) {
+        return await this.#changeReq(id, data, "moment");
+    }
+
+    async #changeReq(id, data, list) {
         this.doc = await CustomElements.getOrCreate(this.interaction.guild.id);
         const trophy = this.doc.getTrophy(id);
         if (!trophy)
@@ -270,10 +307,20 @@ class CustomTrophy {
             const value = data[prop];
 
             if (!value) continue;
-            trophy.req.totals[prop] = value;
+            trophy.req[list][prop] = value;
+        }
+        try {
+            await this.doc.save()
+        } catch (err) {
+            if (err instanceof Error.ValidationError) {
+                throw new BadParamsError(this.interaction, [
+                    "Revisa los campos",
+                    err.message
+                ])
+            }
+            throw err;
         }
 
-        await this.doc.save()
         return await this.interaction.editReply({ embeds: [new Embed({ type: "success" })] });
     }
 

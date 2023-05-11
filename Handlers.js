@@ -275,16 +275,27 @@ class Handlers {
                 poll.pollNo(this.interaction.user.id)
                 return this.interaction.reply({ ephemeral: true, embeds: [new Embed({ type: "success", data: { desc: "Se registró tu voto" } })] });
             }
-            case "reqtrophies1": {
+            case "reqTotalTrophy": {
                 const trophyId = splittedId[1];
                 await new Modal(this.interaction)
-                    .defId("changeReqTrophy1-" + String(trophyId))
+                    .defId(this.interaction.customId)
                     .defTitle("Requerimentos totales: " + trophyId)
                     .addInput({ id: "warns", label: "Warns", placeholder: "Escribe un número entero", style: TextInputStyle.Short })
                     .addInput({ id: "currency", label: Currency.name, placeholder: "Escribe un número entero", style: TextInputStyle.Short })
                     .addInput({ id: "darkcurrency", label: DarkCurrency.name, placeholder: "Escribe un número entero", style: TextInputStyle.Short })
                     .addInput({ id: "blackjack", label: "Blackjacks ganados", placeholder: "Escribe un número entero", style: TextInputStyle.Short })
                     .addInput({ id: "roulette", label: "Roulettes jugados", placeholder: "Escribe un número entero", style: TextInputStyle.Short })
+                    .show();
+                break;
+            }
+
+            case "reqMomentTrophy": {
+                const trophyId = splittedId[1];
+                await new Modal(this.interaction)
+                    .defId(this.interaction.customId)
+                    .defTitle("Requerimentos del momento: " + trophyId)
+                    .addInput({ id: "currency", label: Currency.name, placeholder: "Escribe un número entero", style: TextInputStyle.Short })
+                    .addInput({ id: "darkcurrency", label: DarkCurrency.name, placeholder: "Escribe un número entero", style: TextInputStyle.Short })
                     .show();
                 break;
             }
@@ -328,16 +339,23 @@ class Handlers {
 
             case "editCustomEmbed": {
                 const id = Number(splittedId[1]);
-                await this.interaction.deferReply({ ephemeral: true })
+                await this.interaction.deferReply({ ephemeral: true });
 
                 return await new CustomEmbed(this.interaction).create(recieved).replace(id)
             }
 
-            case "changeReqTrophy1": {
+            case "reqTotalTrophy": {
                 const id = Number(splittedId[1]);
-                await this.interaction.deferReply({ ephemeral: true })
+                await this.interaction.deferReply({ ephemeral: true });
 
                 return await new CustomTrophy(this.interaction).changeTotalReq(id, recieved);
+            }
+
+            case "reqMomentTrophy": {
+                const id = Number(splittedId[1]);
+                await this.interaction.deferReply({ ephemeral: true });
+
+                return await new CustomTrophy(this.interaction).changeMomentReq(id, recieved);
             }
         }
     }

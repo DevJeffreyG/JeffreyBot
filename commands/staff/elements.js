@@ -440,18 +440,18 @@ command.execTrophies = async (interaction, models, params, client) => {
                     new Embed()
                         .defTitle("Editar requerimentos del Trofeo " + id.value)
                         .defColor(Colores.verdeclaro)
-                        .defField("🔁 — Totales", "La cantidad total **(de todos los tiempos)** que se debe de tener de cierta cosa")
-                        .defField("🕓 — Momento", "La cantidad que se tiene **en ese momento** de cierta cosa")
+                        .defField("🔁 — Totales", "La cantidad total **(de todos los tiempos)** que se debe de tener de cierta cosa.")
+                        .defField("🕓 — Momento", "La cantidad que se tiene **en ese momento** de cierta cosa.")
                 ], components: [
                     new ActionRowBuilder()
                         .setComponents(
                             new ButtonBuilder()
-                                .setCustomId("reqtrophies1-" + id.value)
+                                .setCustomId("reqTotalTrophy-" + id.value)
                                 .setLabel("Totales")
                                 .setEmoji("🔁")
                                 .setStyle(ButtonStyle.Primary),
                             new ButtonBuilder()
-                                .setCustomId("reqtrophies2-" + id.value)
+                                .setCustomId("reqMomentTrophy-" + id.value)
                                 .setLabel("Momento")
                                 .setEmoji("🕓")
                                 .setStyle(ButtonStyle.Primary),
