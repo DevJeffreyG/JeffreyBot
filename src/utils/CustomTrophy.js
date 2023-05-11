@@ -1,17 +1,23 @@
+const ms = require("ms");
+const { Error } = require("mongoose");
 const { CustomElements, Users } = require("mongoose").models;
 const { CommandInteraction, ModalSubmitInteraction, GuildMember, Guild } = require("discord.js");
+
 const Embed = require("./Embed");
 const { BadParamsError, DoesntExistsError, DMNotSentError } = require("../errors");
+const { Enum, BoostTypes, BoostObjetives } = require("./Enums");
+const { LimitedTime } = require("./functions");
 const { Colores } = require("../resources");
-const { Error } = require("mongoose");
 
 class CustomTrophy {
+    #save;
     /**
      * @param {CommandInteraction | ModalSubmitInteraction | Guild } interaction 
      * @param {*} params 
      */
     constructor(interaction) {
         this.interaction = interaction;
+        this.#save = true;
     }
 
     async save(id) {
@@ -37,11 +43,7 @@ class CustomTrophy {
     }
 
     async replace(id, params) {
-        this.doc = await CustomElements.getOrCreate(this.interaction.guild.id);
-
-        let actualTrophy = this.doc.getTrophy(id);
-        if (!actualTrophy)
-            throw new DoesntExistsError(this.interaction, `El Trofeo con ID \`${id}\``, "este servidor");
+        const actualTrophy = await this.#fetch(id);
 
         let trophyObj = new CustomTrophy(this.interaction).create(actualTrophy);
         let trophy = new CustomTrophy(this.interaction).create({
@@ -105,28 +107,23 @@ class CustomTrophy {
     }
 
     async toggle(id) {
-        this.doc = await CustomElements.getOrCreate(this.interaction.guild.id);
+        const trophy = await this.#fetch(id);
 
-        try {
-            let trophy = this.doc.getTrophy(id);
-            if (trophy.enabled) trophy.enabled = false
-            else trophy.enabled = true;
+        if (trophy.enabled) trophy.enabled = false
+        else trophy.enabled = true;
 
-            await this.doc.save();
+        await this.doc.save();
 
-            return await this.interaction.editReply({
-                embeds: [
-                    new Embed({
-                        type: "success",
-                        data: {
-                            desc: `Se ha ${trophy.enabled ? "activado" : "desactivado"} el Trofeo`
-                        }
-                    })
-                ]
-            })
-        } catch (err) {
-            throw new DoesntExistsError(this.interaction, `El Trofeo con ID \`${id}\``, "este servidor");
-        }
+        return await this.interaction.editReply({
+            embeds: [
+                new Embed({
+                    type: "success",
+                    data: {
+                        desc: `Se ha ${trophy.enabled ? "activado" : "desactivado"} el Trofeo`
+                    }
+                })
+            ]
+        })
     }
 
     /**
@@ -136,14 +133,15 @@ class CustomTrophy {
      */
     async manage(id, member, newId) {
         this.doc = await CustomElements.getOrCreate(this.interaction instanceof Guild ? this.interaction.id : this.interaction.guild.id);
+        this.member = member;
+        this.user = await Users.getOrCreate({ user_id: member.id, guild_id: member.guild.id });
+
         const trophy = this.doc.getTrophy(id);
 
-        let dbUser = await Users.getOrCreate({ user_id: member.id, guild_id: member.guild.id });
         let grant = true;
         const reqList = trophy.req;
-        const givenList = trophy.given;
 
-        if (dbUser.getTrophies().find(x => x.element_id === trophy.id)) grant = false;
+        if (this.user.getTrophies().find(x => x.element_id === trophy.id)) grant = false;
         if (!trophy.enabled) grant = false;
 
         let entered = false;
@@ -183,7 +181,7 @@ class CustomTrophy {
                                 break;
                         }
 
-                        if (dbUser.getCount(moduleCount) < totalValue) grant = false;
+                        if (this.user.getCount(moduleCount) < totalValue) grant = false;
                     }
                     break;
                 case "moment":
@@ -198,13 +196,13 @@ class CustomTrophy {
                         switch (momentprop) {
                             case "currency":
                                 if (momentValue < 0) {
-                                    if (dbUser.economy.global.currency > momentValue) grant = false;
+                                    if (this.user.economy.global.currency > momentValue) grant = false;
                                 } else {
-                                    if (dbUser.economy.global.currency < momentValue) grant = false;
+                                    if (this.user.economy.global.currency < momentValue) grant = false;
                                 }
                                 break;
                             case "darkcurrency":
-                                if (dbUser.economy.dark.currency < momentValue) grant = false;
+                                if (this.user.economy.dark.currency < momentValue) grant = false;
                                 break;
                         }
                     }
@@ -215,26 +213,15 @@ class CustomTrophy {
 
         if (!grant || !entered) return false;
 
-        given:
-        for (const prop of Object.keys(givenList)) {
-            const value = givenList[prop];
-            if (!value) continue given;
-
-            switch (prop) {
-                case "role":
-                    member.roles.add(value)
-                        .catch(err => console.log(err));
-                    break;
-            }
-        }
+        await this.#rewardsWork(trophy);
 
         // añadirlo a la lista de trophies
-        dbUser.data.trophies.push({
+        this.user.data.trophies.push({
             element_id: trophy.id,
             id: newId
         })
 
-        await dbUser.save();
+        if(this.#save) await this.user.save();
 
         try {
             console.log("digamos que le mandé el dm a %s", member.user.username);
@@ -258,21 +245,25 @@ class CustomTrophy {
         if (!trophy)
             throw new DoesntExistsError(this.interaction, `El Trofeo con ID \`${id}\``, "este servidor");
 
+        this.member = member;
+        this.user = await Users.getOrCreate({ user_id: member.id, guild_id: member.guild.id });
+
         const f = x => x.element_id === trophy.id;
 
-        let dbUser = await Users.getOrCreate({ user_id: member.id, guild_id: member.guild.id });
         let granted;
 
         // Ya tiene el Trofeo
-        if (dbUser.getTrophies().find(f)) {
-            let index = dbUser.data.trophies.findIndex(f);
+        if (this.user.getTrophies().find(f)) {
+            let index = this.user.data.trophies.findIndex(f);
 
-            dbUser.data.trophies.splice(index, 1)
+            this.user.data.trophies.splice(index, 1)
             granted = false;
         } else {
             // No lo tiene
 
-            dbUser.data.trophies.push({
+            await this.#rewardsWork(trophy)
+
+            this.user.data.trophies.push({
                 element_id: trophy.id,
                 id
             })
@@ -285,7 +276,7 @@ class CustomTrophy {
             }
         }
 
-        await dbUser.save();
+        if(this.#save) await this.user.save();
         return granted;
     }
 
@@ -297,11 +288,96 @@ class CustomTrophy {
         return await this.#changeReq(id, data, "moment");
     }
 
-    async #changeReq(id, data, list) {
+    async changeMoneyGiven(id, data) {
+        const trophy = await this.#fetch(id);
+
+        for (const prop of Object.keys(data)) {
+            const value = data[prop];
+            if (!value) continue;
+
+            trophy.given[prop] = value;
+        }
+
+        try {
+            await this.doc.save();
+        } catch (err) {
+            if (err instanceof Error.ValidationError) {
+                throw new BadParamsError(this.interaction, [
+                    "Revisa los campos",
+                    err.message
+                ])
+            }
+            throw err;
+        }
+
+        return await this.interaction.editReply({ embeds: [new Embed({ type: "success" })] });
+    }
+
+    async changeBoostGiven(id, data) {
+        const trophy = await this.#fetch(id);
+
+        for (const prop of Object.keys(data)) {
+            if(data[prop].length === 0) continue;
+            let value;
+            const notValid = new BadParamsError(this.interaction, `\`${data[prop]}\` **NO** es un valor válido`);
+            
+            if(Number(ms(data[prop]) && ms(data[prop]) > ms("1s"))) {
+                value = data[prop]
+            } else {
+                value = Number(data[prop]);
+
+                if (isNaN(value) || value === Infinity) throw notValid;
+            }
+
+            if (!value) continue;
+
+            console.log(value, typeof value);
+
+            // validation
+            switch (prop) {
+                case "type":
+                    if (!new Enum(BoostTypes).exists(value)) throw notValid;
+                    break;
+
+                case "objetive":
+                    if (!new Enum(BoostObjetives).exists(value)) throw notValid;
+                    break;
+
+                case "duration": {
+                    let duration = ms(value);
+                    if (duration < ms("1s") || isNaN(duration)) throw notValid;
+                }
+            }
+
+            trophy.given.boost[prop] = value;
+        }
+
+        try {
+            await this.doc.save();
+        } catch (err) {
+            if (err instanceof Error.ValidationError) {
+                throw new BadParamsError(this.interaction, [
+                    "Revisa los campos",
+                    err.message
+                ])
+            }
+            throw err;
+        }
+
+        return await this.interaction.editReply({ embeds: [new Embed({ type: "success" })] });
+    }
+
+    async #fetch(trophyId) {
         this.doc = await CustomElements.getOrCreate(this.interaction.guild.id);
-        const trophy = this.doc.getTrophy(id);
+        const trophy = this.doc.getTrophy(trophyId);
         if (!trophy)
-            throw new DoesntExistsError(this.interaction, `El Trofeo con ID \`${id}\``, "este servidor");
+            throw new DoesntExistsError(this.interaction, `El Trofeo con ID \`${trophyId}\``, "este servidor");
+
+        return trophy
+    }
+
+    async #changeReq(id, data, list) {
+        const trophy = await this.#fetch(id);
 
         for (const prop of Object.keys(data)) {
             const value = data[prop];
@@ -322,6 +398,28 @@ class CustomTrophy {
         }
 
         return await this.interaction.editReply({ embeds: [new Embed({ type: "success" })] });
+    }
+
+    async #rewardsWork(trophy) {
+        const givenList = trophy.given;
+
+        given:
+        for (const prop of Object.keys(givenList)) {
+            const value = givenList[prop];
+            if (!value) continue given;
+
+            switch (prop) {
+                case "role":
+                    this.member.roles.add(value)
+                        .catch(err => console.log(err));
+                    break;
+                case "boost":
+                    const { type: boost_type, objetive: boost_objetive, value: boost_value, duration } = value;
+                    await LimitedTime(this.member, null, ms(duration), boost_type, boost_objetive, boost_value);
+                    this.#save = false;
+                    break;
+            }
+        }
     }
 
     /**
@@ -356,7 +454,7 @@ class CustomTrophy {
         this.name = name?.value ?? name;
         this.desc = desc?.value ?? desc;
         this.req = {
-            role: req?.value ?? req
+            role: req?.value ?? req?.role ?? null
         }
         this.given = {
             role: dado?.value ?? dado

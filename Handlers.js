@@ -300,6 +300,30 @@ class Handlers {
                 break;
             }
 
+            case "givenMoneyTrophy": {
+                const trophyId = splittedId[1];
+                await new Modal(this.interaction)
+                    .defId(this.interaction.customId)
+                    .defTitle("Recompensas de dinero: " + trophyId)
+                    .addInput({ id: "currency", label: Currency.name, placeholder: "Escribe un número entero", style: TextInputStyle.Short })
+                    .addInput({ id: "darkcurrency", label: DarkCurrency.name, placeholder: "Escribe un número entero", style: TextInputStyle.Short })
+                    .show();
+                break;
+            }
+
+            case "givenBoostTrophy": {
+                const trophyId = splittedId[1];
+                await new Modal(this.interaction)
+                    .defId(this.interaction.customId)
+                    .defTitle("Boost de recompensa: " + trophyId)
+                    .addInput({ id: "type", label: "Tipo de Boost", placeholder: "Multiplicador: 1 / Probabilidad: 2", style: TextInputStyle.Short })
+                    .addInput({ id: "objetive", label: "Objetivo del Boost", placeholder: `${Currency.name}: 1 / EXP: 2 / Todo: 3`, style: TextInputStyle.Short })
+                    .addInput({ id: "value", label: "Valor del Boost", placeholder: `Escribe un número positivo`, style: TextInputStyle.Short })
+                    .addInput({ id: "duration", label: "Duración del Boost", placeholder: `Ej: 1d, 30m, 60s`, style: TextInputStyle.Short })
+                    .show();
+                break;
+            }
+
             default:
             //console.log("No hay acciones para el botón con customId", this.interaction.customId);
         }
@@ -356,6 +380,20 @@ class Handlers {
                 await this.interaction.deferReply({ ephemeral: true });
 
                 return await new CustomTrophy(this.interaction).changeMomentReq(id, recieved);
+            }
+
+            case "givenMoneyTrophy": {
+                const id = Number(splittedId[1]);
+                await this.interaction.deferReply({ephemeral: true});
+                
+                return await new CustomTrophy(this.interaction).changeMoneyGiven(id, recieved)
+            }
+
+            case "givenBoostTrophy": {
+                const id = Number(splittedId[1]);
+                await this.interaction.deferReply({ephemeral: true});
+                
+                return await new CustomTrophy(this.interaction).changeBoostGiven(id, recieved)
             }
         }
     }

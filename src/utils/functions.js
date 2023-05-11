@@ -25,7 +25,6 @@ const { Bases } = require("../resources");
 const Commands = require("../../Commands");
 const Collector = require("./Collector");
 const HumanMs = require("./HumanMs");
-const CustomTrophy = require("./CustomTrophy");
 
 /* ##### MONGOOSE ######## */
 const RandomCumplido = function (force = null) {
@@ -476,12 +475,16 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
 
     // Actualizar lista de Trofeos
     let trophyList = customDoc.trophies;
-    for (const trophy of trophyList) {
-      try {
-        let newId = FindNewId(await Users.find(), "data.trophies", "id");
-        await new CustomTrophy(guild).manage(trophy.id, member, newId);
-      } catch (err) {
-        console.log(err);
+    if (trophyList.length > 0) {
+      const CustomTrophy = require("./CustomTrophy");
+
+      for (const trophy of trophyList) {
+        try {
+          let newId = FindNewId(await Users.find(), "data.trophies", "id");
+          await new CustomTrophy(guild).manage(trophy.id, member, newId);
+        } catch (err) {
+          console.log(err);
+        }
       }
     }
 

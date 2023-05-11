@@ -459,6 +459,39 @@ command.execTrophies = async (interaction, models, params, client) => {
                 ]
             })
         }
+
+        case "dado": {
+            const { id } = trofeos;
+            return await interaction.reply({
+                embeds: [
+                    new Embed()
+                        .defTitle("Editar las recompensas del Trofeo " + id.value)
+                        .defColor(Colores.verdeclaro)
+                        .defField("💰 — Dinero", "Dinero que se dará al usuario al conseguir este trofeo.")
+                        .defField("🚀 — Boost", "Un Boost que se dará al usuario al conseguir este trofeo.")
+                        .defField("🗳️ — Item", "Un Item de alguna de las tiendas será agregado al inventario del usuario que consiga este trofeo.")
+                ], components: [
+                    new ActionRowBuilder()
+                        .setComponents(
+                            new ButtonBuilder()
+                                .setCustomId("givenMoneyTrophy-" + id.value)
+                                .setLabel("Dinero")
+                                .setEmoji("💰")
+                                .setStyle(ButtonStyle.Primary),
+                            new ButtonBuilder()
+                                .setCustomId("givenBoostTrophy-" + id.value)
+                                .setLabel("Boost")
+                                .setEmoji("🚀")
+                                .setStyle(ButtonStyle.Primary),
+                            new ButtonBuilder()
+                                .setCustomId("givenItemTrophy-" + id.value)
+                                .setLabel("Item")
+                                .setEmoji("🗳️")
+                                .setStyle(ButtonStyle.Primary),
+                        )
+                ]
+            })
+        }
     }
 }
 

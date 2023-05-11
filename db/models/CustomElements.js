@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { positiveValidator, integerValidator } = require("../Validators");
+const { positiveValidator, integerValidator, canBeNumber } = require("../Validators");
 
 const Schema = mongoose.Schema({
     guild_id: { type: String, required: true },
@@ -34,10 +34,22 @@ const Schema = mongoose.Schema({
             name: { type: String, required: true },
             desc: { type: String },
             given: {
-                role: { type: String }
+                role: { type: String, validate: canBeNumber },
+                currency: { type: Number, validate: integerValidator },
+                darkcurrency: { type: Number, validate: integerValidator },
+                boost: {
+                    type: { type: Number },
+                    objetive: { type: Number },
+                    value: { type: Number, min: positiveValidator },
+                    duration: { type: String, required: true, default: "1d" }
+                },
+                item: {
+                    id: { type: Number, min: positiveValidator, validate: integerValidator },
+                    isDarkShop: { type: Boolean, default: false }
+                }
             },
             req: {
-                role: { type: String },
+                role: { type: String, validate: canBeNumber },
                 totals: {
                     warns: { type: Number, min: positiveValidator, validate: integerValidator },
                     currency: { type: Number, min: positiveValidator, validate: integerValidator },
