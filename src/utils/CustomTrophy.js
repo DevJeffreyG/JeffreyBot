@@ -6,7 +6,7 @@ const { CommandInteraction, ModalSubmitInteraction, GuildMember, Guild } = requi
 const Embed = require("./Embed");
 const { BadParamsError, DoesntExistsError, DMNotSentError } = require("../errors");
 const { Enum, BoostTypes, BoostObjetives } = require("./Enums");
-const { LimitedTime } = require("./functions");
+const { LimitedTime, FindNewId } = require("./functions");
 const { Colores } = require("../resources");
 
 class CustomTrophy {
@@ -17,7 +17,6 @@ class CustomTrophy {
      */
     constructor(interaction) {
         this.interaction = interaction;
-        this.#save = true;
     }
 
     async save(id) {
@@ -213,15 +212,15 @@ class CustomTrophy {
 
         if (!grant || !entered) return false;
 
-        await this.#rewardsWork(trophy);
-
         // añadirlo a la lista de trophies
         this.user.data.trophies.push({
             element_id: trophy.id,
             id: newId
         })
 
-        if(this.#save) await this.user.save();
+        await this.#rewardsWork(trophy);
+
+        await this.user.save();
 
         try {
             console.log("digamos que le mandé el dm a %s", member.user.username);
@@ -260,14 +259,13 @@ class CustomTrophy {
             granted = false;
         } else {
             // No lo tiene
-
-            await this.#rewardsWork(trophy)
-
+            granted = true;
             this.user.data.trophies.push({
                 element_id: trophy.id,
                 id
             })
-            granted = true;
+
+            await this.#rewardsWork(trophy)
 
             try {
                 await this.#sendDM(member, trophy);
@@ -276,7 +274,7 @@ class CustomTrophy {
             }
         }
 
-        if(this.#save) await this.user.save();
+        await this.user.save();
         return granted;
     }
 
@@ -317,11 +315,11 @@ class CustomTrophy {
         const trophy = await this.#fetch(id);
 
         for (const prop of Object.keys(data)) {
-            if(data[prop].length === 0) continue;
+            if (data[prop].length === 0) continue;
             let value;
             const notValid = new BadParamsError(this.interaction, `\`${data[prop]}\` **NO** es un valor válido`);
-            
-            if(Number(ms(data[prop]) && ms(data[prop]) > ms("1s"))) {
+
+            if (Number(ms(data[prop]) && ms(data[prop]) > ms("1s"))) {
                 value = data[prop]
             } else {
                 value = Number(data[prop]);
@@ -350,6 +348,45 @@ class CustomTrophy {
             }
 
             trophy.given.boost[prop] = value;
+        }
+
+        try {
+            await this.doc.save();
+        } catch (err) {
+            if (err instanceof Error.ValidationError) {
+                throw new BadParamsError(this.interaction, [
+                    "Revisa los campos",
+                    err.message
+                ])
+            }
+            throw err;
+        }
+
+        return await this.interaction.editReply({ embeds: [new Embed({ type: "success" })] });
+    }
+
+    async changeItemGiven(id, data) {
+        const trophy = await this.#fetch(id);
+
+        for (const prop of Object.keys(data)) {
+            if (data[prop].length === 0) continue;
+            let value;
+            const notValid = new BadParamsError(this.interaction, `\`${data[prop]}\` **NO** es un valor válido`);
+
+            value = Number(data[prop]);
+
+            if (isNaN(value) || value === Infinity) throw notValid;
+            if (!value) continue;
+            
+            // validation
+            if (prop === "isDarkShop") {
+                if (value > 2 || value < 1) throw notValid;
+
+                if (value === 2) value = false;
+                else value = true;
+            }
+
+            trophy.given.item[prop] = value;
         }
 
         try {
@@ -409,14 +446,26 @@ class CustomTrophy {
             if (!value) continue given;
 
             switch (prop) {
+                case "currency":
+                    await this.user.addCurrency(value);
+                    break;
+                case "darkcurrency":
+                    await this.user.addDarkCurrency(value);
+                    break;
                 case "role":
                     this.member.roles.add(value)
                         .catch(err => console.log(err));
                     break;
                 case "boost":
                     const { type: boost_type, objetive: boost_objetive, value: boost_value, duration } = value;
+                    if (!boost_value || !boost_type || !boost_objetive || !duration) continue given;
                     await LimitedTime(this.member, null, ms(duration), boost_type, boost_objetive, boost_value);
-                    this.#save = false;
+                    break;
+                case "item":
+                    const { id: item_id, isDarkShop } = value;
+                    if (!item_id) continue given;
+                    const newUseId = FindNewId(await Users.find(), "data.inventory", "use_id");
+                    this.user.data.inventory.push({ isDarkShop, item_id, use_id: newUseId })
                     break;
             }
         }

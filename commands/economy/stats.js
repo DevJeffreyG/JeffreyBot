@@ -37,7 +37,7 @@ command.execute = async (interaction, models, params, client) => {
                 .setLabel("Recuérdame este cumpleaños")
                 .setEmoji("🍰")
                 .setStyle(ButtonStyle.Success)
-                .setCustomId("rememberBirthday")
+                .setCustomId(`rememberBirthday-${member.id}`)
         )
 
     let embed = new Embed({
@@ -157,12 +157,14 @@ command.execute = async (interaction, models, params, client) => {
     let msg = await interaction.editReply({ embeds: firstEmbeds, components });
 
     const filter = async i => {
-        return i.user.id === interaction.user.id && i.message.id === msg.id;
+        return i.user.id === interaction.user.id && i.message.id === msg.id && !i.customId.startsWith("rememberBirthday");
     }
 
     const collector = new Collector(interaction, { filter }).onEnd(() => {
-        row.components.forEach(c => c.setDisabled());
-        interaction.editReply({ components: [row] });
+        if (row.components.length > 0) {
+            row.components.forEach(c => c.setDisabled());
+            interaction.editReply({ components: [row] });
+        }
     }).raw();
 
     collector.on("collect", async i => {

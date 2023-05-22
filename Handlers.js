@@ -78,10 +78,9 @@ class Handlers {
                 case InteractionType.ApplicationCommand:
                     if (this.interaction.isChatInputCommand()) return await this.slashHandler();
                     if (this.interaction.isContextMenuCommand()) return await this.contextMenuHandler();
-
+                    break;
                 case InteractionType.MessageComponent:
                     return await this.componentHandler();
-
                 case InteractionType.ModalSubmit:
                     return await this.modalHandler();
             }
@@ -194,7 +193,7 @@ class Handlers {
 
         switch (splittedId[0]) {
             case "deleteMessage":
-                this.interaction.message.delete();
+                await this.interaction.message.delete();
                 break;
 
             case "bjHelp": {
@@ -220,17 +219,8 @@ class Handlers {
                 return await this.interaction.reply({ embeds: [e], ephemeral: true });
             }
             case "rememberBirthday": {
-                if (!this.interaction.deferred) await this.interaction.deferReply({ ephemeral: true }).catch(err => console.log(err));
-
-                let msg = this.interaction.message;
-                let embed = msg.embeds[0];
-
-                const author_info = embed.data.author.name.split(" ");
-                const tag = author_info.find(x => x.includes("#"));
-                const disc = tag.split("#")[1];
-
-                const member = this.interaction.guild.members.cache.find(x => x.user.discriminator === disc && x.user.tag.includes(tag));
-                if (!member) return this.interaction.deleteReply();
+                if (!this.interaction.deferred) await this.interaction.deferReply({ ephemeral: true })
+                const member = this.interaction.guild.members.cache.get(splittedId[1]);
 
                 if (member === this.interaction.member)
                     throw new SelfExec(this.interaction);
@@ -324,6 +314,17 @@ class Handlers {
                 break;
             }
 
+            case "givenItemTrophy": {
+                const trophyId = splittedId[1];
+                await new Modal(this.interaction)
+                    .defId(this.interaction.customId)
+                    .defTitle("Item de recompensa: " + trophyId)
+                    .addInput({ id: "id", label: "ID del item", placeholder: "Escribe un número entero", style: TextInputStyle.Short })
+                    .addInput({ id: "isDarkShop", label: "Es un item de la DarkShop?", placeholder: `Sí: 1 / No: 2`, style: TextInputStyle.Short })
+                    .show();
+                break;
+            }
+
             default:
             //console.log("No hay acciones para el botón con customId", this.interaction.customId);
         }
@@ -384,16 +385,23 @@ class Handlers {
 
             case "givenMoneyTrophy": {
                 const id = Number(splittedId[1]);
-                await this.interaction.deferReply({ephemeral: true});
-                
+                await this.interaction.deferReply({ ephemeral: true });
+
                 return await new CustomTrophy(this.interaction).changeMoneyGiven(id, recieved)
             }
 
             case "givenBoostTrophy": {
                 const id = Number(splittedId[1]);
-                await this.interaction.deferReply({ephemeral: true});
-                
+                await this.interaction.deferReply({ ephemeral: true });
+
                 return await new CustomTrophy(this.interaction).changeBoostGiven(id, recieved)
+            }
+
+            case "givenItemTrophy": {
+                const id = Number(splittedId[1]);
+                await this.interaction.deferReply({ ephemeral: true });
+
+                return await new CustomTrophy(this.interaction).changeItemGiven(id, recieved)
             }
         }
     }
@@ -460,13 +468,13 @@ class Handlers {
 
         try {
             console.log("🔴 No se pudo ejecutar el comando: %s", error.name)
+            console.error(error);
+
             if (error instanceof JeffreyBotError) {
-                if (error instanceof BadCommandError) console.error(error)
                 return await error.send();
             } else if (error instanceof DiscordAPIError) {
                 return await new DiscordLimitationError(this.interaction, `${this.interaction.commandName ?? this.interaction.customId ?? "execute"}`, error.message).send();
             } else {
-                console.error(error)
                 return await new BadCommandError(this.interaction, error).send();
             }
         } catch (err) {
