@@ -10,7 +10,7 @@ module.exports = {
         validator: (v) => {
             if(v === null) return true;
             try {
-                return isNaN(BigInt(v))
+                return BigInt(v)
             } catch(err) {
                 return false
             }

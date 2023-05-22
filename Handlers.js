@@ -422,7 +422,7 @@ class Handlers {
             if (!this.#isDev()) return interaction.reply({ ephemeral: true, content: "No puedes usar este comando porque no eres desarrollador de Jeffrey Bot" })
         }
 
-        if (this.slashCooldowns.get(this.identifierCooldown)) {
+        if (this.slashCooldowns.get(this.identifierCooldown) && process.env.DEV === "FALSE") {
             let until = moment(this.slashCooldowns.get(this.identifierCooldown)).add(slashCooldown, "ms")
             let cooldownLeft = new HumanMs(until).left(true);
             let c_data = [];
