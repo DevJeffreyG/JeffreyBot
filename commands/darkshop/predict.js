@@ -10,11 +10,20 @@ const command = new Command({
     category: Categories.DarkShop
 })
 
+command.addOption({
+    type: "boolean",
+    name: "compartir",
+    desc: "¿Mostrar el resultado de tu predicción en el chat?"
+})
+
 command.execute = async (interaction, models, params, client) => {
     if (moment().day() === 0) {
         return interaction.reply({ ephemeral: true, embeds: [new ErrorEmbed().defDesc("No es buena idea hacer eso el domingo.")] })
     }
-    await interaction.deferReply({ephemeral: true});
+
+    const { compartir } = params;
+
+    await interaction.deferReply({ ephemeral: !compartir?.value });
 
     const user = params.getUser();
 
