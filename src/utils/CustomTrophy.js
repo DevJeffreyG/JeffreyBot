@@ -8,9 +8,9 @@ const { BadParamsError, DoesntExistsError, DMNotSentError } = require("../errors
 const { Enum, BoostTypes, BoostObjetives } = require("./Enums");
 const { LimitedTime, FindNewId } = require("./functions");
 const { Colores } = require("../resources");
+const HumanMs = require("./HumanMs");
 
 class CustomTrophy {
-    #save;
     /**
      * @param {CommandInteraction | ModalSubmitInteraction | Guild } interaction 
      * @param {*} params 
@@ -31,7 +31,7 @@ class CustomTrophy {
                     type: "success",
                     data: {
                         desc: [
-                            `Se ha creado el Trofeo. Usa ${this.interaction.client.mentionCommand("elements trophies toggle")} para activarlo.`,
+                            `Se ha creado el Trofeo. Usa ${this.interaction.client.mentionCommand("elements trophies toggle")} para que se de automáticamente al cumplir los requisitos`,
                             `Usa ${this.interaction.client.mentionCommand("elements trophies edit")} para hacerle cambios`,
                             `ID: ${id}`
                         ]
@@ -377,7 +377,7 @@ class CustomTrophy {
 
             if (isNaN(value) || value === Infinity) throw notValid;
             if (!value) continue;
-            
+
             // validation
             if (prop === "isDarkShop") {
                 if (value > 2 || value < 1) throw notValid;
@@ -439,6 +439,10 @@ class CustomTrophy {
 
     async #rewardsWork(trophy) {
         const givenList = trophy.given;
+        const guild = this.interaction instanceof Guild ? this.interaction : this.interaction.guild;
+        const { Currency, DarkCurrency } = this.interaction.client.getCustomEmojis(guild.id);
+
+        this.rewardsGiven = [];
 
         given:
         for (const prop of Object.keys(givenList)) {
@@ -448,24 +452,39 @@ class CustomTrophy {
             switch (prop) {
                 case "currency":
                     await this.user.addCurrency(value);
+
+                    this.rewardsGiven.push(`**${Currency}${value.toLocaleString("es-CO")}**`);
                     break;
                 case "darkcurrency":
                     await this.user.addDarkCurrency(value);
+
+                    this.rewardsGiven.push(`**${DarkCurrency}${value.toLocaleString("es-CO")}**`);
                     break;
                 case "role":
-                    this.member.roles.add(value)
+                    await this.member.roles.add(value)
                         .catch(err => console.log(err));
+
+                    this.rewardsGiven.push(`**El rol @${this.member.roles.cache.get(value).name}**`);
+
                     break;
                 case "boost":
                     const { type: boost_type, objetive: boost_objetive, value: boost_value, duration } = value;
                     if (!boost_value || !boost_type || !boost_objetive || !duration) continue given;
                     await LimitedTime(this.member, null, ms(duration), boost_type, boost_objetive, boost_value);
+
+                    let boostobj = new Enum(BoostObjetives).translate(boost_objetive);
+                    if (boostobj === "All") boostobj = "Todo"
+                    if (boostobj === "Currency") boostobj = client.getCustomEmojis(guild.id).Currency.name;
+
+                    this.rewardsGiven.push(`**Un Boost de ${boostobj} x${boost_value}** por **${new HumanMs(ms(duration)).human}**`);
                     break;
                 case "item":
                     const { id: item_id, isDarkShop } = value;
                     if (!item_id) continue given;
                     const newUseId = FindNewId(await Users.find(), "data.inventory", "use_id");
                     this.user.data.inventory.push({ isDarkShop, item_id, use_id: newUseId })
+
+                    this.rewardsGiven.push(`**Un Item de la ${isDarkShop ? "DarkShop" : "tienda"}**`);
                     break;
             }
         }
@@ -476,16 +495,32 @@ class CustomTrophy {
      * @param {*} trophy 
      */
     async #sendDM(member, trophy) {
+        const embeds = [
+            new Embed()
+                .defTitle(`Desbloqueaste un Trofeo en ${member.guild.name}`)
+                .defColor(Colores.verdejeffrey)
+                .defDesc(`**"${trophy.name}"**\n**—** ${trophy.desc}`)
+                .defFooter({ text: "Se mostrará en tu perfil al usar /stats", icon: member.guild.iconURL({ dynamic: true }) }),
+        ]
+
+        // recompensas
+        let rew = new Embed()
+            .defTitle(`Recibiste...`)
+            .defColor(Colores.verde);
+
+        rew.data.description = "";
+
+        let rewarded = false;
+
+        this.rewardsGiven.forEach(reward => {
+            rewarded = true;
+            rew.data.description += `▸ ${reward}.\n`
+        })
+
+        if (rewarded) embeds.push(rew);
+
         try {
-            await member.send({
-                embeds: [
-                    new Embed()
-                        .defTitle(`Desbloqueaste un Trofeo en ${member.guild.name}`)
-                        .defColor(Colores.verdejeffrey)
-                        .defDesc(`**"${trophy.name}"**\n**—** ${trophy.desc}`)
-                        .defFooter({ text: "Se mostrará en tu perfil al usar /stats", icon: member.guild.iconURL({ dynamic: true }) })
-                ]
-            })
+            await member.send({ embeds });
         } catch (err) {
             throw new DMNotSentError(this.interaction, member, err.message);
         }
