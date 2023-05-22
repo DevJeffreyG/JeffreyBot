@@ -1,5 +1,5 @@
 const { Colores } = require("../../src/resources");
-const { Command, Categories, Cooldowns, Enum, InteractivePages, ModifierType, RequirementType, Shop, RouletteItem } = require("../../src/utils");
+const { Command, Categories, Cooldowns, Enum, InteractivePages, ModifierType, RequirementType, Shop, RouletteItem, Multipliers } = require("../../src/utils");
 
 const command = new Command({
     name: "lists",
@@ -71,6 +71,7 @@ command.execute = async (interaction, models, params, client) => {
                 const valor = (modifier.multiplier).toLocaleString("es-CO");
                 const req = modifier.requirement;
                 const req_type = new Enum(RequirementType).translate(modifier.req_type);
+                const objetive = new Enum(modifier.type === ModifierType.Cooldown ?  Cooldowns : Multipliers).translate(modifier.module)
                 const id = modifier.id;
                 const guide = modifier.type === ModifierType.Cooldown ? "La base se __multiplica__ por" : "A la base se le __suma__"
                 const requirement = modifier.req_type === RequirementType.Level ? req : interaction.guild.roles.cache.find(x => x.id === req);
@@ -79,6 +80,7 @@ command.execute = async (interaction, models, params, client) => {
                     tipo,
                     valor,
                     requirement,
+                    objetive,
                     req_type,
                     guide,
                     id
@@ -89,7 +91,7 @@ command.execute = async (interaction, models, params, client) => {
                 title: "Lista de modidificadores",
                 author_icon: interaction.guild.iconURL({ dynamic: true }),
                 color: Colores.verde,
-                addon: `**— {tipo}**\n**▸ {guide}: {valor}**\n**▸ Necesita ({req_type}):** \`{requirement}\`\n||**▸ ID: {id}**||\n\n`
+                addon: `**— {tipo}**\n**▸ {guide}: {valor}**\n**▸ Modifica: {objetive}**\n**▸ Necesita ({req_type}):** \`{requirement}\`\n||**▸ ID: {id}**||\n\n`
             }, items, 5)
 
             await interactive.init(interaction);

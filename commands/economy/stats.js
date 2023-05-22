@@ -102,7 +102,7 @@ command.execute = async (interaction, models, params, client) => {
                     .defField(`🚀 — Boost de ${boostobj} x${value.toLocaleString("es-CO")}`,
                         `▸ Hasta: ${time(boost.active_until)} (${time(boost.active_until, "R")})${disabled ? `\n▸ **Desactivado**.` : ""}`, true);
             } else {
-                boostEmbed.defField("🚀🏆 — ...", `Y unos ${boosts.length - 20} más.`)
+                boostEmbed.defField("🚀 — ...", `Y unos ${boosts.length - 20} más.`)
                 break;
             }
         }
