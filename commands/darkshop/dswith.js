@@ -1,5 +1,6 @@
 const { EconomyError } = require("../../src/errors");
 const { Command, Categories, Embed, DarkShop } = require("../../src/utils")
+const moment = require("moment-timezone");
 
 const command = new Command({
     name: "dswith",
@@ -51,6 +52,11 @@ command.execute = async (interaction, models, params, client) => {
     const economy = user.economy.dark;
 
     economy.currency -= quantity;
+
+    if(moment().day() === 0) {
+        user.data.counts.dark_currency -= quantity;
+    }
+
     await user.addCurrency(total);
 
     let sug = new Embed({

@@ -104,9 +104,7 @@ command.execDarkCurrency = async (interaction, models, params, client) => {
     const { DarkCurrency } = client.getCustomEmojis(interaction.guild.id);
 
     const user = await Users.getOrCreate({ user_id: usuario.value, guild_id: usuario.member.guild.id })
-
-    user.economy.dark.currency += cantidad.value;
-    await user.save();
+    await user.addDarkCurrency(cantidad.value);
 
     let embed = new Embed()
         .defAuthor({ text: `¡Dinero para ti, ${usuario.member.user.tag}!`, icon: usuario.member.guild.iconURL() })

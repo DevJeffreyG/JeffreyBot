@@ -243,6 +243,16 @@ Schema.method("addCurrency", async function (count, save = true) {
     return this;
 })
 
+Schema.method("addDarkCurrency", async function (count, save = true) {
+    this.economy.dark.currency += count;
+    this.data.counts.dark_currency += count;
+    if (save) await this.save();
+
+    console.log("🗨 %s tiene %s DarkCurrency", this.user_id, this.economy.dark.currency);
+
+    return this;
+})
+
 Schema.method("addRep", async function (count) {
     this.economy.global.reputation += count;
     return await this.save();
