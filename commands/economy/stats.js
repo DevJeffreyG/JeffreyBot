@@ -76,6 +76,11 @@ command.execute = async (interaction, models, params, client) => {
 
     if (boosts?.length > 0) {
 
+        let boostInfo = {
+            currency: 1,
+            exp: 1
+        }
+
         row.addComponents(
             new ButtonBuilder()
                 .setLabel("Boosts")
@@ -97,6 +102,20 @@ command.execute = async (interaction, models, params, client) => {
             if (boostobj === "All") boostobj = "Todo"
             if (boostobj === "Currency") boostobj = client.getCustomEmojis(guild.id).Currency.name;
 
+            switch (objetive) {
+                case BoostObjetives.Currency:
+                    boostInfo.currency *= value;
+                    break;
+                case BoostObjetives.EXP:
+                    boostInfo.exp *= value;
+                    break;
+
+                case BoostObjetives.All:
+                    boostInfo.currency *= value;
+                    boostInfo.exp *= value;
+                    break;
+            }
+
             if (!boostEmbed.data.fields || boostEmbed.data.fields.length <= 20) {
                 boostEmbed
                     .defField(`🚀 — Boost de ${boostobj} x${value.toLocaleString("es-CO")}`,
@@ -106,6 +125,10 @@ command.execute = async (interaction, models, params, client) => {
                 break;
             }
         }
+
+        boostEmbed.defFooter({
+            text: `📊 ${client.getCustomEmojis(guild.id).Currency.name} x${boostInfo.currency.toLocaleString("es-CO")}, EXP x${boostInfo.exp.toLocaleString("es-CO")}`
+        })
     }
 
     if (trophies?.length > 0) {
