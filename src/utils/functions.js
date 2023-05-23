@@ -916,8 +916,9 @@ const handleUploads = async function (client) {
       twitch_username: "jeffreyg_"
     }
 
-    let changed = false;
     if (bellytChannel && belltvChannel) setInterval(async () => {
+      let changed = false;
+
       // youtube
       let comentarios = ["Ha llegado el momento, chécalo para evitar que Jeffrey entre en depresión", "Dale like o comenta algo si te gustó lo suficiente :D", "Espero que nos veamos en la próxima, ¡y que no sea en 3 meses!", "BROOOO Está rebueno míralo, a lo bien.", "No sabría decir si es lamentable, espero que no, ¿por qué no lo ves para comprobarlo y me dices qué tal?"]
       let short_comentarios = ["Venga va, que es menos de un minuto chécalo."]
@@ -951,8 +952,7 @@ const handleUploads = async function (client) {
           const videoLink = `https://www.youtube.com/watch?v=${videoId}`;
           const shortLink = `https://www.youtube.com/shorts/${videoId}`;
 
-          if (noti.info.lastVideo === itemId) return; // ya se envió la noti
-          else {
+          if (noti.info.lastVideo != itemId) {
             fetch(shortLink, { redirect: "manual" }).then(res => {
               let isShort = res.headers.get("Location") === videoLink ? false : true;
 
