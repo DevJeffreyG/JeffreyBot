@@ -393,7 +393,7 @@ Schema.method("isBirthday", function () {
 
     let now = moment();
 
-    return (now.day() === bdDay) && (now.month() === bdMonth) && this.data.birthday.locked;
+    return (now.date() === bdDay) && (now.month() === bdMonth) && this.data.birthday.locked;
 })
 
 module.exports = mongoose.model('Users', Schema)

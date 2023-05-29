@@ -554,6 +554,9 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
               .defColor(Colores.verdeclaro)
           ]
         })
+          .then(() => {
+            console.log("🟢 Se recordó a %s del cumpleaños de %s", member.user.tag, reminder)
+          })
           .catch(err => {
             console.log(err)
             console.log("⚠️ No se pudo enviar el recordatorio a %s", member.user.tag)
