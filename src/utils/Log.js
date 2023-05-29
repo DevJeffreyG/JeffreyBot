@@ -31,7 +31,7 @@ class Log {
         if (this.target === ChannelModules.ClientLogs) return;
 
         // prepara lo necesario
-        if (this.guild) this.#doc = await Guilds.getOrCreate(this.guild.id);
+        if (this.guild) this.#doc = await Guilds.getWork(this.guild.id);
 
         if (!await this.#reasonWorker()) return;
         if (!this.target || !new Enum(ChannelModules).exists(this.target)) throw new BadCommandError(this.interaction, "INVALID LOG TARGET");

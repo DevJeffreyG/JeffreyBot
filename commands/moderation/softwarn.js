@@ -78,7 +78,7 @@ command.execute = async (interaction, models, params, client) => {
 
         if (!rule) return interaction.deleteReply();
 
-        const user = await Users.getOrCreate({
+        const user = await Users.getWork({
             user_id: member.id,
             guild_id: member.guild.id
         });

@@ -461,12 +461,12 @@ class DarkShop {
     }
 
     async #getDoc() {
-        this.doc = await DarkShops.getOrNull(this.guild.id);
+        this.doc = await DarkShops.getWork(this.guild.id);
         return this;
     }
 
     async #getGuildDoc() {
-        this.guilddoc = await Guilds.getOrCreate(this.guild.id);
+        this.guilddoc = await Guilds.getWork(this.guild.id);
         return this
     }
 

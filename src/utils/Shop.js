@@ -60,7 +60,7 @@ class Shop {
     }
 
     async setup(options) {
-        this.user = await Users.getOrCreate({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id });
+        this.user = await Users.getWork({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id });
 
         if (!this.doc) await this.#fetchDoc();
 
@@ -92,12 +92,12 @@ class Shop {
      * @returns {Promise<Discord.CommandInteraction>}
      */
     async buy(itemId, user) {
-        this.user = await Users.getOrCreate({
+        this.user = await Users.getWork({
             user_id: this.interaction.user.id,
             guild_id: this.interaction.guild.id
         });
 
-        const inventoryUser = user ? await Users.getOrCreate({
+        const inventoryUser = user ? await Users.getWork({
             user_id: user.id,
             guild_id: this.interaction.guild.id
         }) : this.user;
@@ -304,7 +304,7 @@ class Shop {
     }
 
     async showAllItems() {
-        this.user = await Users.getOrCreate({
+        this.user = await Users.getWork({
             user_id: this.interaction.user.id,
             guild_id: this.interaction.guild.id
         });
@@ -374,7 +374,7 @@ class Shop {
     }
 
     async #fetchDoc() {
-        this.doc = await Guilds.getOrCreate(this.interaction.guild.id);
+        this.doc = await Guilds.getWork(this.interaction.guild.id);
         this.average = await FindAverage(this.interaction.guild);
 
         if (this.isDarkShop) {

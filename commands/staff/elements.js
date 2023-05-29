@@ -182,8 +182,8 @@ command.execute = async (interaction, models, params, client) => {
     const { CustomElements, Guilds } = models;
 
     if (subcommand && !subgroup) await interaction.deferReply();
-    const custom = await CustomElements.getOrCreate(interaction.guild.id);
-    const doc = await Guilds.getOrCreate(interaction.guild.id);
+    const custom = await CustomElements.getWork(interaction.guild.id);
+    const doc = await Guilds.getWork(interaction.guild.id);
 
     params.customDoc = custom;
 

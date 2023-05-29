@@ -26,7 +26,7 @@ module.exports = async (client, message) => {
 
   if (author && message.guild) {
 
-    let user = await Users.getOrCreate({ user_id: author.id, guild_id: message.guild.id });
+    let user = await Users.getWork({ user_id: author.id, guild_id: message.guild.id });
 
     if (user.data.cooldowns.chat_rewards) {
       if (message.channel.id != Bases.owner.channels.mainChannel) return; // TODO: arreglar esto ############################################

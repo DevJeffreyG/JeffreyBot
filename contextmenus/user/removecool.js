@@ -11,7 +11,7 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ ephemeral: true });
     const { Users } = models
     const member = interaction.guild.members.cache.get(params.user.id)
-    const user = await Users.getOrCreate({ user_id: member.id, guild_id: member.guild.id });
+    const user = await Users.getWork({ user_id: member.id, guild_id: member.guild.id });
 
     const cools = new Enum(Cooldowns).complexArray("label");
 

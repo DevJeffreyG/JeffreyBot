@@ -1,4 +1,4 @@
-const { Command, Shop, Categories, Store, ShopTypes } = require("../../src/utils");
+const { Command, Categories, Store, ShopTypes } = require("../../src/utils");
 
 const command = new Command({
     name: "darkshop",
@@ -15,10 +15,6 @@ command.addOption({
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
-    const { DarkShops } = models;
-
-    /* const doc = await DarkShops.getOrNull(interaction.guild.id);
-    const ds = new Shop(doc, interaction, true); */
 
     const ds = await new Store(interaction)
         .setType(ShopTypes.DarkShop)

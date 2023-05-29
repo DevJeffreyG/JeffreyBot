@@ -100,7 +100,7 @@ command.execute = async (interaction, models, params, client) => {
 
         case "descuentos": {
             let items = new Map();
-            let shop = await Shops.getOrCreate(interaction.guild.id)
+            let shop = await Shops.getWork(interaction.guild.id)
 
             for (discount of shop.discounts) {
                 items.set(discount.id, {

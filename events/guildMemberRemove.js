@@ -4,7 +4,7 @@ const { Users, Guilds } = require("mongoose").models;
 module.exports = async (client, member) => {
     if (!client.isThisFetched(member.guild.id)) await FetchThisGuild(client, member.guild);
 
-    const doc = await Guilds.getOrCreate(member.guild.id);
+    const doc = await Guilds.getWork(member.guild.id);
     let channel = member.guild.channels.cache.get(doc.getLogChannel("user_left"));
     let tag = member.user.tag;
 
@@ -30,7 +30,7 @@ module.exports = async (client, member) => {
         .defColor("#66a0ff");
 
     // guardar los roles
-    let user = await Users.getOrCreate({
+    let user = await Users.getWork({
         user_id: member.id,
         guild_id: member.guild.id
     });

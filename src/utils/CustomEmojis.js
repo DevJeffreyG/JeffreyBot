@@ -13,7 +13,7 @@ class CustomEmojis {
     }
 
     async build() {
-        this.doc = await Guilds.getOrCreate(this.guild.id);
+        this.doc = await Guilds.getWork(this.guild.id);
 
         const Currency = this.#resolve(this.doc.getEmoji("economy.currency")) ?? this.#resolve(this.client.EmojisObject.Jeffros.id);
         const DarkCurrency = this.#resolve(this.doc.getEmoji("economy.dark_currency")) ?? this.#resolve(this.client.EmojisObject.DarkJeffros.id);

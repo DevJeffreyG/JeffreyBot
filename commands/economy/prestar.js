@@ -49,7 +49,7 @@ command.execute = async (interaction, models, params, client) => {
     const { Currency } = client.getCustomEmojis(interaction.guild.id);
 
     const user = params.getUser();
-    const lend_user = await Users.getOrCreate({ user_id: usuario.value, guild_id: interaction.guild.id });
+    const lend_user = await Users.getWork({ user_id: usuario.value, guild_id: interaction.guild.id });
     const every = ms(tiempo.value)
 
     if (interaction.user === usuario.user) return new ErrorEmbed(interaction).defDesc("Por mucho que quieras prestarte dinero, no es conveniente.").send();

@@ -12,7 +12,7 @@ const { Guilds, ChangeLogs } = require("mongoose").models;
 module.exports = (app) => {
     app.post("/api/db/update", async (req, res) => {
         let response = true;
-        const doc = await Guilds.getOrCreate(req.header("guildid"));
+        const doc = await Guilds.getWork(req.header("guildid"));
         const apitype = Number(req.header("apitype"));
         const querytype = req.header("querytype");
 

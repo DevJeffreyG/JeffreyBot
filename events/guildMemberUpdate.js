@@ -10,7 +10,7 @@ module.exports = async (client, oldMember, newMember) => {
     let guild = newMember.guild;
     if (!client.isThisFetched(guild.id)) await FetchThisGuild(client, guild);
 
-    const doc = await Guilds.getOrCreate(guild.id);
+    const doc = await Guilds.getWork(guild.id);
 
     const oldTimeout = oldMember.communicationDisabledUntil ?? new Date();
     const newTimeout = newMember.communicationDisabledUntil ?? new Date();

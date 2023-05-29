@@ -61,12 +61,12 @@ module.exports = async (client, message) => {
 
   if (!client.isThisFetched(message.guild.id)) await FetchThisGuild(client, message.guild);
 
-  const doc = await Guilds.getOrCreate(message.guild.id);
+  const doc = await Guilds.getWork(message.guild.id);
   const guild = message.guild;
   const author = message.author;
 
   // buscar usuario
-  const user = await Users.getOrCreate({
+  const user = await Users.getWork({
     user_id: author.id,
     guild_id: guild.id
   });

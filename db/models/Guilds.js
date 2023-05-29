@@ -289,7 +289,7 @@ GuildSchema.pre("save", function () {
     }
 })
 
-GuildSchema.static("getOrCreate", async function (id) {
+GuildSchema.static("getWork", async function (id) {
     return await this.findOne({
         guild_id: id
     }) ?? await new this({

@@ -34,7 +34,7 @@ command.execute = async (interaction, models, params, client) => {
 
     const doc = params.getDoc();
     const user = params.getUser();
-    const victim = await Users.getOrCreate({ user_id: victimMember.id, guild_id: interaction.guild.id });
+    const victim = await Users.getWork({ user_id: victimMember.id, guild_id: interaction.guild.id });
 
     let cool = await user.cooldown(Cooldowns.Rob, { save: false })
     if (cool) return interaction.editReply({

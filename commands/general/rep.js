@@ -28,7 +28,7 @@ command.execute = async (interaction, models, params, client) => {
 
     if (member.id === author.id) throw new SelfExec(interaction);
 
-    const user = await Users.getOrCreate({ user_id: member.id, guild_id: guild.id });
+    const user = await Users.getWork({ user_id: member.id, guild_id: guild.id });
     const user_author = params.getUser();
 
     let cool = await user_author.cooldown(Cooldowns.Rep);

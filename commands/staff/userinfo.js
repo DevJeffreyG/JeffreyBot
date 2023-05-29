@@ -27,8 +27,8 @@ command.execute = async (interaction, models, params, client) => {
     const member = usuario?.member ?? interaction.member;
 
     const doc = params.getDoc();
-    const userd = await Users.getOrCreate({ user_id: member.id, guild_id: interaction.guild.id })
-    const custom = await CustomElements.getOrCreate(interaction.guild.id);
+    const userd = await Users.getWork({ user_id: member.id, guild_id: interaction.guild.id })
+    const custom = await CustomElements.getWork(interaction.guild.id);
 
     const reglas = doc.data.rules;
     const warnsd = userd.warns;

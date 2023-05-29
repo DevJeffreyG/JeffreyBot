@@ -64,8 +64,8 @@ class Handlers {
 
         this.identifierCooldown = BigInt(this.interaction.user.id) + BigInt(this.interaction.commandId ?? 1);
 
-        this.user = await Users.getOrCreate({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id })
-        this.doc = await Guilds.getOrCreate(this.interaction.guild.id);
+        this.user = await Users.getWork({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id })
+        this.doc = await Guilds.getWork(this.interaction.guild.id);
 
         this.params["mongoose_user_doc"] = this.user;
         this.params["mongoose_guild_doc"] = this.doc;

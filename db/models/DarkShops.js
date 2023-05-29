@@ -48,7 +48,7 @@ const DarkShopsSchema = new Schema({
     }
 });
 
-DarkShopsSchema.static("getOrNull", async function (id) {
+DarkShopsSchema.static("getWork", async function (id) {
     return await this.findOne({
         guild_id: id
     }) ?? null

@@ -20,7 +20,7 @@ class CustomTrophy {
     }
 
     async save(id) {
-        this.doc = await CustomElements.getOrCreate(this.interaction.guild.id);
+        this.doc = await CustomElements.getWork(this.interaction.guild.id);
 
         this.doc.addTrophy(this, id)
         await this.doc.save()
@@ -72,7 +72,7 @@ class CustomTrophy {
     }
 
     async delete(id) {
-        this.doc = await CustomElements.getOrCreate(this.interaction.guild.id);
+        this.doc = await CustomElements.getWork(this.interaction.guild.id);
 
         try {
             const users = await Users.find({ guild_id: this.interaction.guild.id });
@@ -131,9 +131,9 @@ class CustomTrophy {
      * @returns {Promise<Boolean>}
      */
     async manage(id, member, newId) {
-        this.doc = await CustomElements.getOrCreate(this.interaction instanceof Guild ? this.interaction.id : this.interaction.guild.id);
+        this.doc = await CustomElements.getWork(this.interaction instanceof Guild ? this.interaction.id : this.interaction.guild.id);
         this.member = member;
-        this.user = await Users.getOrCreate({ user_id: member.id, guild_id: member.guild.id });
+        this.user = await Users.getWork({ user_id: member.id, guild_id: member.guild.id });
 
         const trophy = this.doc.getTrophy(id);
 
@@ -239,13 +239,13 @@ class CustomTrophy {
      * @returns {Promise<Boolean>} Si se dio el Trofeo
      */
     async manual(id, member) {
-        this.doc = await CustomElements.getOrCreate(this.interaction.guild.id);
+        this.doc = await CustomElements.getWork(this.interaction.guild.id);
         const trophy = this.doc.getTrophy(id);
         if (!trophy)
             throw new DoesntExistsError(this.interaction, `El Trofeo con ID \`${id}\``, "este servidor");
 
         this.member = member;
-        this.user = await Users.getOrCreate({ user_id: member.id, guild_id: member.guild.id });
+        this.user = await Users.getWork({ user_id: member.id, guild_id: member.guild.id });
 
         const f = x => x.element_id === trophy.id;
 
@@ -405,7 +405,7 @@ class CustomTrophy {
     }
 
     async #fetch(trophyId) {
-        this.doc = await CustomElements.getOrCreate(this.interaction.guild.id);
+        this.doc = await CustomElements.getWork(this.interaction.guild.id);
         const trophy = this.doc.getTrophy(trophyId);
         if (!trophy)
             throw new DoesntExistsError(this.interaction, `El Trofeo con ID \`${trophyId}\``, "este servidor");

@@ -26,7 +26,7 @@ command.execute = async (interaction, models, params, client) => {
     // codigo
     const member = usuario?.member ?? interaction.member;
 
-    let user = await Users.getOrCreate({ user_id: member.id, guild_id: guild.id });
+    let user = await Users.getWork({ user_id: member.id, guild_id: guild.id });
 
     const economy = user.economy.dark;
 

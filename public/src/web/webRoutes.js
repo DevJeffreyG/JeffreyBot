@@ -204,7 +204,7 @@ module.exports = (app) => {
                 status_code: 400
             });
 
-        const query = await Guilds.getOrCreate(guildId);
+        const query = await Guilds.getWork(guildId);
         res.send(query)
     })
     app.get("/api/db/get-changelogs", async (req, res) => {

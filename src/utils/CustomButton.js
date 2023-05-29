@@ -19,7 +19,7 @@ class CustomButton extends ButtonBuilder {
      * @returns {Promise<CommandInteraction>}
      */
     async save() {
-        this.doc = await CustomElements.getOrCreate(this.interaction.guild.id);
+        this.doc = await CustomElements.getWork(this.interaction.guild.id);
 
         const id = FindNewId(await CustomElements.find(), "buttons", "id")
 
@@ -47,7 +47,7 @@ class CustomButton extends ButtonBuilder {
      * @returns {Promise<CommandInteraction>}
      */
     async replace(id, params) {
-        this.doc = await CustomElements.getOrCreate(this.interaction.guild.id);
+        this.doc = await CustomElements.getWork(this.interaction.guild.id);
         let cstmButton = this.doc.getButton(id)
 
         if (!cstmButton)
@@ -88,7 +88,7 @@ class CustomButton extends ButtonBuilder {
      * @returns {Promise<CommandInteraction>}
      */
     async delete(id) {
-        this.doc = await CustomElements.getOrCreate(this.interaction.guild.id);
+        this.doc = await CustomElements.getWork(this.interaction.guild.id);
 
         try {
             this.doc.deleteButton(id);
@@ -116,7 +116,7 @@ class CustomButton extends ButtonBuilder {
      * @param {Boolean} autorole Es un AutoRole?
      */
     async linkWork(buttonId, embedId, autorole = false) {
-        this.doc = await CustomElements.getOrCreate(this.interaction.guild.id);
+        this.doc = await CustomElements.getWork(this.interaction.guild.id);
 
         const embed = this.doc.getEmbed(embedId);
         if (!embed)

@@ -68,7 +68,7 @@ const Schema = mongoose.Schema({
     ]
 });
 
-Schema.static("getOrCreate", async function (guild_id) {
+Schema.static("getWork", async function (guild_id) {
     return await this.findOne({ guild_id }) ?? await new this({ guild_id }).save();
 })
 

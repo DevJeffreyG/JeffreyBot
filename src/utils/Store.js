@@ -109,7 +109,7 @@ class Store {
         this.#doc = doc;
         this.#user = user;
 
-        this.shop = await this.config.info.model.obj.getOrCreate(this.config.info.model.query);
+        this.shop = await this.config.info.model.obj.getWork(this.config.info.model.query);
 
         this.#interactive.base = {
             title: `${this.config.info.name}`,
@@ -158,7 +158,7 @@ class Store {
     async buy(itemId, user) {
         if (!this.#build) throw this.#buildError;
 
-        const inventoryUser = user ? await Users.getOrCreate({
+        const inventoryUser = user ? await Users.getWork({
             user_id: user.id,
             guild_id: this.interaction.guild.id
         }) : this.#user;

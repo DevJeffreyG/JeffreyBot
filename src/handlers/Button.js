@@ -15,7 +15,7 @@ class Button {
 
     async handle(doc) {
         await this.interaction.deferReply({ ephemeral: true })
-        const elements = await CustomElements.getOrCreate(this.interaction.guild.id);
+        const elements = await CustomElements.getWork(this.interaction.guild.id);
 
         const button = elements.getButton(this.customid);
         if (!button && !this.isAutoRole) await this.interaction.deferUpdate();

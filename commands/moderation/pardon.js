@@ -73,7 +73,7 @@ command.execute = async (interaction, models, params, client) => {
         throw new DoesntExistsError(interaction, `NO existe el __**${textInfraction}**__ con id \`${id.value}\``);
 
     // si hay una id, proseguir
-    let user = await Users.getOrCreate({
+    let user = await Users.getWork({
         user_id: idFound.user_id,
         guild_id: interaction.guild.id
     });

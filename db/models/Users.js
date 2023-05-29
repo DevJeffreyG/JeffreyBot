@@ -224,12 +224,12 @@ Schema.pre("save", function () {
     if (realLvl <= 0 || isNaN(realLvl)) realLvl = 0;
 
     // Cambio de nivel
-    if (this.economy.global.level != realLvl) mongoose.models.Guilds.getOrCreate(this.guild_id).then(doc => doc.manageLevelUp(realLvl, this));
+    if (this.economy.global.level != realLvl) mongoose.models.Guilds.getWork(this.guild_id).then(doc => doc.manageLevelUp(realLvl, this));
 
     this.economy.global.level = realLvl // la ecuacion se toma como si la exp ahora fuese la exp necesaria para el siguiente nivel
 })
 
-Schema.static("getOrCreate", async function ({ user_id, guild_id }) {
+Schema.static("getWork", async function ({ user_id, guild_id }) {
     return await this.findOne({
         user_id: user_id,
         guild_id: guild_id
@@ -327,7 +327,7 @@ Schema.method("toggleBan", async function (module) {
  */
 Schema.method("cooldown", async function (modulo, options = { force_cooldown: null, save: true, check: true, info: false, instant: false, precise: false, log: false }) {
     let { force_cooldown, save, check, info, instant, precise, log } = options
-    const doc = await mongoose.models.Guilds.getOrCreate(this.guild_id)
+    const doc = await mongoose.models.Guilds.getWork(this.guild_id)
     const cooldownInfo = !force_cooldown ? doc.getCooldown(modulo) : null;
 
     const baseCooldown = cooldownInfo?.base;

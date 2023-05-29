@@ -18,7 +18,7 @@ class CustomEmbed extends Embed {
      * @returns {Promise<CommandInteraction>}
      */
     async save() {
-        this.doc = await CustomElements.getOrCreate(this.interaction.guild.id);
+        this.doc = await CustomElements.getWork(this.interaction.guild.id);
 
         const id = FindNewId(await CustomElements.find(), "embeds", "id")
 
@@ -46,7 +46,7 @@ class CustomEmbed extends Embed {
      * @returns {Promise<CommandInteraction>}
      */
     async replace(id) {
-        this.doc = await CustomElements.getOrCreate(this.interaction.guild.id);
+        this.doc = await CustomElements.getWork(this.interaction.guild.id);
         let cstmEmbed = this.doc.getEmbed(id);
         let embed = this.raw();
 
@@ -90,7 +90,7 @@ class CustomEmbed extends Embed {
      * @returns {Promise<CommandInteraction>}
      */
     async delete(id) {
-        this.doc = await CustomElements.getOrCreate(this.interaction.guild.id);
+        this.doc = await CustomElements.getWork(this.interaction.guild.id);
 
         try {
             this.doc.deleteEmbed(id);

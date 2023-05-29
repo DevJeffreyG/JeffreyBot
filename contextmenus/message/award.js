@@ -64,7 +64,7 @@ command.execute = async (interaction, models, params, client) => {
 
     const doc = params.getDoc();
     const user = params.getUser();
-    const message_user = await Users.getOrCreate({ user_id: message.author.id, guild_id: interaction.guild.id });
+    const message_user = await Users.getWork({ user_id: message.author.id, guild_id: interaction.guild.id });
 
     const hall = await interaction.guild.channels.fetch(doc.getChannel("general.halloffame")).catch(err => { });
     if (!hall) {

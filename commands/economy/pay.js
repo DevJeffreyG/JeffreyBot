@@ -38,7 +38,7 @@ command.execute = async (interaction, models, params, client) => {
     // codigo
     let author_user = params.getUser();
 
-    const reciever = await Users.getOrCreate({
+    const reciever = await Users.getWork({
         user_id: recieverMember.id,
         guild_id: guild.id
     });

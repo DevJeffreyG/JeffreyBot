@@ -40,7 +40,7 @@ const ShopsSchema = new Schema({
     ]
 });
 
-ShopsSchema.static("getOrCreate", async function (id) {
+ShopsSchema.static("getWork", async function (id) {
     return await this.findOne({
         guild_id: id
     }) ?? await new this({

@@ -22,13 +22,13 @@ command.execute = async (interaction, models, params, client) => {
     const { usuario } = params;
 
     const guild = interaction.guild;
-    const custom = await CustomElements.getOrCreate(guild.id);
+    const custom = await CustomElements.getWork(guild.id);
 
     // codigo
     const selectedUser = usuario?.member && usuario?.member.id != interaction.member.id;
     const member = usuario?.member ?? interaction.member;
 
-    let user = await Users.getOrCreate({ user_id: member.id, guild_id: guild.id });
+    let user = await Users.getWork({ user_id: member.id, guild_id: guild.id });
 
     const row = new ActionRowBuilder();
     const bdrow = new ActionRowBuilder()

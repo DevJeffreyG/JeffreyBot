@@ -350,8 +350,8 @@ const GenerateLog = async function (guild, options = {
 const GlobalDatasWork = async function (guild, justTempRoles = false) {
   const { Emojis, EmojisObject } = guild.client;
   const { Currency } = guild.client.getCustomEmojis(guild.id);
-  const doc = await Guilds.getOrCreate(guild.id);
-  const customDoc = await CustomElements.getOrCreate(guild.id);
+  const doc = await Guilds.getWork(guild.id);
+  const customDoc = await CustomElements.getWork(guild.id);
 
   const bdRole = doc.getRoleByModule("birthday") ? await guild.roles.fetch(doc.getRoleByModule("birthday")).catch(err => {
     new Log()
@@ -376,7 +376,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
   for await (const member of members.values()) {
     if (member.user.bot) continue
 
-    let dbUser = await Users.getOrCreate({
+    let dbUser = await Users.getWork({
       user_id: member.id,
       guild_id: guild.id
     });
@@ -539,7 +539,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
     for (const reminder_info of birthday_reminders) {
       const reminder = reminder_info.id
       const birthday_member = guild.members.cache.get(reminder);
-      let birthday_query = await Users.getOrCreate({ user_id: reminder, guild_id: guild.id });
+      let birthday_query = await Users.getWork({ user_id: reminder, guild_id: guild.id });
       if (birthday_query?.isBirthday() && !reminder_info.reminded) {
         member.send({
           embeds: [
@@ -578,7 +578,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
         let memberToPay = guild.members.cache.get(debt.user);
         debt.pay_in = moment().add(debt.every, "ms");
         dbUser.economy.global.currency -= topay;
-        let userToPay = await Users.getOrCreate({ user_id: memberToPay.id, guild_id: guild.id });
+        let userToPay = await Users.getWork({ user_id: memberToPay.id, guild_id: guild.id });
         userToPay.addCurrency(topay);
 
         try {
@@ -607,7 +607,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
   doc.data.average_currency = average;
 
   // buscar items deshabilitados temporalmente
-  Shops.getOrCreate(guild.id).then((shop) => {
+  Shops.getWork(guild.id).then((shop) => {
     for (const item of shop.items) {
       if (moment().isAfter(item.disabled_until)) {
         item.disabled = false;
@@ -618,7 +618,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
     shop.save();
   })
 
-  DarkShops.getOrNull(guild.id).then((shop) => {
+  DarkShops.getWork(guild.id).then((shop) => {
     if (!shop) return
     for (const item of shop?.items) {
       if (moment().isAfter(item.disabled_until)) {
@@ -789,7 +789,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
  */
 const LimitedTime = async function (victimMember, roleID = 0, duration, specialType = null, specialObjective = null, specialValue = null) {
   let role = victimMember.guild.roles.cache.find(x => x.id === roleID);
-  let user = await Users.getOrCreate({ user_id: victimMember.id, guild_id: victimMember.guild.id });
+  let user = await Users.getWork({ user_id: victimMember.id, guild_id: victimMember.guild.id });
 
   if (duration === Infinity) return victimMember.roles.add(role); // es un role permanente???
 
@@ -845,7 +845,7 @@ const Subscription = async function (victimMember, roleID, interval, jeffrosPerI
   return new Error("Subscriptions are not enabled in 2.0.0");
 
   let role = victimMember.guild.roles.cache.find(x => x.id === roleID);
-  let user = await Users.getOrCreate({ user_id: victimMember.id, guild_id: victimMember.guild.id });
+  let user = await Users.getWork({ user_id: victimMember.id, guild_id: victimMember.guild.id });
 
   let toPush = {
     role_id: role.id,
@@ -903,7 +903,7 @@ const handleUploads = async function (client) {
   for await (const guild of client.guilds.cache.values()) {
     if (guild.id != Bases.owner.guildId && guild.id != Bases.dev.guild) continue;
 
-    const doc = await Guilds.getOrCreate(guild.id);
+    const doc = await Guilds.getWork(guild.id);
 
     const bellytChannel = client.channels.cache.get(doc.getChannel("notifier.youtube_notif"));
     const belltvChannel = client.channels.cache.get(doc.getChannel("notifier.twitch_notif"));
@@ -1060,7 +1060,7 @@ const handleUploads = async function (client) {
  * @returns 
  */
 const isBannedFrom = async function (interaction, query) {
-  const user = await Users.getOrCreate({ user_id: interaction.user.id, guild_id: interaction.guild.id });
+  const user = await Users.getWork({ user_id: interaction.user.id, guild_id: interaction.guild.id });
 
   let response = false;
 
@@ -1317,7 +1317,7 @@ const ManageDarkShops = async function (client) {
  * @returns 
  */
 const ValidateDarkShop = async function (user, author) {
-  let guild = await Guilds.getOrCreate(user.guild_id);
+  let guild = await Guilds.getWork(user.guild_id);
 
   const r = [
     "{you}... No estás listo.",
@@ -1423,7 +1423,7 @@ const DeterminePrice = async function (user, item, returnString, isDarkShop) {
  * @param {Guild} guild 
  */
 const FindAverage = async function (guild) {
-  //const doc_guild = await Guilds.getOrCreate(guild.id);
+  //const doc_guild = await Guilds.getWork(guild.id);
   const users = await Users.find({ guild_id: guild.id });
   const darkshop = new DarkShop(guild);
 
@@ -1701,7 +1701,7 @@ const DeleteLink = async function (message) {
     "https", "http", "www.", "discord.gg", "discord.gift"
   ];
 
-  const doc = await Guilds.getOrCreate(message.guild.id);
+  const doc = await Guilds.getWork(message.guild.id);
   const member = message.member;
   const link = Links.some(x => message.content.includes(x));
 

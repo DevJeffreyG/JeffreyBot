@@ -60,10 +60,10 @@ class Item {
 
         switch (this.shopType) {
             case ShopTypes.DarkShop:
-                this.shop = await DarkShops.getOrNull(this.interaction.guild.id);
+                this.shop = await DarkShops.getWork(this.interaction.guild.id);
                 break;
             default:
-                this.shop = await Shops.getOrCreate(this.interaction.guild.id);
+                this.shop = await Shops.getWork(this.interaction.guild.id);
         }
 
         this.item = this.shop.findItem(this.itemId, false);
@@ -120,11 +120,11 @@ class Item {
         var victim = qvictim;
 
         this.victim = victim?.id != this.user.user_id && victim ? // la victima NO puede ser el mismo usuario
-            await Users.getOrCreate({ user_id: victim.id, guild_id: this.interaction.guild.id }) :
+            await Users.getWork({ user_id: victim.id, guild_id: this.interaction.guild.id }) :
             null;
 
         if (!this.isDarkShop) { // la victima será el usuario si NO es la darkshop
-            this.victim = await Users.getOrCreate({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id });
+            this.victim = await Users.getWork({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id });
             victim = this.interaction.member;
         }
 
@@ -157,7 +157,7 @@ class Item {
     }
 
     async #removeItemFromInv() {
-        let originalExecutor = await Users.getOrCreate({ user_id: this.original_executor.user_id, guild_id: this.original_executor.guild_id });
+        let originalExecutor = await Users.getWork({ user_id: this.original_executor.user_id, guild_id: this.original_executor.guild_id });
         console.log("🗑️ Eliminando %s del inventario de %s", this.item.name, this.original_executor.user_id)
         originalExecutor.data.inventory.splice(this.itemOnInventoryIndex, 1);
         await originalExecutor.save();
@@ -381,7 +381,7 @@ class Item {
                     let itemId = purchase.item_id;
 
                     // buscar el item en la tienda
-                    let shop = await Shops.getOrCreate(this.interaction.guild.id);
+                    let shop = await Shops.getWork(this.interaction.guild.id);
                     let item = shop.findItem(itemId);
 
                     console.log(item)

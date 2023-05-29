@@ -27,7 +27,7 @@ command.execute = async (interaction, models, params, client) => {
     const { Users } = models;
     const { modulo, usuario } = params;
 
-    const user = await Users.getOrCreate({ user_id: usuario.value, guild_id: interaction.guild.id });
+    const user = await Users.getWork({ user_id: usuario.value, guild_id: interaction.guild.id });
 
     switch (modulo.value) {
         case "sugerencias":

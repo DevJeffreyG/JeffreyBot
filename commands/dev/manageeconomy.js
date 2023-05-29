@@ -83,7 +83,7 @@ command.execCurrency = async (interaction, models, params, client) => {
     const { Users } = models
     const { Currency } = client.getCustomEmojis(interaction.guild.id);
 
-    const user = await Users.getOrCreate({ user_id: usuario.value, guild_id: usuario.member.guild.id })
+    const user = await Users.getWork({ user_id: usuario.value, guild_id: usuario.member.guild.id })
 
     await user.addCurrency(cantidad.value)
 
@@ -103,7 +103,7 @@ command.execDarkCurrency = async (interaction, models, params, client) => {
     const { Users } = models
     const { DarkCurrency } = client.getCustomEmojis(interaction.guild.id);
 
-    const user = await Users.getOrCreate({ user_id: usuario.value, guild_id: usuario.member.guild.id })
+    const user = await Users.getWork({ user_id: usuario.value, guild_id: usuario.member.guild.id })
     await user.addDarkCurrency(cantidad.value);
 
     let embed = new Embed()

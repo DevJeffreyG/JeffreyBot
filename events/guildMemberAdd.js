@@ -13,12 +13,12 @@ module.exports = async (client, member) => {
   if (!client.isThisFetched(guild.id)) await FetchThisGuild(client, guild);
 
   // crear usuario nuevo
-  const user = await Users.getOrCreate({
+  const user = await Users.getWork({
     user_id: member.id,
     guild_id: guild.id
   });
 
-  const doc = await Guilds.getOrCreate(guild.id);
+  const doc = await Guilds.getWork(guild.id);
 
   // cargar los roles que tenia antes
   if (doc.moduleIsActive("functions.save_roles_onleft", doc.settings)) user.data.backup_roles.forEach(roleId => {
