@@ -3,7 +3,7 @@ const moment = require("moment-timezone");
 const ms = require("ms")
 const Chance = require("chance");
 
-const { ItemTypes, ItemObjetives, ItemActions, ItemEffects, LogReasons, ChannelModules } = require("./Enums");
+const { ItemTypes, ItemObjetives, ItemActions, ItemEffects, LogReasons, ChannelModules, ShopTypes } = require("./Enums");
 const { BadCommandError, AlreadyExistsError, DoesntExistsError, FetchError, ExecutionError } = require("../errors");
 
 const { FindNewId, LimitedTime, Subscription, WillBenefit, GetRandomItem } = require("./functions");
@@ -22,10 +22,12 @@ class Item {
      * 
      * @param {BaseInteraction | CommandInteraction} interaction 
      * @param {Number} id 
-     * @param {Boolean} isDarkShop 
+     * @param {Number} type 
      */
-    constructor(interaction, id, isDarkShop = false) {
-        this.isDarkShop = isDarkShop;
+    constructor(interaction, id, type = ShopTypes.Shop) {
+        this.isDarkShop = type === ShopTypes.Shop ? false : true;
+        this.shopType = type;
+
         this.interaction = interaction;
         this.member = interaction.member;
         this.itemId = id;
@@ -56,8 +58,13 @@ class Item {
         this.doc = doc;
         this.user = user;
 
-        if (this.isDarkShop) this.shop = await DarkShops.getOrNull(this.interaction.guild.id)
-        else this.shop = await Shops.getOrCreate(this.interaction.guild.id);
+        switch (this.shopType) {
+            case ShopTypes.DarkShop:
+                this.shop = await DarkShops.getOrNull(this.interaction.guild.id);
+                break;
+            default:
+                this.shop = await Shops.getOrCreate(this.interaction.guild.id);
+        }
 
         this.item = this.shop.findItem(this.itemId, false);
 
@@ -523,10 +530,10 @@ class Item {
 
         if (firewall) { // tiene una firewall activa
             // ¿se la salta?
-            let skip = this.user.hasItem(skipFirewallItem.id, true) && new Chance().bool({ likelihood: this.doc.settings.quantities.percentage_skipfirewall })
+            let skip = this.user.hasItem(skipFirewallItem.id, ShopTypes.DarkShop) && new Chance().bool({ likelihood: this.doc.settings.quantities.percentage_skipfirewall })
 
             // eliminar el skip, se la salte o no
-            if (this.user.hasItem(skipFirewallItem.id, true)) {
+            if (this.user.hasItem(skipFirewallItem.id, ShopTypes.DarkShop)) {
                 console.log("⚪ Se eliminó el skip de firewall de %s", this.interaction.user.tag)
                 let skipIndex = this.user.data.inventory.findIndex(x => x.item_id === skipFirewallItem.id && x.isDarkShop)
 

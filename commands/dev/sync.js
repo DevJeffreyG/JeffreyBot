@@ -1,4 +1,4 @@
-const { Command, Categories, Confirmation, Embed, FindNewId, ItemObjetives } = require("../../src/utils")
+const { Command, Categories, Confirmation, Embed, FindNewId, ItemObjetives, ShopTypes } = require("../../src/utils")
 
 const { PermissionsBitField } = require("discord.js");
 const moment = require("moment-timezone");
@@ -40,10 +40,15 @@ command.addOption({
     sub: "legacy"
 })
 
+command.addSubcommand({
+    name: "inventarios",
+    desc: "Sincroniza los inventarios para cambiar los tipos de tienda"
+})
+
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { subcommand } = params
-    const { Legacy, GlobalDatas, RouletteItems } = models;
+    const { Legacy, GlobalDatas, RouletteItems, Users } = models;
 
     switch (subcommand) {
         case "mute": {
@@ -138,7 +143,7 @@ command.execute = async (interaction, models, params, client) => {
                 } else if (type === "lastExpJeffros") {
                     actual.deleteOne();
                 } else if (type === "rouletteItem") {
-                    if(newInfo.target === ItemObjetives.TempRole) newInfo.target = ItemObjetives.Boost;
+                    if (newInfo.target === ItemObjetives.TempRole) newInfo.target = ItemObjetives.Boost;
                     if (!(await RouletteItems.findOne(newInfo)))
                         await RouletteItems.new(newInfo, FindNewId(await RouletteItems.getAll(), "", "id"));
                 }
@@ -147,6 +152,39 @@ command.execute = async (interaction, models, params, client) => {
             }
 
             return interaction.editReply({ embeds: [new Embed({ type: "success" })] });
+        }
+
+        case "inventarios": {
+            await interaction.editReply({ content: `${client.Emojis.Loading} Sincronizando...` })
+
+            const users = await Users.find();
+            for await (const user of users) {
+                await user.data.purchases.forEach((p, i) => {
+                    if (p.toObject().hasOwnProperty("isDarkShop")) {
+                        let obj = user.data.purchases[i].toObject();
+                        obj.shopType = obj.isDarkShop ? ShopTypes.DarkShop : ShopTypes.Shop;
+
+                        delete obj.isDarkShop;
+
+                        user.data.purchases[i] = obj;
+                        user.markModified("data.purchases")
+                    }
+                })
+
+                await user.data.inventory.forEach((item, i) => {
+                    if (item.toObject().hasOwnProperty("isDarkShop")) {
+                        let obj = user.data.inventory[i].toObject();
+                        obj.shopType = obj.isDarkShop ? ShopTypes.DarkShop : ShopTypes.Shop;
+
+                        delete obj.isDarkShop;
+
+                        user.data.inventory[i] = obj;
+                        user.markModified("data.inventory")
+                    }
+                })
+            }
+
+            return interaction.editReply({ content: `${client.Emojis.Check} Sincronizados.`, allowedMentions: { parse: [] } })
         }
     }
 }

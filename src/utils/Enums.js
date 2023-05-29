@@ -41,7 +41,7 @@ class Enum {
      * #### Predeterminado: [{name: nombre, value: valor}]
      * @returns Array
      */
-    complexArray(first = "name", second = "value") {
+    complexArray(first = "name", second = "value", valueString = true) {
         let arr = [];
 
         let names = this.array();
@@ -49,7 +49,7 @@ class Enum {
         for (const name of names) {
             let obj = {};
             obj[first] = String(name);
-            obj[second] = String(this.values[name]);
+            obj[second] = valueString ? String(this.values[name]) : this.values[name];
 
             arr.push(obj)
         }
@@ -326,6 +326,15 @@ const ChangelogTypes = new Enum({
     Removed: 3
 }).values;
 
+/**
+ * - Shop
+ * - DarkShop
+ */
+const ShopTypes = new Enum({
+    Shop: 1,
+    DarkShop: 2
+}).values;
+
 module.exports = {
     Enum,
     Categories,
@@ -345,5 +354,6 @@ module.exports = {
     RequirementType,
     ModifierType,
     Multipliers,
-    ChangelogTypes
+    ChangelogTypes,
+    ShopTypes
 }

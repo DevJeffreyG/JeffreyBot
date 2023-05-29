@@ -3,7 +3,7 @@ const moment = require("moment-timezone")
 
 const HumanMs = require("../../src/utils/HumanMs")
 const { time } = require('discord.js')
-const { RequirementType } = require('../../src/utils/Enums')
+const { RequirementType, ShopTypes } = require('../../src/utils/Enums')
 const { integerValidator } = require('../Validators')
 
 const Schema = new mongoose.Schema({
@@ -44,14 +44,14 @@ const Schema = new mongoose.Schema({
         },
         purchases: [ // para el interés
             {
-                isDarkShop: { type: Boolean, required: true, default: false },
+                shopType: { type: Number, validate: integerValidator, default: ShopTypes.Shop },
                 item_id: { type: Number, required: true },
                 quantity: { type: Number, required: true }
             }
         ],
         inventory: [ // items comprados que no se han usado
             {
-                isDarkShop: { type: Boolean, required: true, default: false },
+                shopType: { type: Number, validate: integerValidator, default: ShopTypes.Shop },
                 item_id: { type: Number, required: true },
                 use_id: { type: Number, required: true, sparse: true },
                 active: { type: Boolean, required: true, default: false },
@@ -191,6 +191,28 @@ Schema.pre("save", function () {
         this.economy = obj;
     }
 
+    this.data.purchases.forEach((p, i) => {
+        if (p.toObject().hasOwnProperty("isDarkShop")) {
+            let obj = this.data.purchases[i].toObject();
+            obj.shopType = obj.isDarkShop ? ShopTypes.DarkShop : ShopTypes.Shop;
+            
+            delete obj.isDarkShop;
+
+            this.data.purchases[i] = obj;
+        }
+    })
+
+    this.data.inventory.forEach((item, i) => {
+        if (item.toObject().hasOwnProperty("isDarkShop")) {
+            let obj = this.data.inventory[i].toObject();
+            obj.shopType = obj.isDarkShop ? ShopTypes.DarkShop : ShopTypes.Shop;
+
+            delete obj.isDarkShop;
+
+            this.data.inventory[i] = obj;
+        }
+    })
+
     if (this.economy.dark.accuracy > 80) this.economy.dark.accuracy = 80;
 
     // Corregir nivel actual
@@ -258,18 +280,20 @@ Schema.method("addRep", async function (count) {
     return await this.save();
 })
 
-Schema.method("hasItem", function (itemId, darkshop = false) {
+Schema.method("hasItem", function (itemId, shopType = ShopTypes.Shop) {
     let x = false;
     this.data.inventory.forEach(item => {
-        if (item.item_id === itemId && item.isDarkShop === darkshop) x = true;
+        if (item.item_id === itemId && item.shopType === shopType) x = true;
     });
 
     return x
 })
 
-Schema.method("canBuy", function (price, darkshop = false) {
-    if (!darkshop) return this.economy.global.currency >= price
-    return this.economy.dark.currency >= price
+Schema.method("canBuy", function (price, path) {
+    if (!path) return this.economy.global.currency >= price
+    else {
+        return this.get(path) >= price
+    }
 })
 
 Schema.method("parseCurrency", function (Emojis, darkshop = false) {

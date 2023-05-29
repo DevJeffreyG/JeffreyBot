@@ -1,4 +1,4 @@
-const { Command, Categories, Shop } = require("../../src/utils")
+const { Command, Categories, Store, ShopTypes } = require("../../src/utils")
 
 const command = new Command({
     name: "shop",
@@ -14,13 +14,12 @@ command.addOption({
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
-    const { Shops } = models
 
-    // codigo
-    const doc = await Shops.getOrCreate(interaction.guild.id);
-    const shop = new Shop(doc, interaction);
+    const shop = await new Store(interaction)
+        .setType(ShopTypes.Shop)
+        .build(params.getDoc(), params.getUser());
 
-    return shop.setup({ pag: params.pag?.value });
+    return shop.show({ pag: params.pag?.value })
 }
 
 module.exports = command;

@@ -1,4 +1,4 @@
-const { Command, Shop, Categories } = require("../../src/utils");
+const { Command, Shop, Categories, Store, ShopTypes } = require("../../src/utils");
 
 const command = new Command({
     name: "darkshop",
@@ -17,10 +17,14 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { DarkShops } = models;
 
-    const doc = await DarkShops.getOrNull(interaction.guild.id);
-    const ds = new Shop(doc, interaction, true);
+    /* const doc = await DarkShops.getOrNull(interaction.guild.id);
+    const ds = new Shop(doc, interaction, true); */
 
-    return ds.setup({ pag: params.pag?.value })
+    const ds = await new Store(interaction)
+        .setType(ShopTypes.DarkShop)
+        .build(params.getDoc(), params.getUser());
+
+    return ds.show({ pag: params.pag?.value })
 }
 
 module.exports = command;
