@@ -15,7 +15,9 @@ const DarkShop = require("./DarkShop");
 const { AlreadyExistsError, DoesntExistsError, EconomyError, BadParamsError } = require("../errors");
 
 /**
- * Taken from [tutmonda](https://github.com/Jleguim/tutmonda-project) 💜
+ * @deprecated Se está buscando la forma de crear tipos de tiendas: Store.js
+ * 
+ * ###### Taken from [tutmonda](https://github.com/Jleguim/tutmonda-project) 💜
  */
 class Shop {
     /**
