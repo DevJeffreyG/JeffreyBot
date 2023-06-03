@@ -69,7 +69,7 @@ class Store {
                 break;
 
             case ShopTypes.DarkShop:
-                this.setCurrency(this.client.getCustomEmojis(this.interaction.guild.id).DarkCurrency)
+                this.setCurrency(this.client.getCustomEmojis(this.interaction.guild.id).DarkCurrency, "economy.dark.currency")
                 this.setInfo({
                     name: `DarkShop de ${this.interaction.guild.name}`,
                     desc: `**—** Bienvenid@ a la DarkShop. Para comprar items usa ${this.client.mentionCommand("dsbuy")}.`,
@@ -110,6 +110,7 @@ class Store {
         this.#user = user;
 
         this.shop = await this.config.info.model.obj.getWork(this.config.info.model.query);
+        this.average = this.#doc.data.average_currency;
 
         this.#interactive.base = {
             title: `${this.config.info.name}`,

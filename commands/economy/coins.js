@@ -1,4 +1,4 @@
-const { Command, Categories, Embed, BoostTypes, BoostObjetives, Cooldowns, GetRandomItem, FindAverage, BoostWork } = require("../../src/utils");
+const { Command, Categories, Embed, Cooldowns, GetRandomItem, BoostWork } = require("../../src/utils");
 
 const { Responses } = require("../../src/resources/");
 
