@@ -2,8 +2,7 @@ const { EconomyError, ModuleDisabledError } = require("../../src/errors");
 const { Command, Categories, Confirmation, Embed, Cooldowns, HumanMs } = require("../../src/utils");
 const command = new Command({
     name: "exp",
-    desc: "Transforma tu dinero en experiencia para tu perfil",
-    category: Categories.Economy
+    desc: "Transforma tu dinero en experiencia para tu perfil"
 })
 
 command.addOption({

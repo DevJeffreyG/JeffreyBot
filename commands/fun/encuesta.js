@@ -3,8 +3,7 @@ const { Colores } = require("../../src/resources");
 
 const command = new Command({
     name: "encuesta",
-    desc: "Crea una encuesta para que la gente en el chat vote",
-    category: Categories.Fun
+    desc: "Crea una encuesta para que la gente en el chat vote"
 })
 
 command.addOption({

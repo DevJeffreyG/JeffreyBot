@@ -5,8 +5,7 @@ const { SelfExec } = require("../../src/errors");
 const command = new Command({
     name: "rep",
     desc: "Dale un punto de reputación a un usuario que se lo merezca!",
-    helpdesc: "Da un punto de reputación a un usuario",
-    category: Categories.General
+    helpdesc: "Da un punto de reputación a un usuario"
 })
 
 command.addOption({

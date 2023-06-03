@@ -3,8 +3,7 @@ const { Colores } = require("../../src/resources/");
 
 const command = new Command({
   name: "ping",
-  desc: "Revisa la latencia del bot con los servers de Discord",
-  category: Categories.General
+  desc: "Revisa la latencia del bot con los servers de Discord"
 });
 command.execute = async (interaction, models, params, client) => {
   let start = Date.now();

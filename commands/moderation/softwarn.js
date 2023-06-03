@@ -4,8 +4,7 @@ const { ActionRowBuilder, AttachmentBuilder, StringSelectMenuBuilder } = require
 const { AlreadyExistsError, FetchError } = require("../../src/errors");
 const command = new Command({
     name: "softwarn",
-    desc: "Controla las advertencias hechas a un usuario",
-    category: Categories.Moderation
+    desc: "Controla las advertencias hechas a un usuario"
 })
 
 command.addOption({

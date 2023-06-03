@@ -4,8 +4,7 @@ const { DiscordLimitationError } = require("../../src/errors");
 
 const command = new Command({
     name: "lockdown",
-    desc: "Deshabilita temporalmente el canal donde se ejecuta el comando",
-    category: Categories.Administration
+    desc: "Deshabilita temporalmente el canal donde se ejecuta el comando"
 })
 
 command.execute = async (interaction, models, params, client) => {

@@ -3,8 +3,7 @@ const ms = require("ms")
 
 const command = new Command({
     name: "cooldown",
-    desc: "Elimina o agrega un cooldown a un módulo",
-    category: Categories.Developer
+    desc: "Elimina o agrega un cooldown a un módulo"
 });
 
 command.addOption({

@@ -3,8 +3,7 @@ const { Command, Categories } = require("../../src/utils")
 
 const command = new Command({
     name: "dbuser",
-    desc: "Busca la información que tiene Jeffrey Bot de un usuario en la base de datos",
-    category: Categories.Developer
+    desc: "Busca la información que tiene Jeffrey Bot de un usuario en la base de datos"
 });
 
 command.addOption({

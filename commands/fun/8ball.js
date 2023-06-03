@@ -3,8 +3,7 @@ const { Colores } = require("../../src/resources");
 
 const command = new Command({
     name: "8ball",
-    desc: "¡No necesita presentación!",
-    category: Categories.Fun
+    desc: "¡No necesita presentación!"
 })
 
 command.addOption({

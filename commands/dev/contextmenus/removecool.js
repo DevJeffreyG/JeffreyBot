@@ -1,10 +1,9 @@
 const { ApplicationCommandType, ActionRowBuilder, StringSelectMenuBuilder } = require("discord.js")
-const { ContextMenu, Categories, Enum, Cooldowns, Collector, Embed } = require("../../src/utils")
+const { ContextMenu, Enum, Cooldowns, Collector } = require("../../../src/utils")
 
 const command = new ContextMenu({
     name: "Eliminar Cooldown",
-    type: ApplicationCommandType.User,
-    category: Categories.Developer
+    type: ApplicationCommandType.User
 })
 
 command.execute = async (interaction, models, params, client) => {

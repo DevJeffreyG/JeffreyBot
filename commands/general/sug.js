@@ -6,8 +6,7 @@ const { ModuleBannedError, ModuleDisabledError } = require("../../src/errors");
 
 const command = new Command({
     name: "sug",
-    desc: "¡Envía una sugerencia directamente al STAFF para mejorar el servidor!",
-    category: Categories.General
+    desc: "¡Envía una sugerencia directamente al STAFF para mejorar el servidor!"
 })
 
 command.addOption({

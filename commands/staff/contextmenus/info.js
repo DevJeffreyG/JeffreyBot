@@ -1,22 +1,21 @@
 const { ApplicationCommandType } = require("discord.js")
-const { ContextMenu, Categories } = require("../../src/utils")
+const { ContextMenu } = require("../../../src/utils")
 
 const command = new ContextMenu({
-    name: "[DS] Estadísticas",
-    type: ApplicationCommandType.User,
-    category: Categories.DarkShop
+    name: "Información: Usuario",
+    type: ApplicationCommandType.User
 })
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ ephemeral: true });
 
-    const stats = require("../../commands/darkshop/darkstats");
+    const userinfo = require("../userinfo");
     const member = interaction.guild.members.cache.get(params.user.id)
 
-    params["usuario"] =  { member };
+    params["usuario"] = { member };
 
     try {
-        await stats.execute(interaction, models, params, client)
+        await userinfo.execute(interaction, models, params, client)
     } catch (err) {
         console.log(err);
     }

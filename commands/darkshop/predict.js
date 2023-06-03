@@ -6,8 +6,7 @@ const moment = require("moment-timezone")
 
 const command = new Command({
     name: "predict",
-    desc: "De acuerdo a tu precisión, predice si es buena idea recuperar tu inversión en este momento",
-    category: Categories.DarkShop
+    desc: "De acuerdo a tu precisión, predice si es buena idea recuperar tu inversión en este momento"
 })
 
 command.addOption({

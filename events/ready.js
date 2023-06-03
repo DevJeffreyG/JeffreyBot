@@ -59,7 +59,7 @@ module.exports = async (client) => {
     client.logChannel = await devChannels.get(Bases.dev.logs);
 
     if (!client.mapped) {
-        const CommandsLoad = new Commands(["./commands/", "./contextmenus/"]);
+        const CommandsLoad = new Commands(["./commands/"]);
         client = await CommandsLoad.map(client);
     }
 

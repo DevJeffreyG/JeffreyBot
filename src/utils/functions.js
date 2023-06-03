@@ -1681,7 +1681,7 @@ const ProgressBar = function (percentage, options = { max: 100, blocks: 10, empt
  * @param {Client} client 
  */
 const UpdateCommands = async function (client) {
-  const ClientCommands = new Commands(["./commands/", "./contextmenus/"]);
+  const ClientCommands = new Commands(["./commands/"]);
   return new Promise(async (res, rej) => {
     try {
       let resp = await ClientCommands.prepare(client, ["482989052136652800"])

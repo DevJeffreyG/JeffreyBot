@@ -6,8 +6,7 @@ const { BadParamsError, EconomyError } = require("../../src/errors");
 const command = new Command({
     name: "prestar",
     desc: "Présale de tu dinero a otro usuario para que lo tenga que pagar después",
-    helpdesc: "Presta dinero que cobra interés hasta que te lo paguen devuelta",
-    category: Categories.Economy
+    helpdesc: "Presta dinero que cobra interés hasta que te lo paguen devuelta"
 })
 
 command.addOption({

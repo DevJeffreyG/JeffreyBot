@@ -3,8 +3,7 @@ const { Colores } = require("../../src/resources")
 
 const command = new Command({
     name: "actividad",
-    desc: "Administra la actividad del bot",
-    category: Categories.Developer
+    desc: "Administra la actividad del bot"
 })
 
 command.addSubcommand({

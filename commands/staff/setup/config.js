@@ -1,12 +1,11 @@
 const { codeBlock, messageLink, hyperlink } = require("discord.js");
-const { Colores } = require("../../src/resources");
-const { Command, Categories, Confirmation, FindNewId, Embed, ChannelModules, Log, LogReasons, Cooldowns, Enum, ModifierType, RequirementType, Multipliers, InteractivePages } = require("../../src/utils");
-const { BadParamsError, AlreadyExistsError, DoesntExistsError } = require("../../src/errors");
+const { Colores } = require("../../../src/resources");
+const { Command, Confirmation, FindNewId, Embed, ChannelModules, Log, LogReasons, Cooldowns, Enum, ModifierType, RequirementType, Multipliers, InteractivePages } = require("../../../src/utils");
+const { BadParamsError, AlreadyExistsError, DoesntExistsError } = require("../../../src/errors");
 
 const command = new Command({
     name: "config",
-    desc: "Todo lo relacionado con el comportamiento de Jeffrey Bot en el servidor",
-    category: Categories.Administration
+    desc: "Todo lo relacionado con el comportamiento de Jeffrey Bot en el servidor"
 })
 
 const maxValue = 1024; // api limit

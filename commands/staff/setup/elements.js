@@ -1,12 +1,11 @@
 const { SlashCommandStringOption, ButtonStyle, SlashCommandIntegerOption, DiscordAPIError, codeBlock, ActionRowBuilder, TextInputStyle, SlashCommandRoleOption, ButtonBuilder } = require("discord.js");
-const { Command, Categories, CustomEmbed, Confirmation, InteractivePages, CustomButton, Modal, CustomTrophy, Embed, FindNewId } = require("../../src/utils");
-const { Colores } = require("../../src/resources");
-const { DiscordLimitationError, DoesntExistsError } = require("../../src/errors");
+const { Command, CustomEmbed, Confirmation, InteractivePages, CustomButton, Modal, CustomTrophy, Embed, FindNewId } = require("../../../src/utils");
+const { Colores } = require("../../../src/resources");
+const { DiscordLimitationError, DoesntExistsError } = require("../../../src/errors");
 
 const command = new Command({
     name: "elements",
-    desc: "Administración de elementos personalizados dentro del servidor",
-    category: Categories.Staff
+    desc: "Administración de elementos personalizados dentro del servidor"
 })
 
 command.data

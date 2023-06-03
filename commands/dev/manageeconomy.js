@@ -3,8 +3,7 @@ const { Colores } = require("../../src/resources")
 
 const command = new Command({
     name: "manageeconomy",
-    desc: "Administra los balances de un usuario",
-    category: Categories.Developer
+    desc: "Administra los balances de un usuario"
 });
 
 command.addSubcommandGroup({

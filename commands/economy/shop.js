@@ -2,8 +2,7 @@ const { Command, Categories, Store, ShopTypes } = require("../../src/utils")
 
 const command = new Command({
     name: "shop",
-    desc: "Visita la tienda del servidor",
-    category: Categories.Economy
+    desc: "Visita la tienda del servidor"
 })
 
 command.addOption({

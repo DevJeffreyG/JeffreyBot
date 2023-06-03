@@ -4,8 +4,7 @@ const moment = require("moment-timezone");
 
 const command = new Command({
     name: "dscalc",
-    desc: "Determina automáticamente cuánto dinero tienes invertido actualmente",
-    category: Categories.DarkShop
+    desc: "Determina automáticamente cuánto dinero tienes invertido actualmente"
 })
 
 command.addOption({

@@ -5,8 +5,7 @@ const { CommandNotFoundError } = require("../../src/errors/");
 const command = new Command({
     name: "ayuda",
     desc: "Una lista de todos los comandos en el bot",
-    helpdesc: "¡Este comando!",
-    category: Categories.General
+    helpdesc: "¡Este comando!"
 });
 
 command.addOption({

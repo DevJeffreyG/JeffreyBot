@@ -4,8 +4,7 @@ const moment = require("moment-timezone");
 
 const command = new Command({
     name: "clear",
-    desc: "Elimina mensajes del chat",
-    category: Categories.Moderation
+    desc: "Elimina mensajes del chat"
 });
 
 command.addOption({

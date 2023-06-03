@@ -5,8 +5,7 @@ const { DiscordLimitationError, BadParamsError } = require("../../src/errors");
 
 const command = new Command({
     name: "temp",
-    desc: "Agregar roles temporales o boosts",
-    category: Categories.Administration
+    desc: "Agregar roles temporales o boosts"
 })
 
 command.data

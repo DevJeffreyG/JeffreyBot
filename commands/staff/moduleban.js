@@ -2,8 +2,7 @@ const { Command, Categories, Embed } = require("../../src/utils");
 
 const command = new Command({
     name: "moduleban",
-    desc: "Banear a un usuario de cierto módulo para que no lo pueda usar",
-    category: Categories.Staff
+    desc: "Banear a un usuario de cierto módulo para que no lo pueda usar"
 })
 
 command.addOption({

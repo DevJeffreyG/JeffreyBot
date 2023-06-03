@@ -6,8 +6,7 @@ const { Colores } = require("../../src/resources");
 
 const command = new Command({
     name: "stats",
-    desc: "Revisa tus estadísticas del servidor",
-    category: Categories.Economy
+    desc: "Revisa tus estadísticas del servidor"
 })
 
 command.addOption({

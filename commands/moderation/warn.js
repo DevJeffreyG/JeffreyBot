@@ -5,8 +5,7 @@ const { DMNotSentError, FetchError } = require("../../src/errors");
 
 const command = new Command({
     name: "warn",
-    desc: "Agregar una infracción a un usuario",
-    category: Categories.Moderation
+    desc: "Agregar una infracción a un usuario"
 })
 
 command.addOption({

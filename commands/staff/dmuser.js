@@ -4,8 +4,7 @@ const { DMNotSentError } = require("../../src/errors/")
 
 const command = new Command({
     name: "dmuser",
-    desc: "Enviar un mensaje directo al usuario como STAFF anónimamente",
-    category: Categories.Staff
+    desc: "Enviar un mensaje directo al usuario como STAFF anónimamente"
 })
 
 command.addOption({

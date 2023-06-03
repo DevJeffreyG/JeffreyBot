@@ -4,8 +4,7 @@ const { Responses } = require("../../src/resources/");
 
 const command = new Command({
     name: "coins",
-    desc: "Gana dinero extra cada cierto tiempo",
-    category: Categories.Economy
+    desc: "Gana dinero extra cada cierto tiempo"
 });
 
 command.execute = async (interaction, models, params, client) => {

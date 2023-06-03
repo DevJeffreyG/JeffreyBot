@@ -5,8 +5,7 @@ const { DiscordLimitationError } = require("../../src/errors");
 
 const command = new Command({
     name: "mute",
-    desc: "Mutea a un usuario",
-    category: Categories.Moderation
+    desc: "Mutea a un usuario"
 });
 
 command.addOption({

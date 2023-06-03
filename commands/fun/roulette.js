@@ -6,8 +6,7 @@ const { Colores } = require("../../src/resources");
 
 const command = new Command({
     name: "roulette",
-    desc: "Gira la ruleta para conseguir premios o CASTIGOS",
-    category: Categories.Fun
+    desc: "Gira la ruleta para conseguir premios o CASTIGOS"
 })
 
 command.execute = async (interaction, models, params, client) => {

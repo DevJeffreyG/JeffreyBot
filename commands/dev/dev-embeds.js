@@ -4,8 +4,7 @@ const { Colores, Bases } = require("../../src/resources");
 
 const command = new Command({
     name: "dev-embeds",
-    desc: "Enviar embeds defaults para el servidor de JeffreyG",
-    category: Categories.Developer
+    desc: "Enviar embeds defaults para el servidor de JeffreyG"
 })
 
 command.addOption({

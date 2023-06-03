@@ -3,8 +3,7 @@ const { Colores } = require("../../src/resources");
 
 const command = new Command({
     name: "avatar",
-    desc: "Muestra tu avatar o el de otro en el server",
-    category: Categories.General
+    desc: "Muestra tu avatar o el de otro en el server"
 })
 
 command.addOption({

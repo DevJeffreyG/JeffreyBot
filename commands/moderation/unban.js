@@ -4,8 +4,7 @@ const { Command, Categories, Embed } = require("../../src/utils")
 
 const command = new Command({
     name: "unban",
-    desc: "Desbanear a un usuario por su ID",
-    category: Categories.Moderation
+    desc: "Desbanear a un usuario por su ID"
 });
 
 command.addOption({

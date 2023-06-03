@@ -3,8 +3,7 @@ const { Command, Categories, Confirmation, Embed, ErrorEmbed, HumanMs, Cooldowns
 
 const command = new Command({
     name: "claimrep",
-    desc: "Toma los puntos de reputación que tengas y conviértelos en dinero",
-    category: Categories.Economy
+    desc: "Toma los puntos de reputación que tengas y conviértelos en dinero"
 })
 
 command.execute = async (interaction, models, params, client) => {

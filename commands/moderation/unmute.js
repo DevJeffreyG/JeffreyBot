@@ -2,8 +2,7 @@ const { Command, Categories, Embed } = require("../../src/utils")
 
 const command = new Command({
     name: "unmute",
-    desc: "Quita el mute a un usuario",
-    category: Categories.Moderation
+    desc: "Quita el mute a un usuario"
 });
 
 command.addOption({

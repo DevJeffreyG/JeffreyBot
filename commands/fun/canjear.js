@@ -3,8 +3,7 @@ const { Command, Categories, LimitedTime, WillBenefit, HumanMs, ErrorEmbed, Item
 
 const command = new Command({
     name: "canjear",
-    desc: "Canjeas alguna clave para recompensas dentro del servidor",
-    category: Categories.Fun
+    desc: "Canjeas alguna clave para recompensas dentro del servidor"
 })
 
 command.addOption({

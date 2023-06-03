@@ -4,8 +4,7 @@ const { inlineCode } = require("discord.js")
 
 const command = new Command({
     name: "darkstats",
-    desc: "Revisa tus estadísticas en la DarkShop",
-    category: Categories.DarkShop
+    desc: "Revisa tus estadísticas en la DarkShop"
 })
 
 command.addOption({

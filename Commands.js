@@ -5,7 +5,7 @@ const { GlobalDatas } = require("mongoose").models;
 const fs = require("fs")
 
 class Commands {
-    constructor(paths = ["./commands/"]) {
+    constructor(paths = ["./commands"]) {
         this.paths = paths;
         this.routes = [];
         this.commands = [];
@@ -57,26 +57,64 @@ class Commands {
 
     async #load() {
         console.log("============ MAPPEANDO COMANDOS ============");
-        console.log("Path:", this.path);
-        const commandsFolder = fs.readdirSync(this.path).filter(file => !file.endsWith(".txt"));
+        //console.log("Path:", this.path);
 
         this.ids.forEach(guildId => {
             this.routes.push(Routes.applicationGuildCommands(process.env.CLIENT_ID, guildId));
         })
 
-        for (const folder of commandsFolder) {
-            const commandFiles = fs.readdirSync(`${this.path}/${folder}`).filter(file => file.endsWith(".js"));
+        // buscar los comandos por categorías
+        const categories = this.#readDir(this.path);
 
-            for (const file of commandFiles) {
-                const command = require(`${this.path}/${folder}/${file}`);
+        categories.directories.forEach(category => {
+            // sacar la información de la categoría
+            const info = require(`${this.path}/${category}`);
 
-                this.client.commands.set(command.data.name, command);
-                console.log("▶️ Comando", command.data.name, "recibido, agregado a la lista")
-                this.commands.push(command.data.toJSON())
-            }
-        }
+            const categoryContent = this.#readDir(`${this.path}/${category}`);
+
+            // leer los comandos en las subcategorías
+            categoryContent.directories.forEach(subcat => {
+                const subcatInfo = require(`${this.path}/${category}/${subcat}`);
+                let commandsInSub = this.#readDir(`${this.path}/${category}/${subcat}`);
+
+                commandsInSub.files.forEach(c => {
+                    const command = require(c);
+
+                    command
+                        .setCategory(subcatInfo.Category ?? info.Category)
+                        .setSubCategory(subcatInfo.SubCategory);
+
+                    this.#saveToClient(command);
+                })
+            })
+
+            categoryContent.files.forEach(c => {
+                const command = require(c);
+                command.setCategory(info.Category)
+
+                this.#saveToClient(command);
+            })
+        })
 
         this.client.rawCommands = this.commands;
+    }
+
+    #saveToClient(command) {
+        this.client.commands.set(command.data.name, command);
+        console.log("▶️ Comando", command.data.name, "recibido, agregado a la lista")
+        this.commands.push(command.data.toJSON())
+    }
+
+    #readDir(path) {
+        const dirContent = fs.readdirSync(path).filter(x => !x.startsWith("index.js"));
+        const read = {
+            directories: dirContent.filter(x => !x.endsWith(".js")),
+            files: dirContent.filter(x => x.endsWith(".js")).map(x => {
+                return path + "/" + x
+            })
+        }
+
+        return read;
     }
 
     async #register() {

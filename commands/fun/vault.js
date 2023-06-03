@@ -4,8 +4,7 @@ const chance = require("chance");
 
 const command = new Command({
     name: "vault",
-    desc: "Si logras abrir la bóveda con unos acertijos, ganarás premios",
-    category: Categories.Fun
+    desc: "Si logras abrir la bóveda con unos acertijos, ganarás premios"
 })
 
 command.addOption({

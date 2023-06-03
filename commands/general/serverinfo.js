@@ -4,8 +4,7 @@ const { time } = require("discord.js");
 
 const command = new Command({
     name: "serverinfo",
-    desc: "Obtén información del servidor",
-    category: Categories.General
+    desc: "Obtén información del servidor"
 })
 
 command.execute = async (interaction, models, params, client) => {

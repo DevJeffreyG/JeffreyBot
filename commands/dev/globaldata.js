@@ -5,8 +5,7 @@ const { Colores } = require("../../src/resources")
 
 const command = new Command({
     name: "globaldata",
-    desc: "Obtener información de globaldatas",
-    category: Categories.Developer
+    desc: "Obtener información de globaldatas"
 })
 
 command.addOption({

@@ -5,12 +5,53 @@ const Colores = require("../resources/colores.json");
 const { Categories } = require('./Enums');
 
 class Command {
-    constructor(data = { name: "foo", desc: "bar", helpdesc: null, category: "0" }) {
-        if (!(data.name && data.desc && data.category)) return console.error("No están todos los datos para crear un comando:", data)
+    #rawData;
+    constructor(data = { name: "foo", desc: "bar", helpdesc: null, category: Categories.General }) {
+        if (!(data.name && data.desc)) return console.error("No están todos los datos para crear un comando:", data)
 
+        this.#rawData = data;
+
+        this.data = new SlashCommandBuilder()
+            .setName(data.name.toLowerCase());
+
+        this.#prefixWork(data.category);
+
+        this.name = this.data.name;
+        this.info = data.helpdesc ?? data.desc;
+        this.category = data.category;
+        this.subcategory = null;
+
+        this.#setPerms();
+        this.execute = async (interaction, models, params, client) => {
+            await interaction.deferReply()
+            interaction.editReply("Hola mundo!")
+        };
+        this.getHelp = async (interaction) => {
+            let embed = this.#getHelpEmbed(interaction);
+
+            return interaction.editReply({ content: null, embeds: [embed] });
+        }
+        this.methodsCount = 0;
+    }
+
+    setCategory(category) {
+        this.#prefixWork(category);
+        this.category = category;
+        this.#setPerms();
+
+        return this
+    }
+
+    setSubCategory(sub) {
+        this.subcategory = sub;
+
+        return this
+    }
+
+    #prefixWork(category) {
         let prefix = "";
 
-        switch (data.category) {
+        switch (category) {
             case Categories.General:
                 prefix = "GENERAL";
                 break;
@@ -48,24 +89,8 @@ class Command {
                 break;
         }
 
-        this.data = new SlashCommandBuilder()
-            .setName(data.name.toLowerCase())
-            .setDescription(`[${prefix}] ${data.desc}`)
-
-        this.name = this.data.name;
-        this.info = data.helpdesc ?? data.desc;
-        this.category = data.category;
-        this.#setPerms();
-        this.execute = async (interaction, models, params, client) => {
-            await interaction.deferReply()
-            interaction.editReply("Hola mundo!")
-        };
-        this.getHelp = async (interaction) => {
-            let embed = this.#getHelpEmbed(interaction);
-
-            return interaction.editReply({ content: null, embeds: [embed] });
-        }
-        this.methodsCount = 0;
+        this.data.setDescription(`[${prefix}] ${this.#rawData.desc}`)
+        return this;
     }
 
     #toAddWorker(data) {

@@ -5,8 +5,7 @@ const BadSetupError = require("../../src/errors/BadSetupError");
 
 const command = new Command({
     name: "rob",
-    desc: "Intenta robarle dinero normal a un usuario",
-    category: Categories.Economy
+    desc: "Intenta robarle dinero normal a un usuario"
 })
 
 command.addOption({

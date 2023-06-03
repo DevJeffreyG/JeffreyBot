@@ -7,8 +7,7 @@ const ms = require("ms");
 
 const command = new Command({
     name: "userinfo",
-    desc: "Obtén información de un usuario",
-    category: Categories.Staff
+    desc: "Obtén información de un usuario"
 })
 
 command.addOption({

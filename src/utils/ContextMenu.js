@@ -12,7 +12,9 @@ class ContextMenu {
 
         this.name = this.data.name;
         this.type = this.data.type;
+
         this.category = data.category;
+        this.subcategory = null;
 
         this.#setPerms();
 
@@ -27,6 +29,19 @@ class ContextMenu {
             await interaction.deferReply({ ephemeral: true });
             interaction.editReply({ content: "Hola mundo!" });
         }
+    }
+
+    setCategory(category) {
+        this.category = category;
+        this.#setPerms();
+
+        return this;
+    }
+
+    setSubCategory(sub) {
+        this.subcategory = sub;
+
+        return this
     }
 
     #setPerms() {

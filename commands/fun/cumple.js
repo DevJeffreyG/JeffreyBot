@@ -4,8 +4,7 @@ const { time } = require("discord.js");
 
 const command = new Command({
     name: "cumple",
-    desc: "Especificas tu fecha de cumpleaños dentro del servidor",
-    category: Categories.Fun
+    desc: "Especificas tu fecha de cumpleaños dentro del servidor"
 })
 
 command.addSubcommand({

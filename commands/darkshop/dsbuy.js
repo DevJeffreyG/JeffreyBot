@@ -2,8 +2,7 @@ const { Command, Categories, Shop } = require("../../src/utils")
 
 const command = new Command({
     name: "dsbuy",
-    desc: "Compra items de la DarkShop",
-    category: Categories.DarkShop
+    desc: "Compra items de la DarkShop"
 })
 
 command.addOption({

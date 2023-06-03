@@ -3,8 +3,7 @@ const { Command, Categories, ItemObjetives, Embed, BoostTypes, BoostObjetives, E
 
 const command = new Command({
     name: "add",
-    desc: "Agrega diferentes elementos a la base de datos",
-    category: Categories.Developer
+    desc: "Agrega diferentes elementos a la base de datos"
 });
 
 command.data

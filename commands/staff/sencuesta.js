@@ -8,8 +8,7 @@ const { BadParamsError } = require("../../src/errors");
 
 const command = new Command({
     name: "sencuesta",
-    desc: "Encuesta que se pone fuera de las encuestas hechas por la comunidad en el canal de anuncios",
-    category: Categories.Staff
+    desc: "Encuesta que se pone fuera de las encuestas hechas por la comunidad en el canal de anuncios"
 })
 
 command.addOption({

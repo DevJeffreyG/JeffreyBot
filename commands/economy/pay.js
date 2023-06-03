@@ -4,8 +4,7 @@ const { EconomyError } = require("../../src/errors");
 
 const command = new Command({
     name: "pay",
-    desc: "Le pagas dinero a otro usuario",
-    category: Categories.Economy
+    desc: "Le pagas dinero a otro usuario"
 })
 
 command.addOption({

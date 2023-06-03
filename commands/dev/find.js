@@ -3,8 +3,7 @@ const { Colores } = require("../../src/resources")
 
 const command = new Command({
     name: "find",
-    desc: "Buscar el ID por nombre",
-    category: Categories.Developer
+    desc: "Buscar el ID por nombre"
 });
 
 command.addSubcommand({

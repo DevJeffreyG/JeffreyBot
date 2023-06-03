@@ -2,8 +2,7 @@ const { Command, Categories, Embed } = require("../../src/utils")
 
 const command = new Command({
     name: "hackban",
-    desc: "Banea a un usuario que no está en el servidor",
-    category: Categories.Moderation
+    desc: "Banea a un usuario que no está en el servidor"
 });
 
 command.addOption({

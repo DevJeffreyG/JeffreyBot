@@ -3,8 +3,7 @@ const { Command, Categories, Cooldowns, Enum, InteractivePages, ModifierType, Re
 
 const command = new Command({
     name: "lists",
-    desc: "Obtén listas útiles de cosas dentro del servidor",
-    category: Categories.General
+    desc: "Obtén listas útiles de cosas dentro del servidor"
 })
 
 command.data

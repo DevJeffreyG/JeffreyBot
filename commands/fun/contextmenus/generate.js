@@ -1,21 +1,22 @@
 const { ApplicationCommandType } = require("discord.js");
-const { ContextMenu, Categories } = require("../../src/utils");
+const { ContextMenu } = require("../../../src/utils");
 
 const command = new ContextMenu({
-    name: "Pregúntale a la 8ball",
-    type: ApplicationCommandType.Message,
-    category: Categories.Fun
+    name: "Generar imágenes",
+    type: ApplicationCommandType.Message
 })
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ ephemeral: true });
 
-    params["pregunta"] = {
+    params["descripcion"] = {
         value: params.message.content
     }
 
-    const generate = require("../../commands/fun/8ball");
+    const generate = require("../../commands/fun/generate");
     await generate.execute(interaction, models, params, client)
+
+    interaction.followUp({ ephemeral: true, content: `La entrada tomada del mensaje fue \`${params.message.content}\`.` })
 }
 
 module.exports = command;

@@ -1,14 +1,13 @@
 const { ApplicationCommandType, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageContextMenuCommandInteraction, Client, hyperlink, codeBlock } = require("discord.js");
-const { Colores } = require("../../src/resources");
-const { ContextMenu, Categories, Embed, Confirmation, ErrorEmbed, Log, LogReasons, ChannelModules, GetRandomItem } = require("../../src/utils");
+const { Colores } = require("../../../src/resources");
+const { ContextMenu, Embed, Confirmation, ErrorEmbed, Log, LogReasons, ChannelModules, GetRandomItem } = require("../../../src/utils");
 
 const ms = require("ms");
-const { EconomyError, FetchError, ExecutionError } = require("../../src/errors");
+const { EconomyError, FetchError, ExecutionError } = require("../../../src/errors");
 
 const command = new ContextMenu({
     name: "Dar Award",
-    type: ApplicationCommandType.Message,
-    category: Categories.Fun
+    type: ApplicationCommandType.Message
 })
 
 /**

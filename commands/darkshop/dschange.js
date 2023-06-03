@@ -4,8 +4,7 @@ const moment = require("moment-timezone");
 
 const command = new Command({
     name: "dschange",
-    desc: "Invierte tu dinero normal en la DarkShop",
-    category: Categories.DarkShop
+    desc: "Invierte tu dinero normal en la DarkShop"
 })
 
 command.addOption({

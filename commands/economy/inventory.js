@@ -5,8 +5,7 @@ const { FetchError } = require("../../src/errors");
 
 const command = new Command({
     name: "inventory",
-    desc: "Te muestra los items actualmente en tu inventario",
-    category: Categories.Economy
+    desc: "Te muestra los items actualmente en tu inventario"
 })
 
 command.addOption({

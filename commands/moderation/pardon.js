@@ -3,8 +3,7 @@ const { Colores } = require("../../src/resources");
 const { DMNotSentError, FetchError, DoesntExistsError } = require("../../src/errors");
 const command = new Command({
     name: "pardon",
-    desc: "Eliminar un softwarn o un warn por su id",
-    category: Categories.Moderation
+    desc: "Eliminar un softwarn o un warn por su id"
 })
 
 command.addSubcommand({

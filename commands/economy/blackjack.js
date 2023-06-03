@@ -3,8 +3,7 @@ const { Command, Categories, Blackjack, Embed, Cooldowns } = require("../../src/
 
 const command = new Command({
     name: "blackjack",
-    desc: "Juega al Blackjack",
-    category: Categories.Economy
+    desc: "Juega al Blackjack"
 })
 
 command.addOption({

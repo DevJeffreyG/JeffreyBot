@@ -3,8 +3,7 @@ const { Command, Categories, Item } = require("../../src/utils")
 
 const command = new Command({
     name: "use",
-    desc: "Usa items en tu inventario",
-    category: Categories.Economy
+    desc: "Usa items en tu inventario"
 })
 
 command.addOption({

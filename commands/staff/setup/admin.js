@@ -1,14 +1,13 @@
-const { Command, Categories, Embed, ErrorEmbed, FindNewId, Confirmation, Shop, ItemTypes, ItemObjetives, ItemActions, BoostTypes, BoostObjetives, ItemEffects, InteractivePages } = require("../../src/utils")
-const { Colores } = require("../../src/resources")
+const { Command, Embed, FindNewId, Confirmation, Shop, ItemTypes, ItemObjetives, ItemActions, BoostTypes, BoostObjetives, ItemEffects, InteractivePages } = require("../../../src/utils")
+const { Colores } = require("../../../src/resources")
 
 const ms = require("ms");
-const { AlreadyExistsError, DoesntExistsError } = require("../../src/errors");
-const { SlashCommandIntegerOption } = require("discord.js");
+const { AlreadyExistsError, DoesntExistsError } = require("../../../src/errors");
+const { SlashCommandIntegerOption, SlashCommandBooleanOption } = require("discord.js");
 
 const command = new Command({
     name: "admin",
-    desc: "Comandos que administran diferentes secciones dentro de un servidor",
-    category: Categories.Administration
+    desc: "Comandos que administran diferentes secciones dentro de un servidor"
 })
 
 // https://www.youtube.com/watch?v=mABmOBBFEAo
@@ -151,11 +150,6 @@ command.data
                 list
                     .setName("list")
                     .setDescription("Lista de todos los items de la tienda, los que tienen usos y los que no.")
-                    .addBooleanOption(darkshop =>
-                        darkshop.setName("darkshop")
-                            .setDescription("¿Lista de items para la DarkShop?")
-                            .setRequired(true)
-                    )
             )
             .addSubcommand(adddiscount =>
                 adddiscount
@@ -178,11 +172,6 @@ command.data
                 additem
                     .setName("add-item")
                     .setDescription("Agregar un item a alguna de las tiendas")
-                    .addBooleanOption(darkshop =>
-                        darkshop.setName("darkshop")
-                            .setDescription("¿El item es para la DarkShop?")
-                            .setRequired(true)
-                    )
                     .addStringOption(o =>
                         o.setName("nombre")
                             .setDescription("El nombre del item")
@@ -200,11 +189,6 @@ command.data
                 delitem
                     .setName("del-item")
                     .setDescription("Eliminar un item de alguna de las tiendas")
-                    .addBooleanOption(darkshop =>
-                        darkshop.setName("darkshop")
-                            .setDescription("¿El item es para la DarkShop?")
-                            .setRequired(true)
-                    )
                     .addIntegerOption(o =>
                         o.setName("id")
                             .setDescription("La ID del item para eliminar")
@@ -220,11 +204,6 @@ command.data
                 useinfo
                     .setName("use-info")
                     .setDescription("Editar el uso que tiene un item de la tienda. [DS] = DarkShop")
-                    .addBooleanOption(darkshop =>
-                        darkshop.setName("darkshop")
-                            .setDescription("¿El item es de la DarkShop?")
-                            .setRequired(true)
-                    )
                     .addIntegerOption(option =>
                         option.setName("id")
                             .setDescription("La id del item a editar")
@@ -304,11 +283,6 @@ command.data
                 toggle
                     .setName("toggle")
                     .setDescription("Ocultar un item de la tienda")
-                    .addBooleanOption(darkshop =>
-                        darkshop.setName("darkshop")
-                            .setDescription("¿El item es de la DarkShop?")
-                            .setRequired(true)
-                    )
                     .addIntegerOption(option =>
                         option.setName("id")
                             .setDescription("La id del item a alternar")
@@ -321,11 +295,6 @@ command.data
                 name
                     .setName("name")
                     .setDescription("Edita el nombre de un item")
-                    .addBooleanOption(darkshop =>
-                        darkshop.setName("darkshop")
-                            .setDescription("¿El item es de la DarkShop?")
-                            .setRequired(true)
-                    )
                     .addIntegerOption(option =>
                         option.setName("id")
                             .setDescription("La id del item a editar")
@@ -339,11 +308,6 @@ command.data
                 desc
                     .setName("desc")
                     .setDescription("Edita la descripción de un item")
-                    .addBooleanOption(darkshop =>
-                        darkshop.setName("darkshop")
-                            .setDescription("¿El item es de la DarkShop?")
-                            .setRequired(true)
-                    )
                     .addIntegerOption(option =>
                         option.setName("id")
                             .setDescription("La id del item a editar")
@@ -357,11 +321,6 @@ command.data
                 price
                     .setName("price")
                     .setDescription("Edita el precio de un item")
-                    .addBooleanOption(darkshop =>
-                        darkshop.setName("darkshop")
-                            .setDescription("¿El item es de la DarkShop?")
-                            .setRequired(true)
-                    )
                     .addIntegerOption(option =>
                         option.setName("id")
                             .setDescription("La id del item a editar")
@@ -384,6 +343,15 @@ command.addOptionsTo(["keys dinero", "keys exp", "keys role", "keys boost"], [
         .setDescription("Los usos máximos permitidos en el servidor para esta llave")
         .setMinValue(1)
 ])
+
+/* command.addOptionsTo(
+    ["shop list", "shop add-item", "shop del-item", "items use-info", "items toggle", "items name", "items desc", "items price"],
+    [
+        new SlashCommandBooleanOption()
+            .setName("darkshop")
+            .setDescription("¿Lista de items para la DarkShop?")
+            .setRequired(true)
+    ]) */
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();

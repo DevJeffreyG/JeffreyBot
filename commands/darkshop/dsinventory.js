@@ -2,8 +2,7 @@ const { Command, Categories } = require("../../src/utils")
 
 const command = new Command({
     name: "dsinventory",
-    desc: "Muestra tu inventario de la DarkShop",
-    category: Categories.DarkShop
+    desc: "Muestra tu inventario de la DarkShop"
 })
 
 command.execute = async (interaction, models, params, client) => {

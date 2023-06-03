@@ -4,8 +4,7 @@ const moment = require("moment-timezone");
 
 const command = new Command({
     name: "dswith",
-    desc: "Recupera tu inversión según la inflación actual",
-    category: Categories.DarkShop
+    desc: "Recupera tu inversión según la inflación actual"
 })
 
 command.addOption({

@@ -26,6 +26,7 @@ module.exports = async (client, message) => {
         message.reply("[DEV] Se actualizaron los comandos")
       } catch (err) {
         message.reply({ content: `[DEV] Hubo un error al actualizar los comandos.\n${codeBlock("json", err)}` });
+        console.log(err)
       }
     }
 

@@ -3,8 +3,7 @@ const { Command, Categories, Store, ShopTypes } = require("../../src/utils");
 const command = new Command({
     name: "darkshop",
     desc: "Visita la DarkShop",
-    helpdesc: "La otra cara de la moneda te aguarda, visita la DarkShop",
-    category: Categories.DarkShop
+    helpdesc: "La otra cara de la moneda te aguarda, visita la DarkShop"
 })
 
 command.addOption({

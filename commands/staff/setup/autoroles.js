@@ -1,12 +1,11 @@
-const { Command, Categories, Embed, FindNewId, Confirmation, InteractivePages, FetchThisGuild, CustomButton } = require("../../src/utils")
-const { Colores } = require("../../src/resources")
-const { hyperlink, Collection, Emoji } = require("discord.js")
-const { BadParamsError, DoesntExistsError, FetchError, InsuficientSetupError } = require("../../src/errors")
+const { Command, Embed, FindNewId, Confirmation, InteractivePages, FetchThisGuild, CustomButton } = require("../../../src/utils")
+const { Colores } = require("../../../src/resources")
+const { Collection, Emoji } = require("discord.js")
+const { BadParamsError, DoesntExistsError } = require("../../../src/errors")
 
 const command = new Command({
     name: "autoroles",
-    desc: "Todo lo que tenga que ver con AutoRoles está aquí",
-    category: Categories.Staff
+    desc: "Todo lo que tenga que ver con AutoRoles está aquí"
 })
 
 command.data
@@ -223,10 +222,10 @@ command.execute = async (interaction, models, params, client) => {
             for await (x of doc.data.autoroles) {
                 let guildEmote = await interaction.client.guilds.fetch(x.guild_emote ?? interaction.guild.id).catch(err => null);
                 let emote = (!isNaN(x.emote) ? guildEmote.emojis.cache.get(x.emote) : x.emote) ?? "No tiene";
-                
+
                 let toggleGroup = x.toggle_group ? doc.getOrCreateToggleGroup(x.toggle_group) : null;
                 let grupo = x.toggle_group ? `${toggleGroup.group_name} (\`${toggleGroup.id}\`)` : "No tiene";
-                
+
                 let aRole = interaction.guild.roles.cache.get(x.role_id) ?? "Se eliminó el role";
                 let nombre = x.name;
 
