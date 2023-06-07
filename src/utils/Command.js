@@ -223,7 +223,14 @@ class Command {
                 subcommand = subcommand.find(x => x.name === i).options;
             })
 
-            subcommand.push(...options)
+            options.sort((a, b) => {
+                if (a.required && !b.required) return -1
+                if (!a.required && b.require) return 1
+                else return 0;
+            })
+
+            let lastRequired = subcommand.findLastIndex(x => x.required);
+            lastRequired != -1 ? subcommand.splice(lastRequired + 1, 0, ...options) : subcommand.push(...options);
         }
     }
 
