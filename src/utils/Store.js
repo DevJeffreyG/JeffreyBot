@@ -1,23 +1,38 @@
 const { Emoji, CommandInteraction, User } = require("discord.js");
 const { Shops, DarkShops, Users } = require("mongoose").models;
 const { Colores } = require("../resources");
-const { ShopTypes, Enum, ItemTypes } = require("./Enums");
+const { ShopTypes, Enum, ItemTypes, ItemObjetives, ItemActions } = require("./Enums");
 const InteractivePages = require("./InteractivePages");
-const { BadCommandError, DoesntExistsError, EconomyError, AlreadyExistsError } = require("../errors");
+const { BadCommandError, DoesntExistsError, EconomyError, AlreadyExistsError, BadParamsError } = require("../errors");
 const { Confirmation, FindNewId } = require("./functions");
 const Embed = require("./Embed");
+
+const moment = require("moment-timezone");
+const ms = require("ms");
+const { HumanMs } = require(".");
 
 class Store {
     #build = false;
     #doc;
     #user;
+    #isDarkShop = false;
     #interactive = {
+        base: {},
+        items: new Map()
+    }
+    #adminInteractive = {
         base: {},
         items: new Map()
     }
 
     #buildError;
     #noItemError;
+    #updated = new Embed({
+        type: "success",
+        data: {
+            desc: "Se ha actualizado el item"
+        }
+    })
 
     /**
      * @param {CommandInteraction} interaction 
@@ -27,7 +42,7 @@ class Store {
         this.client = this.interaction.client;
 
         this.#buildError = new BadCommandError(this.interaction, "STORE no se construyó");
-        this.#noItemError = new DoesntExistsError(this.interaction, `El item con esa ID`, `la ${this.isDarkShop ? "DarkShop" : "tienda"} de este servidor`);
+        this.#noItemError = new DoesntExistsError(this.interaction, `El item con esa ID`, `la tienda de este servidor`);
 
         this.config = {
             info: {
@@ -47,8 +62,7 @@ class Store {
         }
     }
 
-    /** PREPARATION */
-    
+    /** ------------------ SETUP ------------------ */
     /**
      * @param {Enum} type 
      * @returns 
@@ -66,6 +80,7 @@ class Store {
                     model: Shops,
                     query: this.interaction.guild.id
                 })
+                this.#isDarkShop = true;
                 break;
 
             case ShopTypes.DarkShop:
@@ -122,6 +137,12 @@ class Store {
             icon_footer: this.interaction.member.displayAvatarURL({ dynamic: true })
         }
 
+        this.#adminInteractive.base = this.#interactive.base;
+
+        let adminAddon = this.#adminInteractive.base.addon;
+        this.#adminInteractive.base.description = `**—** [NOT READY]: Falta el uso (${this.client.mentionCommand("admin items use-info")})\n**—** [HIDDEN]: Item desactivado (${this.client.mentionCommand("admin items toggle")})\n**—** [✅]: El item es visible y usable para cualquiera.`;
+        this.#adminInteractive.base.addon = adminAddon.substring(0, 2) + "{publicInfo} — ID: " + adminAddon.substring(2, adminAddon.length - 4) + `\n+ ${this.config.currency.emoji}{item_interest}** al comprarlo.\n\n`
+
         this.shop.items.forEach((item, index) => {
             let price = this.determinePrice(this.#user, item, true);
 
@@ -133,16 +154,54 @@ class Store {
                 showable: (item.use_info.action !== null && !item.disabled) ?? false,
                 index
             })
+
+            // Admin Mode
+            let publicInfo;
+            if (!item.use_info.action) publicInfo = "[NOT READY] ";
+            else if (item.disabled) publicInfo = "[HIDDEN] ";
+            else publicInfo = "[✅] ";
+
+            let notmodified = this.determinePrice(this.#user, item, true, true);
+
+            this.#adminInteractive.items.set(item.id, {
+                item_name: item.name,
+                item_desc: item.description,
+                item_price: notmodified,
+                item_interest: item.interest,
+                item_id: item.id,
+                publicInfo,
+                index
+            })
         });
 
         return this;
     }
 
-    /** MAIN */
+    /** ------------------ MAIN ------------------ */
+    /**
+     * Mostrar la tienda con un Embed
+     * @param {*} options InteractivePages options
+     */
     async show(options = {}) {
         if (!this.#build) throw this.#buildError;
 
         const interactive = new InteractivePages(this.#interactive.base, this.#interactive.items, 3, options)
+
+        try {
+            await interactive.init(this.interaction);
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    /**
+     * (ADMIN) Mostrar todos los items de la tienda
+     * @returns 
+     */
+    async showAllItems() {
+        if (!this.#build) throw this.#buildError;
+
+        const interactive = new InteractivePages(this.#adminInteractive.base, this.#adminInteractive.items, 3)
 
         try {
             await interactive.init(this.interaction);
@@ -195,7 +254,7 @@ class Store {
                 this.interaction,
                 `No tienes tantos ${this.config.currency.emoji.name}`,
                 this.#user.get(this.config.currency.user_path),
-                this.config.info.type === ShopTypes.DarkShop
+                this.#isDarkShop
             )
         if (this.#user.hasItem(itemId, this.config.info.type))
             throw new AlreadyExistsError(this.interaction, itemName, "tu inventario");
@@ -205,7 +264,7 @@ class Store {
         // revisar si debe agregarse interés
         if (item.interest > 0) {
             const interestFilter = x => x.shopType === this.config.info.type && x.item_id === item.id;
-            if (!this.#user.data.purchases.find(interestFilter)) this.#user.data.purchases.push({ isDarkShop: this.isDarkShop, item_id: item.id, quantity: 1 });
+            if (!this.#user.data.purchases.find(interestFilter)) this.#user.data.purchases.push({ shopType: this.config.info.type, item_id: item.id, quantity: 1 });
             else {
                 this.#user.data.purchases.find(interestFilter).quantity++;
             }
@@ -221,7 +280,7 @@ class Store {
                     "Pago realizado con éxito",
                     `Compraste: \`${itemName}\` por **${this.config.currency.emoji}${itemPrice}**${user ? ` para ${user}` : ""}`,
                     user ? `Se usa con \`/use ${newUseId}\`` : `Úsalo con \`/use ${newUseId}\``,
-                    `Ahora tienes: ${this.#user.parseCurrency(this.client.getCustomEmojis(this.interaction.guild.id), this.config.info.type === ShopTypes.DarkShop)}`
+                    `Ahora tienes: ${this.#user.parseCurrency(this.client.getCustomEmojis(this.interaction.guild.id), this.#isDarkShop)}`
                 ]
             }
         })
@@ -232,7 +291,176 @@ class Store {
         return await this.interaction.editReply({ embeds: [embed] });
     }
 
-    /** UTILITIES */
+    /** ------------------ EDICION ------------------ */
+    async addDiscount(level, discount) {
+        const id = FindNewId(await Shops.find(), "discounts", "id");
+
+        let q = this.shop.discounts.find(x => x.level === level);
+        if (q) {
+            if (discount > 0) q.discount = discount
+            else
+                this.shop.discounts.splice(this.shop.discounts.findIndex(x => x.level === level), 1)
+        } else {
+            this.shop.discounts.push({
+                level,
+                discount,
+                id
+            })
+        }
+
+        await this.shop.save();
+
+        return this.interaction.editReply({ embeds: [new Embed({ type: "success" })] });
+    }
+
+    async addItem(params) {
+        const newId = FindNewId(this.shop.items, "", "id");
+
+        let success = new Embed({
+            type: "success",
+            data: {
+                desc: [
+                    "Se ha agregado el item",
+                    `No será visible hasta que se agregue el uso: ${this.client.mentionCommand("admin items use-info")}`,
+                    `ID: \`${newId}\``
+                ]
+            }
+        })
+
+        this.shop.items.push(
+            {
+                name: params.nombre.value,
+                description: params.descripcion.value,
+                price: params.precio.value,
+                id: newId
+            }
+        )
+
+        await this.shop.save();
+        return this.interaction.editReply({ embeds: [success] });
+    }
+
+    // TODO:
+    async editItem(params, subcommand) {
+        /* const item = this.shop.findItem(params.id.value, false);
+        if (!item) throw this.noitem;
+
+        switch (subcommand) {
+            case "name":
+                await this.#editName(item, params.nombre.value);
+                break;
+            case "desc":
+                await this.#editDesc(item, params.descripcion.value);
+                break;
+
+            case "price":
+                await this.#editPrice(item, params.precio.value, params.interes?.value);
+                break;
+        }
+
+        return this.interaction.editReply({ embeds: [this.updated] }) */
+    }
+
+    async removeItem(itemId) {
+        const index = this.shop.findItemIndex(itemId);
+        if (!index) throw this.noitem;
+
+        console.log("🗑️ Eliminando %s de la tienda e inventarios del Guild %s", this.shop.findItem(itemId), this.interaction.guild.id)
+
+        this.shop.items.splice(index, 1);
+        await this.shop.save();
+
+        // eliminar de los inventarios
+        const users = await Users.find({ guild_id: this.interaction.guild.id });
+        for await (const user of users) {
+            let i = user.data.inventory.findIndex(x => x.item_id === itemId && x.shopType === this.config.info.type)
+
+            if (i != -1) {
+                console.log("🗑️ Eliminando del inventario de %s", user.user_id)
+                user.data.inventory.splice(i, 1);
+                await user.save();
+            }
+        }
+        return this.interaction.editReply({ embeds: [new Embed({ type: "success", data: { title: "¡Eliminado!" } })] });
+    }
+
+    async toggleItem(itemId, duration = "50y") {
+        let item = this.shop.findItem(itemId, false)
+
+        if (item.disabled) {
+            item.disabled = false
+            item.disabled_until = null
+        } else {
+            item.disabled = true
+            item.disabled_until = moment().add(ms(duration ?? "50y"), "ms");
+        }
+
+        await this.shop.save();
+
+        return this.interaction.editReply({ embeds: [this.#updated] });
+    }
+
+    async editUse(params) {
+        const roleError = new BadParamsError(this.interaction, "Si se usa un tipo Role, **debe tener**: `role`");
+        const boostError = new BadParamsError(this.interaction, [
+            "Si se usa un tipo Boost __agregando__, **debe tener**: `boostobj`, `boosttype`, `boostval` y `duracion`",
+            "Si es __eliminando__, **sólo debe tener**: `duracion`"
+        ])
+        const notValidCombination = new BadParamsError(this.interaction, "Si se usa un tipo Item, **no puede eliminarse**");
+        const dsError = new BadParamsError(this.interaction, "Si el item es de la DarkShop, **debe tener**: `efecto`");
+
+        const item = this.shop.findItem(params.id.value, false);
+        if (!item) throw this.noitem;
+
+        item.reply = params.reply?.value ?? item.reply;
+
+        const use = item.use_info;
+
+        use.action = Number(params.accion.value);
+        use.objetive = Number(params.objetivo.value);
+
+        use.given = (
+            use.objetive === ItemObjetives.Role ||
+            use.objetive === ItemObjetives.Boost
+        ) ? params.role?.value : params.cantidad?.value;
+
+        use.effect = this.#isDarkShop ? params.efecto?.value : null;
+
+        use.item_info.type = params.especial?.value ?? use.item_info.type;
+        use.item_info.duration = (use.objetive === ItemObjetives.Role ||
+            use.objetive === ItemObjetives.Boost) && params.duracion?.value ? ms(params.duracion?.value) : null
+
+        use.boost_info.type = use.objetive === ItemObjetives.Boost ? params.boosttype?.value : null
+        use.boost_info.value = use.objetive === ItemObjetives.Boost ? params.boostval?.value : null
+        use.boost_info.objetive = use.objetive === ItemObjetives.Boost ? params.boostobj?.value : null
+
+        // boost verification
+        if (use.objetive === ItemObjetives.Boost) {
+            if (!use.boost_info.type && use.action === ItemActions.Add) throw boostError;
+            if (!use.boost_info.value && use.action === ItemActions.Add) throw boostError;
+            if (!use.boost_info.objetive && use.action === ItemActions.Add) throw boostError;
+            if (!use.item_info.duration) throw boostError;
+        }
+
+        // role verification
+        if (use.objetive === ItemObjetives.Role) {
+            if (!use.given) throw roleError;
+        }
+
+        if (use.objetive === ItemObjetives.Item) {
+            if (use.action === ItemActions.Remove) throw notValidCombination;
+        }
+
+        // ds verification
+        if (this.#isDarkShop) {
+            if (!use.effect) throw dsError;
+        }
+
+        await this.shop.save();
+        return this.interaction.editReply({ embeds: [this.updated] });
+    }
+
+    /** ------------------ UTILIDAD ------------------ */
     #discountsWork(user, precio) {
         const inital_price = precio;
         const user_level = user.economy.global.level;
@@ -294,7 +522,7 @@ class Store {
             console.log("🏳️ dinero/media = %s", multidiff)
 
             if (multidiff > 100) {
-                let fix = this.config.info.type === ShopTypes.DarkShop ? multidiff / 50 : multidiff * 0.5;
+                let fix = this.#isDarkShop ? multidiff / 50 : multidiff * 0.5;
                 console.log("🟩 Fixing %s with %s", precio, fix)
                 //console.log(this.average*0.1, "es el maximo")
                 precio *= fix;

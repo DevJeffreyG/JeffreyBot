@@ -1,5 +1,5 @@
 const { SlashCommandIntegerOption } = require("discord.js");
-const { Command, Shop, Confirmation, ShopTypes, Enum, ItemActions, ItemObjetives, ItemEffects, ItemTypes, BoostTypes, BoostObjetives } = require("../../../src/utils");
+const { Command, Shop, Confirmation, ShopTypes, Enum, ItemActions, ItemObjetives, ItemEffects, ItemTypes, BoostTypes, BoostObjetives, Store } = require("../../../src/utils");
 
 const command = new Command({
     name: "admin-shop",
@@ -171,42 +171,40 @@ command.addOptionsTo(["item-list", "add-discount", "add-item", "del-item", "use-
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
 
-    const { Shops, DarkShops } = models;
     const { subcommand } = params;
-    const { nivel, descuento, darkshop, id } = params[subcommand];
+    const { nivel, descuento, id, tipo } = params[subcommand];
 
-    const isDarkShop = darkshop?.value;
-
-    const doc = isDarkShop ? await DarkShops.getWork(interaction.guild.id) : await Shops.getWork(interaction.guild.id);
-    const _shop = new Shop(doc, interaction, isDarkShop);
+    const shop = await new Store(interaction)
+        .setType(tipo.value)
+        .build(params.getDoc(), params.getUser());
 
     switch (subcommand) {
         case "item-list":
-            return _shop.showAllItems();
+            return shop.showAllItems();
 
         case "add-discount":
-            return _shop.addDiscount(nivel.value, descuento.value);
+            return shop.addDiscount(nivel.value, descuento.value);
 
         case "add-item":
-            return _shop.addItem(params[subcommand]);
+            return shop.addItem(params[subcommand]);
 
         case "del-item":
             let confirmation = await Confirmation("Eliminar item", [
-                `El item con Id \`${id.value}\` de la ${isDarkShop ? "DarkShop" : "tienda"}.`,
+                `El item con Id \`${id.value}\` de la tienda.`,
                 `Se eliminará el item de todos los inventarios.`,
                 `No se devolverá dinero.`
             ], interaction)
 
             if (!confirmation) return;
-            return _shop.removeItem(id.value);
+            return shop.removeItem(id.value);
         case "use-info":
-            return await _shop.editUse(items)
+            return await shop.editUse(items)
 
         case "toggle":
-            return await _shop.toggleItem(id.value, duracion?.value);
+            return await shop.toggleItem(id.value, duracion?.value);
 
         case "edit":
-            return await _shop.editItem(items, subcommand)
+            return await shop.editItem(items, subcommand)
     }
 }
 
