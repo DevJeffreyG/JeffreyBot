@@ -12,11 +12,12 @@ class Collector {
      * @param {{filter: Function, time: Number, max: Number}} options 
      * @param {Boolean} stopHandler 
      */
-    constructor(interaction, options = { filter, time, max }, stopHandler = false) {
+    constructor(interaction, options = { filter, time, max }, stopHandler = false, defer = true) {
         this.interaction = interaction;
         this.client = this.interaction.client;
         this.filter = options.filter;
         this.time = options.time ?? ms("1m");
+        this.defer = defer;
 
         this.collector = this.interaction.channel.createMessageComponentCollector({ filter: this.filter, time: this.time, max: options.max });
 
@@ -37,7 +38,7 @@ class Collector {
 
         this.collector.on("collect", async i => {
             try {
-                if (!i.deferred) await i.deferUpdate();
+                if (!i.deferred && this.defer) await i.deferUpdate();
             } catch (err) {
                 console.log("⚠️ %s", err)
             };
@@ -53,7 +54,7 @@ class Collector {
             }
 
             try {
-                if (reason === EndReasons.OldCollector) return this.interaction.deleteReply();
+                if (reason === EndReasons.OldCollector || reason === EndReasons.StoppedByUser) return await this.interaction.deleteReply();
                 if (reason === EndReasons.Deleted) return;
                 if (this.evalOnEnd) this.evalOnEnd(collected, reason);
             } catch (err) {
