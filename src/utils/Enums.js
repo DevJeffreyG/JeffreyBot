@@ -41,8 +41,11 @@ class Enum {
      * #### Predeterminado: [{name: nombre, value: valor}]
      * @returns Array
      */
-    complexArray(first = "name", second = "value", valueString = true) {
+    complexArray(options = { first: "name", second: "value", valueString: false }) {
         let arr = [];
+        const first = options.first ?? "name";
+        const second = options.second ?? "value";
+        const valueString = options.valueString ?? false;
 
         let names = this.array();
 
