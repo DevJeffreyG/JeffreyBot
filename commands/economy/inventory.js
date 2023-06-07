@@ -12,7 +12,7 @@ command.addOption({
     type: "integer",
     name: "tipo",
     desc: "¿Qué inventario quieres ver?",
-    choices: new Enum(ShopTypes).complexArray("name", "value", false)
+    choices: new Enum(ShopTypes).complexArray()
 })
 
 command.execute = async (interaction, models, params, client) => {

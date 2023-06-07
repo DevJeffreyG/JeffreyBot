@@ -17,7 +17,7 @@ command.addOption({
     type: "string",
     name: "modulo",
     desc: "Módulo a administrar",
-    choices: new Enum(Cooldowns).complexArray(),
+    choices: new Enum(Cooldowns).complexArray({valueString: true}),
     req: true
 })
 

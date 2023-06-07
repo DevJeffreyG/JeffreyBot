@@ -40,7 +40,7 @@ command.execute = async (interaction, models, params, client) => {
         case "cooldowns": {
             let items = new Map();
 
-            for (cooldownType of new Enum(Cooldowns).complexArray()) {
+            for (cooldownType of new Enum(Cooldowns).complexArray({valueString: true})) {
                 let info = await user.cooldown(cooldownType.value, { save: false })
 
                 if (info) items.set(cooldownType.name, {
