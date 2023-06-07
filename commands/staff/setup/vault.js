@@ -61,8 +61,8 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
 
     const { Guilds } = models;
-    const { subcommand, vault } = params;
-    const { codigo, pista, recompensa } = vault;
+    const { subcommand } = params;
+    const { codigo, pista, recompensa } = params[subcommand];
     const { Currency } = client.getCustomEmojis(interaction.guild.id)
 
     const doc = params.getDoc();

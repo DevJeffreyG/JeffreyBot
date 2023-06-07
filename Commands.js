@@ -70,12 +70,16 @@ class Commands {
             // sacar la información de la categoría
             const info = require(`${this.path}/${category}`);
 
+            console.log("============ ⬜ CATEGORÍA: %s ⬜ ============", info.Category)
+
             const categoryContent = this.#readDir(`${this.path}/${category}`);
 
             // leer los comandos en las subcategorías
             categoryContent.directories.forEach(subcat => {
                 const subcatInfo = require(`${this.path}/${category}/${subcat}`);
                 let commandsInSub = this.#readDir(`${this.path}/${category}/${subcat}`);
+
+                console.log("--------- ◽SUBCATEGORÍA: %s◽ ---------", subcatInfo.SubCategory)
 
                 commandsInSub.files.forEach(c => {
                     const command = require(c);
@@ -86,6 +90,8 @@ class Commands {
 
                     this.#saveToClient(command);
                 })
+
+                console.log("---------------------------------------------------------------")
             })
 
             categoryContent.files.forEach(c => {

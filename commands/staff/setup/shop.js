@@ -172,7 +172,7 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
 
     const { Shops, DarkShops } = models;
-    const { subcommand, shop } = params;
+    const { subcommand } = params;
     const { nivel, descuento, darkshop, id } = params[subcommand];
 
     const isDarkShop = darkshop?.value;
@@ -188,7 +188,7 @@ command.execute = async (interaction, models, params, client) => {
             return _shop.addDiscount(nivel.value, descuento.value);
 
         case "add-item":
-            return _shop.addItem(shop);
+            return _shop.addItem(params[subcommand]);
 
         case "del-item":
             let confirmation = await Confirmation("Eliminar item", [

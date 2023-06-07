@@ -12,10 +12,10 @@ const maxValue = 1024; // api limit
 const descValue = 50; // menuselectorlimit (warns, tickets)
 const explLength = maxValue - 85 - descValue;
 
-const CooldownChoices = new Enum(Cooldowns).complexArray();
+const CooldownChoices = new Enum(Cooldowns).complexArray({ valueString: true });
 CooldownChoices.splice(CooldownChoices.findIndex(x => x.name === "InflationPrediction"), 1)
 
-const MultiplierChoices = new Enum(Multipliers).complexArray();
+const MultiplierChoices = new Enum(Multipliers).complexArray({ valueString: true });
 const RequirementTypesChoices = new Enum(RequirementType).complexArray();
 
 command.data
@@ -149,7 +149,7 @@ command.data
                         .addChoices(...CooldownChoices)
                         .setRequired(true)
                     )
-                    .addStringOption(tipo => tipo
+                    .addIntegerOption(tipo => tipo
                         .setName("tipo")
                         .setDescription("El tipo de requerimiento")
                         .addChoices(...RequirementTypesChoices)
@@ -182,7 +182,7 @@ command.data
                 .addChoices(...MultiplierChoices)
                 .setRequired(true)
             )
-            .addStringOption(tipo => tipo
+            .addIntegerOption(tipo => tipo
                 .setName("tipo")
                 .setDescription("El tipo de requerimiento")
                 .addChoices(...RequirementTypesChoices)
@@ -417,7 +417,7 @@ ${codeBlock("markdown", expl.value)}`,
 
         case "pos": {
             // revisar que no haya una regla con esa posicion
-            if (doc.data.rules.find(x => x.position === pos.value)) 
+            if (doc.data.rules.find(x => x.position === pos.value))
                 throw new AlreadyExistsError(interaction, "Una regla con esa posición", "este servidor");
 
             regla.position = pos.value;
