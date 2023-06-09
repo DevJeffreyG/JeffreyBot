@@ -50,22 +50,11 @@ command.data
         delitem
             .setName("del-item")
             .setDescription("Eliminar un item de alguna de las tiendas")
-            .addIntegerOption(o =>
-                o.setName("id")
-                    .setDescription("La ID del item para eliminar")
-                    .setRequired(true)
-            )
     )
     .addSubcommand(useinfo =>
         useinfo
             .setName("use-info")
             .setDescription("Editar el uso que tiene un item de la tienda. [DS] = DarkShop")
-            .addIntegerOption(option =>
-                option
-                    .setName("id")
-                    .setDescription("La id del item a editar")
-                    .setRequired(true)
-            )
             .addIntegerOption(option =>
                 option
                     .setName("accion")
@@ -146,10 +135,6 @@ command.data
         toggle
             .setName("toggle")
             .setDescription("Ocultar un item de la tienda")
-            .addIntegerOption(option =>
-                option.setName("id")
-                    .setDescription("La id del item a alternar")
-                    .setRequired(true))
             .addStringOption(option =>
                 option.setName("duracion")
                     .setDescription("¿Cuánto tiempo estará oculto? - 1d, 1h, 10m, 30s, etc."))
@@ -167,6 +152,13 @@ command.addOptionsTo(["item-list", "add-discount", "add-item", "del-item", "use-
         .setChoices(...new Enum(ShopTypes).complexArray())
         .setRequired(true)
 ])
+
+command.addOptionsTo(["edit", "toggle", "use-info", "del-item"], [
+    new SlashCommandIntegerOption()
+        .setName("id")
+        .setDescription("La ID del item")
+        .setRequired(true)
+], true)
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
@@ -198,13 +190,13 @@ command.execute = async (interaction, models, params, client) => {
             if (!confirmation) return;
             return shop.removeItem(id.value);
         case "use-info":
-            return await shop.editUse(items)
+            return await shop.editUse(params[subcommand])
 
         case "toggle":
             return await shop.toggleItem(id.value, duracion?.value);
 
         case "edit":
-            return await shop.editItem(items, subcommand)
+            return await shop.editItem(params[subcommand])
     }
 }
 

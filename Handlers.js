@@ -2,7 +2,7 @@ const { BaseInteraction, InteractionType, time, CommandInteraction, MessageCompo
 
 const { Ticket, Suggestion, Button } = require("./src/handlers/");
 const { Bases, Colores } = require("./src/resources");
-const { ErrorEmbed, Embed, Categories, ValidateDarkShop, Confirmation, HumanMs, Modal, CustomEmbed, CustomTrophy } = require("./src/utils");
+const { ErrorEmbed, Embed, Categories, ValidateDarkShop, Confirmation, HumanMs, Modal, CustomEmbed, CustomTrophy, Enum, ShopTypes, Store } = require("./src/utils");
 
 const { CommandNotFoundError, ToggledCommandError, DiscordLimitationError, BadCommandError, SelfExec, ModuleDisabledError } = require("./src/errors/");
 
@@ -325,6 +325,32 @@ class Handlers {
                 break;
             }
 
+            case "itemInfo": {
+                const itemId = splittedId[1];
+                const shopType = Number(splittedId[2]);
+
+                await new Modal(this.interaction)
+                    .defId(this.interaction.customId)
+                    .defTitle(`Editar item ${itemId} de (${new Enum(ShopTypes).translate(shopType)})`)
+                    .addInput({ id: "name", label: "Nuevo nombre", style: TextInputStyle.Short, placeholder: "El nuevo nombre de este item", max: 25 })
+                    .addInput({ id: "desc", label: "Nueva descripción", style: TextInputStyle.Paragraph, placeholder: "La nueva descripción de este item", max: 1000 })
+                    .show()
+                break;
+            }
+
+            case "itemPrice": {
+                const itemId = splittedId[1];
+                const shopType = Number(splittedId[2]);
+
+                await new Modal(this.interaction)
+                    .defId(this.interaction.customId)
+                    .defTitle(`Editar item ${itemId} de (${new Enum(ShopTypes).translate(shopType)})`)
+                    .addInput({ id: "price", label: "Nuevo precio", style: TextInputStyle.Short, placeholder: "El nuevo precio de este item", max: 100 })
+                    .addInput({ id: "interest", label: "Nuevo interés", style: TextInputStyle.Short, placeholder: "Subida de precio por compra", max: 100 })
+                    .show()
+                break;
+            }
+
             default:
             //console.log("No hay acciones para el botón con customId", this.interaction.customId);
         }
@@ -402,6 +428,19 @@ class Handlers {
                 await this.interaction.deferReply({ ephemeral: true });
 
                 return await new CustomTrophy(this.interaction).changeItemGiven(id, recieved)
+            }
+
+            case "itemPrice":
+            case "itemInfo": {
+                const id = Number(splittedId[1]);
+                const shopType = Number(splittedId[2]);
+                await this.interaction.deferReply({ ephemeral: true });
+
+                const store = await new Store(this.interaction)
+                    .setType(shopType)
+                    .build(this.params.getDoc(), this.params.getUser());
+
+                return await store.editInfo(id, recieved);
             }
         }
     }

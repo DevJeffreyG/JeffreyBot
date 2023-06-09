@@ -1,4 +1,4 @@
-const { Emoji, CommandInteraction, User } = require("discord.js");
+const { Emoji, CommandInteraction, User, ActionRowBuilder, ButtonBuilder } = require("discord.js");
 const { Shops, DarkShops, Users } = require("mongoose").models;
 const { Colores } = require("../resources");
 const { ShopTypes, Enum, ItemTypes, ItemObjetives, ItemActions } = require("./Enums");
@@ -6,10 +6,12 @@ const InteractivePages = require("./InteractivePages");
 const { BadCommandError, DoesntExistsError, EconomyError, AlreadyExistsError, BadParamsError } = require("../errors");
 const { Confirmation, FindNewId } = require("./functions");
 const Embed = require("./Embed");
+const HumanMs = require("./HumanMs");
 
 const moment = require("moment-timezone");
 const ms = require("ms");
-const { HumanMs } = require(".");
+const { ButtonStyle } = require("discord.js");
+const { codeBlock } = require("discord.js");
 
 class Store {
     #build = false;
@@ -80,7 +82,6 @@ class Store {
                     model: Shops,
                     query: this.interaction.guild.id
                 })
-                this.#isDarkShop = true;
                 break;
 
             case ShopTypes.DarkShop:
@@ -92,6 +93,7 @@ class Store {
                     model: DarkShops,
                     query: this.interaction.guild.id
                 })
+                this.#isDarkShop = true;
                 break;
         }
 
@@ -137,10 +139,11 @@ class Store {
             icon_footer: this.interaction.member.displayAvatarURL({ dynamic: true })
         }
 
-        this.#adminInteractive.base = this.#interactive.base;
+        this.#adminInteractive.base = Object.assign({}, this.#interactive.base);
 
         let adminAddon = this.#adminInteractive.base.addon;
         this.#adminInteractive.base.description = `**—** [NOT READY]: Falta el uso (${this.client.mentionCommand("admin items use-info")})\n**—** [HIDDEN]: Item desactivado (${this.client.mentionCommand("admin items toggle")})\n**—** [✅]: El item es visible y usable para cualquiera.`;
+
         this.#adminInteractive.base.addon = adminAddon.substring(0, 2) + "{publicInfo} — ID: " + adminAddon.substring(2, adminAddon.length - 4) + `\n+ ${this.config.currency.emoji}{item_interest}** al comprarlo.\n\n`
 
         this.shop.items.forEach((item, index) => {
@@ -180,12 +183,11 @@ class Store {
     /** ------------------ MAIN ------------------ */
     /**
      * Mostrar la tienda con un Embed
-     * @param {*} options InteractivePages options
      */
-    async show(options = {}) {
+    async show() {
         if (!this.#build) throw this.#buildError;
 
-        const interactive = new InteractivePages(this.#interactive.base, this.#interactive.items, 3, options)
+        const interactive = new InteractivePages(this.#interactive.base, this.#interactive.items, 3)
 
         try {
             await interactive.init(this.interaction);
@@ -200,7 +202,6 @@ class Store {
      */
     async showAllItems() {
         if (!this.#build) throw this.#buildError;
-
         const interactive = new InteractivePages(this.#adminInteractive.base, this.#adminInteractive.items, 3)
 
         try {
@@ -270,7 +271,7 @@ class Store {
             }
         }
 
-        this.#user.set(this.config.currency.user_path, this.config.currency.user_path - price);
+        this.#user.set(this.config.currency.user_path, this.#user.get(this.config.currency.user_path) - price);
         inventoryUser.data.inventory.push({ shopType: this.config.info.type, item_id: item.id, use_id: newUseId })
 
         let embed = new Embed({
@@ -293,7 +294,7 @@ class Store {
 
     /** ------------------ EDICION ------------------ */
     async addDiscount(level, discount) {
-        const id = FindNewId(await Shops.find(), "discounts", "id");
+        const id = FindNewId(await this.config.info.model.obj.find(), "discounts", "id");
 
         let q = this.shop.discounts.find(x => x.level === level);
         if (q) {
@@ -340,25 +341,62 @@ class Store {
         return this.interaction.editReply({ embeds: [success] });
     }
 
-    // TODO:
-    async editItem(params, subcommand) {
-        /* const item = this.shop.findItem(params.id.value, false);
-        if (!item) throw this.noitem;
+    async editItem(params) {
+        const item = this.shop.findItem(params.id.value, false);
 
-        switch (subcommand) {
-            case "name":
-                await this.#editName(item, params.nombre.value);
-                break;
-            case "desc":
-                await this.#editDesc(item, params.descripcion.value);
-                break;
+        // Mostrar la información actual del item
+        return await this.interaction.editReply({
+            embeds: [
+                new Embed()
+                    .defTitle(`Editar la información del item con ID \`${item.id}\``)
+                    .defDesc(`▸ **${item.name}**.
+${codeBlock(item.description)}
+▸ **${this.config.currency.emoji}${item.price.toLocaleString("es-CO")}**.
+▸ **+${this.config.currency.emoji}${item.interest.toLocaleString("es-CO")}** por compra.`)
+                    .defColor(Colores.verdeclaro)
+            ], components: [
+                new ActionRowBuilder()
+                    .setComponents(
+                        new ButtonBuilder()
+                            .setCustomId(`itemInfo-${item.id}-${this.config.info.type}`)
+                            .setLabel("Información")
+                            .setEmoji("📰")
+                            .setStyle(ButtonStyle.Primary),
+                        new ButtonBuilder()
+                            .setCustomId(`itemPrice-${item.id}-${this.config.info.type}`)
+                            .setLabel("Precio")
+                            .setEmoji("💰")
+                            .setStyle(ButtonStyle.Primary),
+                    )
+            ]
+        })
+    }
 
-            case "price":
-                await this.#editPrice(item, params.precio.value, params.interes?.value);
-                break;
+    async editInfo(id, data) {
+        const item = this.shop.findItem(id, false)
+
+        for (const prop of Object.keys(data)) {
+            const value = data[prop];
+            if (!value) continue;
+
+            switch (prop) {
+                case "name":
+                    item.name = value;
+                    break;
+                case "desc":
+                    item.description = value;
+                    break;
+                case "price":
+                    item.price = value;
+                    break;
+                case "interest":
+                    item.interest = value;
+                    break;
+            }
         }
 
-        return this.interaction.editReply({ embeds: [this.updated] }) */
+        await this.shop.save();
+        await this.interaction.editReply({ embeds: [this.#updated] });
     }
 
     async removeItem(itemId) {
@@ -457,7 +495,7 @@ class Store {
         }
 
         await this.shop.save();
-        return this.interaction.editReply({ embeds: [this.updated] });
+        return this.interaction.editReply({ embeds: [this.#updated] });
     }
 
     /** ------------------ UTILIDAD ------------------ */
@@ -470,11 +508,11 @@ class Store {
 
         // descuentos
         let query = discounts?.filter(x => user_level >= x.level)
-            .sort(function (a, b) { // ordenar el array mayor a menor, por array.level
-                if (a.level > b.level) {
+            .sort(function (a, b) { // ordenar el array mayor a menor, por cantidad de descuento
+                if (a.discount > b.discount) {
                     return -1;
                 }
-                if (a.level < b.level) {
+                if (a.discount < b.discount) {
                     return 1;
                 }
 
