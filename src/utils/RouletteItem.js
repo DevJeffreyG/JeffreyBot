@@ -1,7 +1,7 @@
 const { GuildMemberRoleManager, roleMention } = require("discord.js");
 const ms = require("ms")
 
-const { LimitedTime } = require("./functions");
+const { LimitedTime, BoostWork } = require("./functions");
 const { ItemObjetives, BoostObjetives } = require("./Enums");
 const Embed = require("./Embed");
 
@@ -100,6 +100,8 @@ class RouletteItem {
     }
 
     async use() {
+        const { Currency } = this.interaction.client.getCustomEmojis(this.interaction.guild.id);
+
         let save = true;
         let response = null;
         //let value = this.#valueWork();
@@ -141,14 +143,28 @@ class RouletteItem {
             case Number:
                 this.numbers = Number(this.numbers);
 
+                const boost = BoostWork(this.user);
+
                 if (this.nonumbers === "-") {
                     this.#adjust();
                     this.nonumbers = "Se descontaron";
+
+                    if (boost.changed) {
+                        this.numbers = Number((this.numbers * boost.multiplier.currency_value).toFixed(2))
+                        this.frontend_numbers = `**${Currency}${this.numbers.toLocaleString('es-CO')}${boost.emojis.currency}**`
+                    }
+
                     this.user.economy.global.currency -= this.numbers;
                 }
                 else if (this.nonumbers === "+") {
                     this.#adjust();
                     this.nonumbers = "Se agregaron";
+
+                    if (boost.changed) {
+                        this.numbers = Number((this.numbers * boost.multiplier.currency_value).toFixed(2))
+                        this.frontend_numbers = `**${Currency}${this.numbers.toLocaleString('es-CO')}${boost.emojis.currency}**`
+                    }
+
                     this.user.addCurrency(this.numbers, false);
                 }
                 else if (this.nonumbers === "*") {

@@ -36,7 +36,7 @@ command.execute = async (interaction, models, params, client) => {
         .defColor(Colores.verde);
 
     for (const [i, item_avoided] of notSelected.entries()) {
-        const roulttItem = new RouletteItem(interaction, item_avoided).build(user);
+        const roulttItem = new RouletteItem(interaction, item_avoided).build(user, doc);
         let info = roulttItem.info();
         avoidedItems.defDesc(`${avoidedItems.data.description ?? ""}\n\`${i}\` **▸** ${info.text} (${info.likelihood}%)`)
     }
