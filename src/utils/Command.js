@@ -213,8 +213,9 @@ class Command {
      * 
      * @param {Array<String>} paths Array de Strings que contienen la ubicación a la cual se agregarán las opciones
      * @param {Array} options 
+     * @param {Boolean} insertFirst Agregar lo antes posible en las opciones?
      */
-    addOptionsTo(paths, options) {
+    addOptionsTo(paths, options, insertFirst = false) {
         for (const path of paths) {
             let arrayPath = path.split(" ")
             let subcommand = this.data.options;
@@ -225,12 +226,36 @@ class Command {
 
             options.sort((a, b) => {
                 if (a.required && !b.required) return -1
-                if (!a.required && b.require) return 1
+                if (!a.required && b.required) return 1
                 else return 0;
             })
 
             let lastRequired = subcommand.findLastIndex(x => x.required);
-            lastRequired != -1 ? subcommand.splice(lastRequired + 1, 0, ...options) : subcommand.push(...options);
+            let lastNonRequired = subcommand.findLastIndex(x => !x.required);
+
+            if (insertFirst) {
+                // hay que agregar los requeridos antes que todo
+                let requireds = options.filter(x => x.required);
+                let nonrequireds = options.filter(x => !x.required);
+
+                subcommand.splice(0, 0, ...requireds); // agregar las opciones requeridas antes de todo
+
+                if (lastRequired != -1) // existe una opcion requerida, agregar las no requeridas después de esta
+                    subcommand.splice(lastRequired + 1, 0, ...nonrequireds);
+                else if (lastNonRequired != -1) // no existen opciones requeridas, pero sí hay no requeridas, agregar las no requeridas antes de todo
+                    subcommand.slice(0, 0, ...nonrequireds);
+                else // no existen opciones
+                    subcommand.push(...nonrequireds);
+
+            } else {
+                if (lastRequired != -1) // existe una opcion requerida, agregar las opciones ordenadas después de esta
+                    subcommand.splice(lastRequired + 1, 0, ...options);
+                else if (lastNonRequired != -1) // no hay una opcion requerida, pero sí existen no requeridas, agregar las opciones ordenadas antes de estas
+                    subcommand.slice(0, 0, ...options);
+                else // no existen opciones
+                    subcommand.push(...options);
+            }
+
         }
     }
 
