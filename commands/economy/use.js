@@ -31,7 +31,7 @@ command.execute = async (interaction, models, params, client) => {
 
     if (!inv_item) throw new DoesntExistsError(interaction, `Item con ID de uso \`${id.value}\``, "tu inventario");
 
-    const item = await new Item(interaction, inv_item.item_id, inv_item.isDarkShop).build(params.getUser(), params.getDoc());
+    const item = await new Item(interaction, inv_item.item_id, inv_item.shopType).build(params.getUser(), params.getDoc());
     return item.use(id.value, usuario?.member)
 }
 

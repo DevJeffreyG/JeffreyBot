@@ -1,5 +1,5 @@
 const { Colores } = require("../../src/resources");
-const { Command, Categories, Cooldowns, Enum, InteractivePages, ModifierType, RequirementType, Shop, RouletteItem, Multipliers } = require("../../src/utils");
+const { Command, Categories, Cooldowns, Enum, InteractivePages, ModifierType, RequirementType, Shop, RouletteItem, Multipliers, ShopTypes, Store } = require("../../src/utils");
 
 const command = new Command({
     name: "lists",
@@ -21,6 +21,13 @@ command.data
         sub
             .setName("descuentos")
             .setDescription("Lista de los descuentos en las tiendas en este servidor")
+            .addIntegerOption(tipo =>
+                tipo
+                    .setName("tipo")
+                    .setDescription("El tipo de tienda para obtener sus descuentos")
+                    .setChoices(...new Enum(ShopTypes).complexArray())
+                    .setRequired(true)
+            )
     )
     .addSubcommand(sub =>
         sub
@@ -33,14 +40,14 @@ command.execute = async (interaction, models, params, client) => {
 
     const user = params.getUser();
     const doc = params.getDoc();
-    const { Shops, RouletteItems } = models;
+    const { RouletteItems } = models;
     const { subcommand } = params;
 
     switch (subcommand) {
         case "cooldowns": {
             let items = new Map();
 
-            for (cooldownType of new Enum(Cooldowns).complexArray({valueString: true})) {
+            for (cooldownType of new Enum(Cooldowns).complexArray({ valueString: true })) {
                 let info = await user.cooldown(cooldownType.value, { save: false })
 
                 if (info) items.set(cooldownType.name, {
@@ -70,7 +77,7 @@ command.execute = async (interaction, models, params, client) => {
                 const valor = (modifier.multiplier).toLocaleString("es-CO");
                 const req = modifier.requirement;
                 const req_type = new Enum(RequirementType).translate(modifier.req_type);
-                const objetive = new Enum(modifier.type === ModifierType.Cooldown ?  Cooldowns : Multipliers).translate(modifier.module)
+                const objetive = new Enum(modifier.type === ModifierType.Cooldown ? Cooldowns : Multipliers).translate(modifier.module)
                 const id = modifier.id;
                 const guide = modifier.type === ModifierType.Cooldown ? "La base se __multiplica__ por" : "A la base se le __suma__"
                 const requirement = modifier.req_type === RequirementType.Level ? req : interaction.guild.roles.cache.find(x => x.id === req);
@@ -98,10 +105,13 @@ command.execute = async (interaction, models, params, client) => {
         }
 
         case "descuentos": {
-            let items = new Map();
-            let shop = await Shops.getWork(interaction.guild.id)
+            const store = await new Store(interaction)
+                .setType(params[subcommand].tipo.value)
+                .build(doc, user);
 
-            for (discount of shop.discounts) {
+            let items = new Map();
+
+            for (discount of store.shop.discounts) {
                 items.set(discount.id, {
                     level: discount.level.toLocaleString("es-CO"),
                     discount: discount.discount,
@@ -110,7 +120,7 @@ command.execute = async (interaction, models, params, client) => {
             }
 
             const interactive = new InteractivePages({
-                title: "Lista de descuentos",
+                title: `Lista de descuentos (${new Enum(ShopTypes).translate(store.config.info.type)})`,
                 author_icon: interaction.guild.iconURL({ dynamic: true }),
                 color: Colores.verde,
                 addon: `**— ID: {id}**\n**▸ Nivel:** {level}\n**▸ Descuento:** {discount}%\n\n`
@@ -124,7 +134,7 @@ command.execute = async (interaction, models, params, client) => {
             let items = new Map();
             let roulleteItems = await RouletteItems.getAll();
 
-            for(const item of roulleteItems) {
+            for (const item of roulleteItems) {
                 const itemObj = new RouletteItem(interaction, item).build(user, doc).info();
                 items.set(item.id, {
                     text: itemObj.text,

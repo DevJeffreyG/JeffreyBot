@@ -29,7 +29,7 @@ class Modal extends ModalBuilder {
      * @returns {this}
      */
     addInput(options = { id: string, label: string, style: TextInputStyle, req: Boolean, placeholder: string, min: 0, max: Infinity }) {
-        if(this.data.components?.length > 5) return console.error("🔴 No puedes agregar más Inputs")
+        if (this.data.components?.length > 5) return console.error("🔴 No puedes agregar más Inputs")
         const { id, label, style, req, placeholder, min, max } = options;
         if (!id || !label || !style)
             throw new BadCommandError(this.interaction, "No están definidos: id, label, style en el Modal")
@@ -50,8 +50,11 @@ class Modal extends ModalBuilder {
         return this
     }
 
+    /**
+     * @returns {Promise<void>} 
+     */
     async show() {
-        if(!this.data.custom_id || !this.data.title)
+        if (!this.data.custom_id || !this.data.title)
             throw new BadCommandError(this.interaction, new JeffreyBotError(null, "Falta CustomId o título en el Modal"))
         return await this.interaction.showModal(this)
             .catch(err => {

@@ -25,7 +25,7 @@ class Item {
      * @param {Number} type 
      */
     constructor(interaction, id, type = ShopTypes.Shop) {
-        this.isDarkShop = type === ShopTypes.Shop ? false : true;
+        this.isDarkShop = type === ShopTypes.DarkShop ? true : false;
         this.shopType = type;
 
         this.interaction = interaction;

@@ -42,7 +42,7 @@ command.execute = async (interaction, models, params, client) => {
     const textInfraction = isSoftwarn ? "Softwarn" : "Warn";
 
     let idsNow = []; // ids en uso actualmente para el tipo de infraccion a quitar
-    let users = await Users.find();
+    let users = await Users.find({ guild_id: interaction.guild.id });
 
     if (!isSoftwarn) { // buscar la id de los warns
         for (let i = 0; i < users.length; i++) {
@@ -51,7 +51,7 @@ command.execute = async (interaction, models, params, client) => {
             let warns = document.warns;
 
             warns.forEach(warn => {
-                if (document.guild_id === interaction.guild.id) idsNow.push({ id: warn.id, user_id: document.user_id, guild_id: document.guild_id }); // pushear cada id en uso
+                idsNow.push({ id: warn.id, user_id: document.user_id, guild_id: document.guild_id }); // pushear cada id en uso
             });
         }
     } else { // bucsar la id de los SOFTWARNS
@@ -61,7 +61,7 @@ command.execute = async (interaction, models, params, client) => {
             let softwarns = document.softwarns;
 
             softwarns.forEach(softwarn => {
-                if (document.guild_id === interaction.guild.id) idsNow.push({ id: softwarn.id, user_id: document.user_id, guild_id: document.guild_id }); // pushear cada id en uso
+                idsNow.push({ id: softwarn.id, user_id: document.user_id, guild_id: document.guild_id }); // pushear cada id en uso
             });
         }
     }
@@ -78,7 +78,7 @@ command.execute = async (interaction, models, params, client) => {
     });
 
     const member = interaction.guild.members.cache.get(user.user_id)
-    if (!member) 
+    if (!member)
         throw new FetchError(interaction, "usuario", ["El usuario con esta infracción ya no está en el servidor", "No se podrá eliminar hasta que vuelva"])
 
     let toConfirm = [
@@ -91,7 +91,7 @@ command.execute = async (interaction, models, params, client) => {
 
     const infractions = isSoftwarn ? user.softwarns : user.warns;
 
-    const index = infractions.findIndex(x => x.id === id);
+    const index = infractions.findIndex(x => x.id === id.value);
 
     infractions.splice(index, 1); // eliminar la infraccion
     await user.save();

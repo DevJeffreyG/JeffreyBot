@@ -100,7 +100,7 @@ ${member.roles.cache.toJSON().sort().join(", ")}`)
     let [hasW, hasSW] = [false, false];
     warnsd.forEach(warn => {
         // sacar la regla
-        let regla = reglas.find(x => x.id === warn.rule_id)?.name ?? "Víctima de la DARKSHOP";
+        let regla = reglas.find(x => x.id === warn.rule_id)?.name ?? "Warn por un Item";
 
         if (warn.rule_id != 0) warns.defField(`— ${regla} : Regla N°${warn.rule_id}`, `**— [Pruebas](${warn.proof})\n— ID: ${warn.id}**`)
         else warns.defField(`— ${regla}`, `**— ID: ${warn.id}**`)

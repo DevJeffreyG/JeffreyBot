@@ -11,7 +11,7 @@ class Enum {
 
     /**
      * Busca el nombre del enumerador por su valor
-     * @param {String} input El valor a consultar
+     * @param {String | Number} input El valor a consultar
      * @returns String
      */
     translate(input) {

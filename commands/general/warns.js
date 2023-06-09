@@ -51,7 +51,7 @@ command.execute = async (interaction, models, params, client) => {
     // foreach
     warns.forEach(warn => {
         // sacar la regla
-        let regla = reglas.find(x => x.id === warn.rule_id)?.name ?? "Warn por la DarkShop";
+        let regla = reglas.find(x => x.id === warn.rule_id)?.name ?? "Warn por un item";
 
         if (id && warn.id != id.value) return;
         if (warn.rule_id != 0) warnsE.defField(`— ${regla} : Regla N°${warn.rule_id}`, `**— [Pruebas](${warn.proof})\n— ID: ${warn.id}**`)
