@@ -5,12 +5,6 @@ const command = new Command({
     desc: "Visita la tienda del servidor"
 })
 
-command.addOption({
-    type: "integer",
-    name: "pag",
-    desc: "Ir a una página inicial definida"
-});
-
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
 
@@ -18,7 +12,7 @@ command.execute = async (interaction, models, params, client) => {
         .setType(ShopTypes.Shop)
         .build(params.getDoc(), params.getUser());
 
-    return shop.show({ pag: params.pag?.value })
+    return shop.show()
 }
 
 module.exports = command;

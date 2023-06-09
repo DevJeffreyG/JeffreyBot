@@ -6,12 +6,6 @@ const command = new Command({
     helpdesc: "La otra cara de la moneda te aguarda, visita la DarkShop"
 })
 
-command.addOption({
-    type: "integer",
-    name: "pag",
-    desc: "Ir a una página inicial definida"
-});
-
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
 
@@ -19,7 +13,7 @@ command.execute = async (interaction, models, params, client) => {
         .setType(ShopTypes.DarkShop)
         .build(params.getDoc(), params.getUser());
 
-    return ds.show({ pag: params.pag?.value })
+    return ds.show()
 }
 
 module.exports = command;
