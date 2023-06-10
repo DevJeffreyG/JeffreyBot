@@ -1,5 +1,5 @@
 const { BadParamsError } = require("../../src/errors");
-const { Command, Categories, ItemObjetives, Embed, BoostTypes, BoostObjetives, ErrorEmbed, Confirmation, FindNewId } = require("../../src/utils")
+const { Command, ItemObjetives, Embed, BoostTypes, BoostObjetives, Confirmation, FindNewId, Enum } = require("../../src/utils")
 
 const command = new Command({
     name: "add",
@@ -10,13 +10,10 @@ command.data
     .addSubcommand(roulette => roulette
         .setName("roulette-item")
         .setDescription("Agrega un item a la ruleta")
-        .addStringOption(target => target
+        .addIntegerOption(target => target
             .setName("target")
             .setDescription("Lo que va a ser cambiado si llega a ser seleccionado")
-            .setChoices(
-                { name: "Currency", value: String(ItemObjetives.Currency) },
-                { name: "Boost", value: String(ItemObjetives.Boost) }
-            )
+            .setChoices(...new Enum(ItemObjetives).complexArray())
             .setRequired(true)
         )
         .addStringOption(value => value
@@ -35,22 +32,15 @@ command.data
             .setName("duration")
             .setDescription("Si es un boost ¿cuál es su duración? (1d, 10m, etc)")
         )
-        .addStringOption(option => option
+        .addIntegerOption(option => option
             .setName("boosttype")
             .setDescription("El tipo de boost")
-            .addChoices(
-                { name: "Multiplicador", value: String(BoostTypes.Multiplier) },
-                { name: "Probabilidad Boost", value: String(BoostTypes.Probabilities) }
-            )
+            .addChoices(...new Enum(BoostTypes).complexArray())
         )
-        .addStringOption(option => option
+        .addIntegerOption(option => option
             .setName("boostobj")
             .setDescription("Lo que va a modificar")
-            .addChoices(
-                { name: "Currency", value: String(BoostObjetives.Currency) },
-                { name: "EXP", value: String(BoostObjetives.Exp) },
-                { name: "Todo", value: String(BoostObjetives.All) },
-            )
+            .addChoices(...new Enum(BoostObjetives).complexArray())
         )
         .addNumberOption(option => option
             .setName("boostvalue")

@@ -59,10 +59,7 @@ command.data
                 option
                     .setName("accion")
                     .setDescription("¿Se agrega o elimina el 'objetivo'?")
-                    .addChoices(
-                        { name: "Agrega", value: ItemActions.Add },
-                        { name: "Elimina", value: ItemActions.Remove }
-                    )
+                    .addChoices(...new Enum(ItemActions).complexArray())
                     .setRequired(true)
             )
             .addIntegerOption(option =>
@@ -81,11 +78,7 @@ command.data
                 option
                     .setName("boostobj")
                     .setDescription("El objetivo del boost (si es un boost)")
-                    .addChoices(
-                        { name: "Dinero", value: BoostObjetives.Currency },
-                        { name: "EXP", value: BoostObjetives.Exp },
-                        { name: "Todo", value: BoostObjetives.All }
-                    )
+                    .addChoices(...new Enum(BoostObjetives).complexArray())
             )
             .addIntegerOption(option =>
                 option

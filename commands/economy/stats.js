@@ -1,7 +1,7 @@
 const moment = require("moment-timezone");
 const { time, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 
-const { Command, Categories, Embed, Enum, BoostObjetives, Collector } = require("../../src/utils");
+const { Command, Categories, Embed, Enum, BoostObjetives, Collector, BoostTypes, BoostWork } = require("../../src/utils");
 const { Colores } = require("../../src/resources");
 
 const command = new Command({
@@ -75,10 +75,7 @@ command.execute = async (interaction, models, params, client) => {
 
     if (boosts?.length > 0) {
 
-        let boostInfo = {
-            currency: 1,
-            exp: 1
-        }
+        let boostsInfo = BoostWork(user);
 
         row.addComponents(
             new ButtonBuilder()
@@ -98,26 +95,11 @@ command.execute = async (interaction, models, params, client) => {
             const { type, objetive, value, disabled } = boost.special;
 
             let boostobj = new Enum(BoostObjetives).translate(objetive);
-            if (boostobj === "All") boostobj = "Todo"
-            if (boostobj === "Currency") boostobj = client.getCustomEmojis(guild.id).Currency.name;
-
-            switch (objetive) {
-                case BoostObjetives.Currency:
-                    boostInfo.currency *= value;
-                    break;
-                case BoostObjetives.EXP:
-                    boostInfo.exp *= value;
-                    break;
-
-                case BoostObjetives.All:
-                    boostInfo.currency *= value;
-                    boostInfo.exp *= value;
-                    break;
-            }
+            let boosttype = new Enum(BoostTypes).translate(type);
 
             if (!boostEmbed.data.fields || boostEmbed.data.fields.length <= 20) {
                 boostEmbed
-                    .defField(`🚀 — Boost de ${boostobj} x${value.toLocaleString("es-CO")}`,
+                    .defField(`🚀 — Boost ${boosttype} de ${boostobj} x${value.toLocaleString("es-CO")}`,
                         `▸ Hasta: ${time(boost.active_until)} (${time(boost.active_until, "R")})${disabled ? `\n▸ **Desactivado**.` : ""}`, true);
             } else {
                 boostEmbed.defField("🚀 — ...", `Y unos ${boosts.length - 20} más.`)
@@ -126,7 +108,7 @@ command.execute = async (interaction, models, params, client) => {
         }
 
         boostEmbed.defFooter({
-            text: `📊 ${client.getCustomEmojis(guild.id).Currency.name} x${boostInfo.currency.toLocaleString("es-CO")}, EXP x${boostInfo.exp.toLocaleString("es-CO")}`
+            text: `📊 ${client.getCustomEmojis(guild.id).Currency.name} x${boostsInfo.multiplier.currency_value.toLocaleString("es-CO")} (+${(boostsInfo.probability.currency_value - 1)*100}% Prob) — EXP x${boostsInfo.multiplier.exp_value.toLocaleString("es-CO")} (+${(boostsInfo.probability.exp_value - 1)*100}% Prob)`
         })
     }
 
