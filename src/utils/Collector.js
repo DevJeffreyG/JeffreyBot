@@ -1,6 +1,7 @@
 const { CommandInteraction } = require("discord.js");
 const ms = require("ms");
 const { EndReasons } = require("./Enums");
+const Embed = require("./Embed");
 
 /**
  * Un administrador de Component Collectors
@@ -55,6 +56,7 @@ class Collector {
 
             try {
                 if (reason === EndReasons.OldCollector || reason === EndReasons.StoppedByUser) return await this.interaction.deleteReply();
+                if (reason === EndReasons.Done) return await this.interaction.editReply({ embeds: [new Embed({ type: "success" })], components: [], content: null });
                 if (reason === EndReasons.Deleted) return;
                 if (this.evalOnEnd) this.evalOnEnd(collected, reason);
             } catch (err) {

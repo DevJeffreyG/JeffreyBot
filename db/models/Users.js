@@ -92,7 +92,8 @@ const Schema = new mongoose.Schema({
                     price: { type: Number },
                     name: { type: String },
                     isCancelled: { type: Boolean }
-                }
+                },
+                id: { type: Number, sparse: true }
             }
         ],
         cooldowns: {
