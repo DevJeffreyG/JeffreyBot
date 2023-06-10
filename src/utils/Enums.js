@@ -2,11 +2,15 @@
  * Crea Enumeradores porque no sé como hacerlos en JavaScript.
  */
 class Enum {
+    #translations;
+
     /**
      * @param {Object} values Los valores del enumerador, pueden usarse los default para usar los métodos
+     * @param {Boolean} customize Si se deberían cambiar los valores estandarizados por los personalizados
      */
-    constructor(values) {
+    constructor(values, customize = true) {
         this.values = values
+        this.customize = customize
     }
 
     /**
@@ -15,7 +19,41 @@ class Enum {
      * @returns String
      */
     translate(input) {
-        return Object.keys(this.values).find(key => this.values[key] === input);
+        const custom = this.#loadTranslations();
+        let name = Object.keys(this.values).find(key => this.values[key] === input);
+
+        if(custom) return custom[name] ?? name
+        return name;
+    }
+
+    #loadTranslations() {
+        const client = require("../../");
+
+        const CurrencyName = client.getCustomEmojis(client.lastInteraction?.guild.id)?.Currency?.name;
+
+        this.#translations = {
+            Multiplier: "Multiplicador",
+            Probability: "Probabilidad",
+            All: "Todo",
+            Currency: this.customize && CurrencyName ? CurrencyName : "Dinero",
+            ChatRewards: "Recompensas de Chat",
+            CurrencyToExp: "Dinero a EXP",
+            InflationPrediction: "Predicción Inflación",
+            Level: "Nivel",
+            Shop: "Tienda",
+            Positive: "Positivo",
+            Negative: "Negativo",
+            Add: "Agrega",
+            Remove: "Elimina"
+        }
+
+        for (const prop of Object.keys(this.values)) {
+            if (!this.#translations[prop]) continue;
+
+            return this.#translations;
+        }
+
+        return null
     }
 
     /**
@@ -51,7 +89,7 @@ class Enum {
 
         for (const name of names) {
             let obj = {};
-            obj[first] = String(name);
+            obj[first] = this.translate(this.values[name]);
             obj[second] = valueString ? String(this.values[name]) : this.values[name];
 
             arr.push(obj)
@@ -140,11 +178,11 @@ const ItemObjetives = new Enum({
 
 /**
  * - Multiplier
- * - Probabilities
+ * - Probability
  */
 const BoostTypes = new Enum({
     Multiplier: 1,
-    Probabilities: 2
+    Probability: 2
 }).values
 
 /**
@@ -166,6 +204,7 @@ const BoostObjetives = new Enum({
  * - Deleted
  * - TimeOut
  * - StoppedByUser
+ * - Done
  */
 const EndReasons = new Enum({
     OldCollector: 1,
@@ -174,7 +213,8 @@ const EndReasons = new Enum({
     Blackjack: 4,
     Deleted: 5,
     TimeOut: 6,
-    StoppedByUser: 7
+    StoppedByUser: 7,
+    Done: 8
 }).values
 
 /**
