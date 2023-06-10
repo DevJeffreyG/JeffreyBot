@@ -1,6 +1,7 @@
-const { Command, Categories, Embed, Cooldowns, GetRandomItem, BoostWork } = require("../../src/utils");
-
+const { Command, Embed, Cooldowns, GetRandomItem, BoostWork } = require("../../src/utils");
 const { Responses } = require("../../src/resources/");
+
+const Chance = require("chance");
 
 const command = new Command({
     name: "coins",
@@ -36,7 +37,10 @@ command.execute = async (interaction, models, params, client) => {
         if ((average - maximum) > 10000) maximum = average * 0.1;
     }
 
-    let money = Math.ceil(Math.random() * maximum);
+    // buscar si tiene boost
+    const boost = BoostWork(user);
+
+    let money = new Chance().integer({ min: 1, max: maximum * boost.probability.currency_value });
     let tmoney = `**${Currency}${money.toLocaleString('es-CO')}**`;
     let randommember = guild.members.cache.random();
 
@@ -49,9 +53,7 @@ command.execute = async (interaction, models, params, client) => {
 
     let fakemoney = `${Math.round(Math.ceil(Math.random() * 1000) + fakeAdd).toLocaleString("es-CO")} ${Currency.name}`;
 
-    // buscar si tiene boost
-    const boost = BoostWork(user);
-    if (boost.changed) {
+    if (boost.hasAnyChanges()) {
         money = Number((money * Number(boost.multiplier.currency_value)).toFixed(2));
         tmoney = `**${Currency}${money.toLocaleString('es-CO')}${boost.emojis.currency}**`
     }

@@ -802,7 +802,8 @@ const LimitedTime = async function (victimMember, roleID = 0, duration, specialT
       type: specialType,
       objetive: specialObjective,
       value: specialValue
-    }
+    },
+    id: FindNewId(await Users.find({ guild_id: victimMember.guild.id }), "data.temp_roles", "id")
   }
 
   try {
@@ -1513,13 +1514,14 @@ const FindNewId = function (generalQuery, specificQuery, toCheck) {
  * @returns {Promise<Boolean>} This Member already has a temp role with the objetive searched for.
  */
 const WillBenefit = async function (member, objetivesToCheck) {
-  objetivesToCheck = objetivesToCheck ?? ["any"];
+  objetivesToCheck = objetivesToCheck ?? [BoostObjetives.Currency, BoostObjetives.Exp, BoostObjetives.All];
 
-  const user = await Users.findOne({
+  const user = await Users.getWork({
     user_id: member.id,
     guild_id: member.guild.id
   });
 
+  const boostInfo = BoostWork(user);
   const temp_roles = user.data.temp_roles;
 
   let hasBoost = false;
@@ -1530,15 +1532,18 @@ const WillBenefit = async function (member, objetivesToCheck) {
       objetivesToCheck.forEach(objetiveToCheck => {
         switch (objetiveToCheck) {
           case BoostObjetives.Currency:
-          case BoostObjetives.Exp:
-          case BoostObjetives.All:
-            if (special.objetive === objetiveToCheck) hasBoost = true;
+            if (boostInfo.multiplier.changed.currency && boostInfo.multiplier.currency_value > 1) hasBoost = true;
+            if (boostInfo.probability.changed.currency && boostInfo.probability.currency_value > 1) hasBoost = true;
             break;
-
-          case "any":
-            if (special.objetive === BoostObjetives.Currency ||
-              special.objetive === BoostObjetives.Exp ||
-              special.objetive === BoostObjetives.All) hasBoost = true;
+          case BoostObjetives.Exp:
+            if (boostInfo.multiplier.changed.exp && boostInfo.multiplier.exp_value > 1) hasBoost = true;
+            if (boostInfo.probability.changed.exp && boostInfo.probability.exp_value > 1) hasBoost = true;
+            break;
+          case BoostObjetives.All:
+            if (boostInfo.multiplier.changed.currency && boostInfo.multiplier.currency_value > 1) hasBoost = true;
+            if (boostInfo.probability.changed.currency && boostInfo.probability.currency_value > 1) hasBoost = true;
+            if (boostInfo.multiplier.changed.exp && boostInfo.multiplier.exp_value > 1) hasBoost = true;
+            if (boostInfo.probability.changed.exp && boostInfo.probability.exp_value > 1) hasBoost = true;
             break;
 
           default:
@@ -1775,41 +1780,67 @@ const FetchThisGuild = async function (client, guild) {
  */
 const BoostWork = function (user) {
   let boost = {
-    changed: false,
     multiplier: {
+      changed: {
+        currency: false,
+        exp: false
+      },
+      currency_value: 1,
+      exp_value: 1
+    },
+    probability: {
+      changed: {
+        currency: false,
+        exp: false
+      },
       currency_value: 1,
       exp_value: 1
     },
     emojis: {
       currency: "🚀",
       exp: "🚀"
-    }
+    },
+    hasAnyChanges: () => { return boost.multiplier.changed || boost.probability.changed }
   }
 
   for (const userboost of user.data.temp_roles) {
-    boost.changed = true;
     const boostinfo = userboost.special;
 
-    if (boostinfo.type === BoostTypes.Multiplier) {
-      switch (boostinfo.objetive) {
-        case BoostObjetives.Currency:
-          boost.multiplier.currency_value *= boostinfo.value;
-          break;
+    let propToChange;
+    switch (boostinfo.type) {
+      case BoostTypes.Multiplier:
+        propToChange = "multiplier";
+        break;
+      case BoostTypes.Probability:
+        propToChange = "probability";
+        break;
+    }
 
-        case BoostObjetives.Exp:
-          boost.multiplier.exp_value *= boostinfo.value;
-          break;
+    switch (boostinfo.objetive) {
+      case BoostObjetives.Currency:
+        boost[propToChange].changed.currency = true;
+        boost[propToChange].currency_value *= boostinfo.value;
+        break;
 
-        case BoostObjetives.All:
-          boost.multiplier.exp_value *= boostinfo.value;
-          boost.multiplier.currency_value *= boostinfo.value;
-          break;
-      }
+      case BoostObjetives.Exp:
+        boost[propToChange].changed.exp = true;
+        boost[propToChange].exp_value *= boostinfo.value;
+        break;
+
+      case BoostObjetives.All:
+        boost[propToChange].changed.currency = true;
+        boost[propToChange].changed.exp = true;
+        boost[propToChange].exp_value *= boostinfo.value;
+        boost[propToChange].currency_value *= boostinfo.value;
+        break;
     }
   }
 
-  if (boost.multiplier.currency_value <= 1 && boost.changed) boost.emojis.currency = "😟";
-  if (boost.multiplier.exp_value <= 1 && boost.changed) boost.emojis.exp = "😟";
+  boost.emojis.currency = boost.multiplier.currency_value <= 1 && boost.multiplier.changed.currency ? "😟" : "🚀";
+  boost.emojis.exp = boost.multiplier.exp_value <= 1 && boost.multiplier.changed.exp ? "😟" : "🚀";
+
+  boost.emojis.currency = boost.probability.currency_value <= 1 && boost.probability.changed.currency ? "😟" : "🚀";
+  boost.emojis.exp = boost.probability.exp_value <= 1 && boost.probability.changed.exp ? "😟" : "🚀";
 
   return boost;
 }
