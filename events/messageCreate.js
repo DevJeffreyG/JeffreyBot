@@ -117,9 +117,12 @@ module.exports = async (client, message) => {
     const toMultiply = customMultiplier * multiplier;
     let currencyToAdd, expToAdd;
 
+    await GlobalDatasWork(guild, true); // verificar si existen BOOSTS.
+    const boost = BoostWork(user);
+
     try {
-      currencyToAdd = new Chance().integer({ min: minMoney, max: maxMoney }) * toMultiply
-      expToAdd = new Chance().integer({ min: minExp, max: maxExp }) * toMultiply
+      currencyToAdd = new Chance().integer({ min: minMoney, max: maxMoney * boost.probability.currency_value }) * toMultiply
+      expToAdd = new Chance().integer({ min: minExp, max: maxExp * boost.probability.exp_value }) * toMultiply
     } catch (err) {
       if (err instanceof RangeError) {
         new Log(message)
@@ -153,10 +156,7 @@ module.exports = async (client, message) => {
       }
     }
 
-    await GlobalDatasWork(guild, true); // verificar si existen BOOSTS.
-    const boost = BoostWork(user);
-
-    if(boost.changed) {
+    if(boost.hasAnyChanges()) {
       currencyToAdd *= boost.multiplier.currency_value;
       expToAdd *= boost.multiplier.exp_value;
     }

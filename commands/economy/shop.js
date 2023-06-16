@@ -1,4 +1,4 @@
-const { Command, Categories, Store, ShopTypes } = require("../../src/utils")
+const { Command, Store, ShopTypes } = require("../../src/utils")
 
 const command = new Command({
     name: "shop",
@@ -12,7 +12,7 @@ command.execute = async (interaction, models, params, client) => {
         .setType(ShopTypes.Shop)
         .build(params.getDoc(), params.getUser());
 
-    return shop.show()
+    return await shop.show()
 }
 
 module.exports = command;
