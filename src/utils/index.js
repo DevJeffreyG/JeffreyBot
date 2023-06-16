@@ -6,7 +6,6 @@ const ErrorEmbed = require("./ErrorEmbed");
 const InteractivePages = require("./InteractivePages");
 const FilePages = require("./FilePages");
 const Shop = require("./Shop");
-const Store = require("./Store");
 const DarkShop = require("./DarkShop");
 const Top = require("./Top");
 const Item = require("./Item");
@@ -32,9 +31,8 @@ module.exports = {
     ErrorEmbed,
     InteractivePages,
     FilePages,
-    Shop,
     DarkShop,
-    Store,
+    Shop,
     Top,
     Item,
     RouletteItem,

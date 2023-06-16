@@ -1,4 +1,4 @@
-const { Command, Categories, ShopTypes, Store } = require("../../src/utils")
+const { Command, Categories, ShopTypes, Shop } = require("../../src/utils")
 
 const command = new Command({
     name: "buy",
@@ -23,7 +23,7 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { id, user } = params
 
-    const shop = await new Store(interaction)
+    const shop = await new Shop(interaction)
         .setType(ShopTypes.Shop)
         .build(params.getDoc(), params.getUser());
 

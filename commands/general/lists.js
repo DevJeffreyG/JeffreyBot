@@ -1,5 +1,5 @@
 const { Colores } = require("../../src/resources");
-const { Command, Categories, Cooldowns, Enum, InteractivePages, ModifierType, RequirementType, Shop, RouletteItem, Multipliers, ShopTypes, Store } = require("../../src/utils");
+const { Command, Cooldowns, Enum, InteractivePages, ModifierType, RequirementType, Shop, RouletteItem, Multipliers, ShopTypes } = require("../../src/utils");
 
 const command = new Command({
     name: "lists",
@@ -105,13 +105,13 @@ command.execute = async (interaction, models, params, client) => {
         }
 
         case "descuentos": {
-            const store = await new Store(interaction)
+            const shop = await new Shop(interaction)
                 .setType(params[subcommand].tipo.value)
                 .build(doc, user);
 
             let items = new Map();
 
-            for (discount of store.shop.discounts) {
+            for (discount of shop.shopdoc.discounts) {
                 items.set(discount.id, {
                     level: discount.level.toLocaleString("es-CO"),
                     discount: discount.discount,
@@ -120,7 +120,7 @@ command.execute = async (interaction, models, params, client) => {
             }
 
             const interactive = new InteractivePages({
-                title: `Lista de descuentos (${new Enum(ShopTypes).translate(store.config.info.type)})`,
+                title: `Lista de descuentos (${new Enum(ShopTypes).translate(shop.config.info.type)})`,
                 author_icon: interaction.guild.iconURL({ dynamic: true }),
                 color: Colores.verde,
                 addon: `**— ID: {id}**\n**▸ Nivel:** {level}\n**▸ Descuento:** {discount}%\n\n`

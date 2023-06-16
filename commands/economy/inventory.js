@@ -1,5 +1,5 @@
 const { time } = require("discord.js")
-const { Command, Categories, Embed, ShopTypes, Enum, Store } = require("../../src/utils")
+const { Command, Categories, Embed, ShopTypes, Enum, Shop } = require("../../src/utils")
 const { Colores } = require("../../src/resources");
 const { FetchError } = require("../../src/errors");
 
@@ -23,18 +23,18 @@ command.execute = async (interaction, models, params, client) => {
 
     // codigo
     const user = params.getUser();
-    const store = await new Store(interaction)
+    const shop = await new Shop(interaction)
         .setType(type)
         .build(params.getDoc(), params.getUser());
 
     let itemsEmbed = new Embed()
-        .defAuthor({ text: `Tu inventario (${store.config.info.name})`, icon: interaction.member.displayAvatarURL() })
+        .defAuthor({ text: `Tu inventario (${shop.config.info.name})`, icon: interaction.member.displayAvatarURL() })
         .setThumbnail(interaction.guild.iconURL({ dynamic: true }))
         .defFooter({ text: `/use ID para usar un item.` })
-        .defColor(store.config.info.color);
+        .defColor(shop.config.info.color);
 
     for (const item of user.data.inventory) {
-        const real_item = store.shop.items.find(x => x.id === item.item_id);
+        const real_item = shop.shopdoc.items.find(x => x.id === item.item_id);
         if (!real_item) continue;
 
         const f = item.shopType === type && real_item.use_info.action !== null && !real_item.disabled;

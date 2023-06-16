@@ -1,78 +1,155 @@
-const Discord = require("discord.js");
+const { Emoji, CommandInteraction, User, ActionRowBuilder, ButtonBuilder } = require("discord.js");
+const { Shops, DarkShops, Users } = require("mongoose").models;
+const { Colores } = require("../resources");
+const { ShopTypes, Enum, ItemTypes, ItemObjetives, ItemActions } = require("./Enums");
+const InteractivePages = require("./InteractivePages");
+const { BadCommandError, DoesntExistsError, EconomyError, AlreadyExistsError, BadParamsError } = require("../errors");
+const { Confirmation, FindNewId } = require("./functions");
+const Embed = require("./Embed");
+const HumanMs = require("./HumanMs");
+
 const moment = require("moment-timezone");
 const ms = require("ms");
+const { ButtonStyle } = require("discord.js");
+const { codeBlock } = require("discord.js");
 
-const models = require('mongoose').models
-
-const { Users, Shops, Guilds } = models;
-const { FindNewId, Confirmation, FindAverage } = require("./functions")
-const InteractivePages = require("./InteractivePages");
-const { Colores } = require("../resources");
-const Embed = require("./Embed");
-const { ItemObjetives, ItemTypes, ItemActions } = require("./Enums");
-const HumanMs = require("./HumanMs");
-const DarkShop = require("./DarkShop");
-const { AlreadyExistsError, DoesntExistsError, EconomyError, BadParamsError } = require("../errors");
-
-/**
- * ###### Taken from [tutmonda](https://github.com/Jleguim/tutmonda-project) 💜
- */
 class Shop {
-    /**
-     * @deprecated Se está buscando la forma de crear tipos de tiendas: Store.js
-     * @param {*} doc Mongoose doc (Shop)
-     * @param {Discord.CommandInteraction} inter Interaction
-     */
-    constructor(doc, inter, isDarkShop = false) {
-        this.isDarkShop = isDarkShop;
-        this.shop = doc;
-        this.shop.items = this.shop.items.sort((a, b) => a.id - b.id);
-
-        this.interaction = inter;
-        this.client = this.interaction.client;
-
-        this.Emojis = this.client.getCustomEmojis(this.interaction.guild.id);
-
-        const { Currency, DarkCurrency } = this.Emojis;
-
-        this.items = new Map();
-        this.base = {
-            title: `${this.interaction.guild.name} ${isDarkShop ? "DarkShop" : "Shop"}`,
-            author_icon: this.interaction.guild.iconURL({ dynamic: true }) ?? this.interaction.member.displayAvatarURL(),
-            color: isDarkShop ? Colores.negro : Colores.verdejeffrey,
-            description: ``,
-            addon: `**\`{item_id}\` — {item_name}**\n▸ {item_desc}\n▸ **${this.isDarkShop ? DarkCurrency : Currency}{item_price}**\n\n`,
-            footer: `Página {ACTUAL} de {TOTAL}`,
-            icon_footer: this.interaction.guild.iconURL()
-        }
-
-        this.pages;
-        this.user;
-
-        this.updated = new Embed({
-            type: "success",
-            data: {
-                desc: "Se ha actualizado el item"
-            }
-        })
-
-        this.noitem = new DoesntExistsError(this.interaction, `El item con esa ID`, `la ${this.isDarkShop ? "DarkShop" : "tienda"} de este servidor`);
+    #build = false;
+    #doc;
+    #user;
+    #isDarkShop = false;
+    #interactive = {
+        base: {},
+        items: new Map()
+    }
+    #adminInteractive = {
+        base: {},
+        items: new Map()
     }
 
-    async setup(options) {
-        this.user = await Users.getWork({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id });
+    #buildError;
+    #noItemError;
+    #updated = new Embed({
+        type: "success",
+        data: {
+            desc: "Se ha actualizado el item"
+        }
+    })
 
-        if (!this.doc) await this.#fetchDoc();
+    /**
+     * @param {CommandInteraction} interaction 
+     */
+    constructor(interaction) {
+        this.interaction = interaction;
+        this.client = this.interaction.client;
 
-        if (this.isDarkShop)
-            this.base.description = `**—** Bienvenid@ a la DarkShop. Para comprar items usa ${this.client.mentionCommand("dsbuy")}.\n**—** Tienes **${this.Emojis.DarkCurrency}${this.user.economy.dark.currency.toLocaleString("es-CO")}**`;
-        else
-            this.base.description = `**—** ¡Bienvenid@ a la tienda! para comprar items usa ${this.client.mentionCommand("buy")}.\n**—** Tienes **${this.Emojis.Currency}${this.user.economy.global.currency.toLocaleString("es-CO")}**`;
+        this.#buildError = new BadCommandError(this.interaction, "STORE no se construyó");
+        this.#noItemError = new DoesntExistsError(this.interaction, `El item con esa ID`, `la tienda de este servidor`);
 
-        this.shop.items.forEach((item, index) => {
-            var price = this.determinePrice(this.user, item, true);
+        this.config = {
+            info: {
+                name: null,
+                description: null,
+                color: null,
+                model: {
+                    obj: null,
+                    query: {}
+                },
+                type: ShopTypes.Shop
+            },
+            currency: {
+                emoji: null,
+                user_path: null
+            }
+        }
+    }
 
-            this.items.set(item.id, {
+    /** ------------------ SETUP ------------------ */
+    /**
+     * @param {Enum} type 
+     * @returns 
+     */
+    setType(type) {
+        this.config.info.type = type;
+
+        switch (type) {
+            case ShopTypes.Shop:
+                this.setCurrency(this.client.getCustomEmojis(this.interaction.guild.id).Currency)
+                this.setInfo({
+                    name: `Tienda de ${this.interaction.guild.name}`,
+                    desc: `**—** ¡Bienvenid@ a la tienda! para comprar items usa ${this.client.mentionCommand("buy")}.`,
+                    color: Colores.verdejeffrey,
+                    model: Shops,
+                    query: this.interaction.guild.id
+                })
+                break;
+
+            case ShopTypes.DarkShop:
+                this.setCurrency(this.client.getCustomEmojis(this.interaction.guild.id).DarkCurrency, "economy.dark.currency")
+                this.setInfo({
+                    name: `DarkShop de ${this.interaction.guild.name}`,
+                    desc: `**—** Bienvenid@ a la DarkShop. Para comprar items usa ${this.client.mentionCommand("dsbuy")}.`,
+                    color: Colores.negro,
+                    model: DarkShops,
+                    query: this.interaction.guild.id
+                })
+                this.#isDarkShop = true;
+                break;
+        }
+
+        return this;
+    }
+
+    /**
+     * @param {Emoji} CurrencyEmoji El Emoji que será usado para mostrar el dinero
+     * @param {String} path La ruta de donde se sacará el dinero del usuario
+     */
+    setCurrency(CurrencyEmoji, path) {
+        this.config.currency.emoji = CurrencyEmoji;
+        this.config.currency.user_path = path ?? "economy.global.currency";
+
+        return this;
+    }
+
+    setInfo({ name, desc, color, model, query }) {
+        this.config.info.name = name ?? "Tienda";
+        this.config.info.description = desc ?? "Una tienda de cosas varias";
+        this.config.info.color = color ?? Colores.verdejeffrey;
+        this.config.info.model.obj = model;
+        this.config.info.model.query = query ?? this.interaction.guild.id;
+
+        return this;
+    }
+
+    async build(doc, user) {
+        this.#build = true;
+        this.#doc = doc;
+        this.#user = user;
+
+        this.shopdoc = await this.config.info.model.obj.getWork(this.config.info.model.query);
+        this.average = this.#doc.data.average_currency;
+
+        this.#interactive.base = {
+            title: `${this.config.info.name}`,
+            author_icon: this.interaction.guild.iconURL({ dynamic: true }),
+            color: this.config.info.color,
+            description: this.config.info.description + `\n**—** Tienes **${this.config.currency.emoji}${this.#user.get(this.config.currency.user_path).toLocaleString("es-CO")}**`,
+            addon: `**\`{item_id}\` — {item_name}**\n▸ {item_desc}\n▸ **${this.config.currency.emoji}{item_price}**\n\n`,
+            footer: `Página {ACTUAL} de {TOTAL}`,
+            icon_footer: this.interaction.member.displayAvatarURL({ dynamic: true })
+        }
+
+        this.#adminInteractive.base = Object.assign({}, this.#interactive.base);
+
+        let adminAddon = this.#adminInteractive.base.addon;
+        this.#adminInteractive.base.description = `**—** [NOT READY]: Falta el uso (${this.client.mentionCommand("admin items use-info")})\n**—** [HIDDEN]: Item desactivado (${this.client.mentionCommand("admin items toggle")})\n**—** [✅]: El item es visible y usable para cualquiera.`;
+
+        this.#adminInteractive.base.addon = adminAddon.substring(0, 2) + "{publicInfo} — ID: " + adminAddon.substring(2, adminAddon.length - 4) + `\n+ ${this.config.currency.emoji}{item_interest}** al comprarlo.\n\n`
+
+        this.shopdoc.items.forEach((item, index) => {
+            let price = this.determinePrice(this.#user, item, true);
+
+            this.#interactive.items.set(item.id, {
                 item_name: item.name,
                 item_desc: item.description,
                 item_price: price,
@@ -80,124 +157,165 @@ class Shop {
                 showable: (item.use_info.action !== null && !item.disabled) ?? false,
                 index
             })
+
+            // Admin Mode
+            let publicInfo;
+            if (!item.use_info.action) publicInfo = "[NOT READY] ";
+            else if (item.disabled) publicInfo = "[HIDDEN] ";
+            else publicInfo = "[✅] ";
+
+            let notmodified = this.determinePrice(this.#user, item, true, true);
+
+            this.#adminInteractive.items.set(item.id, {
+                item_name: item.name,
+                item_desc: item.description,
+                item_price: notmodified,
+                item_interest: item.interest,
+                item_id: item.id,
+                publicInfo,
+                index
+            })
         });
 
-        return this.#prepareInit(options);
+        return this;
+    }
+
+    /** ------------------ MAIN ------------------ */
+    /**
+     * Mostrar la tienda con un Embed
+     */
+    async show() {
+        if (!this.#build) throw this.#buildError;
+
+        const interactive = new InteractivePages(this.#interactive.base, this.#interactive.items, 3)
+
+        try {
+            await interactive.init(this.interaction);
+        } catch (err) {
+            console.log(err);
+        }
     }
 
     /**
+     * (ADMIN) Mostrar todos los items de la tienda
+     * @returns 
+     */
+    async showAllItems() {
+        if (!this.#build) throw this.#buildError;
+        const interactive = new InteractivePages(this.#adminInteractive.base, this.#adminInteractive.items, 3)
+
+        try {
+            await interactive.init(this.interaction);
+        } catch (err) {
+            console.log(err);
+        }
+    }
+    /**
      * 
      * @param {Number} itemId La ID del Item a comprar
-     * @param {Discord.User} user El usuario que va a recibir el item
-     * @returns {Promise<Discord.CommandInteraction>}
+     * @param {User} user El usuario que va a recibir el item
+     * @returns {Promise<CommandInteraction>}
      */
     async buy(itemId, user) {
-        this.user = await Users.getWork({
-            user_id: this.interaction.user.id,
-            guild_id: this.interaction.guild.id
-        });
+        if (!this.#build) throw this.#buildError;
 
         const inventoryUser = user ? await Users.getWork({
             user_id: user.id,
             guild_id: this.interaction.guild.id
-        }) : this.user;
-
-        if (!this.doc) await this.#fetchDoc();
+        }) : this.#user;
 
         const member = this.interaction.member;
 
-        const item = this.shop.findItem(itemId);
+        const item = this.shopdoc.findItem(itemId);
 
-        if (!item) throw this.noitem;
+        if (!item) throw this.#noItemError;
 
-        const itemPrice = this.determinePrice(this.user, item, true);
+        const itemPrice = this.determinePrice(this.#user, item, true);
         const itemName = item.name;
 
         let toConfirm = [
             `¿Deseas comprar el item \`${itemName}\`${user ? ` a ${user}` : ""}?`,
-            `Pagarás **${this.isDarkShop ? this.Emojis.DarkCurrency : this.Emojis.Currency}${itemPrice}**.`,
+            `Pagarás **${this.config.currency.emoji}${itemPrice}**.`,
             `Esta compra no se puede devolver.`
         ]
 
-        if (item.interest > 0) toConfirm.push(`Al comprar el item, su precio subirá (**+${this.isDarkShop ? this.Emojis.DarkCurrency : this.Emojis.Currency}${item.interest.toLocaleString("es-CO")}**)`)
+        if (item.interest > 0) toConfirm.push(`Al comprar el item, su precio subirá **${this.config.currency.emoji}${item.interest.toLocaleString("es-CO")}**`)
 
         let confirmation = await Confirmation("Comprar item", toConfirm, this.interaction);
         if (!confirmation) return;
 
-        var price = this.determinePrice(this.user, item);
+        let price = this.determinePrice(this.#user, item);
 
         // role requerido
         if (item.req_role && !member.roles.cache.get(item.req_role))
             throw new DoesntExistsError(this.interaction, `<@&${item.req_role}>`, "tu usuario")
 
-        if (!this.user.canBuy(price, this.isDarkShop))
+        if (!this.#user.canBuy(price, this.config.currency.user_path))
             throw new EconomyError(
                 this.interaction,
-                `No tienes tantos ${this.isDarkShop ? this.Emojis.DarkCurrency.name : this.Emojis.Currency.name}`,
-                this.isDarkShop ? this.user.economy.dark.currency : this.user.economy.global.currency,
-                this.isDarkShop
+                `No tienes tantos ${this.config.currency.emoji.name}`,
+                this.#user.get(this.config.currency.user_path),
+                this.#isDarkShop
             )
-        if (this.user.hasItem(itemId, this.isDarkShop)) throw new AlreadyExistsError(this.interaction, itemName, "tu inventario");
+        if (this.#user.hasItem(itemId, this.config.info.type))
+            throw new AlreadyExistsError(this.interaction, itemName, "tu inventario");
 
         const newUseId = FindNewId(await Users.find(), "data.inventory", "use_id");
 
         // revisar si debe agregarse interés
         if (item.interest > 0) {
-            const interestFilter = x => x.isDarkShop === this.isDarkShop && x.item_id === item.id;
-            if (!this.user.data.purchases.find(interestFilter)) this.user.data.purchases.push({ isDarkShop: this.isDarkShop, item_id: item.id, quantity: 1 });
+            const interestFilter = x => x.shopType === this.config.info.type && x.item_id === item.id;
+            if (!this.#user.data.purchases.find(interestFilter)) this.#user.data.purchases.push({ shopType: this.config.info.type, item_id: item.id, quantity: 1 });
             else {
-                this.user.data.purchases.find(interestFilter).quantity++;
+                this.#user.data.purchases.find(interestFilter).quantity++;
             }
         }
 
-        if (this.isDarkShop) this.user.economy.dark.currency -= price;
-        else this.user.economy.global.currency -= price;
-
-        inventoryUser.data.inventory.push({ isDarkShop: this.isDarkShop, item_id: item.id, use_id: newUseId })
+        this.#user.set(this.config.currency.user_path, this.#user.get(this.config.currency.user_path) - price);
+        inventoryUser.data.inventory.push({ shopType: this.config.info.type, item_id: item.id, use_id: newUseId })
 
         let embed = new Embed({
             type: "success",
             data: {
                 desc: [
                     "Pago realizado con éxito",
-                    `Compraste: \`${itemName}\` por **${this.isDarkShop ? this.Emojis.DarkCurrency : this.Emojis.Currency}${itemPrice}**${user ? ` para ${user}` : ""}`,
-                    user ? `Se usa con \`/use ${newUseId}\``: `Úsalo con \`/use ${newUseId}\``,
-                    `Ahora tienes: ${this.user.parseCurrency(this.Emojis, this.isDarkShop)}`
+                    `Compraste: \`${itemName}\` por **${this.config.currency.emoji}${itemPrice}**${user ? ` para ${user}` : ""}`,
+                    user ? `Se usa con \`/use ${newUseId}\`` : `Úsalo con \`/use ${newUseId}\``,
+                    `Ahora tienes: ${this.#user.parseCurrency(this.client.getCustomEmojis(this.interaction.guild.id), this.#isDarkShop)}`
                 ]
             }
         })
 
         if (user) await inventoryUser.save();
-        await this.user.save();
+        await this.#user.save();
 
         return await this.interaction.editReply({ embeds: [embed] });
     }
 
-    async removeItem(itemId) {
-        const index = this.shop.findItemIndex(itemId);
-        if (!index) throw this.noitem;
+    /** ------------------ EDICION ------------------ */
+    async addDiscount(level, discount) {
+        const id = FindNewId(await this.config.info.model.obj.find(), "discounts", "id");
 
-        console.log("🗑️ Eliminando %s de la tienda e inventarios del Guild %s", this.shop.findItem(itemId), this.interaction.guild.id)
-
-        this.shop.items.splice(index, 1);
-        await this.shop.save();
-
-        // eliminar de los inventarios
-        const users = await Users.find({ guild_id: this.interaction.guild.id });
-        for await (const user of users) {
-            let i = user.data.inventory.findIndex(x => x.item_id === itemId && x.isDarkShop === this.isDarkShop)
-
-            if (i != -1) {
-                console.log("🗑️ Eliminando del inventario de %s", user.user_id)
-                user.data.inventory.splice(i, 1);
-                await user.save();
-            }
+        let q = this.shopdoc.discounts.find(x => x.level === level);
+        if (q) {
+            if (discount > 0) q.discount = discount
+            else
+                this.shopdoc.discounts.splice(this.shopdoc.discounts.findIndex(x => x.level === level), 1)
+        } else {
+            this.shopdoc.discounts.push({
+                level,
+                discount,
+                id
+            })
         }
-        return this.interaction.editReply({ embeds: [new Embed({ type: "success", data: { title: "¡Eliminado!" } })] });
+
+        await this.shopdoc.save();
+
+        return this.interaction.editReply({ embeds: [new Embed({ type: "success" })] });
     }
 
     async addItem(params) {
-        const newId = FindNewId(this.shop.items, "", "id");
+        const newId = FindNewId(this.shopdoc.items, "", "id");
 
         let success = new Embed({
             type: "success",
@@ -210,7 +328,7 @@ class Shop {
             }
         })
 
-        this.shop.items.push(
+        this.shopdoc.items.push(
             {
                 name: params.nombre.value,
                 description: params.descripcion.value,
@@ -219,8 +337,105 @@ class Shop {
             }
         )
 
-        await this.shop.save();
+        await this.shopdoc.save();
         return this.interaction.editReply({ embeds: [success] });
+    }
+
+    async editItem(params) {
+        const item = this.shopdoc.findItem(params.id.value, false);
+
+        // Mostrar la información actual del item
+        return await this.interaction.editReply({
+            embeds: [
+                new Embed()
+                    .defTitle(`Editar la información del item con ID \`${item.id}\``)
+                    .defDesc(`▸ **${item.name}**.
+${codeBlock(item.description)}
+▸ **${this.config.currency.emoji}${item.price.toLocaleString("es-CO")}**.
+▸ **+${this.config.currency.emoji}${item.interest.toLocaleString("es-CO")}** por compra.`)
+                    .defColor(Colores.verdeclaro)
+            ], components: [
+                new ActionRowBuilder()
+                    .setComponents(
+                        new ButtonBuilder()
+                            .setCustomId(`itemInfo-${item.id}-${this.config.info.type}`)
+                            .setLabel("Información")
+                            .setEmoji("📰")
+                            .setStyle(ButtonStyle.Primary),
+                        new ButtonBuilder()
+                            .setCustomId(`itemPrice-${item.id}-${this.config.info.type}`)
+                            .setLabel("Precio")
+                            .setEmoji("💰")
+                            .setStyle(ButtonStyle.Primary),
+                    )
+            ]
+        })
+    }
+
+    async editInfo(id, data) {
+        const item = this.shopdoc.findItem(id, false)
+
+        for (const prop of Object.keys(data)) {
+            const value = data[prop];
+            if (!value) continue;
+
+            switch (prop) {
+                case "name":
+                    item.name = value;
+                    break;
+                case "desc":
+                    item.description = value;
+                    break;
+                case "price":
+                    item.price = value;
+                    break;
+                case "interest":
+                    item.interest = value;
+                    break;
+            }
+        }
+
+        await this.shopdoc.save();
+        await this.interaction.editReply({ embeds: [this.#updated] });
+    }
+
+    async removeItem(itemId) {
+        const index = this.shopdoc.findItemIndex(itemId);
+        if (!index) throw this.noitem;
+
+        console.log("🗑️ Eliminando %s de la tienda e inventarios del Guild %s", this.shopdoc.findItem(itemId), this.interaction.guild.id)
+
+        this.shopdoc.items.splice(index, 1);
+        await this.shopdoc.save();
+
+        // eliminar de los inventarios
+        const users = await Users.find({ guild_id: this.interaction.guild.id });
+        for await (const user of users) {
+            let i = user.data.inventory.findIndex(x => x.item_id === itemId && x.shopType === this.config.info.type)
+
+            if (i != -1) {
+                console.log("🗑️ Eliminando del inventario de %s", user.user_id)
+                user.data.inventory.splice(i, 1);
+                await user.save();
+            }
+        }
+        return this.interaction.editReply({ embeds: [new Embed({ type: "success", data: { title: "¡Eliminado!" } })] });
+    }
+
+    async toggleItem(itemId, duration = "50y") {
+        let item = this.shopdoc.findItem(itemId, false)
+
+        if (item.disabled) {
+            item.disabled = false
+            item.disabled_until = null
+        } else {
+            item.disabled = true
+            item.disabled_until = moment().add(ms(duration ?? "50y"), "ms");
+        }
+
+        await this.shopdoc.save();
+
+        return this.interaction.editReply({ embeds: [this.#updated] });
     }
 
     async editUse(params) {
@@ -232,7 +447,7 @@ class Shop {
         const notValidCombination = new BadParamsError(this.interaction, "Si se usa un tipo Item, **no puede eliminarse**");
         const dsError = new BadParamsError(this.interaction, "Si el item es de la DarkShop, **debe tener**: `efecto`");
 
-        const item = this.shop.findItem(params.id.value, false);
+        const item = this.shopdoc.findItem(params.id.value, false);
         if (!item) throw this.noitem;
 
         item.reply = params.reply?.value ?? item.reply;
@@ -247,7 +462,7 @@ class Shop {
             use.objetive === ItemObjetives.Boost
         ) ? params.role?.value : params.cantidad?.value;
 
-        use.effect = this.isDarkShop ? params.efecto?.value : null;
+        use.effect = this.#isDarkShop ? params.efecto?.value : null;
 
         use.item_info.type = params.especial?.value ?? use.item_info.type;
         use.item_info.duration = (use.objetive === ItemObjetives.Role ||
@@ -275,155 +490,29 @@ class Shop {
         }
 
         // ds verification
-        if (this.isDarkShop) {
+        if (this.#isDarkShop) {
             if (!use.effect) throw dsError;
         }
 
-        await this.shop.save();
-        return this.interaction.editReply({ embeds: [this.updated] });
+        await this.shopdoc.save();
+        return this.interaction.editReply({ embeds: [this.#updated] });
     }
 
-    async editItem(params, subcommand) {
-        const item = this.shop.findItem(params.id.value, false);
-        if (!item) throw this.noitem;
-
-        switch (subcommand) {
-            case "name":
-                await this.#editName(item, params.nombre.value);
-                break;
-            case "desc":
-                await this.#editDesc(item, params.descripcion.value);
-                break;
-
-            case "price":
-                await this.#editPrice(item, params.precio.value, params.interes?.value);
-                break;
-        }
-
-        return this.interaction.editReply({ embeds: [this.updated] })
-    }
-
-    async showAllItems() {
-        this.user = await Users.getWork({
-            user_id: this.interaction.user.id,
-            guild_id: this.interaction.guild.id
-        });
-
-        if (!this.doc) await this.#fetchDoc();
-
-        this.base.description = `**—** [NOT READY]: Falta el uso (${this.client.mentionCommand("admin items use-info")})\n**—** [HIDDEN]: Item desactivado (${this.client.mentionCommand("admin items toggle")})\n**—** [✅]: El item es visible y usable para cualquiera.`;
-        this.base.addon = this.base.addon.substring(0, 2) + "{publicInfo} — ID: " + this.base.addon.substring(2, this.base.addon.length - 4) + `\n+ ${this.isDarkShop ? this.Emojis.DarkCurrency : this.Emojis.Currency}{item_interest}** al comprarlo.\n\n`
-
-        this.shop.items.forEach((item, index) => {
-            let publicInfo;
-            if (!item.use_info.action) publicInfo = "[NOT READY] ";
-            else if (item.disabled) publicInfo = "[HIDDEN] ";
-            else publicInfo = "[✅] ";
-
-            let price = this.determinePrice(this.user, item, true, true);
-
-            this.items.set(item.id, {
-                item_name: item.name,
-                item_desc: item.description,
-                item_price: price,
-                item_interest: item.interest,
-                item_id: item.id,
-                publicInfo,
-                index
-            })
-        });
-
-        return this.#prepareInit();
-    }
-
-    async addDiscount(level, discount) {
-        const id = FindNewId(await Shops.find(), "discounts", "id");
-
-        let q = this.shop.discounts.find(x => x.level === level);
-        if (q) {
-            if (discount > 0) q.discount = discount
-            else
-                this.shop.discounts.splice(this.shop.discounts.findIndex(x => x.level === level), 1)
-        } else {
-            this.shop.discounts.push({
-                level,
-                discount,
-                id
-            })
-        }
-
-        await this.shop.save();
-
-        return this.interaction.editReply({ embeds: [new Embed({ type: "success" })] });
-    }
-
-    async toggleItem(itemId, duration = "50y") {
-        let item = this.shop.findItem(itemId, false)
-
-        if (item.disabled) {
-            item.disabled = false
-            item.disabled_until = null
-        } else {
-            item.disabled = true
-            item.disabled_until = moment().add(ms(duration ?? "50y"), "ms");
-        }
-
-        await this.shop.save();
-
-        return this.interaction.editReply({ embeds: [this.updated] });
-    }
-
-    async #fetchDoc() {
-        this.doc = await Guilds.getWork(this.interaction.guild.id);
-        this.average = await FindAverage(this.interaction.guild);
-
-        if (this.isDarkShop) {
-            this.darkshop = new DarkShop(this.interaction.guild);
-            this.darkshopEquivalency = await this.darkshop.equals(null, this.user.economy.dark.currency)
-        }
-    }
-
-    async #prepareInit(options = {}) {
-        const interactive = new InteractivePages(this.base, this.items, 3, options)
-        this.pages = interactive.pages;
-
-        try {
-            await interactive.init(this.interaction);
-        } catch (err) {
-            console.log(err);
-        }
-    }
-
-    async #editName(item, value) {
-        item.name = value;
-        return this.shop.save();
-    }
-
-    async #editDesc(item, value) {
-        item.description = value;
-        return this.shop.save();
-    }
-
-    async #editPrice(item, value, interest_value) {
-        item.price = value;
-        item.interest = interest_value ?? 0;
-        return this.shop.save();
-    }
-
+    /** ------------------ UTILIDAD ------------------ */
     #discountsWork(user, precio) {
         const inital_price = precio;
         const user_level = user.economy.global.level;
-        const discounts = this.shop.discounts;
+        const discounts = this.shopdoc.discounts;
 
-        if (!discounts || this.isDarkShop) return;
+        if (!discounts) return;
 
         // descuentos
         let query = discounts?.filter(x => user_level >= x.level)
-            .sort(function (a, b) { // ordenar el array mayor a menor, por array.level
-                if (a.level > b.level) {
+            .sort(function (a, b) { // ordenar el array mayor a menor, por cantidad de descuento
+                if (a.discount > b.discount) {
                     return -1;
                 }
-                if (a.level < b.level) {
+                if (a.discount < b.discount) {
                     return 1;
                 }
 
@@ -453,17 +542,17 @@ class Shop {
 
         // nuevo precio a partir de interés
         const interest = item.interest;
-        const searchInterest = x => (x.isDarkShop === this.isDarkShop) && (x.item_id === item.id);
+        const searchInterest = x => (x.shopType === this.config.info.type) && (x.item_id === item.id);
         const totalpurchases = user.data.purchases.find(searchInterest)?.quantity ?? 0;
 
         const interestPrice = originalPrice + (totalpurchases * interest);
         let precio = interestPrice;
 
         // para calmar a los mr inversiones
-        if (this.doc.toAdjust(this.isDarkShop ? "darkshop" : "shop")) {
+        if (this.#doc.toAdjust(new Enum(ShopTypes).translate(this.config.info.type).toLowerCase())) {
             let media = 0;
-            this.shop.items.forEach(i => media += i.price);
-            media /= this.shop.items.length;
+            this.shopdoc.items.forEach(i => media += i.price);
+            media /= this.shopdoc.items.length;
 
             let multidiff = Math.floor(this.average / media);
 
@@ -471,7 +560,7 @@ class Shop {
             console.log("🏳️ dinero/media = %s", multidiff)
 
             if (multidiff > 100) {
-                let fix = this.isDarkShop ? multidiff / 50 : multidiff * 0.5;
+                let fix = this.#isDarkShop ? multidiff / 50 : multidiff * 0.5;
                 console.log("🟩 Fixing %s with %s", precio, fix)
                 //console.log(this.average*0.1, "es el maximo")
                 precio *= fix;

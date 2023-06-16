@@ -1,5 +1,5 @@
 const { SlashCommandIntegerOption } = require("discord.js");
-const { Command, Shop, Confirmation, ShopTypes, Enum, ItemActions, ItemObjetives, ItemEffects, ItemTypes, BoostTypes, BoostObjetives, Store } = require("../../../src/utils");
+const { Command, Shop, Confirmation, ShopTypes, Enum, ItemActions, ItemObjetives, ItemEffects, ItemTypes, BoostTypes, BoostObjetives } = require("../../../src/utils");
 
 const command = new Command({
     name: "admin-shop",
@@ -159,7 +159,7 @@ command.execute = async (interaction, models, params, client) => {
     const { subcommand } = params;
     const { nivel, descuento, id, tipo } = params[subcommand];
 
-    const shop = await new Store(interaction)
+    const shop = await new Shop(interaction)
         .setType(tipo.value)
         .build(params.getDoc(), params.getUser());
 

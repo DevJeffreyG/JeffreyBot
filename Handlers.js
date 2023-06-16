@@ -2,7 +2,7 @@ const { BaseInteraction, InteractionType, time, CommandInteraction, MessageCompo
 
 const { Ticket, Suggestion, Button } = require("./src/handlers/");
 const { Bases, Colores } = require("./src/resources");
-const { ErrorEmbed, Embed, Categories, ValidateDarkShop, Confirmation, HumanMs, Modal, CustomEmbed, CustomTrophy, Enum, ShopTypes, Store } = require("./src/utils");
+const { ErrorEmbed, Embed, Categories, ValidateDarkShop, Confirmation, HumanMs, Modal, CustomEmbed, CustomTrophy, Enum, ShopTypes, Shop } = require("./src/utils");
 
 const { CommandNotFoundError, ToggledCommandError, DiscordLimitationError, BadCommandError, SelfExec, ModuleDisabledError } = require("./src/errors/");
 
@@ -436,11 +436,11 @@ class Handlers {
                 const shopType = Number(splittedId[2]);
                 await this.interaction.deferReply({ ephemeral: true });
 
-                const store = await new Store(this.interaction)
+                const shop = await new Shop(this.interaction)
                     .setType(shopType)
                     .build(this.params.getDoc(), this.params.getUser());
 
-                return await store.editInfo(id, recieved);
+                return await shop.editInfo(id, recieved);
             }
         }
     }
