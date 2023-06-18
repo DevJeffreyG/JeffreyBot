@@ -10,17 +10,18 @@ class Collector {
     /**
      * 
      * @param {CommandInteraction} interaction 
-     * @param {{filter: Function, time: Number, max: Number}} options 
+     * @param {{filter: Function, time: Number, max: Number, wait: Boolean}} options 
      * @param {Boolean} stopHandler 
      */
-    constructor(interaction, options = { filter, time, max }, stopHandler = false, defer = true) {
+    constructor(interaction, options = { filter, time, max, wait }, stopHandler = false, defer = true) {
         this.interaction = interaction;
         this.client = this.interaction.client;
         this.filter = options.filter;
         this.time = options.time ?? ms("1m");
+        this.wait = options.wait ?? false;
         this.defer = defer;
 
-        this.collector = this.interaction.channel.createMessageComponentCollector({ filter: this.filter, time: this.time, max: options.max });
+        this.collector = this.wait ? this.interaction.channel.awaitMessageComponent({ filter: this.filter, time: this.time, max: options.max }) : this.interaction.channel.createMessageComponentCollector({ filter: this.filter, time: this.time, max: options.max });
 
         if (!stopHandler) this.handle();
     }
@@ -37,33 +38,35 @@ class Collector {
 
         this.client.activeCollectors.push({ manager: this, collector: this.collector, userid: this.interaction.user.id, channelid: this.interaction.channel.id, commandName: this.interaction.commandName });
 
-        this.collector.on("collect", async i => {
-            try {
-                if (!i.deferred && this.defer) await i.deferUpdate();
-            } catch (err) {
-                console.log("⚠️ %s", err)
-            };
-        });
+        if (!this.wait) {
+            this.collector.on("collect", async i => {
+                try {
+                    if (!i.deferred && this.defer) await i.deferUpdate();
+                } catch (err) {
+                    console.log("⚠️ %s", err)
+                };
+            });
 
-        this.collector.on("end", async (collected, reason) => {
-            let index = this.client.activeCollectors.findIndex(x => x.collector === this.collector && x.userid === this.interaction.user.id);
-            if (index != -1) {
-                this.client.activeCollectors.splice(index, 1);
-            } else {
-                console.log(`🟥 NO SE ELIMINÓ DE LOS ACTIVECOLLECTORS !!`)
-                console.log(this.raw());
-            }
+            this.collector.on("end", async (collected, reason) => {
+                let index = this.client.activeCollectors.findIndex(x => x.collector === this.collector && x.userid === this.interaction.user.id);
+                if (index != -1) {
+                    this.client.activeCollectors.splice(index, 1);
+                } else {
+                    console.log(`🟥 NO SE ELIMINÓ DE LOS ACTIVECOLLECTORS !!`)
+                    console.log(this.raw());
+                }
 
-            try {
-                if (reason === EndReasons.OldCollector || reason === EndReasons.StoppedByUser) return await this.interaction.deleteReply();
-                if (reason === EndReasons.Done) return await this.interaction.editReply({ embeds: [new Embed({ type: "success" })], components: [], content: null });
-                if (reason === EndReasons.Deleted) return;
-                if (this.evalOnEnd) this.evalOnEnd(collected, reason);
-            } catch (err) {
-                console.log("Error %s", err)
-            }
+                try {
+                    if (reason === EndReasons.OldCollector || reason === EndReasons.StoppedByUser) return await this.interaction.deleteReply();
+                    if (reason === EndReasons.Done) return await this.interaction.editReply({ embeds: [new Embed({ type: "success" })], components: [], content: null });
+                    if (reason === EndReasons.Deleted) return;
+                    if (this.evalOnEnd) this.evalOnEnd(collected, reason);
+                } catch (err) {
+                    console.log("Error %s", err)
+                }
 
-        })
+            })
+        }
 
         return this
     }
