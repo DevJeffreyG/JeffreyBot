@@ -22,7 +22,7 @@ command.execute = async (interaction, models, params, client) => {
 
     let pregEmbed = new Embed()
         .defColor(Colores.verde)
-        .defAuthor({ text: `${interaction.user.tag}`, icon: interaction.member.displayAvatarURL() })
+        .defAuthor({ text: `${interaction.user.username}`, icon: interaction.member.displayAvatarURL() })
         .defField("Pregunta", pregunta.value)
         .defField("Respuesta", replies[answer]);
 

@@ -85,7 +85,7 @@ command.execute = async (interaction, models, params, client) => {
         let ruleTxt = doc.data.rules.find(x => x.id === rule).name;
 
         let toConfirm = [
-            `¿Estás segur@ de warnear a **${member.user.tag}**?`,
+            `¿Estás segur@ de warnear a **${member.user.username}**?`,
             `Razón: Infringir la regla N°${ruleNo} (${ruleTxt})`,
             `Pruebas:`,
             pruebasEmbed
@@ -108,8 +108,8 @@ command.execute = async (interaction, models, params, client) => {
 
         if (!hasSoft) {
             let skipConfirmation = [
-                `**${member.user.tag}** __NO__ tiene el **softwarn** de la regla "${ruleTxt}"`,
-                `¿Estás segur@ de warnear a **${member.user.tag}**?`,
+                `**${member.user.username}** __NO__ tiene el **softwarn** de la regla "${ruleTxt}"`,
+                `¿Estás segur@ de warnear a **${member.user.username}**?`,
                 `Razón: Infringir la regla N°${ruleNo} (${ruleTxt})`,
                 pruebasEmbed
             ];
@@ -146,8 +146,8 @@ command.execute = async (interaction, models, params, client) => {
             data: {
                 title: "Warn",
                 desc: [
-                    `Usuario: **${member.user.tag}**`,
-                    `Moderador: **${interaction.user.tag}**`,
+                    `Usuario: **${member.user.username}**`,
+                    `Moderador: **${interaction.user.username}**`,
                     `Warns actuales: **${user.warns.length}**`,
                     `Por infringir la regla: **${ruleTxt}**`,
                     `ID de infracción: \`${newId}\``

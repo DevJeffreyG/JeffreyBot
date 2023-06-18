@@ -300,7 +300,7 @@ command.execute = async (interaction, models, params, client) => {
             embeds: [
                 new Embed()
                     .defAuthor({ text: `Cambios en la configuración`, title: true })
-                    .defDesc(`**—** **${interaction.user.tag}** hizo cambios en la configuración del bot.
+                    .defDesc(`**—** **${interaction.user.username}** hizo cambios en la configuración del bot.
 **—** En \`/config (...?) ${subcommand ?? subgroup}\`: ${hyperlink("Mensaje", messageLink(interaction.channel.id, message.id))}`)
                     .defColor(Colores.verde)
                     .defFooter({ timestamp: true })

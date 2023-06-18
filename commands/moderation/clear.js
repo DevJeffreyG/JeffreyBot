@@ -64,7 +64,7 @@ command.execute = async (interaction, models, params, client) => {
     new Log(interaction)
         .setReason(LogReasons.MsgClear)
         .setTarget(ChannelModules.ModerationLogs)
-        .send({ content: `- **${interaction.user.tag}** ha eliminado ${count} mensajes en ${interaction.channel}.` })
+        .send({ content: `- **${interaction.user.username}** ha eliminado ${count} mensajes en ${interaction.channel}.` })
 
     return interaction.editReply({
         embeds: [

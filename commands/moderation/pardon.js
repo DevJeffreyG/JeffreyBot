@@ -101,8 +101,8 @@ command.execute = async (interaction, models, params, client) => {
         data: {
             title: `Pardon ${textInfraction}`,
             desc: [
-                `Miembro: **${member.user.tag}**`,
-                `Moderador: **${interaction.user.tag}**`,
+                `Miembro: **${member.user.username}**`,
+                `Moderador: **${interaction.user.username}**`,
                 `${textInfraction + "s"} actuales: **${infractions.length}**`
             ]
         }

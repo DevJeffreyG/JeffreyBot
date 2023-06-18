@@ -108,7 +108,7 @@ command.execute = async (interaction, models, params, client) => {
 
         // denegar todos los permisos a cada role en el canal actual
         await interaction.editReply({ content: `${Loading} Editando el canal actual` })
-        await channel.edit({ permissionOverwrites: newChannelPerms, reason: `[BULK] Lockdown por ${interaction.user.tag}` })
+        await channel.edit({ permissionOverwrites: newChannelPerms, reason: `[BULK] Lockdown por ${interaction.user.username}` })
 
         doc.data.locked_channels.push(newLock);
         doc.save();
@@ -116,7 +116,7 @@ command.execute = async (interaction, models, params, client) => {
         await new Log(interaction)
             .setReason(LogReasons.Settings)
             .setTarget(ChannelModules.ModerationLogs)
-            .send({ content: `- **${interaction.user.tag}** inició lockdown en ${interaction.channel}.` });
+            .send({ content: `- **${interaction.user.username}** inició lockdown en ${interaction.channel}.` });
     }
 
     async function unlock() {
@@ -155,7 +155,7 @@ command.execute = async (interaction, models, params, client) => {
         }))
 
         // actualizarlo con la informacion traducida a la original
-        await channel.edit({ permissionOverwrites: oldPermissions, reason: `[BULK] Se terminó el lockdown (${interaction.user.tag})` })
+        await channel.edit({ permissionOverwrites: oldPermissions, reason: `[BULK] Se terminó el lockdown (${interaction.user.username})` })
             .catch(err => {
                 console.log(err)
                 throw discordError;
@@ -170,7 +170,7 @@ command.execute = async (interaction, models, params, client) => {
         await new Log(interaction)
             .setReason(LogReasons.Settings)
             .setTarget(ChannelModules.ModerationLogs)
-            .send({ content: `- **${interaction.user.tag}** detuvo el lockdown en ${interaction.channel}.` });
+            .send({ content: `- **${interaction.user.username}** detuvo el lockdown en ${interaction.channel}.` });
 
         return interaction.editReply({ content: `${client.Emojis.Check} Listo` })
     }

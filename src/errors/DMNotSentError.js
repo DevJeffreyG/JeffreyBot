@@ -14,7 +14,7 @@ class DMNotSentError extends JeffreyBotError {
         this.embed = new ErrorEmbed(interaction, {
             type: this.name,
             data: {
-                tag: member.user.tag,
+                tag: member.user.username,
                 error
             }
         })

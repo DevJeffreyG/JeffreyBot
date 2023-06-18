@@ -89,7 +89,7 @@ class Button {
                                 }
                             })]
                     })
-                    console.log(`💬 Se eliminó por AUTOROLES ${role.name} a ${this.interaction.user.tag}`);
+                    console.log(`💬 Se eliminó por AUTOROLES ${role.name} a ${this.interaction.user.username}`);
                 } else {
                     await this.interaction.member.roles.add(role);
                     await this.interaction.editReply({
@@ -100,7 +100,7 @@ class Button {
                                 }
                             })]
                     })
-                    console.log(`💬 Se agregó por AUTOROLES ${role.name} a ${this.interaction.user.tag}`);
+                    console.log(`💬 Se agregó por AUTOROLES ${role.name} a ${this.interaction.user.username}`);
 
                     // buscar toggles
                     if (autorole.toggle_group) {
@@ -127,7 +127,7 @@ class Button {
                     .send({
                         embeds: [
                             new ErrorEmbed()
-                                .defDesc(`Hubo un error usando un AutoRole (\`${this.customid}\`) por ${this.interaction.user.tag}:${codeBlock("js", err)}`)
+                                .defDesc(`Hubo un error usando un AutoRole (\`${this.customid}\`) por ${this.interaction.user.username}:${codeBlock("js", err)}`)
                         ]
                     });
             }

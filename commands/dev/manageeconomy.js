@@ -87,7 +87,7 @@ command.execCurrency = async (interaction, models, params, client) => {
     await user.addCurrency(cantidad.value)
 
     let embed = new Embed()
-        .defAuthor({ text: `¡Dinero para ti, ${usuario.member.user.tag}!`, icon: usuario.member.guild.iconURL() })
+        .defAuthor({ text: `¡Dinero para ti, ${usuario.member.user.username}!`, icon: usuario.member.guild.iconURL() })
         .defDesc(`**+${Currency}${cantidad.value.toLocaleString('es-CO')}
 — ${Currency}${user.economy.global.currency.toLocaleString('es-CO')}**`)
         .defColor(Colores.verde)
@@ -106,7 +106,7 @@ command.execDarkCurrency = async (interaction, models, params, client) => {
     await user.addDarkCurrency(cantidad.value);
 
     let embed = new Embed()
-        .defAuthor({ text: `¡Dinero para ti, ${usuario.member.user.tag}!`, icon: usuario.member.guild.iconURL() })
+        .defAuthor({ text: `¡Dinero para ti, ${usuario.member.user.username}!`, icon: usuario.member.guild.iconURL() })
         .defDesc(`**+${DarkCurrency}${cantidad.value.toLocaleString('es-CO')}
 — ${DarkCurrency}${user.economy.dark.currency.toLocaleString('es-CO')}**`)
         .defColor(Colores.verde)

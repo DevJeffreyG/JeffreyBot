@@ -48,11 +48,11 @@ command.execute = async (interaction, models, params, client) => {
 
     let boostEmbed = new Embed(embed)
         .defColor(Colores.verdeclaro)
-        .defAuthor({ text: `Boosts de ${member.user.tag}`, icon: member.guild.iconURL({ dynamic: true }) })
+        .defAuthor({ text: `Boosts de ${member.user.username}`, icon: member.guild.iconURL({ dynamic: true }) })
         .defDesc(null)
 
     let trophiesEmbed = new Embed(embed)
-        .defAuthor({ text: `Trofeos de ${member.user.tag}`, icon: member.guild.iconURL({ dynamic: true }) })
+        .defAuthor({ text: `Trofeos de ${member.user.username}`, icon: member.guild.iconURL({ dynamic: true }) })
         .defColor(Colores.verde)
         .defDesc(null)
 

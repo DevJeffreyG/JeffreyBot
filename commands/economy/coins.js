@@ -77,7 +77,7 @@ command.execute = async (interaction, models, params, client) => {
 
     if (index.author) {
         let rAuthor = guild.members.cache.find(x => x.id === index.author);
-        let suggestor = rAuthor ? rAuthor.user.tag : "un usuario";
+        let suggestor = rAuthor ? rAuthor.user.username : "un usuario";
         let img = rAuthor ? rAuthor.displayAvatarURL() : guild.iconURL();
         embed.defFooter({ text: `• Respuesta sugerida por ${suggestor}`, icon: img })
     }

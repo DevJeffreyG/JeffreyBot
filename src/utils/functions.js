@@ -555,11 +555,11 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
           ]
         })
           .then(() => {
-            console.log("🟢 Se recordó a %s del cumpleaños de %s", member.user.tag, reminder)
+            console.log("🟢 Se recordó a %s del cumpleaños de %s", member.user.username, reminder)
           })
           .catch(err => {
             console.log(err)
-            console.log("⚠️ No se pudo enviar el recordatorio a %s", member.user.tag)
+            console.log("⚠️ No se pudo enviar el recordatorio a %s", member.user.username)
             console.log("⚠️ Se eliminará el recordatorio")
 
             dbUser.data.birthday_reminders.splice(dbUser.getBirthdayReminders().findIndex(x => x === reminder), 1)
@@ -1275,7 +1275,7 @@ const AfterInfraction = async function (user, data) {
       if (totalWarns >= 2) {
         let infoEmbed = new Embed()
           .defAuthor({ text: `Información`, icon: client.EmojisObject.Danger.url })
-          .defDesc(`**—** ${member.user.tag}, este es tu **warn número ❛ \`2\` ❜**
+          .defDesc(`**—** ${member.user.username}, este es tu **warn número ❛ \`2\` ❜**
 *— ¿Qué impacto tendrá este warn?*
 **—** Tranquil@. Este warn no afectará en nada tu estadía en el servidor, sin embargo; el siguiente warn será un **ban de un día**.
 **—** Te sugiero comprar un **-1 Warn** en la tienda del servidor. *( \`/shop\` para más info de precios, etc. )*`)

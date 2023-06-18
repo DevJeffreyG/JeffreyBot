@@ -21,7 +21,7 @@ command.execute = async (interaction, models, params, client) => {
 
     let error = new Embed()
         .defColor(Colores.rojo)
-        .defAuthor({ text: `${member.user.tag}`, icon: member.displayAvatarURL() })
+        .defAuthor({ text: `${member.user.username}`, icon: member.displayAvatarURL() })
         .defDesc(`No tienes warns.`);
 
     const user = params.getUser();
@@ -34,12 +34,12 @@ command.execute = async (interaction, models, params, client) => {
     }
 
     let warnsE = new Embed()
-        .defAuthor({ text: `${member.user.tag}'s warns`, icon: member.displayAvatarURL() })
+        .defAuthor({ text: `${member.user.username}'s warns`, icon: member.displayAvatarURL() })
         .defDesc(`**Número de warns ** ❛ \`${warns.length}\` ❜`)
         .defColor(Colores.verde);
 
     let softwarnsE = new Embed()
-        .defAuthor({ text: `${member.user.tag}'s softwarns`, icon: member.displayAvatarURL() })
+        .defAuthor({ text: `${member.user.username}'s softwarns`, icon: member.displayAvatarURL() })
         .defDesc(`**Número de softwarns ** ❛ \`${softwarns.length}\` ❜`)
         .defColor(Colores.verde);
 

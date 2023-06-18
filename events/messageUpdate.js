@@ -17,7 +17,7 @@ module.exports = async (client, oldMessage, message) => {
 
   await GenerateLog(message.guild, {
     header: `Se ha editado un mensaje`,
-    footer: `${member.user.tag}`,
+    footer: `${member.user.username}`,
     description: [
       `Ahora: ${codeBlock(message.content)}`,
       `Antes: ${codeBlock(oldMessage.content) ?? codeBlock("js", "null")}`,

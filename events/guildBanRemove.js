@@ -10,7 +10,7 @@ module.exports = async (client, ban) => {
         logReason: LogReasons.Ban,
         header: `Se ha desbaneado un usuario`,
         description: [
-            `**${ban.user.tag}** (\`${ban.user.id}\`)`,
+            `**${ban.user.username}** (\`${ban.user.id}\`)`,
             `Baneado por: ${ban.reason}.`
         ],
         color: Colores.verdejeffrey

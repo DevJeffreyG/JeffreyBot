@@ -30,7 +30,7 @@ module.exports = async (client, oldMember, newMember) => {
                         .send({
                             embeds: [
                                 new ErrorEmbed()
-                                    .defDesc(`**No se pudo agregar el role (${roleId}) a ${newMember.user.tag}**:\n${codeBlock("json", err)}`)
+                                    .defDesc(`**No se pudo agregar el role (${roleId}) a ${newMember.user.username}**:\n${codeBlock("json", err)}`)
                             ]
                         });
 
@@ -48,7 +48,7 @@ module.exports = async (client, oldMember, newMember) => {
                 logReason: LogReasons.TimeOut,
                 header: `Se ha muteado un usuario`,
                 description: [
-                    `**${newMember.user.tag}** (\`${newMember.user.id}\`)`,
+                    `**${newMember.user.username}** (\`${newMember.user.id}\`)`,
                     `Hasta ${time(newTimeout, "D")} ${time(newTimeout, "T")}.`
                 ],
                 color: Colores.verdejeffrey
@@ -60,7 +60,7 @@ module.exports = async (client, oldMember, newMember) => {
                 logReason: LogReasons.TimeOut,
                 header: `Se ha desmuteado un usuario`,
                 description: [
-                    `**${newMember.user.tag}** (\`${newMember.user.id}\`)`,
+                    `**${newMember.user.username}** (\`${newMember.user.id}\`)`,
                 ],
                 color: Colores.verdejeffrey
             });

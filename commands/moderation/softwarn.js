@@ -86,7 +86,7 @@ command.execute = async (interaction, models, params, client) => {
         let ruleTxt = doc.data.rules.find(x => x.position === rule).name;
 
         let toConfirm = [
-            `¿Estás segur@ de softwarnear a **${member.user.tag}**?`,
+            `¿Estás segur@ de softwarnear a **${member.user.username}**?`,
             `Llamado de atención: Incumplimiento de la regla N°${ruleNo} (${ruleTxt})`,
             `Pruebas:`,
             pruebasEmbed
@@ -124,8 +124,8 @@ command.execute = async (interaction, models, params, client) => {
             data: {
                 title: "Softwarn",
                 desc: [
-                    `Usuario: **${member.user.tag}**`,
-                    `Moderador: **${interaction.user.tag}**`,
+                    `Usuario: **${member.user.username}**`,
+                    `Moderador: **${interaction.user.username}**`,
                     `Softwarns actuales: **${user.softwarns.length}**`,
                     `Por infringir la regla: **${ruleTxt}**`,
                     `ID de infracción: \`${newId}\``

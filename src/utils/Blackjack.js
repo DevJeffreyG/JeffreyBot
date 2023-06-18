@@ -291,7 +291,7 @@ class Blackjack {
     }
 
     async #hit() {
-        console.log("🟢 %s ha pedido otra carta", this.interaction.user.tag)
+        console.log("🟢 %s ha pedido otra carta", this.interaction.user.username)
 
         let card = this.#borrowCards(1);
         this.player_hand = this.player_hand.concat(card); // agregar la nueva carta a la mano
@@ -306,7 +306,7 @@ class Blackjack {
     }
 
     async #stand() {
-        console.log("🟢 %s se ha plantado", this.interaction.user.tag)
+        console.log("🟢 %s se ha plantado", this.interaction.user.username)
 
         let hit = true;
         let saved = 0;
@@ -353,7 +353,7 @@ class Blackjack {
     }
 
     async #double() {
-        console.log("🟢 %s ha doblado decidió doblar su apuesta", this.interaction.user.tag);
+        console.log("🟢 %s ha doblado decidió doblar su apuesta", this.interaction.user.username);
 
         this.bet *= 2
 
@@ -466,7 +466,7 @@ class Blackjack {
 
                 this.user.economy.global.currency -= this.bet;
 
-                console.log("🔴 %s perdió %s %s en el Blackjack", this.interaction.user.tag, this.bet.toLocaleString("es-CO"), this.Emojis.Currency.name);
+                console.log("🔴 %s perdió %s %s en el Blackjack", this.interaction.user.username, this.bet.toLocaleString("es-CO"), this.Emojis.Currency.name);
             } else {
                 save = false;
                 this.embed

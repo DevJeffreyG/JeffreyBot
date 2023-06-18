@@ -6,7 +6,7 @@ module.exports = async (client, member) => {
 
     const doc = await Guilds.getWork(member.guild.id);
     let channel = member.guild.channels.cache.get(doc.getLogChannel("user_left"));
-    let tag = member.user.tag;
+    let tag = member.user.username;
 
     let despedidas = [
         `¡**${tag}** se ha ido a un lugar mejor...! A su casa.`,

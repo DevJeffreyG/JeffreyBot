@@ -35,7 +35,7 @@ command.execute = async (interaction, models, params, client) => {
         }
     }
 
-    interaction.editReply({ content: `**${miembro.user.tag}**\n${codeBlock("json", query)}` });
+    interaction.editReply({ content: `**${miembro.user.username}**\n${codeBlock("json", query)}` });
 }
 
 module.exports = command;

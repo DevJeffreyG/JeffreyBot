@@ -130,7 +130,7 @@ class Item {
 
         this.victimMember = this.victim ? victim : null; // this.victim es el doc de mongoose
 
-        console.log("🟢 %s está usando el item %s!", this.interaction.user.tag, this.item.name)
+        console.log("🟢 %s está usando el item %s!", this.interaction.user.username, this.item.name)
 
         const inventory = this.user.data.inventory;
         const inventoryFilter = x => x.use_id === id;
@@ -260,7 +260,7 @@ class Item {
             this.notfound.send().catch(e => console.error(e));
             return false;
         }
-        console.log("🗨️ Agregando el role %s a %s", role.name, this.member.user.tag);
+        console.log("🗨️ Agregando el role %s a %s", role.name, this.member.user.username);
 
         if (this.member.roles.cache.find(x => x === role)) {
             console.log("🔴 Ya tiene el role que da el item.")
@@ -316,7 +316,7 @@ class Item {
             return false;
         }
 
-        console.log("🗨️ Eliminando el role %s a %s por %s", role.name, this.member.user.tag, this.duration);
+        console.log("🗨️ Eliminando el role %s a %s por %s", role.name, this.member.user.username, this.duration);
 
         if (!this.member.roles.cache.find(x => x === role)) {
             console.log("🔴 No tiene el role que quita el item. %s", this.member.roles.cache)
@@ -350,7 +350,7 @@ class Item {
 
                 let randomPercentage = Number((Math.random() * 5).toFixed(1));
 
-                console.log("🟩 Se agregarán %s% al accuracy de %s", randomPercentage, this.interaction.user.tag)
+                console.log("🟩 Se agregarán %s% al accuracy de %s", randomPercentage, this.interaction.user.username)
                 this.user.economy.dark.accuracy += randomPercentage
                 if (this.user.economy.dark.accuracy > 90) this.user.economy.dark.accuracy = 90;
                 await this.user.save()
@@ -429,7 +429,7 @@ class Item {
     async #addBoost() {
         if (!await this.#darkshopWork()) return false;
         const role = this.interaction.guild.roles.cache.find(x => x.id === this.given);
-        console.log("🗨️ Agregando el role como Boost %s a %s", role?.name ?? "SIN ROL", this.interaction.user.tag);
+        console.log("🗨️ Agregando el role como Boost %s a %s", role?.name ?? "SIN ROL", this.interaction.user.username);
 
         if (this.member.roles.cache.find(x => x === role)) {
             console.log("🔴 Ya tiene el role que da el item. (BOOST)")
@@ -459,7 +459,7 @@ class Item {
 
         const role = this.interaction.guild.roles.cache.find(x => x.id === temprole.role_id);
 
-        console.log("🗨️ Eliminando el role %s a %s por %s", role?.name ?? "SIN ROL", this.member.user.tag, this.duration);
+        console.log("🗨️ Eliminando el role %s a %s por %s", role?.name ?? "SIN ROL", this.member.user.username, this.duration);
 
         /* if (role && !this.member.roles.cache.find(x => x === role)) {
             console.log("🔴 No tiene el role que te quita el item. %s", this.member.roles.cache)
@@ -504,21 +504,21 @@ class Item {
 
         let skipped = new Embed()
             .defAuthor({ text: `Interacción`, icon: this.interaction.client.EmojisObject.DarkShop.url })
-            .defDesc(`**—** ¡**${this.interaction.user.tag}** se ha volado la Firewall  y ha usado el item \`${this.item.name}\` en **${this.member.user.tag}**!`)
+            .defDesc(`**—** ¡**${this.interaction.user.username}** se ha volado la Firewall  y ha usado el item \`${this.item.name}\` en **${this.member.user.username}**!`)
             .defColor(Colores.negro)
-            .defFooter({ text: `${this.item.name} para ${this.member.user.tag}`, timestamp: true });
+            .defFooter({ text: `${this.item.name} para ${this.member.user.username}`, timestamp: true });
 
         let success = new Embed()
             .defAuthor({ text: `Interacción`, icon: this.interaction.client.EmojisObject.DarkShop.url })
-            .defDesc(`**—** ¡**${this.interaction.user.tag}** ha usado el item \`${this.item.name}\` en **${this.member.user.tag}**!`)
+            .defDesc(`**—** ¡**${this.interaction.user.username}** ha usado el item \`${this.item.name}\` en **${this.member.user.username}**!`)
             .defColor(Colores.negro)
-            .defFooter({ text: `${this.item.name} para ${this.member.user.tag}`, timestamp: true });
+            .defFooter({ text: `${this.item.name} para ${this.member.user.username}`, timestamp: true });
 
         let fail = new Embed()
             .defAuthor({ text: `Interacción`, icon: this.interaction.client.EmojisObject.DarkShop.url })
-            .defDesc(`**—** ¡**${this.interaction.user.tag}** ha querido usar el item \`${this.item.name}\` en **${this.member.user.tag}** pero NO HA FUNCIONADO!`)
+            .defDesc(`**—** ¡**${this.interaction.user.username}** ha querido usar el item \`${this.item.name}\` en **${this.member.user.username}** pero NO HA FUNCIONADO!`)
             .defColor(Colores.negro)
-            .defFooter({ text: `${this.item.name} para ${this.member.user.tag}`, timestamp: true });
+            .defFooter({ text: `${this.item.name} para ${this.member.user.username}`, timestamp: true });
 
         // como el efecto es negativo, hay que revisar la firewall
         const firewallItem = this.shop.items.find(x => x.use_info.item_info.type === ItemTypes.Firewall)
@@ -534,7 +534,7 @@ class Item {
 
             // eliminar el skip, se la salte o no
             if (this.user.hasItem(skipFirewallItem.id, ShopTypes.DarkShop)) {
-                console.log("⚪ Se eliminó el skip de firewall de %s", this.interaction.user.tag)
+                console.log("⚪ Se eliminó el skip de firewall de %s", this.interaction.user.username)
                 let skipIndex = this.user.data.inventory.findIndex(x => x.item_id === skipFirewallItem.id && x.isDarkShop)
 
                 console.log(skipIndex)
@@ -547,21 +547,21 @@ class Item {
                 await this.victim.save();
 
                 // enviar embed
-                dsEvents?.send({ content: `**${this.interaction.user.tag}** ➡️ **${this.member}**.`, embeds: [fail], allowedMentions: { parse: ["users"] } })
+                dsEvents?.send({ content: `**${this.interaction.user.username}** ➡️ **${this.member}**.`, embeds: [fail], allowedMentions: { parse: ["users"] } })
 
                 await this.#removeItemFromInv() // como es fallido, no llega al codigo base para que se elimine el item
                 return false;
             } else { // se salta la firewall
                 console.log("🟢 Se ha saltado la Firewall")
-                dsEvents?.send({ content: `**${this.interaction.user.tag}** ➡️ **${this.member}**.`, embeds: [skipped], allowedMentions: { parse: ["users"] } })
+                dsEvents?.send({ content: `**${this.interaction.user.username}** ➡️ **${this.member}**.`, embeds: [skipped], allowedMentions: { parse: ["users"] } })
                 return true
             }
         } else { // no tiene firewall
             if (this.victim.economy.global.level >= this.doc.settings.quantities.darkshop_level) {
-                dsEvents?.send({ content: `**${this.interaction.user.tag}** ➡️ **${this.member}**.`, embeds: [success], allowedMentions: { parse: ["users"] } })
+                dsEvents?.send({ content: `**${this.interaction.user.username}** ➡️ **${this.member}**.`, embeds: [success], allowedMentions: { parse: ["users"] } })
                 return true
             } else { // ni siquiera es parte de la red de la darkshop
-                dsEvents?.send({ content: `**${this.interaction.user.tag}** ➡️ **${this.member}**.`, embeds: [fail], allowedMentions: { parse: ["users"] } })
+                dsEvents?.send({ content: `**${this.interaction.user.username}** ➡️ **${this.member}**.`, embeds: [fail], allowedMentions: { parse: ["users"] } })
 
                 return false // para que no se elimine el item
             }

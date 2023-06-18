@@ -27,8 +27,8 @@ command.execute = async (interaction, models, params, client) => {
 
     if (usuario.user.bot) return interaction.editReply({ content: "No le voy a enviar un mensaje a un bot, perdona." })
 
-    let yoStr = mensaje.value.replace(new RegExp('{yo}', "g"), `**${interaction.user.tag}**`);
-    let final = yoStr.replace(new RegExp('{user}', "g"), `**${usuario.user.tag}**`)
+    let yoStr = mensaje.value.replace(new RegExp('{yo}', "g"), `**${interaction.user.username}**`);
+    let final = yoStr.replace(new RegExp('{user}', "g"), `**${usuario.user.username}**`)
 
     let embed = new Embed()
         .defAuthor({ text: "Hola:", icon: client.EmojisObject.Hola.url })

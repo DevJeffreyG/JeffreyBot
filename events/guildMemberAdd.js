@@ -7,7 +7,7 @@ const { Colores } = require("../src/resources");
 const { Users, Guilds } = require("mongoose").models;
 
 module.exports = async (client, member) => {
-  let tag = member.user.tag;
+  let tag = member.user.username;
   const guild = member.guild;
 
   if (!client.isThisFetched(guild.id)) await FetchThisGuild(client, guild);

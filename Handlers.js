@@ -446,7 +446,7 @@ class Handlers {
     }
 
     async #executeCommand(interaction, models, params, client) {
-        console.log(`-------- ${interaction.commandName} • por ${interaction.user.tag} (${interaction.user.id}) • en ${interaction.guild.name} (${interaction.guild.id}) ----------`)
+        console.log(`-------- ${interaction.commandName} • por ${interaction.user.username} (${interaction.user.id}) • en ${interaction.guild.name} (${interaction.guild.id}) ----------`)
 
         if (!this.executedCommand) throw new CommandNotFoundError(interaction);
         if (this.executedCommand.category === Categories.DarkShop) {

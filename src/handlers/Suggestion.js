@@ -101,7 +101,7 @@ class Suggestion {
 
                 let newembed = new Embed(this.interaction.message.embeds[0])
                     .defTitle(`Sugerencia aprobada el ${time(new Date(), "d")}`)
-                    .defFields([{ up: `Aprobada por ${this.interaction.user.tag}`, down: recievedModal.reasonInput }])
+                    .defFields([{ up: `Aprobada por ${this.interaction.user.username}`, down: recievedModal.reasonInput }])
                     .defFooter({ text: "Aprobada", icon: this.interaction.client.EmojisObject.Check.url, timestamp: true })
                     .defColor(Colores.verdeclaro);
 
@@ -140,7 +140,7 @@ ${codeBlock(suggestion.suggestion)}`)
 
                 let newembed = new Embed(this.interaction.message.embeds[0])
                     .defTitle(`Sugerencia rechazada el ${time(new Date(), "d")}`)
-                    .defFields([{ up: `Rechazada por ${this.interaction.user.tag}`, down: recievedModal.reasonInput }])
+                    .defFields([{ up: `Rechazada por ${this.interaction.user.username}`, down: recievedModal.reasonInput }])
                     .defFooter({ text: "Rechazada", icon: this.interaction.client.EmojisObject.Cross.url, timestamp: true })
                     .defColor(Colores.rojo);
 
@@ -163,7 +163,7 @@ ${codeBlock(suggestion.suggestion)}
 
                 let newembed = new Embed(this.interaction.message.embeds[0])
                     .defTitle(`Sugerencia invalidada el ${time(new Date(), "d")}`)
-                    .defFields([{ up: `Invalidada por ${this.interaction.user.tag}`, down: recievedModal.reasonInput }])
+                    .defFields([{ up: `Invalidada por ${this.interaction.user.username}`, down: recievedModal.reasonInput }])
                     .defFooter({ text: "Inválida", icon: this.interaction.client.EmojisObject.Error.url, timestamp: true })
                     .defColor(Colores.rojo)
 

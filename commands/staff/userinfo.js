@@ -55,7 +55,7 @@ command.execute = async (interaction, models, params, client) => {
 
 **— Discord**
 **Creación en**: ${time(member.user.createdAt)}.
-**Tag**: ${member.user.tag}`)
+**Tag**: ${member.user.username}`)
         .defThumbnail(member.displayAvatarURL())
         .defColor(Colores.verde)
 

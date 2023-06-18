@@ -48,7 +48,7 @@ command.execute = async (interaction, models, params, client) => {
         )
 
     let embed = new Embed()
-        .defAuthor({ text: interaction.user.tag, icon: interaction.member.displayAvatarURL() })
+        .defAuthor({ text: interaction.user.username, icon: interaction.member.displayAvatarURL() })
         .defTitle("Sugerencia")
         .defDesc(`**—** ${interaction.member} Sugiere:
 ${codeBlock(sugerencia)}

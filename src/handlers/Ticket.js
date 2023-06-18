@@ -255,7 +255,7 @@ class Ticket {
         // CREAR CANAL  
         let channel = await category.children.create({
             name: channelName,
-            topic: `**—** Ticket creado por **${this.interaction.user.tag}** (${time()})`,
+            topic: `**—** Ticket creado por **${this.interaction.user.username}** (${time()})`,
             permissionOverwrites: this.permissions
         });
 
@@ -279,7 +279,7 @@ class Ticket {
 
         await new Log(this.interaction)
             .setTarget(ChannelModules.StaffLogs)
-            .send({ content: `- **${this.interaction.user.tag}** ha creado un nuevo ticket **(${ticketType})**: ${channel}` });
+            .send({ content: `- **${this.interaction.user.username}** ha creado un nuevo ticket **(${ticketType})**: ${channel}` });
 
         return this.interaction.editReply({ content: `${this.client.Emojis.Check} Se ha creado el ticket: ${channel}`, embeds: [] });
     }
@@ -331,7 +331,7 @@ class Ticket {
 
         await new Log(interaction)
             .setTarget(ChannelModules.StaffLogs)
-            .send({ content: `- **${interaction.user.tag}** ha forzado el cierre del ticket: ${channel}` });
+            .send({ content: `- **${interaction.user.username}** ha forzado el cierre del ticket: ${channel}` });
 
         return interaction.editReply({ content: `${this.client.Emojis.Check} Se cerró el Ticket.`, embeds: [], components: [] });
     }
@@ -377,7 +377,7 @@ class Ticket {
 
         await new Log(interaction)
             .setTarget(ChannelModules.StaffLogs)
-            .send({ content: `- **${interaction.user.tag}** ha marcado como resuelto el ticket: ${channel}` });
+            .send({ content: `- **${interaction.user.username}** ha marcado como resuelto el ticket: ${channel}` });
 
         // eliminar al autor del ticket del canal
         return channel.permissionOverwrites.edit(ticket.created_by, {
@@ -432,7 +432,7 @@ class Ticket {
 
         await new Log(interaction)
             .setTarget(ChannelModules.StaffLogs)
-            .send({ content: `- **${interaction.user.tag}** ha reabierto el ticket: ${channel}` });
+            .send({ content: `- **${interaction.user.username}** ha reabierto el ticket: ${channel}` });
 
         // mencionar al creador original
         return channel.send(`¡${originalCreator}! El STAFF ha vuelto a abrir tu ticket.`);
