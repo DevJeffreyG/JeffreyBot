@@ -115,6 +115,13 @@ const GuildSchema = new Schema({
                 ]
             }
         ],
+        social_notifications: {
+            youtube: {
+                videos: [],
+                shorts: []
+            },
+            twitch: []
+        },
         average_currency: { type: String, default: 0 }
     },
     settings: {

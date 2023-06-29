@@ -897,160 +897,152 @@ const VaultWork = function (vault, user, interaction, notCodeEmbed) { // mostrar
 }
 
 /**
- * @param {Client} client 
+ * 
+ * @param {Guild} guild 
  */
-const handleUploads = async function (client) {
+const handleNotification = async function (guild) {
+  if (guild.id != Bases.owner.guildId && guild.id != Bases.dev.guild) return;
+  const doc = await Guilds.getWork(guild.id);
 
-  for await (const guild of client.guilds.cache.values()) {
-    if (guild.id != Bases.owner.guildId && guild.id != Bases.dev.guild) continue;
+  const youtubeChannel = guild.channels.cache.get(doc.getChannel("notifier.youtube_notif"));
+  const twitchChannel = guild.channels.cache.get(doc.getChannel("notifier.twitch_notif"));
 
-    const doc = await Guilds.getWork(guild.id);
+  const ytRole = guild.roles.cache.get(doc.getRole("notifications.youtube")) ?? "¡Gente!";
+  const shortsRole = guild.roles.cache.get(doc.getRole("notifications.youtube_shorts")) ?? "¡Gente!";
+  const twitchRole = guild.roles.cache.get(doc.getRole("notifications.twitch")) ?? "¡Gente!";
 
-    const bellytChannel = client.channels.cache.get(doc.getChannel("notifier.youtube_notif"));
-    const belltvChannel = client.channels.cache.get(doc.getChannel("notifier.twitch_notif"));
+  let data = doc.data.social_notifications;
 
-    const ytRole = guild.roles.cache.get(doc.getRole("notifications.youtube"));
-    const ytShortsRole = guild.roles.cache.get(doc.getRole("notifications.youtube_shorts"));
-    const tvRole = guild.roles.cache.get(doc.getRole("notifications.twitch"));
-
-    // revisar si existe el globaldata
-    let interval = ms("30s");
-    let noti = await GlobalDatas.findOne({
-      type: "bellNotification"
-    });
-
-    if (!noti) {
-      const newNotification = new GlobalDatas({
-        type: "bellNotification",
-        info: {
-          lastVideo: null,
-          lastTweet: null,
-          lastLive: null
-        }
-      })
-
-      await newNotification.save();
-      noti = await GlobalDatas.findOne({
-        type: "bellNotification"
-      });
-    }
-
-    const config = {
-      youtube_channelId: "UCCYiF7GGja7iJgsc4LN0oHw",
-      twitter_screenname: "JeffreyG__",
-      twitch_username: "jeffreyg_"
-    }
-
-    if (bellytChannel && belltvChannel) setInterval(async () => {
-      let changed = false;
-
-      // youtube
-      let comentarios = ["Ha llegado el momento, chécalo para evitar que Jeffrey entre en depresión", "Dale like o comenta algo si te gustó lo suficiente :D", "Espero que nos veamos en la próxima, ¡y que no sea en 3 meses!", "BROOOO Está rebueno míralo, a lo bien.", "No sabría decir si es lamentable, espero que no, ¿por qué no lo ves para comprobarlo y me dices qué tal?"]
-      let short_comentarios = ["Venga va, que es menos de un minuto chécalo."]
-
-      let comentario = GetRandomItem(comentarios);
-      let short_comentario = GetRandomItem(short_comentarios);
-
-      google.youtube("v3").activities.list({
-        key: process.env.YOUTUBE_TOKEN,
-        part: "snippet, contentDetails",
-        channelId: config.youtube_channelId
-      })
-        .then(async response => {
-          let item;
-
-          itemLoop:
-          for (let i = 0; i < response.data.items.length; i++) {
-            const _item = response.data.items[i];
-
-            if (_item.snippet.type === "upload") {
-              item = _item;
-              break itemLoop;
-            } else {
-              item = null;
-            }
-          }
-          if (!item) return;
-
-          const itemId = item.id;
-          const videoId = item.contentDetails.upload.videoId;
-          const videoLink = `https://www.youtube.com/watch?v=${videoId}`;
-          const shortLink = `https://www.youtube.com/shorts/${videoId}`;
-
-          if (noti.info.lastVideo != itemId) {
-            fetch(shortLink, { redirect: "manual" }).then(res => {
-              let isShort = res.headers.get("Location") === videoLink ? false : true;
-
-              changed = true;
-              noti.info.lastVideo = itemId;
-
-              if (isShort) {
-                bellytChannel.send({ content: `**¡NUEVO SHORT, ${ytShortsRole}!**\n\n${short_comentario}\n\n➟ ${shortLink}` });
-              } else {
-                bellytChannel.send({ content: `**:fire::zap:️¡NUEVO VÍDEO, ${ytRole}!:zap:️:fire:**\n\n${comentario}\n\n➟ ${videoLink}` });
-              }
-            });
-          }
-        })
-        .catch(err => console.log("YOUTUBE", err));
-
-      // twitch
-      let saludos = ["Di hola", "Ven y saluda", "Llégate", "Esto no pasa todo el tiempo, ven"]
-      let saludo = GetRandomItem(saludos);
-      const streamLink = `https://twitch.tv/${config.twitch_username}`;
-
-      const authProvider = new AppTokenAuthProvider(process.env.TWITCH_CLIENT, process.env.TWITCH_SECRET);
-      const apiClient = new ApiClient({ authProvider });
-
-      let streaming = await isStreaming(config.twitch_username);
-
-      if (streaming) { // si está directo
-        const stream = await getStream(config.twitch_username);
-
-        const streamId = stream.id;
-        const streamTitle = stream.title;
-
-        if (noti.info.lastLive === streamId) return console.log("ESTÁ EN DIRECTO, PERO YA SE HA PUBLICADO");
-        else {
-          changed = true;
-          noti.info.lastLive = streamId;
-
-          belltvChannel.send(`**🔴 ¡Jeffrey está en directo, ${tvRole}!** 🔴\n\`➟\` **${streamTitle}**\n\n**${saludo} ➟ ${streamLink} !! :D**`);
-        }
-      }
-
-      async function isStreaming(username) {
-        try {
-          const user = await apiClient.users.getUserByName(username);
-
-          if (!user) return false;
-          return await user.getStream() !== null;
-        } catch (err) {
-          console.log(err)
-        }
-      }
-
-      async function getStream(username) {
-        const user = await apiClient.users.getUserByName(username);
-
-        if (!user) return null;
-
-        const stream = await user.getStream()
-
-        if (!stream) return null;
-
-        return stream;
-      }
-
-      if (changed) {
-        noti.markModified("info")
-        await noti.save().then(res => {
-          console.log(res.info);
-        });
-      }
-    }, interval);
+  const config = {
+    youtube_channelId: "UCCYiF7GGja7iJgsc4LN0oHw",
+    twitch_username: "jeffreyg_"
   }
 
+  const textos = {
+    videos: ["Ha llegado el momento, chécalo para evitar que Jeffrey entre en depresión.", "Dale like o comenta algo si te gustó lo suficiente :D", "Espero que nos veamos en la próxima, ¡y que no sea en 3 meses!", "BROOOO Está rebueno míralo, a lo bien.", "No sabría decir si es lamentable, espero que no, ¿por qué no lo ves para comprobarlo y me dices qué tal?"],
+    shorts: ["Venga va, que es menos de un minuto chécalo.", "¡Viva el contenido rápido!", "¿Sólo unos días más para que salga un vídeo real?", "¡Otro vídeo de menos de un minuto!"],
+    twitch: ["¡Ven y di hola!", "¡Ven y saluda!", "¡Pásate!", "¡Esto no pasa todo el tiempo, ven!"],
+    emojis: ["⚡", "🔥", "✨", "💚", "🦊", guild.client.Emojis.Badge, "✅"],
+    labels: ["¡Me interesa!", "¡Veamos!", "¡Interesante!", "¡Click!", "¡Me sirve!", "¡A ver!"]
+  }
+
+  // YouTube
+  const googleRes = await google.youtube("v3").activities.list({
+    key: process.env.YOUTUBE_TOKEN,
+    part: "snippet, contentDetails",
+    channelId: config.youtube_channelId
+  })
+
+  for (const item of googleRes.data.items) {
+    if (item.snippet.type != "upload") continue;
+
+    const itemId = item.id;
+    const videoId = item.contentDetails.upload.videoId;
+    const videoLink = `https://www.youtube.com/watch?v=${videoId}`;
+    const shortLink = `https://www.youtube.com/shorts/${videoId}`;
+
+    let checkIfShort = async () => {
+      let res = await fetch(shortLink, { redirect: "manual" });
+      return res.headers.get("Location") === videoLink ? false : true;
+    }
+
+    let isShort = await checkIfShort();
+    let prop = isShort ? "shorts" : "videos";
+
+    let embed = new Embed()
+      .defTitle(isShort ? "¡NUEVO SHORT!" : "¡NUEVO VÍDEO!")
+      .defColor(Colores.verde)
+      .defFooter({ text: `— ${item.snippet.title}` })
+      .defImage(item.snippet.thumbnails.maxres.url ?? item.snippet.thumbnails.default.url);
+
+    let components = [
+      new ActionRowBuilder()
+        .setComponents(
+          new ButtonBuilder()
+            .setStyle(ButtonStyle.Link)
+            .setURL(isShort ? shortLink : videoLink)
+            .setEmoji(isShort ? guild.client.Emojis.YouTubeShorts : guild.client.Emojis.YouTube)
+            .setLabel(GetRandomItem(textos.labels))
+        )
+    ]
+
+    if (!data.youtube[prop].find(x => x === itemId) && youtubeChannel) {
+      data.youtube[prop].push(itemId);
+      await doc.save();
+
+      embed.defDesc(GetRandomItem(textos.emojis) + " " + GetRandomItem(textos[prop]))
+
+      await youtubeChannel.send({ content: (isShort ? shortsRole : ytRole).toString(), embeds: [embed], components });
+    }
+  }
+
+  // Twitch
+  const streamLink = `https://twitch.tv/${config.twitch_username}`;
+
+  const authProvider = new AppTokenAuthProvider(process.env.TWITCH_CLIENT, process.env.TWITCH_SECRET);
+  const apiClient = new ApiClient({ authProvider });
+
+  let streaming = await isStreaming(config.twitch_username);
+
+  if (streaming && twitchChannel) { // si está directo
+    const stream = await getStream(config.twitch_username);
+    const streamId = stream.id;
+    const streamTitle = stream.title;
+    if (!data.twitch.find(x => x === streamId)) {
+      let embed = new Embed()
+        .defTitle("¡Jeffrey está en directo!")
+        .defDesc(streamTitle)
+        .defColor("#9146FF")
+        .defFooter({ text: `${GetRandomItem(textos.emojis)} ${GetRandomItem(textos.twitch)}` })
+        .defImage(await getUserPicture(config.twitch_username));
+
+      let components = [
+        new ActionRowBuilder()
+          .setComponents(
+            new ButtonBuilder()
+              .setStyle(ButtonStyle.Link)
+              .setURL(streamLink)
+              .setEmoji(guild.client.Emojis.Twitch)
+              .setLabel(GetRandomItem(textos.labels))
+          )
+      ]
+
+      data.twitch.push(streamId);
+      await doc.save();
+
+      await twitchChannel.send({ content: twitchRole.toString(), embeds: [embed], components });
+    }
+  }
+
+  async function isStreaming(username) {
+    try {
+      const user = await apiClient.users.getUserByName(username);
+
+      if (!user) return false;
+      return await user.getStream() !== null;
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  async function getStream(username) {
+    const user = await apiClient.users.getUserByName(username);
+
+    if (!user) return null;
+
+    const stream = await user.getStream()
+
+    if (!stream) return null;
+
+    return stream;
+  }
+
+  async function getUserPicture(username) {
+    const user = await apiClient.users.getUserByName(username);
+    if (!user) return null
+
+    return user.profilePictureUrl;
+  }
 
 }
 
@@ -1853,7 +1845,7 @@ module.exports = {
   VaultWork,
   LimitedTime,
   Subscription,
-  handleUploads,
+  handleNotification,
   isBannedFrom,
   Confirmation,
   AfterInfraction,

@@ -91,19 +91,42 @@ module.exports = async (client) => {
         })
 
         new CronJob("0 */1 * * * *", async function () {
-            functions.GlobalDatasWork(guild);
+            try {
+                await functions.GlobalDatasWork(guild);
+            } catch (err) {
+                console.log("🔴 Hubo un error con las GlobalDatas");
+                console.error(err);
+            }
         }, null, true, "America/Bogota", null, true);
+
+        new CronJob("*/30 * * * * *", async function () {
+            try {
+                await functions.handleNotification(guild);
+            } catch (err) {
+                console.log("🔴 Hubo un error con las notificaciones")
+                console.error(err);
+            }
+        }, null, true, "America/Bogota", null, true)
     }
 
     // Cada minuto
     new CronJob("0 */1 * * * *", async function () {
-        functions.ActivityWork(client)
+        try {
+            await functions.ActivityWork(client)
+        } catch (err) {
+            console.log("🔴 Hubo un error con la actividad")
+            console.error(err);
+        }
     }, null, true, "America/Bogota", null, true);
 
     // Cada 5 minutos
-    functions.ManageDarkShops(client)
     new CronJob("0 */5 * * * *", async function () {
-        functions.ManageDarkShops(client)
+        try {
+            await functions.ManageDarkShops(client)
+        } catch (err) {
+            console.log("🔴 Hubo un error con las DarkShops")
+            console.error(err);
+        }
     }, null, true, "America/Bogota", null, true);
 
     console.log("============================================================");
@@ -128,8 +151,4 @@ module.exports = async (client) => {
             ]
         });
     console.log("=================== LOGS =======================")
-
-    /* YOUTUBE NOTIFACTIONS */
-
-    functions.handleUploads(client);
 }
