@@ -1,5 +1,5 @@
 const { SlashCommandIntegerOption } = require("discord.js");
-const { Command, Shop, Confirmation, ShopTypes, Enum, ItemActions, ItemObjetives, ItemEffects, ItemTypes, BoostTypes, BoostObjetives } = require("../../../src/utils");
+const { Command, Shop, Confirmation, ShopTypes, Enum, ItemActions, ItemObjetives, ItemEffects, BoostTypes, BoostObjetives } = require("../../../src/utils");
 
 const command = new Command({
     name: "admin-shop",
@@ -66,8 +66,13 @@ command.data
                 option
                     .setName("objetivo")
                     .setDescription("El objetivo al usar el item: ¿a qué se hará la accion?")
-                    .addChoices(...new Enum(ItemObjetives).complexArray())
+                    .addChoices(...new Enum(ItemObjetives).complexArray().slice(0, 4))
                     .setRequired(true)
+            )
+            .addBooleanOption(option =>
+                option
+                    .setName("uso-manual")
+                    .setDescription("¿tiene que activarlo usando el comando /use?")
             )
             .addRoleOption(option =>
                 option
@@ -106,16 +111,10 @@ command.data
                     .setName("duracion")
                     .setDescription("Si es un tipo role o boost, ¿cuánto dura? 1d, 7d, 10m, etc")
             )
-            .addIntegerOption(o =>
+            .addBooleanOption(o =>
                 o
                     .setName("especial")
-                    .setDescription("Si es algún item especial, el tipo que es.")
-                    .addChoices(
-                        { name: "[DS] Firewall", value: ItemTypes.Firewall },
-                        { name: "[DS] ~(+5%) Precisión (Stack Overflow)", value: ItemTypes.StackOverflow },
-                        { name: "[DS] Reset Interest", value: ItemTypes.ResetInterest },
-                        { name: "[DS] Skip Firewall", value: ItemTypes.SkipFirewall }
-                    )
+                    .setDescription("Si es algún item especial.")
             )
             .addIntegerOption(option =>
                 option

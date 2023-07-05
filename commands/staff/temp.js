@@ -97,7 +97,7 @@ command.execute = async (interaction, models, params, client) => {
                 embeds: [
                     new Embed({
                         type: "success", data: {
-                            desc: `Agregado el Rol Temporal a **${usuario.user.tag}** por ${new HumanMs(duration).human}`
+                            desc: `Agregado el Rol Temporal a **${usuario.user.username}** por ${new HumanMs(duration).human}`
                         }
                     })
                 ]
@@ -113,7 +113,7 @@ command.execute = async (interaction, models, params, client) => {
             let multi = valor.value;
 
             let toConfirm = [
-                `**${usuario.user.tag}** será BENEFICIADO AÚN MÁS si aplica este boost`,
+                `**${usuario.user.username}** será BENEFICIADO AÚN MÁS si aplica este boost`,
                 `¿Estás segur@ de proseguir aún así?`
             ];
 
@@ -141,14 +141,13 @@ command.execute = async (interaction, models, params, client) => {
                 embeds: [
                     new Embed({
                         type: "success", data: {
-                            desc: `Agregado el Boost a **${usuario.user.tag}** por ${new HumanMs(duration).human}`
+                            desc: `Agregado el Boost a **${usuario.user.username}** por ${new HumanMs(duration).human}`
                         }
                     })
                 ]
             })
         }
         case "del": {
-            // TODO: Eliminar TempRoles de un usuario
             // Crear lista de los Boosts disponibles
 
             let selectMenu = new StringSelectMenuBuilder()
@@ -198,7 +197,7 @@ command.execute = async (interaction, models, params, client) => {
             const collector = new Collector(interaction, { filter }).raw();
 
             collector.on("collect", async i => {
-                if (i.customId === "stop") collector.stop(EndReasons.StoppedByUser);
+                if (i.customId === "stop") return collector.stop(EndReasons.StoppedByUser);
                 else if (i.customId === "selectTempRole") {
                     let left = user.data.temp_roles.filter(x => {
                         return !i.values.includes(String(x.id))

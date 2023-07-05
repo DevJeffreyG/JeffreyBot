@@ -1844,7 +1844,7 @@ module.exports = {
   ManageDarkShops,
   VaultWork,
   LimitedTime,
-  Subscription,
+  Subscription, 
   handleNotification,
   isBannedFrom,
   Confirmation,
