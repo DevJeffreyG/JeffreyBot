@@ -1,7 +1,7 @@
 const moment = require("moment-timezone");
-const { time, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const { time, ActionRowBuilder, ButtonBuilder, ButtonStyle, inlineCode } = require("discord.js");
 
-const { Command, Categories, Embed, Enum, BoostObjetives, Collector, BoostTypes, BoostWork } = require("../../src/utils");
+const { Command, Categories, Embed, Enum, BoostObjetives, Collector, BoostTypes, BoostWork, ProgressBar } = require("../../src/utils");
 const { Colores } = require("../../src/resources");
 
 const command = new Command({
@@ -22,12 +22,15 @@ command.execute = async (interaction, models, params, client) => {
 
     const guild = interaction.guild;
     const custom = await CustomElements.getWork(guild.id);
+    const { Currency, DarkCurrency } = client.getCustomEmojis(guild.id);
+    const { DarkShop } = client.Emojis
 
     // codigo
     const selectedUser = usuario?.member && usuario?.member.id != interaction.member.id;
     const member = usuario?.member ?? interaction.member;
 
     let user = await Users.getWork({ user_id: member.id, guild_id: guild.id });
+    let doc = params.getDoc();
 
     const row = new ActionRowBuilder();
     const bdrow = new ActionRowBuilder()
@@ -46,6 +49,13 @@ command.execute = async (interaction, models, params, client) => {
         }
     })
 
+    let darkstats = new Embed()
+        .defAuthor({ text: `DarkStats del usuario N°${member.id}`, icon: client.EmojisObject.DarkShop.url })
+        .defDesc(`**— ${DarkCurrency.name}**: **${DarkCurrency}${user.economy.dark.currency}**.
+**— Precisión**: ${ProgressBar(user.economy.dark.accuracy, { max: 80 })} ${inlineCode(user.economy.dark.accuracy + "%")}.`)
+        .defThumbnail(member.displayAvatarURL({ dynamic: true }))
+        .defColor(Colores.negro);
+
     let boostEmbed = new Embed(embed)
         .defColor(Colores.verdeclaro)
         .defAuthor({ text: `Boosts de ${member.user.username}`, icon: member.guild.iconURL({ dynamic: true }) })
@@ -58,6 +68,7 @@ command.execute = async (interaction, models, params, client) => {
 
     let embeds = {
         "stats": embed,
+        "darkstats": darkstats,
         "boosts": boostEmbed,
         "trophies": trophiesEmbed
     }
@@ -65,13 +76,24 @@ command.execute = async (interaction, models, params, client) => {
     let boosts = user.getBoosts();
     let trophies = user.getTrophies();
 
-    if (boosts?.length > 0 || trophies?.length > 0) row.addComponents(
-        new ButtonBuilder()
-            .setLabel("Estadísticas")
-            .setEmoji("📊")
-            .setStyle(ButtonStyle.Primary)
-            .setCustomId("stats")
-    );
+    if (boosts?.length > 0 || trophies?.length > 0 || user.economy.global.level >= doc.settings.quantities.darkshop_level)
+        row.addComponents(
+            new ButtonBuilder()
+                .setLabel("Estadísticas")
+                .setEmoji("📊")
+                .setStyle(ButtonStyle.Primary)
+                .setCustomId("stats")
+        );
+
+    if (user.economy.global.level >= doc.settings.quantities.darkshop_level) {
+        row.addComponents(
+            new ButtonBuilder()
+                .setLabel("DarkStats")
+                .setEmoji(DarkShop)
+                .setStyle(ButtonStyle.Secondary)
+                .setCustomId("darkstats")
+        )
+    }
 
     if (boosts?.length > 0) {
 
@@ -108,7 +130,7 @@ command.execute = async (interaction, models, params, client) => {
         }
 
         boostEmbed.defFooter({
-            text: `📊 ${client.getCustomEmojis(guild.id).Currency.name} x${boostsInfo.multiplier.currency_value.toLocaleString("es-CO")} (+${(boostsInfo.probability.currency_value - 1)*100}% Prob) — EXP x${boostsInfo.multiplier.exp_value.toLocaleString("es-CO")} (+${(boostsInfo.probability.exp_value - 1)*100}% Prob)`
+            text: `📊 ${Currency.name} x${boostsInfo.multiplier.currency_value.toLocaleString("es-CO")} (+${(boostsInfo.probability.currency_value - 1) * 100}% Prob) — EXP x${boostsInfo.multiplier.exp_value.toLocaleString("es-CO")} (+${(boostsInfo.probability.exp_value - 1) * 100}% Prob)`
         })
     }
 
