@@ -59,7 +59,7 @@ command.data
     )
     .addSubcommand(remove => remove
         .setName("del")
-        .setDescription("Elimina un rol temporal de un usuario")
+        .setDescription("Elimina roles temporales de un usuario")
         .addUserOption(u => u
             .setName("usuario")
             .setDescription("El usuario al que quieres eliminarle el rol temporal")

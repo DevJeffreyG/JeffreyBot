@@ -261,14 +261,16 @@ class Top {
         });
 
         if (rank === 1) {
-            txt = `**🏆 ${member.user.username}**${toadd}\n\n`;
+            txt = `# **🏆 ${member.user.username}**${toadd}`;
         } else if (rank === 2) {
-            txt = `**🥈 ${member.user.username}**${toadd}\n\n`;
+            txt = `\n## **🥈 ${member.user.username}**${toadd}`;
         } else if (rank === 3) {
-            txt = `**🥉 ${member.user.username}**${toadd}\n\n`;
+            txt = `\n### **🥉 ${member.user.username}**${toadd}\n\n`;
         } else {
-            txt = `**${rank}. ${member.user.username}**${toadd}\n\n`;
+            txt = `${rank}. **${member.user.username}**${toadd}\n\n`;
         }
+
+        console.log(txt);
 
         return txt;
     }

@@ -40,26 +40,26 @@ const Schema = mongoose.Schema({
                 boost: {
                     type: { type: Number },
                     objetive: { type: Number },
-                    value: { type: Number, min: positiveValidator },
+                    value: { type: Number, validate: positiveValidator },
                     duration: { type: String, required: true, default: "1d" }
                 },
                 item: {
-                    id: { type: Number, min: positiveValidator, validate: integerValidator },
-                    isDarkShop: { type: Boolean, default: false }
+                    id: { type: Number, validate: [positiveValidator, integerValidator] },
+                    shopType: { type: Number, default: false }
                 }
             },
             req: {
                 role: { type: String, validate: canBeNumber },
                 totals: {
-                    warns: { type: Number, min: positiveValidator, validate: integerValidator },
-                    currency: { type: Number, min: positiveValidator, validate: integerValidator },
-                    darkcurrency: { type: Number, min: positiveValidator, validate: integerValidator },
-                    blackjack: { type: Number, min: positiveValidator, validate: integerValidator },
-                    roulette: { type: Number, min: positiveValidator, validate: integerValidator }
+                    warns: { type: Number, validate: [positiveValidator, integerValidator] },
+                    currency: { type: Number, validate: [positiveValidator, integerValidator] },
+                    darkcurrency: { type: Number, validate: [positiveValidator, integerValidator] },
+                    blackjack: { type: Number, validate: [positiveValidator, integerValidator] },
+                    roulette: { type: Number, validate: [positiveValidator, integerValidator] }
                 },
                 moment: {
                     currency: { type: Number, validate: integerValidator },
-                    darkcurrency: { type: Number, min: positiveValidator },
+                    darkcurrency: { type: Number, validate: positiveValidator },
                 }
             },
             enabled: { type: Boolean, default: false },

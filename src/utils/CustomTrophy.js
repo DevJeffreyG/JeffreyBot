@@ -5,7 +5,7 @@ const { CommandInteraction, ModalSubmitInteraction, GuildMember, Guild } = requi
 
 const Embed = require("./Embed");
 const { BadParamsError, DoesntExistsError, DMNotSentError } = require("../errors");
-const { Enum, BoostTypes, BoostObjetives } = require("./Enums");
+const { Enum, BoostTypes, BoostObjetives, ShopTypes } = require("./Enums");
 const { LimitedTime, FindNewId } = require("./functions");
 const { Colores } = require("../resources");
 const HumanMs = require("./HumanMs");
@@ -379,11 +379,10 @@ class CustomTrophy {
             if (!value) continue;
 
             // validation
-            if (prop === "isDarkShop") {
-                if (value > 2 || value < 1) throw notValid;
+            if (prop === "shopType") {
+                if (value > 3 || value < 1) throw notValid;
 
-                if (value === 2) value = false;
-                else value = true;
+                value = parseInt(value)
             }
 
             trophy.given.item[prop] = value;
@@ -473,18 +472,17 @@ class CustomTrophy {
                     await LimitedTime(this.member, null, ms(duration), boost_type, boost_objetive, boost_value);
 
                     let boostobj = new Enum(BoostObjetives).translate(boost_objetive);
-                    if (boostobj === "All") boostobj = "Todo"
-                    if (boostobj === "Currency") boostobj = client.getCustomEmojis(guild.id).Currency.name;
+                    let boosttype = new Enum(BoostTypes).translate(boost_type);
 
-                    this.rewardsGiven.push(`**Un Boost de ${boostobj} x${boost_value}** por **${new HumanMs(ms(duration)).human}**`);
+                    this.rewardsGiven.push(`**Un Boost ${boosttype} de ${boostobj} x${boost_value}** por **${new HumanMs(ms(duration)).human}**`);
                     break;
                 case "item":
-                    const { id: item_id, isDarkShop } = value;
+                    const { id: item_id, shopType } = value;
                     if (!item_id) continue given;
                     const newUseId = FindNewId(await Users.find(), "data.inventory", "use_id");
-                    this.user.data.inventory.push({ isDarkShop, item_id, use_id: newUseId })
+                    this.user.data.inventory.push({ shopType, item_id, use_id: newUseId })
 
-                    this.rewardsGiven.push(`**Un Item de la ${isDarkShop ? "DarkShop" : "tienda"}**`);
+                    this.rewardsGiven.push(`**Un Item de la ${new Enum(ShopTypes).translate(Number(shopType))}**`);
                     break;
             }
         }

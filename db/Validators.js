@@ -5,13 +5,18 @@ module.exports = {
         },
         message: "Tiene que ser un entero"
     },
-    positiveValidator: [0, "Tiene que ser un número positivo"],
+    positiveValidator: {
+        validator: (v) => {
+            return v > 0;
+        },
+        message: "Tiene que ser un número positivo"
+    },
     canBeNumber: {
         validator: (v) => {
-            if(v === null) return true;
+            if (v === null) return true;
             try {
                 return BigInt(v)
-            } catch(err) {
+            } catch (err) {
                 return false
             }
         },
