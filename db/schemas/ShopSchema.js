@@ -9,6 +9,7 @@ const Schema = {
             req_role: { type: String, default: null },
             interest: { type: Number, default: 0, required: true },
             use_info: {
+                manualUse: { type: Boolean, default: true },
                 effect: { type: Number, default: null },
                 action: { type: Number, default: null }, // add | remove
                 given: { type: String, default: null }, // puede ser un INT, o un ROLE, lo que se da

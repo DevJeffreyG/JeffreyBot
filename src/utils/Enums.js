@@ -16,13 +16,14 @@ class Enum {
     /**
      * Busca el nombre del enumerador por su valor
      * @param {String | Number} input El valor a consultar
-     * @returns String
+     * @param {Boolean} human Si debería traducirse friendly si existe
+     * @returns {String}
      */
-    translate(input) {
+    translate(input, human = true) {
         const custom = this.#loadTranslations();
         let name = Object.keys(this.values).find(key => this.values[key] === input);
 
-        if(custom) return custom[name] ?? name
+        if (custom && human) return custom[name] ?? name
         return name;
     }
 
@@ -33,7 +34,7 @@ class Enum {
 
         this.#translations = {
             Multiplier: "Multiplicador",
-            Probability: "Probabilidad",
+            Probability: "Probabilístico",
             All: "Todo",
             Currency: this.customize && CurrencyName ? CurrencyName : "Dinero",
             ChatRewards: "Recompensas de Chat",
@@ -41,10 +42,15 @@ class Enum {
             InflationPrediction: "Predicción Inflación",
             Level: "Nivel",
             Shop: "Tienda",
+            PetShop: "Tienda de Mascotas",
             Positive: "Positivo",
             Negative: "Negativo",
             Add: "Agrega",
-            Remove: "Elimina"
+            Remove: "Elimina",
+            Basic: "Básico",
+            Critical: "Crítico",
+            Advanced: "Avanzado",
+            Ultimate: "Definitivo"
         }
 
         for (const prop of Object.keys(this.values)) {
@@ -71,7 +77,7 @@ class Enum {
      */
     exists(query) {
         let a = this.array();
-        return a.find(x => x === this.translate(query)) ? true : false;
+        return a.find(x => x === this.translate(query, false)) ? true : false;
     }
 
     /**
@@ -129,6 +135,7 @@ const Categories = new Enum({
  * - Subscription
  * - Temporal
  * - SkipFirewall
+ * - Pet
  */
 const ItemTypes = new Enum({
     StackOverflow: 1,
@@ -136,7 +143,9 @@ const ItemTypes = new Enum({
     Firewall: 3,
     Subscription: 4,
     Temporal: 5,
-    SkipFirewall: 6
+    SkipFirewall: 6,
+    Pet: 7/* ,
+    PetHpUpgrade: 8 */
 }).values
 
 /**
@@ -374,10 +383,25 @@ const ChangelogTypes = new Enum({
 /**
  * - Shop
  * - DarkShop
+ * - PetShop
  */
 const ShopTypes = new Enum({
     Shop: 1,
-    DarkShop: 2
+    DarkShop: 2,
+    PetShop: 3
+}).values;
+
+/**
+ * - Basic
+ * - Critical
+ * - Advanced
+ * - Ultimate
+ */
+const PetAttacksType = new Enum({
+    Basic: 1,
+    Critical: 2,
+    Advanced: 3,
+    Ultimate: 4
 }).values;
 
 module.exports = {
@@ -400,5 +424,6 @@ module.exports = {
     ModifierType,
     Multipliers,
     ChangelogTypes,
-    ShopTypes
+    ShopTypes,
+    PetAttacksType
 }

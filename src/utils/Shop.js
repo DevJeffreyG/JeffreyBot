@@ -1,17 +1,20 @@
-const { Emoji, CommandInteraction, User, ActionRowBuilder, ButtonBuilder } = require("discord.js");
-const { Shops, DarkShops, Users } = require("mongoose").models;
+const { Emoji, CommandInteraction, User, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, TextInputStyle } = require("discord.js");
+const { Shops, DarkShops, PetShops, Users } = require("mongoose").models;
 const { Colores } = require("../resources");
-const { ShopTypes, Enum, ItemTypes, ItemObjetives, ItemActions } = require("./Enums");
+const { ShopTypes, Enum, ItemTypes, ItemObjetives, ItemActions, EndReasons } = require("./Enums");
 const InteractivePages = require("./InteractivePages");
 const { BadCommandError, DoesntExistsError, EconomyError, AlreadyExistsError, BadParamsError } = require("../errors");
 const { Confirmation, FindNewId } = require("./functions");
 const Embed = require("./Embed");
 const HumanMs = require("./HumanMs");
+const Collector = require("./Collector");
 
 const moment = require("moment-timezone");
 const ms = require("ms");
 const { ButtonStyle } = require("discord.js");
 const { codeBlock } = require("discord.js");
+const Item = require("./Item");
+const Modal = require("./Modal");
 
 class Shop {
     #build = false;
@@ -29,6 +32,7 @@ class Shop {
 
     #buildError;
     #noItemError;
+    #Emojis;
     #updated = new Embed({
         type: "success",
         data: {
@@ -43,7 +47,9 @@ class Shop {
         this.interaction = interaction;
         this.client = this.interaction.client;
 
-        this.#buildError = new BadCommandError(this.interaction, "STORE no se construyó");
+        this.#Emojis = this.client.Emojis;
+
+        this.#buildError = new BadCommandError(this.interaction, "SHOP no se construyó");
         this.#noItemError = new DoesntExistsError(this.interaction, `El item con esa ID`, `la tienda de este servidor`);
 
         this.config = {
@@ -94,6 +100,17 @@ class Shop {
                     query: this.interaction.guild.id
                 })
                 this.#isDarkShop = true;
+                break;
+
+            case ShopTypes.PetShop:
+                this.setCurrency(this.client.getCustomEmojis(this.interaction.guild.id).Currency)
+                this.setInfo({
+                    name: `Tienda de mascotas de ${this.interaction.guild.name}`,
+                    desc: `**—** ¡Bienvenid@ a la tienda de mascotas! Para comprar items usa ${this.client.mentionCommand("petbuy")}.`,
+                    color: Colores.verde,
+                    model: PetShops,
+                    query: this.interaction.guild.id
+                })
                 break;
         }
 
@@ -217,6 +234,7 @@ class Shop {
      * @returns {Promise<CommandInteraction>}
      */
     async buy(itemId, user) {
+        if (user?.id === this.interaction.user.id) user = null;
         if (!this.#build) throw this.#buildError;
 
         const inventoryUser = user ? await Users.getWork({
@@ -274,22 +292,35 @@ class Shop {
         this.#user.set(this.config.currency.user_path, this.#user.get(this.config.currency.user_path) - price);
         inventoryUser.data.inventory.push({ shopType: this.config.info.type, item_id: item.id, use_id: newUseId })
 
-        let embed = new Embed({
-            type: "success",
-            data: {
-                desc: [
-                    "Pago realizado con éxito",
-                    `Compraste: \`${itemName}\` por **${this.config.currency.emoji}${itemPrice}**${user ? ` para ${user}` : ""}`,
-                    user ? `Se usa con \`/use ${newUseId}\`` : `Úsalo con \`/use ${newUseId}\``,
-                    `Ahora tienes: ${this.#user.parseCurrency(this.client.getCustomEmojis(this.interaction.guild.id), this.#isDarkShop)}`
-                ]
-            }
-        })
+        let desc = [
+            "Pago realizado con éxito",
+            `Compraste: \`${itemName}\` por **${this.config.currency.emoji}${itemPrice}**${user ? ` para ${user}` : ""}`,
+            user ? `Se usa con \`/use ${newUseId}\`` : `Úsalo con \`/use ${newUseId}\``,
+            `Ahora tienes: ${this.#user.parseCurrency(this.client.getCustomEmojis(this.interaction.guild.id), this.#isDarkShop)}`
+        ]
 
         if (user) await inventoryUser.save();
         await this.#user.save();
 
-        return await this.interaction.editReply({ embeds: [embed] });
+        let m = null;
+        if (!item.use_info.manualUse) {
+            desc.splice(2, 1);
+
+            m = await this.interaction.followUp({ ephemeral: true, content: `${this.#Emojis.Loading} Usando automáticamente...` });
+
+            const itemObj = await new Item(this.interaction, item.id, this.config.info.type).build(inventoryUser, this.#doc);
+            await itemObj.use(newUseId);
+        }
+
+        let embed = new Embed({
+            type: "success",
+            data: {
+                desc
+            }
+        })
+
+        return await this.interaction.editReply({ message: m, content: null, embeds: [embed] });
+
     }
 
     /** ------------------ EDICION ------------------ */
@@ -401,7 +432,7 @@ ${codeBlock(item.description)}
 
     async removeItem(itemId) {
         const index = this.shopdoc.findItemIndex(itemId);
-        if (!index) throw this.noitem;
+        if (typeof index != "number") throw this.#noItemError;
 
         console.log("🗑️ Eliminando %s de la tienda e inventarios del Guild %s", this.shopdoc.findItem(itemId), this.interaction.guild.id)
 
@@ -439,20 +470,114 @@ ${codeBlock(item.description)}
     }
 
     async editUse(params) {
+        let specialType = null;
+
+        // mascotas
+        let petStats = null;
+        let stats = null;
+
+        if (params.especial?.value) { // Sí es un item especial
+            let select = new StringSelectMenuBuilder()
+                .setCustomId("specialItemSelect")
+                .setPlaceholder("Escoge el tipo de Item")
+
+            switch (this.config.info.type) {
+                case ShopTypes.Shop:
+                    select
+                        .setOptions(
+                            new StringSelectMenuOptionBuilder()
+                                .setLabel("No especial")
+                                .setDescription("No hay items especiales para este tipo de tienda")
+                                .setValue("0")
+                        );
+                    break;
+                case ShopTypes.DarkShop:
+                    select
+                        .setOptions(
+                            new StringSelectMenuOptionBuilder()
+                                .setLabel("Firewall")
+                                .setDescription("No permite daños al usuario mientras esté activa")
+                                .setValue(String(ItemTypes.Firewall)),
+                            new StringSelectMenuOptionBuilder()
+                                .setLabel("Stack Overflow")
+                                .setDescription("~5% más de precisión en su uso")
+                                .setValue(String(ItemTypes.StackOverflow)),
+                            new StringSelectMenuOptionBuilder()
+                                .setLabel("Reset Interés")
+                                .setDescription("Elimina los intereses de un item de la tienda normal")
+                                .setValue(String(ItemTypes.ResetInterest)),
+                            new StringSelectMenuOptionBuilder()
+                                .setLabel("Firewall Skipper")
+                                .setDescription("Permite saltar la Firewall de un usuario")
+                                .setValue(String(ItemTypes.SkipFirewall))
+                        )
+                    break;
+                case ShopTypes.PetShop:
+                    select
+                        .setOptions(
+                            new StringSelectMenuOptionBuilder()
+                                .setLabel("Mascota")
+                                .setDescription("Es una mascota")
+                                .setValue(String(ItemTypes.Pet))
+                        )
+
+                    petStats = async (inter) => {
+                        await new Modal(inter)
+                            .setCustomId("petStats")
+                            .setTitle("Estadísticas base de Mascota")
+                            .addInput({ id: "hp", label: "HP", placeholder: "Escribe un número entero positivo", style: TextInputStyle.Short })
+                            .addInput({ id: "attack", label: "Max Ataque", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
+                            .addInput({ id: "defense", label: "Max Defensa", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
+                            .show()
+
+                        let c = await inter.awaitModalSubmit({ filter: (i) => i.customId === "petStats" && i.user.id === this.interaction.user.id, time: ms("1m") });
+                        await c.deferUpdate();
+                        return new Modal(c).read();
+                    }
+                    break;
+            }
+
+            let components = [
+                new ActionRowBuilder()
+                    .setComponents(select)
+            ]
+
+            await this.interaction.editReply({ components })
+
+            const filter = (inter) => inter.isStringSelectMenu() || inter.isButton() && inter.user.id === this.interaction.user.id;
+            const collector = await new Collector(this.interaction, { filter, wait: true, max: 1 }).raw();
+
+            specialType = Number(collector.values[0]);
+
+            if(this.config.info.type === ShopTypes.PetShop && specialType === ItemTypes.Pet) {
+                stats = await petStats(collector);
+            }
+
+            if (specialType === 0) specialType = null;
+        }
+
         const roleError = new BadParamsError(this.interaction, "Si se usa un tipo Role, **debe tener**: `role`");
         const boostError = new BadParamsError(this.interaction, [
             "Si se usa un tipo Boost __agregando__, **debe tener**: `boostobj`, `boosttype`, `boostval` y `duracion`",
             "Si es __eliminando__, **sólo debe tener**: `duracion`"
         ])
         const notValidCombination = new BadParamsError(this.interaction, "Si se usa un tipo Item, **no puede eliminarse**");
-        const dsError = new BadParamsError(this.interaction, "Si el item es de la DarkShop, **debe tener**: `efecto`");
+        const dsError = new BadParamsError(this.interaction, "Si el item es de la DarkShop, **debe tener**: `efecto` y verdadero en `uso-manual`");
+        const notItemPetError = new BadParamsError(this.interaction, "Si el item es de la Tienda de Mascotas, su **objetivo** debe ser **Item** y ser **especial**");
 
         const item = this.shopdoc.findItem(params.id.value, false);
-        if (!item) throw this.noitem;
+        if (!item) throw this.#noItemError;
+
+        if(stats) {
+            item.stats = Object.assign({}, item.stats, stats);
+        }
 
         item.reply = params.reply?.value ?? item.reply;
 
         const use = item.use_info;
+
+        if (this.#isDarkShop && typeof params["uso-manual"].value === "boolean" && !params["uso-manual"].value) throw dsError;
+        else use.manualUse = params["uso-manual"]?.value ?? use.manualUse;
 
         use.action = Number(params.accion.value);
         use.objetive = Number(params.objetivo.value);
@@ -464,7 +589,10 @@ ${codeBlock(item.description)}
 
         use.effect = this.#isDarkShop ? params.efecto?.value : null;
 
-        use.item_info.type = params.especial?.value ?? use.item_info.type;
+        use.item_info.type = specialType ?? use.item_info.type;
+
+        if (this.config.info.type === ShopTypes.PetShop && (use.objetive != ItemObjetives.Item || !use.item_info.type)) throw notItemPetError;
+
         use.item_info.duration = (use.objetive === ItemObjetives.Role ||
             use.objetive === ItemObjetives.Boost) && params.duracion?.value ? ms(params.duracion?.value) : null
 
@@ -495,7 +623,7 @@ ${codeBlock(item.description)}
         }
 
         await this.shopdoc.save();
-        return this.interaction.editReply({ embeds: [this.#updated] });
+        return this.interaction.editReply({ embeds: [this.#updated], components: [] });
     }
 
     /** ------------------ UTILIDAD ------------------ */

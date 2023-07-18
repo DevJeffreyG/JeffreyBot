@@ -4,7 +4,7 @@ const moment = require("moment-timezone")
 const HumanMs = require("../../src/utils/HumanMs")
 const { time } = require('discord.js')
 const { RequirementType, ShopTypes } = require('../../src/utils/Enums')
-const { integerValidator } = require('../Validators')
+const { integerValidator, positiveValidator } = require('../Validators')
 
 const Schema = new mongoose.Schema({
     guild_id: { type: String, required: true },
@@ -58,7 +58,24 @@ const Schema = new mongoose.Schema({
                 active_since: { type: Date, default: null }
             }
         ],
-        customrole: { type: String, required: true, default: "0" },
+        pets: [{
+            name: { type: String, required: true },
+            shopId: { type: Number, required: true },
+            wins: { type: Number, default: 0 },
+            defeats: { type: Number, default: 0 },
+            stats: {
+                hp: { type: Number, validate: [integerValidator, positiveValidator], required: true },
+                hunger: { type: Number, validate: [integerValidator, positiveValidator], required: true },
+                attack: { type: Number, required: true, validate: positiveValidator },
+                defense: { type: Number, required: true, validate: positiveValidator }
+            },
+            attacks: [{
+                name: { type: String, required: true },
+                cost: { type: Number, required: true },
+                type: { type: Number, required: true }
+            }],
+            id: { type: Number, sparse: true, validate: [integerValidator, positiveValidator] }
+        }],
         lastGained: {
             exp: { type: Number },
             currency: { type: Number }
@@ -175,6 +192,7 @@ Schema.pre("validate", function () {
 
     this.data.counts.normal_currency = Math.round(this.data.counts.normal_currency);
     this.data.counts.dark_currency = Math.round(this.data.counts.dark_currency);
+    this.economy.dark.accuracy = Number(Number(this.economy.dark.accuracy).toFixed(1));
 })
 
 Schema.pre("save", function () {

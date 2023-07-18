@@ -3,7 +3,7 @@ const moment = require("moment-timezone");
 const ms = require("ms")
 const Chance = require("chance");
 
-const { ItemTypes, ItemObjetives, ItemActions, ItemEffects, LogReasons, ChannelModules, ShopTypes } = require("./Enums");
+const { ItemTypes, ItemObjetives, ItemActions, ItemEffects, LogReasons, ChannelModules, ShopTypes, PetAttacksType, Enum } = require("./Enums");
 const { BadCommandError, AlreadyExistsError, DoesntExistsError, FetchError, ExecutionError } = require("../errors");
 
 const { FindNewId, LimitedTime, Subscription, WillBenefit, GetRandomItem } = require("./functions");
@@ -15,7 +15,7 @@ const ErrorEmbed = require("./ErrorEmbed");
 const Colores = require("../resources/colores.json");
 
 const models = require("mongoose").models;
-const { Shops, DarkShops, Users, Guilds, GlobalDatas } = models;
+const { Shops, DarkShops, Users, PetShops, GlobalDatas } = models;
 
 class Item {
     /**
@@ -61,6 +61,9 @@ class Item {
         switch (this.shopType) {
             case ShopTypes.DarkShop:
                 this.shop = await DarkShops.getWork(this.interaction.guild.id);
+                break;
+            case ShopTypes.PetShop:
+                this.shop = await PetShops.getWork(this.interaction.guild.id);
                 break;
             default:
                 this.shop = await Shops.getWork(this.interaction.guild.id);
@@ -133,7 +136,7 @@ class Item {
         console.log("🟢 %s está usando el item %s!", this.interaction.user.username, this.item.name)
 
         const inventory = this.user.data.inventory;
-        const inventoryFilter = x => x.use_id === id;
+        const inventoryFilter = x => x.use_id === id && x.shopType === this.shopType;
 
         this.itemInv = inventory.find(inventoryFilter);
         this.itemOnInventoryIndex = this.user.data.inventory.findIndex(inventoryFilter);
@@ -415,9 +418,87 @@ class Item {
                 this.#removeItemFromInv();
                 return true;
 
+            case ItemTypes.Pet:
+                console.log("🟩 Mascota!")
+                console.log(this.item);
+
+                let attacks;
+
+                do {
+                    attacks = [
+                        this.#addPetAttack(PetAttacksType.Basic),
+                        new Chance().bool({ likelihood: 80 }) ? this.#addPetAttack(PetAttacksType.Advanced) : this.#addPetAttack(PetAttacksType.Critical),
+                        new Chance().bool({ likelihood: 80 }) ? this.#addPetAttack(PetAttacksType.Advanced) : this.#addPetAttack(PetAttacksType.Critical),
+                        this.#addPetAttack(PetAttacksType.Ultimate)
+                    ]
+                } while (attacks.some(function (item, idx) {
+                    return attacks.indexOf(item) != idx
+                }))
+
+                let newpet = {
+                    name: new Chance().name({ nationality: "en" }).split(" ")[0],
+                    shopId: this.item.id,
+                    stats: Object.assign({}, this.item.stats, {
+                        hunger: new Chance().integer({ max: 100, min: 85 })
+                    }),
+                    attacks,
+                    id: FindNewId(await Users.find(), "data.pets", "id")
+                }
+
+                // Crear mascota
+                this.user.data.pets.push(newpet)
+                await this.user.save();
+                this.#removeItemFromInv();
+                return true;
             default:
                 console.log("Item simple! %s", itemType)
                 return await this.#activateItem();
+        }
+    }
+
+    #addPetAttack(type) {
+        let names = {
+            base: [
+                "Golpe", "Patada", "Rasguño", "Mordida", "Mareo", "Cabezazo"
+            ],
+            basic: [
+                "Sencillx", "Leve", "Conformista", "Rápidx", "Suave", "Estándar", "Regular", "Simple", "Genéricx"
+            ],
+            critical: [
+                "Certerx", "Fijx", "Conformista", "Rápidx", "Durx", "Letal", "Feroz"
+            ],
+            advanced: [
+                "Firme", "Limpix", "Profesional", "Energéticx", "Intensx"
+            ],
+            ultimate: [
+                "Final", "Críticx", "Infalible", "Poderosx", "Trascendental", "Apocalípticx", "Supremx", "Fulminante"
+            ]
+        }
+
+        let prop = new Enum(PetAttacksType).translate(type, false).toLowerCase();
+        let name = new Chance().pickone(names.base);
+        name += " " + new Chance().pickone(names[prop]).replace("x", name.charAt(name.length - 1) === "a" ? "a" : "o")
+        let cost;
+
+        switch (type) {
+            case PetAttacksType.Basic:
+                cost = new Chance().integer({ min: 5, max: 10 });
+                break;
+            case PetAttacksType.Critical:
+                cost = new Chance().integer({ min: 15, max: 20 });
+                break;
+            case PetAttacksType.Advanced:
+                cost = new Chance().integer({ min: 10, max: 15 });
+                break;
+            case PetAttacksType.Ultimate:
+                cost = new Chance().integer({ min: 20, max: 40 });
+                break;
+        }
+
+        return {
+            name,
+            cost,
+            type
         }
     }
 

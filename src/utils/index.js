@@ -19,6 +19,7 @@ const Collector = require("./Collector");
 const CustomEmbed = require("./CustomEmbed");
 const CustomButton = require("./CustomButton");
 const CustomTrophy = require("./CustomTrophy");
+const Pet = require("./Pet");
 
 const Enums = require("./Enums");
 const Functions = require("./functions");
@@ -45,6 +46,7 @@ module.exports = {
     CustomEmbed,
     CustomButton,
     CustomTrophy,
+    Pet,
 
     ...Enums,
     ...Functions

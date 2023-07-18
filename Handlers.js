@@ -320,7 +320,7 @@ class Handlers {
                     .defId(this.interaction.customId)
                     .defTitle("Item de recompensa: " + trophyId)
                     .addInput({ id: "id", label: "ID del item", placeholder: "Escribe un número entero", style: TextInputStyle.Short })
-                    .addInput({ id: "isDarkShop", label: "Es un item de la DarkShop?", placeholder: `Sí: 1 / No: 2`, style: TextInputStyle.Short })
+                    .addInput({ id: "shopType", label: "Tienda", placeholder: `Tienda: 1 / DarkShop: 2 / Mascotas: 3`, style: TextInputStyle.Short })
                     .show();
                 break;
             }
