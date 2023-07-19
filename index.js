@@ -31,6 +31,7 @@ const client = new Client({
 });
 
 const { connection } = require('./db');
+const { ShopTypes } = require("./src/utils/Enums");
 const pckVersion = require("./package.json").version;
 
 console.log("==============================================")
@@ -47,7 +48,7 @@ connection.then(async (c) => {
 
     users.forEach(user => {
       user.data.purchases.forEach(async (purchase, index) => {
-        if (purchase.isDarkShop) {
+        if (purchase.shopType === ShopTypes.DarkShop) {
           console.log("🟢 Se eliminó la compra: ")
           console.log(purchase)
           console.log("🟢 De: %s en %s", user.user_id, user.guild_id)

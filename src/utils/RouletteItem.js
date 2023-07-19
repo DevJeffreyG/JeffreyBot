@@ -2,7 +2,7 @@ const { GuildMemberRoleManager, roleMention } = require("discord.js");
 const ms = require("ms")
 
 const { LimitedTime, BoostWork } = require("./functions");
-const { ItemObjetives, BoostObjetives } = require("./Enums");
+const { ItemObjetives, BoostObjetives, Enum, BoostTypes } = require("./Enums");
 const Embed = require("./Embed");
 
 const { Users, Guilds } = require("mongoose").models;
@@ -205,7 +205,8 @@ class RouletteItem {
             text: null,
             boost: {
                 value: null,
-                objetive: null
+                objetive: null,
+                type: null
             }
         };
 
@@ -243,10 +244,10 @@ class RouletteItem {
             case ItemObjetives.Boost:
                 translated.boost = {
                     value: this.item.extra.boostvalue,
-                    objetive: this.item.extra.boostobj === BoostObjetives.Currency ? Currency.name :
-                        this.item.extra.boostobj === BoostObjetives.Exp ? "EXP" : "Todo"
+                    objetive: new Enum(BoostObjetives).translate(this.item.extra.boostobj),
+                    type: new Enum(BoostTypes).translate(this.item.extra.boosttype)
                 }
-                translated.text = `${translated.action} **Un Boost de x${translated.boost.value.toLocaleString("es-CO")} para ${translated.boost.objetive}**`
+                translated.text = `${translated.action} **Un Boost ${translated.boost.type} x${translated.boost.value.toLocaleString("es-CO")} para ${translated.boost.objetive}**`
                 break;
         }
 

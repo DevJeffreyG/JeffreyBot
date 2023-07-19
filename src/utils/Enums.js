@@ -50,7 +50,9 @@ class Enum {
             Basic: "Básico",
             Critical: "Crítico",
             Advanced: "Avanzado",
-            Ultimate: "Definitivo"
+            Ultimate: "Definitivo",
+            Roulette: "Ruleta",
+            ClaimRep: "Reclamar Rep"
         }
 
         for (const prop of Object.keys(this.values)) {
