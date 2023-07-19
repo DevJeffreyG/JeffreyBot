@@ -4,7 +4,7 @@ const moment = require("moment-timezone")
 const HumanMs = require("../../src/utils/HumanMs")
 const { time } = require('discord.js')
 const { RequirementType, ShopTypes } = require('../../src/utils/Enums')
-const { integerValidator, positiveValidator } = require('../Validators')
+const { integerValidator, positiveValidator, positiveWithZeroValidator } = require('../Validators')
 
 const Schema = new mongoose.Schema({
     guild_id: { type: String, required: true },
@@ -64,8 +64,8 @@ const Schema = new mongoose.Schema({
             wins: { type: Number, default: 0 },
             defeats: { type: Number, default: 0 },
             stats: {
-                hp: { type: Number, validate: [integerValidator, positiveValidator], required: true },
-                hunger: { type: Number, validate: [integerValidator, positiveValidator], required: true },
+                hp: { type: Number, validate: [integerValidator, positiveWithZeroValidator], required: true },
+                hunger: { type: Number, validate: [integerValidator, positiveWithZeroValidator], required: true },
                 attack: { type: Number, required: true, validate: positiveValidator },
                 defense: { type: Number, required: true, validate: positiveValidator }
             },
@@ -74,6 +74,11 @@ const Schema = new mongoose.Schema({
                 cost: { type: Number, required: true },
                 type: { type: Number, required: true }
             }],
+            notices: {
+                halfhp: { type: Date, default: null },
+                lowhp: { type: Date, default: null },
+                hungry: { type: Date, default: null }
+            },
             id: { type: Number, sparse: true, validate: [integerValidator, positiveValidator] }
         }],
         lastGained: {

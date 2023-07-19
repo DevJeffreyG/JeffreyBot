@@ -107,6 +107,16 @@ module.exports = async (client) => {
                 console.error(err);
             }
         }, null, true, "America/Bogota", null, true)
+
+        // Cada hora
+        new CronJob("0 0 */1 * * *", async function () {
+            try {
+                await functions.PetWork(guild);
+            } catch (err) {
+                console.log("🔴 Hubo un error con las Mascotas")
+                console.error(err);
+            }
+        }, null, true, "America/Bogota", null, false)
     }
 
     // Cada minuto

@@ -406,6 +406,19 @@ const PetAttacksType = new Enum({
     Ultimate: 4
 }).values;
 
+/**
+ * - HalfHp
+ * - Dead
+ * - LowHp
+ * - Hungry
+ */
+const PetNotices = new Enum({
+    HalfHp: 1,
+    Dead: 2,
+    LowHp: 3,
+    Hungry: 4
+}).values;
+
 module.exports = {
     Enum,
     Categories,
@@ -427,5 +440,6 @@ module.exports = {
     Multipliers,
     ChangelogTypes,
     ShopTypes,
-    PetAttacksType
+    PetAttacksType,
+    PetNotices
 }

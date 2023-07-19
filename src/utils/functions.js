@@ -7,6 +7,7 @@ const ErrorEmbed = require("../utils/ErrorEmbed");
 const Embed = require("../utils/Embed");
 const InteractivePages = require("../utils/InteractivePages");
 const DarkShop = require("../utils/DarkShop");
+const Pet = require("../utils/Pet");
 
 const ms = require("ms");
 const moment = require("moment-timezone");
@@ -19,12 +20,13 @@ const { Users, Guilds, DarkShops, Shops, GlobalDatas, CustomElements } = require
 const { google } = require("googleapis");
 const { ApiClient } = require("@twurple/api");
 const { AppTokenAuthProvider } = require("@twurple/auth");
-const { BoostObjetives, ChannelModules, LogReasons, BoostTypes } = require("./Enums");
+const { BoostObjetives, ChannelModules, LogReasons, BoostTypes, PetNotices } = require("./Enums");
 const Log = require("./Log");
 const { Bases } = require("../resources");
 const Commands = require("../../Commands");
 const Collector = require("./Collector");
 const HumanMs = require("./HumanMs");
+const { Chance } = require("chance");
 
 /* ##### MONGOOSE ######## */
 const RandomCumplido = function (force = null) {
@@ -345,7 +347,7 @@ const GenerateLog = async function (guild, options = {
  * GlobalData work
  * @param {Guild} guild The Guild where the interval shall be executed
  * @param {boolean} [justTempRoles=false] Just execute interval of temporal roles
- * @returns void
+ * @returns {Promise<void>}
  */
 const GlobalDatasWork = async function (guild, justTempRoles = false) {
   const { Emojis, EmojisObject } = guild.client;
@@ -774,6 +776,51 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
 
   await doc.save();
   return;
+}
+
+/**
+ * 
+ * @param {Guild} guild 
+ * @return {Promise<void>}
+ */
+const PetWork = async function (guild) {
+  const doc = await Guilds.getWork(guild.id);
+  const members = guild.members.cache;
+
+  for await (const member of members.values()) {
+    const user = await Users.getWork({ user_id: member.id, guild_id: guild.id });
+    const pets = user.data.pets;
+    if (pets.length === 0) continue
+
+    // Bajar las stats de hunger a cada mascota
+    for await (const p of pets) {
+      const pet = await new Pet(null, p.id).setMember(member).build(doc, user)
+      const maxHp = pet.shop_info.stats.hp;
+      const maxHungerRemoval = doc.settings.quantities.max_hunger;
+
+      let removeHunger = new Chance().integer({ min: 1, max: maxHungerRemoval });
+      pet.changeHunger(-removeHunger);
+
+      // ----------- Hunger ----------- 
+      if(pet.hunger <= 40) await pet.notice(PetNotices.Hungry);
+      
+      if(pet.hunger === 0) {
+        let removal = new Chance().integer({min: 1, max: Math.ceil(maxHp * 0.05)});
+        pet.changeHp(-removal);
+      }
+
+      // ----------- HP ----------- 
+      if(pet.hp <= maxHp / 2) await pet.notice(PetNotices.HalfHp)
+      else if(pet.hp <= maxHp / 4) await pet.notice(PetNotices.LowHp)
+      
+      if(pet.hp === 0) {
+        pet.kill();
+        await pet.notice(PetNotices.Dead)
+      }
+      
+      await pet.save();
+    }
+  }
 }
 
 /**
@@ -1844,7 +1891,7 @@ module.exports = {
   ManageDarkShops,
   VaultWork,
   LimitedTime,
-  Subscription, 
+  Subscription,
   handleNotification,
   isBannedFrom,
   Confirmation,
@@ -1870,5 +1917,6 @@ module.exports = {
   DeleteLink,
   FindAverage,
   FetchThisGuild,
-  BoostWork
+  BoostWork,
+  PetWork
 }
