@@ -138,6 +138,7 @@ const Categories = new Enum({
  * - Temporal
  * - SkipFirewall
  * - Pet
+ * - PetStatsModifier
  */
 const ItemTypes = new Enum({
     StackOverflow: 1,
@@ -146,8 +147,8 @@ const ItemTypes = new Enum({
     Subscription: 4,
     Temporal: 5,
     SkipFirewall: 6,
-    Pet: 7/* ,
-    PetHpUpgrade: 8 */
+    Pet: 7,
+    PetStatsModifier: 8
 }).values
 
 /**

@@ -13,6 +13,9 @@ class Pet {
     #user;
     #info;
 
+    #changedHp;
+    #changedHunger;
+
     /**
      * 
      * @param {CommandInteraction} interaction 
@@ -61,6 +64,7 @@ class Pet {
      * @returns {this}
      */
     changeHunger(value) {
+        this.#changedHunger = true;
         this.hunger += value;
         if (this.hunger > 100) this.hunger = 100;
         else if (this.hunger < 0) this.hunger = 0;
@@ -72,6 +76,7 @@ class Pet {
      * @returns {this}
      */
     changeHp(value) {
+        this.#changedHp = true;
         this.hp += value;
         if (this.hp > this.shop_info.stats.hp) this.hp = this.shop_info.stats.hp;
         else if (this.hp < 0) this.hp = 0;
@@ -93,6 +98,13 @@ class Pet {
             this.#user.data.pets.splice(i, 1);
             return await this.#user.save();
         }
+
+        if(this.#changedHp) {
+            this.notices.halfhp = null;
+            this.notices.lowhp = null;
+        }
+
+        if(this.#changedHunger) this.notices.hungry = null;
 
         this.#user.data.pets[i] = Object.assign(this.#user.data.pets[i], {
             name: this.name,

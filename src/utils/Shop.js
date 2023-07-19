@@ -15,6 +15,7 @@ const { ButtonStyle } = require("discord.js");
 const { codeBlock } = require("discord.js");
 const Item = require("./Item");
 const Modal = require("./Modal");
+const { Error } = require("mongoose");
 
 class Shop {
     #build = false;
@@ -159,7 +160,7 @@ class Shop {
         this.#adminInteractive.base = Object.assign({}, this.#interactive.base);
 
         let adminAddon = this.#adminInteractive.base.addon;
-        this.#adminInteractive.base.description = `**—** [NOT READY]: Falta el uso (${this.client.mentionCommand("admin items use-info")})\n**—** [HIDDEN]: Item desactivado (${this.client.mentionCommand("admin items toggle")})\n**—** [✅]: El item es visible y usable para cualquiera.`;
+        this.#adminInteractive.base.description = `**—** [NOT READY]: Falta el uso (${this.client.mentionCommand("admin-shop use-info")})\n**—** [HIDDEN]: Item desactivado (${this.client.mentionCommand("admin-shop toggle")})\n**—** [✅]: El item es visible y usable para cualquiera.`;
 
         this.#adminInteractive.base.addon = adminAddon.substring(0, 2) + "{publicInfo} — ID: " + adminAddon.substring(2, adminAddon.length - 4) + `\n+ ${this.config.currency.emoji}{item_interest}** al comprarlo.\n\n`
 
@@ -353,7 +354,7 @@ class Shop {
             data: {
                 desc: [
                     "Se ha agregado el item",
-                    `No será visible hasta que se agregue el uso: ${this.client.mentionCommand("admin items use-info")}`,
+                    `No será visible hasta que se agregue el uso: ${this.client.mentionCommand("admin-shop use-info")}`,
                     `ID: \`${newId}\``
                 ]
             }
@@ -473,7 +474,9 @@ ${codeBlock(item.description)}
         let specialType = null;
 
         // mascotas
+        let itemConfig = null;
         let petStats = null;
+
         let stats = null;
 
         if (params.especial?.value) { // Sí es un item especial
@@ -518,7 +521,11 @@ ${codeBlock(item.description)}
                             new StringSelectMenuOptionBuilder()
                                 .setLabel("Mascota")
                                 .setDescription("Es una mascota")
-                                .setValue(String(ItemTypes.Pet))
+                                .setValue(String(ItemTypes.Pet)),
+                            new StringSelectMenuOptionBuilder()
+                                .setLabel("Modificador de estadísticas")
+                                .setDescription("Agrega HP y/o quita el hambre")
+                                .setValue(String(ItemTypes.PetStatsModifier))
                         )
 
                     petStats = async (inter) => {
@@ -531,6 +538,19 @@ ${codeBlock(item.description)}
                             .show()
 
                         let c = await inter.awaitModalSubmit({ filter: (i) => i.customId === "petStats" && i.user.id === this.interaction.user.id, time: ms("1m") });
+                        await c.deferUpdate();
+                        return new Modal(c).read();
+                    }
+
+                    itemConfig = async (inter) => {
+                        await new Modal(inter)
+                            .setCustomId("petStatsModifier")
+                            .setTitle("Configuración del item")
+                            .addInput({ id: "hp", value: "0", label: "HP Dada", placeholder: "Escribe un número entero positivo", style: TextInputStyle.Short })
+                            .addInput({ id: "hunger", value: "0", label: "Hambre mitigada", placeholder: "Escribe un número entero positivo", style: TextInputStyle.Short })
+                            .show()
+
+                        let c = await inter.awaitModalSubmit({ filter: (i) => i.customId === "petStatsModifier" && i.user.id === this.interaction.user.id, time: ms("1m") });
                         await c.deferUpdate();
                         return new Modal(c).read();
                     }
@@ -549,8 +569,19 @@ ${codeBlock(item.description)}
 
             specialType = Number(collector.values[0]);
 
-            if(this.config.info.type === ShopTypes.PetShop && specialType === ItemTypes.Pet) {
-                stats = await petStats(collector);
+            if (this.config.info.type === ShopTypes.PetShop) {
+                switch (specialType) {
+                    case ItemTypes.Pet:
+                        stats = await petStats(collector);
+                        break;
+                    case ItemTypes.PetStatsModifier:
+                        stats = await itemConfig(collector);
+                        stats.attack = 0;
+                        stats.defense = 0;
+
+                        console.log(stats);
+                        break;
+                }
             }
 
             if (specialType === 0) specialType = null;
@@ -568,7 +599,7 @@ ${codeBlock(item.description)}
         const item = this.shopdoc.findItem(params.id.value, false);
         if (!item) throw this.#noItemError;
 
-        if(stats) {
+        if (stats) {
             item.stats = Object.assign({}, item.stats, stats);
         }
 
@@ -622,7 +653,16 @@ ${codeBlock(item.description)}
             if (!use.effect) throw dsError;
         }
 
-        await this.shopdoc.save();
+        try {
+            await this.shopdoc.save();
+        } catch(err) {
+            if(err instanceof Error.ValidationError) throw new BadParamsError(this.interaction, [
+                "Revisa los campos",
+                err.message
+            ])
+            
+            throw err
+        }
         return this.interaction.editReply({ embeds: [this.#updated], components: [] });
     }
 

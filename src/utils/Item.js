@@ -13,6 +13,8 @@ const Embed = require("./Embed");
 const ErrorEmbed = require("./ErrorEmbed");
 
 const Colores = require("../resources/colores.json");
+const Collector = require("./Collector");
+const Pet = require("./Pet");
 
 const models = require("mongoose").models;
 const { Shops, DarkShops, Users, PetShops, GlobalDatas } = models;
@@ -52,6 +54,10 @@ class Item {
 
         this.actived = new ExecutionError(interaction, "Ya está activado este item");
         this.roleDeleted = new ExecutionError(interaction, "Ya se ha eliminado temporalmente este rol");
+
+        this.canceled = new Embed()
+            .defDesc(`Cancelado.`)
+            .defColor(Colores.negro);
     }
 
     async build(user, doc) {
@@ -365,7 +371,7 @@ class Item {
                 console.log("🟩 Firewall!");
                 return await this.#activateItem();
 
-            case ItemTypes.ResetInterest:
+            case ItemTypes.ResetInterest: {
                 console.log("🟩 Reset interest!")
 
                 // hacer elegir qué interés eliminar
@@ -379,7 +385,7 @@ class Item {
                 row.addComponents(selector)
 
                 for (const purchase of purchases) {
-                    if (purchase.isDarkShop) continue
+                    if (purchase.shopType != ShopTypes.Shop) continue
 
                     let itemId = purchase.item_id;
 
@@ -417,6 +423,7 @@ class Item {
 
                 this.#removeItemFromInv();
                 return true;
+            }
 
             case ItemTypes.Pet:
                 console.log("🟩 Mascota!")
@@ -448,6 +455,43 @@ class Item {
                 // Crear mascota
                 this.user.data.pets.push(newpet)
                 await this.user.save();
+                this.#removeItemFromInv();
+                return true;
+            case ItemTypes.PetStatsModifier:
+                console.log("🟩 Estadísticas de mascota!");
+
+                // hacer elegir a qué mascota aplicar
+                const pets = this.user.data.pets;
+
+                const row = new ActionRowBuilder()
+                const selector = new StringSelectMenuBuilder()
+                    .setCustomId("modifyPetStats")
+                    .setPlaceholder("¿En cuál mascota quieres usar este item?");
+
+                for (const pet of pets) {
+                    selector.addOptions({ label: pet.name, description: `❤️: ${pet.stats.hp} / 🍗: ${pet.stats.hunger}`, value: String(pet.id) })
+                }
+
+                row.addComponents(selector)
+
+                selector.addOptions({ label: "Cancelar", value: "cancel", emoji: this.interaction.client.Emojis.Cross })
+
+                await this.interaction.editReply({ components: [row] });
+
+                let filter = (i) => i.isStringSelectMenu() && i.customId === "modifyPetStats" && i.user.id === this.interaction.user.id;
+                let collector = await new Collector(this.interaction, { filter, max: 1, wait: true }).raw();
+                if (!collector || collector.values[0] === "cancel") {
+                    this.interaction.editReply({ embeds: [this.canceled], components: [] });
+                    return false
+                }
+
+                let petId = Number(collector.values[0]);
+                const pet = await new Pet(this.interaction, petId).build(this.doc, this.user);
+
+                if (this.item.stats.hp >= 0) pet.changeHp(this.item.stats.hp)
+                if (this.item.stats.hunger >= 0) pet.changeHunger(-this.item.stats.hunger)
+
+                await pet.save();
                 this.#removeItemFromInv();
                 return true;
             default:
