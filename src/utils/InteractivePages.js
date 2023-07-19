@@ -17,6 +17,37 @@ class InteractivePages {
      * @param {Map<Id, values>} items Mapped by Id's, the {x.y} used on the 'addon', 'y' would be the values inside the key
      * @param {Number} itemsNum The number of items that will be in one page.
      */
+    /**
+     * @example 
+    let items = new Map();
+
+    for (const item of array) {
+        let name = item.name;
+        let foo = item.foo;
+        let bar = item.bar ?? "Bar";
+        let id = rule.id;
+
+        items.set(id, {
+            name,
+            foo,
+            bar,
+            id
+        })
+    }
+
+    const interactive = new InteractivePages({
+        title: "Titulo",
+        footer: `Comentario | Página {ACTUAL} de {TOTAL}`,
+        color: "#fff",
+        description: `Una descripción que no cambiará.`,
+        addon: `
+**— {name}**
+**▸ Foo**: {foo}
+**▸ Bar**: {bar}
+**▸ ID**: {id}\n\n`
+    }, items, 3);\
+
+    return await interactive.init()*/
     constructor(structure, items, itemsNum = 3, options) {
         this.base = structure;
         this.options = options;

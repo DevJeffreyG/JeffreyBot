@@ -491,7 +491,7 @@ ${codeBlock("markdown", expl.value)}`,
 
             const interactive = new InteractivePages({
                 title: "Lista de reglas",
-                footer: `Hay ${doc.data.rules.length} regla(s) | Pagina {ACTUAL} de {TOTAL}`,
+                footer: `Hay ${doc.data.rules.length} regla(s) | Página {ACTUAL} de {TOTAL}`,
                 color: Colores.verde,
                 footer_icon: interaction.guild.iconURL({ dynamic: true }),
                 description: `Usa los comandos en ${interaction.client.mentionCommand("config reglas")} para administrar lo que ves aquí.`,

@@ -25,12 +25,12 @@ class Modal extends ModalBuilder {
 
     /**
      * 
-     * @param {{id: string, label: string, style: TextInputStyle, req: boolean, placeholder: string, min: Number, max: Number}} options 
+     * @param {{id: string, value: string, label: string, style: TextInputStyle, req: boolean, placeholder: string, min: Number, max: Number}} options 
      * @returns {this}
      */
-    addInput(options = { id: string, label: string, style: TextInputStyle, req: Boolean, placeholder: string, min: 0, max: Infinity }) {
+    addInput(options = { id: string, value: string, label: string, style: TextInputStyle, req: Boolean, placeholder: string, min: 0, max: Infinity }) {
         if (this.data.components?.length > 5) return console.error("🔴 No puedes agregar más Inputs")
-        const { id, label, style, req, placeholder, min, max } = options;
+        const { id, value, label, style, req, placeholder, min, max } = options;
         if (!id || !label || !style)
             throw new BadCommandError(this.interaction, "No están definidos: id, label, style en el Modal")
                 .setEphemeral(true)
@@ -39,6 +39,7 @@ class Modal extends ModalBuilder {
             .setCustomId(id)
             .setLabel(label)
             .setStyle(style)
+            .setValue(value ?? null)
 
             .setRequired(req ?? false)
             .setPlaceholder(placeholder ?? "");
@@ -68,7 +69,7 @@ class Modal extends ModalBuilder {
         const fields = {};
 
         this.interaction.fields.fields.forEach(field => { // Collection
-            fields[field.customId] = field.value
+            if(field.value.length > 0) fields[field.customId] = field.value
         })
 
         return fields;

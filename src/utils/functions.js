@@ -1,4 +1,4 @@
-const { ActivityType, ButtonStyle, OverwriteType, PermissionsBitField, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, Guild, GuildMember, CommandInteraction, BaseInteraction, Message, Client, time, hyperlink, codeBlock, PresenceUpdateStatus, User } = require("discord.js");
+const { ActivityType, ButtonStyle, OverwriteType, PermissionsBitField, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, Guild, GuildMember, CommandInteraction, BaseInteraction, Message, Client, time, hyperlink, codeBlock, PresenceUpdateStatus, User, MessageFlags } = require("discord.js");
 
 const Colores = require("../resources/colores.json");
 const Cumplidos = require("../resources/cumplidos.json");
@@ -591,7 +591,8 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
                 .defTitle(`Intereses del ${debt.interest}% cada ${new HumanMs(debt.every).human}`)
                 .defDesc(`**—** Se te cobró **${Currency}${topay.toLocaleString("es-CO")}** por el préstamo que tienes pendiente con ${memberToPay}.
 **—** Usa \`/pay\` para pagarle los **${Currency}${debt.debt.toLocaleString("es-CO")}** que le debes.`)
-            ]
+            ],
+            flags: [MessageFlags.SuppressNotifications]
           })
         } catch (err) {
           console.log(err)
@@ -796,15 +797,15 @@ const PetWork = async function (guild) {
     for await (const p of pets) {
       const pet = await new Pet(null, p.id).setMember(member).build(doc, user)
       const maxHp = pet.shop_info.stats.hp;
-      const maxHungerRemoval = doc.settings.quantities.max_hunger;
+      const maxHungerGiven = doc.settings.quantities.max_hunger;
 
-      let removeHunger = new Chance().integer({ min: 1, max: maxHungerRemoval });
-      pet.changeHunger(-removeHunger);
+      let giveHunger = new Chance().integer({ min: 1, max: maxHungerGiven });
+      pet.changeHunger(giveHunger);
 
       // ----------- Hunger ----------- 
-      if(pet.hunger <= 40) await pet.notice(PetNotices.Hungry);
+      if(pet.hunger >= 60) await pet.notice(PetNotices.Hungry);
       
-      if(pet.hunger === 0) {
+      if(pet.hunger === 100) {
         let removal = new Chance().integer({min: 1, max: Math.ceil(maxHp * 0.05)});
         pet.changeHp(-removal);
       }

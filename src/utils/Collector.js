@@ -32,13 +32,13 @@ class Collector {
             return y.commandName === this.interaction.commandName && x.channelId === this.collector.channelId && x.interactionType === this.collector.interactionType && y.userid === this.interaction.user.id
         });
         if (active) {
+            console.log(active);
             if (this.evalOnActive) this.evalOnActive();
             this.defaultOnActive(active);
         }
 
-        this.client.activeCollectors.push({ manager: this, collector: this.collector, userid: this.interaction.user.id, channelid: this.interaction.channel.id, commandName: this.interaction.commandName });
-
         if (!this.wait) {
+            this.client.activeCollectors.push({ manager: this, collector: this.collector, userid: this.interaction.user.id, channelid: this.interaction.channel.id, commandName: this.interaction.commandName });
             this.collector.on("collect", async i => {
                 try {
                     if (!i.deferred && this.defer) await i.deferUpdate();
@@ -72,7 +72,7 @@ class Collector {
     }
 
     defaultOnActive(active) {
-        active.collector.stop(EndReasons.OldCollector);
+        if (active.collector) active.collector.stop(EndReasons.OldCollector);
     }
 
     /**
