@@ -270,8 +270,6 @@ class Top {
             txt = `${rank}. **${member.user.username}**${toadd}\n\n`;
         }
 
-        console.log(txt);
-
         return txt;
     }
 

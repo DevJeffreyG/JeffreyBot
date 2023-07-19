@@ -11,6 +11,12 @@ module.exports = {
         },
         message: "Tiene que ser un número positivo"
     },
+    positiveWithZeroValidator: {
+        validator: (v) => {
+            return v >= 0;
+        },
+        message: "Tiene que ser un número positivo"
+    },
     canBeNumber: {
         validator: (v) => {
             if (v === null) return true;

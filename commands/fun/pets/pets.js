@@ -1,5 +1,5 @@
 const { CommandInteraction, Client } = require("discord.js");
-const { Command, InteractivePages, Pet, Enum, PetAttacksType } = require("../../../src/utils");
+const { Command, InteractivePages, Pet, Enum, PetAttacksType, ProgressBar } = require("../../../src/utils");
 const { Colores } = require("../../../src/resources");
 
 const command = new Command({
@@ -21,12 +21,18 @@ command.execute = async (interaction, models, params, client) => {
 
     for await (const p of user.data.pets) {
         const pet = await new Pet(interaction, p.id).build(params.getDoc(), user)
+
+        let hpbar = ProgressBar((pet.hp / pet.shop_info.stats.hp) * 100, { blocks: 6 });
+        let hungerbar = ProgressBar(pet.hunger, { blocks: 6 });
+
         items.set(p.id, {
             name: pet.name,
+            hpbar,
             hp: pet.hp,
             storename: pet.shop_info.name,
             storedesc: pet.shop_info.description,
             hunger: pet.hunger,
+            hungerbar,
             wins: pet.wins,
             defeats: pet.defeats,
             attack: pet.stats.attack,
@@ -43,8 +49,8 @@ command.execute = async (interaction, models, params, client) => {
         addon: `# **{storename} — {name}**
 > {storedesc}
 ## Estadísticas
-❤️ — **{hp}**
-🍗 — **{hunger}**
+❤️ — {hpbar} (**{hp}**)
+🍗 — {hungerbar} (**{hunger}**)
 🗡️ — **{attack}**
 🛡️ — **{defense}**
 

@@ -4,7 +4,7 @@ const ms = require("ms");
 
 const { ModifierType } = require('../../src/utils/Enums');
 
-const { integerValidator } = require('../Validators');
+const { integerValidator, positiveValidator, positiveWithZeroValidator } = require('../Validators');
 
 const Schema = mongoose.Schema;
 
@@ -166,35 +166,36 @@ const GuildSchema = new Schema({
             guild_id: { type: String },
         },
         quantities: {
-            blackjack_bet: { type: Number, default: 1000 },
-            darkshop_level: { type: Number, default: 5 },
-            percentage_skipfirewall: { type: Number, default: 100 },
-            min_exp: { type: Number, default: 5, validate: integerValidator },
-            max_exp: { type: Number, default: 35, validate: integerValidator },
-            min_curr: { type: Number, default: 5, validate: integerValidator },
-            max_curr: { type: Number, default: 15, validate: integerValidator },
-            baseprice_darkshop: { type: Number, default: 200, validate: integerValidator },
-            currency_per_rep: { type: Number, default: 500, validate: integerValidator },
+            blackjack_bet: { type: Number, default: 1000, validate: [positiveValidator, integerValidator] },
+            darkshop_level: { type: Number, default: 5, validate: positiveWithZeroValidator },
+            percentage_skipfirewall: { type: Number, default: 100, validate: positiveWithZeroValidator },
+            min_exp: { type: Number, default: 5, validate: [positiveValidator, integerValidator] },
+            max_exp: { type: Number, default: 35, validate: [positiveValidator, integerValidator] },
+            min_curr: { type: Number, default: 5, validate: [positiveValidator, integerValidator] },
+            max_curr: { type: Number, default: 15, validate: [positiveValidator, integerValidator] },
+            max_hunger: { type: Number, default: 3, validate: [positiveValidator, integerValidator] },
+            baseprice_darkshop: { type: Number, default: 200, validate: [positiveValidator, integerValidator] },
+            currency_per_rep: { type: Number, default: 500, validate: [positiveValidator, integerValidator] },
             awards: {
                 tier1: {
-                    price: { type: Number, default: 100, validate: integerValidator },
-                    gift: { type: Number, default: 0, validate: integerValidator }
+                    price: { type: Number, default: 100, validate: [positiveValidator, integerValidator] },
+                    gift: { type: Number, default: 0, validate: [positiveWithZeroValidator, integerValidator] }
                 },
                 tier2: {
-                    price: { type: Number, default: 500, validate: integerValidator },
-                    gift: { type: Number, default: 100, validate: integerValidator }
+                    price: { type: Number, default: 500, validate: [positiveValidator, integerValidator] },
+                    gift: { type: Number, default: 100, validate: [positiveWithZeroValidator, integerValidator] }
                 },
                 tier3: {
-                    price: { type: Number, default: 1800, validate: integerValidator },
-                    gift: { type: Number, default: 700, validate: integerValidator }
+                    price: { type: Number, default: 1800, validate: [positiveValidator, integerValidator] },
+                    gift: { type: Number, default: 700, validate: [positiveWithZeroValidator, integerValidator] }
                 },
             },
             rob: {
-                percentage: { type: Number, default: 60 },
-                min_success: { type: Number, default: 5 },
-                max_success: { type: Number, default: 15 },
-                min_fail: { type: Number, default: 10 },
-                max_fail: { type: Number, default: 30 },
+                percentage: { type: Number, default: 60, validate: [positiveValidator, integerValidator] },
+                min_success: { type: Number, default: 5, validate: [positiveValidator, integerValidator] },
+                max_success: { type: Number, default: 15, validate: [positiveValidator, integerValidator] },
+                min_fail: { type: Number, default: 10, validate: [positiveValidator, integerValidator] },
+                max_fail: { type: Number, default: 30, validate: [positiveValidator, integerValidator] },
             }
 
         },
@@ -209,8 +210,8 @@ const GuildSchema = new Schema({
             },
             levels_deleteOldRole: { type: Boolean, default: false },
             save_roles_onleft: { type: Boolean, default: true },
-            sug_remind: { type: Number, default: 7, validate: integerValidator },
-            ticket_remind: { type: Number, default: 7, validate: integerValidator },
+            sug_remind: { type: Number, default: 7, validate: [positiveValidator, integerValidator] },
+            ticket_remind: { type: Number, default: 7, validate: [positiveValidator, integerValidator] },
         },
         cooldowns: {
             coins: { type: String, default: "10m" },
