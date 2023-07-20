@@ -1,4 +1,4 @@
-const { Command, Shop, ShopTypes } = require("../../src/utils")
+const { Command, Shop, ShopTypes } = require("../../../src/utils")
 
 const command = new Command({
     name: "dsbuy",

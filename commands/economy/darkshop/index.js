@@ -1,4 +1,4 @@
-const { Categories } = require("../../src/utils");
+const { Categories } = require("../../../src/utils");
 
 module.exports = {
     Category: Categories.DarkShop

@@ -1,5 +1,5 @@
-const { Command, Categories, Embed, DarkShop, GetRandomItem, Cooldowns, ErrorEmbed } = require("../../src/utils")
-const { Colores } = require("../../src/resources")
+const { Command, Embed, DarkShop, GetRandomItem, Cooldowns, ErrorEmbed } = require("../../../src/utils")
+const { Colores } = require("../../../src/resources")
 
 const Chance = require("chance")
 const moment = require("moment-timezone")

@@ -1,5 +1,5 @@
-const { EconomyError } = require("../../src/errors");
-const { Command, Categories, Embed, DarkShop } = require("../../src/utils")
+const { EconomyError } = require("../../../src/errors");
+const { Command, Embed, DarkShop } = require("../../../src/utils")
 const moment = require("moment-timezone");
 
 const command = new Command({

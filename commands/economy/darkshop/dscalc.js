@@ -1,5 +1,5 @@
-const { Command, Categories, Embed, DarkShop } = require("../../src/utils");
-const { Colores } = require("../../src/resources")
+const { Command, Embed, DarkShop } = require("../../../src/utils");
+const { Colores } = require("../../../src/resources")
 const moment = require("moment-timezone");
 
 const command = new Command({
