@@ -1,4 +1,4 @@
-const { Command, Categories, Embed, GetRandomItem, Cooldowns, ErrorEmbed, Log, LogReasons, ChannelModules } = require("../../src/utils")
+const { Command, Categories, Embed, GetRandomItem, Cooldowns, ErrorEmbed, Log, LogReasons, ChannelModules, RandomHuman } = require("../../src/utils")
 const Chance = require("chance");
 const { Responses, Colores } = require("../../src/resources");
 const BadSetupError = require("../../src/errors/BadSetupError");
@@ -19,7 +19,7 @@ command.execute = async (interaction, models, params, client) => {
 
     const { usuario } = params;
     const { Users } = models;
-    const { Currency } = client.getCustomEmojis(interaction.guild.id);
+    const { Currency, DarkCurrency } = client.getCustomEmojis(interaction.guild.id);
 
     const victimMember = usuario.member;
 
@@ -149,7 +149,13 @@ command.execute = async (interaction, models, params, client) => {
             `**${victimMember.displayName}**`
         ).replace(
             new RegExp("{ FAKE MONEY }", "g"),
-            `${Math.ceil(Math.random() * 50).toLocaleString("es-CO")} ${Currency.name}`
+            `${new Chance().integer({ min: victim.economy.global.currency, max: victim.economy.global.currency * 3 }).toLocaleString("es-CO")} ${Currency.name}`
+        ).replace(
+            new RegExp("{ MONEY NAME }", "g"), Currency.name
+        ).replace(
+            new RegExp("{ DARK NAME }", "g"), DarkCurrency.name
+        ).replace(
+            new RegExp("{ OWNER }", "g"), interaction.guild.members.cache.get(interaction.guild.ownerId)
         )
     }
 }

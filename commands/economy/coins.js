@@ -1,4 +1,4 @@
-const { Command, Embed, Cooldowns, GetRandomItem, BoostWork } = require("../../src/utils");
+const { Command, Embed, Cooldowns, GetRandomItem, BoostWork, RandomHuman } = require("../../src/utils");
 const { Responses } = require("../../src/resources/");
 
 const Chance = require("chance");
@@ -9,7 +9,7 @@ const command = new Command({
 });
 
 command.execute = async (interaction, models, params, client) => {
-    const { Currency } = client.getCustomEmojis(interaction.guild.id);
+    const { Currency, DarkCurrency } = client.getCustomEmojis(interaction.guild.id);
 
     await interaction.deferReply();
 
@@ -51,7 +51,7 @@ command.execute = async (interaction, models, params, client) => {
 
     randommember = `**${randommember.displayName}**`;
 
-    let fakemoney = `${Math.round(Math.ceil(Math.random() * 1000) + fakeAdd).toLocaleString("es-CO")} ${Currency.name}`;
+    let fakemoney = `${new Chance().integer({ min: fakeAdd, max: fakeAdd * 2 }).toLocaleString("es-CO")} ${Currency.name}`;
 
     if (boost.hasAnyChanges()) {
         money = Number((money * Number(boost.multiplier.currency_value)).toFixed(2));
@@ -69,7 +69,16 @@ command.execute = async (interaction, models, params, client) => {
     ).replace(
         new RegExp("{ FAKE MONEY }", "g"),
         `${fakemoney}`
-    ).replace(new RegExp("{ COOLDOWN }", "g"), `${cooldownInfo / 60000}`);
+    ).replace(
+        new RegExp("{ COOLDOWN }", "g"),
+        `${cooldownInfo / 60000}`
+    ).replace(
+        new RegExp("{ MONEY NAME }", "g"), Currency.name
+    ).replace(
+        new RegExp("{ DARK NAME }", "g"), DarkCurrency.name
+    ).replace(
+        new RegExp("{ OWNER }", "g"), interaction.guild.members.cache.get(interaction.guild.ownerId)
+    )
 
     let embed = new Embed()
         .defColor(member.displayHexColor)
