@@ -164,7 +164,7 @@ module.exports = async (client, message) => {
     await user.addCurrency(currencyToAdd)
     user.economy.global.exp += expToAdd;
 
-    console.log("🟢 %s ganó %s EXP y %s %s en #%s", author.tag, expToAdd, currencyToAdd, client.getCustomEmojis(guild.id).Currency.name, message.channel.name);
+    console.log("🟢 %s ganó %s EXP y %s %s en #%s", author.username, expToAdd, currencyToAdd, client.getCustomEmojis(guild.id).Currency.name, message.channel.name);
 
     user.data.lastGained.currency = currencyToAdd;
     user.data.lastGained.exp = expToAdd;

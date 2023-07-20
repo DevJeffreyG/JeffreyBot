@@ -135,7 +135,7 @@ command.execute = async (interaction, models, params, client) => {
     })
     interaction.editReply({ embeds: [new Embed({ type: "success" })] });
 
-    return interaction.followUp({ content: `**${author.tag}** ➡️ **${recieverMember}**.`, embeds: [doneEmbed], allowedMentions: { parse: ["users"] } });
+    return interaction.followUp({ content: `**${author.username}** ➡️ **${recieverMember}**.`, embeds: [doneEmbed], allowedMentions: { parse: ["users"] } });
 }
 
 module.exports = command;

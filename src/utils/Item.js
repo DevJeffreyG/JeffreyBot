@@ -446,7 +446,7 @@ class Item {
                     name: new Chance().name({ nationality: "en" }).split(" ")[0],
                     shopId: this.item.id,
                     stats: Object.assign({}, this.item.stats, {
-                        hunger: new Chance().integer({ max: 100, min: 85 })
+                        hunger: new Chance().integer({ min: 0, max: 25 })
                     }),
                     attacks,
                     id: FindNewId(await Users.find(), "data.pets", "id")

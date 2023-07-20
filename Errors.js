@@ -28,7 +28,7 @@ module.exports = async (client) => {
 
         lastinter = `\n\nLa última interacción registrada fue:
 **—** En el servidor \`${guild?.name}\` (\`${guild?.id}\`)
-**—** Por \`${user?.tag}\` (\`${user?.id}\`)
+**—** Por \`${user?.username}\` (\`${user?.id}\`)
 **—** En \`#${channel?.name}\` (\`${channel?.id}\`)
 **—** Tipo de interacción: \`${client.lastInteraction?.type}\`
 **—** Nombre del comando: \`${client.lastInteraction?.commandName}\`

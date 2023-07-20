@@ -1373,7 +1373,7 @@ const ValidateDarkShop = async function (user, author) {
 
   const desc = res.replace(
     new RegExp("{you}", "g"),
-    `**${author.tag}**`
+    `**${author.username}**`
   );
 
   const notReady = new Embed()
@@ -1767,7 +1767,7 @@ ${codeBlock(message.content)}`)
     ]
   })
     .catch(async err => {
-      let msg = await message.channel.send(`No envíes links, **${message.author.tag}**.`)
+      let msg = await message.channel.send(`No envíes links, **${message.author.username}**.`)
 
       setTimeout(() => {
         msg.delete();
@@ -1781,7 +1781,7 @@ ${codeBlock(message.content)}`)
       .send({
         embeds: [
           new Embed()
-            .defAuthor({ text: `Se eliminó un mensaje de ${message.author.tag}`, icon: member.displayAvatarURL({ dynamic: true }) })
+            .defAuthor({ text: `Se eliminó un mensaje de ${message.author.username}`, icon: member.displayAvatarURL({ dynamic: true }) })
             .defDesc(`${codeBlock(message.content)}`)
             .defColor(Colores.verde)
             .defFooter({ text: "NO se aplicaron sanciones", timestamp: true })

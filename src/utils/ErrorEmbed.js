@@ -75,7 +75,7 @@ ${codeBlock("json", data.error)}`])
             case "DMNotSent":
                 this.#errorName("No se envió")
                 this.#errorAuthor(7);
-                this.#errorDesc("No pude enviar el mensaje al usuario por privado", data.tag, [data.error])
+                this.#errorDesc("No pude enviar el mensaje al usuario por privado", data.username, [data.error])
                 break;
 
             case "BadParams":

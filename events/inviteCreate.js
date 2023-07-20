@@ -9,7 +9,7 @@ module.exports = async (client, invite) => {
 
     await GenerateLog(invite.guild, {
         header: "Se ha creado una invitación",
-        footer: `${invite.inviter.tag}`,
+        footer: `${invite.inviter.username}`,
         description: [
             `${invite.inviter} ha creado la invitación.`,
             `discord.gg/${invite.code}`,

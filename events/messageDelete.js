@@ -12,9 +12,9 @@ module.exports = async (client, message) => {
 
     await GenerateLog(message.guild, {
       header: `Se ha eliminado un mensaje`,
-      footer: `Eliminado por ${info?.executor.tag ?? "un usuario"}`,
+      footer: `Eliminado por ${info?.executor.username ?? "un usuario"}`,
       description: [
-        `${info?.target.tag ?? "Sin información del autor"}`,
+        `${info?.target.username ?? "Sin información del autor"}`,
         `${message.content ?? message.embeds[0]?.description ?? "Sin información del mensaje"}`,
         `ID: \`${message.id}\`.`
       ],

@@ -121,6 +121,8 @@ command.execute = async (interaction, models, params, client) => {
 
     user.economy.global.currency -= toLend;
     lend_user.addCurrency(toLend);
+
+    await user.save()
 }
 
 module.exports = command;
