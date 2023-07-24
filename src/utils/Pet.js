@@ -56,6 +56,10 @@ class Pet {
         this.attacks = this.#info.attacks
         this.notices = this.#info.notices;
 
+        this.ultCharge = 0;
+        this.inCombat = false;
+        this.wasDefeated = false;
+
         return this
     }
 
@@ -66,7 +70,10 @@ class Pet {
     changeHunger(value) {
         this.#changedHunger = true;
         this.hunger += value;
-        if (this.hunger > 100) this.hunger = 100;
+        if (this.hunger > 100) {
+            this.changeHp(100 - this.hunger);
+            this.hunger = 100;
+        }
         else if (this.hunger < 0) this.hunger = 0;
         return this
     }
@@ -80,6 +87,9 @@ class Pet {
         this.hp += value;
         if (this.hp > this.shop_info.stats.hp) this.hp = this.shop_info.stats.hp;
         else if (this.hp < 0) this.hp = 0;
+
+        if (this.inCombat && this.hp === 0) this.wasDefeated = true;
+
         return this
     }
 
@@ -99,17 +109,18 @@ class Pet {
             return await this.#user.save();
         }
 
-        if(this.#changedHp) {
+        if (this.#changedHp) {
             this.notices.halfhp = null;
             this.notices.lowhp = null;
         }
 
-        if(this.#changedHunger) this.notices.hungry = null;
+        if (this.#changedHunger) this.notices.hungry = null;
 
         this.#user.data.pets[i] = Object.assign(this.#user.data.pets[i], {
             name: this.name,
             wins: this.wins,
             defeats: this.defeats,
+            inCombat: this.inCombat,
             stats: {
                 hp: this.hp,
                 hunger: this.hunger,
@@ -126,6 +137,7 @@ class Pet {
      * @return {Promise<void>}
      */
     async notice(type) {
+        if (this.inCombat) return;
         switch (type) {
             case PetNotices.HalfHp:
                 if (!this.notices.halfhp) {
@@ -163,7 +175,7 @@ class Pet {
                 }
                 break;
             case PetNotices.Hungry:
-                if(!this.notices.hungry) {
+                if (!this.notices.hungry) {
                     await (this.member ?? this.interaction.member).send({
                         embeds: [
                             new Embed()

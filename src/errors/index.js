@@ -14,6 +14,7 @@ const ExecutionError = require("./ExecutionError");
 const ModuleBannedError = require("./ModuleBannedError");
 const ModuleDisabledError = require("./ModuleDisabledError");
 const PermissionError = require("./PermissionError");
+const AlreadyUsingError = require("./AlreadyUsingError");
 
 module.exports = {
     CommandNotFoundError,
@@ -31,5 +32,6 @@ module.exports = {
     ExecutionError,
     ModuleBannedError,
     ModuleDisabledError,
-    PermissionError
+    PermissionError,
+    AlreadyUsingError
 }

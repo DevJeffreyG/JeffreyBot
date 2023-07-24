@@ -144,6 +144,12 @@ ${codeBlock("json", data.error)}`])
                 this.#errorDesc("Hay un error en la configuración del bot", "Avísa a los administradores")
                 break;
 
+            case "AlreadyUsing":
+                this.#errorName("En uso")
+                this.#errorAuthor(20)
+                this.#errorDesc("Ya está en progreso", data.guide)
+                break;
+
             default:
                 console.log(options)
                 console.error("⚠️🔴 No existe %s como tipo de Error ❗❗", type);

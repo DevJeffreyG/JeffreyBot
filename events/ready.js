@@ -24,6 +24,7 @@ module.exports = async (client) => {
     client.fetchedGuilds = [];
     client.blackjackCards = [];
     client.wonBlackjack = [];
+    client.petCombats = new Collection();
     client.totalMembers = 0;
     client.CustomEmojis = new Map();
     client.slashCooldowns = new Map();

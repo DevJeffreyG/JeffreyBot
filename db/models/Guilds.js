@@ -196,6 +196,9 @@ const GuildSchema = new Schema({
                 max_success: { type: Number, default: 15, validate: [positiveValidator, integerValidator] },
                 min_fail: { type: Number, default: 10, validate: [positiveValidator, integerValidator] },
                 max_fail: { type: Number, default: 30, validate: [positiveValidator, integerValidator] },
+            },
+            pets: {
+                basic_unlocked: { type: Number, default: 5 },
             }
 
         },

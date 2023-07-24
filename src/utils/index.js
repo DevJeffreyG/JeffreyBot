@@ -20,6 +20,7 @@ const CustomEmbed = require("./CustomEmbed");
 const CustomButton = require("./CustomButton");
 const CustomTrophy = require("./CustomTrophy");
 const Pet = require("./Pet");
+const PetCombat = require("./PetCombat");
 
 const Enums = require("./Enums");
 const Functions = require("./functions");
@@ -47,6 +48,7 @@ module.exports = {
     CustomButton,
     CustomTrophy,
     Pet,
+    PetCombat,
 
     ...Enums,
     ...Functions
