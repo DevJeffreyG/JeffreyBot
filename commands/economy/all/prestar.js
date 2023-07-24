@@ -4,7 +4,7 @@ const file = require("../prestar");
 
 const command = new Command({
     name: "all-prestar",
-    desc: "Prestále todo tu dinero a un usuario"
+    desc: "Préstale todo tu dinero a un usuario"
 })
 
 command.data.options = file.data.options.filter(x => x.name != "dinero");
