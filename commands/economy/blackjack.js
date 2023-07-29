@@ -1,5 +1,5 @@
 const { EconomyError } = require("../../src/errors");
-const { Command, Categories, Blackjack, Embed, Cooldowns } = require("../../src/utils")
+const { Command, Blackjack, Embed, Cooldowns } = require("../../src/utils")
 
 const command = new Command({
     name: "blackjack",
@@ -22,8 +22,8 @@ command.execute = async (interaction, models, params, client) => {
 
     let user = params.getUser();
 
-    if (user.economy.global.currency < apuesta.value)
-        throw new EconomyError(interaction, "No tienes tanto dinero para apostar", user.economy.global.currency)
+    if (user.getCurrency() < apuesta.value)
+        throw new EconomyError(interaction, "No tienes tanto dinero para apostar", user.getCurrency())
     let winCounts = client.wonBlackjack.find(x => x.user === interaction.user.id && x.guild === interaction.guild.id)
 
     let cool = await user.cooldown(Cooldowns.Blackjack, { info: true })

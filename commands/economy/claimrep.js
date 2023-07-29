@@ -1,5 +1,5 @@
 const { ModuleDisabledError } = require("../../src/errors");
-const { Command, Categories, Confirmation, Embed, ErrorEmbed, HumanMs, Cooldowns, BoostWork } = require("../../src/utils")
+const { Command, Confirmation, Embed, ErrorEmbed, HumanMs, Cooldowns, BoostWork, PrettyCurrency } = require("../../src/utils")
 
 const command = new Command({
     name: "claimrep",
@@ -9,12 +9,10 @@ const command = new Command({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
 
-    const { Currency } = client.getCustomEmojis(interaction.guild.id);
-
-    const guild = params.getDoc();
+    const doc = params.getDoc();
     const user = params.getUser();
 
-    if (!guild.moduleIsActive("functions.rep_to_currency")) throw new ModuleDisabledError(interaction);
+    if (!doc.moduleIsActive("functions.rep_to_currency")) throw new ModuleDisabledError(interaction);
 
     if (user.economy.global.reputation === 0) return interaction.editReply({ embeds: [new ErrorEmbed().defDesc(`**No tienes puntos de reputación...**`)] });
 
@@ -25,17 +23,17 @@ command.execute = async (interaction, models, params, client) => {
         ]
     });
 
-    let perRep = guild.settings.quantities.currency_per_rep;
-    if (guild.toAdjust("claim_rep")) {
-        if (guild.data.average_currency / perRep > 1000)
-            perRep += Math.round(guild.data.average_currency * 0.01);
+    let perRep = doc.settings.quantities.currency_per_rep;
+    if (doc.toAdjust("claim_rep")) {
+        if (doc.data.average_currency / perRep > 1000)
+            perRep += Math.round(doc.data.average_currency * 0.01);
     }
 
     const boost = BoostWork(user);
     let value = user.economy.global.reputation * perRep * boost.multiplier.currency_value;
 
     let toConfirm = [
-        `Se añadirán **${Currency}${value.toLocaleString("es-CO")}${boost.changed ? boost.emojis.currency : ""}** a tu cuenta.`,
+        `Se añadirán ${PrettyCurrency(interaction.guild, value, { boostemoji: boost.multiplier.changed.currency ? boost.emojis.currency : null })} a tu cuenta.`,
         `Sólo puedes usar este comando cada ${new HumanMs(await user.cooldown(Cooldowns.ClaimRep, { info: true, check: false })).human}.`
     ]
 

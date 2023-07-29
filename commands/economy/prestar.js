@@ -1,4 +1,4 @@
-const { Command, Categories, Confirmation, HumanMs, ErrorEmbed, FindNewId, Embed, GetRandomItem } = require("../../src/utils");
+const { Command, Confirmation, HumanMs, ErrorEmbed, FindNewId, Embed, GetRandomItem, PrettyCurrency } = require("../../src/utils");
 const ms = require("ms");
 const moment = require("moment-timezone");
 const { BadParamsError, EconomyError } = require("../../src/errors");
@@ -45,7 +45,6 @@ command.execute = async (interaction, models, params, client) => {
 
     const { usuario, dinero, interes, tiempo } = params;
     const { Users } = models;
-    const { Currency } = client.getCustomEmojis(interaction.guild.id);
 
     const user = params.getUser();
     const lend_user = await Users.getWork({ user_id: usuario.value, guild_id: interaction.guild.id });
@@ -56,11 +55,12 @@ command.execute = async (interaction, models, params, client) => {
     if (every < ms("5m") || isNaN(every)) throw new BadParamsError(interaction, "El tiempo debe ser mayor o igual a 5 minutos");
 
     const toLend = dinero.value;
+    const deuda = PrettyCurrency(interaction.guild, toLend);
 
-    if (!user.canBuy(toLend)) throw new EconomyError(interaction, "No tienes tanto dinero", user.economy.global.currency)
+    if (!user.canBuy(toLend)) throw new EconomyError(interaction, "No tienes tanto dinero", user.getCurrency())
 
     const authorConfirmation = await Confirmation("Prestar dinero", [
-        `Le prestarás **${Currency}${toLend.toLocaleString("es-CO")}** a ${usuario.member}.`,
+        `Le prestarás ${deuda} a ${usuario.member}.`,
         `Se le cobrará **${interes.value}%** de lo que te deba ${usuario.member} cada ${new HumanMs(every).human}.`,
         `**Después que confirmes se le pedirá confirmar a ${usuario.member} también**.`
     ], interaction)
@@ -71,7 +71,7 @@ command.execute = async (interaction, models, params, client) => {
 
     let lendUserConfirmations = [
         `Le pagarás un **${interes.value}%** de lo que le debas a ${interaction.member} cada ${new HumanMs(every).human}.`,
-        `Será un préstamo inicial de **${Currency}${toLend.toLocaleString("es-CO")}**`,
+        `Será un préstamo inicial de ${deuda}`,
         `Para pagar tu deuda usa ${client.mentionCommand("pay")}.`,
         `Te llegará un mensaje de directo **CADA VEZ** que se te cobren los intereses.`
     ];
@@ -84,7 +84,7 @@ command.execute = async (interaction, models, params, client) => {
 
         lend_user.markModified("data");
 
-        lendUserConfirmations[1] = `Se agregará **${Currency}${toLend.toLocaleString("es-CO")}** a lo que le debes a ${interaction.member}.`;
+        lendUserConfirmations[1] = `Se agregará ${deuda} a lo que le debes a ${interaction.member}.`;
     } else {
         lend_user.data.debts.push({
             user: interaction.user.id,
@@ -101,7 +101,6 @@ command.execute = async (interaction, models, params, client) => {
 
     const messenger = interaction.member;
     const lendMember = usuario.member;
-    const deuda = `**${Currency}${toLend.toLocaleString("es-CO")}**`
 
     let possibleDescriptions = [
         `${messenger} le prestó ${deuda} a ${lendMember}`,
@@ -119,7 +118,7 @@ command.execute = async (interaction, models, params, client) => {
     })
     await interaction.editReply({ content: null, embeds: [doneEmbed] });
 
-    user.economy.global.currency -= toLend;
+    user.getCurrency() -= toLend;
     lend_user.addCurrency(toLend);
 
     await user.save()

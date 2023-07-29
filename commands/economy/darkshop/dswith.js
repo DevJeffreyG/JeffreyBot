@@ -1,5 +1,5 @@
 const { EconomyError } = require("../../../src/errors");
-const { Command, Embed, DarkShop } = require("../../../src/utils")
+const { Command, Embed, DarkShop, PrettyCurrency } = require("../../../src/utils")
 const moment = require("moment-timezone");
 
 const command = new Command({
@@ -18,7 +18,6 @@ command.addOption({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { cantidad } = params
-    const { DarkCurrency, Currency } = client.getCustomEmojis(interaction.guild.id);
 
     // codigo
     const quantity = cantidad.value;
@@ -26,7 +25,7 @@ command.execute = async (interaction, models, params, client) => {
 
     const darkshop = new DarkShop(interaction.guild);
 
-    const usermoney = user.economy.dark.currency;
+    const usermoney = user.getDarkCurrency();
     const total = Math.round(await darkshop.equals(null, quantity));
 
     const embeds = [];
@@ -35,8 +34,8 @@ command.execute = async (interaction, models, params, client) => {
         type: "success",
         data: {
             desc: [
-                `Se han restado **${DarkCurrency}${quantity.toLocaleString('es-CO')}**`,
-                `Se añadieron **${Currency}${total.toLocaleString("es-CO")}** a tu cuenta`
+                `Se han restado ${PrettyCurrency(interaction.guild, quantity, { name: "DarkCurrency" })}`,
+                `Se añadieron ${PrettyCurrency(interaction.guild, total)} a tu cuenta`
             ]
         }
     })
@@ -45,14 +44,14 @@ command.execute = async (interaction, models, params, client) => {
     if (quantity > usermoney)
         throw new EconomyError(interaction, [
             "No tienes tanto dinero para cambiar",
-            `Quieres cambiar: **${DarkCurrency}${quantity.toLocaleString("es-CO")}**`
+            `Quieres cambiar: ${PrettyCurrency(interaction.guild, quantity, { name: "DarkCurrency" })}`
         ], usermoney, true)
 
     const economy = user.economy.dark;
 
     economy.currency -= quantity;
 
-    if(moment().day() === 0) {
+    if (moment().day() === 0) {
         user.data.counts.dark_currency -= quantity;
     }
 

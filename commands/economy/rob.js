@@ -1,4 +1,4 @@
-const { Command, Categories, Embed, GetRandomItem, Cooldowns, ErrorEmbed, Log, LogReasons, ChannelModules, RandomHuman } = require("../../src/utils")
+const { Command, Embed, GetRandomItem, Cooldowns, ErrorEmbed, Log, LogReasons, ChannelModules, PrettyCurrency } = require("../../src/utils")
 const Chance = require("chance");
 const { Responses, Colores } = require("../../src/resources");
 const BadSetupError = require("../../src/errors/BadSetupError");
@@ -78,10 +78,10 @@ command.execute = async (interaction, models, params, client) => {
         }
     }
 
-    const successValue = Math.round(victim.economy.global.currency * successPerc);
-    const failedValue = Math.round(user.economy.global.currency * failedPerc);
+    const successValue = Math.round(victim.getCurrency() * successPerc);
+    const failedValue = Math.round(user.getCurrency() * failedPerc);
 
-    const minRequired = Math.round(victim.economy.global.currency * min_success / 100);
+    const minRequired = Math.round(victim.getCurrency() * min_success / 100);
 
     if (successValue <= 0) robSuccess = false;
 
@@ -92,7 +92,7 @@ command.execute = async (interaction, models, params, client) => {
 
     //console.log(failedValue, successValue, robSuccess)
 
-    if ((user.economy.global.currency < minRequired) || (minRequired < 0)) {
+    if ((user.getCurrency() < minRequired) || (minRequired < 0)) {
         await user.save();
         let e = new ErrorEmbed(interaction)
             .defDesc("**No tenías suficiente dinero como para robarle.**")
@@ -105,7 +105,7 @@ command.execute = async (interaction, models, params, client) => {
     if (!robSuccess) {
         suggester = getAuthor(fail);
 
-        user.economy.global.currency -= failedValue;
+        user.getCurrency() -= failedValue;
         await user.save();
 
         embed = new Embed()
@@ -115,7 +115,7 @@ command.execute = async (interaction, models, params, client) => {
         suggester = getAuthor(success);
 
         user.addCurrency(successValue);
-        victim.economy.global.currency -= successValue;
+        victim.getCurrency() -= successValue;
 
         await victim.save();
 
@@ -143,13 +143,13 @@ command.execute = async (interaction, models, params, client) => {
     function replace(text) {
         return text.replace(
             new RegExp("{ MONEY }", "g"),
-            `**${Currency}${robSuccess ? successValue.toLocaleString("es-CO") : failedValue.toLocaleString("es-CO")}**`
+            `${PrettyCurrency(interaction.guild, robSuccess ? successValue : failedValue)}`
         ).replace(
             new RegExp("{ MEMBER }", "g"),
             `**${victimMember.displayName}**`
         ).replace(
             new RegExp("{ FAKE MONEY }", "g"),
-            `${new Chance().integer({ min: victim.economy.global.currency, max: victim.economy.global.currency * 3 }).toLocaleString("es-CO")} ${Currency.name}`
+            `${new Chance().integer({ min: victim.getCurrency(), max: victim.getCurrency() * 3 }).toLocaleString("es-CO")} ${Currency.name}`
         ).replace(
             new RegExp("{ MONEY NAME }", "g"), Currency.name
         ).replace(

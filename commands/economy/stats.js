@@ -51,7 +51,7 @@ command.execute = async (interaction, models, params, client) => {
 
     let darkstats = new Embed()
         .defAuthor({ text: `DarkStats del usuario N°${member.id}`, icon: client.EmojisObject.DarkShop.url })
-        .defDesc(`**— ${DarkCurrency.name}**: **${DarkCurrency}${user.economy.dark.currency}**.
+        .defDesc(`**— ${DarkCurrency.name}**: **${DarkCurrency}${user.getDarkCurrency()}**.
 **— Precisión**: ${ProgressBar(user.economy.dark.accuracy, { max: 80 })} ${inlineCode(user.economy.dark.accuracy + "%")}.`)
         .defThumbnail(member.displayAvatarURL({ dynamic: true }))
         .defColor(Colores.negro);

@@ -1,4 +1,4 @@
-const { Command, Embed, Cooldowns, GetRandomItem, BoostWork, RandomHuman } = require("../../src/utils");
+const { Command, Embed, Cooldowns, GetRandomItem, BoostWork, PrettyCurrency } = require("../../src/utils");
 const { Responses } = require("../../src/resources/");
 
 const Chance = require("chance");
@@ -41,7 +41,6 @@ command.execute = async (interaction, models, params, client) => {
     const boost = BoostWork(user);
 
     let money = new Chance().integer({ min: 1, max: maximum * boost.probability.currency_value });
-    let tmoney = `**${Currency}${money.toLocaleString('es-CO')}**`;
     let randommember = guild.members.cache.random();
 
     while (randommember.user.id === member.id) { // el randommember NO puede ser el mismo usuario
@@ -53,10 +52,10 @@ command.execute = async (interaction, models, params, client) => {
 
     let fakemoney = `${new Chance().integer({ min: fakeAdd, max: fakeAdd * 2 }).toLocaleString("es-CO")} ${Currency.name}`;
 
-    if (boost.hasAnyChanges()) {
+    if (boost.hasAnyChanges())
         money = Number((money * Number(boost.multiplier.currency_value)).toFixed(2));
-        tmoney = `**${Currency}${money.toLocaleString('es-CO')}${boost.emojis.currency}**`
-    }
+
+    let tmoney = PrettyCurrency(guild, money, { boostemoji: boost.emojis.currency })
 
     let index = GetRandomItem(Responses.coins);
     let textString = index.text;

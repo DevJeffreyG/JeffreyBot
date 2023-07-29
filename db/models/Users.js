@@ -134,13 +134,13 @@ const Schema = new mongoose.Schema({
             blackjack: { type: Number, default: 0, validate: integerValidator },
             normal_currency: {
                 type: Number, default: function () {
-                    if (this.economy.global.currency && this.economy.global.currency > 0) return this.economy.global.currency
+                    if (this.getCurrency() && this.getCurrency() > 0) return this.getCurrency()
                     return 0
                 }, validate: integerValidator
             },
             dark_currency: {
                 type: Number, default: function () {
-                    if (this.economy.dark.currency) return this.economy.dark.currency
+                    if (this.getDarkCurrency()) return this.getDarkCurrency()
                     return 0
                 }, validate: integerValidator
             },
@@ -190,10 +190,10 @@ const Schema = new mongoose.Schema({
 })
 
 Schema.pre("validate", function () {
-    this.economy.global.currency = Math.round(this.economy.global.currency);
+    this.economy.global.currency = Math.round(this.getCurrency());
     this.economy.global.exp = Math.round(this.economy.global.exp);
 
-    this.economy.dark.currency = Math.round(this.economy.dark.currency);
+    this.economy.dark.currency = Math.round(this.getDarkCurrency());
 
     this.data.counts.normal_currency = Math.round(this.data.counts.normal_currency);
     this.data.counts.dark_currency = Math.round(this.data.counts.dark_currency);
@@ -201,14 +201,14 @@ Schema.pre("validate", function () {
 })
 
 Schema.pre("save", function () {
-    if (this.economy.global.currency) {
+    if (this.getCurrency()) {
         let obj = this.economy.toObject();
         delete obj.global.jeffros;
 
         this.economy = obj;
     }
 
-    if (this.economy.dark.currency) {
+    if (this.getDarkCurrency()) {
         let obj = this.economy.toObject();
         delete obj.dark.darkjeffro;
 
@@ -270,6 +270,14 @@ Schema.method("getNextLevelExp", function (level = null) {
     return 10 * (level ** 2) + 50 * level + 100;
 })
 
+Schema.method("getCurrency", function() {
+    return this.economy.global.currency;
+})
+
+Schema.method("getDarkCurrency", function() {
+    return this.economy.dark.currency
+})
+
 Schema.method("addCount", async function (module, count = 1, save = true) {
     this.data.counts[module] += count;
     if (save) return await this.save();
@@ -284,7 +292,7 @@ Schema.method("addCurrency", async function (count, save = true) {
     this.data.counts.normal_currency += count;
     if (save) await this.save();
 
-    console.log("🗨 %s tiene %s Currency", this.user_id, this.economy.global.currency);
+    console.log("🗨 %s tiene %s Currency", this.user_id, this.getCurrency());
 
     return this;
 })
@@ -294,7 +302,7 @@ Schema.method("addDarkCurrency", async function (count, save = true) {
     this.data.counts.dark_currency += count;
     if (save) await this.save();
 
-    console.log("🗨 %s tiene %s DarkCurrency", this.user_id, this.economy.dark.currency);
+    console.log("🗨 %s tiene %s DarkCurrency", this.user_id, this.getDarkCurrency());
 
     return this;
 })
@@ -314,15 +322,10 @@ Schema.method("hasItem", function (itemId, shopType = ShopTypes.Shop) {
 })
 
 Schema.method("canBuy", function (price, path) {
-    if (!path) return this.economy.global.currency >= price
+    if (!path) return this.getCurrency() >= price
     else {
         return this.get(path) >= price
     }
-})
-
-Schema.method("parseCurrency", function (Emojis, darkshop = false) {
-    if (!darkshop) return `**${Emojis.Currency}${this.economy.global.currency.toLocaleString("es-CO")}**`;
-    return `**${Emojis.DarkCurrency}${this.economy.dark.currency.toLocaleString("es-CO")}**`;
 })
 
 Schema.method("isBannedFrom", function (module) {

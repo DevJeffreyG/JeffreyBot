@@ -26,7 +26,7 @@ command.execute = async (interaction, models, params, client) => {
 
     const user = params.getUser();
 
-    if (user.economy.dark.currency === 0) return interaction.editReply({ embeds: [new ErrorEmbed().defDesc(`No tienes nada invertido, mejor esperar al domingo y usar ${client.mentionCommand("dschange")}.`)] })
+    if (user.getDarkCurrency() === 0) return interaction.editReply({ embeds: [new ErrorEmbed().defDesc(`No tienes nada invertido, mejor esperar al domingo y usar ${client.mentionCommand("dschange")}.`)] })
 
     const darkshop = new DarkShop(interaction.guild, interaction)
     const values = await darkshop.getAllValues();

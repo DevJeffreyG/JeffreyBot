@@ -6,7 +6,7 @@ const { CommandInteraction, ModalSubmitInteraction, GuildMember, Guild } = requi
 const Embed = require("./Embed");
 const { BadParamsError, DoesntExistsError, DMNotSentError } = require("../errors");
 const { Enum, BoostTypes, BoostObjetives, ShopTypes } = require("./Enums");
-const { LimitedTime, FindNewId } = require("./functions");
+const { LimitedTime, FindNewId, PrettyCurrency } = require("./functions");
 const { Colores } = require("../resources");
 const HumanMs = require("./HumanMs");
 
@@ -195,13 +195,13 @@ class CustomTrophy {
                         switch (momentprop) {
                             case "currency":
                                 if (momentValue < 0) {
-                                    if (this.user.economy.global.currency > momentValue) grant = false;
+                                    if (this.user.getCurrency() > momentValue) grant = false;
                                 } else {
-                                    if (this.user.economy.global.currency < momentValue) grant = false;
+                                    if (this.user.getCurrency() < momentValue) grant = false;
                                 }
                                 break;
                             case "darkcurrency":
-                                if (this.user.economy.dark.currency < momentValue) grant = false;
+                                if (this.user.getDarkCurrency() < momentValue) grant = false;
                                 break;
                         }
                     }
@@ -439,7 +439,6 @@ class CustomTrophy {
     async #rewardsWork(trophy) {
         const givenList = trophy.given;
         const guild = this.interaction instanceof Guild ? this.interaction : this.interaction.guild;
-        const { Currency, DarkCurrency } = this.interaction.client.getCustomEmojis(guild.id);
 
         this.rewardsGiven = [];
 
@@ -452,12 +451,12 @@ class CustomTrophy {
                 case "currency":
                     await this.user.addCurrency(value);
 
-                    this.rewardsGiven.push(`**${Currency}${value.toLocaleString("es-CO")}**`);
+                    this.rewardsGiven.push(`${PrettyCurrency(guild, value)}`);
                     break;
                 case "darkcurrency":
                     await this.user.addDarkCurrency(value);
 
-                    this.rewardsGiven.push(`**${DarkCurrency}${value.toLocaleString("es-CO")}**`);
+                    this.rewardsGiven.push(`${PrettyCurrency(guild, value, { name: "DarkCurrency" })}`);
                     break;
                 case "role":
                     await this.member.roles.add(value)

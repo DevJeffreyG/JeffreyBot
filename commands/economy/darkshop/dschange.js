@@ -1,5 +1,5 @@
 const { EconomyError } = require("../../../src/errors");
-const { Command, ErrorEmbed, Embed, DarkShop } = require("../../../src/utils")
+const { Command, ErrorEmbed, Embed, DarkShop, PrettyCurrency } = require("../../../src/utils")
 const moment = require("moment-timezone");
 
 const command = new Command({
@@ -21,13 +21,13 @@ command.execute = async (interaction, models, params, client) => {
     }
     await interaction.deferReply();
     const { cantidad } = params
-    const { DarkCurrency, Currency } = client.getCustomEmojis(interaction.guild.id);
+    const { DarkCurrency } = client.getCustomEmojis(interaction.guild.id);
 
     // codigo
     const quantity = cantidad.value;
     const user = params.getUser();
 
-    let money = user.economy.global.currency;
+    let money = user.getCurrency();
 
     const darkshop = new DarkShop(interaction.guild);
     const one = await darkshop.oneEquals();
@@ -40,8 +40,8 @@ command.execute = async (interaction, models, params, client) => {
         type: "success",
         data: {
             desc: [
-                `Se han restado **${Currency}${total.toLocaleString('es-CO')}**`,
-                `Se añadieron **${DarkCurrency}${quantity.toLocaleString("es-CO")}** a tu cuenta`
+                `Se han restado ${PrettyCurrency(interaction.guild, total)}`,
+                `Se añadieron ${PrettyCurrency(interaction.guild, quantity, { name: "DarkCurrency" })} a tu cuenta`
             ]
         }
     })
@@ -49,14 +49,14 @@ command.execute = async (interaction, models, params, client) => {
 
     if (total > money) throw new EconomyError(interaction, [
         "No tienes tanto dinero para cambiar.",
-        `Inflación: **${DarkCurrency}1** = **${Currency}${one.toLocaleString("es-CO")}**`,
-        `Necesitas: **${Currency}${total.toLocaleString("es-CO")}**`
+        `Inflación: **${DarkCurrency}1** = ${PrettyCurrency(interaction.guild, one)}`,
+        `Necesitas: ${PrettyCurrency(interaction.guild, total)}`
     ], money)
 
     const economy = user.economy.dark;
 
     await user.addDarkCurrency(quantity, false);
-    user.economy.global.currency -= total;
+    user.getCurrency() -= total;
 
     economy.until = moment().add(1, "w").startOf("day").toDate();
 

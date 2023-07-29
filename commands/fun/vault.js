@@ -1,4 +1,4 @@
-const { Command, Categories, Embed, VaultWork } = require("../../src/utils");
+const { Command, Embed, VaultWork, PrettyCurrency } = require("../../src/utils");
 const { Colores } = require("../../src/resources");
 const chance = require("chance");
 
@@ -17,7 +17,6 @@ command.addOption({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ ephemeral: true });
     const { EmojisObject } = client;
-    const { Currency } = client.getCustomEmojis(interaction.guild.id);
 
     const code = params.codigo ? params.codigo.value : null;
 
@@ -104,7 +103,7 @@ command.execute = async (interaction, models, params, client) => {
     let ggEmbed = new Embed()
         .defAuthor({ text: `Desencriptado.`, icon: EmojisObject.Check.url })
         .defColor(Colores.verde)
-        .defDesc(finale.replace(new RegExp("{ PRIZE }", "g"), `**${Currency}${codeInVault.reward.toLocaleString('es-CO')}**`));
+        .defDesc(finale.replace(new RegExp("{ PRIZE }", "g"), `${PrettyCurrency(interaction.guild, codeInVault.reward)}`));
 
     user.data.unlockedVaults.push(codeInVault.id);
     await user.save();

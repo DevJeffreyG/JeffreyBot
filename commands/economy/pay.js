@@ -1,4 +1,4 @@
-const { Command, Categories, Confirmation, Embed, Sleep, GetRandomItem } = require("../../src/utils")
+const { Command, Confirmation, Embed, Sleep, GetRandomItem, PrettyCurrency } = require("../../src/utils")
 const { Colores } = require("../../src/resources");
 const { EconomyError } = require("../../src/errors");
 
@@ -26,13 +26,12 @@ command.execute = async (interaction, models, params, client) => {
     const { Users } = models
     const { usuario, cantidad } = params;
     const { EmojisObject } = client;
-    const { Currency } = client.getCustomEmojis(interaction.guild.id);
 
     const author = interaction.user;
     const recieverMember = usuario.member;
     const quantity = cantidad?.value;
 
-    const guild = client.guilds.cache.find(x => x.id === interaction.guildId);
+    const guild = interaction.guild;
 
     // codigo
     let author_user = params.getUser();
@@ -59,7 +58,7 @@ command.execute = async (interaction, models, params, client) => {
                     embeds: [
                         new Embed()
                             .defTitle("Deuda pendiente")
-                            .defDesc(`**—** Aún le debes **${Currency}${author_user.data.debts[debt].debt.toLocaleString("es-CO")}** a ${recieverMember}.`)
+                            .defDesc(`**—** Aún le debes ${PrettyCurrency(guild, author_user.data.debts[debt].debt)} a ${recieverMember}.`)
                             .defColor(Colores.rojooscuro)
                             .defFooter({ text: "Desde", icon: interaction.guild.iconURL({ dynamic: true }), timestamp: author_user.data.debts[debt].since })
                     ]
@@ -76,9 +75,9 @@ command.execute = async (interaction, models, params, client) => {
     }
 
     let toConfirm = [
-        `¿Deseas pagarle **${Currency}${quantity.toLocaleString('es-CO')}** a ${recieverMember}?`,
-        `Tienes **${Currency}${author_user.economy.global.currency.toLocaleString('es-CO')}**.`,
-        `${recieverMember} tiene **${Currency}${reciever.economy.global.currency.toLocaleString('es-CO')}**.`,
+        `¿Deseas pagarle ${PrettyCurrency(guild, quantity)} a ${recieverMember}?`,
+        `Tienes ${PrettyCurrency(guild, author_user.getCurrency())}.`,
+        `${recieverMember} tiene ${PrettyCurrency(guild, reciever.getCurrency())}.`,
         `Se mencionará al destinatario.`,
         `Esto no se puede deshacer, a menos que te los den devuelta.`
     ];
@@ -86,7 +85,7 @@ command.execute = async (interaction, models, params, client) => {
     let confirmation = await Confirmation("Pagar dinero", toConfirm, interaction);
     if (!confirmation) return;
 
-    if (!author_user.canBuy(quantity)) throw new EconomyError(interaction, "No tienes tanto dinero", author_user.economy.global.currency);
+    if (!author_user.canBuy(quantity)) throw new EconomyError(interaction, "No tienes tanto dinero", author_user.getCurrency());
 
     if (author.id === recieverMember.id) {
         let msg = await interaction.fetchReply();
@@ -109,12 +108,12 @@ command.execute = async (interaction, models, params, client) => {
         if (author_user.data.debts[debt].debt <= 0) author_user.data.debts.splice(debt, 1);
     }
 
-    author_user.economy.global.currency -= quantity;
+    author_user.getCurrency() -= quantity;
     await reciever.addCurrency(quantity);
     await author_user.save();
 
     const messenger = `**${author}**`;
-    const pay = `**${Currency}${quantity.toLocaleString('es-CO')}**`;
+    const pay = PrettyCurrency(guild, quantity);
 
     let possibleDescriptions = [
         `${messenger} le pagó ${pay} a ${recieverMember}`,

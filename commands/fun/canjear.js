@@ -1,5 +1,5 @@
 const { BadCommandError, DoesntExistsError } = require("../../src/errors");
-const { Command, Categories, LimitedTime, WillBenefit, HumanMs, ErrorEmbed, ItemObjetives, BoostTypes, Embed } = require("../../src/utils");
+const { Command, LimitedTime, WillBenefit, HumanMs, ItemObjetives, BoostTypes, Embed, PrettyCurrency } = require("../../src/utils");
 
 const command = new Command({
     name: "canjear",
@@ -15,7 +15,6 @@ command.addOption({
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ ephemeral: true });
-    const { Currency } = client.getCustomEmojis(interaction.guild.id);
 
     const _key = params.llave.value;
 
@@ -45,12 +44,12 @@ command.execute = async (interaction, models, params, client) => {
         case ItemObjetives.Currency:
             await user.addCurrency(reward.value)
 
-            reply = `Se han agregado **${Currency}${Number(reward.value).toLocaleString("es-CO")}** a tu cuenta.`
+            reply = `Se han agregado ${PrettyCurrency(interaction.guild, reward.value)} a tu cuenta.`
             break;
 
         case ItemObjetives.Exp:
             user.economy.global.exp += Number(reward.value);
-            reply = `Se han agregado **${Number(reward.value).toLocaleString("es-CO")}** puntos de EXP a tu cuenta.`
+            reply = `Se han agregado  **${Number(reward.value).toLocaleString("es-CO")}** puntos de EXP a tu cuenta.`
 
             await user.save();
             break;

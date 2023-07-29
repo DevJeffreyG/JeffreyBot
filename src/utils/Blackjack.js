@@ -9,6 +9,7 @@ const { Colores } = require("../resources");
 
 const Collector = require("./Collector");
 const { ExecutionError } = require("../errors");
+const { PrettyCurrency } = require("./functions");
 
 /**
  * TY UnbelievaBoat 💚 !
@@ -201,7 +202,7 @@ class Blackjack {
         //console.log("⚪ Se debería mostrar las cartas del Dealer? %s", showDealer)
         this.embed = new Embed()
             .defAuthor({ text: "Blackjack", icon: this.client.EmojisObject.BackCard.url })
-            .defDesc(`Hay **${this.Emojis.Currency}${this.bet.toLocaleString("es-CO")}** en juego.`)
+            .defDesc(`Hay ${PrettyCurrency(this.interaction.guild, this.bet)} en juego.`)
             .defField("Tu mano", this.#translateCards(this.player_hand), true)
             .defField("Mano del Dealer", this.#translateCards(this.dealer_hand, showDealer ? false : true), true)
             .defFooter({ text: `Quedan ${this.deck.length} cartas en la baraja` })
@@ -402,7 +403,7 @@ class Blackjack {
 
         if (this.bet < this.doc.settings.quantities.blackjack_bet)
             throw new ExecutionError(this.interaction,
-                `La apuesta debe ser mayor a **${this.Emojis.Currency}${this.doc.settings.quantities.blackjack_bet.toLocaleString("es-CO")}**`
+                `La apuesta debe ser mayor a ${PrettyCurrency(this.interaction.guild, this.doc.settings.quantities.blackjack_bet)}`
             )
 
         console.log("🟢 Hay %s cartas en la baraja", this.deck.length)
@@ -445,37 +446,37 @@ class Blackjack {
 
         if (won === -1) {
             this.embed
-                .defDesc(`Se te regresan **${this.Emojis.Currency}${this.bet.toLocaleString("es-CO")}**.`)
+                .defDesc(`Se te regresan ${PrettyCurrency(this.interaction.guild, this.bet)}.`)
                 .defColor(Colores.cake)
         } else
 
             if (!won) {
                 this.embed
-                    .defDesc(`Perdiste **${this.Emojis.Currency}${this.bet.toLocaleString("es-CO")}**.`)
+                    .defDesc(`Perdiste ${PrettyCurrency(this.interaction.guild, this.bet)}.`)
                     .defColor(Colores.rojo)
 
                 if (reason === EndReasons.GaveUp) {
                     this.embed
-                        .defDesc(`Perdiste **${this.Emojis.Currency}${this.bet.toLocaleString("es-CO")}** al rendirte.`)
+                        .defDesc(`Perdiste ${PrettyCurrency(this.interaction.guild, this.bet)} al rendirte.`)
                         .defColor(Colores.rojooscuro)
                 } else if (reason === EndReasons.TimeOut) {
                     this.embed
-                        .defDesc(`Perdiste **${this.Emojis.Currency}${this.bet.toLocaleString("es-CO")}** porque pasó mucho tiempo.`)
+                        .defDesc(`Perdiste ${PrettyCurrency(this.interaction.guild, this.bet)} porque pasó mucho tiempo.`)
                         .defColor(Colores.rojooscuro)
                 }
 
-                this.user.economy.global.currency -= this.bet;
+                this.user.getCurrency() -= this.bet;
 
                 console.log("🔴 %s perdió %s %s en el Blackjack", this.interaction.user.username, this.bet.toLocaleString("es-CO"), this.Emojis.Currency.name);
             } else {
                 save = false;
                 this.embed
-                    .defDesc(`Ganaste **${this.Emojis.Currency}${this.bet.toLocaleString("es-CO")}**.`)
+                    .defDesc(`Ganaste ${PrettyCurrency(this.interaction.guild, this.bet)}.`)
                     .defColor(Colores.verdejeffrey)
 
                 if (reason === EndReasons.Blackjack) {
                     this.embed
-                        .defDesc(`Ganaste **${this.Emojis.Currency}${this.bet.toLocaleString("es-CO")}** instantáneamente.`)
+                        .defDesc(`Ganaste ${PrettyCurrency(this.interaction.guild, this.bet)} instantáneamente.`)
                         .defAuthor({ text: "BLACKJACK!", icon: this.client.EmojisObject.BackCard.url })
                 }
 

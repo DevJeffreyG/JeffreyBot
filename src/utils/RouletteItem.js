@@ -1,13 +1,18 @@
-const { GuildMemberRoleManager, roleMention } = require("discord.js");
+const { GuildMemberRoleManager, roleMention, CommandInteraction } = require("discord.js");
 const ms = require("ms")
 
-const { LimitedTime, BoostWork } = require("./functions");
+const { LimitedTime, BoostWork, PrettyCurrency } = require("./functions");
 const { ItemObjetives, BoostObjetives, Enum, BoostTypes } = require("./Enums");
 const Embed = require("./Embed");
 
 const { Users, Guilds } = require("mongoose").models;
 
 class RouletteItem {
+    /**
+     * 
+     * @param {CommandInteraction} interaction 
+     * @param {*} globalinfo 
+     */
     constructor(interaction, globalinfo) {
         this.interaction = interaction;
         this.item = globalinfo;
@@ -74,14 +79,12 @@ class RouletteItem {
         this.numbers = this.item.value.match(/[0-9\.]/g).join("");
         this.nonumbers = this.item.value.replace(/[0-9\.]/g, "");
 
-        const { Currency } = this.interaction.client.getCustomEmojis(this.interaction.guild.id);
-
         switch (Number(this.item.target)) {
             case ItemObjetives.Currency:
-                this.target = this.user.economy.global.currency;
+                this.target = this.user.getCurrency();
 
-                this.frontend_target = `**${Currency}${this.target.toLocaleString("es-CO")}**`;
-                this.frontend_numbers = `**${Currency}${this.numbers.toLocaleString("es-CO")}**`;
+                this.frontend_target = PrettyCurrency(this.interaction.guild, this.target);
+                this.frontend_numbers = PrettyCurrency(this.interaction.guild, this.numbers);
                 break;
 
             case ItemObjetives.Boost:
@@ -100,8 +103,6 @@ class RouletteItem {
     }
 
     async use() {
-        const { Currency } = this.interaction.client.getCustomEmojis(this.interaction.guild.id);
-
         let save = true;
         let response = null;
         //let value = this.#valueWork();
@@ -149,9 +150,9 @@ class RouletteItem {
                     this.#adjust();
                     this.nonumbers = "Se descontaron";
 
-                    if (boost.changed) {
+                    if (boost.multiplier.changed.currency) {
                         this.numbers = Number((this.numbers * boost.multiplier.currency_value).toFixed(2))
-                        this.frontend_numbers = `**${Currency}${this.numbers.toLocaleString('es-CO')}${boost.emojis.currency}**`
+                        this.frontend_numbers = PrettyCurrency(this.interaction.guild, this.numbers, { boostemoji: boost.emojis.currency});
                     }
 
                     this.user.economy.global.currency -= this.numbers;
@@ -160,9 +161,9 @@ class RouletteItem {
                     this.#adjust();
                     this.nonumbers = "Se agregaron";
 
-                    if (boost.changed) {
+                    if (boost.multiplier.changed.currency) {
                         this.numbers = Number((this.numbers * boost.multiplier.currency_value).toFixed(2))
-                        this.frontend_numbers = `**${Currency}${this.numbers.toLocaleString('es-CO')}${boost.emojis.currency}**`
+                        this.frontend_numbers = PrettyCurrency(this.interaction.guild, this.numbers, { boostemoji: boost.emojis.currency});
                     }
 
                     this.user.addCurrency(this.numbers, false);
@@ -196,8 +197,6 @@ class RouletteItem {
      * @returns
      */
     info() {
-        const { Currency } = this.interaction.client.getCustomEmojis(this.interaction.guild.id);
-
         let translated = {
             action: null,
             quantity: this.numbers,
@@ -234,11 +233,11 @@ class RouletteItem {
         switch (Number(this.item.target)) {
             case ItemObjetives.Currency:
                 if (this.nonumbers === "%") {
-                    translated.text = `${translated.action} **${translated.quantity.toLocaleString("es-CO")}%** a **${Currency}${this.target.toLocaleString("es-CO")}**`;
+                    translated.text = `${translated.action} **${translated.quantity.toLocaleString("es-CO")}%** a ${PrettyCurrency(this.interaction.guild, this.target)}`;
                 } else if (this.nonumbers === "*") {
-                    translated.text = `${translated.action} por **${translated.quantity.toLocaleString("es-CO")}** a **${Currency}${this.target.toLocaleString("es-CO")}**`;
+                    translated.text = `${translated.action} por **${translated.quantity.toLocaleString("es-CO")}** a ${PrettyCurrency(this.interaction.guild, this.target)}`;
                 } else {
-                    translated.text = `${translated.action} **${Currency}${translated.quantity.toLocaleString("es-CO")}** a **${Currency}${this.target.toLocaleString("es-CO")}**`;
+                    translated.text = `${translated.action} ${PrettyCurrency(this.interaction.guild, translated.quantity)} a ${PrettyCurrency(this.interaction.guild, this.target)}`;
                 }
                 break;
             case ItemObjetives.Boost:

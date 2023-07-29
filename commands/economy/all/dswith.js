@@ -9,11 +9,11 @@ const command = new Command({
 command.execute = async (interaction, models, params, client) => {
     const file = require("../darkshop/dswith");
     const user = params.getUser();
-    if (user.economy.dark.currency <= 0) throw new BadParamsError(interaction, "Tienes que tener dinero para hacer eso");
+    if (user.getDarkCurrency() <= 0) throw new BadParamsError(interaction, "Tienes que tener dinero para hacer eso");
 
     return await file.execute(interaction, models, Object.assign({}, params, {
         cantidad: {
-            value: user.economy.dark.currency
+            value: user.getDarkCurrency()
         }
     }), client)
 }

@@ -9,11 +9,11 @@ const command = new Command({
 command.execute = async (interaction, models, params, client) => {
     const file = require("../blackjack");
     const user = params.getUser();
-    if (user.economy.global.currency <= 0) throw new BadParamsError(interaction, "Tienes que tener dinero para hacer eso");
+    if (user.getCurrency() <= 0) throw new BadParamsError(interaction, "Tienes que tener dinero para hacer eso");
 
     return await file.execute(interaction, models, Object.assign({}, params, {
         apuesta: {
-            value: user.economy.global.currency
+            value: user.getCurrency()
         }
     }), client)
 }

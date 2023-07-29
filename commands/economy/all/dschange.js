@@ -9,11 +9,11 @@ const command = new Command({
 command.execute = async (interaction, models, params, client) => {
     const file = require("../darkshop/dschange");
     const user = params.getUser();
-    if (user.economy.global.currency <= 0) throw new BadParamsError(interaction, "Tienes que tener dinero para hacer eso");
+    if (user.getCurrency() <= 0) throw new BadParamsError(interaction, "Tienes que tener dinero para hacer eso");
 
     const darkshop = new DarkShop(interaction.guild);
     const one = await darkshop.oneEquals();
-    const total = Math.floor(user.economy.global.currency / one);
+    const total = Math.floor(user.getCurrency() / one);
 
     return await file.execute(interaction, models, Object.assign({}, params, {
         cantidad: {

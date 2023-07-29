@@ -1,6 +1,6 @@
 const { ApplicationCommandType, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageContextMenuCommandInteraction, Client, hyperlink, codeBlock } = require("discord.js");
 const { Colores } = require("../../../src/resources");
-const { ContextMenu, Embed, Confirmation, ErrorEmbed, Log, LogReasons, ChannelModules, GetRandomItem } = require("../../../src/utils");
+const { ContextMenu, Embed, Confirmation, ErrorEmbed, Log, LogReasons, ChannelModules, GetRandomItem, PrettyCurrency } = require("../../../src/utils");
 
 const ms = require("ms");
 const { EconomyError, FetchError, ExecutionError } = require("../../../src/errors");
@@ -24,8 +24,6 @@ command.execute = async (interaction, models, params, client) => {
     const { Users } = models;
 
     const { Tier1, Tier2, Tier3 } = client.Emojis;
-    const CustomEmojis = client.getCustomEmojis(interaction.guild.id);
-    const { Currency } = CustomEmojis
 
     // Definir el tipo de tier
     const tierRow = new ActionRowBuilder()
@@ -89,14 +87,14 @@ command.execute = async (interaction, models, params, client) => {
     const { price, gift } = doc.settings.quantities.awards[quantityProperty]
 
     const confirmation = await Confirmation("Dar premio", [
-        `Esto serán **${Currency}${price.toLocaleString("es-CO")}**.`,
-        `El autor del mensaje recibirá **${Currency}${gift.toLocaleString("es-CO")}**.`,
-        `Tienes ${user.parseCurrency(CustomEmojis)}.`,
+        `Esto serán ${PrettyCurrency(interaction.guild, price)}`,
+        `El autor del mensaje recibirá ${PrettyCurrency(interaction.guild, gift)}`,
+        `Tienes ${PrettyCurrency(interaction.guild, user.getCurrency())}`,
         `Se enviará un mensaje a ${hall}.`
     ], interaction)
     if (!confirmation) return;
 
-    if (!user.canBuy(price)) throw new EconomyError(interaction, "No tienes tanto dinero", user.economy.global.currency);
+    if (!user.canBuy(price)) throw new EconomyError(interaction, "No tienes tanto dinero", user.getCurrency());
 
     const hallEmbed = new Embed();
     const star = hyperlink("★", message.url);
@@ -148,7 +146,7 @@ command.execute = async (interaction, models, params, client) => {
     if (user.user_id === message_user.user_id) {
         user.addCurrency((-price) + gift);
     } else {
-        user.economy.global.currency -= price;
+        user.getCurrency() -= price;
         message_user.addCurrency(gift);
         await user.save();
     }

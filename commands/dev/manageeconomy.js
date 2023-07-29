@@ -1,4 +1,4 @@
-const { Command, Categories, Embed } = require("../../src/utils")
+const { Command, Embed, PrettyCurrency } = require("../../src/utils")
 const { Colores } = require("../../src/resources")
 
 const command = new Command({
@@ -77,10 +77,9 @@ command.execute = async (interaction, models, params, client) => {
 }
 
 command.execCurrency = async (interaction, models, params, client) => {
-    const { subcommand, currency } = params;
+    const { currency } = params;
     const { usuario, cantidad } = currency
     const { Users } = models
-    const { Currency } = client.getCustomEmojis(interaction.guild.id);
 
     const user = await Users.getWork({ user_id: usuario.value, guild_id: usuario.member.guild.id })
 
@@ -88,8 +87,8 @@ command.execCurrency = async (interaction, models, params, client) => {
 
     let embed = new Embed()
         .defAuthor({ text: `¡Dinero para ti, ${usuario.member.user.username}!`, icon: usuario.member.guild.iconURL() })
-        .defDesc(`**+${Currency}${cantidad.value.toLocaleString('es-CO')}
-— ${Currency}${user.economy.global.currency.toLocaleString('es-CO')}**`)
+        .defDesc(`**+** ${PrettyCurrency(interaction.guild, cantidad.value)}
+— ${PrettyCurrency(interaction.guild, user.getCurrency())}`)
         .defColor(Colores.verde)
         .defThumbnail(usuario.member.displayAvatarURL());
 
@@ -97,18 +96,17 @@ command.execCurrency = async (interaction, models, params, client) => {
 }
 
 command.execDarkCurrency = async (interaction, models, params, client) => {
-    const { subcommand, darkcurrency } = params;
+    const { darkcurrency } = params;
     const { usuario, cantidad } = darkcurrency
     const { Users } = models
-    const { DarkCurrency } = client.getCustomEmojis(interaction.guild.id);
 
     const user = await Users.getWork({ user_id: usuario.value, guild_id: usuario.member.guild.id })
     await user.addDarkCurrency(cantidad.value);
 
     let embed = new Embed()
         .defAuthor({ text: `¡Dinero para ti, ${usuario.member.user.username}!`, icon: usuario.member.guild.iconURL() })
-        .defDesc(`**+${DarkCurrency}${cantidad.value.toLocaleString('es-CO')}
-— ${DarkCurrency}${user.economy.dark.currency.toLocaleString('es-CO')}**`)
+        .defDesc(`**+** ${PrettyCurrency(interaction.guild, cantidad.value, { name: "DarkCurrency" })}
+— ${PrettyCurrency(interaction.guild, user.getDarkCurrency(), { name: "DarkCurrency" })}`)
         .defColor(Colores.verde)
         .defThumbnail(usuario.member.displayAvatarURL());
 

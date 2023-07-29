@@ -1,5 +1,5 @@
 const { BadParamsError, AlreadyUsingError } = require("../../../src/errors");
-const { Command, PetCombat, Confirmation } = require("../../../src/utils");
+const { Command, PetCombat, Confirmation, PrettyCurrency } = require("../../../src/utils");
 
 const command = new Command({
     name: "combat",
@@ -22,8 +22,7 @@ command.addOption({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { Users } = models;
-    const { usuario, apuesta } = params
-    const { Currency } = client.getCustomEmojis(interaction.guild.id)
+    const { usuario, apuesta } = params;
 
     if (interaction.user === usuario.user) throw new BadParamsError(interaction, "No puedes retarte a ti mismo");
     let player1 = client.petCombats.get(interaction.user.id);
@@ -46,7 +45,7 @@ command.execute = async (interaction, models, params, client) => {
 
     let rivalConfirmation = await Confirmation("Combatir", [
         `¿Quieres combatir contra ${interaction.user}?`,
-        apuesta ? `Hay una apuesta de **${Currency}${apuesta.value.toLocaleString("es-CO")}**` : "No hay apuesta."
+        apuesta ? `Hay una apuesta de ${PrettyCurrency(interaction.guild, apuesta.value)}` : "No hay apuesta."
     ], interaction, usuario.user)
     if (!rivalConfirmation) return;
 

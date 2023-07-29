@@ -1,10 +1,10 @@
 const { Emoji, CommandInteraction, User, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, TextInputStyle } = require("discord.js");
 const { Shops, DarkShops, PetShops, Users } = require("mongoose").models;
 const { Colores } = require("../resources");
-const { ShopTypes, Enum, ItemTypes, ItemObjetives, ItemActions, EndReasons } = require("./Enums");
+const { ShopTypes, Enum, ItemTypes, ItemObjetives, ItemActions } = require("./Enums");
 const InteractivePages = require("./InteractivePages");
 const { BadCommandError, DoesntExistsError, EconomyError, AlreadyExistsError, BadParamsError } = require("../errors");
-const { Confirmation, FindNewId } = require("./functions");
+const { Confirmation, FindNewId, PrettyCurrency } = require("./functions");
 const Embed = require("./Embed");
 const HumanMs = require("./HumanMs");
 const Collector = require("./Collector");
@@ -276,8 +276,8 @@ class Shop {
                 this.#user.get(this.config.currency.user_path),
                 this.#isDarkShop
             )
-        if (this.#user.hasItem(itemId, this.config.info.type))
-            throw new AlreadyExistsError(this.interaction, itemName, "tu inventario");
+        if (inventoryUser.hasItem(itemId, this.config.info.type))
+            throw new AlreadyExistsError(this.interaction, itemName, "el inventario");
 
         const newUseId = FindNewId(await Users.find(), "data.inventory", "use_id");
 
@@ -297,7 +297,7 @@ class Shop {
             "Pago realizado con éxito",
             `Compraste: \`${itemName}\` por **${this.config.currency.emoji}${itemPrice}**${user ? ` para ${user}` : ""}`,
             user ? `Se usa con \`/use ${newUseId}\`` : `Úsalo con \`/use ${newUseId}\``,
-            `Ahora tienes: ${this.#user.parseCurrency(this.client.getCustomEmojis(this.interaction.guild.id), this.#isDarkShop)}`
+            `Ahora tienes: ${PrettyCurrency(this.interaction.guild, this.#isDarkShop ? this.#user.getDarkCurrency() : this.#user.getCurrency())}`
         ]
 
         if (user) await inventoryUser.save();

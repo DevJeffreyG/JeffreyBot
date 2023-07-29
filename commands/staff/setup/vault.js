@@ -1,6 +1,6 @@
 const { AlreadyExistsError, DoesntExistsError } = require("../../../src/errors");
 const { Colores } = require("../../../src/resources");
-const { Command, Confirmation, InteractivePages } = require("../../../src/utils");
+const { Command, Confirmation, InteractivePages, PrettyCurrency } = require("../../../src/utils");
 
 const command = new Command({
     name: "admin-vault",
@@ -104,7 +104,7 @@ command.execute = async (interaction, models, params, client) => {
             let confirm = [
                 `Código con ID \`${vaultCode.id}\` : "**${vaultCode.code}**".`,
                 `Tiene \`${vaultCode.hints.length}\` pistas adjuntas.`,
-                `Da de recompensa **${Currency}${vaultCode.reward.toLocaleString("es-CO")}**`,
+                `Da de recompensa ${PrettyCurrency(interaction.guild, vaultCode.reward)}`,
                 `Esto no se puede deshacer.`
             ]
 
@@ -133,7 +133,7 @@ command.execute = async (interaction, models, params, client) => {
             if (!pista && !recompensa) { // config del codigo actual
                 let e = new Embed()
                     .defAuthor({ text: `Configuración de ${vaultCode.code}`, title: true })
-                    .defDesc(`**—** Recompensa de **${Currency}${vaultCode.reward.toLocaleString("es-CO")}**
+                    .defDesc(`**—** Recompensa de ${PrettyCurrency(interaction.guild, vaultCode.reward)}
 **—** Tiene \`${vaultCode.hints.length}\` pistas en total.
 **—** ID: \`${vaultCode.id}\`.`)
                     .defColor(Colores.verde);
@@ -181,7 +181,7 @@ command.execute = async (interaction, models, params, client) => {
             for (const vault of doc.data.vault_codes) {
                 items.set(vault.id, {
                     code: vault.code,
-                    reward: vault.reward.toLocaleString("es-CO"),
+                    reward: PrettyCurrency(interaction.guild, vault.reward),
                     hints: vault.hints.join("; "),
                     id: vault.id
                 })
@@ -190,7 +190,7 @@ command.execute = async (interaction, models, params, client) => {
             const interactive = new InteractivePages({
                 title: "Lista de códigos",
                 color: Colores.verde,
-                addon: `**— {code}**\n**Premio: ${Currency}{reward}**\n**Pistas:** \`\`\`{hints}\`\`\`\n**ID:** {id}\n\n`
+                addon: `**— {code}**\n**Premio: {reward}**\n**Pistas:** \`\`\`{hints}\`\`\`\n**ID:** {id}\n\n`
             }, items, 3)
 
             return interactive.init(interaction);

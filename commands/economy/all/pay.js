@@ -11,11 +11,11 @@ command.data.options = file.data.options.filter(x => x.name != "cantidad");
 
 command.execute = async (interaction, models, params, client) => {
     const user = params.getUser();
-    if (user.economy.global.currency <= 0) throw new BadParamsError(interaction, "Tienes que tener dinero para hacer eso");
+    if (user.getCurrency() <= 0) throw new BadParamsError(interaction, "Tienes que tener dinero para hacer eso");
 
     return await file.execute(interaction, models, Object.assign({}, params, {
         cantidad: {
-            value: user.economy.global.currency
+            value: user.getCurrency()
         }
     }), client)
 }

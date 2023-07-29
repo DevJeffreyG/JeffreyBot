@@ -1,5 +1,5 @@
 const { Bases } = require("../src/resources/");
-const { Log, ChannelModules, LogReasons, Cooldowns, BoostTypes, BoostObjetives, Multipliers, RequirementType, ErrorEmbed, UpdateCommands, DeleteLink, FetchThisGuild, BoostWork } = require("../src/utils");
+const { Log, ChannelModules, LogReasons, Cooldowns, Multipliers, RequirementType, ErrorEmbed, UpdateCommands, DeleteLink, FetchThisGuild, BoostWork } = require("../src/utils");
 
 const { GlobalDatasWork } = require("../src/utils/");
 const { ChannelType, codeBlock, Client, Message, ActionRowBuilder, ButtonBuilder, ButtonStyle, time } = require("discord.js");
@@ -156,7 +156,7 @@ module.exports = async (client, message) => {
       }
     }
 
-    if(boost.hasAnyChanges()) {
+    if(boost.hasMultiplierChanges()) {
       currencyToAdd *= boost.multiplier.currency_value;
       expToAdd *= boost.multiplier.exp_value;
     }

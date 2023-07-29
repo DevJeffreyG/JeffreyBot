@@ -1,4 +1,4 @@
-const { Command, Embed, DarkShop } = require("../../../src/utils");
+const { Command, Embed, DarkShop, PrettyCurrency } = require("../../../src/utils");
 const { Colores } = require("../../../src/resources")
 const moment = require("moment-timezone");
 
@@ -29,10 +29,9 @@ command.execute = async (interaction, models, params, client) => {
     const { darkcurrency, inflacion } = params;
 
     const { EmojisObject } = client;
-    const { DarkCurrency, Currency } = client.getCustomEmojis(interaction.guild.id);
 
     const user = params.getUser();
-    const toCalc = darkcurrency?.value ?? user.economy.dark.currency;
+    const toCalc = darkcurrency?.value ?? user.getDarkCurrency();
     const darkshop = new DarkShop(interaction.guild);
 
     const inflation = inflacion?.value.toFixed(2) ?? await darkshop.getInflation();
@@ -44,16 +43,16 @@ command.execute = async (interaction, models, params, client) => {
     let stonksEmbed = new Embed()
         .defAuthor({ text: `Cálculo`, icon: EmojisObject.DarkShop.url })
         .defDesc(`📊 **— ${inflation}%**.
-**— ${DarkCurrency}${toCalc.toLocaleString('es-CO')} = ${Currency}${calculation.toLocaleString('es-CO')}**.`)
+**— ${PrettyCurrency(interaction.guild, toCalc, { name: "DarkCurrency" })} = ${PrettyCurrency(interaction.guild, calculation)}.`)
         .setColor(Colores.negro);
 
     embeds.push(stonksEmbed)
 
-    const total = Math.floor(user.economy.global.currency / one);
+    const total = Math.floor(user.getCurrency() / one);
 
     let allConversion = new Embed()
         .defAuthor({ text: "Puedes convertir...", title: true })
-        .defDesc(`**${Currency}${user.economy.global.currency.toLocaleString("es-CO")}** ➡️ **${DarkCurrency}${total.toLocaleString("es-CO")}**`)
+        .defDesc(`${PrettyCurrency(interaction.guild, user.getCurrency())} ➡️ ${PrettyCurrency(interaction.guild, total, { name: "DarkCurrency" })}`)
         .defColor(Colores.verdejeffrey)
 
     if (!darkcurrency && total > 0 && !inflacion && moment().day() === 0) embeds.push(allConversion)

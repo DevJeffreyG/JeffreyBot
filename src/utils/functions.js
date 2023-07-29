@@ -579,7 +579,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
         let topay = Math.round(debt.debt * (debt.interest / 100));
         let memberToPay = guild.members.cache.get(debt.user);
         debt.pay_in = moment().add(debt.every, "ms");
-        dbUser.economy.global.currency -= topay;
+        dbUser.getCurrency() -= topay;
         let userToPay = await Users.getWork({ user_id: memberToPay.id, guild_id: guild.id });
         userToPay.addCurrency(topay);
 
@@ -589,8 +589,8 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
               new Embed()
                 .defColor(Colores.verde)
                 .defTitle(`Intereses del ${debt.interest}% cada ${new HumanMs(debt.every).human}`)
-                .defDesc(`**—** Se te cobró **${Currency}${topay.toLocaleString("es-CO")}** por el préstamo que tienes pendiente con ${memberToPay}.
-**—** Usa \`/pay\` para pagarle los **${Currency}${debt.debt.toLocaleString("es-CO")}** que le debes.`)
+                .defDesc(`**—** Se te cobró ${PrettyCurrency(guild, topay)} por el préstamo que tienes pendiente con ${memberToPay}.
+**—** Usa \`/pay\` para pagarle los ${PrettyCurrency(guild, debt.debt)} que le debes.`)
             ],
             flags: [MessageFlags.SuppressNotifications]
           })
@@ -803,22 +803,22 @@ const PetWork = async function (guild) {
       pet.changeHunger(giveHunger);
 
       // ----------- Hunger ----------- 
-      if(pet.hunger >= 60) await pet.notice(PetNotices.Hungry);
-      
-      if(pet.hunger === 100) {
-        let removal = new Chance().integer({min: 1, max: Math.ceil(maxHp * 0.05)});
+      if (pet.hunger >= 60) await pet.notice(PetNotices.Hungry);
+
+      if (pet.hunger === 100) {
+        let removal = new Chance().integer({ min: 1, max: Math.ceil(maxHp * 0.05) });
         pet.changeHp(-removal);
       }
 
       // ----------- HP ----------- 
-      if(pet.hp <= maxHp / 2) await pet.notice(PetNotices.HalfHp)
-      else if(pet.hp <= maxHp / 4) await pet.notice(PetNotices.LowHp)
-      
-      if(pet.hp === 0) {
+      if (pet.hp <= maxHp / 2) await pet.notice(PetNotices.HalfHp)
+      else if (pet.hp <= maxHp / 4) await pet.notice(PetNotices.LowHp)
+
+      if (pet.hp === 0) {
         pet.kill();
         await pet.notice(PetNotices.Dead)
       }
-      
+
       await pet.save();
     }
   }
@@ -1477,7 +1477,7 @@ const FindAverage = async function (guild) {
     if (member && !member.user.bot) {
       let darkcurrency = user.economy.dark?.currency ?? 0;
       let darkcurrencyValue = await darkshop.equals(null, darkcurrency) ?? 0;
-      let finalQuantity = Math.round(darkcurrencyValue + user.economy.global.currency);
+      let finalQuantity = Math.round(darkcurrencyValue + user.getCurrency());
 
       if (finalQuantity > 0 || (finalQuantity === 0 && !top.find(x => x.money === 0))) top.push({
         member,
@@ -1840,7 +1840,9 @@ const BoostWork = function (user) {
       currency: "🚀",
       exp: "🚀"
     },
-    hasAnyChanges: () => { return boost.multiplier.changed || boost.probability.changed }
+    hasMultiplierChanges: () => { return boost.multiplier.changed.currency || boost.multiplier.changed.exp },
+    hasProbabilityChanges: () => { return boost.probability.changed.currency || boost.probability.changed.exp },
+    hasAnyChanges: () => { return boost.multiplier.changed.currency || boost.multiplier.changed.exp || boost.probability.changed.currency || boost.probability.changed.exp }
   }
 
   for (const userboost of user.data.temp_roles) {
@@ -1876,13 +1878,36 @@ const BoostWork = function (user) {
     }
   }
 
-  boost.emojis.currency = boost.multiplier.currency_value <= 1 && boost.multiplier.changed.currency ? "😟" : "🚀";
-  boost.emojis.exp = boost.multiplier.exp_value <= 1 && boost.multiplier.changed.exp ? "😟" : "🚀";
+  if (boost.hasMultiplierChanges() && boost.hasProbabilityChanges()) {
+    boost.emojis.currency = boost.multiplier.currency_value * boost.probability.currency_value <= 1 ? "😟" : "🚀";
+    boost.emojis.exp = boost.multiplier.exp_value * boost.probability.exp_value <= 1 ? "😟" : "🚀";
+  } else {
+    if (boost.hasMultiplierChanges()) {
+      boost.emojis.currency = boost.multiplier.currency_value <= 1 && boost.multiplier.changed.currency ? "😟" : "🚀";
+      boost.emojis.exp = boost.multiplier.exp_value <= 1 && boost.multiplier.changed.exp ? "😟" : "🚀";
+    }
 
-  boost.emojis.currency = boost.probability.currency_value <= 1 && boost.probability.changed.currency ? "😟" : "🚀";
-  boost.emojis.exp = boost.probability.exp_value <= 1 && boost.probability.changed.exp ? "😟" : "🚀";
+    if (boost.hasProbabilityChanges()) {
+      boost.emojis.currency = boost.probability.currency_value <= 1 && boost.probability.changed.currency ? "😟" : "🚀";
+      boost.emojis.exp = boost.probability.exp_value <= 1 && boost.probability.changed.exp ? "😟" : "🚀";
+    }
+  }
 
   return boost;
+}
+
+/**
+ * 
+ * @param {Guild} guild 
+ * @param {Number | String} quantity 
+ * @param {String} param2 
+ * @returns 
+ */
+const PrettyCurrency = function (guild, quantity, { name, boostemoji } = { name: null, boostemoji: null }) {
+  const client = guild.client;
+  const emojis = client.getCustomEmojis(guild.id);
+
+  return `**${emojis[name ?? "Currency"]}${Number(quantity).toLocaleString("es-CO")}${boostemoji ?? ""}**`;
 }
 
 module.exports = {
@@ -1919,5 +1944,6 @@ module.exports = {
   FindAverage,
   FetchThisGuild,
   BoostWork,
-  PetWork
+  PetWork,
+  PrettyCurrency
 }

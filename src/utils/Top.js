@@ -2,6 +2,7 @@ const { CommandInteraction } = require("discord.js");
 const { Colores } = require("../resources");
 const DarkShop = require("./DarkShop");
 const InteractivePages = require("./InteractivePages");
+const { PrettyCurrency } = require("./functions");
 
 class Top {
     #res = [];
@@ -68,8 +69,8 @@ class Top {
             // agregar la cantidad de darkcurrency
             if (member && !member.user.bot) {
                 let darkcurrency = user.economy.dark?.currency ?? 0;
-                let darkcurrencyValue = user.economy.dark?.currency ? await darkshop.equals(null, user.economy.dark.currency) : 0;
-                let finalQuantity = darkcurrencyValue != 0 ? darkcurrencyValue + user.economy.global.currency : user.economy.global.currency;
+                let darkcurrencyValue = user.economy.dark?.currency ? await darkshop.equals(null, user.getDarkCurrency()) : 0;
+                let finalQuantity = darkcurrencyValue != 0 ? darkcurrencyValue + user.getCurrency() : user.getCurrency();
 
                 let toPush = {
                     user_id: member.user.id,
@@ -92,10 +93,10 @@ class Top {
         // determinar el texto a agregar
         for await (const user of this.#res) {
             let darkshopMoney;
-            if (user.currency != 0) darkshopMoney = ` (${DarkCurrency}${user.currency.toLocaleString('es-CO')}➟**${Currency}${user.currencyValue.toLocaleString('es-CO')}**)`
+            if (user.currency != 0) darkshopMoney = ` (${PrettyCurrency(this.interaction.guild, user.currency, { name: "DarkCurrency"})}➟${PrettyCurrency(this.interaction.guild, user.currencyValue)})`
             else darkshopMoney = "";
 
-            const txt = this.#getTxt(user, [`${Currency}**${user.total.toLocaleString('es-CO')}**${darkshopMoney}`, `|| Obtenido desde siempre: **${Currency}${user.alltime.toLocaleString("es-CO")}** ||`])
+            const txt = this.#getTxt(user, [`${PrettyCurrency(this.interaction.guild, user.total)}${darkshopMoney}`, `|| Obtenido desde siempre: ${PrettyCurrency(this.interaction.guild, user.alltime)} ||`])
 
             this.top.set(user.user_id, {
                 txt

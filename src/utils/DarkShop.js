@@ -403,6 +403,7 @@ class DarkShop {
     }
 
     async removeDarkCurrency() {
+        const PrettyCurrency = this.#requirePretty();
         const users = await Users.find({
             guild_id: this.guild.id
         });
@@ -424,7 +425,7 @@ class DarkShop {
                     .defColor(Colores.verde)
                     .defDesc(`**—** Se han eliminado los ${this.Emojis.DarkCurrency.name} de **${deletedTag}**.
 **—** Desde: ${time(moment(darkdata.until).subtract(1, "w").toDate())}.
-**—** Tenía: **${this.Emojis.DarkCurrency}${darkdata.currency.toLocaleString("es-CO")}**`)
+**—** Tenía: ${PrettyCurrency(this.interaction.guild, darkdata.currency, { name: "DarkCurrency" })}`)
                     .defFooter({ text: "Mensaje enviado a la vez que al usuario", timestamp: true })
 
                 const ErrorLogger = new Log(this.interaction)
@@ -598,6 +599,7 @@ class DarkShop {
      * Recibir la inflación actual en la hora actual en un Embed (SE NECESITA INTERACTION)
      */
     async inflationEmbed() {
+        const PrettyCurrency = this.#requirePretty();
         const { inflation, oldinflation } = await this.getRealInflations();
         const one = await this.oneEquals();
         const { EmojisObject } = this.client;
@@ -611,10 +613,10 @@ class DarkShop {
 
         let stonksEmbed = new Embed()
             .defAuthor({ text: `DarkShop: Inflación`, icon: EmojisObject.DarkShop.url })
-            .defDesc(`**${this.Emojis.DarkCurrency}1 = ${this.Emojis.Currency}${one.toLocaleString('es-CO')}**
+            .defDesc(`**${this.Emojis.DarkCurrency}1 =** ${PrettyCurrency(this.interaction.guild, one)}
 
 ${stonks} **—** La inflación actual de los ${this.Emojis.DarkCurrency.name} es de un \`${inflation}%\`.
-${stonks} **—** Antes era de un \`${oldinflation}%\`: (**${this.Emojis.DarkCurrency}1 = ${this.Emojis.Currency}${(await this.oneEquals(oldinflation))?.toLocaleString("es-CO")}**).
+${stonks} **—** Antes era de un \`${oldinflation}%\`: (**${this.Emojis.DarkCurrency}1 = ${PrettyCurrency(this.interaction.guild, await this.oneEquals(oldinflation))}).
 
 ${tz.now.day() != 0 ? `**—** La inflación inicial fue \`${this.baseValue}%\`.\n` : ""}**—** La inflación cambiará ${time(date, "R")}.`)
             .defColor(Colores.negro);
@@ -641,6 +643,11 @@ ${tz.now.day() != 0 ? `**—** La inflación inicial fue \`${this.baseValue}%\`.
         }) */
 
         return expanded[Math.floor(float * expanded.length)].item;
+    }
+
+    #requirePretty() {
+        const { PrettyCurrency } = require("./functions");
+        return PrettyCurrency;
     }
 
 

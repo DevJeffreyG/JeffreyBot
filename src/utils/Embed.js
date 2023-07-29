@@ -105,7 +105,7 @@ class Embed extends Discord.EmbedBuilder {
 
     #setup(options) {
         const client = require("../../index");
-        const { RandomCumplido, ProgressBar } = require("./functions");
+        const { RandomCumplido, ProgressBar, PrettyCurrency } = require("./functions");
         const { type, data } = options
 
         switch (type) {
@@ -151,7 +151,7 @@ class Embed extends Discord.EmbedBuilder {
                 const member = data.member;
                 const { Currency } = client.getCustomEmojis(data.member.guild.id);
 
-                const actualCurrency = user?.economy.global.currency.toLocaleString('es-CO') ?? 0;
+                const actualCurrency = user?.getCurrency() ?? 0;
                 const curExp = user?.economy.global.exp.toLocaleString('es-CO') ?? 0;
                 const curLvl = user?.economy.global.level.toLocaleString('es-CO') ?? 0;
                 const rep = user?.economy.global.reputation.toLocaleString('es-CO') ?? 0;
@@ -180,7 +180,7 @@ class Embed extends Discord.EmbedBuilder {
                 this.defAuthor({ text: `Estadísticas de ${member.user.username}`, icon: member.guild.iconURL({ dynamic: true }) })
                     .defDesc(`**— Nivel**: ${curLvl}
 **— EXP**: ${ProgressBar(expSoFar / expToGet * 100, { blocks: 5 })} ${inlineCode(`${curExp} / ${nxtLvlExp}`)}
-**— ${Currency.name}**: ${Currency}${actualCurrency}
+**— ${Currency.name}**: ${PrettyCurrency(data.member.guild, actualCurrency)}
 **— Puntos de reputación**: ${rep}
 ${bdString}`)
                     .defThumbnail(member.displayAvatarURL())
