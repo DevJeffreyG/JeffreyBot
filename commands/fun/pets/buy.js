@@ -1,3 +1,4 @@
+const { AlreadyUsingError } = require("../../../src/errors");
 const { Command, Shop, ShopTypes } = require("../../../src/utils");
 
 const command = new Command({
@@ -23,6 +24,8 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { id, user } = params
 
+    let userCheck = user?.user ?? interaction.user;
+    if (client.petCombats.get(userCheck.id)) throw new AlreadyUsingError(interaction, `Como ${userCheck.toString()} estaba en combate, no pudo hacerse`);
     const shop = await new Shop(interaction)
         .setType(ShopTypes.PetShop)
         .build(params.getDoc(), params.getUser());

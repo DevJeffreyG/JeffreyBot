@@ -1,4 +1,4 @@
-const { BadParamsError, AlreadyUsingError } = require("../../../src/errors");
+const { BadParamsError, AlreadyUsingError, EconomyError } = require("../../../src/errors");
 const { Command, PetCombat, Confirmation, PrettyCurrency } = require("../../../src/utils");
 
 const command = new Command({
@@ -28,9 +28,9 @@ command.execute = async (interaction, models, params, client) => {
     let player1 = client.petCombats.get(interaction.user.id);
     let player2 = client.petCombats.get(usuario.value);
 
-    if(player1) throw new AlreadyUsingError(interaction, `${player1.user.toString()} ya está en un combate`);
-    if(player2) throw new AlreadyUsingError(interaction, `${player2.user.toString()} ya está en un combate`);
-    
+    if (player1) throw new AlreadyUsingError(interaction, `${player1.user.toString()} ya está en un combate`);
+    if (player2) throw new AlreadyUsingError(interaction, `${player2.user.toString()} ya está en un combate`);
+
     const combat = await new PetCombat(interaction)
         .build(params.getDoc(), params.getUser(), await Users.getWork({ user_id: usuario.value, guild_id: interaction.guild.id }));
 
@@ -40,6 +40,8 @@ command.execute = async (interaction, models, params, client) => {
     ], interaction);
     if (!hostConfirmation) return;
 
+    if (apuesta && !combat.userDoc.affords(apuesta.value)) throw new EconomyError(interaction, "No tienes tanto dinero", combat.userDoc.getCurrency());
+
     await interaction.editReply({ content: usuario.user.toString() })
     await interaction.followUp({ content: usuario.user.toString() }).then(m => m.delete());
 
@@ -48,6 +50,7 @@ command.execute = async (interaction, models, params, client) => {
         apuesta ? `Hay una apuesta de ${PrettyCurrency(interaction.guild, apuesta.value)}` : "No hay apuesta."
     ], interaction, usuario.user)
     if (!rivalConfirmation) return;
+    if (apuesta && !combat.rivalDoc.affords(apuesta.value)) throw new EconomyError(interaction, "No tienes tanto dinero", combat.rivalDoc.getCurrency());
 
     await combat.changePet(interaction.user);
     await combat.changePet(usuario.user)

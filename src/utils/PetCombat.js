@@ -1,14 +1,16 @@
-const { CommandInteraction, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, User, ButtonBuilder, ButtonStyle } = require("discord.js");
+const { CommandInteraction, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, User, ButtonBuilder, ButtonStyle, AllowedMentionsTypes } = require("discord.js");
 const Pet = require("./Pet");
 const Collector = require("./Collector");
 const Embed = require("./Embed");
-const { ProgressBar, Sleep, GetRandomItem } = require("./functions");
+const { ProgressBar, Sleep, GetRandomItem, PrettyCurrency } = require("./functions");
 const { Colores } = require("../resources");
 const { PetAttacksType, ShopTypes } = require("./Enums");
-const { FetchError, AlreadyUsingError } = require("../errors");
+const { FetchError } = require("../errors");
 
 const Chance = require("chance");
-const ms = require("ms")
+const ms = require("ms");
+const Item = require("./Item");
+const { Users } = require("mongoose").models;
 
 /**
  * Representa una pelea entre mascotas
@@ -16,9 +18,7 @@ const ms = require("ms")
 class PetCombat {
     #interaction;
     #doc;
-    #userDoc;
-    #rivalDoc;
-    #bet;
+    #bet = null;
     #player;
     #users = new Map();
     #ended = false;
@@ -37,10 +37,10 @@ class PetCombat {
 
     async build(doc, user, rival) {
         this.#doc = doc;
-        this.#userDoc = user;
-        this.#rivalDoc = rival;
+        this.userDoc = user;
+        this.rivalDoc = rival;
 
-        if (this.#userDoc.data.pets.length === 0 || this.#rivalDoc.data.pets.length === 0)
+        if (this.userDoc.data.pets.length === 0 || this.rivalDoc.data.pets.length === 0)
             throw new FetchError(this.#interaction, "mascotas", [
                 "Ambos usuarios deben tener al menos una mascota"
             ])
@@ -54,7 +54,7 @@ class PetCombat {
      */
     async changePet(user) {
         const playerNo = user.id === this.#interaction.user.id ? 0 : 1;
-        let doc = playerNo === 0 ? this.#userDoc : this.#rivalDoc
+        let doc = playerNo === 0 ? this.userDoc : this.rivalDoc
 
         // Seleccionar mascota
         let components = [
@@ -66,8 +66,8 @@ class PetCombat {
                 )
         ]
 
-        if ((playerNo === 0 ? this.#userDoc.data.pets : this.#rivalDoc.data.pets).length != 1) {
-            for await (const pet of playerNo === 0 ? this.#userDoc.data.pets : this.#rivalDoc.data.pets) {
+        if ((playerNo === 0 ? this.userDoc.data.pets : this.rivalDoc.data.pets).length != 1) {
+            for await (const pet of playerNo === 0 ? this.userDoc.data.pets : this.rivalDoc.data.pets) {
                 components[0].components[0].addOptions(
                     new StringSelectMenuOptionBuilder()
                         .setLabel(`${pet.name} | 🗡️ ${pet.stats.attack} 🛡️ ${pet.stats.defense}`)
@@ -92,7 +92,7 @@ class PetCombat {
                 pet: await new Pet(this.#interaction, Number(collector.values[0])).build(this.#doc, doc)
             })
         } else { // Tiene una sola mascota
-            let p = playerNo === 0 ? this.#userDoc.data.pets : this.#rivalDoc.data.pets;
+            let p = playerNo === 0 ? this.userDoc.data.pets : this.rivalDoc.data.pets;
             this.#users.set(playerNo, {
                 user,
                 doc,
@@ -101,6 +101,18 @@ class PetCombat {
         }
 
         this.#interaction.client.petCombats.set(user.id, this.#users.get(playerNo));
+    }
+
+    async #updateDocs() {
+        for await (const n of [0, 1]) {
+            let get = this.#users.get(n)
+            const { user_id, guild_id } = get.doc
+            this.#users.set(n, Object.assign(get, {
+                doc: await Users.getWork({ user_id, guild_id })
+            }))
+
+            console.log(this.#users.get(n));
+        }
     }
 
     // ------------------- COMBAT -----------------------
@@ -132,33 +144,75 @@ class PetCombat {
 
         await Sleep(2000);
 
-        while (!this.#ended) await this.#turn()
+        while (!this.#ended) {
+            try {
+                await this.#turn()
+            } catch (err) {
+                await this.#interaction.followUp({
+                    content: `## ${this.#interaction.client.Emojis.Check} Gana el combate **${this.#rival.user}**.\n## ${this.#interaction.client.Emojis.Error} ${this.#playing.user} tardó demasiado en jugar.`,
+                    allowedMentions: {
+                        users: [this.#rival.user.id]
+                    }
+                })
+
+                this.pet.changeHp(-this.pet.hp);
+                await this.pet.save();
+            }
+        }
     }
 
-    // TODO: Apuestas, embeds
     async endgame() {
         let player1 = this.#users.get(0);
         let player2 = this.#users.get(1);
 
+        let embed = new Embed();
+
         if (player1.pet.wasDefeated && player2.pet.wasDefeated) { // ambas perdieron
-            console.log("fue un empate");
+            embed
+                .defTitle("🏳️ Fue un empate")
+                .defDesc(`## Ambos quedaron en **0 HP** ‼️
+${this.#bet ? `### A cada uno se le regresan ${PrettyCurrency(this.#interaction.guild, this.#bet)}` : ``}
+### No cambiaron las métricas de victorias o derrotas`)
+                .defColor(Colores.nocolor);
             player1.pet.changeHp(1);
             player2.pet.changeHp(1);
         } else if (player1.pet.wasDefeated) { // perdio el retador
-            console.log("gano el jugador 2");
+            embed
+                .defTitle(`🏆 Gana ${player2.user.username}`)
+                .defDesc(`## 💔 ${player1.pet.name} se quedó en **0 HP**.
+${this.#bet ? `### — Se le dan ${PrettyCurrency(this.#interaction.guild, this.#bet)} al ganador.` : ``}`)
+                .defColor(Colores.verde);
+
             player1.pet.changeHp(1);
             player1.pet.defeats++;
             player2.pet.wins++;
+            if (this.#bet) {
+                player2.doc.addCurrency(this.#bet, false);
+                player1.doc.economy.global.currency -= this.#bet;
+            }
         } else { // perdio el retado
-            console.log("gano el jugador 1");
+            embed
+                .defTitle(`🏆 Gana ${player1.user.username}`)
+                .defDesc(`## 💔 ${player2.pet.name} se quedó en **0 HP**.
+${this.#bet ? `### — Se le dan ${PrettyCurrency(this.#interaction.guild, this.#bet)} al ganador.` : ``}`)
+                .defColor(Colores.verde);
+
             player2.pet.changeHp(1);
             player2.pet.defeats++;
             player1.pet.wins++;
+
+            if (this.#bet) {
+                player1.doc.addCurrency(this.#bet, false);
+                player2.doc.economy.global.currency -= this.#bet;
+            }
         }
+
+        await this.#interaction.editReply({ embeds: [embed], components: [], content: null })
 
         this.#interaction.client.petCombats.delete(player1.user.id)
         this.#interaction.client.petCombats.delete(player2.user.id)
 
+        // actualizar la base de datos
         await player1.pet.save();
         await player2.pet.save();
     }
@@ -173,7 +227,7 @@ class PetCombat {
         this.pet.inCombat = true;
         this.rivalpet.inCombat = true;
 
-        if(this.#movementNo === 1) {
+        if (this.#movementNo === 1) {
             await this.pet.save()
             await this.rivalpet.save()
         }
@@ -231,7 +285,8 @@ class PetCombat {
             .defDesc(`# ${this.pet.name}
 ## 🗡️ ${this.pet.stats.attack} — 🛡️ ${this.pet.stats.defense}
 ### ❤️ ${ProgressBar(this.pet.hp / this.pet.shop_info.stats.hp * 100)} — **${this.pet.hp}**
-### 🍗 ${ProgressBar(this.pet.hunger)} — **${this.pet.hunger}**`)
+### 🍗 ${ProgressBar(this.pet.hunger)} — **${this.pet.hunger}**
+### ⚡ ${ProgressBar(this.pet.ultCharge)} — **ULT ${this.pet.ultCharge}**`)
             .defColor(Colores.verde)
             .defFooter({ text: `Movimiento #${this.#movementNo} — Contra ${this.#rival.user.username}`, icon: this.#interaction.guild.iconURL({ dynamic: true }) });
 
@@ -251,8 +306,13 @@ class PetCombat {
             case "petAttack":
                 await this.#selectAttack();
                 break;
+            case "petItem":
+                await this.#selectItem();
+                break;
         }
-        
+
+        await this.#updateDocs();
+
         this.#movementNo++;
     }
 
@@ -329,6 +389,7 @@ class PetCombat {
         this.#messages.push(`### **${this.rivalpet.name}** -${attackValue.toLocaleString("es-CO")} ❤️`);
 
         this.pet.changeHunger(attack.cost);
+        this.pet.ultCharge += attackValue;
         this.rivalpet.changeHp(-attackValue);
 
         await this.pet.save();
@@ -343,6 +404,72 @@ class PetCombat {
         })
 
         await this.#interaction.editReply({ embeds: [attackEmbed], components: [] })
+        await Sleep(2000)
+        return this.#togglePlayer();
+    }
+
+    async #selectItem() {
+        const maxhp = this.pet.shop_info.stats.hp;
+
+        this.#components[0].components.forEach(c => c.setDisabled(true));
+        this.#components[1] = new ActionRowBuilder()
+            .setComponents(
+                new StringSelectMenuBuilder()
+                    .setCustomId("itemSelection")
+                    .setPlaceholder("Selecciona un item")
+            )
+
+        let itemsAdded = [];
+
+        for (const [i, _item] of this.#playing.doc.data.inventory.entries()) {
+            if (itemsAdded.find(x => x === _item.item_id) || _item.shopType != ShopTypes.PetShop) continue;
+            const item = await new Item(this.#interaction, _item.item_id, _item.shopType).build(this.#playing.doc, this.#doc);
+
+            let hunger = item.item.stats.hunger > 100 ? 100 : item.item.stats.hunger;
+            let hp = item.item.stats.hp > maxhp ? maxhp : item.item.stats.hp;
+
+            this.#components[1].components[0]
+                .addOptions(
+                    new StringSelectMenuOptionBuilder()
+                        .setLabel(item.item.name)
+                        .setDescription(`- ${hunger} 🍗, + ${hp} ❤️‍🩹`)
+                        .setValue(String(i))
+                )
+
+            itemsAdded.push(item.item.id);
+        }
+
+        await this.#interaction.editReply({ components: this.#components });
+        const collector = await new Collector(this.#interaction, {
+            wait: true,
+            filter: (inter) => inter.customId === "itemSelection" && inter.user.id === this.#playing.user.id,
+            time: ms("10m")
+        }).raw();
+        await collector.deferUpdate();
+
+        const itemIndex = Number(collector.values[0]);
+
+        let item = await new Item(this.#interaction, this.#playing.doc.data.inventory[itemIndex].item_id, ShopTypes.PetShop).build(this.#playing.doc, this.#doc);
+        let hunger = item.item.stats.hunger > 100 ? 100 : item.item.stats.hunger;
+        let hp = item.item.stats.hp > maxhp ? maxhp : item.item.stats.hp;
+
+        this.#messages.push(`### **${this.pet.name}** -${hunger.toLocaleString("es-CO")} 🍗`);
+        this.#messages.push(`### **${this.pet.name}** +${hp.toLocaleString("es-CO")} ❤️`);
+
+        this.pet.changeHunger(-hunger);
+        this.pet.changeHp(hp);
+        await item.removeItemFromInv();
+        await this.pet.save();
+
+        let itemEmbed = new Embed()
+            .defTitle(`${this.pet.name} usa ${item.item.name}!`)
+            .defColor(Colores.verde);
+
+        this.#messages.forEach(msg => {
+            itemEmbed.defDesc(`${itemEmbed.data.description ?? ""}\n${msg}`)
+        })
+
+        await this.#interaction.editReply({ embeds: [itemEmbed], components: [] })
         await Sleep(2000)
         return this.#togglePlayer();
     }
