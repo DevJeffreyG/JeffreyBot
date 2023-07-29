@@ -57,7 +57,7 @@ command.execute = async (interaction, models, params, client) => {
     const toLend = dinero.value;
     const deuda = PrettyCurrency(interaction.guild, toLend);
 
-    if (!user.canBuy(toLend)) throw new EconomyError(interaction, "No tienes tanto dinero", user.getCurrency())
+    if (!user.affords(toLend)) throw new EconomyError(interaction, "No tienes tanto dinero", user.getCurrency())
 
     const authorConfirmation = await Confirmation("Prestar dinero", [
         `Le prestarás ${deuda} a ${usuario.member}.`,

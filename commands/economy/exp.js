@@ -23,7 +23,7 @@ command.execute = async (interaction, models, params, client) => {
     const user = params.getUser();
     if (!doc.moduleIsActive("functions.currency_to_exp")) throw new ModuleDisabledError(interaction);
 
-    if (!user.canBuy(dinero.value)) throw new EconomyError(interaction, "No tienes tanto dinero", user.getCurrency())
+    if (!user.affords(dinero.value)) throw new EconomyError(interaction, "No tienes tanto dinero", user.getCurrency())
 
     let cool = await user.cooldown(Cooldowns.CurrencyToExp, { save: false });
     if (cool) return interaction.editReply({ embeds: [new Embed({ type: "cooldown", data: { cool } })] });

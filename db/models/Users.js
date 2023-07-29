@@ -321,7 +321,7 @@ Schema.method("hasItem", function (itemId, shopType = ShopTypes.Shop) {
     return x
 })
 
-Schema.method("canBuy", function (price, path) {
+Schema.method("affords", function (price, path) {
     if (!path) return this.getCurrency() >= price
     else {
         return this.get(path) >= price

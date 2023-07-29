@@ -269,7 +269,7 @@ class Shop {
         if (item.req_role && !member.roles.cache.get(item.req_role))
             throw new DoesntExistsError(this.interaction, `<@&${item.req_role}>`, "tu usuario")
 
-        if (!this.#user.canBuy(price, this.config.currency.user_path))
+        if (!this.#user.affords(price, this.config.currency.user_path))
             throw new EconomyError(
                 this.interaction,
                 `No tienes tantos ${this.config.currency.emoji.name}`,

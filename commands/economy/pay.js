@@ -85,7 +85,7 @@ command.execute = async (interaction, models, params, client) => {
     let confirmation = await Confirmation("Pagar dinero", toConfirm, interaction);
     if (!confirmation) return;
 
-    if (!author_user.canBuy(quantity)) throw new EconomyError(interaction, "No tienes tanto dinero", author_user.getCurrency());
+    if (!author_user.affords(quantity)) throw new EconomyError(interaction, "No tienes tanto dinero", author_user.getCurrency());
 
     if (author.id === recieverMember.id) {
         let msg = await interaction.fetchReply();
