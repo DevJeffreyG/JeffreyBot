@@ -22,13 +22,14 @@ command.execute = async (interaction, models, params, client) => {
 
     let user = params.getUser();
 
-    if (user.getCurrency() < apuesta.value)
-        throw new EconomyError(interaction, "No tienes tanto dinero para apostar", user.getCurrency())
+    if (!user.affords(apuesta.value))
+        throw new EconomyError(interaction, "No tienes tanto dinero para apostar", user.getCurrency());
+
     let winCounts = client.wonBlackjack.find(x => x.user === interaction.user.id && x.guild === interaction.guild.id)
 
     let cool = await user.cooldown(Cooldowns.Blackjack, { info: true })
     if (cool) {
-        if(winCounts) winCounts.count = 0;
+        if (winCounts) winCounts.count = 0;
         return interaction.editReply({ embeds: [new Embed({ type: "cooldown", data: { cool } })] })
     }
 

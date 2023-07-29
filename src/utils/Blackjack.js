@@ -8,7 +8,7 @@ const ErrorEmbed = require("./ErrorEmbed");
 const { Colores } = require("../resources");
 
 const Collector = require("./Collector");
-const { ExecutionError } = require("../errors");
+const { ExecutionError, AlreadyUsingError } = require("../errors");
 const { PrettyCurrency } = require("./functions");
 
 /**
@@ -222,7 +222,11 @@ class Blackjack {
 
         this.collector = new Collector(this.interaction, { filter, time: ms("10m") }, true);
         this.collector.onActive(async () => {
-            this.interaction.followUp({ ephemeral: true, embeds: [new ErrorEmbed().defDesc("Ya estás en un juego de Blackjack, terminalo antes de iniciar otro.")] });
+            this.interaction.followUp({
+                ephemeral: true, embeds: [
+                    new AlreadyUsingError(interaction, "Ya estás en un juego de Blackjack, terminalo antes de iniciar otro.").embed
+                ]
+            });
         }).onEnd(() => {
             this.row.components.forEach(c => c.setDisabled());
             this.supportRow.components.find(c => c.data.custom_id === "giveup").setDisabled();
@@ -284,7 +288,8 @@ class Blackjack {
             }
         })
 
-        this.collector.on("end", async () => {
+        this.collector.on("end", async (c, reason) => {
+            if (reason === EndReasons.OldCollector) return;
             if (!this.ended) {
                 await this.endgame(false, EndReasons.TimeOut);
             }
@@ -442,7 +447,7 @@ class Blackjack {
         let save = true;
 
         console.log("🟢 Se terminó el juego con resultado %s", won)
-        await this.#generateEmbed(reason != EndReasons.Over21 && reason != EndReasons.Blackjack)
+        await this.#generateEmbed(reason != EndReasons.Blackjack)
 
         if (won === -1) {
             this.embed
