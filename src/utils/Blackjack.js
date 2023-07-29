@@ -465,7 +465,7 @@ class Blackjack {
                         .defColor(Colores.rojooscuro)
                 }
 
-                this.user.getCurrency() -= this.bet;
+                this.user.economy.global.currency -= this.bet;
 
                 console.log("🔴 %s perdió %s %s en el Blackjack", this.interaction.user.username, this.bet.toLocaleString("es-CO"), this.Emojis.Currency.name);
             } else {

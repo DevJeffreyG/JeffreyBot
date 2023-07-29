@@ -39,7 +39,7 @@ class Modal extends ModalBuilder {
             .setCustomId(id)
             .setLabel(label)
             .setStyle(style)
-            .setValue(value ?? null)
+            .setValue(value ?? "")
 
             .setRequired(req ?? false)
             .setPlaceholder(placeholder ?? "");

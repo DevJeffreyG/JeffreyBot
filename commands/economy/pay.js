@@ -108,7 +108,7 @@ command.execute = async (interaction, models, params, client) => {
         if (author_user.data.debts[debt].debt <= 0) author_user.data.debts.splice(debt, 1);
     }
 
-    author_user.getCurrency() -= quantity;
+    author_user.economy.global.currency -= quantity;
     await reciever.addCurrency(quantity);
     await author_user.save();
 
@@ -132,9 +132,8 @@ command.execute = async (interaction, models, params, client) => {
             desc: description
         }
     })
-    interaction.editReply({ embeds: [new Embed({ type: "success" })] });
-
-    return interaction.followUp({ content: `**${author.username}** ➡️ **${recieverMember}**.`, embeds: [doneEmbed], allowedMentions: { parse: ["users"] } });
+    await interaction.editReply({ embeds: [new Embed({ type: "success" })] });
+    return await interaction.followUp({ content: `**${author.username}** ➡️ **${recieverMember}**.`, embeds: [doneEmbed] });
 }
 
 module.exports = command;

@@ -138,55 +138,59 @@ class Pet {
      */
     async notice(type) {
         if (this.inCombat) return;
-        switch (type) {
-            case PetNotices.HalfHp:
-                if (!this.notices.halfhp) {
+        try {
+            switch (type) {
+                case PetNotices.HalfHp:
+                    if (!this.notices.halfhp) {
+                        await (this.member ?? this.interaction.member).send({
+                            embeds: [
+                                new Embed()
+                                    .defTitle(`⚠️ Tu mascota ${this.name} tiene la mitad de su vida`)
+                                    .defDesc(`Dale algo de comer para evitar que siga bajando`)
+                                    .defColor(Colores.nocolor)
+                            ]
+                        })
+                        this.notices.halfhp = new Date();
+                    }
+                    break;
+                case PetNotices.Dead:
                     await (this.member ?? this.interaction.member).send({
                         embeds: [
                             new Embed()
-                                .defTitle(`⚠️ Tu mascota ${this.name} tiene la mitad de su vida`)
-                                .defDesc(`Dale algo de comer para evitar que siga bajando`)
-                                .defColor(Colores.nocolor)
+                                .defDesc(`# ${this.name} ha muerto.`)
+                                .defColor(Colores.rojooscuro)
                         ]
                     })
-                    this.notices.halfhp = new Date();
-                }
-                break;
-            case PetNotices.Dead:
-                await (this.member ?? this.interaction.member).send({
-                    embeds: [
-                        new Embed()
-                            .defDesc(`# ${this.name} ha muerto.`)
-                            .defColor(Colores.rojooscuro)
-                    ]
-                })
-                break;
-            case PetNotices.LowHp:
-                if (!this.notices.lowhp) {
-                    await (this.member ?? this.interaction.member).send({
-                        embeds: [
-                            new Embed()
-                                .defTitle(`⚠️ Tu mascota ${this.name} tiene muy poca vida`)
-                                .defDesc(`¡Cúrala o dale de comer!`)
-                                .defColor(Colores.rojo)
-                        ]
-                    })
-                    this.notices.lowhp = new Date();
-                }
-                break;
-            case PetNotices.Hungry:
-                if (!this.notices.hungry) {
-                    await (this.member ?? this.interaction.member).send({
-                        embeds: [
-                            new Embed()
-                                .defTitle(`Tu mascota ${this.name} tiene hambre`)
-                                .defDesc(`Dale de comer para evitar que llegue a 0 y **baje su vida**.`)
-                                .defColor(Colores.nocolor)
-                        ]
-                    })
-                    this.notices.hungry = new Date();
-                }
-                break;
+                    break;
+                case PetNotices.LowHp:
+                    if (!this.notices.lowhp) {
+                        await (this.member ?? this.interaction.member).send({
+                            embeds: [
+                                new Embed()
+                                    .defTitle(`⚠️ Tu mascota ${this.name} tiene muy poca vida`)
+                                    .defDesc(`¡Cúrala o dale de comer!`)
+                                    .defColor(Colores.rojo)
+                            ]
+                        })
+                        this.notices.lowhp = new Date();
+                    }
+                    break;
+                case PetNotices.Hungry:
+                    if (!this.notices.hungry) {
+                        await (this.member ?? this.interaction.member).send({
+                            embeds: [
+                                new Embed()
+                                    .defTitle(`Tu mascota ${this.name} tiene hambre`)
+                                    .defDesc(`Dale de comer para evitar que llegue a 100 y **baje su vida**.`)
+                                    .defColor(Colores.nocolor)
+                            ]
+                        })
+                        this.notices.hungry = new Date();
+                    }
+                    break;
+            }
+        } catch (e) {
+            console.log(e);
         }
     }
 }

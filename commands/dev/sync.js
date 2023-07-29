@@ -69,7 +69,7 @@ command.execute = async (interaction, models, params, client) => {
                 console.log("🔄", q.name, "actualizado");
             })
 
-            return interaction.editReply({ content: `${client.Emojis.Check} ${role} Sincronizado.`, allowedMentions: { parse: [] } })
+            return await interaction.editReply({ content: `${client.Emojis.Check} ${role} Sincronizado.`, allowedMentions: { parse: [] } })
         }
 
         case "legacy": {
@@ -183,7 +183,7 @@ command.execute = async (interaction, models, params, client) => {
                 })
             }
 
-            return interaction.editReply({ content: `${client.Emojis.Check} Sincronizados.`, allowedMentions: { parse: [] } })
+            return await interaction.editReply({ content: `${client.Emojis.Check} Sincronizados.` })
         }
     }
 }

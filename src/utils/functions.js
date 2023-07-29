@@ -579,7 +579,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
         let topay = Math.round(debt.debt * (debt.interest / 100));
         let memberToPay = guild.members.cache.get(debt.user);
         debt.pay_in = moment().add(debt.every, "ms");
-        dbUser.getCurrency() -= topay;
+        dbUser.economy.global.currency -= topay;
         let userToPay = await Users.getWork({ user_id: memberToPay.id, guild_id: guild.id });
         userToPay.addCurrency(topay);
 

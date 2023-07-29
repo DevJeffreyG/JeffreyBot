@@ -105,7 +105,7 @@ command.execute = async (interaction, models, params, client) => {
     if (!robSuccess) {
         suggester = getAuthor(fail);
 
-        user.getCurrency() -= failedValue;
+        user.economy.global.currency -= failedValue;
         await user.save();
 
         embed = new Embed()
@@ -115,7 +115,7 @@ command.execute = async (interaction, models, params, client) => {
         suggester = getAuthor(success);
 
         user.addCurrency(successValue);
-        victim.getCurrency() -= successValue;
+        victim.economy.global.currency -= successValue;
 
         await victim.save();
 

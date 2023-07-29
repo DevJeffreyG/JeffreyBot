@@ -1,4 +1,4 @@
-const { Command, Categories } = require("../../src/utils");
+const { Command } = require("../../src/utils");
 
 const command = new Command({
     name: "say",
@@ -14,10 +14,9 @@ command.addOption({
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
-    const mensaje = params.mensaje.value;
+    await interaction.deleteReply();
 
-    interaction.deleteReply();
-    return interaction.channel.send({ content: mensaje, allowedMentions: { parse: [] } });
+    return await interaction.channel.send({ content: params.mensaje.value, allowedMentions: { parse: [] } });
 }
 
 module.exports = command;

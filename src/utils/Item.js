@@ -63,6 +63,7 @@ class Item {
     async build(user, doc) {
         this.doc = doc;
         this.user = user;
+        this.original_executor = this.user;
 
         switch (this.shopType) {
             case ShopTypes.DarkShop:
@@ -76,6 +77,12 @@ class Item {
         }
 
         this.item = this.shop.findItem(this.itemId, false);
+
+        const inventory = this.user.data.inventory;
+        const inventoryFilter = x => x.item_id === this.itemId && x.shopType === this.shopType;
+
+        this.itemInv = inventory.find(inventoryFilter);
+        this.itemOnInventoryIndex = this.user.data.inventory.findIndex(inventoryFilter);
 
         this.#itemInfo();
 
@@ -124,8 +131,6 @@ class Item {
     async use(id, qvictim = this.interaction.member) {
         if (!this.#verify()) return false;
 
-        this.original_executor = this.user;
-
         var victim = qvictim;
 
         this.victim = victim?.id != this.user.user_id && victim ? // la victima NO puede ser el mismo usuario
@@ -140,12 +145,6 @@ class Item {
         this.victimMember = this.victim ? victim : null; // this.victim es el doc de mongoose
 
         console.log("🟢 %s está usando el item %s!", this.interaction.user.username, this.item.name)
-
-        const inventory = this.user.data.inventory;
-        const inventoryFilter = x => x.use_id === id && x.shopType === this.shopType;
-
-        this.itemInv = inventory.find(inventoryFilter);
-        this.itemOnInventoryIndex = this.user.data.inventory.findIndex(inventoryFilter);
 
         this.success = new Embed({ type: "success", data: { desc: this.item.reply } });
 
@@ -165,11 +164,11 @@ class Item {
         console.log("===========================")
     }
 
-    async #removeItemFromInv() {
+    async removeItemFromInv(save = true) {
         let originalExecutor = await Users.getWork({ user_id: this.original_executor.user_id, guild_id: this.original_executor.guild_id });
         console.log("🗑️ Eliminando %s del inventario de %s", this.item.name, this.original_executor.user_id)
         originalExecutor.data.inventory.splice(this.itemOnInventoryIndex, 1);
-        await originalExecutor.save();
+        if (save) await originalExecutor.updateOne(originalExecutor);
     }
 
     async #useWork() {
@@ -223,7 +222,7 @@ class Item {
             await this.user.save()
         }
 
-        this.#removeItemFromInv()
+        this.removeItemFromInv()
         return true
     }
 
@@ -245,7 +244,7 @@ class Item {
             await this.user.save()
         }
 
-        this.#removeItemFromInv()
+        this.removeItemFromInv()
         return true;
     }
 
@@ -302,7 +301,7 @@ class Item {
         }
         else this.member.roles.add(role);
 
-        this.#removeItemFromInv()
+        this.removeItemFromInv()
         return true;
     }
 
@@ -344,7 +343,7 @@ class Item {
 
         this.member.roles.remove(role);
 
-        this.#removeItemFromInv()
+        this.removeItemFromInv()
         return true;
     }
 
@@ -364,7 +363,7 @@ class Item {
                 if (this.user.economy.dark.accuracy > 90) this.user.economy.dark.accuracy = 90;
                 await this.user.save()
 
-                this.#removeItemFromInv()
+                this.removeItemFromInv()
                 return true;
 
             case ItemTypes.Firewall:
@@ -421,7 +420,7 @@ class Item {
                 this.user.data.purchases.splice(purchaseIndex, 1);
                 await this.user.save()
 
-                this.#removeItemFromInv();
+                this.removeItemFromInv();
                 return true;
             }
 
@@ -455,7 +454,7 @@ class Item {
                 // Crear mascota
                 this.user.data.pets.push(newpet)
                 await this.user.save();
-                this.#removeItemFromInv();
+                this.removeItemFromInv();
                 return true;
             case ItemTypes.PetStatsModifier:
                 console.log("🟩 Estadísticas de mascota!");
@@ -492,7 +491,7 @@ class Item {
                 if (this.item.stats.hunger >= 0) pet.changeHunger(-this.item.stats.hunger)
 
                 await pet.save();
-                this.#removeItemFromInv();
+                this.removeItemFromInv();
                 return true;
             default:
                 console.log("Item simple! %s", itemType)
@@ -572,7 +571,7 @@ class Item {
         // llamar la funcion para hacer un globaldata y dar el role con boost
         await LimitedTime(this.member, role?.id, this.duration, this.boost_type, this.boost_objetive, this.boost_value);
 
-        this.#removeItemFromInv()
+        this.removeItemFromInv()
         return true;
     }
 
@@ -607,7 +606,7 @@ class Item {
         await this.user.save();
         if (role) this.member.roles.remove(role);
 
-        this.#removeItemFromInv()
+        this.removeItemFromInv()
         return true;
     }
 
@@ -672,21 +671,21 @@ class Item {
                 await this.victim.save();
 
                 // enviar embed
-                dsEvents?.send({ content: `**${this.interaction.user.username}** ➡️ **${this.member}**.`, embeds: [fail], allowedMentions: { parse: ["users"] } })
+                dsEvents?.send({ content: `**${this.interaction.user.username}** ➡️ **${this.member}**.`, embeds: [fail] })
 
-                await this.#removeItemFromInv() // como es fallido, no llega al codigo base para que se elimine el item
+                await this.removeItemFromInv() // como es fallido, no llega al codigo base para que se elimine el item
                 return false;
             } else { // se salta la firewall
                 console.log("🟢 Se ha saltado la Firewall")
-                dsEvents?.send({ content: `**${this.interaction.user.username}** ➡️ **${this.member}**.`, embeds: [skipped], allowedMentions: { parse: ["users"] } })
+                dsEvents?.send({ content: `**${this.interaction.user.username}** ➡️ **${this.member}**.`, embeds: [skipped] })
                 return true
             }
         } else { // no tiene firewall
             if (this.victim.economy.global.level >= this.doc.settings.quantities.darkshop_level) {
-                dsEvents?.send({ content: `**${this.interaction.user.username}** ➡️ **${this.member}**.`, embeds: [success], allowedMentions: { parse: ["users"] } })
+                dsEvents?.send({ content: `**${this.interaction.user.username}** ➡️ **${this.member}**.`, embeds: [success] })
                 return true
             } else { // ni siquiera es parte de la red de la darkshop
-                dsEvents?.send({ content: `**${this.interaction.user.username}** ➡️ **${this.member}**.`, embeds: [fail], allowedMentions: { parse: ["users"] } })
+                dsEvents?.send({ content: `**${this.interaction.user.username}** ➡️ **${this.member}**.`, embeds: [fail] })
 
                 return false // para que no se elimine el item
             }

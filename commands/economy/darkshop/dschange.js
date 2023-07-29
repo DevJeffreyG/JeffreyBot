@@ -56,7 +56,7 @@ command.execute = async (interaction, models, params, client) => {
     const economy = user.economy.dark;
 
     await user.addDarkCurrency(quantity, false);
-    user.getCurrency() -= total;
+    user.economy.global.currency -= total;
 
     economy.until = moment().add(1, "w").startOf("day").toDate();
 

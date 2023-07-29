@@ -1,7 +1,7 @@
 require("dotenv").config();
 require("./server");
 
-const { Client, GatewayIntentBits, Partials } = require("discord.js");
+const { Client, GatewayIntentBits, Partials, AllowedMentionsTypes } = require("discord.js");
 const CronJob = require("cron").CronJob;
 
 const moment = require("moment-timezone")
@@ -11,7 +11,7 @@ const Events = require("./Events");
 const Errors = require("./Errors");
 
 const client = new Client({
-  allowedMentions: { parse: ['users', 'roles'], repliedUser: true }, intents: [
+  allowedMentions: { parse: [AllowedMentionsTypes.Role, AllowedMentionsTypes.User], repliedUser: false }, intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildModeration,

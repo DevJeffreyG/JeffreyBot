@@ -35,7 +35,7 @@ command.execute = async (interaction, models, params, client) => {
     ], interaction)
     if (!confirmation) return;
 
-    user.getCurrency() -= dinero.value;
+    user.economy.global.currency -= dinero.value;
     user.economy.global.exp += dinero.value;
 
     await user.save();
