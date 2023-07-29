@@ -52,7 +52,8 @@ class Enum {
             Advanced: "Avanzado",
             Ultimate: "Definitivo",
             Roulette: "Ruleta",
-            ClaimRep: "Reclamar Rep"
+            ClaimRep: "Reclamar Rep",
+            Yes: "Sí"
         }
 
         for (const prop of Object.keys(this.values)) {
@@ -420,6 +421,15 @@ const PetNotices = new Enum({
     Hungry: 4
 }).values;
 
+/**
+ * - Yes
+ * - No
+ */
+const YesNo = new Enum({
+    Yes: 1,
+    No: 2
+}).values;
+
 module.exports = {
     Enum,
     Categories,
@@ -442,5 +452,6 @@ module.exports = {
     ChangelogTypes,
     ShopTypes,
     PetAttacksType,
-    PetNotices
+    PetNotices,
+    YesNo
 }

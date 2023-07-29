@@ -26,6 +26,7 @@ const Schema = {
             },
             disabled: { type: Boolean, default: false },
             disabled_until: { type: Date, default: null },
+            canHaveMany: { type: Boolean, default: false },
             id: { type: Number, required: true, sparse: true }
         }
     ],

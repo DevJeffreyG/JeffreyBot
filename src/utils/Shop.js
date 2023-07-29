@@ -1,7 +1,7 @@
 const { Emoji, CommandInteraction, User, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, TextInputStyle } = require("discord.js");
 const { Shops, DarkShops, PetShops, Users } = require("mongoose").models;
 const { Colores } = require("../resources");
-const { ShopTypes, Enum, ItemTypes, ItemObjetives, ItemActions } = require("./Enums");
+const { ShopTypes, Enum, ItemTypes, ItemObjetives, ItemActions, YesNo } = require("./Enums");
 const InteractivePages = require("./InteractivePages");
 const { BadCommandError, DoesntExistsError, EconomyError, AlreadyExistsError, BadParamsError } = require("../errors");
 const { Confirmation, FindNewId, PrettyCurrency } = require("./functions");
@@ -276,7 +276,7 @@ class Shop {
                 this.#user.get(this.config.currency.user_path),
                 this.#isDarkShop
             )
-        if (inventoryUser.hasItem(itemId, this.config.info.type))
+        if (inventoryUser.hasItem(itemId, this.config.info.type) && !item.canHaveMany)
             throw new AlreadyExistsError(this.interaction, itemName, "el inventario");
 
         const newUseId = FindNewId(await Users.find(), "data.inventory", "use_id");
@@ -417,6 +417,10 @@ ${codeBlock(item.description)}
                     break;
                 case "desc":
                     item.description = value;
+                    break;
+                case "canHaveMany":
+                    if (!new Enum(YesNo).exists(Number(value))) throw new BadParamsError(this.interaction, `\`${value}\` **NO** es un valor válido`);
+                    item.canHaveMany = Number(value) === YesNo.Yes ? true : false;
                     break;
                 case "price":
                     item.price = value;
@@ -655,12 +659,12 @@ ${codeBlock(item.description)}
 
         try {
             await this.shopdoc.save();
-        } catch(err) {
-            if(err instanceof Error.ValidationError) throw new BadParamsError(this.interaction, [
+        } catch (err) {
+            if (err instanceof Error.ValidationError) throw new BadParamsError(this.interaction, [
                 "Revisa los campos",
                 err.message
             ])
-            
+
             throw err
         }
         return this.interaction.editReply({ embeds: [this.#updated], components: [] });

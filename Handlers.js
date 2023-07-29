@@ -334,6 +334,7 @@ class Handlers {
                     .defTitle(`Editar item ${itemId} de (${new Enum(ShopTypes).translate(shopType)})`)
                     .addInput({ id: "name", label: "Nuevo nombre", style: TextInputStyle.Short, placeholder: "El nuevo nombre de este item", max: 25 })
                     .addInput({ id: "desc", label: "Nueva descripción", style: TextInputStyle.Paragraph, placeholder: "La nueva descripción de este item", max: 1000 })
+                    .addInput({ id: "canHaveMany", label: "¿Puede tener más de uno en el inventario?", style: TextInputStyle.Short, placeholder: "Sí: 1 / No: 2" })
                     .show()
                 break;
             }
