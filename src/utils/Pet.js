@@ -58,6 +58,7 @@ class Pet {
 
         this.ultCharge = 0;
         this.inCombat = false;
+        this.isDefending = false;
         this.wasDefeated = false;
 
         return this

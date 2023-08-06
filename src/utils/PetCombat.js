@@ -1,4 +1,4 @@
-const { CommandInteraction, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, User, ButtonBuilder, ButtonStyle, AllowedMentionsTypes } = require("discord.js");
+const { CommandInteraction, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, User, ButtonBuilder, ButtonStyle, Message, ThreadAutoArchiveDuration } = require("discord.js");
 const Pet = require("./Pet");
 const Collector = require("./Collector");
 const Embed = require("./Embed");
@@ -27,6 +27,7 @@ class PetCombat {
     #playing;
     #rival;
     #messages;
+    #lastMsg;
 
     /**
      * @param {CommandInteraction} interaction 
@@ -111,8 +112,17 @@ class PetCombat {
                 doc: await Users.getWork({ user_id, guild_id })
             }))
 
-            console.log(this.#users.get(n));
+            //console.log(this.#users.get(n));
         }
+    }
+
+    /**
+     * 
+     * @param {*} options 
+     * @returns {Promise<Message>}
+     */
+    async changeStatus(options) {
+        return await this.thread.send(options);
     }
 
     // ------------------- COMBAT -----------------------
@@ -132,7 +142,7 @@ class PetCombat {
         this.#bet = bet;
         this.#player = new Chance().bool() ? 0 : 1;
 
-        await this.#interaction.editReply({
+        let threadMsg = await this.#interaction.followUp({
             content: this.#users.get(this.#player).user.toString(),
             embeds: [
                 new Embed()
@@ -142,13 +152,20 @@ class PetCombat {
             components: []
         })
 
-        await Sleep(2000);
+        this.thread = await threadMsg.startThread({
+            name: `Combate ${this.#users.get(0).user.username} vs ${this.#users.get(1).user.username}`,
+            autoArchiveDuration: ThreadAutoArchiveDuration.OneHour,
+            reason: `Comando /combat`
+        });
 
         while (!this.#ended) {
             try {
                 await this.#turn()
+                await Sleep(1000);
             } catch (err) {
-                await this.#interaction.followUp({
+                if (err.code != "InteractionCollectorError") throw err;
+
+                await this.changeStatus({
                     content: `## ${this.#interaction.client.Emojis.Check} Gana el combate **${this.#rival.user}**.\n## ${this.#interaction.client.Emojis.Error} ${this.#playing.user} tardó demasiado en jugar.`,
                     allowedMentions: {
                         users: [this.#rival.user.id]
@@ -207,7 +224,7 @@ ${this.#bet ? `### — Se le dan ${PrettyCurrency(this.#interaction.guild, this.
             }
         }
 
-        await this.#interaction.editReply({ embeds: [embed], components: [], content: null })
+        await this.changeStatus({ embeds: [embed], components: [], content: null })
 
         this.#interaction.client.petCombats.delete(player1.user.id)
         this.#interaction.client.petCombats.delete(player2.user.id)
@@ -215,6 +232,11 @@ ${this.#bet ? `### — Se le dan ${PrettyCurrency(this.#interaction.guild, this.
         // actualizar la base de datos
         await player1.pet.save();
         await player2.pet.save();
+
+        await Sleep(5000);
+
+        this.thread.setLocked(true);
+        this.thread.setArchived(true);
     }
 
     async #turn() {
@@ -290,9 +312,9 @@ ${this.#bet ? `### — Se le dan ${PrettyCurrency(this.#interaction.guild, this.
             .defColor(Colores.verde)
             .defFooter({ text: `Movimiento #${this.#movementNo} — Contra ${this.#rival.user.username}`, icon: this.#interaction.guild.iconURL({ dynamic: true }) });
 
-        await this.#interaction.editReply({ content: this.#playing.user.toString(), components: this.#components, embeds: [e] })
+        this.#lastMsg = await this.changeStatus({ content: this.#playing.user.toString(), components: this.#components, embeds: [e] })
 
-        const collector = await new Collector(this.#interaction, {
+        const collector = await new Collector(this.#lastMsg, {
             filter: (i) => this.#components.find(x => {
                 return x.components.find(y => y.data.custom_id === i.customId) && i.user.id === this.#playing.user.id
             }),
@@ -305,6 +327,9 @@ ${this.#bet ? `### — Se le dan ${PrettyCurrency(this.#interaction.guild, this.
         switch (collector.customId) {
             case "petAttack":
                 await this.#selectAttack();
+                break;
+            case "petDefense":
+                await this.#defend();
                 break;
             case "petItem":
                 await this.#selectItem();
@@ -338,8 +363,8 @@ ${this.#bet ? `### — Se le dan ${PrettyCurrency(this.#interaction.guild, this.
                 )
         }
 
-        await this.#interaction.editReply({ components: this.#components });
-        const collector = await new Collector(this.#interaction, {
+        await this.#lastMsg.edit({ components: this.#components });
+        const collector = await new Collector(this.#lastMsg, {
             wait: true,
             filter: (inter) => inter.customId === "attackSelection" && inter.user.id === this.#playing.user.id,
             time: ms("10m")
@@ -349,6 +374,7 @@ ${this.#bet ? `### — Se le dan ${PrettyCurrency(this.#interaction.guild, this.
         const attackIndex = Number(collector.values[0]);
         let attack = this.pet.attacks[attackIndex];
         let max = this.pet.stats.attack;
+        let maxdefense = this.rivalpet.stats.defense;
 
         let attackValue = 1;
 
@@ -385,6 +411,20 @@ ${this.#bet ? `### — Se le dan ${PrettyCurrency(this.#interaction.guild, this.
                 break;
         }
 
+        if (this.rivalpet.isDefending) {
+            let originalAtt = attackValue;
+            let rivaldefense = new Chance().integer({ min: 1, max: maxdefense });
+            attackValue -= rivaldefense;
+
+            if (attackValue < 0) attackValue = 0;
+
+            this.rivalpet.changeHunger(originalAtt);
+            this.rivalpet.isDefending = false;
+
+            this.#messages.push(`### **${this.rivalpet.name}** reduce ${rivaldefense.toLocaleString("es-CO")} ❤️`)
+            this.#messages.push(`### **${this.rivalpet.name}** +${originalAtt.toLocaleString("es-CO")} 🍗`)
+        }
+
         this.#messages.push(`### **${this.pet.name}** +${attack.cost.toLocaleString("es-CO")} 🍗`);
         this.#messages.push(`### **${this.rivalpet.name}** -${attackValue.toLocaleString("es-CO")} ❤️`);
 
@@ -403,12 +443,49 @@ ${this.#bet ? `### — Se le dan ${PrettyCurrency(this.#interaction.guild, this.
             attackEmbed.defDesc(`${attackEmbed.data.description ?? ""}\n${msg}`)
         })
 
-        await this.#interaction.editReply({ embeds: [attackEmbed], components: [] })
-        await Sleep(2000)
+        await this.changeStatus({ embeds: [attackEmbed], components: [] })
+        return this.#togglePlayer();
+    }
+
+    async #defend() {
+        if (this.rivalpet.isDefending) {
+            let removedHunger = new Chance().integer({ min: 1, max: this.rivalpet.stats.defense });
+            this.rivalpet.changeHunger(-removedHunger)
+            this.rivalpet.isDefending = false;
+            await this.rivalpet.save();
+
+            this.#messages.push(`### **${this.rivalpet.name}** -${removedHunger.toLocaleString("es-CO")} 🍗`);
+        }
+
+        this.#messages.push(GetRandomItem([
+            `# **${this.pet.name}** tapa su cara`
+        ]))
+
+        this.pet.isDefending = true;
+        await this.pet.save();
+
+        let defendEmbed = new Embed()
+            .defTitle(`${this.pet.name} Defends!`)
+            .defColor(Colores.verde);
+
+        this.#messages.forEach(msg => {
+            defendEmbed.defDesc(`${defendEmbed.data.description ?? ""}\n${msg}`)
+        })
+
+        await this.changeStatus({ embeds: [defendEmbed], components: [] })
         return this.#togglePlayer();
     }
 
     async #selectItem() {
+        if (this.rivalpet.isDefending) {
+            let removedHunger = new Chance().integer({ min: 1, max: this.rivalpet.stats.defense });
+            this.rivalpet.changeHunger(-removedHunger)
+            this.rivalpet.isDefending = false;
+            await this.rivalpet.save();
+
+            this.#messages.push(`### **${this.rivalpet.name}** -${removedHunger.toLocaleString("es-CO")} 🍗`);
+        }
+
         const maxhp = this.pet.shop_info.stats.hp;
 
         this.#components[0].components.forEach(c => c.setDisabled(true));
@@ -439,8 +516,8 @@ ${this.#bet ? `### — Se le dan ${PrettyCurrency(this.#interaction.guild, this.
             itemsAdded.push(item.item.id);
         }
 
-        await this.#interaction.editReply({ components: this.#components });
-        const collector = await new Collector(this.#interaction, {
+        await this.#lastMsg.editReply({ components: this.#components });
+        const collector = await new Collector(this.#lastMsg, {
             wait: true,
             filter: (inter) => inter.customId === "itemSelection" && inter.user.id === this.#playing.user.id,
             time: ms("10m")
@@ -469,8 +546,7 @@ ${this.#bet ? `### — Se le dan ${PrettyCurrency(this.#interaction.guild, this.
             itemEmbed.defDesc(`${itemEmbed.data.description ?? ""}\n${msg}`)
         })
 
-        await this.#interaction.editReply({ embeds: [itemEmbed], components: [] })
-        await Sleep(2000)
+        await this.changeStatus({ embeds: [itemEmbed], components: [] })
         return this.#togglePlayer();
     }
 }
