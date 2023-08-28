@@ -1,5 +1,5 @@
 const { Bases } = require("../src/resources/");
-const { Log, ChannelModules, LogReasons, Cooldowns, Multipliers, RequirementType, ErrorEmbed, UpdateCommands, DeleteLink, FetchThisGuild, BoostWork } = require("../src/utils");
+const { Log, ChannelModules, LogReasons, Cooldowns, Multipliers, RequirementType, ErrorEmbed, UpdateCommands, DeleteLink, FetchThisGuild, BoostWork, MinMaxInt } = require("../src/utils");
 
 const { GlobalDatasWork } = require("../src/utils/");
 const { ChannelType, codeBlock, Client, Message, ActionRowBuilder, ButtonBuilder, ButtonStyle, time } = require("discord.js");
@@ -88,11 +88,11 @@ module.exports = async (client, message) => {
   if (configured) { // Está dentro de los canales configurados
     const { multiplier } = configured;
 
-    const minMoney = doc.settings.quantities.min_curr;
-    const maxMoney = doc.settings.quantities.max_curr;
+    const minMoney = doc.settings.quantities.limits.currency.min;
+    const maxMoney = doc.settings.quantities.limits.currency.max;
 
-    const minExp = doc.settings.quantities.min_exp;
-    const maxExp = doc.settings.quantities.max_exp;
+    const minExp = doc.settings.quantities.limits.exp.min;
+    const maxExp = doc.settings.quantities.limits.exp.max;
 
     let cool = await user.cooldown(Cooldowns.ChatRewards, { save: false });
     if (cool) return;
@@ -115,38 +115,12 @@ module.exports = async (client, message) => {
     }
 
     const toMultiply = customMultiplier * multiplier;
-    let currencyToAdd, expToAdd;
 
     await GlobalDatasWork(guild, true); // verificar si existen BOOSTS.
     const boost = BoostWork(user);
 
-    try {
-      currencyToAdd = new Chance().integer({ min: minMoney, max: maxMoney * boost.probability.currency_value }) * toMultiply
-      expToAdd = new Chance().integer({ min: minExp, max: maxExp * boost.probability.exp_value }) * toMultiply
-    } catch (err) {
-      if (err instanceof RangeError) {
-        new Log(message)
-          .setReason(LogReasons.Error)
-          .setTarget(ChannelModules.StaffLogs)
-          .send({
-            embeds: [
-              new ErrorEmbed()
-                .defDesc(`No se ha podido agregar ni EXP ni ${client.getCustomEmojis(guild.id).Currency.name}. Mínimos y máximos deben ser menores y mayores los unos con los otros. ${client.mentionCommand("config dashboard")}.`)
-                .defFields([
-                  { up: "Min Money", down: String(minMoney), inline: true },
-                  { up: "Max Money", down: String(maxMoney), inline: true },
-                  { up: "||                             ||", down: String(" ") },
-                  { up: "Min EXP", down: String(minExp), inline: true },
-                  { up: "Max EXP", down: String(maxExp), inline: true }
-                ])
-                .raw()
-            ]
-          });
-
-        currencyToAdd = 0;
-        expToAdd = 0;
-      }
-    }
+    let currencyToAdd = MinMaxInt(minMoney, maxMoney, {guild, msg: `No se ha podido agregar ${client.getCustomEmojis(guild.id).Currency.name}`})* toMultiply;
+    let expToAdd = MinMaxInt(minExp, maxExp, {guild, msg: `No se ha podido agregar EXP`})* toMultiply;
 
     if(doc.toAdjust("chat_rewards")) {
       let average = doc.data.average_currency;

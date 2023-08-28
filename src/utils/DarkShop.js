@@ -42,7 +42,7 @@ class DarkShop {
         // ANUNCIARLO
         if (!this.guilddoc) await this.#getGuildDoc();
 
-        const dsNewsRole = await this.guild.roles.fetch(this.guilddoc.getRoleByModule("darkshop_news"))
+        const dsNewsRole = await this.guild.roles.fetch(this.guilddoc.getRole("announcements.darkshop"))
 
         const messages = [
             "Se termina una semana, y empieza la búsqueda de beneficios.",
@@ -610,7 +610,7 @@ class DarkShop {
     async getBasePrice() {
         if (!this.guilddoc) await this.#getGuildDoc();
 
-        return this.guilddoc.settings.quantities.baseprice_darkshop;
+        return this.guilddoc.settings.quantities.darkshop.baseprice;
     }
 
     /**

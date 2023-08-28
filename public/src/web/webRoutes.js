@@ -173,7 +173,7 @@ module.exports = (app) => {
 
         let embed = new Embed()
             .defAuthor({ text: `Cambios en la configuración`, title: true })
-            .defDesc(`**—** **${executor.username}#${executor.discriminator}** hizo cambios en la configuración del bot.
+            .defDesc(`**—** **${executor.username}** hizo cambios en la configuración del bot.
 **—** En la Dashboard.
 **—** Lo que se guardó: ${codeBlock("json", JSON.parse(changes))}
 **—** En qué sección se hizo: \`${page}\`.`)

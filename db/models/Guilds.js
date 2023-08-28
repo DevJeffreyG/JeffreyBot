@@ -47,6 +47,21 @@ const GuildSchema = new Schema({
                 id: { type: Number, sparse: true }
             }
         ],
+        bets: [
+            {
+                title: { type: String, required: true },
+                closes_in: { type: Date, required: true },
+                closed: { type: Boolean, default: false },
+                options: [
+                    {
+                        name: String,
+                        betting: [
+                            { user_id: String, quantity: Number }
+                        ]
+                    }
+                ]
+            }
+        ],
         autoroles: [
             {
                 name: { type: String, required: true },
@@ -171,15 +186,13 @@ const GuildSchema = new Schema({
             guild_id: { type: String },
         },
         quantities: {
-            blackjack_bet: { type: Number, default: 1000, validate: [positiveValidator, integerValidator] },
-            darkshop_level: { type: Number, default: 5, validate: positiveWithZeroValidator },
-            percentage_skipfirewall: { type: Number, default: 100, validate: positiveWithZeroValidator },
-            min_exp: { type: Number, default: 5, validate: [positiveValidator, integerValidator] },
-            max_exp: { type: Number, default: 35, validate: [positiveValidator, integerValidator] },
-            min_curr: { type: Number, default: 5, validate: [positiveValidator, integerValidator] },
-            max_curr: { type: Number, default: 15, validate: [positiveValidator, integerValidator] },
-            max_hunger: { type: Number, default: 3, validate: [positiveValidator, integerValidator] },
-            baseprice_darkshop: { type: Number, default: 200, validate: [positiveValidator, integerValidator] },
+            blackjack: {
+                consecutive_wins: { type: Number, default: 5, validate: [positiveValidator, integerValidator] }
+            },
+            darkshop: {
+                level: { type: Number, default: 5, validate: positiveWithZeroValidator },
+                baseprice: { type: Number, default: 200, validate: [positiveValidator, integerValidator] }
+            },
             currency_per_rep: { type: Number, default: 500, validate: [positiveValidator, integerValidator] },
             awards: {
                 tier1: {
@@ -195,17 +208,51 @@ const GuildSchema = new Schema({
                     gift: { type: Number, default: 700, validate: [positiveWithZeroValidator, integerValidator] }
                 },
             },
-            rob: {
-                percentage: { type: Number, default: 60, validate: [positiveValidator, integerValidator] },
-                min_success: { type: Number, default: 5, validate: [positiveValidator, integerValidator] },
-                max_success: { type: Number, default: 15, validate: [positiveValidator, integerValidator] },
-                min_fail: { type: Number, default: 10, validate: [positiveValidator, integerValidator] },
-                max_fail: { type: Number, default: 30, validate: [positiveValidator, integerValidator] },
+            limits: {
+                exp: {
+                    min: { type: Number, default: 5, validate: [positiveValidator, integerValidator] },
+                    max: { type: Number, default: 35, validate: [positiveValidator, integerValidator] }
+                },
+                currency: {
+                    min: { type: Number, default: 5, validate: [positiveValidator, integerValidator] },
+                    max: { type: Number, default: 15, validate: [positiveValidator, integerValidator] }
+                },
+                pets: {
+                    hunger: {
+                        min: { type: Number, default: 1, validate: [positiveValidator, integerValidator] },
+                        max: { type: Number, default: 3, validate: [positiveValidator, integerValidator] },
+                    }
+                },
+                bets: {
+                    blackjack: {
+                        min: { type: Number, default: 1000, validate: [positiveValidator, integerValidator] },
+                        max: { type: Number, default: Infinity, validate: [positiveValidator] }
+                    },
+                    staff_bets: {
+                        min: { type: Number, default: 300, validate: [positiveValidator, integerValidator] },
+                        max: { type: Number, default: 100000, validate: [positiveValidator] }
+                    }
+                }
             },
-            pets: {
-                basic_unlocked: { type: Number, default: 5 },
+            percentages: {
+                skipfirewall: { type: Number, default: 100, validate: positiveWithZeroValidator },
+                rob: { type: Number, default: 60, validate: [positiveValidator, integerValidator] },
+                pets: {
+                    basic_unlocked: { type: Number, default: 5 },
+                },
+                limits: {
+                    rob: {
+                        success: {
+                            min: { type: Number, default: 5, validate: [positiveValidator, integerValidator] },
+                            max: { type: Number, default: 15, validate: [positiveValidator, integerValidator] }
+                        },
+                        fail: {
+                            min: { type: Number, default: 10, validate: [positiveValidator, integerValidator] },
+                            max: { type: Number, default: 30, validate: [positiveValidator, integerValidator] }
+                        }
+                    }
+                }
             }
-
         },
         functions: {
             adjust: {
@@ -245,13 +292,16 @@ const GuildSchema = new Schema({
             }
         ],
         birthday: { type: String },
-        darkshop_news: { type: String },
         suggester_role: { type: String },
-        notifications: {
-            youtube: { type: String },
-            youtube_shorts: { type: String },
-            twitter: { type: String },
-            twitch: { type: String }
+        announcements: {
+            youtube: {
+                videos: String,
+                shorts: String,
+            },
+            twitch: String,
+            darkshop: String,
+            polls: String,
+            bets: String
         }
     },
     channels: {
@@ -484,12 +534,6 @@ GuildSchema.method("moduleIsActive", function (query, initial = this.settings.ac
     }
 
     return general;
-})
-
-GuildSchema.method("getRoleByModule", function (module) {
-    if (this.roles[module] instanceof Array) return console.log("🔴 SÓLO ROLES QUE SEAN STRINGS")
-
-    return this.roles[module];
 })
 
 GuildSchema.method("getEmoji", function (query) {

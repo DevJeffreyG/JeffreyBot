@@ -174,19 +174,19 @@ class Dashboard {
      * @param {String} parentId 
      * @returns {HTMLElement} Parent
      */
-    #createNumberSelector(parentId, { title, placeholder, id }, { min, max }) {
+    #createNumberSelector(parentId, { title, placeholder, id }, options = { min: undefined, max: undefined }) {
         const parent = this.#createDivItem(parentId);
         parent.classList.add("number-selector");
 
         const input = document.createElement("input")
         input.type = "number"
-        input.placeholder = placeholder;
+        input.placeholder = placeholder ?? "";
         input.id = id;
         input.required = true;
 
-        if (typeof min !== "undefined" || typeof max !== "undefined") {
-            input.max = max ?? Infinity;
-            input.min = min ?? Infinity;
+        if (typeof options.min !== "undefined" || typeof options.max !== "undefined") {
+            input.max = options.max ?? Infinity;
+            input.min = options.min ?? Infinity;
         }
 
         parent.append(title)
@@ -289,6 +289,12 @@ class Dashboard {
         div.dataset.min = min || 0;
 
         return parent
+    }
+
+    #createSubtitle(text) {
+        let d = document.createElement("h4")
+        d.innerText = text
+        return d;
     }
 
     /**
@@ -404,23 +410,31 @@ class Dashboard {
         this.#findAndSync("automoderation-remove_links", active)
 
         const quantities = this.doc.settings.quantities;
-        this.#findAndSync("blackjack_bet", quantities);
-        this.#findAndSync("darkshop_level", quantities);
-        this.#findAndSync("percentage_skipfirewall", quantities);
-        this.#findAndSync("rob-percentage", quantities);
-
-        this.#findAndSync("baseprice_darkshop", quantities);
+        this.#findAndSync("blackjack-consecutive_wins", quantities);
+        this.#findAndSync("darkshop-level", quantities);
+        this.#findAndSync("darkshop-baseprice", quantities);
+        this.#findAndSync("darkshop-level", quantities);
         this.#findAndSync("currency_per_rep", quantities);
 
-        this.#findAndSync("min_exp", quantities);
-        this.#findAndSync("max_exp", quantities);
-        this.#findAndSync("min_curr", quantities);
-        this.#findAndSync("max_curr", quantities);
+        this.#findAndSync("limits-bets-blackjack-min", quantities);
+        this.#findAndSync("limits-bets-blackjack-max", quantities);
+        this.#findAndSync("limits-bets-staff_bets-min", quantities);
+        this.#findAndSync("limits-bets-staff_bets-max", quantities);
+        this.#findAndSync("limits-exp-min", quantities);
+        this.#findAndSync("limits-exp-max", quantities);
+        this.#findAndSync("limits-currency-min", quantities);
+        this.#findAndSync("limits-currency-max", quantities);
+        this.#findAndSync("limits-pets-hunger-min", quantities);
+        this.#findAndSync("limits-pets-hunger-max", quantities);
 
-        this.#findAndSync("rob-min_success", quantities);
-        this.#findAndSync("rob-max_success", quantities);;
-        this.#findAndSync("rob-min_fail", quantities);
-        this.#findAndSync("rob-max_fail", quantities);
+        this.#findAndSync("percentages-limits-rob-success-min", quantities);
+        this.#findAndSync("percentages-limits-rob-success-max", quantities);
+        this.#findAndSync("percentages-limits-rob-fail-min", quantities);
+        this.#findAndSync("percentages-limits-rob-fail-max", quantities);
+        this.#findAndSync("percentages-rob", quantities);
+        this.#findAndSync("percentages-skipfirewall", quantities);
+        this.#findAndSync("percentages-pets-basic_unlocked", quantities);
+
 
         const functions = this.doc.settings.functions;
         this.#findAndSync("adjust-shop", functions);
@@ -443,13 +457,14 @@ class Dashboard {
         this.#findAndSync("bots", roles)
 
         this.#findAndSync("birthday", roles)
-        this.#findAndSync("darkshop_news", roles)
         this.#findAndSync("suggester_role", roles)
 
-        this.#findAndSync("notifications-youtube", roles)
-        this.#findAndSync("notifications-youtube_shorts", roles)
-        //this.#findAndSync("notifications-twitter", roles)
-        this.#findAndSync("notifications-twitch", roles)
+        this.#findAndSync("announcements-darkshop", roles)
+        this.#findAndSync("announcements-youtube-videos", roles)
+        this.#findAndSync("announcements-youtube-shorts", roles)
+        this.#findAndSync("announcements-twitch", roles)
+        this.#findAndSync("announcements-polls", roles)
+        this.#findAndSync("announcements-bets", roles)
 
         this.#findAndSync("levels", roles)
 
@@ -754,103 +769,139 @@ class Dashboard {
 
         container.appendChild(contents);
 
-        let min = this.#createDivSection("min");
-        min.classList.add("wrap")
-        min.append("Mínimos")
+        let base = this.#createDivSection("base");
+        base.classList.add("wrap")
+        base.append("Valores base")
 
-        let blackjackbet = this.#createNumberSelector("blackjackbet", {
-            title: "Apuesta mínima en Blackjack",
-            placeholder: "Cantidad mínima para apostar",
-            id: "blackjack_bet"
-        }, { min: 1 });
+        this.#appendChilds(base, [
+            this.#createNumberSelector("base", {
+                title: "Blackjack: Ganadas consecutivas",
+                placeholder: "Cantidad mínima para Cooldown",
+                id: "blackjack-consecutive_wins"
+            }, { min: 1 }),
+            this.#createNumberSelector("base", {
+                title: "DarkShop: Nivel mínimo",
+                placeholder: "5",
+                id: "darkshop-level"
+            }, { min: 1 }),
+            this.#createNumberSelector("base", {
+                title: "DarkShop: Valor base",
+                placeholder: "200",
+                id: "darkshop-baseprice"
+            }, { min: 1 }),
+            this.#createNumberSelector("base", {
+                title: "DarkShop: Nivel mínimo",
+                placeholder: "5",
+                id: "darkshop-level"
+            }, { min: 1 }),
+            this.#createNumberSelector("currperrep", {
+                title: "Dinero dado por nivel",
+                placeholder: "El dinero dado por cada punto de reputación",
+                id: "currency_per_rep"
+            }, { min: 1 })
+        ])
 
-        let darkshoplvl = this.#createNumberSelector("dslevel", {
-            title: "Nivel para usar la DarkShop",
-            placeholder: "El nivel mínimo necesario",
-            id: "darkshop_level"
-        }, { min: 0 });
+        let limits = this.#createDivSection("limit");
+        limits.classList.add("wrap")
+        limits.append("Mínimos y Máximos")
+        this.#appendChilds(limits, [
+            this.#createSubtitle("Blackjack"),
+            this.#createNumberSelector("limit", {
+                title: "Blackjack: Apuesta mínima",
+                placeholder: "1.000",
+                id: "limits-bets-blackjack-min"
+            }, { min: 1 }),
+            this.#createNumberSelector("limit", {
+                title: "Blackjack: Apuesta máxima",
+                id: "limits-bets-blackjack-max"
+            }),
+            this.#createSubtitle("Apuestas"),
+            this.#createNumberSelector("limit", {
+                title: "Apuestas: puje mínimo",
+                placeholder: "300",
+                id: "limits-bets-staff_bets-min"
+            }, { min: 1 }),
+            this.#createNumberSelector("limit", {
+                title: "Apuestas: puje máximo",
+                id: "limits-bets-staff_bets-max"
+            }),
+            this.#createSubtitle("Recompensas en chat"),
+            this.#createNumberSelector("limit", {
+                title: "EXP: mínima",
+                placeholder: "5",
+                id: "limits-exp-min"
+            }, { min: 1 }),
+            this.#createNumberSelector("limit", {
+                title: "EXP: máxima",
+                id: "limits-exp-max"
+            }, { min: 1 }),
+            this.#createNumberSelector("limit", {
+                title: "Dinero: mínimo",
+                placeholder: "5",
+                id: "limits-currency-min"
+            }, { min: 1 }),
+            this.#createNumberSelector("limit", {
+                title: "Dinero: máximo",
+                id: "limits-currency-max"
+            }, { min: 1 }),
+            this.#createSubtitle("Mascotas"),
+            this.#createNumberSelector("limit", {
+                title: "Mascotas: hambre mínima dada",
+                placeholder: "1",
+                id: "limits-pets-hunger-min"
+            }, { min: 1 }),
+            this.#createNumberSelector("limit", {
+                title: "Mascotas: hambre máxima dada",
+                placeholder: "3",
+                id: "limits-pets-hunger-max"
+            }, { min: 1 })
+        ])
 
-        let skipfirewall = this.#createNumberSelector("dsskip", {
-            title: "%Probabilidad de saltarse la Firewall",
-            placeholder: "Probabilidad de que el item funcione",
-            id: "percentage_skipfirewall"
-        }, { min: 0, max: 100 });
+        let percentages = this.#createDivSection("perce");
+        percentages.classList.add("wrap")
+        percentages.append("%Porcentajes")
+        this.#appendChilds(percentages, [
+            this.#createSubtitle("Robar"),
+            this.#createNumberSelector("perce", {
+                title: "Robar: %Mínima recompensa",
+                placeholder: "Debe ser menor que el máximo",
+                id: "percentages-limits-rob-success-min"
+            }, { min: 1 }),
+            this.#createNumberSelector("perce", {
+                title: "Robar: %Máxima recompensa",
+                placeholder: "Debe ser mayor que el mínimo",
+                id: "percentages-limits-rob-success-max"
+            }, { min: 1 }),
+            this.#createNumberSelector("perce", {
+                title: "Robar: %Mínimo castigo",
+                placeholder: "Debe ser menor que el máximo",
+                id: "percentages-limits-rob-fail-min"
+            }, { min: 1 }),
+            this.#createNumberSelector("perce", {
+                title: "Robar: %Máximo castigo",
+                placeholder: "Debe ser mayor que el mínimo",
+                id: "percentages-limits-rob-fail-max"
+            }, { min: 1 }),
+            this.#createNumberSelector("perce", {
+                title: "Robar: %Éxito",
+                placeholder: "Probabilidad de que robe",
+                id: "percentages-rob"
+            }, { min: 1 }),
+            this.#createSubtitle("DarkShop"),
+            this.#createNumberSelector("perce", {
+                title: "DarkShop: %Saltar firewall",
+                placeholder: "Al usar el item especial, probabilidad de que funcione",
+                id: "percentages-skipfirewall"
+            }, { min: 1 }),
+            this.#createSubtitle("Mascotas"),
+            this.#createNumberSelector("perce", {
+                title: "Mascotas: %Desbloquear básico",
+                placeholder: "Usar un ataque básica a veces puede hacer mucho daño",
+                id: "percentages-pets-basic_unlocked"
+            }, { min: 1 })
+        ])
 
-        let robPerc = this.#createNumberSelector("robperc", {
-            title: "%Probabilidad de robo exitoso",
-            placeholder: "Probabilidad de que el robo funcione",
-            id: "rob-percentage"
-        }, { min: 0, max: 100 });
-
-        this.#appendChilds(min, [blackjackbet, darkshoplvl, skipfirewall, robPerc]);
-
-        let bases = this.#createDivSection("bases")
-        bases.classList.add("wrap")
-        bases.append("Valores base")
-
-        let basedarkshop = this.#createNumberSelector("basepriceds", {
-            title: "Precio base de la moneda (DarkShop)",
-            placeholder: "Valor de la moneda cuando la inflación está en 0%",
-            id: "baseprice_darkshop"
-        }, { min: 1 });
-
-        let currperrep = this.#createNumberSelector("currperrep", {
-            title: "Dinero dado por nivel",
-            placeholder: "El dinero dado por cada punto de reputación",
-            id: "currency_per_rep"
-        }, { min: 1 });
-
-        let minexp = this.#createNumberSelector("minexp", {
-            title: "Mínima EXP dada por hablar",
-            placeholder: "Debe ser menor que el máximo",
-            id: "min_exp"
-        }, { min: 1 });
-
-        let maxexp = this.#createNumberSelector("maxexp", {
-            title: "Máxima EXP dada por hablar",
-            placeholder: "Debe ser mayor que el mínimo",
-            id: "max_exp"
-        }, { min: 1 });
-
-        let mincur = this.#createNumberSelector("mincur", {
-            title: "Mínimo dinero dado por hablar",
-            placeholder: "Debe ser menor que el máximo",
-            id: "min_curr"
-        }, { min: 1 });
-
-        let maxcur = this.#createNumberSelector("maxcur", {
-            title: "Máximo dinero dado por hablar",
-            placeholder: "Debe ser mayor que el mínimo",
-            id: "max_curr"
-        }, { min: 1 });
-
-        let rob_minscs = this.#createNumberSelector("robminscs", {
-            title: "(Robar) %Mínima recompensa",
-            placeholder: "Debe ser menor que el máximo",
-            id: "rob-min_success"
-        }, { min: 1 });
-
-        let rob_maxscs = this.#createNumberSelector("robmaxscs", {
-            title: "(Robar) %Máxima recompensa",
-            placeholder: "Debe ser mayor que el mínimo",
-            id: "rob-max_success"
-        }, { min: 1 });
-
-        let rob_minfail = this.#createNumberSelector("robminfail", {
-            title: "(Robar) %Mínimo castigo",
-            placeholder: "Debe ser menor que el máximo",
-            id: "rob-min_fail"
-        }, { min: 0, max: 100 });
-
-        let rob_maxfail = this.#createNumberSelector("robmaxfail", {
-            title: "(Robar) %Máximo castigo",
-            placeholder: "Debe ser mayor que el mínimo",
-            id: "rob-max_fail"
-        }, { min: 0, max: 100 });
-
-        this.#appendChilds(bases, [basedarkshop, currperrep, minexp, maxexp, mincur, maxcur, rob_minscs, rob_maxscs, rob_minfail, rob_maxfail]);
-
-        this.#appendChilds(contents, [min, bases])
+        this.#appendChilds(contents, [base, limits, percentages])
     }
 
     async #functionsHandler() {
@@ -985,45 +1036,51 @@ class Dashboard {
             max: 1
         });
 
-        let dsRole = this.#createRoleSelector("rbd", {
-            title: "Role de eventos DarkShop",
-            id: "darkshop_news",
-            max: 1
-        });
+        this.#appendChilds(generals, [users, bots, bd, suggester]);
 
-        this.#appendChilds(generals, [users, bots, bd, suggester, dsRole]);
-
-        let noti = this.#createDivSection("generals");
-        noti.classList.add("wrap")
-        noti.append("Notifier [JeffreyG Only (WIP)]")
+        let announcements = this.#createDivSection("generals");
+        announcements.classList.add("wrap")
+        announcements.append("Anuncios")
 
         let yt = this.#createRoleSelector("ryt", {
             title: "YouTube",
-            id: "notifications-youtube",
+            id: "announcements-youtube-videos",
             max: 1
         });
 
         let ytshorts = this.#createRoleSelector("ryt", {
             title: "YouTube Shorts",
-            id: "notifications-youtube_shorts",
+            id: "announcements-youtube-shorts",
             max: 1
         });
-
-        /* let tw = this.#createRoleSelector("rtw", {
-            title: "Twitter",
-            id: "notifications-twitter",
-            max: 1
-        }); */
 
         let tv = this.#createRoleSelector("rtv", {
             title: "Twitch",
-            id: "notifications-twitch",
+            id: "announcements-twitch",
             max: 1
         });
 
-        this.#appendChilds(noti, [yt, ytshorts, tv]);
+        let dsRole = this.#createRoleSelector("rbd", {
+            title: "Eventos de DarkShop",
+            id: "announcements-darkshop",
+            max: 1
+        });
 
-        this.#appendChilds(contents, [staff, generals, noti])
+        let polls = this.#createRoleSelector("rpolls", {
+            title: "Encuestas",
+            id: "announcements-polls",
+            max: 1
+        });
+
+        let bets = this.#createRoleSelector("rbets", {
+            title: "Apuestas",
+            id: "announcements-bets",
+            max: 1
+        });
+
+        this.#appendChilds(announcements, [dsRole, yt, ytshorts, tv, polls, bets]);
+
+        this.#appendChilds(contents, [staff, generals, announcements])
     }
 
     async #channelsHandler() {

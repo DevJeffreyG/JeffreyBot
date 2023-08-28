@@ -1,4 +1,4 @@
-const { Command, Embed, GetRandomItem, Cooldowns, ErrorEmbed, Log, LogReasons, ChannelModules, PrettyCurrency } = require("../../src/utils")
+const { Command, Embed, GetRandomItem, Cooldowns, ErrorEmbed, Log, LogReasons, ChannelModules, PrettyCurrency, MinMaxInt } = require("../../src/utils")
 const Chance = require("chance");
 const { Responses, Colores } = require("../../src/resources");
 const BadSetupError = require("../../src/errors/BadSetupError");
@@ -42,41 +42,16 @@ command.execute = async (interaction, models, params, client) => {
         ]
     });
 
-    const { min_success, max_success, min_fail, max_fail, percentage } = doc.settings.quantities.rob;
+    const { rob, limits } = doc.settings.quantities.percentages;
+    let robSuccess = new Chance().bool({ likelihood: rob });
 
-    let robSuccess = new Chance().bool({ likelihood: percentage });
+    const { success, fail } = limits.rob
 
-    const success = GetRandomItem(Responses.rob.success);
-    const fail = GetRandomItem(Responses.rob.fail);
+    const successResponse = GetRandomItem(Responses.rob.success);
+    const failResponse = GetRandomItem(Responses.rob.fail);
 
-    let successPerc, failedPerc;
-
-    try {
-        successPerc = new Chance().floating({ min: min_success, max: max_success, fixed: 2 }) / 100;
-        failedPerc = new Chance().floating({ min: min_fail, max: max_fail, fixed: 2 }) / 100;
-    } catch (err) {
-        if (err instanceof RangeError) {
-            new Log(interaction)
-                .setReason(LogReasons.Error)
-                .setTarget(ChannelModules.StaffLogs)
-                .send({
-                    embeds: [
-                        new ErrorEmbed()
-                            .defDesc(`No se ha podido determinar recompensas o castigos. Mínimos y máximos deben ser menores y mayores los unos con los otros. ${client.mentionCommand("config dashboard")}.`)
-                            .defFields([
-                                { up: "Min Success", down: String(min_success), inline: true },
-                                { up: "Max Success", down: String(max_success), inline: true },
-                                { up: "|| Soy un separador ||", down: String(" ") },
-                                { up: "Min Fail", down: String(min_fail), inline: true },
-                                { up: "Max Fail", down: String(max_fail), inline: true }
-                            ])
-                            .raw()
-                    ]
-                });
-
-            throw new BadSetupError(interaction);
-        }
-    }
+    const successPerc = MinMaxInt(success.min, success.max, { guild: interaction.guild, msg: "No se ha podido determinar recompensas" }) / 100;
+    const failedPerc = MinMaxInt(fail.min, fail.max, { guild: interaction.guild, msg: "No se ha podido determinar castigos" }) / 100;
 
     const successValue = Math.round(victim.getCurrency() * successPerc);
     const failedValue = Math.round(user.getCurrency() * failedPerc);
@@ -85,8 +60,8 @@ command.execute = async (interaction, models, params, client) => {
 
     if (successValue <= 0) robSuccess = false;
 
-    const successText = replace(success.text)
-    const failedText = replace(fail.text)
+    const successText = replace(successResponse.text)
+    const failedText = replace(failResponse.text)
 
     let embed, suggester;
 
@@ -97,13 +72,13 @@ command.execute = async (interaction, models, params, client) => {
         let e = new ErrorEmbed(interaction)
             .defDesc("**No tenías suficiente dinero como para robarle.**")
 
-        if(minRequired > 0) e.defFooter({ text: `Necesitas al menos ${minRequired.toLocaleString("es-CO")} ${Currency.name} en tu cuenta.` });
+        if (minRequired > 0) e.defFooter({ text: `Necesitas al menos ${minRequired.toLocaleString("es-CO")} ${Currency.name} en tu cuenta.` });
         return e.send();
     }
 
     // Fallido
     if (!robSuccess) {
-        suggester = getAuthor(fail);
+        suggester = getAuthor(failResponse);
 
         user.economy.global.currency -= failedValue;
         await user.save();
@@ -112,7 +87,7 @@ command.execute = async (interaction, models, params, client) => {
             .defColor(Colores.rojo)
             .defDesc(`${failedText}.`);
     } else {
-        suggester = getAuthor(success);
+        suggester = getAuthor(successResponse);
 
         user.addCurrency(successValue);
         victim.economy.global.currency -= successValue;

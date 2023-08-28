@@ -30,8 +30,8 @@ dashboard {
 
     gap: .5em;
     padding-bottom: calc(5rem);
-    
-    border-radius: 30px ;
+
+    border-radius: 30px;
 
     background-color: rgba(0, 0, 0, 0.3);
 }
@@ -57,7 +57,7 @@ dashboard .sidebar-wrap {
     overflow-x: hidden;
 
     padding: .3em;
- 
+
     background-color: var(--bg-black);
 }
 
@@ -156,11 +156,17 @@ dashboard #sidebar a.active:hover {
     gap: .5rem;
 }
 
-.section > * {
+.section>* {
     width: 100%;
     height: auto;
 
     align-items: center;
+}
+
+.section>h4 {
+    width: 100%;
+    height: auto;
+    text-align: center;
 }
 
 .section .item {
@@ -178,7 +184,8 @@ dashboard #sidebar a.active:hover {
     border-radius: 0;
 }
 
-.item > div, .item > input {
+.item>div,
+.item>input {
     margin-left: auto;
 }
 
@@ -211,11 +218,11 @@ dashboard #sidebar a.active:hover {
 .item input {
     width: 30%;
     padding: .4rem;
-    
+
     border: solid 2px var(--dark);
-    
+
     border-radius: 10px;
-    
+
     transition: all 50ms ease;
 }
 
@@ -230,16 +237,19 @@ dashboard #sidebar a.active:hover {
 =========
 */
 
-.role-selector, .channel-selector {
+.role-selector,
+.channel-selector {
     display: flex;
     min-height: 110px;
 
     font-size: 40px;
 }
 
-.role-drop, .channel-drop, .category-drop {
+.role-drop,
+.channel-drop,
+.category-drop {
     position: relative;
-    
+
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -265,7 +275,9 @@ dashboard #sidebar a.active:hover {
     right: .3em;
 }
 
-.role-drop > div, .channel-drop > div, .category-drop > div {
+.role-drop>div,
+.channel-drop>div,
+.category-drop>div {
     user-select: none;
     height: 80%;
     font-size: .45em;
@@ -273,17 +285,18 @@ dashboard #sidebar a.active:hover {
 
     padding: .1em .5em;
     border-radius: 10px;
-    
+
     background-color: var(--semitrans);
     border: solid 1px transparent;
 }
 
-.role-drop > div::before {
+.role-drop>div::before {
     content: "@";
     margin-right: .1em;
 }
 
-.channel-drop > div::before, .category-drop > div::before {
+.channel-drop>div::before,
+.category-drop>div::before {
     content: "#";
     margin-right: .1em;
 }
@@ -305,14 +318,14 @@ dashboard #sidebar a.active:hover {
     filter: blur(2px);
     visibility: hidden;
     opacity: 0;
-    
+
     position: absolute;
     z-index: 10;
     display: flex;
 
     top: 100%;
     transform: translateY(10px);
-    
+
     flex-direction: column;
     align-items: center;
 
@@ -328,10 +341,10 @@ dashboard #sidebar a.active:hover {
 
 .item-list li {
     font-size: .5em;
-    
+
     display: flex;
     flex-direction: row;
-    
+
     height: auto;
     width: 90%;
 

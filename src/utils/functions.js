@@ -355,7 +355,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
   const doc = await Guilds.getWork(guild.id);
   const customDoc = await CustomElements.getWork(guild.id);
 
-  const bdRole = doc.getRoleByModule("birthday") ? await guild.roles.fetch(doc.getRoleByModule("birthday")).catch(err => {
+  const bdRole = doc.getRole("birthday") ? await guild.roles.fetch(doc.getRole("birthday")).catch(err => {
     new Log()
       .setGuild(guild)
       .setReason(LogReasons.Error)
@@ -797,9 +797,10 @@ const PetWork = async function (guild) {
     for await (const p of pets) {
       const pet = await new Pet(null, p.id).setMember(member).build(doc, user)
       const maxHp = pet.shop_info.stats.hp;
-      const maxHungerGiven = doc.settings.quantities.max_hunger;
+      const maxHungerGiven = doc.settings.quantities.limits.pets.hunger.max;
+      const minHungerGiven = doc.settings.quantities.limits.pets.hunger.min;
 
-      let giveHunger = new Chance().integer({ min: 1, max: maxHungerGiven });
+      const giveHunger = MinMaxInt(minHungerGiven, maxHungerGiven, {guild, msg: "No se ha podido agregar hambre a las mascotas"});
       pet.changeHunger(giveHunger);
 
       // ----------- Hunger ----------- 
@@ -866,7 +867,7 @@ const LimitedTime = async function (victimMember, roleID = 0, duration, specialT
   let lastAddedIndex = user.data.temp_roles.length - 1;
 
   // timeout, por si pasa el tiempo antes de que el bot pueda reiniciarse
-  if (duration <= 2147483647) setTimeout(async function () {
+  TimeoutIf(duration, async function () {
     try {
       if (role) await victimMember.roles.remove(role);
 
@@ -875,9 +876,19 @@ const LimitedTime = async function (victimMember, roleID = 0, duration, specialT
     } catch (err) {
       throw new Error(err);
     }
-  }, duration);
+  })
 
   return user
+}
+
+/**
+ * Se ejecuta un timeout si es posible
+ * @param {Number} time 
+ * @param {Function} func 
+ */
+const TimeoutIf = function (time, func) {
+  if (time > 2147483647) return;
+  setTimeout(func, time);
 }
 
 /**
@@ -955,9 +966,9 @@ const handleNotification = async function (guild) {
   const youtubeChannel = guild.channels.cache.get(doc.getChannel("notifier.youtube_notif"));
   const twitchChannel = guild.channels.cache.get(doc.getChannel("notifier.twitch_notif"));
 
-  const ytRole = guild.roles.cache.get(doc.getRole("notifications.youtube")) ?? "¡Gente!";
-  const shortsRole = guild.roles.cache.get(doc.getRole("notifications.youtube_shorts")) ?? "¡Gente!";
-  const twitchRole = guild.roles.cache.get(doc.getRole("notifications.twitch")) ?? "¡Gente!";
+  const ytRole = guild.roles.cache.get(doc.getRole("announcements.youtube.videos")) ?? "¡Gente!";
+  const shortsRole = guild.roles.cache.get(doc.getRole("announcements.youtube.shorts")) ?? "¡Gente!";
+  const twitchRole = guild.roles.cache.get(doc.getRole("announcements.twitch")) ?? "¡Gente!";
 
   let data = doc.data.social_notifications;
 
@@ -1381,7 +1392,7 @@ const ValidateDarkShop = async function (user, author) {
     .defDesc(desc)
     .defFooter({ text: `▸ Vuelve cuando seas nivel ${guild.settings.quantities.darkshop_level}.` });
 
-  if (user.economy.global.level < guild.settings.quantities.darkshop_level) return { valid: false, embed: notReady }
+  if (user.economy.global.level < guild.settings.quantities.darkshop.level) return { valid: false, embed: notReady }
   else return { valid: true, embed: null };
 }
 
@@ -1911,6 +1922,34 @@ const PrettyCurrency = function (guild, quantity, { name, boostemoji } = { name:
   return `**${emojis[name ?? "Currency"]}${Number(quantity).toLocaleString("es-CO")}${boostemoji ?? ""}**`;
 }
 
+
+const MinMaxInt = function (min, max, { guild, msg }) {
+  let value = 0;
+  try {
+    value = new Chance().integer({ min, max });
+  } catch (err) {
+    if (err instanceof RangeError) {
+      new Log()
+        .setGuild(guild)
+        .setReason(LogReasons.Error)
+        .setTarget(ChannelModules.StaffLogs)
+        .send({
+          embeds: [
+            new ErrorEmbed()
+              .defDesc(`${msg}. Mínimos y máximos deben ser menores y mayores los unos con los otros. ${guild.client.mentionCommand("config dashboard")}.`)
+              .defFields([
+                { up: "Min", down: String(min), inline: true },
+                { up: "Max", down: String(max), inline: true },
+              ])
+              .raw()
+          ]
+        });
+    }
+  }
+
+  return value;
+}
+
 module.exports = {
   GetChangesAndCreateFields,
   FetchAuditLogs,
@@ -1946,5 +1985,7 @@ module.exports = {
   FetchThisGuild,
   BoostWork,
   PetWork,
-  PrettyCurrency
+  PrettyCurrency,
+  TimeoutIf,
+  MinMaxInt
 }

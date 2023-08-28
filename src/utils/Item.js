@@ -654,7 +654,7 @@ class Item {
 
         if (firewall) { // tiene una firewall activa
             // ¿se la salta?
-            let skip = this.user.hasItem(skipFirewallItem.id, ShopTypes.DarkShop) && new Chance().bool({ likelihood: this.doc.settings.quantities.percentage_skipfirewall })
+            let skip = this.user.hasItem(skipFirewallItem.id, ShopTypes.DarkShop) && new Chance().bool({ likelihood: this.doc.settings.quantities.percentages.skipfirewall })
 
             // eliminar el skip, se la salte o no
             if (this.user.hasItem(skipFirewallItem.id, ShopTypes.DarkShop)) {

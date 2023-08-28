@@ -406,9 +406,13 @@ class Blackjack {
         this.user = user;
         this.doc = doc;
 
-        if (this.bet < this.doc.settings.quantities.blackjack_bet)
+        if (this.bet < this.doc.settings.quantities.limits.bets.blackjack.min)
             throw new ExecutionError(this.interaction,
-                `La apuesta debe ser mayor a ${PrettyCurrency(this.interaction.guild, this.doc.settings.quantities.blackjack_bet)}`
+                `La apuesta debe ser mayor a ${PrettyCurrency(this.interaction.guild, this.doc.settings.quantities.limits.bets.blackjack.min)}`
+            )
+        else if (this.bet > this.doc.settings.quantities.limits.bets.blackjack.max)
+            throw new ExecutionError(this.interaction,
+                `La apuesta debe ser menor a ${PrettyCurrency(this.interaction.guild, this.doc.settings.quantities.limits.bets.blackjack.max)}`
             )
 
         console.log("🟢 Hay %s cartas en la baraja", this.deck.length)
@@ -493,7 +497,7 @@ class Blackjack {
                     count: 1
                 })
 
-                if (countQ?.count === 5) await this.user.cooldown(Cooldowns.Blackjack, { save: false });
+                if (countQ?.count === this.doc.settings.quantities.blackjack.consecutive_wins) await this.user.cooldown(Cooldowns.Blackjack, { save: false });
 
                 this.user.addCount("blackjack", 1, false);
                 await this.user.addCurrency(this.bet)

@@ -87,7 +87,7 @@ class Suggestion {
             throw suggestionNotFound;
         }
 
-        const suggesterRole = await this.interaction.guild.roles.fetch(this.doc.getRoleByModule("suggester_role"));
+        const suggesterRole = await this.interaction.guild.roles.fetch(this.doc.getRole("suggester_role"));
         const suggester = await this.interaction.guild.members.fetch(suggestion.user_id);
 
         const recievedModal = new Modal(this.interaction).read();
