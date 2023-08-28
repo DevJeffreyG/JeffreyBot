@@ -1347,7 +1347,7 @@ const ManageDarkShops = async function (client) {
   for await (const guild of client.guilds.cache.values()) {
     const darkshop = new DarkShop(guild);
 
-    darkshop.inflationWork();
+    await darkshop.inflationWork();
   }
 }
 
@@ -1615,6 +1615,7 @@ const Sleep = ms => new Promise(r => setTimeout(r, ms));
 /**
  * Obtén un item aleatorio de un Array
  * @param {Array} array The Array of items to find
+ * @deprecated Usar new Chance().pickone()
  * @returns {any}
  */
 const GetRandomItem = (array) => {

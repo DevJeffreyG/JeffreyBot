@@ -9,9 +9,7 @@ const { Tendencies, Enum, ChannelModules, LogReasons } = require("./Enums");
 const Embed = require("./Embed");
 const { Colores } = require("../resources");
 const Log = require("./Log");
-const GetRandomItem = (array) => {
-    return array[Math.floor(Math.random() * array.length)];
-}
+const { InsuficientSetupError } = require("../errors");
 
 class DarkShop {
     /**
@@ -43,7 +41,7 @@ class DarkShop {
 
         // ANUNCIARLO
         if (!this.guilddoc) await this.#getGuildDoc();
-        const dsChannel = await this.guild.channels.fetch(this.guilddoc.getDarkShopChannel("events"));
+
         const dsNewsRole = await this.guild.roles.fetch(this.guilddoc.getRoleByModule("darkshop_news"))
 
         const messages = [
@@ -55,15 +53,31 @@ class DarkShop {
             "La semana pasada fue interesante, seguro esta lo es más."
         ];
 
-        dsChannel?.send({
-            content: dsNewsRole?.toString() ?? null, embeds: [
-                new Embed()
-                    .defAuthor({ text: "Domingo", icon: this.client.EmojisObject.DarkShop.url })
-                    .defDesc(`**—** ${GetRandomItem(messages)}
+        try {
+            return await new Log(this.interaction)
+                .setGuild(this.guild)
+                .setTarget(ChannelModules.DarkShopLogs)
+                .setReason(LogReasons.DSSunday)
+                .send({
+                    content: dsNewsRole?.toString() ?? null,
+                    embeds: [
+                        new Embed()
+                            .defAuthor({ text: "Domingo", icon: this.client.EmojisObject.DarkShop.url })
+                            .defDesc(`**—** ${new Chance().pickone(messages)}
 **—** La inflación hoy estará en **${this.baseValue}%**. Ya veremos **qué pasa en la semana...**`)
-                    .defColor(Colores.negro)
-            ]
-        })
+                            .defColor(Colores.negro)
+                    ]
+                })
+        } catch (err) {
+            if (err instanceof InsuficientSetupError) {
+                new Log()
+                    .setGuild(this.guild)
+                    .setTarget(ChannelModules.StaffLogs)
+                    .setReason(LogReasons.Error)
+                    .send({ embed: err.embed })
+                    .catch(console.error);
+            }
+        }
     }
 
     async #weekWork() {
@@ -408,30 +422,41 @@ class DarkShop {
             guild_id: this.guild.id
         });
 
+        const PublicLogger = new Log()
+            .setGuild(this.guild)
+            .setTarget(ChannelModules.DarkShopLogs)
+            .setReason(LogReasons.AutomatedChange)
+
+        const ErrorLogger = new Log(this.interaction)
+            .setGuild(this.guild)
+            .setTarget(ChannelModules.StaffLogs)
+            .setReason(LogReasons.Error)
+
+        const Logger = new Log()
+            .setGuild(this.guild)
+            .setTarget(ChannelModules.StaffLogs)
+            .setReason(LogReasons.AutomatedChange)
+
         users.forEach(async user => {
             const darkdata = user.economy.dark;
             const until = moment(darkdata.until);
             if (moment().isBefore(until)) return;
 
             if (darkdata.currency != 0) {
+                const had = PrettyCurrency(this.guild, darkdata.currency, { name: "DarkCurrency" });
                 // enviar mensaje al usuario
                 console.log(`🟥 ${user.user_id} se eliminarán sus DarkCurrency por haber pasado una semana.`)
 
                 let memberDJ = this.guild.members.cache.find(x => x.id === user.user_id);
 
-                let deletedTag = memberDJ?.user.username ?? `<AUSENTE> (${user.user_id})`
+                let deleted = memberDJ?.user.username ?? `<AUSENTE> (${user.user_id})`
 
                 let log = new Embed()
                     .defColor(Colores.verde)
-                    .defDesc(`**—** Se han eliminado los ${this.Emojis.DarkCurrency.name} de **${deletedTag}**.
-**—** Desde: ${time(moment(darkdata.until).subtract(1, "w").toDate())}.
-**—** Tenía: ${PrettyCurrency(this.interaction.guild, darkdata.currency, { name: "DarkCurrency" })}`)
+                    .defDesc(`**—** Se han eliminado los ${this.Emojis.DarkCurrency.name} de **${deleted}**.
+**—** Desde: ${time(moment(darkdata.until).subtract(1, "week").toDate())}.
+**—** Tenía: ${had}`)
                     .defFooter({ text: "Mensaje enviado a la vez que al usuario", timestamp: true })
-
-                const ErrorLogger = new Log(this.interaction)
-                    .setGuild(this.guild)
-                    .setTarget(ChannelModules.StaffLogs)
-                    .setReason(LogReasons.Error)
 
                 let embed = new Embed()
                     .defAuthor({ text: `...`, icon: this.client.EmojisObject.DarkShop.url })
@@ -440,6 +465,7 @@ class DarkShop {
 **—** Siempre ten un ojo en la **inflación** con \`/inflacion\` y **recupera tu inversión** con \`/dswith\` en el transcurso de la semana.`)
                     .defFooter("▸ Si crees que se trata de un error, contacta al STAFF.");
 
+                // Enviar la información al usuario
                 memberDJ?.send({ embeds: [embed] })
                     .catch(error => {
                         ErrorLogger.send({
@@ -447,11 +473,26 @@ class DarkShop {
                         })
                     })
 
-                new Log(this.interaction)
-                    .setGuild(this.guild)
-                    .setTarget(ChannelModules.StaffLogs)
-                    .setReason(LogReasons.Logger)
-                    .send({ embeds: [log] });
+                // Enviar la información al STAFF
+                await Logger.send({ embeds: [log] });
+
+                // Enviar el evento publicamente;
+                let messages = [
+                    `Parece que **${deleted}** lo olvidó.`,
+                    `Gracias a **${deleted}**, la economía se equilibra un poco más.`,
+                    `**${deleted}** tomó decisiones financieras cuestionables.`,
+                    `Complicado, ¿no, **${deleted}**?`,
+                    `¿Intentamos esto otra vez, **${deleted}**?`,
+                    `¡Piensa **${deleted}**, piensa!`
+                ];
+
+                await PublicLogger.send({
+                    embed: new Embed()
+                        .defAuthor({ text: "Evento", icon: this.client.EmojisObject.DarkShop.url })
+                        .defDesc(`**—** ${new Chance().pickone(messages)}
+**—** No recuperó sus ${had}.`)
+                        .defColor(Colores.negro)
+                })
             }
 
             darkdata.currency = 0;

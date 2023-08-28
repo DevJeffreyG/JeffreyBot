@@ -266,13 +266,15 @@ const Tendencies = new Enum({
  * - StaffLogs - Interacciones de usuarios en el server (tickets, recordatorios, etc) o simplemente logs/info para Staffs
  * - ClientLogs - Logs para Developer
  * - SuggestionLogs - Donde se envían las sugerencias 
+ * - DarkShopLogs - Donde se envian los eventos de la DarkShop de un servidor
  */
 const ChannelModules = new Enum({
     GuildLogs: "guild_logs",
     ModerationLogs: "moderation_logs",
     StaffLogs: "staff_logs",
     ClientLogs: "client_logs",
-    SuggestionLogs: "suggestions"
+    SuggestionLogs: "suggestions",
+    DarkShopLogs: "darkshop_logs"
 }).values
 
 /**
@@ -288,6 +290,8 @@ const ChannelModules = new Enum({
  * - Logger
  * - Settings
  * - Error
+ * - DSSunday
+ * - AutomatedChange
  */
 const LogReasons = new Enum({
     Ticket: 1,
@@ -301,7 +305,9 @@ const LogReasons = new Enum({
     AutoMod: 9,
     Logger: 10,
     Settings: 11,
-    Error: 12
+    Error: 12,
+    DSSunday: 13,
+    AutomatedChange: 14
 }).values
 
 /**

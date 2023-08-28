@@ -154,6 +154,11 @@ const GuildSchema = new Schema({
                     tickets: { type: Boolean, default: true },
                     settings: { type: Boolean, default: true },
                     errors: { type: Boolean, default: true },
+                    automated_changes: { type: Boolean, default: true }
+                },
+                darkshop: {
+                    sunday: { type: Boolean, default: true },
+                    removed_currency: { type: Boolean, default: false }
                 }
             },
             automoderation: {
@@ -255,7 +260,8 @@ const GuildSchema = new Schema({
             moderation_logs: { type: String },
             staff_logs: { type: String },
             suggestions: { type: String },
-            user_left: { type: String }
+            user_left: { type: String },
+            darkshop_logs: { type: String }
         },
         chat_rewards: [
             {
@@ -274,9 +280,6 @@ const GuildSchema = new Schema({
             faq: { type: String },
             announcements: { type: String },
             halloffame: { type: String },
-        },
-        darkshop: {
-            events: { type: String }
         }
     },
     categories: {
@@ -451,10 +454,6 @@ GuildSchema.method("getCategory", function (query) {
 
 GuildSchema.method("getLogChannel", function (module) {
     return this.getChannel("logs." + module);
-})
-
-GuildSchema.method("getDarkShopChannel", function (module) {
-    return this.getChannel("darkshop." + module)
 })
 
 GuildSchema.method("getRole", function (query) {

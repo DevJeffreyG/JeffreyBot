@@ -98,6 +98,17 @@ class Log {
             case LogReasons.Error:
                 isEnabled = this.#doc.moduleIsActive("logs.staff.errors");
                 break;
+
+            case LogReasons.DSSunday:
+                isEnabled = this.#doc.moduleIsActive("logs.darkshop.sunday");
+                break;
+            case LogReasons.AutomatedChange:
+                if (this.target === ChannelModules.DarkShopLogs) {
+                    isEnabled = this.#doc.moduleIsActive("logs.darkshop.removed_currency");
+                } else {
+                    isEnabled = this.#doc.moduleIsActive("logs.staff.automated_changes");
+                }
+                break;
         }
 
         this.enabled = isEnabled;
