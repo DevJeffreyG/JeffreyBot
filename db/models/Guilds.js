@@ -55,11 +55,13 @@ const GuildSchema = new Schema({
                 options: [
                     {
                         name: String,
+                        emoji: String,
                         betting: [
                             { user_id: String, quantity: Number }
                         ]
                     }
-                ]
+                ],
+                message_id: { type: String, required: true }
             }
         ],
         autoroles: [
@@ -209,13 +211,21 @@ const GuildSchema = new Schema({
                 },
             },
             limits: {
-                exp: {
-                    min: { type: Number, default: 5, validate: [positiveValidator, integerValidator] },
-                    max: { type: Number, default: 35, validate: [positiveValidator, integerValidator] }
+                chat_rewards: {
+                    exp: {
+                        min: { type: Number, default: 5, validate: [positiveValidator, integerValidator] },
+                        max: { type: Number, default: 35, validate: [positiveValidator, integerValidator] }
+                    },
+                    currency: {
+                        min: { type: Number, default: 5, validate: [positiveValidator, integerValidator] },
+                        max: { type: Number, default: 15, validate: [positiveValidator, integerValidator] }
+                    }
                 },
                 currency: {
-                    min: { type: Number, default: 5, validate: [positiveValidator, integerValidator] },
-                    max: { type: Number, default: 15, validate: [positiveValidator, integerValidator] }
+                    coins: {
+                        min: { type: Number, default: 1, validate: [positiveValidator, integerValidator] },
+                        max: { type: Number, default: 20, validate: [positiveValidator, integerValidator] }
+                    }
                 },
                 pets: {
                     hunger: {
@@ -229,8 +239,8 @@ const GuildSchema = new Schema({
                         max: { type: Number, default: Infinity, validate: [positiveValidator] }
                     },
                     staff_bets: {
-                        min: { type: Number, default: 300, validate: [positiveValidator, integerValidator] },
-                        max: { type: Number, default: 100000, validate: [positiveValidator] }
+                        min: { type: Number, default: 10, validate: [positiveValidator, integerValidator] },
+                        max: { type: Number, default: 1000, validate: [positiveValidator] }
                     }
                 }
             },
@@ -262,6 +272,7 @@ const GuildSchema = new Schema({
                 chat_rewards: { type: Boolean, default: false },
                 claim_rep: { type: Boolean, default: false },
                 roulette: { type: Boolean, default: false },
+                staff_bets: { type: Boolean, default: false },
             },
             levels_deleteOldRole: { type: Boolean, default: false },
             save_roles_onleft: { type: Boolean, default: true },

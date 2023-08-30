@@ -174,7 +174,7 @@ class Dashboard {
      * @param {String} parentId 
      * @returns {HTMLElement} Parent
      */
-    #createNumberSelector(parentId, { title, placeholder, id }, options = { min: undefined, max: undefined }) {
+    #createNumberSelector(parentId, { title, placeholder, id }, options = { min: null, max: null }) {
         const parent = this.#createDivItem(parentId);
         parent.classList.add("number-selector");
 
@@ -185,8 +185,8 @@ class Dashboard {
         input.required = true;
 
         if (typeof options.min !== "undefined" || typeof options.max !== "undefined") {
-            input.max = options.max ?? Infinity;
-            input.min = options.min ?? Infinity;
+            input.max = options.max ?? "Infinity";
+            input.min = options.min ?? 0;
         }
 
         parent.append(title)
@@ -253,7 +253,7 @@ class Dashboard {
         parent.append(title)
         parent.appendChild(div)
 
-        div.dataset.max = max || Infinity;
+        div.dataset.max = max || "Infinity";
         div.dataset.min = min || 0;
 
         return parent
@@ -285,7 +285,7 @@ class Dashboard {
         parent.append(title)
         parent.appendChild(div)
 
-        div.dataset.max = max || Infinity;
+        div.dataset.max = max || "Infinity";
         div.dataset.min = min || 0;
 
         return parent
@@ -415,17 +415,20 @@ class Dashboard {
         this.#findAndSync("darkshop-baseprice", quantities);
         this.#findAndSync("darkshop-level", quantities);
         this.#findAndSync("currency_per_rep", quantities);
+        this.#findAndSync("staff_bets_increase", quantities);
 
         this.#findAndSync("limits-bets-blackjack-min", quantities);
         this.#findAndSync("limits-bets-blackjack-max", quantities);
         this.#findAndSync("limits-bets-staff_bets-min", quantities);
         this.#findAndSync("limits-bets-staff_bets-max", quantities);
-        this.#findAndSync("limits-exp-min", quantities);
-        this.#findAndSync("limits-exp-max", quantities);
-        this.#findAndSync("limits-currency-min", quantities);
-        this.#findAndSync("limits-currency-max", quantities);
+        this.#findAndSync("limits-chat_rewards-exp-min", quantities);
+        this.#findAndSync("limits-chat_rewards-exp-max", quantities);
+        this.#findAndSync("limits-chat_rewards-currency-min", quantities);
+        this.#findAndSync("limits-chat_rewards-currency-max", quantities);
         this.#findAndSync("limits-pets-hunger-min", quantities);
         this.#findAndSync("limits-pets-hunger-max", quantities);
+        this.#findAndSync("limits-currency-coins-min", quantities);
+        this.#findAndSync("limits-currency-coins-max", quantities);
 
         this.#findAndSync("percentages-limits-rob-success-min", quantities);
         this.#findAndSync("percentages-limits-rob-success-max", quantities);
@@ -443,6 +446,7 @@ class Dashboard {
         this.#findAndSync("adjust-chat_rewards", functions);
         this.#findAndSync("adjust-claim_rep", functions);
         this.#findAndSync("adjust-roulette", functions);
+        this.#findAndSync("adjust-staff_bets", functions);
 
         this.#findAndSync("levels_deleteOldRole", functions);
         this.#findAndSync("save_roles_onleft", functions);
@@ -789,11 +793,6 @@ class Dashboard {
                 placeholder: "200",
                 id: "darkshop-baseprice"
             }, { min: 1 }),
-            this.#createNumberSelector("base", {
-                title: "DarkShop: Nivel mínimo",
-                placeholder: "5",
-                id: "darkshop-level"
-            }, { min: 1 }),
             this.#createNumberSelector("currperrep", {
                 title: "Dinero dado por nivel",
                 placeholder: "El dinero dado por cada punto de reputación",
@@ -818,31 +817,32 @@ class Dashboard {
             this.#createSubtitle("Apuestas"),
             this.#createNumberSelector("limit", {
                 title: "Apuestas: puje mínimo",
-                placeholder: "300",
+                placeholder: "10",
                 id: "limits-bets-staff_bets-min"
             }, { min: 1 }),
             this.#createNumberSelector("limit", {
                 title: "Apuestas: puje máximo",
+                placeholder: "1000",
                 id: "limits-bets-staff_bets-max"
             }),
             this.#createSubtitle("Recompensas en chat"),
             this.#createNumberSelector("limit", {
-                title: "EXP: mínima",
+                title: "Recompensas del chat: EXP mínima",
                 placeholder: "5",
-                id: "limits-exp-min"
+                id: "limits-chat_rewards-exp-min"
             }, { min: 1 }),
             this.#createNumberSelector("limit", {
-                title: "EXP: máxima",
-                id: "limits-exp-max"
+                title: "Recompensas del chat: EXP máxima",
+                id: "limits-chat_rewards-exp-max"
             }, { min: 1 }),
             this.#createNumberSelector("limit", {
-                title: "Dinero: mínimo",
+                title: "Recompensas del chat: Dinero mínimo",
                 placeholder: "5",
-                id: "limits-currency-min"
+                id: "limits-chat_rewards-currency-min"
             }, { min: 1 }),
             this.#createNumberSelector("limit", {
-                title: "Dinero: máximo",
-                id: "limits-currency-max"
+                title: "Recompensas del chat: Dinero máximo",
+                id: "limits-chat_rewards-currency-max"
             }, { min: 1 }),
             this.#createSubtitle("Mascotas"),
             this.#createNumberSelector("limit", {
@@ -854,6 +854,16 @@ class Dashboard {
                 title: "Mascotas: hambre máxima dada",
                 placeholder: "3",
                 id: "limits-pets-hunger-max"
+            }, { min: 1 }),
+            this.#createNumberSelector("limit", {
+                title: "Coins: Dinero mínimo",
+                placeholder: "1",
+                id: "limits-currency-coins-min"
+            }, { min: 1 }),
+            this.#createNumberSelector("limit", {
+                title: "Coins: Dinero máximo",
+                placeholder: "1",
+                id: "limits-currency-coins-max"
             }, { min: 1 })
         ])
 
@@ -977,8 +987,13 @@ class Dashboard {
             id: "adjust-roulette"
         });
 
+        let betsadjust = this.#createBoolSelector("betsdjst", {
+            title: "Ajustar los aumentos de apuestas predeterminadas",
+            id: "adjust-staff_bets"
+        });
+
         this.#appendChilds(main, [saveRoles, lvlsOldRole, dayRemindSug, dayRemindTicket]);
-        this.#appendChilds(money, [shopadjust, dsadjust, chatrwadjust, coinsadjust, claimrepadjust, rouletteadjust]);
+        this.#appendChilds(money, [shopadjust, dsadjust, chatrwadjust, coinsadjust, claimrepadjust, rouletteadjust, betsadjust]);
 
         this.#appendChilds(contents, [main, money])
     }
@@ -1769,6 +1784,9 @@ class Dashboard {
                         Number(value) < Number(inputElement.min) ||
                         Number(value) > Number(inputElement.max)
                     ) {
+                        console.log((typeof value !== "number" && isNaN(value)),
+                            Number(value) < Number(inputElement.min),
+                            Number(value) > Number(inputElement.max), value, inputElement.max);
                         valid = false;
                         this.problems.set(inputElement.parentElement, value);
                     }

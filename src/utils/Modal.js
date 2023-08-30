@@ -39,12 +39,12 @@ class Modal extends ModalBuilder {
             .setCustomId(id)
             .setLabel(label)
             .setStyle(style)
-            .setValue(value ?? "")
 
             .setRequired(req ?? false)
             .setPlaceholder(placeholder ?? "");
 
-        if (min) input.setMinLength(min)
+        if (value) input.setValue(value);
+        if (min) input.setMinLength(min);
         if (max) input.setMaxLength(max);
 
         this.addComponents(new ActionRowBuilder().addComponents(input));
@@ -69,7 +69,7 @@ class Modal extends ModalBuilder {
         const fields = {};
 
         this.interaction.fields.fields.forEach(field => { // Collection
-            if(field.value.length > 0) fields[field.customId] = field.value
+            if (field.value.length > 0) fields[field.customId] = field.value
         })
 
         return fields;

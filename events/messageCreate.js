@@ -88,11 +88,11 @@ module.exports = async (client, message) => {
   if (configured) { // Está dentro de los canales configurados
     const { multiplier } = configured;
 
-    const minMoney = doc.settings.quantities.limits.currency.min;
-    const maxMoney = doc.settings.quantities.limits.currency.max;
+    const minMoney = doc.settings.quantities.limits.chat_rewards.currency.min;
+    const maxMoney = doc.settings.quantities.limits.chat_rewards.currency.max;
 
-    const minExp = doc.settings.quantities.limits.exp.min;
-    const maxExp = doc.settings.quantities.limits.exp.max;
+    const minExp = doc.settings.quantities.limits.chat_rewards.exp.min;
+    const maxExp = doc.settings.quantities.limits.chat_rewards.exp.max;
 
     let cool = await user.cooldown(Cooldowns.ChatRewards, { save: false });
     if (cool) return;

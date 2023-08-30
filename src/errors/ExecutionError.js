@@ -16,7 +16,7 @@ class ExecutionError extends JeffreyBotError {
         this.embed = new ErrorEmbed(interaction, {
             type: this.name,
             data: {
-                command: interaction.commandName ?? interaction.customId,
+                command: interaction.commandName ?? interaction.customId?.split("-")[0] ?? interaction.customId,
                 guide
             }
         })

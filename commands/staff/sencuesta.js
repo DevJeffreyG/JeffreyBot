@@ -38,7 +38,8 @@ command.execute = async (interaction, models, params, client) => {
 
     const guild = interaction.guild;
     const channel = interaction.guild.channels.cache.get(doc.getChannel("general.announcements"));
-    const timestamp = duration > ms("1m") && !isNaN(duration) ? moment().add(duration, "ms").toDate() : null;
+    const role = interaction.guild.roles.cache.get(doc.getRole("announcements.polls")) ?? "";
+    const timestamp = duration >= ms("1m") && !isNaN(duration) ? moment().add(duration, "ms").toDate() : null;
     const image = importImage("vota");
 
     if (!timestamp) throw new BadParamsError(interaction, "La duración debe ser mayor o igual a 1 minuto");
@@ -57,7 +58,7 @@ command.execute = async (interaction, models, params, client) => {
 
     let embed = new Embed()
         .defAuthor({ text: `¡Nueva encuesta del STAFF!`, title: true })
-        .defField("Encuesta:", poll)
+        .defField("### Encuesta:", poll)
         .defColor(Colores.verdeclaro)
         .defFooter({ text: footer })
         .setTimestamp(timestamp)
@@ -75,7 +76,7 @@ command.execute = async (interaction, models, params, client) => {
                 .setStyle(ButtonStyle.Danger),
         )
 
-    let msg = await channel.send({ embeds: [imgEmbed, embed], files: [image.file], components: [row] })
+    let msg = await channel.send({ content: role.toString(), embeds: [imgEmbed, embed], files: [image.file], components: [row] })
     //let msg = await channel.send({embeds: [embed]});
     let pollId = FindNewId(await GlobalDatas.find({ type: "temporalPoll", "info.guild_id": guild.id }), "info", "id");
 

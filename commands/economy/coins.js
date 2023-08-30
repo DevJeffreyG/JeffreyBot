@@ -1,4 +1,4 @@
-const { Command, Embed, Cooldowns, GetRandomItem, BoostWork, PrettyCurrency } = require("../../src/utils");
+const { Command, Embed, Cooldowns, GetRandomItem, BoostWork, PrettyCurrency, MinMaxInt } = require("../../src/utils");
 const { Responses } = require("../../src/resources/");
 
 const Chance = require("chance");
@@ -28,8 +28,9 @@ command.execute = async (interaction, models, params, client) => {
         ]
     });
 
-    let maximum = 20;
-    let fakeAdd = 999;
+    let maximum = doc.settings.quantities.currency.coins.max;
+    let min = doc.settings.quantities.currency.coins.min;
+    let fakeAdd = maximum * 50;
 
     if (doc.toAdjust("coins")) {
         const average = doc.data.average_currency;
@@ -40,7 +41,7 @@ command.execute = async (interaction, models, params, client) => {
     // buscar si tiene boost
     const boost = BoostWork(user);
 
-    let money = new Chance().integer({ min: 1, max: maximum * boost.probability.currency_value });
+    let money = MinMaxInt(min, maximum * boost.probability.currency_value, { guild, msg: `No se ha podido determinar la recompensa de ${client.mentionCommand("coins")}` });
     let randommember = guild.members.cache.random();
 
     while (randommember.user.id === member.id) { // el randommember NO puede ser el mismo usuario
