@@ -56,6 +56,7 @@ const GuildSchema = new Schema({
                     {
                         name: String,
                         emoji: String,
+                        square: String,
                         betting: [
                             { user_id: String, quantity: Number }
                         ]

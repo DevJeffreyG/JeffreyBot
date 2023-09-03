@@ -1,10 +1,10 @@
-const { BaseInteraction, InteractionType, time, CommandInteraction, MessageComponentInteraction, ModalSubmitInteraction, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction, DiscordAPIError, chatInputApplicationCommandMention, ActionRowBuilder, codeBlock, TextInputStyle } = require("discord.js");
+const { BaseInteraction, InteractionType, time, CommandInteraction, MessageComponentInteraction, ModalSubmitInteraction, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction, DiscordAPIError, chatInputApplicationCommandMention, ActionRowBuilder, codeBlock, TextInputStyle, ButtonBuilder, ButtonStyle, TimestampStyles } = require("discord.js");
 
 const { Ticket, Suggestion, Button } = require("./src/handlers/");
 const { Bases, Colores } = require("./src/resources");
-const { ErrorEmbed, Embed, Categories, ValidateDarkShop, Confirmation, HumanMs, Modal, CustomEmbed, CustomTrophy, Enum, ShopTypes, Shop } = require("./src/utils");
+const { ErrorEmbed, Embed, Categories, ValidateDarkShop, Confirmation, HumanMs, Modal, CustomEmbed, CustomTrophy, Enum, ShopTypes, Shop, PrettyCurrency, MinMaxInt, PrettifyNumber, Collector, MultiplePercentages } = require("./src/utils");
 
-const { CommandNotFoundError, ToggledCommandError, DiscordLimitationError, BadCommandError, SelfExec, ModuleDisabledError } = require("./src/errors/");
+const { CommandNotFoundError, ToggledCommandError, DiscordLimitationError, BadCommandError, SelfExec, ModuleDisabledError, AlreadyUsingError, ExecutionError, InsuficientSetupError } = require("./src/errors/");
 
 const JeffreyBotError = require("./src/errors/JeffreyBotError");
 
@@ -349,6 +349,125 @@ class Handlers {
                     .addInput({ id: "price", label: "Nuevo precio", style: TextInputStyle.Short, placeholder: "El nuevo precio de este item", max: 100 })
                     .addInput({ id: "interest", label: "Nuevo interés", style: TextInputStyle.Short, placeholder: "Subida de precio por compra", max: 100 })
                     .show()
+                break;
+            }
+
+            case "betOption": {
+                await this.interaction.deferReply({ ephemeral: true });
+                const index = Number(splittedId[1]);
+                const bet = this.doc.data.bets.find(x => x.message_id === this.interaction.message.id);
+
+                // Revisar que no esté en ninguna otra
+                let filter = bet.options.filter(x => {
+                    return x.betting.find(y => y.user_id === this.interaction.user.id)
+                })[0];
+                if (filter) {
+                    let existingIndex = bet.options.findIndex(x => x._id === filter._id);
+
+                    if (existingIndex != index)
+                        throw new ExecutionError(this.interaction, ["Ya apostaste por otra opción, no puedes apostar a otra", "Sube tu apuesta con el botón con la misma opción"]);
+                }
+
+                const bettings = bet.options[index].betting;
+                let userBetI = bettings.findIndex(x => x.user_id === this.interaction.user.id);
+                let userBet = userBetI != -1 ? bettings[userBetI] : { user_id: this.interaction.user.id, quantity: 0 };
+
+                if (userBetI === -1) userBetI = 0;
+
+                const min = this.doc.settings.quantities.limits.bets.staff_bets.min;
+                const max = this.doc.settings.quantities.limits.bets.staff_bets.max;
+
+                let valid = MinMaxInt(min, max, { guild: this.interaction.guild, msg: "No se pudieron conseguir las apuestas predeterminadas" });
+                if (valid === 0)
+                    throw new InsuficientSetupError(this.interaction, "Mínimos y máximo de apuestas", ["Los mínimos y máximos deben ser menores y mayores los unos con los otros"])
+
+                const av = this.doc.data.average_currency;
+                const mult = this.doc.toAdjust("staff_bets") && av - max > 10000 ? av * 0.01 : 1;
+                const middleNum = mult * (max - min) / 5;
+
+                await this.interaction.editReply({
+                    embeds: [
+                        new Embed()
+                            .defTitle("Aumentar apuesta")
+                            .defDesc(`Elige cuánto quieres subir tu apuesta actual (${PrettyCurrency(this.interaction.guild, userBet.quantity)})`)
+                            .defColor(Colores.verde)
+                    ],
+                    components: [
+                        new ActionRowBuilder()
+                            .setComponents(
+                                new ButtonBuilder()
+                                    .setCustomId(PrettifyNumber(Math.round(mult * min), 0, 3).toLocaleString("es-CO"))
+                                    .setLabel(PrettifyNumber(Math.round(mult * min), 0, 3).toLocaleString("es-CO"))
+                                    .setEmoji("➕")
+                                    .setStyle(ButtonStyle.Secondary),
+                                new ButtonBuilder()
+                                    .setCustomId(PrettifyNumber(Math.round(middleNum), 0, 3).toLocaleString("es-CO"))
+                                    .setLabel(PrettifyNumber(Math.round(middleNum), 0, 3).toLocaleString("es-CO"))
+                                    .setEmoji("➕")
+                                    .setStyle(ButtonStyle.Secondary),
+                                new ButtonBuilder()
+                                    .setCustomId(PrettifyNumber(Math.round(middleNum * 2), 0, 3).toLocaleString("es-CO"))
+                                    .setLabel(PrettifyNumber(Math.round(middleNum * 2), 0, 3).toLocaleString("es-CO"))
+                                    .setEmoji("➕")
+                                    .setStyle(ButtonStyle.Primary),
+                                new ButtonBuilder()
+                                    .setCustomId(PrettifyNumber(Math.round(middleNum * 3), 0, 3).toLocaleString("es-CO"))
+                                    .setLabel(PrettifyNumber(Math.round(middleNum * 3), 0, 3).toLocaleString("es-CO"))
+                                    .setEmoji("➕")
+                                    .setStyle(ButtonStyle.Success),
+                                new ButtonBuilder()
+                                    .setCustomId("customPush")
+                                    .setLabel("Custom")
+                                    .setEmoji("🔧")
+                                    .setStyle(ButtonStyle.Danger)
+                            )
+                    ]
+                })
+
+                const collector = await new Collector(this.interaction, {
+                    filter: (i) => {
+                        return i.user.id === this.interaction.user.id
+                    },
+                    time: ms("1m"),
+                    wait: true
+                }).raw();
+                await collector.deferUpdate();
+
+                const value = Number(collector.customId.replace(".", ""));
+                userBet.quantity += value;
+
+                bettings[userBetI] = userBet;
+                await this.doc.save();
+                await this.interaction.editReply({ embeds: [new Embed({ type: "success" })], components: [] });
+
+                // Actualizar la barra de progreso
+                let total = 0;
+                let elements = [];
+                let embed = new Embed(this.interaction.message.embeds[0])
+                embed.data.fields = [];
+                let betInfo = new Map();
+                bet.options.forEach((option, i) => {
+                    total += option.betting.length;
+
+                    betInfo.set(i, {
+                        square: option.square,
+                        betting: option.betting
+                    })
+
+                    embed.defField(`${option.emoji} ${option.name}`, `Usuarios: ${option.betting.length}`);
+                })
+
+                betInfo.forEach((value) => {
+                    elements.push({
+                        percentage: value.betting.length / total * 100,
+                        square: value.square
+                    });
+                })
+
+                let progressbar = MultiplePercentages(elements, 10);
+                embed.defDesc(`# ${bet.title}\n### Las apuestas se cierran ${time(bet.closes_in, TimestampStyles.RelativeTime)}\n## ${progressbar}`)
+
+                await this.interaction.message.edit({ embeds: [embed] })
                 break;
             }
 

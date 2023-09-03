@@ -351,7 +351,6 @@ const GenerateLog = async function (guild, options = {
  */
 const GlobalDatasWork = async function (guild, justTempRoles = false) {
   const { Emojis, EmojisObject } = guild.client;
-  const { Currency } = guild.client.getCustomEmojis(guild.id);
   const doc = await Guilds.getWork(guild.id);
   const customDoc = await CustomElements.getWork(guild.id);
 
@@ -720,6 +719,80 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
     }
   }
 
+  // buscar apuestas
+  staffBets:
+  for (let i = 0; i < doc.data.bets.length; i++) {
+    const bet = doc.data.bets[i];
+
+    if (moment().isAfter(bet.closes_in) && !bet.closed) {
+      const ch = guild.channels.cache.get(doc.getChannel("general.announcements"));
+      const message = await ch.messages.fetch(bet.message_id);
+
+      if (message.size > 1) {
+        doc.data.bets.splice(i, 1);
+        break staffBets;
+      }
+      const embed = new Embed(message.embeds[0]);
+      embed.defDesc(`# ${bet.title}\n**Esperando la respuesta del STAFF...**`);
+
+      const fields = [];
+      const elements = [];
+      const betInfo = new Map();
+      let total = 0;
+
+      const newRow = new ActionRowBuilder();
+
+      bet.options.forEach((option, i) => {
+        total += option.betting.length;
+
+        betInfo.set(i, {
+          title: `${option.emoji} ${option.name}`,
+          emoji: option.emoji,
+          square: option.square,
+          betting: option.betting
+        })
+
+        newRow.addComponents(
+          new ButtonBuilder()
+            .setCustomId(`betWinner-${i}`)
+            .setLabel(option.name)
+            .setEmoji(option.emoji)
+            .setStyle(ButtonStyle.Secondary)
+        )
+      })
+
+      betInfo.forEach((value) => {
+        elements.push({
+          percentage: value.betting.length / total * 100,
+          square: value.square
+        });
+
+        fields.push({
+          up: value.title,
+          down: "Usuarios: " + String(value.betting.length)
+        })
+      })
+
+      const progressbar = MultiplePercentages(elements, 10);
+      embed.data.description += "\n## " + progressbar;
+      embed.defFields(fields)
+
+      await message.edit({
+        embeds: [embed], components: [
+          newRow,
+          new ActionRowBuilder()
+            .setComponents(
+              new ButtonBuilder()
+                .setCustomId("cancelBet")
+                .setLabel("Cancelar")
+                .setStyle(ButtonStyle.Danger)
+            )
+        ]
+      })
+      bet.closed = true;
+    }
+  }
+
   // buscar tickets sin respuesta
   ticketReminder:
   for (const ticket of doc.data.tickets) {
@@ -800,7 +873,7 @@ const PetWork = async function (guild) {
       const maxHungerGiven = doc.settings.quantities.limits.pets.hunger.max;
       const minHungerGiven = doc.settings.quantities.limits.pets.hunger.min;
 
-      const giveHunger = MinMaxInt(minHungerGiven, maxHungerGiven, {guild, msg: "No se ha podido agregar hambre a las mascotas"});
+      const giveHunger = MinMaxInt(minHungerGiven, maxHungerGiven, { guild, msg: "No se ha podido agregar hambre a las mascotas" });
       pet.changeHunger(giveHunger);
 
       // ----------- Hunger ----------- 
@@ -883,7 +956,7 @@ const LimitedTime = async function (victimMember, roleID = 0, duration, specialT
 
 /**
  * Se ejecuta un timeout si es posible
- * @param {Number} time 
+ * @param {Number} time En MS
  * @param {Function} func 
  */
 const TimeoutIf = function (time, func) {
@@ -1714,6 +1787,7 @@ const UpdateObj = function (obj, prop, value) {
  * @param {{blocks: Number, emptyChr: String, fullChr: String}} options 
  */
 const ProgressBar = function (percentage, options = { max: 100, blocks: 10, emptyChr: "⬜", fullChr: "🟩" }) {
+  if (!percentage || isNaN(percentage)) percentage = 0;
   const empty = options.emptyChr ?? "⬜";
   const full = options.fullChr ?? "🟩";
   const blocks = options.blocks ?? 10;
@@ -1732,6 +1806,18 @@ const ProgressBar = function (percentage, options = { max: 100, blocks: 10, empt
   let emptyBlocks = empty.repeat(emptyNum)
 
   return fullBlocks + emptyBlocks;
+}
+
+const MultiplePercentages = function (elements = [{ percentage, square }], blocks = 10) {
+  let prog = "";
+
+  elements.forEach(element => {
+    prog += ProgressBar(element.percentage, { fullChr: element.square, emptyChr: "", blocks })
+  })
+
+  prog += ProgressBar((blocks - prog.length) / blocks * 100, { fullChr: "⬜", emptyChr: "" });
+
+  return prog;
 }
 
 /**
@@ -1950,6 +2036,28 @@ const MinMaxInt = function (min, max, { guild, msg }) {
   return value;
 }
 
+/**
+ * Vuelve lo de la derecha ceros
+ * @param {Number} number El número a tratar
+ * @param {Number} initials Los primeros qué números se mantienen
+ * @param {Number} zeros Cuantos ceros se quieren al final (sobreescribe los initials)
+ * @returns {Number}
+ */
+const PrettifyNumber = function (number, initials = 1, zeros = null) {
+  const original = String(number);
+  if (!zeros) {
+    let firstPart = original.substring(0, initials - 1);
+    let secondPart = "0".repeat(original.length - firstPart.length);
+
+    return Number(firstPart + secondPart);
+  } else {
+    let firstPart = original.substring(0, original.length - zeros - 1);
+    let secondPart = "0".repeat(zeros);
+
+    return Number(firstPart + secondPart);
+  }
+}
+
 module.exports = {
   GetChangesAndCreateFields,
   FetchAuditLogs,
@@ -1987,5 +2095,7 @@ module.exports = {
   PetWork,
   PrettyCurrency,
   TimeoutIf,
-  MinMaxInt
+  MinMaxInt,
+  PrettifyNumber,
+  MultiplePercentages
 }
