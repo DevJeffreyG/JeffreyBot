@@ -1,4 +1,4 @@
-const { BaseInteraction, InteractionType, time, CommandInteraction, MessageComponentInteraction, ModalSubmitInteraction, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction, DiscordAPIError, chatInputApplicationCommandMention } = require("discord.js");
+const { BaseInteraction, InteractionType, time, CommandInteraction, MessageComponentInteraction, ModalSubmitInteraction, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction, DiscordAPIError, chatInputApplicationCommandMention, GuildMember } = require("discord.js");
 
 const { Ticket, Suggestion } = require("./src/handlers/");
 const { Bases, Colores } = require("./src/resources");
@@ -229,14 +229,18 @@ class Handlers {
                 let embed = msg.embeds[0];
 
                 const author_info = embed.data.author.name.split(" ");
-                const tag = author_info.find(x => x.includes("#"));
-                const disc = tag.split("#")[1];
+                let member;
+                for (let i = author_info.length - 1; i > 0; i--) {
+                    const element = author_info[i];
 
-                const member = this.interaction.guild.members.cache.find(x => x.user.discriminator === disc && x.user.tag.includes(tag));
-                if(!member) return this.interaction.deleteReply();
+                    member = this.interaction.guild.members.cache.find(x => x.user.username === element);
+                    if (member instanceof GuildMember) break;
+                }
+
+                if (!member) return await this.interaction.deleteReply();
 
                 if (member === this.interaction.member) {
-                    return new ErrorEmbed(this.interaction, {
+                    return await new ErrorEmbed(this.interaction, {
                         type: "execError",
                         data: {
                             command: "reminder",
