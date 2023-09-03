@@ -1,7 +1,6 @@
-const { Command, Embed, GetRandomItem, Cooldowns, ErrorEmbed, Log, LogReasons, ChannelModules, PrettyCurrency, MinMaxInt } = require("../../src/utils")
+const { Command, Embed, GetRandomItem, Cooldowns, ErrorEmbed, PrettyCurrency, MinMaxInt } = require("../../src/utils")
 const Chance = require("chance");
 const { Responses, Colores } = require("../../src/resources");
-const BadSetupError = require("../../src/errors/BadSetupError");
 
 const command = new Command({
     name: "rob",
@@ -23,7 +22,7 @@ command.execute = async (interaction, models, params, client) => {
 
     const victimMember = usuario.member;
 
-    if (victimMember === interaction.member) return interaction.reply({
+    if (victimMember === interaction.member) return await interaction.reply({
         ephemeral: true, embeds: [
             new ErrorEmbed().defDesc("No es un buena idea robarte a ti mismo.")
         ]
@@ -36,7 +35,7 @@ command.execute = async (interaction, models, params, client) => {
     const victim = await Users.getWork({ user_id: victimMember.id, guild_id: interaction.guild.id });
 
     let cool = await user.cooldown(Cooldowns.Rob, { save: false })
-    if (cool) return interaction.editReply({
+    if (cool) return await interaction.editReply({
         content: null, embeds: [
             new Embed({ type: "cooldown", data: { cool } })
         ]
@@ -56,7 +55,7 @@ command.execute = async (interaction, models, params, client) => {
     const successValue = Math.round(victim.getCurrency() * successPerc);
     const failedValue = Math.round(user.getCurrency() * failedPerc);
 
-    const minRequired = Math.round(victim.getCurrency() * min_success / 100);
+    const minRequired = Math.round(victim.getCurrency() * success.min / 100);
 
     if (successValue <= 0) robSuccess = false;
 
@@ -105,7 +104,7 @@ command.execute = async (interaction, models, params, client) => {
             icon: typeof suggester != "boolean" ? suggester.displayAvatarURL({ dynamic: true }) : interaction.guild.iconURL({ dynamic: true })
         });
 
-    return interaction.editReply({ embeds: [embed] });
+    return await interaction.editReply({ embeds: [embed] });
 
     function getAuthor(obj) {
         if (!obj.author) return false;
