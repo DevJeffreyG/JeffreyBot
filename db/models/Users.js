@@ -138,6 +138,7 @@ const Schema = new mongoose.Schema({
                     return 0
                 }, validate: integerValidator
             },
+            secured_currency: { type: Number, default: 0, validate: integerValidator },
             dark_currency: {
                 type: Number, default: function () {
                     if (this.getDarkCurrency()) return this.getDarkCurrency()
@@ -175,7 +176,8 @@ const Schema = new mongoose.Schema({
             exp: { type: Number, required: true, default: 0, validate: integerValidator },
             level: { type: Number, required: true, default: 0, validate: integerValidator },
             reputation: { type: Number, required: true, default: 0, validate: integerValidator },
-            currency: { type: Number, required: true, default: 0, validate: integerValidator }
+            currency: { type: Number, required: true, default: 0, validate: integerValidator },
+            secured: { type: Number, required: true, default: 0, validate: [integerValidator, positiveWithZeroValidator] }
         },
         dark: {
             currency: { type: Number, default: 0, validate: integerValidator },
@@ -219,7 +221,7 @@ Schema.pre("save", function () {
         if (p.toObject().hasOwnProperty("isDarkShop")) {
             let obj = this.data.purchases[i].toObject();
             obj.shopType = obj.isDarkShop ? ShopTypes.DarkShop : ShopTypes.Shop;
-            
+
             delete obj.isDarkShop;
 
             this.data.purchases[i] = obj;
@@ -270,11 +272,19 @@ Schema.method("getNextLevelExp", function (level = null) {
     return 10 * (level ** 2) + 50 * level + 100;
 })
 
-Schema.method("getCurrency", function() {
+Schema.method("getCurrency", function () {
     return this.economy.global.currency;
 })
 
-Schema.method("getDarkCurrency", function() {
+Schema.method("getSecured", function () {
+    return this.economy.global.secured;
+})
+
+Schema.method("getAllMoney", function () {
+    return this.getCurrency() + this.getSecured();
+})
+
+Schema.method("getDarkCurrency", function () {
     return this.economy.dark.currency
 })
 
@@ -293,6 +303,31 @@ Schema.method("addCurrency", async function (count, save = true) {
     if (save) await this.save();
 
     console.log("🗨 %s tiene %s Currency", this.user_id, this.getCurrency());
+
+    return this;
+})
+
+Schema.method("secure", async function (count, save = true) {
+    this.economy.global.currency -= count;
+    this.economy.global.secured += count;
+    this.data.counts.secured_currency += count;
+
+    if (save) await this.save();
+
+    console.log("🗨 %s tiene %s Currency", this.user_id, this.getCurrency());
+    console.log("🗨 %s tiene %s Currency guardados", this.user_id, this.getSecured());
+
+    return this;
+})
+
+Schema.method("withdraw", async function (count, save = true) {
+    this.economy.global.currency += count;
+    this.economy.global.secured -= count;
+
+    if (save) await this.save();
+
+    console.log("🗨 %s tiene %s Currency", this.user_id, this.getCurrency());
+    console.log("🗨 %s tiene %s Currency guardados", this.user_id, this.getSecured());
 
     return this;
 })

@@ -417,6 +417,8 @@ class Dashboard {
         this.#findAndSync("currency_per_rep", quantities);
         this.#findAndSync("staff_bets_increase", quantities);
 
+        this.#findAndSync("interest_days-secured", quantities);
+
         this.#findAndSync("limits-bets-blackjack-min", quantities);
         this.#findAndSync("limits-bets-blackjack-max", quantities);
         this.#findAndSync("limits-bets-staff_bets-min", quantities);
@@ -437,6 +439,7 @@ class Dashboard {
         this.#findAndSync("percentages-rob", quantities);
         this.#findAndSync("percentages-skipfirewall", quantities);
         this.#findAndSync("percentages-pets-basic_unlocked", quantities);
+        this.#findAndSync("percentages-interests-secured", quantities);
 
 
         const functions = this.doc.settings.functions;
@@ -787,17 +790,23 @@ class Dashboard {
                 title: "DarkShop: Nivel mínimo",
                 placeholder: "5",
                 id: "darkshop-level"
-            }, { min: 1 }),
+            }, { min: 0 }),
             this.#createNumberSelector("base", {
                 title: "DarkShop: Valor base",
                 placeholder: "200",
                 id: "darkshop-baseprice"
             }, { min: 1 }),
-            this.#createNumberSelector("currperrep", {
+            this.#createNumberSelector("base", {
                 title: "Dinero dado por nivel",
                 placeholder: "El dinero dado por cada punto de reputación",
                 id: "currency_per_rep"
-            }, { min: 1 })
+            }, { min: 1 }),
+            this.#createSubtitle("Intereses: intervalo en días"),
+            this.#createNumberSelector("base", {
+                title: "Para dinero asegurado",
+                placeholder: "14",
+                id: "interest_days-secured"
+            }, { min: 0 })
         ])
 
         let limits = this.#createDivSection("limit");
@@ -902,13 +911,19 @@ class Dashboard {
                 title: "DarkShop: %Saltar firewall",
                 placeholder: "Al usar el item especial, probabilidad de que funcione",
                 id: "percentages-skipfirewall"
-            }, { min: 1 }),
+            }, { min: 0 }),
             this.#createSubtitle("Mascotas"),
             this.#createNumberSelector("perce", {
                 title: "Mascotas: %Desbloquear básico",
                 placeholder: "Usar un ataque básica a veces puede hacer mucho daño",
                 id: "percentages-pets-basic_unlocked"
-            }, { min: 1 })
+            }, { min: 1 }),
+            this.#createSubtitle("Intereses"),
+            this.#createNumberSelector("perce", {
+                title: "Asegurados: %Interés",
+                placeholder: "Cuanto se descuenta por la cantidad asegurada",
+                id: "percentages-interests-secured"
+            }, { min: 0 })
         ])
 
         this.#appendChilds(contents, [base, limits, percentages])

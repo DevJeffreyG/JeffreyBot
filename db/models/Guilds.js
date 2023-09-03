@@ -139,7 +139,13 @@ const GuildSchema = new Schema({
             },
             twitch: []
         },
-        average_currency: { type: String, default: 0 }
+        average_currency: { type: Number, default: 0 },
+        bank: {
+            interests: { type: Number, default: 0, validate: [integerValidator, positiveWithZeroValidator] },
+            gambling: { type: Number, default: 0, validate: [integerValidator, positiveWithZeroValidator] },
+            user_actions: { type: Number, default: 0, validate: [integerValidator, positiveWithZeroValidator] },
+            others: { type: Number, default: 0, validate: [integerValidator, positiveWithZeroValidator] }
+        }
     },
     settings: {
         active_modules: {
@@ -189,6 +195,9 @@ const GuildSchema = new Schema({
             guild_id: { type: String },
         },
         quantities: {
+            interest_days: {
+                secured: { type: Number, default: 14, validate: [positiveWithZeroValidator, integerValidator] }
+            },
             blackjack: {
                 consecutive_wins: { type: Number, default: 5, validate: [positiveValidator, integerValidator] }
             },
@@ -246,6 +255,9 @@ const GuildSchema = new Schema({
                 }
             },
             percentages: {
+                interests: {
+                    secured: { type: Number, default: 1, validate: positiveWithZeroValidator },
+                },
                 skipfirewall: { type: Number, default: 100, validate: positiveWithZeroValidator },
                 rob: { type: Number, default: 60, validate: [positiveValidator, integerValidator] },
                 pets: {
@@ -445,8 +457,25 @@ GuildSchema.method("getAutoRole", function (id) {
 })
 
 GuildSchema.method("getOrCreateToggleGroup", function (id) {
-    let q = this.data.togglegroups.find(x => x.id === id) ?? this.data.togglegroups.push({ group_name: `Grupo ${id}`, id });
-    return q;
+    return this.data.togglegroups.find(x => x.id === id) ?? this.data.togglegroups.push({ group_name: `Grupo ${id}`, id });
+})
+
+GuildSchema.method("getBankValue", function (modulo = null) {
+    if (modulo) return this.data.bank[modulo]
+
+    let s = 0;
+    for (const prop of this.data.bank) {
+        s += this.data.bank[prop];
+    }
+
+    return s
+})
+
+GuildSchema.method("addToBank", async function (count, modulo, save = true) {
+    this.data.bank[modulo] += count
+    if (save) this.save();
+
+    return this
 })
 
 GuildSchema.method("addAutoRole", async function (name, role_id, emoteInfo, id) {
