@@ -436,7 +436,6 @@ class Dashboard {
         this.#findAndSync("percentages-limits-rob-success-max", quantities);
         this.#findAndSync("percentages-limits-rob-fail-min", quantities);
         this.#findAndSync("percentages-limits-rob-fail-max", quantities);
-        this.#findAndSync("percentages-rob", quantities);
         this.#findAndSync("percentages-skipfirewall", quantities);
         this.#findAndSync("percentages-pets-basic_unlocked", quantities);
         this.#findAndSync("percentages-interests-secured", quantities);
@@ -900,11 +899,6 @@ class Dashboard {
                 title: "Robar: %Máximo castigo",
                 placeholder: "Debe ser mayor que el mínimo",
                 id: "percentages-limits-rob-fail-max"
-            }, { min: 1 }),
-            this.#createNumberSelector("perce", {
-                title: "Robar: %Éxito",
-                placeholder: "Probabilidad de que robe",
-                id: "percentages-rob"
             }, { min: 1 }),
             this.#createSubtitle("DarkShop"),
             this.#createNumberSelector("perce", {

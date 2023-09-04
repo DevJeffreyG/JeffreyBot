@@ -41,42 +41,25 @@ command.execute = async (interaction, models, params, client) => {
         ]
     });
 
-    const { rob, limits } = doc.settings.quantities.percentages;
-    let robSuccess = new Chance().bool({ likelihood: rob });
+    const { success, fail } = doc.settings.quantities.percentages.limits.rob;
 
-    const { success, fail } = limits.rob
+    const likelihood = user.getAllMoney() / (victim.getAllMoney() + user.getAllMoney()) * 100;
+    const robFail = new Chance().bool({ likelihood });
+    const successValue = Math.round((100 - likelihood) / 100 * victim.getCurrency() * (MinMaxInt(success.min, success.max, { guild: interaction.guild, msg: "No se ha podido determinar recompensa" }) / 100));
 
-    const successResponse = GetRandomItem(Responses.rob.success);
-    const failResponse = GetRandomItem(Responses.rob.fail);
-
-    const successPerc = MinMaxInt(success.min, success.max, { guild: interaction.guild, msg: "No se ha podido determinar recompensas" }) / 100;
     const failedPerc = MinMaxInt(fail.min, fail.max, { guild: interaction.guild, msg: "No se ha podido determinar castigos" }) / 100;
-
-    const successValue = Math.round(victim.getCurrency() * successPerc);
     const failedValue = Math.round(user.getCurrency() * failedPerc);
 
-    const minRequired = Math.round(victim.getCurrency() * success.min / 100);
-
-    if (successValue <= 0) robSuccess = false;
-
+    // Embed Text
+    const successResponse = GetRandomItem(Responses.rob.success);
+    const failResponse = GetRandomItem(Responses.rob.fail);
     const successText = replace(successResponse.text)
     const failedText = replace(failResponse.text)
 
     let embed, suggester;
 
-    //console.log(failedValue, successValue, robSuccess)
-
-    if ((user.getCurrency() < minRequired) || (minRequired < 0)) {
-        await user.save();
-        let e = new ErrorEmbed(interaction)
-            .defDesc("**No tenías suficiente dinero como para robarle.**")
-
-        if (minRequired > 0) e.defFooter({ text: `Necesitas al menos ${minRequired.toLocaleString("es-CO")} ${Currency.name} en tu cuenta.` });
-        return e.send();
-    }
-
     // Fallido
-    if (!robSuccess) {
+    if (robFail) {
         suggester = getAuthor(failResponse);
 
         user.economy.global.currency -= failedValue;
@@ -117,13 +100,13 @@ command.execute = async (interaction, models, params, client) => {
     function replace(text) {
         return text.replace(
             new RegExp("{ MONEY }", "g"),
-            `${PrettyCurrency(interaction.guild, robSuccess ? successValue : failedValue)}`
+            `${PrettyCurrency(interaction.guild, !robFail ? successValue : failedValue)}`
         ).replace(
             new RegExp("{ MEMBER }", "g"),
             `**${victimMember.displayName}**`
         ).replace(
             new RegExp("{ FAKE MONEY }", "g"),
-            `${new Chance().integer({ min: victim.getCurrency(), max: victim.getCurrency() * 3 }).toLocaleString("es-CO")} ${Currency.name}`
+            `${new Chance().integer({ min: victim.getAllMoney(), max: victim.getAllMoney() * 5 }).toLocaleString("es-CO")} ${Currency.name}`
         ).replace(
             new RegExp("{ MONEY NAME }", "g"), Currency.name
         ).replace(

@@ -235,6 +235,10 @@ const GuildSchema = new Schema({
                     coins: {
                         min: { type: Number, default: 1, validate: [positiveValidator, integerValidator] },
                         max: { type: Number, default: 20, validate: [positiveValidator, integerValidator] }
+                    },
+                    rob: {
+                        min: { type: Number, default: 40, validate: [positiveValidator, integerValidator]},
+                        max: { type: Number, default: 100, validate: [positiveValidator, integerValidator]},
                     }
                 },
                 pets: {
@@ -259,19 +263,18 @@ const GuildSchema = new Schema({
                     secured: { type: Number, default: 1, validate: positiveWithZeroValidator },
                 },
                 skipfirewall: { type: Number, default: 100, validate: positiveWithZeroValidator },
-                rob: { type: Number, default: 60, validate: [positiveValidator, integerValidator] },
                 pets: {
                     basic_unlocked: { type: Number, default: 5 },
                 },
                 limits: {
                     rob: {
                         success: {
-                            min: { type: Number, default: 5, validate: [positiveValidator, integerValidator] },
-                            max: { type: Number, default: 15, validate: [positiveValidator, integerValidator] }
+                            min: { type: Number, default: 50, validate: [positiveValidator, integerValidator] },
+                            max: { type: Number, default: 80, validate: [positiveValidator, integerValidator] }
                         },
                         fail: {
-                            min: { type: Number, default: 10, validate: [positiveValidator, integerValidator] },
-                            max: { type: Number, default: 30, validate: [positiveValidator, integerValidator] }
+                            min: { type: Number, default: 20, validate: [positiveValidator, integerValidator] },
+                            max: { type: Number, default: 40, validate: [positiveValidator, integerValidator] }
                         }
                     }
                 }
