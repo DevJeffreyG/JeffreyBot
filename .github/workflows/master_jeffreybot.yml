@@ -52,5 +52,5 @@ jobs:
         with:
           app-name: 'jeffreybot'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2E031555F69149EABB960916B40809DE }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_C9E514DF9744458FB53132E398D85B0B }}
           package: .
