@@ -26,12 +26,16 @@ jobs:
           npm install
           npm run build --if-present
           npm run test --if-present
+
+      - name: Zip artifact to upload
+        run: zip -r jb.zip .
       
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
         with:
           name: node-app
-          path: .
+          path: ./jb.zip
+          retention-days: 1
 
   deploy:
     runs-on: ubuntu-latest
@@ -53,4 +57,4 @@ jobs:
           app-name: 'jeffreybot'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_C9E514DF9744458FB53132E398D85B0B }}
-          package: .
+          package: ./jb.zip
