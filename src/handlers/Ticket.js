@@ -11,7 +11,7 @@ const { Guilds } = require("mongoose").models;
 const ms = require("ms");
 const Log = require("../utils/Log");
 const { ChannelModules } = require("../utils/Enums");
-const { DoesntExistsError, ModuleBannedError, ModuleDisabledError } = require("../errors");
+const { DoesntExistsError, ModuleBannedError, ModuleDisabledError, PermissionError } = require("../errors");
 
 const ticketCooldown = ms("1m");
 const activeCreatingTicket = new Map();
@@ -388,7 +388,8 @@ class Ticket {
 
     async #reopenTicket() {
         const interaction = this.interaction;
-        if (!this.interaction.member.roles.cache.hasAny(...this.staffRoles)) return interaction.editReply({ content: "Sólo el STAFF puede reabrir el ticket." });
+        if (!this.docGuild.checkStaff(interaction.member))
+            throw new PermissionError(interaction);
 
         let confirmation = await Confirmation("Abrir ticket", [`¿Estás segur@ de que quieres volver a abrir el ticket?`, `Se mencionará al creador original del ticket`], interaction, true);
         if (!confirmation) return;

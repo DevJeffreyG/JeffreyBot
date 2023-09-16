@@ -19,9 +19,7 @@ class Suggestion {
         this.user = user;
         this.doc = doc;
 
-        let staffRoles = this.doc.getStaffs();
-
-        if (!this.interaction.member.roles.cache.hasAny(...staffRoles)) throw new PermissionError(this.interaction);
+        if (!this.doc.checkStaff(this.interaction.member)) throw new PermissionError(this.interaction);
         if (!this.doc.moduleIsActive("functions.suggestions")) throw new ModuleDisabledError(interaction);
         if (this.interaction instanceof ModalSubmitInteraction) return await this.#modalHandler();
 
