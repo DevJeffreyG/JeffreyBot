@@ -391,6 +391,10 @@ GuildSchema.static("getById", async function (id) {
     return await this.findOne({ guild_id: id })
 });
 
+GuildSchema.method("checkStaff", function(member) {
+    return member.roles.cache.hasAny(...this.getStaffs());
+})
+
 GuildSchema.method("manageLevelUp", async function (level, userDoc) {
     const client = require("../../index");
     const guild = await client.guilds.fetch(this.guild_id);

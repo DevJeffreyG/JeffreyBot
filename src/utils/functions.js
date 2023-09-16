@@ -769,12 +769,11 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
 
         fields.push({
           up: value.title,
-          down: "Usuarios: " + String(value.betting.length)
+          down: `Usuarios: ${String(value.betting.length)} (${PrettyCurrency(guild, value.betting.map(x => x.quantity).reduce((prev, cur) => prev + cur, 0))})`
         })
       })
-
-      const progressbar = MultiplePercentages(elements, 10);
-      embed.data.description += "\n## " + progressbar;
+      
+      embed.data.description += "\n## " + MultiplePercentages(elements, 10);;
       embed.defFields(fields)
 
       await message.edit({

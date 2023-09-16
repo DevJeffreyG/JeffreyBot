@@ -1,10 +1,10 @@
-const { BaseInteraction, InteractionType, time, CommandInteraction, MessageComponentInteraction, ModalSubmitInteraction, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction, DiscordAPIError, ActionRowBuilder, codeBlock, TextInputStyle, ButtonBuilder, ButtonStyle, TimestampStyles } = require("discord.js");
+const { BaseInteraction, InteractionType, time, CommandInteraction, MessageComponentInteraction, ModalSubmitInteraction, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction, DiscordAPIError, ActionRowBuilder, codeBlock, TextInputStyle, ButtonBuilder, ButtonStyle, TimestampStyles, hyperlink, MessageFlags } = require("discord.js");
 
 const { Ticket, Suggestion, Button } = require("./src/handlers/");
 const { Bases, Colores } = require("./src/resources");
-const { ErrorEmbed, Embed, Categories, ValidateDarkShop, Confirmation, HumanMs, Modal, CustomEmbed, CustomTrophy, Enum, ShopTypes, Shop, PrettyCurrency, MinMaxInt, PrettifyNumber, Collector, MultiplePercentages } = require("./src/utils");
+const { ErrorEmbed, Embed, Categories, ValidateDarkShop, Confirmation, HumanMs, Modal, CustomEmbed, CustomTrophy, Enum, ShopTypes, Shop, PrettyCurrency, MinMaxInt, PrettifyNumber, Collector, MultiplePercentages, ProgressBar } = require("./src/utils");
 
-const { CommandNotFoundError, ToggledCommandError, DiscordLimitationError, BadCommandError, SelfExec, ModuleDisabledError, AlreadyUsingError, ExecutionError, InsuficientSetupError } = require("./src/errors/");
+const { CommandNotFoundError, ToggledCommandError, DiscordLimitationError, BadCommandError, SelfExec, ModuleDisabledError, ExecutionError, InsuficientSetupError, EconomyError, PermissionError } = require("./src/errors/");
 
 const JeffreyBotError = require("./src/errors/JeffreyBotError");
 
@@ -266,6 +266,9 @@ class Handlers {
                 return this.interaction.reply({ ephemeral: true, embeds: [new Embed({ type: "success", data: { desc: "Se registró tu voto" } })] });
             }
             case "reqTotalTrophy": {
+                if (!this.doc.checkStaff(this.interaction.member))
+                    throw new PermissionError(this.interaction);
+
                 const trophyId = splittedId[1];
                 await new Modal(this.interaction)
                     .defId(this.interaction.customId)
@@ -280,6 +283,9 @@ class Handlers {
             }
 
             case "reqMomentTrophy": {
+                if (!this.doc.checkStaff(this.interaction.member))
+                    throw new PermissionError(this.interaction);
+
                 const trophyId = splittedId[1];
                 await new Modal(this.interaction)
                     .defId(this.interaction.customId)
@@ -291,6 +297,9 @@ class Handlers {
             }
 
             case "givenMoneyTrophy": {
+                if (!this.doc.checkStaff(this.interaction.member))
+                    throw new PermissionError(this.interaction);
+
                 const trophyId = splittedId[1];
                 await new Modal(this.interaction)
                     .defId(this.interaction.customId)
@@ -302,6 +311,9 @@ class Handlers {
             }
 
             case "givenBoostTrophy": {
+                if (!this.doc.checkStaff(this.interaction.member))
+                    throw new PermissionError(this.interaction);
+
                 const trophyId = splittedId[1];
                 await new Modal(this.interaction)
                     .defId(this.interaction.customId)
@@ -315,6 +327,9 @@ class Handlers {
             }
 
             case "givenItemTrophy": {
+                if (!this.doc.checkStaff(this.interaction.member))
+                    throw new PermissionError(this.interaction);
+
                 const trophyId = splittedId[1];
                 await new Modal(this.interaction)
                     .defId(this.interaction.customId)
@@ -326,6 +341,9 @@ class Handlers {
             }
 
             case "itemInfo": {
+                if (!this.doc.checkStaff(this.interaction.member))
+                    throw new PermissionError(this.interaction);
+
                 const itemId = splittedId[1];
                 const shopType = Number(splittedId[2]);
 
@@ -340,6 +358,9 @@ class Handlers {
             }
 
             case "itemPrice": {
+                if (!this.doc.checkStaff(this.interaction.member))
+                    throw new PermissionError(this.interaction);
+
                 const itemId = splittedId[1];
                 const shopType = Number(splittedId[2]);
 
@@ -354,8 +375,20 @@ class Handlers {
 
             case "betOption": {
                 await this.interaction.deferReply({ ephemeral: true });
+                if (this.doc.checkStaff(this.interaction.member))
+                    throw new PermissionError(this.interaction);
+
                 const index = Number(splittedId[1]);
                 const bet = this.doc.data.bets.find(x => x.message_id === this.interaction.message.id);
+
+                // Revisar en caso de que no se haya alcanzado a cerrar
+                if (moment().isAfter(bet.closes_in))
+                    return await this.interaction.editReply({
+                        embeds: [
+                            new ErrorEmbed()
+                                .defDesc("Ya cerraron las apuestas.")
+                        ]
+                    })
 
                 // Revisar que no esté en ninguna otra
                 let filter = bet.options.filter(x => {
@@ -431,12 +464,31 @@ class Handlers {
                     time: ms("1m"),
                     wait: true
                 }).raw();
-                await collector.deferUpdate();
 
-                const value = Number(collector.customId.replace(".", ""));
+                let customVal = null;
+                if (collector.customId === "customPush") {
+                    await new Modal(collector)
+                        .defId(collector.customId)
+                        .defTitle("Aumentar apuesta")
+                        .addInput({ id: "bet", label: "Apuesta", style: TextInputStyle.Short, req: true, min: 1, placeholder: "Número entero positivo" })
+                        .show();
+
+                    let c = await collector.awaitModalSubmit({ filter: (i) => i.customId === "customPush" && i.user.id === this.interaction.user.id, time: ms("1m") });
+                    await c.deferUpdate();
+
+                    customVal = Math.round(new Modal(c).read().bet);
+                    if (customVal < 0)
+                        throw new EconomyError(this.interaction, ["Debes apostar un valor mayor a 0"], this.user.getCurrency());
+                }
+                //await collector.deferUpdate();
+                const value = customVal ?? Number(collector.customId.replaceAll(".", ""));
+                if (!this.user.affords(value))
+                    throw new EconomyError(this.interaction, ["No tienes tanto dinero para apostar"], this.user.getCurrency())
                 userBet.quantity += value;
-
                 bettings[userBetI] = userBet;
+
+                this.user.economy.global.currency -= value;
+                await this.user.save();
                 await this.doc.save();
                 await this.interaction.editReply({ embeds: [new Embed({ type: "success" })], components: [] });
 
@@ -468,6 +520,104 @@ class Handlers {
                 embed.defDesc(`# ${bet.title}\n### Las apuestas se cierran ${time(bet.closes_in, TimestampStyles.RelativeTime)}\n## ${progressbar}`)
 
                 await this.interaction.message.edit({ embeds: [embed] })
+                break;
+            }
+
+            case "betWinner": {
+                await this.interaction.deferReply({ ephemeral: true });
+                if (!this.doc.checkStaff(this.interaction.member))
+                    throw new PermissionError(this.interaction);
+
+                const index = Number(splittedId[1]);
+                const filter = x => x.message_id === this.interaction.message.id;
+                const bet = this.doc.data.bets.find(filter);
+                const betIndex = this.doc.data.bets.findIndex(filter);
+                const loserOptions = bet.options.slice();
+                loserOptions.splice(index, 1);
+                const winnerOption = bet.options[index];
+
+                let confirmation = await Confirmation("Declarar ganador", [
+                    `Los usuarios (\`${winnerOption.betting.length}\`) que hayan apostado por esta opción recibirán el dinero de las apuestas de las otras.`,
+                    "Esta acción no se puede deshacer."
+                ], this.interaction)
+                if (!confirmation) return;
+
+                const winnerTotal = winnerOption.betting.map(x => x.quantity).reduce((prev, cur) => prev + cur, 0)
+                const loserTotal = loserOptions.flatMap(x => x.betting).map(x => x.quantity).reduce((prev, cur) => prev + cur, 0)
+
+                // Devolver el dinero a los ganadores
+                for await (const winner of winnerOption.betting) {
+                    let u = await Users.getWork({ user_id: winner.user_id, guild_id: this.interaction.guildId });
+                    const won = (winnerTotal + loserTotal) / (winner.quantity / winnerTotal);
+
+                    console.log("%s ganó %s Currency", u.user_id, won);
+
+                    await u.addCurrency(won);
+                }
+
+                this.doc.data.bets.splice(betIndex, 1);
+
+                await this.interaction.message.edit({
+                    components: [], embeds: [
+                        new Embed(this.interaction.message.embeds[0])
+                            .defDesc(`# ${bet.title}: ${winnerOption.name}\n## ${ProgressBar(100, { fullChr: winnerOption.square })}
+### Se repartieron ${PrettyCurrency(this.interaction.guild, loserTotal)}.`)
+                    ]
+                })
+                await this.interaction.editReply({ embeds: [new Embed({ type: "success" })] })
+                await this.doc.save();
+                break;
+            }
+
+            case "cancelBet": {
+                await this.interaction.deferReply({ ephemeral: true })
+                if (!this.doc.checkStaff(this.interaction.member))
+                    throw new PermissionError(this.interaction);
+
+                let confirmation = await Confirmation("Cancelar apuesta", [
+                    `Se devolverán los ${Currency.name} a todos los usuarios que apostaron`,
+                    `Se les enviará un mensaje directo diciéndoles que se agregó dinero a su cuenta`,
+                    `No habrá ganador`
+                ], this.interaction);
+                if (!confirmation) return;
+
+                const filter = x => x.message_id === this.interaction.message.id;
+                const bet = this.doc.data.bets.find(filter);
+
+                for (const option of bet.options) {
+                    for await (const user of option.betting) {
+                        const member = this.interaction.guild.members.cache.get(user.user_id);
+                        const userDoc = await Users.getWork({ user_id: user.user_id, guild_id: this.interaction.guildId });
+
+                        try {
+                            await userDoc.addCurrency(user.quantity);
+                            await member.send({
+                                embeds: [
+                                    new Embed()
+                                        .defColor(Colores.verde)
+                                        .defDesc(`**—** Se agregaron ${PrettyCurrency(this.interaction.guild, user.quantity)}.
+**—** El STAFF canceló una ${hyperlink("apuesta", this.interaction.message.url)} en la que participaste.`)
+                                ],
+                                flags: [MessageFlags.SuppressNotifications]
+                            });
+                        } catch (err) {
+                            if (err instanceof DiscordAPIError) {
+                                console.log("🔴 No se pudo enviar el DM a %s", member.user.username);
+                            }
+                        }
+                    }
+                }
+
+                await this.interaction.editReply({ embeds: [new Embed({ type: "success" })] });
+
+                await this.interaction.message.edit({
+                    embeds: [
+                        new Embed(this.interaction.message.embeds[0])
+                            .defDesc(`## El STAFF canceló esta apuesta\n### Todos los ${Currency.name} fueron devueltos.`)
+                            .defColor(Colores.rojo)
+                    ],
+                    components: []
+                })
                 break;
             }
 
