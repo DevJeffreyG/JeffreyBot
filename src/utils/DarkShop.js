@@ -24,6 +24,7 @@ class DarkShop {
         this.now = moment();
 
         this.Emojis = this.client.getCustomEmojis(this.guild.id);
+        this.darkshopDisabled = false;
     }
 
     async #sunday() {
@@ -42,7 +43,7 @@ class DarkShop {
         // ANUNCIARLO
         if (!this.guilddoc) await this.#getGuildDoc();
 
-        const dsNewsRole = await this.guild.roles.fetch(this.guilddoc.getRole("announcements.darkshop"))
+        const dsNewsRole = this.guild.roles.cache.get(this.guilddoc.getRole("announcements.darkshop")) ?? "";
 
         const messages = [
             "Se termina una semana, y empieza la búsqueda de beneficios.",
@@ -59,7 +60,7 @@ class DarkShop {
                 .setTarget(ChannelModules.DarkShopLogs)
                 .setReason(LogReasons.DSSunday)
                 .send({
-                    content: dsNewsRole?.toString() ?? null,
+                    content: dsNewsRole.toString(),
                     embeds: [
                         new Embed()
                             .defAuthor({ text: "Domingo", icon: this.client.EmojisObject.DarkShop.url })
@@ -85,6 +86,13 @@ class DarkShop {
     }
 
     async #fetchInfo() {
+        if (!this.guilddoc) await this.#getGuildDoc();
+        this.darkshopDisabled = !this.guilddoc.moduleIsActive("functions.darkshop");
+
+        if (this.darkshopDisabled) return;
+        const FetchThisGuild = this.#requireFetch();
+        if (!this.client.isThisFetched(this.guild.id)) await FetchThisGuild(this.client, this.guild);
+
         if (!this.doc || !this.doc?.inflation.tendency_type) return this.#createTendency()
 
         this.values = this.doc.inflation.values;
@@ -513,9 +521,6 @@ class DarkShop {
     }
 
     async inflationWork() {
-        if (!this.guilddoc) await this.#getGuildDoc();
-        if (!this.guilddoc.moduleIsActive("functions.darkshop")) return;
-
         if (!this.doc) await this.#getDoc();
         await this.#fetchInfo();
 
@@ -689,6 +694,11 @@ ${tz.now.day() != 0 ? `**—** La inflación inicial fue \`${this.baseValue}%\`.
     #requirePretty() {
         const { PrettyCurrency } = require("./functions");
         return PrettyCurrency;
+    }
+
+    #requireFetch() {
+        const { FetchThisGuild } = require("./functions");
+        return FetchThisGuild;
     }
 
 
