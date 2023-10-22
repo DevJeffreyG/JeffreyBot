@@ -156,6 +156,7 @@ class RouletteItem {
                     }
 
                     this.user.economy.global.currency -= this.numbers;
+                    await this.doc.addToBank(this.numbers, "gambling");
                 }
                 else if (this.nonumbers === "+") {
                     this.#adjust();

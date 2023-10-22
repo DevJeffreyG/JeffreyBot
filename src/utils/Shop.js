@@ -291,6 +291,7 @@ class Shop {
         }
 
         this.#user.set(this.config.currency.user_path, this.#user.get(this.config.currency.user_path) - price);
+        await this.#doc.addToBank(price, "user_actions");
         inventoryUser.data.inventory.push({ shopType: this.config.info.type, item_id: item.id, use_id: newUseId })
 
         let desc = [

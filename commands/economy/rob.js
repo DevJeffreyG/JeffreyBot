@@ -63,6 +63,7 @@ command.execute = async (interaction, models, params, client) => {
         suggester = getAuthor(failResponse);
 
         user.economy.global.currency -= failedValue;
+        await doc.addToBank(failedValue, "user_actions");
         await user.save();
 
         embed = new Embed()

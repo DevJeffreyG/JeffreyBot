@@ -1,6 +1,7 @@
-const { Command, Confirmation, Embed, Sleep, GetRandomItem, PrettyCurrency } = require("../../src/utils")
+const { Command, Confirmation, Embed, Sleep, PrettyCurrency } = require("../../src/utils")
 const { Colores } = require("../../src/resources");
 const { EconomyError } = require("../../src/errors");
+const Chance = require("chance");
 
 const command = new Command({
     name: "pay",
@@ -74,13 +75,23 @@ command.execute = async (interaction, models, params, client) => {
         });
     }
 
+    let isDonation = recieverMember.id === client.user.id;
+    let memberText = recieverMember.user.bot ? `**🤖 ${recieverMember}**` : `**👤 ${recieverMember}**`
     let toConfirm = [
-        `¿Deseas pagarle ${PrettyCurrency(guild, quantity)} a ${recieverMember}?`,
+        `¿Deseas pagarle ${PrettyCurrency(guild, quantity)} a ${memberText}?`,
         `Tienes ${PrettyCurrency(guild, author_user.getCurrency())}.`,
-        `${recieverMember} tiene ${PrettyCurrency(guild, reciever.getCurrency())}.`,
+        `${memberText} tiene ${PrettyCurrency(guild, reciever.getCurrency())}.`,
         `Se mencionará al destinatario.`,
         `Esto no se puede deshacer, a menos que te los den devuelta.`
     ];
+
+    if(isDonation) {
+        toConfirm = [
+            `¿Deseas donar ${PrettyCurrency(guild, quantity)} al **banco de ${guild.name}**?`,
+            `Tienes ${PrettyCurrency(guild, author_user.getCurrency())}.`,
+            `Esto no se puede deshacer.`
+        ];
+    }
 
     let confirmation = await Confirmation("Pagar dinero", toConfirm, interaction);
     if (!confirmation) return;
@@ -109,7 +120,9 @@ command.execute = async (interaction, models, params, client) => {
     }
 
     author_user.economy.global.currency -= quantity;
-    await reciever.addCurrency(quantity);
+    if(isDonation) await doc.addToBank(quantity, "others");
+    else await reciever.addCurrency(quantity);
+
     await author_user.save();
 
     const messenger = `**${author}**`;
@@ -124,7 +137,14 @@ command.execute = async (interaction, models, params, client) => {
         `${messenger} entregó ${pay} a ${recieverMember}`
     ];
 
-    let description = GetRandomItem(possibleDescriptions);
+    let donationDescriptiopns = [
+        `${messenger} donó ${pay} al banco del servidor.`,
+        `El banco recibió los ${pay} de ${messenger}.`,
+        `${messenger} dió un cheque de ${pay} al banco.`,
+        `${messenger} entregó ${pay} al banco.`
+    ];
+
+    let description = new Chance().pickone(isDonation ? donationDescriptiopns : possibleDescriptions);
 
     let doneEmbed = new Embed({
         type: "success",
@@ -133,7 +153,10 @@ command.execute = async (interaction, models, params, client) => {
         }
     })
     await interaction.editReply({ embeds: [new Embed({ type: "success" })] });
-    return await interaction.followUp({ content: `**${author.username}** ➡️ **${recieverMember}**.`, embeds: [doneEmbed] });
+    return await interaction.followUp({
+        content: isDonation ? `**${author.username}** ➡️ **${guild.name}**.` : `**${author.username}** ➡️ **${recieverMember}**.`,
+        embeds: [doneEmbed]
+    });
 }
 
 module.exports = command;
