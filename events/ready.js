@@ -1,6 +1,7 @@
 const { Bases } = require("../src/resources");
 
 const { Collection, Client, time, chatInputApplicationCommandMention } = require("discord.js");
+const { Guilds } = require("mongoose").models;
 
 const Managers = require("../src/utils/Managers");
 const CustomEmojis = require("../src/utils/CustomEmojis");
@@ -118,6 +119,22 @@ module.exports = async (client) => {
                 console.error(err);
             }
         }, null, true, "America/Bogota", null, false)
+
+        // Cada semana
+        new CronJob("0 0 0 * * 0", async function() {
+            try {
+                const doc = await Guilds.getWork(guild.id);
+
+                // Ajustar el promedio
+                let average = await functions.FindAverage(guild)
+                doc.data.average_currency = average;
+
+                await doc.save();
+            } catch(err) {
+                console.log("🔴 Hubo un error con las semanales")
+                console.error(err);
+            }
+        }, null, true, "America/Bogota", null, true)
     }
 
     // Cada minuto

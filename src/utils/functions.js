@@ -604,10 +604,6 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
       .catch(err => console.log(err));
   }
 
-  // Ajustar el promedio
-  let average = await FindAverage(guild)
-  doc.data.average_currency = average;
-
   // buscar items deshabilitados temporalmente
   Shops.getWork(guild.id).then((shop) => {
     for (const item of shop.items) {

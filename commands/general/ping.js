@@ -1,5 +1,6 @@
-const { Command, Categories, Embed } = require("../../src/utils")
+const { Command, Embed } = require("../../src/utils")
 const { Colores } = require("../../src/resources/");
+const { time } = require("discord.js");
 
 const command = new Command({
   name: "ping",
@@ -14,9 +15,10 @@ command.execute = async (interaction, models, params, client) => {
     let API = (client.ws.ping).toFixed(2)
 
     let embed = new Embed()
-      .defAuthor({ text: `🔔 Pong!`, title: true })
-      .defField("📶 Ping", `${diff}ms`)
-      .defField("💻 API", `${API}ms`)
+      .defTitle(`🔔 Pong!`)
+      .defDesc(`### ${client.user.username} v${client.version} Online desde ${time(client.readyAt, "R")}`)
+      .defField("📶 Ping", `${diff}ms`, true)
+      .defField("💻 API", `${API}ms`, true)
 
     switch (true) {
       case diff >= 180:
