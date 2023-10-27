@@ -28,8 +28,8 @@ command.execute = async (interaction, models, params, client) => {
         ]
     });
 
-    let maximum = doc.settings.quantities.currency.coins.max;
-    let min = doc.settings.quantities.currency.coins.min;
+    let maximum = doc.settings.quantities.limits.currency.coins.max;
+    let min = doc.settings.quantities.limits.currency.coins.min;
     let fakeAdd = maximum * 50;
 
     if (doc.toAdjust("coins")) {

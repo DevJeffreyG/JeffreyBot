@@ -16,6 +16,7 @@ command.addOption({
 })
 
 command.execute = async (interaction, models, params, client) => {
+    if(params.usuario.member.id === client.user.id) return require("./bank").execute(interaction, models, params, client);
     if (!interaction.deferred) await interaction.deferReply();
     const { Users, CustomElements } = models
     const { usuario } = params;

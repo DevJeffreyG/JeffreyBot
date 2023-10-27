@@ -85,11 +85,16 @@ class DarkShop {
         await this.#fetchInfo()
     }
 
-    async #fetchInfo() {
+    async checkDisabled() {
         if (!this.guilddoc) await this.#getGuildDoc();
         this.darkshopDisabled = !this.guilddoc.moduleIsActive("functions.darkshop");
+        return this.darkshopDisabled;
+    }
 
+    async #fetchInfo() {
+        await this.checkDisabled();
         if (this.darkshopDisabled) return;
+        
         const FetchThisGuild = this.#requireFetch();
         if (!this.client.isThisFetched(this.guild.id)) await FetchThisGuild(this.client, this.guild);
 

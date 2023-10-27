@@ -58,8 +58,9 @@ class Top {
     }
 
     async #currencyTop() {
-        const { Currency, DarkCurrency } = this.interaction.client.getCustomEmojis(this.interaction.guild.id);
+        const { Currency } = this.interaction.client.getCustomEmojis(this.interaction.guild.id);
         const darkshop = new DarkShop(this.interaction.guild);
+        const dsDisabled = await darkshop.checkDisabled();
 
         this.base.title = `Top de ${Currency.name}`;
 
@@ -69,7 +70,9 @@ class Top {
             // agregar la cantidad de darkcurrency
             if (member && !member.user.bot) {
                 let darkcurrency = user.economy.dark?.currency ?? 0;
-                let darkcurrencyValue = user.economy.dark?.currency ? await darkshop.equals(null, user.getDarkCurrency()) : 0;
+                let darkcurrencyValue = 0;
+                if(!dsDisabled) darkcurrencyValue = await darkshop.equals(null, user.getDarkCurrency()) ?? 0;
+
                 let finalQuantity = darkcurrencyValue != 0 ? darkcurrencyValue + user.getCurrency() : user.getCurrency();
 
                 let toPush = {

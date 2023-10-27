@@ -1546,6 +1546,7 @@ const FindAverage = async function (guild) {
   //const doc_guild = await Guilds.getWork(guild.id);
   const users = await Users.find({ guild_id: guild.id });
   const darkshop = new DarkShop(guild);
+  const disabled = await darkshop.checkDisabled();
 
   let top = [];
 
@@ -1555,7 +1556,10 @@ const FindAverage = async function (guild) {
 
     if (member && !member.user.bot) {
       let darkcurrency = user.economy.dark?.currency ?? 0;
-      let darkcurrencyValue = await darkshop.equals(null, darkcurrency) ?? 0;
+      let darkcurrencyValue = 0;
+      
+      if(!disabled) darkcurrencyValue = await darkshop.equals(null, darkcurrency) ?? 0;
+      
       let finalQuantity = Math.round(darkcurrencyValue + user.getCurrency());
 
       if (finalQuantity > 0 || (finalQuantity === 0 && !top.find(x => x.money === 0))) top.push({
