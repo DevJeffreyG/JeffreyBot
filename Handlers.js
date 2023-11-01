@@ -575,9 +575,9 @@ class Handlers {
                     throw new PermissionError(this.interaction);
 
                 let confirmation = await Confirmation("Cancelar apuesta", [
-                    `Se devolverán los ${Currency.name} a todos los usuarios que apostaron`,
-                    `Se les enviará un mensaje directo diciéndoles que se agregó dinero a su cuenta`,
-                    `No habrá ganador`
+                    `Se devolverán los ${Currency.name} a todos los usuarios que apostaron.`,
+                    `Se les enviará un mensaje directo diciéndoles que se agregó dinero a su cuenta.`,
+                    `No habrá ganador.`
                 ], this.interaction);
                 if (!confirmation) return;
 
@@ -613,7 +613,7 @@ class Handlers {
                 await this.interaction.message.edit({
                     embeds: [
                         new Embed(this.interaction.message.embeds[0])
-                            .defDesc(`## El STAFF canceló esta apuesta\n### Todos los ${Currency.name} fueron devueltos.`)
+                            .defDesc(`## ${bet.title}: El STAFF canceló esta apuesta\n### Todos los ${Currency.name} fueron devueltos.`)
                             .defColor(Colores.rojo)
                     ],
                     components: []

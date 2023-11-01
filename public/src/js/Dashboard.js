@@ -482,7 +482,7 @@ class Dashboard {
         this.#findAndSync("general-announcements", channels)
         this.#findAndSync("general-halloffame", channels)
 
-        this.#findAndSync("darkshop-events", channels)
+        this.#findAndSync("logs-darkshop_logs", channels)
 
         this.#findAndSync("logs-guild_logs", channels)
         this.#findAndSync("logs-moderation_logs", channels)
@@ -1160,7 +1160,7 @@ class Dashboard {
 
         let events = this.#createChannelSelector("cdsevents", {
             title: "Eventos",
-            id: "darkshop-events",
+            id: "logs-darkshop_logs",
             max: 1
         });
 
