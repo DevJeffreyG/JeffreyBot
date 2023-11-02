@@ -37,6 +37,7 @@
     "googleapis": "^123.0.0",
     "moment-timezone": "^0.5.43",
     "mongoose": "^7.4.2",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "ws": "^8.14.2"
   }
 }
