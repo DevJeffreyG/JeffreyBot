@@ -22,7 +22,7 @@ command.execute = async (interaction, models, params, client) => {
 
     const user = usuario.value;
 
-    await GlobalDatas.findOneAndRemove({
+    await GlobalDatas.findOneAndDelete({
         type: "temporalGuildBan",
         "info.guild_id": interaction.guild.id,
         "info.user_id": user
