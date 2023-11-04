@@ -1,5 +1,6 @@
 const { ApiUpdate } = require("../../../src/utils/Enums");
 const { UpdateObj } = require("../../../src/utils/functions");
+const { Verify } = require("../js/Functions");
 
 const Express = require("express")();
 const { Guilds, ChangeLogs } = require("mongoose").models;
@@ -10,6 +11,7 @@ const { Guilds, ChangeLogs } = require("mongoose").models;
  */
 module.exports = (app) => {
     app.post("/api/db/update", async (req, res) => {
+        if (!Verify(req)) return res.status(403).send({ message: "Not authorized" });
         try {
             let response = true;
             const doc = await Guilds.getWork(req.header("guildid"));
@@ -121,6 +123,7 @@ module.exports = (app) => {
     })
 
     app.post("/api/db/add-changelog", async (req, res) => {
+        if (!Verify(req)) return res.status(403).send({ message: "Not authorized" });
         try {
             const { info, changes } = req.body
             let query = await ChangeLogs.create(info, changes)
