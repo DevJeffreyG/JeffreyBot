@@ -12,7 +12,8 @@ module.exports = (app) => {
         } catch (err) {
             console.error("🌎", err);
         }
-    })
+    });
+
     app.get("/api/db/get-changelogs", async (req, res) => {
         if (!Verify(req)) res.status(403).send({ message: "Not authorized" });
         try {
@@ -21,5 +22,5 @@ module.exports = (app) => {
         } catch (err) {
             console.error("🌎", err);
         }
-    })
+    });
 }

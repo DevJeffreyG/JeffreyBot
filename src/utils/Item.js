@@ -1,6 +1,7 @@
 const { GuildMember, StringSelectMenuBuilder, ActionRowBuilder, BaseInteraction, CommandInteraction, Collection } = require("discord.js")
 const moment = require("moment-timezone");
 const ms = require("ms")
+const superagent = require("superagent");
 const Chance = require("chance");
 
 const { ItemTypes, ItemObjetives, ItemActions, ItemEffects, LogReasons, ChannelModules, ShopTypes, PetAttacksType, Enum } = require("./Enums");
@@ -15,9 +16,10 @@ const ErrorEmbed = require("./ErrorEmbed");
 const Colores = require("../resources/colores.json");
 const Collector = require("./Collector");
 const Pet = require("./Pet");
+const JeffreyBotError = require("../errors/JeffreyBotError");
 
 const models = require("mongoose").models;
-const { Shops, DarkShops, Users, PetShops, GlobalDatas } = models;
+const { Shops, DarkShops, Users, PetShops, EXShops, GlobalDatas } = models;
 
 class Item {
     /**
@@ -71,6 +73,9 @@ class Item {
                 break;
             case ShopTypes.PetShop:
                 this.shop = await PetShops.getWork(this.interaction.guild.id);
+                break;
+            case ShopTypes.EXShop:
+                this.shop = await EXShops.getWork(this.interaction.guild.id);
                 break;
             default:
                 this.shop = await Shops.getWork(this.interaction.guild.id);
@@ -493,6 +498,31 @@ class Item {
                 await pet.save();
                 this.removeItemFromInv();
                 return true;
+
+            case ItemTypes.EXKeyboard:
+                console.log("🟩 EX Keyboard!");
+
+                try {
+                    let q = await superagent
+                        .post(`${process.env.HOME_PAGE}/api/ws/item-use`)
+                        .send({
+                            item: this.item,
+                            guild: this.interaction.guild
+                        })
+                        .set("auth", process.env.TOKEN)
+
+                    if(!q.body) throw new JeffreyBotError(this.interaction, "No hubo cliente a quien enviar la respuesta");
+
+                    return true;
+                } catch (err) {
+                    if(!(err instanceof JeffreyBotError)) console.error(err);
+
+                    await this.interaction.editReply({embeds: [
+                        new ErrorEmbed().defDesc(`No se encontró un Cliente conectado para usar este item.`)
+                    ]})
+                    return false;
+                }
+                break;
             default:
                 console.log("Item simple! %s", itemType)
                 return await this.#activateItem();

@@ -43,6 +43,7 @@ class Enum {
             Level: "Nivel",
             Shop: "Tienda",
             PetShop: "Tienda de Mascotas",
+            EXShop: "Tienda Externa",
             Positive: "Positivo",
             Negative: "Negativo",
             Add: "Agrega",
@@ -140,6 +141,7 @@ const Categories = new Enum({
  * - SkipFirewall
  * - Pet
  * - PetStatsModifier
+ * - EXKeyboard
  */
 const ItemTypes = new Enum({
     StackOverflow: 1,
@@ -149,7 +151,8 @@ const ItemTypes = new Enum({
     Temporal: 5,
     SkipFirewall: 6,
     Pet: 7,
-    PetStatsModifier: 8
+    PetStatsModifier: 8,
+    EXKeyboard: 9
 }).values
 
 /**
@@ -394,11 +397,13 @@ const ChangelogTypes = new Enum({
  * - Shop
  * - DarkShop
  * - PetShop
+ * - EXShop
  */
 const ShopTypes = new Enum({
     Shop: 1,
     DarkShop: 2,
-    PetShop: 3
+    PetShop: 3,
+    EXShop: 4
 }).values;
 
 /**

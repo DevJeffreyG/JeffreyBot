@@ -43,7 +43,7 @@ connection.then(async (c) => {
   client.version = pckVersion;
   //client.on("debug", console.log)
 
-  new CronJob('0 0 31 11 *', async function () { // reiniciar precios de la darkshop anualmente
+  new CronJob('0 0 31 12 *', async function () { // reiniciar precios de la darkshop anualmente
     const users = await require("mongoose").models.Users.find();
 
     users.forEach(user => {

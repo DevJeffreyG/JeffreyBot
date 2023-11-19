@@ -10,6 +10,8 @@ const { Guilds, ChangeLogs } = require("mongoose").models;
  * @param {Express} app 
  */
 module.exports = (app) => {
+    const { WSServer } = app;
+
     app.post("/api/db/update", async (req, res) => {
         if (!Verify(req)) return res.status(403).send({ message: "Not authorized" });
         try {
@@ -131,6 +133,23 @@ module.exports = (app) => {
             res.send(query ? true : false);
         } catch (err) {
             console.error("🌎", err);
+        }
+    })
+
+    app.post("/api/ws/item-use", async (req, res) => {
+        if (!Verify(req)) return res.status(403).send({ message: "Not authorized" });
+
+        try {
+            const { item, guild } = req.body
+
+            const Client = WSServer.Clients.get(guild.id);
+            Client.send({ message: "Se usó un item desde el servidor configurado!" })
+            Client.send({ message: JSON.stringify(item), json: true })
+
+            res.send(true);
+        } catch (err) {
+            console.log(err);
+            res.send(false);
         }
     })
 }

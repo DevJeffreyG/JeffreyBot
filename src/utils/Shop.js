@@ -1,5 +1,5 @@
 const { Emoji, CommandInteraction, User, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, TextInputStyle } = require("discord.js");
-const { Shops, DarkShops, PetShops, Users } = require("mongoose").models;
+const { Shops, DarkShops, PetShops, EXShops, Users } = require("mongoose").models;
 const { Colores } = require("../resources");
 const { ShopTypes, Enum, ItemTypes, ItemObjetives, ItemActions, YesNo } = require("./Enums");
 const InteractivePages = require("./InteractivePages");
@@ -110,6 +110,17 @@ class Shop {
                     desc: `**—** ¡Bienvenid@ a la tienda de mascotas! Para comprar items usa ${this.client.mentionCommand("petbuy")}.`,
                     color: Colores.verde,
                     model: PetShops,
+                    query: this.interaction.guild.id
+                })
+                break;
+
+            case ShopTypes.EXShop:
+                this.setCurrency(this.client.getCustomEmojis(this.interaction.guild.id).Currency)
+                this.setInfo({
+                    name: `Tienda Externa de ${this.interaction.guild.name}`,
+                    desc: `**—** ¡Bienvenid@ a la tienda externa! Para comprar items usa ${this.client.mentionCommand("exbuy")}.\n**—** Puedes interactuar con cosas en la vida real con estos items.`,
+                    color: Colores.verde,
+                    model: EXShops,
                     query: this.interaction.guild.id
                 })
                 break;
@@ -481,8 +492,12 @@ ${codeBlock(item.description)}
         // mascotas
         let itemConfig = null;
         let petStats = null;
-
         let stats = null;
+
+        // external
+        let getKeyActions = null;
+        let actions = [];
+        let delays = {};
 
         if (params.especial?.value) { // Sí es un item especial
             let select = new StringSelectMenuBuilder()
@@ -490,15 +505,6 @@ ${codeBlock(item.description)}
                 .setPlaceholder("Escoge el tipo de Item")
 
             switch (this.config.info.type) {
-                case ShopTypes.Shop:
-                    select
-                        .setOptions(
-                            new StringSelectMenuOptionBuilder()
-                                .setLabel("No especial")
-                                .setDescription("No hay items especiales para este tipo de tienda")
-                                .setValue("0")
-                        );
-                    break;
                 case ShopTypes.DarkShop:
                     select
                         .setOptions(
@@ -560,6 +566,40 @@ ${codeBlock(item.description)}
                         return new Modal(c).read();
                     }
                     break;
+
+                case ShopTypes.EXShop:
+                    select
+                        .setOptions(
+                            new StringSelectMenuOptionBuilder()
+                                .setLabel("Teclado")
+                                .setDescription("Controla el teclado de un PC remotamente")
+                                .setValue(String(ItemTypes.EXKeyboard))
+                        )
+
+                    getKeyActions = async (inter) => {
+                        await new Modal(inter)
+                            .setCustomId("externalItemConfig")
+                            .setTitle("Configuración del item")
+                            .addInput({ id: "actions", value: "ALT TAB\nt\ne\nx\nt\no", label: "Teclas pulsadas", placeholder: "Teclas presionadas al tiempo en una sola linea. Teclas separadas por espacios.", style: TextInputStyle.Paragraph })
+                            .addInput({ id: "keysDelay", value: "50", label: "Delay de teclas (ms)", placeholder: "Escribe un número entero positivo", style: TextInputStyle.Short })
+                            .addInput({ id: "globalUseDelay", value: "10m", label: "Delay de uso global", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
+                            .addInput({ id: "individualUseDelay", value: "10m", label: "Delay de uso individual", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
+                            .show()
+
+                        let c = await inter.awaitModalSubmit({ filter: (i) => i.customId === "externalItemConfig" && i.user.id === this.interaction.user.id, time: ms("5m") });
+                        await c.deferUpdate();
+                        return new Modal(c).read();
+                    }
+                    break;
+
+                default:
+                    select
+                        .setOptions(
+                            new StringSelectMenuOptionBuilder()
+                                .setLabel("No especial")
+                                .setDescription("No hay items especiales para este tipo de tienda")
+                                .setValue("0")
+                        );
             }
 
             let components = [
@@ -583,11 +623,23 @@ ${codeBlock(item.description)}
                         stats = await itemConfig(collector);
                         stats.attack = 0;
                         stats.defense = 0;
-
-                        console.log(stats);
                         break;
                 }
-            }
+            } else
+                if (this.config.info.type === ShopTypes.EXShop) {
+                    switch (specialType) {
+                        case ItemTypes.EXKeyboard:
+                            let userActions = await getKeyActions(collector);
+
+                            actions = userActions.actions?.split("\n") ?? [];
+
+                            if (userActions.keysDelay) delays["keys"] = Number(userActions.keysDelay);
+                            if (userActions.globalUseDelay) delays["global"] = ms(userActions.globalUseDelay);
+                            if (userActions.individualUseDelay) delays["individual"] = ms(userActions.individualUseDelay);
+                            break;
+                    }
+
+                }
 
             if (specialType === 0) specialType = null;
         }
@@ -604,8 +656,11 @@ ${codeBlock(item.description)}
         const item = this.shopdoc.findItem(params.id.value, false);
         if (!item) throw this.#noItemError;
 
-        if (stats) {
-            item.stats = Object.assign({}, item.stats, stats);
+        if (stats) item.stats = Object.assign({}, item.stats, stats);
+        if(this.config.info.type === ShopTypes.EXShop) {
+            item.use_info.external_info.type = specialType;
+            if (actions.length > 0) item.use_info.external_info.actions = actions;
+            item.use_info.external_info.delays = Object.assign(item.use_info.external_info.delays, delays);
         }
 
         item.reply = params.reply?.value ?? item.reply;
