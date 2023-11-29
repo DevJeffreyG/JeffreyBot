@@ -495,7 +495,7 @@ ${codeBlock(item.description)}
         let stats = null;
 
         // external
-        let getKeyActions = null;
+        let getKeyActions = null, getMediaActions = null;
         let actions = [];
         let delays = {};
 
@@ -573,12 +573,16 @@ ${codeBlock(item.description)}
                             new StringSelectMenuOptionBuilder()
                                 .setLabel("Teclado")
                                 .setDescription("Controla el teclado de un PC remotamente")
-                                .setValue(String(ItemTypes.EXKeyboard))
+                                .setValue(String(ItemTypes.EXKeyboard)),
+                            new StringSelectMenuOptionBuilder()
+                                .setLabel("Multimedia")
+                                .setDescription("Reproduce multimedia a un PC remotamente")
+                                .setValue(String(ItemTypes.EXMedia))
                         )
 
                     getKeyActions = async (inter) => {
                         await new Modal(inter)
-                            .setCustomId("externalItemConfig")
+                            .setCustomId("exKeysItemConfig")
                             .setTitle("Configuración del item")
                             .addInput({ id: "actions", value: "ALT TAB\nt\ne\nx\nt\no", label: "Teclas pulsadas", placeholder: "Teclas presionadas al tiempo en una sola linea. Teclas separadas por espacios.", style: TextInputStyle.Paragraph })
                             .addInput({ id: "keysDelay", value: "50", label: "Delay de teclas (ms)", placeholder: "Escribe un número entero positivo", style: TextInputStyle.Short })
@@ -586,7 +590,21 @@ ${codeBlock(item.description)}
                             .addInput({ id: "individualUseDelay", value: "10m", label: "Delay de uso individual", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
                             .show()
 
-                        let c = await inter.awaitModalSubmit({ filter: (i) => i.customId === "externalItemConfig" && i.user.id === this.interaction.user.id, time: ms("5m") });
+                        let c = await inter.awaitModalSubmit({ filter: (i) => i.customId === "exKeysItemConfig" && i.user.id === this.interaction.user.id, time: ms("5m") });
+                        await c.deferUpdate();
+                        return new Modal(c).read();
+                    }
+
+                    getMediaActions = async (inter) => {
+                        await new Modal(inter)
+                            .setCustomId("exMediaItemConfig")
+                            .setTitle("Configuración del item")
+                            .addInput({ id: "urls", label: "Multimedia(s)", style: TextInputStyle.Paragraph })
+                            .addInput({ id: "globalUseDelay", value: "10m", label: "Delay de uso global", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
+                            .addInput({ id: "individualUseDelay", value: "10m", label: "Delay de uso individual", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
+                            .show()
+
+                        let c = await inter.awaitModalSubmit({ filter: (i) => i.customId === "exMediaItemConfig" && i.user.id === this.interaction.user.id, time: ms("5m") });
                         await c.deferUpdate();
                         return new Modal(c).read();
                     }
@@ -637,6 +655,14 @@ ${codeBlock(item.description)}
                             if (userActions.globalUseDelay) delays["global"] = ms(userActions.globalUseDelay);
                             if (userActions.individualUseDelay) delays["individual"] = ms(userActions.individualUseDelay);
                             break;
+                        case ItemTypes.EXMedia:
+                            let mediaActions = await getMediaActions(collector);
+
+                            actions = mediaActions.urls?.split("\n") ?? [];
+
+                            if (mediaActions.globalUseDelay) delays["global"] = ms(mediaActions.globalUseDelay);
+                            if (mediaActions.individualUseDelay) delays["individual"] = ms(mediaActions.individualUseDelay);
+                            break;
                     }
 
                 }
@@ -657,7 +683,7 @@ ${codeBlock(item.description)}
         if (!item) throw this.#noItemError;
 
         if (stats) item.stats = Object.assign({}, item.stats, stats);
-        if(this.config.info.type === ShopTypes.EXShop) {
+        if (this.config.info.type === ShopTypes.EXShop) {
             item.use_info.external_info.type = specialType;
             if (actions.length > 0) item.use_info.external_info.actions = actions;
             item.use_info.external_info.delays = Object.assign(item.use_info.external_info.delays, delays);

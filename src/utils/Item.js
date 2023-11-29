@@ -499,6 +499,7 @@ class Item {
                 this.removeItemFromInv();
                 return true;
 
+            case ItemTypes.EXMedia:
             case ItemTypes.EXKeyboard:
                 console.log("🟩 EX Item!");
 
