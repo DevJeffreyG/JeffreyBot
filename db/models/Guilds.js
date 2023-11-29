@@ -1,6 +1,7 @@
 const { Collection } = require('discord.js');
 const mongoose = require('mongoose');
 const ms = require("ms");
+const Chance = require("chance");
 
 const { ModifierType } = require('../../src/utils/Enums');
 
@@ -145,6 +146,11 @@ const GuildSchema = new Schema({
             gambling: { type: Number, default: 0, validate: [integerValidator, positiveWithZeroValidator] },
             user_actions: { type: Number, default: 0, validate: [integerValidator, positiveWithZeroValidator] },
             others: { type: Number, default: 0, validate: [integerValidator, positiveWithZeroValidator] }
+        },
+        client: {
+            pin: { type: Number, default: () => {
+                return new Chance().integer({min: 1000, max: 9999})
+            }}
         }
     },
     settings: {

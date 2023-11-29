@@ -1,9 +1,11 @@
 const Client = require("./public/websocket/Client");
+const { Guilds } = require("mongoose").models;
 
 const Enums = {
     CloseReasons: {
         Existing: "1",
-        Exitted: "2"
+        Exitted: "2",
+        NotValid: "3"
     }
 }
 
@@ -20,14 +22,13 @@ module.exports = {
 
             console.log("Nuevo cliente!");
             ws.on("pong", (data) => {
-                console.log("ponging!", data.toString());
                 const client = server.Clients.get(data.toString());
                 if (!client) ws.terminate();
 
                 client.ws.isAlive = true;
             });
 
-            ws.addEventListener("message", (e) => {
+            ws.addEventListener("message", async (e) => {
                 const message = JSON.parse(e.data);
 
                 switch (message.reason) {
@@ -36,8 +37,16 @@ module.exports = {
                             ws.send(JSON.stringify({ message: "Ya existe una conexión con este servidor." }));
                             ws.close(1000, String(Enums.CloseReasons.Existing + "-" + message.serverId));
                         } else {
-                            server.Clients.set(message.serverId, new Client(message.serverId, ws))
-                            ws.send(JSON.stringify({ message: "Nueva conexión hecha sin problemas." }))
+                            const doc = await Guilds.getWork(message.serverId);
+                            const c = new Client(message.serverId, ws).setDoc(doc).verify(message.PIN);
+
+                            if (c.disconnected) {
+                                ws.send(JSON.stringify({ message: "No se pudo verificar el PIN para conectarse a este servidor." }));
+                                return ws.close(1000, String(Enums.CloseReasons.NotValid + "-" + message.serverId))
+                            }
+
+                            server.Clients.set(message.serverId, c)
+                            ws.send(JSON.stringify({ message: "Nueva conexión hecha sin problemas." }));
                         }
                         break;
                 }
@@ -46,9 +55,9 @@ module.exports = {
             ws.addEventListener("close", (e) => {
                 const splitted = e.reason.split("-");
 
-                if(!splitted[1]) {
-                    server.Clients.forEach((val) => {
-                        if(val.ws.readyState === val.ws.CLOSED) server.Clients.delete(val.guildId);
+                if (!splitted[1]) {
+                    server.Clients.forEach(async (val) => {
+                        if (val.ws.readyState === val.ws.CLOSED) server.Clients.delete(val.guildId);
                     })
                 } else server.Clients.delete(splitted[1]);
             })

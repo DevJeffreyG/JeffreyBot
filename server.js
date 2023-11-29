@@ -9,9 +9,6 @@ const bodyParser = require("body-parser");
 const app = express();
 const server = require("http").createServer(app);
 
-const WSServer = new WebSocket.Server({ server });
-require("./websocket").handler(WSServer);
-
 app.set("root", path.join(__dirname, "/public"));
 app.set("port", process.env.PORT || 5000);
 
@@ -22,12 +19,14 @@ app.use(express.static(app.get("root")));
 app.use(express.static(path.join(__dirname, "/public/src")));
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json());
-app.WSServer = WSServer;
 
 const { connection } = require("./db");
 const { webRoutes, postHandler, errorHandler } = require("./public/src/web");
 
 connection.then(() => {
+  const WSServer = new WebSocket.Server({ server });
+  require("./websocket").handler(WSServer);
+  app.WSServer = WSServer;
 
   webRoutes(app);
   postHandler(app);

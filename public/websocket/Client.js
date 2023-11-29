@@ -14,6 +14,16 @@ class Client {
         this.heartbeat();
     }
 
+    setDoc(doc) {
+        this.doc = doc;
+        return this;
+    }
+
+    verify(PIN) {
+        if(this.doc.data.client.pin != PIN) this.disconnected = true;
+        return this;
+    }
+
     send(obj) {
         if(!this.disconnected) this.ws.send(JSON.stringify(obj));
         else throw new Error("Está desconectado")

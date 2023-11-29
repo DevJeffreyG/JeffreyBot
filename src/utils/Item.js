@@ -500,12 +500,13 @@ class Item {
                 return true;
 
             case ItemTypes.EXKeyboard:
-                console.log("🟩 EX Keyboard!");
+                console.log("🟩 EX Item!");
 
                 try {
                     let q = await superagent
                         .post(`${process.env.HOME_PAGE}/api/ws/item-use`)
                         .send({
+                            type: itemType,
                             item: this.item,
                             guild: this.interaction.guild
                         })

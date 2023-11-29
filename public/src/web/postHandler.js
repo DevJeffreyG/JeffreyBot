@@ -140,11 +140,11 @@ module.exports = (app) => {
         if (!Verify(req)) return res.status(403).send({ message: "Not authorized" });
 
         try {
-            const { item, guild } = req.body
+            const { item, type, guild } = req.body
 
             const Client = WSServer.Clients.get(guild.id);
             Client.send({ message: "Se usó un item desde el servidor configurado!" })
-            Client.send({ message: JSON.stringify(item), json: true })
+            Client.send({ type, message: JSON.stringify(item), json: true })
 
             res.send(true);
         } catch (err) {
