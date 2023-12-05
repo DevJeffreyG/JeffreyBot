@@ -305,10 +305,14 @@ class Shop {
         await this.#doc.addToBank(price, "user_actions");
         inventoryUser.data.inventory.push({ shopType: this.config.info.type, item_id: item.id, use_id: newUseId })
 
+        let useHelp = `Úsalo con \`/use ${newUseId}\``;
+        if (user) useHelp = `Úsalo con \`/use ${newUseId}\``;
+        if(this.shopdoc.isSub(item)) useHelp = `Se te seguirá cobrando en el momento que uses/actives la suscripción: \`/use ${newUseId}\``;
+
         let desc = [
             "Pago realizado con éxito",
             `Compraste: \`${itemName}\` por **${this.config.currency.emoji}${itemPrice}**${user ? ` para ${user}` : ""}`,
-            user ? `Se usa con \`/use ${newUseId}\`` : `Úsalo con \`/use ${newUseId}\``,
+            useHelp,
             `Ahora tienes: ${PrettyCurrency(this.interaction.guild, this.#isDarkShop ? this.#user.getDarkCurrency() : this.#user.getCurrency())}`
         ]
 
@@ -670,6 +674,12 @@ ${codeBlock(item.description)}
             if (specialType === 0) specialType = null;
         }
 
+        if (params.sub?.value) specialType = ItemTypes.Subscription;
+
+        const subError = new BadParamsError(this.interaction, [
+            "Si es una suscripción, **debe tener**: `duracion`",
+            "**No puede ser** `especial`"
+        ]);
         const roleError = new BadParamsError(this.interaction, "Si se usa un tipo Role, **debe tener**: `role`");
         const boostError = new BadParamsError(this.interaction, [
             "Si se usa un tipo Boost __agregando__, **debe tener**: `boostobj`, `boosttype`, `boostval` y `duracion`",
@@ -711,11 +721,17 @@ ${codeBlock(item.description)}
         if (this.config.info.type === ShopTypes.PetShop && (use.objetive != ItemObjetives.Item || !use.item_info.type)) throw notItemPetError;
 
         use.item_info.duration = (use.objetive === ItemObjetives.Role ||
-            use.objetive === ItemObjetives.Boost) && params.duracion?.value ? ms(params.duracion?.value) : null
+            use.objetive === ItemObjetives.Boost || this.shopdoc.isSub(item)) && params.duracion?.value ? ms(params.duracion?.value) : null
 
         use.boost_info.type = use.objetive === ItemObjetives.Boost ? params.boosttype?.value : null
         use.boost_info.value = use.objetive === ItemObjetives.Boost ? params.boostval?.value : null
         use.boost_info.objetive = use.objetive === ItemObjetives.Boost ? params.boostobj?.value : null
+
+        // sub verification
+        if (this.shopdoc.isSub(item)) {
+            if (params.especial?.value) throw subError;
+            if (!use.item_info.duration) throw subError;
+        }
 
         // boost verification
         if (use.objetive === ItemObjetives.Boost) {

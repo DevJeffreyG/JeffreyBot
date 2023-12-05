@@ -1,3 +1,5 @@
+const { ItemTypes } = require("../../src/utils/Enums");
+
 class Shop {
     static async getWork(id) {
         return await this.findOne({
@@ -30,6 +32,10 @@ class Shop {
 
     getItemType(item) {
         return item.use_info.item_info.type;
+    }
+
+    isSub(item) {
+        return this.getItemType(item) === ItemTypes.Subscription;
     }
 }
 

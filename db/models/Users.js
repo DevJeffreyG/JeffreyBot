@@ -111,8 +111,10 @@ const Schema = new mongoose.Schema({
                 },
                 isSub: { type: Boolean, required: true, default: false },
                 sub_info: {
+                    active_since: { type: Date, default: () => { return new Date() } },
                     price: { type: Number },
                     name: { type: String },
+                    inteval: { type: Number },
                     isCancelled: { type: Boolean }
                 },
                 id: { type: Number, sparse: true }
@@ -300,6 +302,15 @@ Schema.method("getCount", function (module) {
 Schema.method("addCurrency", async function (count, save = true) {
     this.economy.global.currency += count;
     this.data.counts.normal_currency += count;
+    if (save) await this.save();
+
+    console.log("🗨 %s tiene %s Currency", this.user_id, this.getCurrency());
+
+    return this;
+})
+
+Schema.method("removeCurrency", async function (count, save = false) {
+    this.economy.global.currency -= count;
     if (save) await this.save();
 
     console.log("🗨 %s tiene %s Currency", this.user_id, this.getCurrency());

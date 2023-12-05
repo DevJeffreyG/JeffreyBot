@@ -1,5 +1,5 @@
 const { time, inlineCode } = require("discord.js")
-const { Command, Embed, ShopTypes, Enum, Shop, InteractivePages } = require("../../src/utils")
+const { Command, Embed, ShopTypes, Enum, Shop, InteractivePages, ItemTypes, HumanMs, PrettyCurrency } = require("../../src/utils")
 const { FetchError } = require("../../src/errors");
 
 const command = new Command({
@@ -28,27 +28,30 @@ command.execute = async (interaction, models, params, client) => {
 
     let items = new Map();
 
-    for (const item of user.data.inventory) {
-        const real_item = shop.shopdoc.items.find(x => x.id === item.item_id);
-        if (!real_item) continue;
+    for (const inv_item of user.data.inventory) {
+        const shop_item = shop.shopdoc.items.find(x => x.id === inv_item.item_id);
+        if (!shop_item) continue;
 
-        const f = item.shopType === type && real_item.use_info.action !== null && !real_item.disabled;
+        const isSub = shop.shopdoc.isSub(shop_item);
+        const f = inv_item.shopType === type && shop_item.use_info.action !== null && !shop_item.disabled;
         if (f) {
             let count = 1;
-            let useId = inlineCode(item.use_id);
-            let old = items.get(real_item.id);
+            let useId = inlineCode(inv_item.use_id);
+            let old = items.get(shop_item.id);
 
             if (old) {
                 count += old.count;
                 useId = old.useId + `, ${useId}`
             }
 
-            items.set(real_item.id, {
-                name: real_item.name,
+            items.set(shop_item.id, {
+                name: shop_item.name,
                 count,
-                desc: real_item.description,
-                active: item.active ? `Sí, desde ${time(item.active_since)}` : "No",
-                useId
+                desc: shop_item.description,
+                active: inv_item.active ? `Sí, desde ${time(inv_item.active_since)}` : "No",
+                useId,
+                sub_info: isSub ?
+                `**▸ Es una suscripción,** ${PrettyCurrency(interaction.guild, shop_item.price)} **cada ${new HumanMs(shop_item.use_info.item_info?.duration).human}**.\n` : ""
             })
         }
     }
@@ -60,8 +63,8 @@ command.execute = async (interaction, models, params, client) => {
         description: `### — Usa ${client.mentionCommand("use")} para usar un item.\n— Tienes...`,
         color: shop.config.info.color,
         addon: `**— ({count}) {name}**
-ℹ️ {desc}
-**▸ Activo**: {active}.
+> ℹ️ {desc}
+{sub_info}**▸ Activo**: {active}.
 **▸ ID**: {useId}.\n\n`
     }, items, 3);
 

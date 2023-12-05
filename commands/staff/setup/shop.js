@@ -109,12 +109,17 @@ command.data
             .addStringOption(option =>
                 option
                     .setName("duracion")
-                    .setDescription("Si es un tipo role o boost, ¿cuánto dura? 1d, 7d, 10m, etc")
+                    .setDescription("Si es una SUB, ¿cada cuánto paga? Si es un tipo role o boost, ¿cuánto dura? 1d, 7d, 10m, etc")
             )
             .addBooleanOption(o =>
                 o
                     .setName("especial")
                     .setDescription("Si es algún item especial.")
+            )
+            .addBooleanOption(o =>
+                o
+                    .setName("sub")
+                    .setDescription("Si es una suscripción.")
             )
             .addIntegerOption(option =>
                 option

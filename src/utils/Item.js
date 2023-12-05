@@ -117,7 +117,7 @@ class Item {
         this.name = this.item.name;
 
         this.isTemp = this.shop.getItemType(this.item) === ItemTypes.Temporal;
-        this.isSub = this.shop.getItemType(this.item) === ItemTypes.Subscription;
+        this.isSub = this.shop.isSub(this.item);
         this.disabled = this.item.disabled;
 
         this.duration = duration;
@@ -513,15 +513,17 @@ class Item {
                         })
                         .set("auth", process.env.TOKEN)
 
-                    if(!q.body) throw new JeffreyBotError(this.interaction, "No hubo cliente a quien enviar la respuesta");
+                    if (!q.body) throw new JeffreyBotError(this.interaction, "No hubo cliente a quien enviar la respuesta");
 
                     return true;
                 } catch (err) {
-                    if(!(err instanceof JeffreyBotError)) console.error(err);
+                    if (!(err instanceof JeffreyBotError)) console.error(err);
 
-                    await this.interaction.editReply({embeds: [
-                        new ErrorEmbed().defDesc(`No se encontró un Cliente conectado para usar este item.`)
-                    ]})
+                    await this.interaction.editReply({
+                        embeds: [
+                            new ErrorEmbed().defDesc(`No se encontró un Cliente conectado para usar este item.`)
+                        ]
+                    })
                     return false;
                 }
                 break;
@@ -600,9 +602,16 @@ class Item {
             return false
         }
 
-        // llamar la funcion para hacer un globaldata y dar el role con boost
-        await LimitedTime(this.member, role?.id, this.duration, this.boost_type, this.boost_objetive, this.boost_value);
-
+        if (this.isSub) {
+            await Subscription(this.member, role?.id, {
+                type: this.boost_type,
+                objetive: this.boost_objetive,
+                value: this.boost_value,
+            }, this.duration, this.price, this.item.name);
+        } else {
+            // llamar la funcion para hacer un globaldata y dar el role con boost
+            await LimitedTime(this.member, role?.id, this.duration, this.boost_type, this.boost_objetive, this.boost_value);
+        }
         this.removeItemFromInv()
         return true;
     }

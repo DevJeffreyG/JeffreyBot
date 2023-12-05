@@ -393,80 +393,86 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
       let role = guild.roles.cache.find(x => x.id === temprole.role_id);
       let until = temprole.active_until;
 
-      if (moment().isAfter(until)) {
+      const Logger = new Log()
+        .setGuild(guild)
+        .setReason(LogReasons.Error)
+        .setTarget(ChannelModules.StaffLogs);
 
+      const removingRoleErr = (err) => new ErrorEmbed().defDesc(`**No se pudo eliminar el role de un temprole**\n${codeBlock("json", err)}`);
+
+      // Ya pasó el tiempo definido
+      if (moment().isAfter(until)) {
+        // No es una suscripción
         if (!temprole.isSub) {
-          // sacarle el role
           console.log("🟢 Ha pasado el tiempo del temprole %s", temprole);
+
           try {
             if (role) await member.roles.remove(role);
           } catch (err) {
-            new Log()
-              .setGuild(guild)
-              .setReason(LogReasons.Error)
-              .setTarget(ChannelModules.StaffLogs)
-              .send({
-                embeds: [
-                  new ErrorEmbed().defDesc(`**No se pudo eliminar el role de un temprole**\n${codeBlock("json", err)}`)
-                ]
-              })
+            Logger.send({ embed: removingRoleErr(err) })
           }
 
-          // eliminar el temprole de la db
           dbUser.data.temp_roles.splice(i, 1);
-        } else { // es una suscripción
-          // TODO: REWORK NEEDED
-          return console.log("REWORK DE LAS SUBS")
-          let price = Number(temprole.sub_info.price);
+        } else { // Es una suscripción, y ya es momento de cobrarle
+          let price = temprole.sub_info.price;
           let subName = temprole.sub_info.name;
-          let isCancelled = temprole.sub_info.isCancelled;
+          let { interval, isCancelled } = temprole.sub_info;
 
-          let notEnough = new ErrorEmbed(interaction)
-            .defDesc(`**—** No tienes suficientes Jeffros **(${Emojis.Jeffros}${price.toLocaleString('es-CO')})** para pagar la suscripción a \`${subName}\`.
-**—** Tu saldo ha quedado en **alerta roja**.`);
+          let notEnough = new ErrorEmbed()
+            .defDesc(`**—** No pudiste pagar tu suscripción **${subName}** (${PrettyCurrency(guild, price)}. Se canceló automáticamente.`);
 
+          // Ya fue cancelada, eliminar el temprole
           if (isCancelled) {
-            member.roles.remove(role);
-
-            // eliminar el temprole de la db
-            dbUser.data.temp_roles.splice(i, 1);
-            dbUser.save();
-          } else {
-            // cobrar jeffros
-            let jeffros = dbUser.economy.global;
-
-            let paidEmbed = new Embed({
-              type: "success",
-              data: {
-                title: "Pagado",
-                desc: [
-                  `Se han restado **${Emojis.Jeffros}${price.toLocaleString('es-CO')}** para pagar la suscripción a \`${subName}\`.`,
-                  `Tu saldo ha quedado en **${Emojis.Jeffros}${(jeffros.jeffros - price).toLocaleString('es-CO')}**.`
-                ]
-              }
-            })
-
-            if (!jeffros || jeffros.jeffros < price) {
-              // quitarle los jeffros, y dejarlo en negativo
-              console.log(jeffros.userID, "ha quedado en negativos por no poder pagar", subName);
-              jeffros.jeffros -= price;
-              member.send({ embeds: [notEnough] });
-
-              // eliminar el temprole de la db
-              dbUser.data.temp_roles.splice(i, 1);
-
-              member.roles.remove(role);
-              dbUser.save();
-            } else { // cobrar
-              jeffros.jeffros -= price;
-              dbUser.save();
-
-              // actualizar el globaldata
-              temprole.active_since = today;
-              dbUser.save();
-
-              member.send({ embeds: [paidEmbed] });
+            try {
+              if (role) await member.roles.remove(role);
+            } catch (err) {
+              Logger.send({ embed: removingRoleErr(err) })
             }
+
+            dbUser.data.temp_roles.splice(i, 1);
+          } else {
+            // Como aún está activa, cobrar la sub
+            let newTotal = dbUser.getCurrency() - price;
+
+            if (!dbUser.affords(price)) {
+              try {
+                await member.send({ embeds: [notEnough] })
+              } catch (err) {
+                console.log("🔴 No se pudo enviar el DM a %s", member.user.username);
+              }
+
+              try {
+                if (role) await member.roles.remove(role);
+              } catch (err) {
+                Logger.send({ embed: removingRoleErr(err) })
+              }
+
+              dbUser.data.temp_roles.splice(i, 1);
+            } else {
+              temprole.active_since = new Date();
+              temprole.active_until = moment().add(interval, ms).toDate()
+
+              try {
+                await member.send({
+                  embeds: [
+                    new Embed({
+                      type: "success",
+                      data: {
+                        title: "Pagado",
+                        desc: [
+                          `Se han restado ${PrettyCurrency(guild, price)} para pagar la suscripción a **${subName}**`,
+                          `Tu saldo ha quedado en ${PrettyCurrency(guild, newTotal)}`
+                        ]
+                      }
+                    })
+                  ]
+                })
+              } catch (err) {
+                console.log("🔴 No se pudo enviar el DM a %s", member.user.username);
+              }
+            }
+
+            await dbUser.removeCurrency(price);
           }
         }
       }
@@ -768,7 +774,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
           down: `Usuarios: ${String(value.betting.length)} (${PrettyCurrency(guild, value.betting.map(x => x.quantity).reduce((prev, cur) => prev + cur, 0))})`
         })
       })
-      
+
       embed.data.description += "\n## " + MultiplePercentages(elements, 10);;
       embed.defFields(fields)
 
@@ -898,7 +904,6 @@ const PetWork = async function (guild) {
  * @param {GuildMember} victimMember - The Discord.JS Member
  * @param {string} roleID - The ID of the temporary role
  * @param {(number | string)} duration The duration of the temporary role in ms.
- * - "permanent" for not being an temporary role.
  * @param {Number} [specialType=false] The special type of this temporary role.
  * @param {Number} [specialObjective=false] The objetive for this special type of temporary role.
  * @param {number} [specialValue=false] The value for the objetive of this special temporary role.
@@ -910,11 +915,11 @@ const LimitedTime = async function (victimMember, roleID = 0, duration, specialT
 
   if (duration === Infinity) return victimMember.roles.add(role); // es un role permanente???
 
-  let until = moment().add(duration, "ms").toDate();
+  let active_until = moment().add(duration, "ms").toDate();
 
   let toPush = {
     role_id: roleID,
-    active_until: until,
+    active_until,
     special: {
       type: specialType,
       objetive: specialObjective,
@@ -926,7 +931,7 @@ const LimitedTime = async function (victimMember, roleID = 0, duration, specialT
   try {
     if (role) await victimMember.roles.add(role);
   } catch (err) {
-    throw new Error(err);
+    console.log(err);
   }
 
   user.data.temp_roles.push(toPush);
@@ -960,37 +965,41 @@ const TimeoutIf = function (time, func) {
 }
 
 /**
- * @deprecated TODO: Rework
- * 
  * Adds a new subscription to the database and adds the role to the user.
- * @param {GuildMember} victimMember The Discord.JS GuildMember
- * @param {string} roleID The ID for the role given by the suscription
- * @param {Number} interval The interval of time in which the user will pay (ms)
- * @param {Number} jeffrosPerInterval The price the user will pay every interval
- * @param {string} subscriptionName The name of the suscription
+ * @param {GuildMember} member 
+ * @param {string} roleID - The ID of the temporary role
+ * @param {any} tempInfo La información de temprole necesaria
+ * @param {Number} interval El intervalo de cada cuanto va a pagar (ms)
+ * @param {Number} price Lo que va a pagar cada vez
+ * @param {string} subscriptionName El nombre de la suscripción 
  */
-const Subscription = async function (victimMember, roleID, interval, jeffrosPerInterval, subscriptionName) {
-  return new Error("Subscriptions are not enabled in 2.0.0");
-
-  let role = victimMember.guild.roles.cache.find(x => x.id === roleID);
-  let user = await Users.getWork({ user_id: victimMember.id, guild_id: victimMember.guild.id });
+const Subscription = async function (member, roleID = 0, tempInfo, interval, price, subscriptionName) {
+  let role = member.guild.roles.cache.get(roleID);
+  let user = await Users.getWork({ user_id: member.id, guild_id: member.guild.id });
+  let active_until = moment().add(interval, ms).toDate();
 
   let toPush = {
-    role_id: role.id,
-    active_since: new Date(),
-    duration: interval,
+    role_id: role?.id,
+    active_until,
     isSub: true,
+    special: {
+      ...tempInfo
+    },
     sub_info: {
-      price: jeffrosPerInterval,
+      price,
       name: subscriptionName,
+      interval,
       isCancelled: false
     }
   }
+  try {
+    if (role) await member.roles.add(role);
+    user.data.temp_roles.push(toPush);
 
-  await victimMember.roles.add(role);
-  user.data.temp_roles.push(toPush);
-
-  await user.save();
+    await user.save();
+  } catch (err) {
+    console.log("🔴 No se pudo agregar la sub", err);
+  }
 
   return user
 }
@@ -1557,9 +1566,9 @@ const FindAverage = async function (guild) {
     if (member && !member.user.bot) {
       let darkcurrency = user.economy.dark?.currency ?? 0;
       let darkcurrencyValue = 0;
-      
-      if(!disabled) darkcurrencyValue = await darkshop.equals(null, darkcurrency) ?? 0;
-      
+
+      if (!disabled) darkcurrencyValue = await darkshop.equals(null, darkcurrency) ?? 0;
+
       let finalQuantity = Math.round(darkcurrencyValue + user.getCurrency());
 
       if (finalQuantity > 0 || (finalQuantity === 0 && !top.find(x => x.money === 0))) top.push({
