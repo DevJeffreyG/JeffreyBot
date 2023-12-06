@@ -307,7 +307,7 @@ class Shop {
 
         let useHelp = `Úsalo con \`/use ${newUseId}\``;
         if (user) useHelp = `Úsalo con \`/use ${newUseId}\``;
-        if(this.shopdoc.isSub(item)) useHelp = `Se te seguirá cobrando en el momento que uses/actives la suscripción: \`/use ${newUseId}\``;
+        if (this.shopdoc.isSub(item)) useHelp = `Se te seguirá cobrando en el momento que uses/actives la suscripción: \`/use ${newUseId}\``;
 
         let desc = [
             "Pago realizado con éxito",
@@ -632,7 +632,11 @@ ${codeBlock(item.description)}
             await this.interaction.editReply({ components })
 
             const filter = (inter) => inter.isStringSelectMenu() || inter.isButton() && inter.user.id === this.interaction.user.id;
-            const collector = await new Collector(this.interaction, { filter, wait: true, max: 1 }).raw();
+            const collector = await new Collector(this.interaction, { filter, wait: true, max: 1 })
+                .wait(() => {
+                    this.interaction.deleteReply();
+                })
+            if (!collector) return;
 
             specialType = Number(collector.values[0]);
 

@@ -483,9 +483,14 @@ class Item {
                 await this.interaction.editReply({ components: [row] });
 
                 let filter = (i) => i.isStringSelectMenu() && i.customId === "modifyPetStats" && i.user.id === this.interaction.user.id;
-                let collector = await new Collector(this.interaction, { filter, max: 1, wait: true }).raw();
+                let collector = await new Collector(this.interaction, { filter, max: 1, wait: true }).wait();
+
                 if (!collector || collector.values[0] === "cancel") {
-                    this.interaction.editReply({ embeds: [this.canceled], components: [] });
+                    try {
+                        await this.interaction.editReply({ embeds: [this.canceled], components: [] });
+                    } catch(err) {
+                        console.error("🔴 %s", err);
+                    }
                     return false
                 }
 

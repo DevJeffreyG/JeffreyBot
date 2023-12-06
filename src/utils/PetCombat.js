@@ -2,9 +2,9 @@ const { CommandInteraction, ActionRowBuilder, StringSelectMenuBuilder, StringSel
 const Pet = require("./Pet");
 const Collector = require("./Collector");
 const Embed = require("./Embed");
-const { ProgressBar, Sleep, GetRandomItem, PrettyCurrency } = require("./functions");
+const { ProgressBar, Sleep, GetRandomItem, PrettyCurrency, CreateInteractionFilter } = require("./functions");
 const { Colores } = require("../resources");
-const { PetAttacksType, ShopTypes } = require("./Enums");
+const { PetAttacksType, ShopTypes, EndReasons } = require("./Enums");
 const { FetchError } = require("../errors");
 
 const Chance = require("chance");
@@ -82,8 +82,9 @@ class PetCombat {
                 filter: (inter) => {
                     return inter.isStringSelectMenu() && inter.customId === "petCombat" && inter.user.id === user.id
                 },
+                user,
                 wait: true
-            }).raw();
+            }).wait();
 
             await collector.deferUpdate();
 
@@ -163,7 +164,7 @@ class PetCombat {
                 await this.#turn()
                 await Sleep(1000);
             } catch (err) {
-                if (err.code != "InteractionCollectorError") throw err;
+                if (err != EndReasons.TimeOut) throw err;
 
                 await this.changeStatus({
                     content: `## ${this.#interaction.client.Emojis.Check} Gana el combate **${this.#rival.user}**.\n## ${this.#interaction.client.Emojis.Error} ${this.#playing.user} tardó demasiado en jugar.`,
@@ -314,15 +315,13 @@ ${this.#bet ? `### — Se le dan ${PrettyCurrency(this.#interaction.guild, this.
 
         this.#lastMsg = await this.changeStatus({ content: this.#playing.user.toString(), components: this.#components, embeds: [e] })
 
-        const collector = await new Collector(this.#lastMsg, {
-            filter: (i) => this.#components.find(x => {
-                return x.components.find(y => y.data.custom_id === i.customId) && i.user.id === this.#playing.user.id
-            }),
+        const collector = await new Collector(this.#interaction, {
+            filter: CreateInteractionFilter(this.#interaction, this.#lastMsg, this.#playing.user),
             wait: true,
+            user: this.#playing.user,
+            channel: this.thread,
             time: ms("10m")
-        }).raw()
-
-        await collector.deferUpdate();
+        }).wait();
 
         switch (collector.customId) {
             case "petAttack":
@@ -343,6 +342,7 @@ ${this.#bet ? `### — Se le dan ${PrettyCurrency(this.#interaction.guild, this.
 
     // ----------- Movements -----------
     async #selectAttack() {
+        console.log("attacking!");
         this.#components[0].components.forEach(c => c.setDisabled(true));
         this.#components[1] = new ActionRowBuilder()
             .setComponents(
@@ -364,12 +364,13 @@ ${this.#bet ? `### — Se le dan ${PrettyCurrency(this.#interaction.guild, this.
         }
 
         await this.#lastMsg.edit({ components: this.#components });
-        const collector = await new Collector(this.#lastMsg, {
+        const collector = await new Collector(this.#interaction, {
             wait: true,
             filter: (inter) => inter.customId === "attackSelection" && inter.user.id === this.#playing.user.id,
+            user: this.#playing.user,
+            channel: this.thread,
             time: ms("10m")
-        }).raw();
-        await collector.deferUpdate();
+        }).wait();
 
         const attackIndex = Number(collector.values[0]);
         let attack = this.pet.attacks[attackIndex];
@@ -380,7 +381,7 @@ ${this.#bet ? `### — Se le dan ${PrettyCurrency(this.#interaction.guild, this.
 
         switch (attack.type) {
             case PetAttacksType.Basic:
-                let unlocked = new Chance().bool({ likelihood: this.#doc.settings.quantities.pets.basic_unlocked });
+                let unlocked = new Chance().bool({ likelihood: this.#doc.settings.quantities.percentages.pets.basic_unlocked });
 
                 if (unlocked) this.#messages.push(GetRandomItem([
                     `# **${this.pet.name}** se viene arriba`,
@@ -517,12 +518,13 @@ ${this.#bet ? `### — Se le dan ${PrettyCurrency(this.#interaction.guild, this.
         }
 
         await this.#lastMsg.editReply({ components: this.#components });
-        const collector = await new Collector(this.#lastMsg, {
+        const collector = await new Collector(this.#interaction, {
             wait: true,
             filter: (inter) => inter.customId === "itemSelection" && inter.user.id === this.#playing.user.id,
+            user: this.#playing.user,
+            channel: this.thread,
             time: ms("10m")
-        }).raw();
-        await collector.deferUpdate();
+        }).wait();
 
         const itemIndex = Number(collector.values[0]);
 
