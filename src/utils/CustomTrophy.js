@@ -5,8 +5,8 @@ const { CommandInteraction, ModalSubmitInteraction, GuildMember, Guild } = requi
 
 const Embed = require("./Embed");
 const { BadParamsError, DoesntExistsError, DMNotSentError } = require("../errors");
-const { Enum, BoostTypes, BoostObjetives, ShopTypes } = require("./Enums");
-const { LimitedTime, FindNewId, PrettyCurrency } = require("./functions");
+const { Enum, BoostTypes, BoostObjetives, ShopTypes, DirectMessageType } = require("./Enums");
+const { LimitedTime, FindNewId, PrettyCurrency, SendDirect } = require("./functions");
 const { Colores } = require("../resources");
 const HumanMs = require("./HumanMs");
 
@@ -468,7 +468,7 @@ class CustomTrophy {
                 case "boost":
                     const { type: boost_type, objetive: boost_objetive, value: boost_value, duration } = value;
                     if (!boost_value || !boost_type || !boost_objetive || !duration) continue given;
-                    await LimitedTime(this.member, null, ms(duration), boost_type, boost_objetive, boost_value);
+                    await LimitedTime(this.member, null, ms(duration), {}, boost_type, boost_objetive, boost_value);
 
                     let boostobj = new Enum(BoostObjetives).translate(boost_objetive);
                     let boosttype = new Enum(BoostTypes).translate(boost_type);
@@ -516,11 +516,7 @@ class CustomTrophy {
 
         if (rewarded) embeds.push(rew);
 
-        try {
-            await member.send({ embeds });
-        } catch (err) {
-            throw new DMNotSentError(this.interaction, member, err.message);
-        }
+        await SendDirect(this.interaction, member, DirectMessageType.Trophies, { embeds });
     }
 
     /**

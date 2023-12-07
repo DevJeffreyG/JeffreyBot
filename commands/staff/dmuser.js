@@ -1,4 +1,4 @@
-const { Command, Categories, Embed, ErrorEmbed } = require("../../src/utils")
+const { Command, Categories, Embed, ErrorEmbed, SendDirect, DirectMessageType } = require("../../src/utils")
 const { Colores } = require("../../src/resources")
 const { DMNotSentError } = require("../../src/errors/")
 
@@ -24,6 +24,7 @@ command.addOption({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { usuario, mensaje } = params;
+    const { Preferences } = models;
 
     if (usuario.user.bot) return interaction.editReply({ content: "No le voy a enviar un mensaje a un bot, perdona." })
 
@@ -36,21 +37,18 @@ command.execute = async (interaction, models, params, client) => {
         .defFooter({ text: "Este es un mensaje directamente del STAFF del servidor." })
         .defColor(Colores.verde);
 
-    try {
-        await usuario.member.send({ embeds: [embed] })
-        interaction.editReply({
-            content: null, embeds: [
-                new Embed({
-                    type: "success",
-                    data: {
-                        desc: `Se envió el mensaje por privado`
-                    }
-                })
-            ]
-        })
-    } catch (e) {
-        throw new DMNotSentError(interaction, usuario.member, e);
-    }
+    await SendDirect(interaction, usuario.member, DirectMessageType.Staff, { embeds: [embed] })
+    await interaction.editReply({
+        content: null, embeds: [
+            new Embed({
+                type: "success",
+                data: {
+                    desc: `Se envió el mensaje por privado`
+                }
+            })
+        ]
+    })
+
 
 }
 

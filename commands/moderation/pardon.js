@@ -1,4 +1,4 @@
-const { Command, Categories, Embed, Confirmation, Log, LogReasons, ChannelModules } = require("../../src/utils")
+const { Command, Categories, Embed, Confirmation, Log, LogReasons, ChannelModules, SendDirect, DirectMessageType } = require("../../src/utils")
 const { Colores } = require("../../src/resources");
 const { DMNotSentError, FetchError, DoesntExistsError } = require("../../src/errors");
 const command = new Command({
@@ -121,12 +121,8 @@ command.execute = async (interaction, models, params, client) => {
         .send({ embeds: [pardon] })
 
     await interaction.followUp({ embeds: [new Embed({ type: "success" })] });
-    try {
-        if (!isSoftwarn) await member.send({ embeds: [memberEmbed] })
-    } catch (e) {
-        throw new DMNotSentError(interaction, member, e)
-    }
 
+    if (!isSoftwarn) await SendDirect(interaction, member, DirectMessageType.Moderation, { embeds: [memberEmbed] })
 }
 
 module.exports = command;

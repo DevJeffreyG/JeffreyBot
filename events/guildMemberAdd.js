@@ -1,7 +1,7 @@
 const Discord = require("discord.js");
 
 const { time } = Discord;
-const { GenerateLog, DaysUntilToday, Embed, GetRandomItem, FetchThisGuild } = require("../src/utils/");
+const { GenerateLog, DaysUntilToday, Embed, GetRandomItem, FetchThisGuild, SendDirect, DirectMessageType } = require("../src/utils/");
 const { Colores } = require("../src/resources");
 
 const { Users, Guilds } = require("mongoose").models;
@@ -29,8 +29,8 @@ module.exports = async (client, member) => {
     user.save();
   })
 
-  let reglasC = guild.channels.cache.get(doc.getChannel("general.rules"));
-  let infoC = guild.channels.cache.get(doc.getChannel("general.information"));
+  let reglasC = guild.channels.cache.get(doc.getChannel("general.rules")) ?? "#reglas";
+  let infoC = guild.channels.cache.get(doc.getChannel("general.information")) ?? "#info";
 
   if (member.user.bot) {
     let botRoles = doc.getBots();
@@ -51,7 +51,11 @@ module.exports = async (client, member) => {
     .defFooter({ text: `* Para poder hablar en el chat debes aceptar las reglas`, icon: guild.iconURL() })
     .defColor(Colores.verde);
 
-  member.send({ embeds: [embed] }).catch(e => { });
+  try {
+    await SendDirect(null, member, DirectMessageType.Welcome, { embeds: [embed] })
+  } catch (err) {
+    console.error("🔴 %s", err.message());
+  }
 
   member.guild.invites.fetch().then((invites) => {
     invites.forEach(async invite => {
