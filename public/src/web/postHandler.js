@@ -148,7 +148,7 @@ module.exports = (app) => {
 
             res.send(true);
         } catch (err) {
-            console.log(err);
+            console.log("🌎", err);
             res.send(false);
         }
     })

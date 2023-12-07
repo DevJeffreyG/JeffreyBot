@@ -22,7 +22,7 @@ const Schema = {
                     type: { type: Number, default: null },
                     value: { type: Number, default: null },
                     objetive: { type: Number, default: null }
-                },
+                }
             },
             disabled: { type: Boolean, default: false },
             disabled_until: { type: Date, default: null },

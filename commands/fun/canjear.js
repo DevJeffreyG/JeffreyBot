@@ -1,5 +1,5 @@
 const { BadCommandError, DoesntExistsError } = require("../../src/errors");
-const { Command, LimitedTime, WillBenefit, HumanMs, ItemObjetives, BoostTypes, Embed, PrettyCurrency } = require("../../src/utils");
+const { Command, LimitedTime, WillBenefit, HumanMs, ItemObjetives, BoostTypes, Embed, PrettyCurrency, Enum } = require("../../src/utils");
 
 const command = new Command({
     name: "canjear",
@@ -22,20 +22,20 @@ command.execute = async (interaction, models, params, client) => {
     const user = params.getUser();
     const key = doc.data.keys.find(x => x.code === _key);
 
-    if (!key) throw new DoesntExistsError(interaction, `La llave \`${_key}\``, "este servidor");
+    if (!key)
+        throw new DoesntExistsError(interaction, `La llave \`${_key}\``, "este servidor");
 
     // si llega al punto máximo de usos borrar
     if (key.config.used >= key.config.maxuses) {
         await key.deleteOne();
 
-        interaction.deleteReply();
-        return doc.save();
+        await interaction.deleteReply();
+        return await doc.save();
     }
 
     // revisar que no lo haya usado antes
-    if (key.config.usedBy.find(x => x === interaction.user.id)) {
-        return interaction.editReply({ content: `${interaction.user}, ya has usado esta llave, no puedes volverla a usar :(` });
-    }
+    if (key.config.usedBy.find(x => x === interaction.user.id))
+        return await interaction.editReply({ content: `${interaction.user}, ya has usado esta llave, no puedes volverla a usar :(` });
 
     const reward = key.reward;
     let reply;
@@ -56,34 +56,33 @@ command.execute = async (interaction, models, params, client) => {
 
         case ItemObjetives.Role:
             const isTemp = (reward.duration > 0 && reward.duration != Infinity) ?? false;
-            const role = interaction.guild.roles.cache.find(x => x.id === reward.value);
+            const role = interaction.guild.roles.cache.get(reward.value);
 
             if (interaction.member.roles.cache.find(x => x === role)) {
-                return interaction.editReply(`${interaction.user}, no puedes usar esta key porque ya tienes el rol que da :(`)
+                return await interaction.editReply(`${interaction.user}, no puedes usar esta key porque ya tienes el rol que da :(`)
             }
 
             if (isTemp) await LimitedTime(interaction.member, reward.value, reward.duration);
-            else interaction.member.roles.add(role);
+            else await interaction.member.roles.add(role);
 
             reply = `Se ha agregado el role \`${role.name}\` **${isTemp ? `por ${new HumanMs(reward.duration).human}` : "permanentemente"}**.`
             break;
 
         case ItemObjetives.Boost:
-            const brole = interaction.guild.roles.cache.find(x => x.id === reward.value);
+            const brole = interaction.guild.roles.cache.get(reward.value);
             const willBenefit = await WillBenefit(interaction.member);
 
             if (interaction.member.roles.cache.find(x => x === brole)) {
                 return interaction.editReply(`${interaction.user}, no puedes usar esta key porque ya tienes el rol que da :(`)
             }
 
-            if (willBenefit) {
-                return interaction.editReply(`${interaction.user}, no puedes usar esta key te beneficiaría aún más con el boost que tienes :(`);
-            }
+            if (willBenefit)
+                return await interaction.editReply(`${interaction.user}, no puedes usar esta key porque te beneficiaría aún más con el boost que tienes :(`);
 
             // llamar la funcion para hacer un globaldata y dar el role con boost
-            await LimitedTime(interaction.member, brole?.id, reward.duration, reward.boost_type, reward.boost_objetive, reward.boost_value);
+            await LimitedTime(interaction.member, brole?.id, reward.duration, {}, reward.boost_type, reward.boost_objetive, reward.boost_value);
 
-            reply = `Se ha activado el **Boost ${reward.boost_type === BoostTypes.Multiplier ? "Multiplicador" : "de probabilidad"}** **x${reward.boost_value}** por **${new HumanMs(reward.duration).human}**.`
+            reply = `Se ha activado el **Boost ${new Enum(BoostTypes).translate(reward.boost_type)}** **x${reward.boost_value}** por **${new HumanMs(reward.duration).human}**`
             break;
 
         default:
@@ -95,7 +94,7 @@ command.execute = async (interaction, models, params, client) => {
     key.config.used += 1;
     await doc.save()
 
-    return interaction.editReply({
+    return await interaction.editReply({
         embeds: [
             new Embed({
                 type: "success", data: {
