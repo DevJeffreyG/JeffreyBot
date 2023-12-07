@@ -54,7 +54,15 @@ class Enum {
             Ultimate: "Definitivo",
             Roulette: "Ruleta",
             ClaimRep: "Reclamar Rep",
-            Yes: "Sí"
+            Yes: "Sí",
+            Moderation: "Moderación",
+            Pets: "Mascotas",
+            Welcome: "Bienvenida",
+            Subscriptions: "Suscripciones",
+            Trophies: "Trofeos",
+            Staff: "STAFF",
+            Birthdays: "Cumpleaños",
+            Incomes: "Ingresos"
         }
 
         for (const prop of Object.keys(this.values)) {
@@ -119,6 +127,7 @@ class Enum {
  * - Moderation
  * - Developer
  * - Music
+ * - DM
  */
 const Categories = new Enum({
     General: "GENERAL",
@@ -129,7 +138,8 @@ const Categories = new Enum({
     Administration: "ADMIN",
     Moderation: "MODERATION",
     Developer: "DEV",
-    Music: "MUSIC"
+    Music: "MUSIC",
+    DM: "DM"
 }).values
 
 /**
@@ -443,6 +453,27 @@ const YesNo = new Enum({
     No: 2
 }).values;
 
+/**
+ * - Moderation
+ * - Pets
+ * - Welcome
+ * - Payments
+ * - Trophies
+ * - STAFF
+ * - Birthdays
+ * - Incomes
+ */
+const DirectMessageType = new Enum({
+    Moderation: 1,
+    Pets: 2,
+    Welcome: 3,
+    Payments: 4,
+    Trophies: 5,
+    Staff: 6,
+    Birthdays: 7,
+    Incomes: 8
+}).values;
+
 module.exports = {
     Enum,
     Categories,
@@ -466,5 +497,6 @@ module.exports = {
     ShopTypes,
     PetAttacksType,
     PetNotices,
-    YesNo
+    YesNo,
+    DirectMessageType
 }

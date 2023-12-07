@@ -1,8 +1,8 @@
 const { BaseInteraction, InteractionType, time, CommandInteraction, MessageComponentInteraction, ModalSubmitInteraction, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction, DiscordAPIError, ActionRowBuilder, codeBlock, TextInputStyle, ButtonBuilder, ButtonStyle, TimestampStyles, hyperlink, MessageFlags } = require("discord.js");
 
-const { Ticket, Suggestion, Button } = require("./src/handlers/");
+const { Ticket, Suggestion, Button, ManagePreferences } = require("./src/handlers/");
 const { Bases, Colores } = require("./src/resources");
-const { ErrorEmbed, Embed, Categories, ValidateDarkShop, Confirmation, HumanMs, Modal, CustomEmbed, CustomTrophy, Enum, ShopTypes, Shop, PrettyCurrency, MinMaxInt, PrettifyNumber, Collector, MultiplePercentages, ProgressBar } = require("./src/utils");
+const { ErrorEmbed, Embed, Categories, ValidateDarkShop, Confirmation, HumanMs, Modal, CustomEmbed, CustomTrophy, Enum, ShopTypes, Shop, PrettyCurrency, MinMaxInt, PrettifyNumber, Collector, MultiplePercentages, ProgressBar, SendDirect, DirectMessageType } = require("./src/utils");
 
 const { CommandNotFoundError, ToggledCommandError, DiscordLimitationError, BadCommandError, SelfExec, ModuleDisabledError, ExecutionError, InsuficientSetupError, EconomyError, PermissionError } = require("./src/errors/");
 
@@ -14,7 +14,7 @@ const moment = require("moment-timezone");
 const slashCooldown = ms("5s");
 
 const models = require("mongoose").models;
-const { ToggledCommands, Users, Guilds, GlobalDatas } = models;
+const { ToggledCommands, Users, Guilds, GlobalDatas, Preferences } = models;
 
 class Handlers {
     /**
@@ -33,7 +33,6 @@ class Handlers {
     async #startHandler() {
         this.params = {}
 
-        if (!this.interaction.inGuild() && !this.#isDev()) return interaction.reply({ ephemeral: true, embeds: [new ErrorEmbed().defDesc("No puedes usar esto en mensajes directos.")] });
         if (this.interaction.client.isOnLockdown && !this.#isDev()) try {
             return await this.interaction.reply({ ephemeral: true, embeds: [new ErrorEmbed().defDesc(`Jeffrey Bot está bloqueado ahora mismo, lamentamos los inconvenientes.`)] });
         } catch (err) {
@@ -43,6 +42,7 @@ class Handlers {
         if (this.interaction.customId?.toUpperCase().includes("TICKET")) this.ticket = new Ticket(this.interaction);
         if (this.interaction.customId?.toUpperCase().includes("SUGGESTION")) this.suggestion = new Suggestion(this.interaction);
         if (this.interaction.customId?.toUpperCase().includes("BUTTON")) this.button = new Button(this.interaction);
+        if (this.interaction.customId?.toUpperCase().includes("PREFERENCES")) this.preferences = new ManagePreferences(this.interaction);
         if (this.interaction.customId?.toUpperCase().includes("KILL") && this.#isDev()) {
             try {
                 const killInfo = this.interaction.customId.split("-");
@@ -66,12 +66,15 @@ class Handlers {
 
         this.user = await Users.getWork({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id })
         this.doc = await Guilds.getWork(this.interaction.guild.id);
+        this.user_preferences = await Preferences.getWork(this.interaction.user.id);
 
         this.params["mongoose_user_doc"] = this.user;
         this.params["mongoose_guild_doc"] = this.doc;
+        this.params["mongoose_user_preferences"] = this.user_preferences;
 
         this.params["getDoc"] = () => { return this.params["mongoose_guild_doc"] }
         this.params["getUser"] = () => { return this.params["mongoose_user_doc"] }
+        this.params["getPrefs"] = () => { return this.params["mongoose_user_preferences"] }
 
         try {
             switch (this.interaction.type) {
@@ -187,6 +190,7 @@ class Handlers {
         await this.ticket?.handle(this.user, this.doc);
         await this.suggestion?.handle(this.user, this.doc);
         await this.button?.handle(this.doc);
+        await this.preferences?.handle(this.user_preferences);
 
         const splittedId = this.interaction.customId.split("-");
         const { Currency, DarkCurrency } = this.client.getCustomEmojis(this.interaction.guild.id);
@@ -463,7 +467,10 @@ class Handlers {
                     },
                     time: ms("1m"),
                     wait: true
-                }).raw();
+                }).wait(() => {
+                    this.interaction.deleteReply();
+                })
+                if (!collector) return;
 
                 let customVal = null;
                 if (collector.customId === "customPush") {
@@ -591,19 +598,17 @@ class Handlers {
 
                         try {
                             await userDoc.addCurrency(user.quantity);
-                            await member.send({
+                            await SendDirect(this.interaction, member, DirectMessageType.Incomes, {
                                 embeds: [
                                     new Embed()
                                         .defColor(Colores.verde)
                                         .defDesc(`**—** Se agregaron ${PrettyCurrency(this.interaction.guild, user.quantity)}.
 **—** El STAFF canceló una ${hyperlink("apuesta", this.interaction.message.url)} en la que participaste.`)
-                                ],
-                                flags: [MessageFlags.SuppressNotifications]
-                            });
+                                ]
+                            })
                         } catch (err) {
-                            if (err instanceof DiscordAPIError) {
-                                console.log("🔴 No se pudo enviar el DM a %s", member.user.username);
-                            }
+                            if (err instanceof JeffreyBotError) console.error("🔴 %s", err.message());
+                            else throw err;
                         }
                     }
                 }
@@ -719,6 +724,9 @@ class Handlers {
         console.log(`-------- ${interaction.commandName} • por ${interaction.user.username} (${interaction.user.id}) • en ${interaction.guild.name} (${interaction.guild.id}) ----------`)
 
         if (!this.executedCommand) throw new CommandNotFoundError(interaction);
+        if (!this.interaction.inGuild() && this.executedCommand.category != Categories.DM) interaction.reply({ ephemeral: true, embeds: [new ErrorEmbed().defDesc("No puedes usar esto en mensajes directos.")] });
+        else if (this.interaction.inGuild() && this.executedCommand.category === Categories.DM && !this.#isDev()) interaction.reply({ ephemeral: true, embeds: [new ErrorEmbed().defDesc("Usa este comando en los mensajes directos con el bot.")] })
+
         if (this.executedCommand.category === Categories.DarkShop) {
             if (!this.doc.moduleIsActive("functions.darkshop"))
                 throw new ModuleDisabledError(interaction);
@@ -727,9 +735,8 @@ class Handlers {
             if (!validation.valid) return interaction.reply({ embeds: [validation.embed] })
         }
 
-        if (this.executedCommand.category === Categories.Developer) {
-            if (!this.#isDev()) return interaction.reply({ ephemeral: true, content: "No puedes usar este comando porque no eres desarrollador de Jeffrey Bot" })
-        }
+        if (this.executedCommand.category === Categories.Developer && !this.#isDev())
+            return interaction.reply({ ephemeral: true, content: "No puedes usar este comando porque no eres desarrollador de Jeffrey Bot" })
 
         if (this.slashCooldowns.get(this.identifierCooldown) && process.env.DEV === "FALSE") {
             let until = moment(this.slashCooldowns.get(this.identifierCooldown)).add(slashCooldown, "ms")

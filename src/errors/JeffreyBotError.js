@@ -31,6 +31,10 @@ class JeffreyBotError extends Error {
         }
     }
 
+    message() {
+        return this.embed?.data.description ?? "ERR";
+    }
+
     /**
      * @param {Boolean} b Es ephemeral?
      */

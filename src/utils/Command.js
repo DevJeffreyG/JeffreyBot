@@ -87,6 +87,10 @@ class Command {
             case Categories.Music:
                 prefix = "MUSIC";
                 break;
+
+            case Categories.DM:
+                prefix = "DM";
+                break;
         }
 
         this.data.setDescription(`[${prefix}] ${this.#rawData.desc}`)

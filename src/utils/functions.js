@@ -14,19 +14,20 @@ const moment = require("moment-timezone");
 
 /* ##### MONGOOSE ######## */
 
-const { Users, Guilds, DarkShops, Shops, GlobalDatas, CustomElements } = require("mongoose").models;
+const { Users, Guilds, DarkShops, Shops, GlobalDatas, CustomElements, Preferences } = require("mongoose").models;
 
 // JEFFREY BOT NOTIFICATIONS
 const { google } = require("googleapis");
 const { ApiClient } = require("@twurple/api");
 const { AppTokenAuthProvider } = require("@twurple/auth");
-const { BoostObjetives, ChannelModules, LogReasons, BoostTypes, PetNotices } = require("./Enums");
+const { BoostObjetives, ChannelModules, LogReasons, BoostTypes, PetNotices, Enum, DirectMessageType } = require("./Enums");
 const Log = require("./Log");
 const { Bases } = require("../resources");
 const Commands = require("../../Commands");
 const Collector = require("./Collector");
 const HumanMs = require("./HumanMs");
 const { Chance } = require("chance");
+const { DMNotSentError } = require("../errors");
 
 /* ##### MONGOOSE ######## */
 const RandomCumplido = function (force = null) {
@@ -350,7 +351,7 @@ const GenerateLog = async function (guild, options = {
  * @returns {Promise<void>}
  */
 const GlobalDatasWork = async function (guild, justTempRoles = false) {
-  const { Emojis, EmojisObject } = guild.client;
+  const { EmojisObject } = guild.client;
   const doc = await Guilds.getWork(guild.id);
   const customDoc = await CustomElements.getWork(guild.id);
 
@@ -436,9 +437,9 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
 
             if (!dbUser.affords(price)) {
               try {
-                await member.send({ embeds: [notEnough] })
+                await SendDirect(null, member, DirectMessageType.Payments, { embeds: [notEnough] });
               } catch (err) {
-                console.log("🔴 No se pudo enviar el DM a %s", member.user.username);
+                console.error("🔴 %s", err.message());
               }
 
               try {
@@ -449,11 +450,10 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
 
               dbUser.data.temp_roles.splice(i, 1);
             } else {
-              temprole.active_since = new Date();
-              temprole.active_until = moment().add(interval, ms).toDate()
+              dbUser.data.temp_roles[i].active_until = moment().add(interval, "ms").toDate();
 
               try {
-                await member.send({
+                await SendDirect(null, member, DirectMessageType.Payments, {
                   embeds: [
                     new Embed({
                       type: "success",
@@ -468,146 +468,147 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
                   ]
                 })
               } catch (err) {
-                console.log("🔴 No se pudo enviar el DM a %s", member.user.username);
+                console.error("🔴 %s", err.message());
               }
+
+              await dbUser.removeCurrency(price);
             }
-
-            await dbUser.removeCurrency(price);
           }
         }
       }
-    }
 
-    if (justTempRoles) return await dbUser.save();
+      try {
+        if (justTempRoles) return await dbUser.save();
+      } catch (err) {
+        console.error("🔴 Error guardando en GlobalDatas siendo solo temproles", err);
+      }
 
-    // Actualizar lista de Trofeos
-    let trophyList = customDoc.trophies;
-    if (trophyList.length > 0) {
-      const CustomTrophy = require("./CustomTrophy");
+      // Actualizar lista de Trofeos
+      let trophyList = customDoc.trophies;
+      if (trophyList.length > 0) {
+        const CustomTrophy = require("./CustomTrophy");
 
-      for (const trophy of trophyList) {
-        try {
-          let newId = FindNewId(await Users.find(), "data.trophies", "id");
-          await new CustomTrophy(guild).manage(trophy.id, member, newId);
-        } catch (err) {
-          console.log(err);
+        for (const trophy of trophyList) {
+          try {
+            let newId = FindNewId(await Users.find(), "data.trophies", "id");
+            await new CustomTrophy(guild).manage(trophy.id, member, newId);
+          } catch (err) {
+            console.error("🔴 %s", err);
+          }
         }
       }
-    }
 
-    birthdayIf:
-    if (birthday) {
-      if (!doc.moduleIsActive("functions.birthdays")) break birthdayIf;
+      birthdayIf:
+      if (birthday) {
+        if (!doc.moduleIsActive("functions.birthdays")) break birthdayIf;
 
-      if (dbUser?.isBirthday()) { // actualMonth + 1 ( 0 = ENERO && 11 = DICIEMBRE )
-        if (!bdRole) return new Log()
-          .setGuild(guild)
-          .setReason(LogReasons.Error)
-          .setTarget(ChannelModules.StaffLogs)
-          .send({
-            embeds: [
-              new ErrorEmbed()
-                .defDesc("**No se pudo agregar el role, no se pudo conseguir el role de cumpleaños**")
-            ]
+        if (dbUser?.isBirthday()) { // actualMonth + 1 ( 0 = ENERO && 11 = DICIEMBRE )
+          if (!bdRole) return new Log()
+            .setGuild(guild)
+            .setReason(LogReasons.Error)
+            .setTarget(ChannelModules.StaffLogs)
+            .send({
+              embeds: [
+                new ErrorEmbed()
+                  .defDesc("**No se pudo agregar el role, no se pudo conseguir el role de cumpleaños**")
+              ]
+            })
+
+          // ES EL CUMPLEAÑOS
+          if (!member.roles.cache.get(bdRole?.id)) member.roles.add(bdRole);
+        } else {
+          // revisar si tiene el rol de cumpleaños, entonces quitarselo
+          if (member.roles.cache.get(bdRole?.id)) member.roles.remove(bdRole);
+        }
+      }
+
+      // hay roles eliminados de manera temporal
+      for (const deletion of temproledeletions) {
+        if (moment().isAfter(deletion.info.until)) {
+          let temproleIndex = dbUser.data.temp_roles.findIndex(x => {
+            if (deletion.tempRoleObjectId) {
+              return x._id === deletion.tempRoleObjectId;
+            }
+            if (deletion.info.boost && x.role_id === deletion.info.role_id) {
+              return x.special.objetive === deletion.info.boost && x.role_id === deletion.info.role_id && x.special.disabled === true
+            } else {
+              return x.special.disabled === true;
+            }
           })
+          if (deletion.info.role_id) member.roles.add(deletion.info.role_id)
 
-        // ES EL CUMPLEAÑOS
-        if (!member.roles.cache.get(bdRole?.id)) member.roles.add(bdRole);
-      } else {
-        // revisar si tiene el rol de cumpleaños, entonces quitarselo
-        if (member.roles.cache.get(bdRole?.id)) member.roles.remove(bdRole);
-      }
-    }
-
-    // hay roles eliminados de manera temporal
-    for (const deletion of temproledeletions) {
-      if (moment().isAfter(deletion.info.until)) {
-        let temproleIndex = dbUser.data.temp_roles.findIndex(x => {
-          if (deletion.tempRoleObjectId) {
-            return x._id === deletion.tempRoleObjectId;
+          if (temproleIndex != -1) {
+            dbUser.data.temp_roles[temproleIndex].special.disabled = false;
+            dbUser.markModified("data")
           }
-          if (deletion.info.boost && x.role_id === deletion.info.role_id) {
-            return x.special.objetive === deletion.info.boost && x.role_id === deletion.info.role_id && x.special.disabled === true
-          } else {
-            return x.special.disabled === true;
-          }
-        })
-        if (deletion.info.role_id) member.roles.add(deletion.info.role_id)
 
-        if (temproleIndex != -1) {
-          dbUser.data.temp_roles[temproleIndex].special.disabled = false;
-          dbUser.markModified("data")
+          deletion.deleteOne();
         }
-
-        deletion.deleteOne();
       }
-    }
 
-    for (const reminder_info of birthday_reminders) {
-      const reminder = reminder_info.id
-      const birthday_member = guild.members.cache.get(reminder);
-      let birthday_query = await Users.getWork({ user_id: reminder, guild_id: guild.id });
-      if (birthday_query?.isBirthday() && !reminder_info.reminded) {
-        member.send({
-          embeds: [
-            new Embed()
-              .defAuthor({ text: `Hola`, icon: EmojisObject.Hola.url })
-              .defDesc(`¡Vengo a recordarte que ${birthday_member} está de cumpleaños hoy!`)
-              .defFooter({
-                text: `Recibiste este mensaje porque quisiste que te lo recordara, para dejar de recibir esto usa /stats usuario:@${birthday_member.user.username} y presiona el botón de recordatorios`,
-                icon: guild.iconURL({ dynamic: true }),
-                timestamp: true
-              })
-              .defColor(Colores.verdeclaro)
-          ]
-        })
-          .then(() => {
-            console.log("🟢 Se recordó a %s del cumpleaños de %s", member.user.username, reminder)
-          })
-          .catch(err => {
-            console.log(err)
+      for (const reminder_info of birthday_reminders) {
+        const reminder = reminder_info.id
+        const birthday_member = guild.members.cache.get(reminder);
+        let birthday_query = await Users.getWork({ user_id: reminder, guild_id: guild.id });
+        if (birthday_query?.isBirthday() && !reminder_info.reminded) {
+          try {
+            await SendDirect(null, member, DirectMessageType.Birthdays, {
+              embeds: [
+                new Embed()
+                  .defAuthor({ text: `Hola`, icon: EmojisObject.Hola.url })
+                  .defDesc(`¡Vengo a recordarte que ${birthday_member} está de cumpleaños hoy!`)
+                  .defFooter({
+                    text: `Recibiste este mensaje porque quisiste que te lo recordara, para dejar de recibir esto usa /stats usuario:@${birthday_member.user.username} y presiona el botón de recordatorios`,
+                    icon: guild.iconURL({ dynamic: true }),
+                    timestamp: true
+                  })
+                  .defColor(Colores.verdeclaro)
+              ]
+            })
+          } catch (err) {
             console.log("⚠️ No se pudo enviar el recordatorio a %s", member.user.username)
             console.log("⚠️ Se eliminará el recordatorio")
 
             dbUser.data.birthday_reminders.splice(dbUser.getBirthdayReminders().findIndex(x => x === reminder), 1)
-          })
+          }
 
-        reminder_info.reminded = true;
-      } else if (!birthday_query?.isBirthday() && reminder_info.reminded) {
-        reminder_info.reminded = false;
-      }
-    }
-
-    for (const debt of debts) {
-      if (moment().isAfter(debt.pay_in)) {
-        // cobrar intereses y actualizar la fecha
-        let topay = Math.round(debt.debt * (debt.interest / 100));
-        let memberToPay = guild.members.cache.get(debt.user);
-        debt.pay_in = moment().add(debt.every, "ms");
-        dbUser.economy.global.currency -= topay;
-        let userToPay = await Users.getWork({ user_id: memberToPay.id, guild_id: guild.id });
-        userToPay.addCurrency(topay);
-
-        try {
-          member.send({
-            embeds: [
-              new Embed()
-                .defColor(Colores.verde)
-                .defTitle(`Intereses del ${debt.interest}% cada ${new HumanMs(debt.every).human}`)
-                .defDesc(`**—** Se te cobró ${PrettyCurrency(guild, topay)} por el préstamo que tienes pendiente con ${memberToPay}.
-**—** Usa \`/pay\` para pagarle los ${PrettyCurrency(guild, debt.debt)} que le debes.`)
-            ],
-            flags: [MessageFlags.SuppressNotifications]
-          })
-        } catch (err) {
-          console.log(err)
+          reminder_info.reminded = true;
+        } else if (!birthday_query?.isBirthday() && reminder_info.reminded) {
+          reminder_info.reminded = false;
         }
-
       }
+
+      for (const debt of debts) {
+        if (moment().isAfter(debt.pay_in)) {
+          // cobrar intereses y actualizar la fecha
+          let topay = Math.round(debt.debt * (debt.interest / 100));
+          let memberToPay = guild.members.cache.get(debt.user);
+          debt.pay_in = moment().add(debt.every, "ms");
+          dbUser.economy.global.currency -= topay;
+          let userToPay = await Users.getWork({ user_id: memberToPay.id, guild_id: guild.id });
+          userToPay.addCurrency(topay);
+
+          try {
+            await SendDirect(null, member, DirectMessageType.Payments, {
+              embeds: [
+                new Embed()
+                  .defColor(Colores.verde)
+                  .defTitle(`Intereses del ${debt.interest}% cada ${new HumanMs(debt.every).human}`)
+                  .defDesc(`**—** Se te cobró ${PrettyCurrency(guild, topay)} por el préstamo que tienes pendiente con ${memberToPay}.
+**—** Usa \`/pay\` para pagarle los ${PrettyCurrency(guild, debt.debt)} que le debes.`)
+              ]
+            })
+          } catch (err) {
+            console.error("🔴 %s", err);
+          }
+
+        }
+      }
+
+      dbUser.save()
+        .catch(err => console.error("🔴 %s", err));
     }
 
-    dbUser.save()
-      .catch(err => console.log(err));
   }
 
   // buscar items deshabilitados temporalmente
@@ -654,7 +655,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
           guild.members.unban(userID);
           console.log("🟢 Se ha desbaneado a %s", userID)
         } catch (err) {
-          console.log(err);
+          console.error("🔴 %s", err);
         }
         ban.deleteOne();
 
@@ -673,7 +674,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
             .setReason(LogReasons.Ban)
             .send({ embeds: [unBEmbed] })
         } catch (err) {
-          console.log(err)
+          console.error("🔴 %s", err);
         }
       }
     }
@@ -714,7 +715,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
       try {
         msg.edit({ components: [row] });
       } catch (err) {
-        console.log(err)
+        console.error("🔴 %s", err);
       }
 
       polls[i].deleteOne();
@@ -904,12 +905,13 @@ const PetWork = async function (guild) {
  * @param {GuildMember} victimMember - The Discord.JS Member
  * @param {string} roleID - The ID of the temporary role
  * @param {(number | string)} duration The duration of the temporary role in ms.
+ * @param {any} activation_info La del item de la tienda
  * @param {Number} [specialType=false] The special type of this temporary role.
  * @param {Number} [specialObjective=false] The objetive for this special type of temporary role.
  * @param {number} [specialValue=false] The value for the objetive of this special temporary role.
  * @returns Mongoose User document
  */
-const LimitedTime = async function (victimMember, roleID = 0, duration, specialType = null, specialObjective = null, specialValue = null) {
+const LimitedTime = async function (victimMember, roleID = 0, duration, activation_info, specialType = null, specialObjective = null, specialValue = null) {
   let role = victimMember.guild.roles.cache.find(x => x.id === roleID);
   let user = await Users.getWork({ user_id: victimMember.id, guild_id: victimMember.guild.id });
 
@@ -920,6 +922,7 @@ const LimitedTime = async function (victimMember, roleID = 0, duration, specialT
   let toPush = {
     role_id: roleID,
     active_until,
+    activation_info,
     special: {
       type: specialType,
       objetive: specialObjective,
@@ -931,7 +934,7 @@ const LimitedTime = async function (victimMember, roleID = 0, duration, specialT
   try {
     if (role) await victimMember.roles.add(role);
   } catch (err) {
-    console.log(err);
+    console.error("🔴 %s", err);
   }
 
   user.data.temp_roles.push(toPush);
@@ -969,11 +972,12 @@ const TimeoutIf = function (time, func) {
  * @param {GuildMember} member 
  * @param {string} roleID - The ID of the temporary role
  * @param {any} tempInfo La información de temprole necesaria
+ * @param {any} activation_info La del item de la tienda
  * @param {Number} interval El intervalo de cada cuanto va a pagar (ms)
  * @param {Number} price Lo que va a pagar cada vez
  * @param {string} subscriptionName El nombre de la suscripción 
  */
-const Subscription = async function (member, roleID = 0, tempInfo, interval, price, subscriptionName) {
+const Subscription = async function (member, roleID = 0, tempInfo, activation_info, interval, price, subscriptionName) {
   let role = member.guild.roles.cache.get(roleID);
   let user = await Users.getWork({ user_id: member.id, guild_id: member.guild.id });
   let active_until = moment().add(interval, ms).toDate();
@@ -982,6 +986,7 @@ const Subscription = async function (member, roleID = 0, tempInfo, interval, pri
     role_id: role?.id,
     active_until,
     isSub: true,
+    activation_info,
     special: {
       ...tempInfo
     },
@@ -1157,7 +1162,7 @@ const handleNotification = async function (guild) {
       if (!user) return false;
       return await user.getStream() !== null;
     } catch (err) {
-      console.log(err)
+      console.error("🔴 %s", err);
     }
   }
 
@@ -1418,7 +1423,9 @@ const AfterInfraction = async function (user, data) {
   if (banMember) member.ban({ reason: `AutoMod. (Infringir "${rule}")` });
 
   try {
-    await member.send({ embeds: arrayEmbeds });
+    await SendDirect(null, member, DirectMessageType.Moderation, {
+      embeds: arrayEmbeds
+    })
     return true;
   } catch (e) {
     return e;
@@ -1894,7 +1901,7 @@ ${codeBlock(message.content)}`)
         ]
       })
   } catch (err) {
-    console.log(err);
+    console.error("🔴 %s", err);
   }
 
   return true;
@@ -2066,6 +2073,67 @@ const PrettifyNumber = function (number, initials = 1, zeros = null) {
   }
 }
 
+/**
+ * @param {BaseInteraction} interaction 
+ * @param {Message} message 
+ * @param {User} user
+ */
+const CreateInteractionFilter = function (interaction, message, user) {
+  return (inter) => {
+    let flat = message.components.flatMap((row) => {
+      return row.components.flatMap((comp) => {
+        return comp.customId
+      });
+    })
+
+    return flat.find(x => x === inter.customId) && inter.user.id === (user?.id ?? interaction.user.id);
+  }
+}
+
+/**
+ * 
+ * @param {BaseInteraction} interaction 
+ * @param {GuildMember} member 
+ * @param {Enum} type 
+ * @param {import("discord.js").MessageCreateOptions} options 
+ */
+const SendDirect = async function (interaction, member, type, options) {
+  const preferences = await Preferences.getWork(member.id);
+  let flags = [];
+
+  // Es el primer DM que se le envía al usuario
+  if (!preferences.direct_messages.firstDmSent) {
+    try {
+      await member.send({
+        embeds: [
+          new Embed()
+            .defThumbnail(member.client.user.displayAvatarURL({ dynamic: true }))
+            .defDesc(`# ¡Hola, ${member.user.username}!\nSoy ${member.client.user.username}, puedes configurar tus preferencias para mensajes directos con ${member.client.mentionCommand("preferencias")}.\n**No volverás a recibir este mensaje en un futuro!**`)
+            .defColor(Colores.verdejeffrey)
+        ]
+      })
+
+      preferences.direct_messages.firstDmSent = true;
+      await preferences.save();
+    } catch (err) {
+      console.error("🔴", err);
+    }
+  }
+
+  if (!preferences.direct_messages.options.allowed)
+    throw new DMNotSentError(interaction, member, "El usuario deshabilitó los mensajes directos para Jeffrey Bot")
+
+  if (preferences.direct_messages.options.supressed) flags.push(MessageFlags.SuppressNotifications);
+
+  let path = "direct_messages.allowed." + new Enum(DirectMessageType).translate(type, false).toLowerCase();
+  const allowed = preferences.get(path);
+
+  if (!allowed)
+    throw new DMNotSentError(interaction, member, `El usuario deshabilitó este módulo (${new Enum(DirectMessageType).translate(type)})`);
+
+  await member.send({ ...options, flags });
+}
+
 module.exports = {
   GetChangesAndCreateFields,
   FetchAuditLogs,
@@ -2105,5 +2173,7 @@ module.exports = {
   TimeoutIf,
   MinMaxInt,
   PrettifyNumber,
-  MultiplePercentages
+  MultiplePercentages,
+  CreateInteractionFilter,
+  SendDirect
 }
