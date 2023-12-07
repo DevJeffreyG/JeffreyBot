@@ -1,6 +1,8 @@
 const { SlashCommandIntegerOption, SlashCommandStringOption } = require("discord.js");
-const { Command, Enum, BoostTypes, BoostObjetives, ItemObjetives, FindNewId } = require("../../../src/utils");
-const { DoesntExistsError } = require("../../../src/errors");
+const { Command, Enum, BoostTypes, BoostObjetives, ItemObjetives, FindNewId, Embed } = require("../../../src/utils");
+const { DoesntExistsError, BadParamsError } = require("../../../src/errors");
+
+const ms = require("ms");
 
 const command = new Command({
     name: "admin-keys",
@@ -130,6 +132,10 @@ command.execute = async (interaction, models, params) => {
                 type = ItemObjetives.Role
             }
 
+            const duration = ms(duracion?.value ?? 0);
+            if (duration < ms("1m") || isNaN(duration))
+                throw new BadParamsError(interaction, "El tiempo debe ser mayor o igual a 1 minuto")
+
             doc.data.keys.push({
                 config: {
                     maxuses: usos ? usos.value : Infinity
@@ -140,7 +146,7 @@ command.execute = async (interaction, models, params) => {
                     boost_value,
                     boost_objetive,
                     value: role?.value ?? 0,
-                    duration: duracion ? ms(duracion.value) : Infinity
+                    duration
                 },
                 code: generatedCode,
                 id: generatedID

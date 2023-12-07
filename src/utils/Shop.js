@@ -326,7 +326,7 @@ class Shop {
             m = await this.interaction.followUp({ ephemeral: true, content: `${this.#Emojis.Loading} Usando automáticamente...` });
 
             const itemObj = await new Item(this.interaction, item.id, this.config.info.type).build(inventoryUser, this.#doc);
-            await itemObj.use(newUseId);
+            await itemObj.use();
         }
 
         let embed = new Embed({
@@ -682,7 +682,8 @@ ${codeBlock(item.description)}
 
         const subError = new BadParamsError(this.interaction, [
             "Si es una suscripción, **debe tener**: `duracion`",
-            "**No puede ser** `especial`"
+            "**No puede ser** `especial`",
+            "`duracion` **debe ser** mayor o igual a 1 minuto"
         ]);
         const roleError = new BadParamsError(this.interaction, "Si se usa un tipo Role, **debe tener**: `role`");
         const boostError = new BadParamsError(this.interaction, [
@@ -735,6 +736,7 @@ ${codeBlock(item.description)}
         if (this.shopdoc.isSub(item)) {
             if (params.especial?.value) throw subError;
             if (!use.item_info.duration) throw subError;
+            if (use.item_info.duration < ms("1m")) throw subError;
         }
 
         // boost verification
@@ -761,6 +763,7 @@ ${codeBlock(item.description)}
 
         try {
             await this.shopdoc.save();
+            await this.fixTempRoles(item);
         } catch (err) {
             if (err instanceof Error.ValidationError) throw new BadParamsError(this.interaction, [
                 "Revisa los campos",
@@ -851,6 +854,26 @@ ${codeBlock(item.description)}
             return work?.stringPrecio ?? Math.floor(precio).toLocaleString("es-CO");
         }
         return Math.floor(work?.precio ?? precio);
+    }
+
+    async fixTempRoles(item) {
+        switch (item.use_info.item_info.type) {
+            case ItemTypes.Subscription: {
+                for await (const user of await Users.find({ guild_id: this.interaction.guild.id })) {
+                    const index = user.data.temp_roles.findIndex(x => x.activation_info?.item_id === item.id && x.activation_info?.shop_type === this.config.info.type)
+                    if (index != -1) {
+                        user.data.temp_roles[index].sub_info = Object.assign({}, user.data.temp_roles[index].sub_info, {
+                            price: item.price,
+                            interval: item.use_info.item_info.duration
+                        })
+
+                        // TODO: SendDirect();
+
+                        await user.save();
+                    }
+                }
+            }
+        }
     }
 }
 

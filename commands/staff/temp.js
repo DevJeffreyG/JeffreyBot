@@ -105,8 +105,8 @@ command.execute = async (interaction, models, params, client) => {
         }
         case "boost": {
             const duration = ms(tiempo.value);
-            if (duration < ms("1s") || isNaN(duration))
-                throw new BadParamsError(interaction, "El tiempo debe ser mayor o igual a 1 segundo");
+            if (duration < ms("1m") || isNaN(duration))
+                throw new BadParamsError(interaction, "El tiempo debe ser mayor o igual a 1 minuto");
 
             let btype = tipo.value;
             let bobj = objetivo.value;
@@ -128,7 +128,7 @@ command.execute = async (interaction, models, params, client) => {
 
             // llamar la funcion para hacer un globaldata y dar el role con boost
             try {
-                await LimitedTime(usuario.member, role?.role.id, duration, btype, bobj, multi);
+                await LimitedTime(usuario.member, role?.role.id, duration, {}, btype, bobj, multi);
             } catch (err) {
                 throw new DiscordLimitationError(interaction, "temp", [
                     `Algo no ha ido bien`,

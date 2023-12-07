@@ -128,12 +128,10 @@ class Item {
     }
 
     /**
-     * 
-     * @param {Number} id The UseId of the item
      * @param {GuildMember} [qvictim = null] The member affected (darkshop)
      * @returns 
      */
-    async use(id, qvictim = this.interaction.member) {
+    async use(qvictim = this.interaction.member) {
         if (!this.#verify()) return false;
 
         var victim = qvictim;
@@ -282,11 +280,17 @@ class Item {
         }
 
         if (this.isTemp) {
-            await LimitedTime(this.member, this.given, this.duration);
+            await LimitedTime(this.member, this.given, this.duration, {
+                item_id: this.itemId,
+                shop_type: this.shopType
+            });
         }
         if (this.isSub) {
             try {
-                await Subscription(this.member, this.given, this.duration, this.price, this.name)
+                await Subscription(this.member, this.given, {}, {
+                    item_id: this.itemId,
+                    shop_type: this.shopType
+                }, this.duration, this.price, this.name)
             } catch (err) {
                 console.log(err);
 
@@ -488,7 +492,7 @@ class Item {
                 if (!collector || collector.values[0] === "cancel") {
                     try {
                         await this.interaction.editReply({ embeds: [this.canceled], components: [] });
-                    } catch(err) {
+                    } catch (err) {
                         console.error("🔴 %s", err);
                     }
                     return false
@@ -612,10 +616,16 @@ class Item {
                 type: this.boost_type,
                 objetive: this.boost_objetive,
                 value: this.boost_value,
+            }, {
+                item_id: this.itemId,
+                shop_type: this.shopType
             }, this.duration, this.price, this.item.name);
         } else {
             // llamar la funcion para hacer un globaldata y dar el role con boost
-            await LimitedTime(this.member, role?.id, this.duration, this.boost_type, this.boost_objetive, this.boost_value);
+            await LimitedTime(this.member, role?.id, this.duration, {
+                item_id: this.itemId,
+                shop_type: this.shopType
+            }, this.boost_type, this.boost_objetive, this.boost_value);
         }
         this.removeItemFromInv()
         return true;

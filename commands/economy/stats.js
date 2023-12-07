@@ -123,7 +123,7 @@ command.execute = async (interaction, models, params, client) => {
             if (!boostEmbed.data.fields || boostEmbed.data.fields.length <= 20) {
                 boostEmbed
                     .defField(`🚀 — Boost ${boosttype} de ${boostobj} x${value.toLocaleString("es-CO")}`,
-                        `▸ Hasta: ${time(boost.active_until)} (${time(boost.active_until, "R")})${disabled ? `\n▸ **Desactivado**.` : ""}`, true);
+                        `▸ ${boost.isSub ? "**(SUB)** Se renueva:" : "Hasta:"} ${time(boost.active_until)} (${time(boost.active_until, "R")})${boost.isSub ? `\n▸ **Desde:** ${time(boost.sub_info.active_since, "R")}` : ""}${disabled ? `\n▸ **Desactivado**.` : ""}`, true);
             } else {
                 boostEmbed.defField("🚀 — ...", `Y unos ${boosts.length - 20} más.`)
                 break;

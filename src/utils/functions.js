@@ -915,9 +915,7 @@ const LimitedTime = async function (victimMember, roleID = 0, duration, activati
   let role = victimMember.guild.roles.cache.find(x => x.id === roleID);
   let user = await Users.getWork({ user_id: victimMember.id, guild_id: victimMember.guild.id });
 
-  if (duration === Infinity) return victimMember.roles.add(role); // es un role permanente???
-
-  let active_until = moment().add(duration, "ms").toDate();
+  let active_until = moment().add(duration === Infinity ? ms("999y") : duration, "ms").toDate();
 
   let toPush = {
     role_id: roleID,

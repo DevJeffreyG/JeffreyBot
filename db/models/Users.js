@@ -103,6 +103,10 @@ const Schema = new mongoose.Schema({
             {
                 role_id: { type: String },
                 active_until: { type: Date, required: true },
+                activation_info: {
+                    item_id: { type: Number },
+                    shop_type: { type: Number }
+                },
                 special: {
                     type: { type: Number, default: null },
                     objetive: { type: Number, default: null },
@@ -114,7 +118,7 @@ const Schema = new mongoose.Schema({
                     active_since: { type: Date, default: () => { return new Date() } },
                     price: { type: Number },
                     name: { type: String },
-                    inteval: { type: Number },
+                    interval: { type: Number },
                     isCancelled: { type: Boolean }
                 },
                 id: { type: Number, sparse: true }
