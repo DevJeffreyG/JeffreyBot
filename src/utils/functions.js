@@ -450,7 +450,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
 
               dbUser.data.temp_roles.splice(i, 1);
             } else {
-              dbUser.data.temp_roles[i].active_until = moment().add(interval, "ms").toDate();
+              dbUser.data.temp_roles[i].active_until = moment().add(interval, "ms").startOf("minute").toDate();
 
               try {
                 await SendDirect(null, member, DirectMessageType.Payments, {
@@ -461,8 +461,11 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
                         title: "Pagado",
                         desc: [
                           `Se han restado ${PrettyCurrency(guild, price)} para pagar la suscripción a **${subName}**`,
-                          `Tu saldo ha quedado en ${PrettyCurrency(guild, newTotal)}`
-                        ]
+                          `Ahora tienes ${PrettyCurrency(guild, newTotal)}`,
+                          `Administra tus suscripciones usando ${guild.client.mentionCommand("subs")} en un servidor`
+                        ],
+                        footer: guild.name,
+                        footer_icon: guild.iconURL()
                       }
                     })
                   ]
@@ -471,6 +474,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
                 console.error("🔴 %s", err.message());
               }
 
+              dbUser.addCount("subscriptions_currency", price, false);
               await dbUser.removeCurrency(price);
             }
           }
@@ -488,10 +492,10 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
       if (trophyList.length > 0) {
         const CustomTrophy = require("./CustomTrophy");
 
-        for (const trophy of trophyList) {
+        for await (const trophy of trophyList) {
           try {
             let newId = FindNewId(await Users.find(), "data.trophies", "id");
-            await new CustomTrophy(guild).manage(trophy.id, member, newId);
+            dbUser = await new CustomTrophy(guild).manage(trophy.id, member, newId, false)
           } catch (err) {
             console.error("🔴 %s", err);
           }
@@ -915,7 +919,7 @@ const LimitedTime = async function (victimMember, roleID = 0, duration, activati
   let role = victimMember.guild.roles.cache.find(x => x.id === roleID);
   let user = await Users.getWork({ user_id: victimMember.id, guild_id: victimMember.guild.id });
 
-  let active_until = moment().add(duration === Infinity ? ms("999y") : duration, "ms").toDate();
+  let active_until = moment().add(duration === Infinity ? ms("999y") : duration, "ms").startOf("minute").toDate();
 
   let toPush = {
     role_id: roleID,
@@ -978,7 +982,7 @@ const TimeoutIf = function (time, func) {
 const Subscription = async function (member, roleID = 0, tempInfo, activation_info, interval, price, subscriptionName) {
   let role = member.guild.roles.cache.get(roleID);
   let user = await Users.getWork({ user_id: member.id, guild_id: member.guild.id });
-  let active_until = moment().add(interval, ms).toDate();
+  let active_until = moment().add(interval, ms).startOf("minute").toDate();
 
   let toPush = {
     role_id: role?.id,
@@ -993,7 +997,8 @@ const Subscription = async function (member, roleID = 0, tempInfo, activation_in
       name: subscriptionName,
       interval,
       isCancelled: false
-    }
+    },
+    id: FindNewId(await Users.find({ guild_id: member.guild.id }), "data.temp_roles", "id")
   }
   try {
     if (role) await member.roles.add(role);

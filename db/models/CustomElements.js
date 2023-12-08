@@ -55,7 +55,8 @@ const Schema = mongoose.Schema({
                     currency: { type: Number, validate: [positiveValidator, integerValidator] },
                     darkcurrency: { type: Number, validate: [positiveValidator, integerValidator] },
                     blackjack: { type: Number, validate: [positiveValidator, integerValidator] },
-                    roulette: { type: Number, validate: [positiveValidator, integerValidator] }
+                    roulette: { type: Number, validate: [positiveValidator, integerValidator] },
+                    subscriptions_currency: { type: Number, validate: [positiveValidator, integerValidator] }
                 },
                 moment: {
                     currency: { type: Number, validate: integerValidator },

@@ -144,6 +144,7 @@ const Schema = new mongoose.Schema({
                     return 0
                 }, validate: integerValidator
             },
+            subscriptions_currency: { type: Number, default: 0, validate: integerValidator },
             secured_currency: { type: Number, default: 0, validate: integerValidator },
             dark_currency: {
                 type: Number, default: function () {
@@ -203,8 +204,8 @@ Schema.pre("validate", function () {
 
     this.economy.dark.currency = Math.round(this.getDarkCurrency());
 
-    this.data.counts.normal_currency = Math.round(this.data.counts.normal_currency);
-    this.data.counts.dark_currency = Math.round(this.data.counts.dark_currency);
+    this.data.counts.normal_currency = Math.round(this.getCount("normal_currency"));
+    this.data.counts.dark_currency = Math.round(this.getCount("dark_currency"));
     this.economy.dark.accuracy = Number(Number(this.economy.dark.accuracy).toFixed(1));
 })
 
@@ -303,9 +304,9 @@ Schema.method("getCount", function (module) {
     return this.data.counts[module]
 })
 
-Schema.method("addCurrency", async function (count, save = true) {
+Schema.method("addCurrency", async function (count, save = true, alltime = true) {
     this.economy.global.currency += count;
-    this.data.counts.normal_currency += count;
+    if(alltime) this.addCount("normal_currency", count, false);
     if (save) await this.save();
 
     console.log("🗨 %s tiene %s Currency", this.user_id, this.getCurrency());
@@ -325,7 +326,7 @@ Schema.method("removeCurrency", async function (count, save = false) {
 Schema.method("secure", async function (count, save = true) {
     this.economy.global.currency -= count;
     this.economy.global.secured += count;
-    this.data.counts.secured_currency += count;
+    this.addCount("secured_currency", count, false);
 
     if (save) await this.save();
 
@@ -349,7 +350,7 @@ Schema.method("withdraw", async function (count, save = true) {
 
 Schema.method("addDarkCurrency", async function (count, save = true) {
     this.economy.dark.currency += count;
-    this.data.counts.dark_currency += count;
+    this.addCount("dark_currency", count, false);
     if (save) await this.save();
 
     console.log("🗨 %s tiene %s DarkCurrency", this.user_id, this.getDarkCurrency());

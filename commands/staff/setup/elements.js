@@ -450,6 +450,11 @@ command.execTrophies = async (interaction, models, params, client) => {
                                 .setEmoji("🔁")
                                 .setStyle(ButtonStyle.Primary),
                             new ButtonBuilder()
+                                .setCustomId("reqTotalTrophy2-" + id.value)
+                                .setLabel("Totales II")
+                                .setEmoji("🔁")
+                                .setStyle(ButtonStyle.Primary),
+                            new ButtonBuilder()
                                 .setCustomId("reqMomentTrophy-" + id.value)
                                 .setLabel("Momento")
                                 .setEmoji("🕓")

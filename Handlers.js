@@ -278,10 +278,23 @@ class Handlers {
                     .defId(this.interaction.customId)
                     .defTitle("Requerimentos totales: " + trophyId)
                     .addInput({ id: "warns", label: "Warns", placeholder: "Escribe un número entero", style: TextInputStyle.Short })
-                    .addInput({ id: "currency", label: Currency.name, placeholder: "Escribe un número entero", style: TextInputStyle.Short })
-                    .addInput({ id: "darkcurrency", label: DarkCurrency.name, placeholder: "Escribe un número entero", style: TextInputStyle.Short })
+                    .addInput({ id: "currency", label: `${Currency.name} ganados`, placeholder: "Escribe un número entero", style: TextInputStyle.Short })
+                    .addInput({ id: "darkcurrency", label: `${DarkCurrency.name} invertidos`, placeholder: "Escribe un número entero", style: TextInputStyle.Short })
                     .addInput({ id: "blackjack", label: "Blackjacks ganados", placeholder: "Escribe un número entero", style: TextInputStyle.Short })
                     .addInput({ id: "roulette", label: "Roulettes jugados", placeholder: "Escribe un número entero", style: TextInputStyle.Short })
+                    .show();
+                break;
+            }
+
+            case "reqTotalTrophy2": {
+                if (!this.doc.checkStaff(this.interaction.member))
+                    throw new PermissionError(this.interaction);
+
+                const trophyId = splittedId[1];
+                await new Modal(this.interaction)
+                    .defId(this.interaction.customId)
+                    .defTitle("Requerimentos totales: " + trophyId)
+                    .addInput({ id: "subscriptions_currency", label: "Dinero gastado en suscripciones", placeholder: "Escribe un número entero positivo", style: TextInputStyle.Short })
                     .show();
                 break;
             }
@@ -670,6 +683,7 @@ class Handlers {
                 return await new CustomEmbed(this.interaction).create(recieved).replace(id)
             }
 
+            case "reqTotalTrophy2":
             case "reqTotalTrophy": {
                 const id = Number(splittedId[1]);
                 await this.interaction.deferReply({ ephemeral: true });
