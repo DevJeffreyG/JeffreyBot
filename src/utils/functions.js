@@ -389,6 +389,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
     let temproledeletions = await GlobalDatas.getTempRoleDeletions(member.id, guild.id) ?? [];
     let debts = dbUser?.data.debts ?? [];
 
+    let tempRoleIndex = 0;
     for await (const temprole of temp_roles) {
       let role = guild.roles.cache.find(x => x.id === temprole.role_id);
       let until = temprole.active_until;
@@ -412,14 +413,14 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
             Logger.send({ embed: removingRoleErr(err) })
           }
 
-          dbUser.data.temp_roles.splice(i, 1);
+          dbUser.data.temp_roles.splice(tempRoleIndex, 1);
         } else { // Es una suscripción, y ya es momento de cobrarle
           let price = temprole.sub_info.price;
           let subName = temprole.sub_info.name;
           let { interval, isCancelled } = temprole.sub_info;
 
           let notEnough = new ErrorEmbed()
-            .defDesc(`**—** No pudiste pagar tu suscripción **${subName}** (${PrettyCurrency(guild, price)}. Se canceló automáticamente.`);
+            .defDesc(`**—** No pudiste pagar tu suscripción **${subName}** (${PrettyCurrency(guild, price)}). Se canceló automáticamente.`);
 
           // Ya fue cancelada, eliminar el temprole
           if (isCancelled) {
@@ -429,7 +430,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
               Logger.send({ embed: removingRoleErr(err) })
             }
 
-            dbUser.data.temp_roles.splice(i, 1);
+            dbUser.data.temp_roles.splice(tempRoleIndex, 1);
           } else {
             // Como aún está activa, cobrar la sub
             let newTotal = dbUser.getCurrency() - price;
@@ -447,7 +448,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
                 Logger.send({ embed: removingRoleErr(err) })
               }
 
-              dbUser.data.temp_roles.splice(i, 1);
+              dbUser.data.temp_roles.splice(tempRoleIndex, 1);
             } else {
               temprole.active_until = moment().add(interval, "ms").startOf("minute").toDate();
               dbUser.markModified("data.temp_roles");
@@ -474,11 +475,15 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
               }
 
               await dbUser.addCount("subscriptions_currency", price, false);
-              await dbUser.removeCurrency(price);
             }
+
+            await dbUser.removeCurrency(price);
+
           }
         }
       }
+
+      tempRoleIndex++;
     }
 
     try {
@@ -583,15 +588,16 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
       }
     }
 
-    for (const debt of debts) {
+    for await (const debt of debts) {
       if (moment().isAfter(debt.pay_in)) {
         // cobrar intereses y actualizar la fecha
         let topay = Math.round(debt.debt * (debt.interest / 100));
         let memberToPay = guild.members.cache.get(debt.user);
         debt.pay_in = moment().add(debt.every, "ms");
-        dbUser.economy.global.currency -= topay;
+        await dbUser.removeCurrency(topay);
+
         let userToPay = await Users.getWork({ user_id: memberToPay.id, guild_id: guild.id });
-        userToPay.addCurrency(topay);
+        await userToPay.addCurrency(topay);
 
         try {
           await SendDirect(null, member, DirectMessageType.Payments, {
@@ -601,6 +607,20 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
                 .defTitle(`Intereses del ${debt.interest}% cada ${new HumanMs(debt.every).human}`)
                 .defDesc(`**—** Se te cobró ${PrettyCurrency(guild, topay)} por el préstamo que tienes pendiente con ${memberToPay}.
 **—** Usa \`/pay\` para pagarle los ${PrettyCurrency(guild, debt.debt)} que le debes.`)
+            ]
+          })
+        } catch (err) {
+          console.error("🔴 %s", err);
+        }
+
+        try {
+          await SendDirect(null, memberToPay, DirectMessageType.Incomes, {
+            embeds: [
+              new Embed()
+                .defColor(Colores.verde)
+                .defTitle(`Intereses del ${debt.interest}% cada ${new HumanMs(debt.every).human}`)
+                .defDesc(`**—** Se depositaron ${PrettyCurrency(guild, topay)} por el préstamo que tienes con ${member}.
+**—** Aún te deben ${PrettyCurrency(guild, debt.debt)}.`)
             ]
           })
         } catch (err) {
@@ -664,7 +684,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
         } catch (err) {
           console.error("🔴 %s", err);
         }
-        
+
         await ban.deleteOne();
 
         let unBEmbed = new Embed()
@@ -731,6 +751,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
   }
 
   // buscar apuestas
+  let betsIndex = 0;
   staffBets:
   for await (const bet of doc.data.bets) {
     if (moment().isAfter(bet.closes_in) && !bet.closed) {
@@ -738,7 +759,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
       const message = await ch.messages.fetch(bet.message_id);
 
       if (message.size > 1) {
-        doc.data.bets.splice(i, 1);
+        doc.data.bets.splice(betsIndex, 1);
         break staffBets;
       }
       const embed = new Embed(message.embeds[0]);
@@ -799,6 +820,8 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
       })
       bet.closed = true;
     }
+
+    betsIndex++;
   }
 
   // buscar tickets sin respuesta
