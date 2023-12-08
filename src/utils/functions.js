@@ -389,8 +389,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
     let temproledeletions = await GlobalDatas.getTempRoleDeletions(member.id, guild.id) ?? [];
     let debts = dbUser?.data.debts ?? [];
 
-    for (let i = 0; i < temp_roles.length; i++) {
-      const temprole = temp_roles[i];
+    for await (const temprole of temp_roles) {
       let role = guild.roles.cache.find(x => x.id === temprole.role_id);
       let until = temprole.active_until;
 
@@ -450,8 +449,8 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
 
               dbUser.data.temp_roles.splice(i, 1);
             } else {
-              dbUser.data.temp_roles[i].active_until = moment().add(interval, "ms").startOf("minute").toDate();
-
+              temprole.active_until = moment().add(interval, "ms").startOf("minute").toDate();
+              dbUser.markModified("data.temp_roles");
               try {
                 await SendDirect(null, member, DirectMessageType.Payments, {
                   embeds: [
@@ -474,143 +473,148 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
                 console.error("🔴 %s", err.message());
               }
 
-              dbUser.addCount("subscriptions_currency", price, false);
+              await dbUser.addCount("subscriptions_currency", price, false);
               await dbUser.removeCurrency(price);
             }
           }
         }
       }
+    }
 
-      try {
-        if (justTempRoles) return await dbUser.save();
-      } catch (err) {
-        console.error("🔴 Error guardando en GlobalDatas siendo solo temproles", err);
-      }
+    try {
+      if (justTempRoles) return await dbUser.save();
+    } catch (err) {
+      console.error("🔴 Error guardando en GlobalDatas siendo solo temproles", err);
+    }
 
-      // Actualizar lista de Trofeos
-      let trophyList = customDoc.trophies;
-      if (trophyList.length > 0) {
-        const CustomTrophy = require("./CustomTrophy");
+    // Actualizar lista de Trofeos
+    let trophyList = customDoc.trophies;
+    if (trophyList.length > 0) {
+      const CustomTrophy = require("./CustomTrophy");
 
-        for await (const trophy of trophyList) {
-          try {
-            let newId = FindNewId(await Users.find(), "data.trophies", "id");
-            dbUser = await new CustomTrophy(guild).manage(trophy.id, member, newId, false)
-          } catch (err) {
-            console.error("🔴 %s", err);
-          }
+      for await (const trophy of trophyList) {
+        try {
+          let newId = FindNewId(await Users.find(), "data.trophies", "id");
+          dbUser = await new CustomTrophy(guild).manage(trophy.id, member, dbUser, newId, false)
+          //console.log(dbUser.data.temp_roles);
+        } catch (err) {
+          console.error("🔴 %s", err);
         }
       }
+    }
 
-      birthdayIf:
-      if (birthday) {
-        if (!doc.moduleIsActive("functions.birthdays")) break birthdayIf;
+    birthdayIf:
+    if (birthday) {
+      if (!doc.moduleIsActive("functions.birthdays")) break birthdayIf;
 
-        if (dbUser?.isBirthday()) { // actualMonth + 1 ( 0 = ENERO && 11 = DICIEMBRE )
-          if (!bdRole) return new Log()
-            .setGuild(guild)
-            .setReason(LogReasons.Error)
-            .setTarget(ChannelModules.StaffLogs)
-            .send({
-              embeds: [
-                new ErrorEmbed()
-                  .defDesc("**No se pudo agregar el role, no se pudo conseguir el role de cumpleaños**")
-              ]
-            })
-
-          // ES EL CUMPLEAÑOS
-          if (!member.roles.cache.get(bdRole?.id)) member.roles.add(bdRole);
-        } else {
-          // revisar si tiene el rol de cumpleaños, entonces quitarselo
-          if (member.roles.cache.get(bdRole?.id)) member.roles.remove(bdRole);
-        }
-      }
-
-      // hay roles eliminados de manera temporal
-      for (const deletion of temproledeletions) {
-        if (moment().isAfter(deletion.info.until)) {
-          let temproleIndex = dbUser.data.temp_roles.findIndex(x => {
-            if (deletion.tempRoleObjectId) {
-              return x._id === deletion.tempRoleObjectId;
-            }
-            if (deletion.info.boost && x.role_id === deletion.info.role_id) {
-              return x.special.objetive === deletion.info.boost && x.role_id === deletion.info.role_id && x.special.disabled === true
-            } else {
-              return x.special.disabled === true;
-            }
+      if (dbUser?.isBirthday()) { // actualMonth + 1 ( 0 = ENERO && 11 = DICIEMBRE )
+        if (!bdRole) return new Log()
+          .setGuild(guild)
+          .setReason(LogReasons.Error)
+          .setTarget(ChannelModules.StaffLogs)
+          .send({
+            embeds: [
+              new ErrorEmbed()
+                .defDesc("**No se pudo agregar el role, no se pudo conseguir el role de cumpleaños**")
+            ]
           })
-          if (deletion.info.role_id) member.roles.add(deletion.info.role_id)
 
-          if (temproleIndex != -1) {
-            dbUser.data.temp_roles[temproleIndex].special.disabled = false;
-            dbUser.markModified("data")
-          }
-
-          deletion.deleteOne();
-        }
+        // ES EL CUMPLEAÑOS
+        if (!member.roles.cache.get(bdRole?.id)) member.roles.add(bdRole);
+      } else {
+        // revisar si tiene el rol de cumpleaños, entonces quitarselo
+        if (member.roles.cache.get(bdRole?.id)) member.roles.remove(bdRole);
       }
+    }
 
-      for (const reminder_info of birthday_reminders) {
-        const reminder = reminder_info.id
-        const birthday_member = guild.members.cache.get(reminder);
-        let birthday_query = await Users.getWork({ user_id: reminder, guild_id: guild.id });
-        if (birthday_query?.isBirthday() && !reminder_info.reminded) {
-          try {
-            await SendDirect(null, member, DirectMessageType.Birthdays, {
-              embeds: [
-                new Embed()
-                  .defAuthor({ text: `Hola`, icon: EmojisObject.Hola.url })
-                  .defDesc(`¡Vengo a recordarte que ${birthday_member} está de cumpleaños hoy!`)
-                  .defFooter({
-                    text: `Recibiste este mensaje porque quisiste que te lo recordara, para dejar de recibir esto usa /stats usuario:@${birthday_member.user.username} y presiona el botón de recordatorios`,
-                    icon: guild.iconURL({ dynamic: true }),
-                    timestamp: true
-                  })
-                  .defColor(Colores.verdeclaro)
-              ]
-            })
-          } catch (err) {
-            console.log("⚠️ No se pudo enviar el recordatorio a %s", member.user.username)
-            console.log("⚠️ Se eliminará el recordatorio")
-
-            dbUser.data.birthday_reminders.splice(dbUser.getBirthdayReminders().findIndex(x => x === reminder), 1)
+    // hay roles eliminados de manera temporal
+    for (const deletion of temproledeletions) {
+      if (moment().isAfter(deletion.info.until)) {
+        let temproleIndex = dbUser.data.temp_roles.findIndex(x => {
+          if (deletion.tempRoleObjectId) {
+            return x._id === deletion.tempRoleObjectId;
           }
+          if (deletion.info.boost && x.role_id === deletion.info.role_id) {
+            return x.special.objetive === deletion.info.boost && x.role_id === deletion.info.role_id && x.special.disabled === true
+          } else {
+            return x.special.disabled === true;
+          }
+        })
+        if (deletion.info.role_id) member.roles.add(deletion.info.role_id)
 
-          reminder_info.reminded = true;
-        } else if (!birthday_query?.isBirthday() && reminder_info.reminded) {
-          reminder_info.reminded = false;
+        if (temproleIndex != -1) {
+          dbUser.data.temp_roles[temproleIndex].special.disabled = false;
+          dbUser.markModified("data")
         }
+
+        deletion.deleteOne();
       }
+    }
 
-      for (const debt of debts) {
-        if (moment().isAfter(debt.pay_in)) {
-          // cobrar intereses y actualizar la fecha
-          let topay = Math.round(debt.debt * (debt.interest / 100));
-          let memberToPay = guild.members.cache.get(debt.user);
-          debt.pay_in = moment().add(debt.every, "ms");
-          dbUser.economy.global.currency -= topay;
-          let userToPay = await Users.getWork({ user_id: memberToPay.id, guild_id: guild.id });
-          userToPay.addCurrency(topay);
+    for (const reminder_info of birthday_reminders) {
+      const reminder = reminder_info.id
+      const birthday_member = guild.members.cache.get(reminder);
+      let birthday_query = await Users.getWork({ user_id: reminder, guild_id: guild.id });
+      if (birthday_query?.isBirthday() && !reminder_info.reminded) {
+        try {
+          await SendDirect(null, member, DirectMessageType.Birthdays, {
+            embeds: [
+              new Embed()
+                .defAuthor({ text: `Hola`, icon: EmojisObject.Hola.url })
+                .defDesc(`¡Vengo a recordarte que ${birthday_member} está de cumpleaños hoy!`)
+                .defFooter({
+                  text: `Recibiste este mensaje porque quisiste que te lo recordara, para dejar de recibir esto usa /stats usuario:@${birthday_member.user.username} y presiona el botón de recordatorios`,
+                  icon: guild.iconURL({ dynamic: true }),
+                  timestamp: true
+                })
+                .defColor(Colores.verdeclaro)
+            ]
+          })
+        } catch (err) {
+          console.log("⚠️ No se pudo enviar el recordatorio a %s", member.user.username)
+          console.log("⚠️ Se eliminará el recordatorio")
 
-          try {
-            await SendDirect(null, member, DirectMessageType.Payments, {
-              embeds: [
-                new Embed()
-                  .defColor(Colores.verde)
-                  .defTitle(`Intereses del ${debt.interest}% cada ${new HumanMs(debt.every).human}`)
-                  .defDesc(`**—** Se te cobró ${PrettyCurrency(guild, topay)} por el préstamo que tienes pendiente con ${memberToPay}.
+          dbUser.data.birthday_reminders.splice(dbUser.getBirthdayReminders().findIndex(x => x === reminder), 1)
+        }
+
+        reminder_info.reminded = true;
+      } else if (!birthday_query?.isBirthday() && reminder_info.reminded) {
+        reminder_info.reminded = false;
+      }
+    }
+
+    for (const debt of debts) {
+      if (moment().isAfter(debt.pay_in)) {
+        // cobrar intereses y actualizar la fecha
+        let topay = Math.round(debt.debt * (debt.interest / 100));
+        let memberToPay = guild.members.cache.get(debt.user);
+        debt.pay_in = moment().add(debt.every, "ms");
+        dbUser.economy.global.currency -= topay;
+        let userToPay = await Users.getWork({ user_id: memberToPay.id, guild_id: guild.id });
+        userToPay.addCurrency(topay);
+
+        try {
+          await SendDirect(null, member, DirectMessageType.Payments, {
+            embeds: [
+              new Embed()
+                .defColor(Colores.verde)
+                .defTitle(`Intereses del ${debt.interest}% cada ${new HumanMs(debt.every).human}`)
+                .defDesc(`**—** Se te cobró ${PrettyCurrency(guild, topay)} por el préstamo que tienes pendiente con ${memberToPay}.
 **—** Usa \`/pay\` para pagarle los ${PrettyCurrency(guild, debt.debt)} que le debes.`)
-              ]
-            })
-          } catch (err) {
-            console.error("🔴 %s", err);
-          }
-
+            ]
+          })
+        } catch (err) {
+          console.error("🔴 %s", err);
         }
-      }
 
-      dbUser.save()
-        .catch(err => console.error("🔴 %s", err));
+      }
+    }
+
+    try {
+      //console.log("$", dbUser.data.temp_roles);
+      await dbUser.save()
+    } catch (err) {
+      console.error("🔴 %s", err)
     }
 
   }
@@ -646,8 +650,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
   });
 
   if (tempBans) {
-    for (let i = 0; i < tempBans.length; i++) {
-      let ban = tempBans[i];
+    for await (const ban of tempBans) {
       let userID = ban.info.userID;
       let since = ban.info.since;
       let realDuration = ban.info.duration;
@@ -656,12 +659,13 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
       if (today - since >= realDuration) {
         // ya pasó el tiempo, unban
         try {
-          guild.members.unban(userID);
+          await guild.members.unban(userID);
           console.log("🟢 Se ha desbaneado a %s", userID)
         } catch (err) {
           console.error("🔴 %s", err);
         }
-        ban.deleteOne();
+        
+        await ban.deleteOne();
 
         let unBEmbed = new Embed()
           .defAuthor({ text: `Unban`, icon: guild.iconURL() })
@@ -686,19 +690,19 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
 
   // buscar encuestas
   let polls = await GlobalDatas.find({ type: "temporalPoll", "info.guild_id": guild.id });
-  for (let i = 0; i < polls.length; i++) {
-    const poll = polls[i].info;
+  for await (const poll of polls) {
+    const pollInfo = poll.info;
 
-    if (moment().isAfter(poll.until)) {
-      let c = guild.channels.cache.find(x => x.id === poll.channel_id);
-      let msg = await c.messages.fetch(poll.message_id);
+    if (moment().isAfter(pollInfo.until)) {
+      let c = guild.channels.cache.find(x => x.id === pollInfo.channel_id);
+      let msg = await c.messages.fetch(pollInfo.message_id);
 
-      const { yes, no } = poll;
+      const { yes, no } = pollInfo;
 
       let textEmbed = new Embed()
         .defColor(Colores.verdeclaro)
         .defAuthor({ text: "La encuesta del STAFF terminó:", title: true })
-        .defDesc(poll.poll + `\n\n**LOS USUARIOS DICEN:**`)
+        .defDesc(pollInfo.poll + `\n\n**LOS USUARIOS DICEN:**`)
         .defField(`${msg.client.Emojis.Check} SÍ:`, `${yes.length}`, true)
         .defField(`${msg.client.Emojis.Cross} NO:`, `${no.length}`, true);
 
@@ -717,20 +721,18 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
         )
 
       try {
-        msg.edit({ components: [row] });
+        await msg.edit({ components: [row] });
       } catch (err) {
         console.error("🔴 %s", err);
       }
 
-      polls[i].deleteOne();
+      await poll.deleteOne();
     }
   }
 
   // buscar apuestas
   staffBets:
-  for (let i = 0; i < doc.data.bets.length; i++) {
-    const bet = doc.data.bets[i];
-
+  for await (const bet of doc.data.bets) {
     if (moment().isAfter(bet.closes_in) && !bet.closed) {
       const ch = guild.channels.cache.get(doc.getChannel("general.announcements"));
       const message = await ch.messages.fetch(bet.message_id);

@@ -99,7 +99,7 @@ module.exports = async (client) => {
                 console.log("🔴 Hubo un error con las GlobalDatas");
                 console.error(err);
             }
-        }, null, true, "America/Bogota", null, true);
+        }, null, process.env.DEV === "TRUE", "America/Bogota", null, true);
 
         new CronJob("*/30 * * * * *", async function () {
             try {
@@ -108,7 +108,7 @@ module.exports = async (client) => {
                 console.log("🔴 Hubo un error con las notificaciones")
                 console.error(err);
             }
-        }, null, true, "America/Bogota", null, true)
+        }, null, process.env.DEV === "TRUE", "America/Bogota", null, true)
 
         // Cada hora
         new CronJob("0 0 */1 * * *", async function () {
@@ -118,10 +118,10 @@ module.exports = async (client) => {
                 console.log("🔴 Hubo un error con las Mascotas")
                 console.error(err);
             }
-        }, null, true, "America/Bogota", null, false)
+        }, null, process.env.DEV === "TRUE", "America/Bogota", null, false)
 
         // Cada semana
-        new CronJob("0 0 0 * * 0", async function() {
+        new CronJob("0 0 0 * * 0", async function () {
             try {
                 const doc = await Guilds.getWork(guild.id);
 
@@ -130,7 +130,7 @@ module.exports = async (client) => {
                 doc.data.average_currency = average;
 
                 await doc.save();
-            } catch(err) {
+            } catch (err) {
                 console.log("🔴 Hubo un error con las semanales")
                 console.error(err);
             }

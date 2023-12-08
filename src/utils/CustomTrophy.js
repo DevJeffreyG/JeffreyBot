@@ -113,27 +113,41 @@ class CustomTrophy {
 
         await this.doc.save();
 
-        return await this.interaction.editReply({
-            embeds: [
-                new Embed({
-                    type: "success",
-                    data: {
-                        desc: `Se ha ${trophy.enabled ? "activado" : "desactivado"} el Trofeo`
-                    }
-                })
-            ]
+        let embeds = [
+            new Embed({
+                type: "success",
+                data: {
+                    desc: `Se ha ${trophy.enabled ? "activado" : "desactivado"} el Trofeo`
+                }
+            })
+        ]
+
+        let sug = new Embed({
+            type: "didYouKnow",
+            data: {
+                text: `Un Trofeo siempre debe tener al menos un requerimiento, sino, **NUNCA** nadie lo tendrá`,
+                likelihood: 50
+            }
         })
+
+        if (sug.likelihood) embeds.push(sug);
+
+        return await this.interaction.editReply({ embeds })
     }
 
     /**
-     * @param {Number} id 
+     * 
+     * @param {Number} id Trophy ID
      * @param {GuildMember} member 
-     * @returns {Promise<any>}
+     * @param {any} userDoc Mongoose User Document
+     * @param {Number} newId Nueva ID al agregarse el trofeo al usuario
+     * @param {Boolean} save 
+     * @returns {Promise<any>} Mongoose User
      */
-    async manage(id, member, newId, save = true) {
+    async manage(id, member, userDoc, newId, save = true) {
         this.doc = await CustomElements.getWork(this.interaction instanceof Guild ? this.interaction.id : this.interaction.guild.id);
         this.member = member;
-        this.user = await Users.getWork({ user_id: member.id, guild_id: member.guild.id });
+        this.user = userDoc;
 
         const trophy = this.doc.getTrophy(id);
 

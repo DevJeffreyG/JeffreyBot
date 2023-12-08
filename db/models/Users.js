@@ -298,6 +298,8 @@ Schema.method("getDarkCurrency", function () {
 Schema.method("addCount", async function (module, count = 1, save = true) {
     this.data.counts[module] += count;
     if (save) return await this.save();
+
+    return this
 })
 
 Schema.method("getCount", function (module) {
