@@ -173,13 +173,7 @@ ${codeBlock("json", data.error)}`])
 
     #errorDesc(desc, principal, more = []) {
         this.defDesc(`**— ${desc} ▸ ${principal}**`);
-        let d = this.description;
-        if (Array.isArray(more)) more.forEach(data => {
-            d += `\n▸ ${data}`
-            if (!data.endsWith(".") && !(data.endsWith(":") || data.endsWith("!") || data.endsWith("```") || data.endsWith("?"))) d += `.`;
-        })
-
-        this.defDesc(d);
+        this.fillDesc(more);
     }
 
     async send(options = { ephemeral: false, followup: false }) {

@@ -126,15 +126,7 @@ class Embed extends Discord.EmbedBuilder {
                     const sep = data?.separator ?? "▸"
                     const desc = data.desc;
 
-                    if (typeof desc === "string") this.defDesc(`${sep} ${desc}.`)
-                    else {
-                        let t = ""
-                        desc.forEach(item => {
-                            t += `${sep} ${item}.\n`
-                        })
-
-                        this.defDesc(t);
-                    }
+                    this.fillDesc(desc, sep);
                 }
 
                 if (data?.footer) this.defFooter({ text: data.footer, icon: data.footer_icon, timestamp: data.timestamp })
@@ -197,6 +189,25 @@ ${bdString}`)
         if (this.data) {
             this.description = this.data.description;
         }
+    }
+
+    /**
+     * @param {String | String[]} data 
+     * @returns {this}
+     */
+    fillDesc(data, separator = "▸") {
+        let d = this.description ?? this.data.description ?? "";
+        let isArray = Array.isArray(data);
+
+        if (!isArray) data = [data];
+
+        data.forEach(line => {
+            d += `\n${separator} ${line}`
+            if (!line.endsWith(".") && !(line.endsWith(":") || line.endsWith("!") || line.endsWith("```") || line.endsWith("?"))) d += `.`;
+        })
+
+        this.defDesc(d);
+        return this
     }
 }
 
