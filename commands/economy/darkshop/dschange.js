@@ -56,7 +56,7 @@ command.execute = async (interaction, models, params, client) => {
     const economy = user.economy.dark;
 
     await user.addDarkCurrency(quantity, false);
-    user.economy.global.currency -= total;
+    user.removeCurrency(total);
 
     economy.until = moment().add(1, "w").startOf("day").toDate();
 
@@ -72,7 +72,7 @@ command.execute = async (interaction, models, params, client) => {
 
     if (sug.likelihood) embeds.push(sug);
 
-    return interaction.editReply({ embeds });
+    return await interaction.editReply({ embeds });
 
 }
 

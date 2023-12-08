@@ -136,7 +136,7 @@ command.execute = async (interaction, models, params, client) => {
         warns.push({ rule_id: rule, proof: msg.attachments.first().url, id: newId });
         if (hasSoft) softwarns.splice(indexOfSoftwarn, 1);
 
-        user.data.counts.warns += 1;
+        user.addCount("warns", 1, false);
         await user.save();
 
         let after = await AfterInfraction(user, data); // enviar mensaje con la informacion del warn al usuario

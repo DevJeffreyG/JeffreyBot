@@ -51,11 +51,13 @@ command.execute = async (interaction, models, params, client) => {
 
     economy.currency -= quantity;
 
+    // Si es domingo, significa que no se invirtió
     if (moment().day() === 0) {
-        user.data.counts.dark_currency -= quantity;
+        user.addCount("dark_currency", -quantity, false);
+        user.addCurrency(total, true, false) += total; // No cambiar el contador alltime
+    } else {
+        await user.addCurrency(total);
     }
-
-    await user.addCurrency(total);
 
     let sug = new Embed({
         type: "didYouKnow",
@@ -67,7 +69,7 @@ command.execute = async (interaction, models, params, client) => {
 
     if (sug.likelihood) embeds.push(sug);
 
-    return interaction.editReply({ embeds });
+    return await interaction.editReply({ embeds });
 
 }
 

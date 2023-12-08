@@ -71,7 +71,7 @@ class Top {
             if (member && !member.user.bot) {
                 let darkcurrency = user.economy.dark?.currency ?? 0;
                 let darkcurrencyValue = 0;
-                if(!dsDisabled) darkcurrencyValue = await darkshop.equals(null, user.getDarkCurrency()) ?? 0;
+                if (!dsDisabled) darkcurrencyValue = await darkshop.equals(null, user.getDarkCurrency()) ?? 0;
 
                 let finalQuantity = darkcurrencyValue != 0 ? darkcurrencyValue + user.getCurrency() : user.getCurrency();
 
@@ -80,10 +80,10 @@ class Top {
                     currency: darkcurrency, // numero de dj que tiene
                     currencyValue: Math.round(darkcurrencyValue), // lo que valen esos dcurrency en dinero ahora mismo
                     total: Math.round(finalQuantity), // la suma del valor de los dcurrency y el dinero
-                    alltime: user.data.counts.normal_currency
+                    alltime: user.getCount("normal_currency")
                 }
 
-                if(toPush.total > 0) this.#res.push(toPush);
+                if (toPush.total > 0) this.#res.push(toPush);
             }
         }
 
@@ -96,7 +96,7 @@ class Top {
         // determinar el texto a agregar
         for await (const user of this.#res) {
             let darkshopMoney;
-            if (user.currency != 0) darkshopMoney = ` (${PrettyCurrency(this.interaction.guild, user.currency, { name: "DarkCurrency"})}➟${PrettyCurrency(this.interaction.guild, user.currencyValue)})`
+            if (user.currency != 0) darkshopMoney = ` (${PrettyCurrency(this.interaction.guild, user.currency, { name: "DarkCurrency" })}➟${PrettyCurrency(this.interaction.guild, user.currencyValue)})`
             else darkshopMoney = "";
 
             const txt = this.#getTxt(user, [`${PrettyCurrency(this.interaction.guild, user.total)}${darkshopMoney}`, `|| Obtenido desde siempre: ${PrettyCurrency(this.interaction.guild, user.alltime)} ||`])
@@ -120,7 +120,7 @@ class Top {
                     total: user.economy.global.exp
                 }
 
-                if(toPush.total > 0) this.#res.push(toPush)
+                if (toPush.total > 0) this.#res.push(toPush)
             }
         });
 
@@ -186,7 +186,7 @@ class Top {
             if (member && !member.user.bot) {
                 let toPush = {
                     user_id: member.user.id,
-                    total: user.data.counts.warns
+                    total: user.getCount("warns")
                 }
 
                 if (toPush.total != 0) this.#res.push(toPush)

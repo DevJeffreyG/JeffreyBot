@@ -219,7 +219,7 @@ class Item {
 
         for (let i = 0; i < this.given; i++) {
             const id = FindNewId(await Users.find(), "warns", "id");
-            this.user.data.counts.warns += 1;
+            this.user.addCount("warns", 1, false);
             warns.push({ rule_id: 0, id });
 
             await this.user.save()
