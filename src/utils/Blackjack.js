@@ -4,7 +4,6 @@ const ms = require("ms");
 
 const { CardType, EndReasons, Cooldowns } = require("./Enums");
 const Embed = require("./Embed");
-const ErrorEmbed = require("./ErrorEmbed");
 const { Colores } = require("../resources");
 
 const Collector = require("./Collector");
@@ -474,7 +473,7 @@ class Blackjack {
                         .defColor(Colores.rojooscuro)
                 }
 
-                this.user.economy.global.currency -= this.bet;
+                await this.user.removeCurrency(this.bet);
                 await this.doc.addToBank(this.bet, "gambling");
 
                 console.log("🔴 %s perdió %s %s en el Blackjack", this.interaction.user.username, this.bet.toLocaleString("es-CO"), this.Emojis.Currency.name);

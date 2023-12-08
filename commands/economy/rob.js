@@ -62,7 +62,7 @@ command.execute = async (interaction, models, params, client) => {
     if (robFail) {
         suggester = getAuthor(failResponse);
 
-        user.economy.global.currency -= failedValue;
+        await user.removeCurrency(failedValue);
         await doc.addToBank(failedValue, "user_actions");
         await user.save();
 
@@ -72,8 +72,8 @@ command.execute = async (interaction, models, params, client) => {
     } else {
         suggester = getAuthor(successResponse);
 
-        user.addCurrency(successValue);
-        victim.economy.global.currency -= successValue;
+        await user.addCurrency(successValue);
+        await victim.removeCurrency(successValue);
 
         await victim.save();
 

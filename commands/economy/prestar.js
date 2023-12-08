@@ -118,8 +118,8 @@ command.execute = async (interaction, models, params, client) => {
     })
     await interaction.editReply({ content: null, embeds: [doneEmbed] });
 
-    user.economy.global.currency -= toLend;
-    lend_user.addCurrency(toLend);
+    await user.removeCurrency(toLend);
+    await lend_user.addCurrency(toLend);
 
     await user.save()
 }

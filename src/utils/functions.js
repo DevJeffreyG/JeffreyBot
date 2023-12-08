@@ -593,7 +593,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
         // cobrar intereses y actualizar la fecha
         let topay = Math.round(debt.debt * (debt.interest / 100));
         let memberToPay = guild.members.cache.get(debt.user);
-        debt.pay_in = moment().add(debt.every, "ms");
+        debt.pay_in = moment().add(debt.every, "ms").startOf("minute");
         await dbUser.removeCurrency(topay);
 
         let userToPay = await Users.getWork({ user_id: memberToPay.id, guild_id: guild.id });

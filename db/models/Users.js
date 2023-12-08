@@ -326,7 +326,7 @@ Schema.method("removeCurrency", async function (count, save = false) {
 })
 
 Schema.method("secure", async function (count, save = true) {
-    this.economy.global.currency -= count;
+    this.removeCurrency(count);
     this.economy.global.secured += count;
     this.addCount("secured_currency", count, false);
 

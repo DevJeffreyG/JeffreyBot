@@ -112,7 +112,7 @@ class RouletteItem {
         console.log("🟢 Números:", this.numbers)
         console.log("🟢 No-Números:", this.nonumbers)
 
-        this.user.addCount("roulette", 1, false);
+        await this.user.addCount("roulette", 1, false);
 
         switch (this.target.constructor) {
             case GuildMemberRoleManager:
@@ -152,10 +152,10 @@ class RouletteItem {
 
                     if (boost.multiplier.changed.currency) {
                         this.numbers = Number((this.numbers * boost.multiplier.currency_value).toFixed(2))
-                        this.frontend_numbers = PrettyCurrency(this.interaction.guild, this.numbers, { boostemoji: boost.emojis.currency});
+                        this.frontend_numbers = PrettyCurrency(this.interaction.guild, this.numbers, { boostemoji: boost.emojis.currency });
                     }
 
-                    this.user.economy.global.currency -= this.numbers;
+                    await this.user.removeCurrency(this.numbers);
                     await this.doc.addToBank(this.numbers, "gambling");
                 }
                 else if (this.nonumbers === "+") {
@@ -164,10 +164,10 @@ class RouletteItem {
 
                     if (boost.multiplier.changed.currency) {
                         this.numbers = Number((this.numbers * boost.multiplier.currency_value).toFixed(2))
-                        this.frontend_numbers = PrettyCurrency(this.interaction.guild, this.numbers, { boostemoji: boost.emojis.currency});
+                        this.frontend_numbers = PrettyCurrency(this.interaction.guild, this.numbers, { boostemoji: boost.emojis.currency });
                     }
 
-                    this.user.addCurrency(this.numbers, false);
+                    await this.user.addCurrency(this.numbers, false);
                 }
                 else if (this.nonumbers === "*") {
                     this.nonumbers = "Se multiplicó por"

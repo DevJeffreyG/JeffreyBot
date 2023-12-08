@@ -146,7 +146,7 @@ command.execute = async (interaction, models, params, client) => {
     if (user.user_id === message_user.user_id) {
         user.addCurrency((-price) + gift);
     } else {
-        user.economy.global.currency -= price;
+        await user.removeCurrency(price);
         await doc.addToBank(price, "user_actions");
         message_user.addCurrency(gift);
         await user.save();

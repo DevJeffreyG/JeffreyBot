@@ -205,8 +205,8 @@ ${this.#bet ? `### — Se le dan ${PrettyCurrency(this.#interaction.guild, this.
             player1.pet.defeats++;
             player2.pet.wins++;
             if (this.#bet) {
-                player2.doc.addCurrency(this.#bet, false);
-                player1.doc.economy.global.currency -= this.#bet;
+                await player2.doc.addCurrency(this.#bet, false);
+                await player1.doc.removeCurrency(this.#bet);
             }
         } else { // perdio el retado
             embed
@@ -220,8 +220,8 @@ ${this.#bet ? `### — Se le dan ${PrettyCurrency(this.#interaction.guild, this.
             player1.pet.wins++;
 
             if (this.#bet) {
-                player1.doc.addCurrency(this.#bet, false);
-                player2.doc.economy.global.currency -= this.#bet;
+                await player1.doc.addCurrency(this.#bet, false);
+                await player2.doc.removeCurrency(this.#bet);
             }
         }
 

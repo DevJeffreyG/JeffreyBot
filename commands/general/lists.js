@@ -147,7 +147,7 @@ command.execute = async (interaction, models, params, client) => {
                 title: "Lista de Items de la Ruleta",
                 author_icon: client.user.displayAvatarURL({ dynamic: true }),
                 color: Colores.verde,
-                addon: `**▸** {text}\n**▸** Probabilidad del **{prop}%** para que salga\n\n`
+                addon: `**▸** {text}\n**▸** Probabilidad del **{prop}%** para que se detenga.\n\n`
             }, items, 5)
 
             await interactive.init(interaction);

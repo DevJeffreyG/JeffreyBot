@@ -2,6 +2,7 @@ const { Command, Confirmation, Embed, Sleep, PrettyCurrency } = require("../../s
 const { Colores } = require("../../src/resources");
 const { EconomyError } = require("../../src/errors");
 const Chance = require("chance");
+const { time } = require("discord.js");
 
 const command = new Command({
     name: "pay",
@@ -60,6 +61,10 @@ command.execute = async (interaction, models, params, client) => {
                         new Embed()
                             .defTitle("Deuda pendiente")
                             .defDesc(`**—** Aún le debes ${PrettyCurrency(guild, author_user.data.debts[debt].debt)} a ${recieverMember}.`)
+                            .fillDesc([
+                                `Tienes que pagar el **${author_user.data.debts[debt].interest}%** ${time(author_user.data.debts[debt].pay_in, "R")}`,
+                                `Le debes desde ${time(author_user.data.debts[debt].since)} (${time(author_user.data.debts[debt].since, "R")})`,
+                            ])
                             .defColor(Colores.rojooscuro)
                             .defFooter({ text: "Desde", icon: interaction.guild.iconURL({ dynamic: true }), timestamp: author_user.data.debts[debt].since })
                     ]
@@ -85,7 +90,7 @@ command.execute = async (interaction, models, params, client) => {
         `Esto no se puede deshacer, a menos que te los den devuelta.`
     ];
 
-    if(isDonation) {
+    if (isDonation) {
         toConfirm = [
             `¿Deseas donar ${PrettyCurrency(guild, quantity)} al **banco de ${guild.name}**?`,
             `Tienes ${PrettyCurrency(guild, author_user.getCurrency())}.`,
@@ -119,8 +124,8 @@ command.execute = async (interaction, models, params, client) => {
         if (author_user.data.debts[debt].debt <= 0) author_user.data.debts.splice(debt, 1);
     }
 
-    author_user.economy.global.currency -= quantity;
-    if(isDonation) await doc.addToBank(quantity, "others");
+    await author_user.removeCurrency(quantity);
+    if (isDonation) await doc.addToBank(quantity, "others");
     else await reciever.addCurrency(quantity);
 
     await author_user.save();

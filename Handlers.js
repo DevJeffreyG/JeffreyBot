@@ -507,7 +507,7 @@ class Handlers {
                 userBet.quantity += value;
                 bettings[userBetI] = userBet;
 
-                this.user.economy.global.currency -= value;
+                await this.user.removeCurrency(value);
                 await this.user.save();
                 await this.doc.save();
                 await this.interaction.editReply({ embeds: [new Embed({ type: "success" })], components: [] });
