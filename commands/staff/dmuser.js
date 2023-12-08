@@ -1,6 +1,6 @@
-const { Command, Categories, Embed, ErrorEmbed, SendDirect, DirectMessageType } = require("../../src/utils")
+const { Command, Embed, SendDirect, DirectMessageType } = require("../../src/utils")
 const { Colores } = require("../../src/resources")
-const { DMNotSentError } = require("../../src/errors/")
+const { BadCommandError } = require("../../src/errors")
 
 const command = new Command({
     name: "dmuser",
@@ -17,25 +17,42 @@ command.addOption({
 command.addOption({
     type: "string",
     name: "mensaje",
-    desc: "Mensaje a enviar. Usa {yo} para poner tu nombre, {user} para poner el tag de 'usuario'",
+    desc: "Mensaje a enviar. Ponga '!' para ver los tags que se pueden usar en este comando",
     req: true
 })
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { usuario, mensaje } = params;
-    const { Preferences } = models;
 
-    if (usuario.user.bot) return interaction.editReply({ content: "No le voy a enviar un mensaje a un bot, perdona." })
+    if (usuario.user.bot)
+        throw new BadCommandError(interaction, "No se puede usar este comando en un bot.");
 
-    let yoStr = mensaje.value.replace(new RegExp('{yo}', "g"), `**${interaction.user.username}**`);
-    let final = yoStr.replace(new RegExp('{user}', "g"), `**${usuario.user.username}**`)
+    let desc = mensaje.value
+        .replace(new RegExp('{server}', "g"), `**${interaction.guild.name}**`)
+        .replace(new RegExp('{ent}', "g"), `\n`)
+        .replace(new RegExp('{user}', "g"), `**${usuario.user.username}**`);
 
     let embed = new Embed()
-        .defAuthor({ text: "Hola:", icon: client.EmojisObject.Hola.url })
-        .defDesc(final)
-        .defFooter({ text: "Este es un mensaje directamente del STAFF del servidor." })
+        .defAuthor({ text: "v:", icon: client.EmojisObject.Hola.url })
+        .defDesc(desc)
+        .defFooter({ text: "Este mensaje fue escrito por una persona del STAFF de un servidor." })
         .defColor(Colores.verde);
+
+    if (mensaje.value === "!")
+        return await interaction.editReply({
+            embeds: [
+                new Embed()
+                    .defColor(Colores.verdeclaro)
+                    .defDesc(`# Ayuda con ${client.mentionCommand("dmuser")}`)
+                    .fillDesc([
+                        `Puedes usar varios **tags** al usar este comando y serán reemplazados así:`,
+                        `\`{user}\`: El nombre de usuario que esté en \`usuario\`. En este caso se reemplazaría por: **${usuario.user.username}**.`,
+                        `\`{server}\`: Nombre del servidor de donde se está enviado el mensaje. Útil para que el usuario sepa de donde viene el mensaje.`,
+                        `\`{ent}\`: Para dejar una línea y escribir en la siguiente.`
+                    ])
+            ]
+        })
 
     await SendDirect(interaction, usuario.member, DirectMessageType.Staff, { embeds: [embed] })
     await interaction.editReply({
