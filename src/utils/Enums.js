@@ -31,12 +31,14 @@ class Enum {
         const client = require("../../");
 
         const CurrencyName = client.getCustomEmojis(client.lastInteraction?.guild.id)?.Currency?.name;
+        const DarkCurrencyName = client.getCustomEmojis(client.lastInteraction?.guild.id)?.DarkCurrency?.name;
 
         this.#translations = {
             Multiplier: "Multiplicador",
             Probability: "Probabilístico",
             All: "Todo",
             Currency: this.customize && CurrencyName ? CurrencyName : "Dinero",
+            DarkCurrency: this.customize && DarkCurrencyName ? DarkCurrencyName : "Dinero de DarkShop",
             ChatRewards: "Recompensas de Chat",
             CurrencyToExp: "Dinero a EXP",
             InflationPrediction: "Predicción Inflación",
@@ -62,7 +64,8 @@ class Enum {
             Trophies: "Trofeos",
             Staff: "STAFF",
             Birthdays: "Cumpleaños",
-            Incomes: "Ingresos"
+            Incomes: "Ingresos",
+            SubscriptionsCurrency: `${this.customize && CurrencyName ? CurrencyName : "Dinero"} en Suscripciones`
         }
 
         for (const prop of Object.keys(this.values)) {
@@ -474,6 +477,23 @@ const DirectMessageType = new Enum({
     Incomes: 8
 }).values;
 
+/**
+ * - Warns
+ * - Currency
+ * - DarkCurrency
+ * - Blackjack
+ * - Roulette
+ * - SubscriptionsCurrency
+ */
+const TrophyRequirements = new Enum({
+    Warns: "warns",
+    Currency: "currency",
+    DarkCurrency: "darkcurrency",
+    Blackjack: "blackjack",
+    Roulette: "roulette",
+    SubscriptionsCurrency: "subscriptions_currency"
+}).values;
+
 module.exports = {
     Enum,
     Categories,
@@ -498,5 +518,6 @@ module.exports = {
     PetAttacksType,
     PetNotices,
     YesNo,
-    DirectMessageType
+    DirectMessageType,
+    TrophyRequirements
 }

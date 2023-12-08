@@ -1,11 +1,11 @@
 const ms = require("ms");
 const { Error } = require("mongoose");
 const { CustomElements, Users } = require("mongoose").models;
-const { CommandInteraction, ModalSubmitInteraction, GuildMember, Guild } = require("discord.js");
+const { CommandInteraction, ModalSubmitInteraction, GuildMember, Guild, bold } = require("discord.js");
 
 const Embed = require("./Embed");
 const { BadParamsError, DoesntExistsError, DMNotSentError } = require("../errors");
-const { Enum, BoostTypes, BoostObjetives, ShopTypes, DirectMessageType } = require("./Enums");
+const { Enum, BoostTypes, BoostObjetives, ShopTypes, DirectMessageType, TrophyRequirements } = require("./Enums");
 const { LimitedTime, FindNewId, PrettyCurrency, SendDirect } = require("./functions");
 const { Colores } = require("../resources");
 const HumanMs = require("./HumanMs");
@@ -128,9 +128,9 @@ class CustomTrophy {
     /**
      * @param {Number} id 
      * @param {GuildMember} member 
-     * @returns {Promise<Boolean>}
+     * @returns {Promise<any>}
      */
-    async manage(id, member, newId) {
+    async manage(id, member, newId, save = true) {
         this.doc = await CustomElements.getWork(this.interaction instanceof Guild ? this.interaction.id : this.interaction.guild.id);
         this.member = member;
         this.user = await Users.getWork({ user_id: member.id, guild_id: member.guild.id });
@@ -176,6 +176,7 @@ class CustomTrophy {
                             case "warns":
                             case "blackjack":
                             case "roulette":
+                            case "subscriptions_currency":
                                 moduleCount = totalprop;
                                 break;
                         }
@@ -210,26 +211,28 @@ class CustomTrophy {
             }
         }
 
-        if (!grant || !entered) return false;
+        if (grant && entered) {
+            // añadirlo a la lista de trophies
+            this.user.data.trophies.push({
+                element_id: trophy.id,
+                id: newId
+            })
 
-        // añadirlo a la lista de trophies
-        this.user.data.trophies.push({
-            element_id: trophy.id,
-            id: newId
-        })
+            this.user.markModified("data.trophies")
 
-        await this.#rewardsWork(trophy);
+            await this.#rewardsWork(trophy);
 
-        await this.user.save();
+            if (save) await this.user.save();
 
-        try {
-            console.log("digamos que le mandé el dm a %s", member.user.username);
-            // TODO: await this.#sendDM(member, trophy);
-        } catch (err) {
-            console.log(err);
+            try {
+                console.log("digamos que le mandé el dm a %s", member.user.username);
+                // TODO: await this.#sendDM(member, trophy);
+            } catch (err) {
+                console.log(err);
+            }
         }
 
-        return grant;
+        return this.user;
     }
 
     /**
@@ -265,6 +268,7 @@ class CustomTrophy {
                 id
             })
 
+            await this.#reqWork(trophy)
             await this.#rewardsWork(trophy)
 
             try {
@@ -279,7 +283,7 @@ class CustomTrophy {
     }
 
     async changeTotalReq(id, data) {
-        return await this.#changeReq(id, data, "total");
+        return await this.#changeReq(id, data, "totals");
     }
 
     async changeMomentReq(id, data) {
@@ -436,6 +440,101 @@ class CustomTrophy {
         return await this.interaction.editReply({ embeds: [new Embed({ type: "success" })] });
     }
 
+    async #reqWork(trophy) {
+        const reqList = trophy.req;
+        const guild = this.interaction instanceof Guild ? this.interaction : this.interaction.guild;
+
+        this.reqsDone = [];
+
+        req:
+        for (const prop of Object.keys(reqList)) {
+            const value = reqList[prop];
+            if (!value) continue req;
+
+            switch (prop) {
+                case "role":
+                    this.reqsDone.push(`**El rol @${guild.roles.cache.get(value).name}**`);
+                    break;
+                case "totals":
+                    Object.keys(value).forEach(totalProps => {
+                        if (value[totalProps]) {
+                            const TrophyEnums = new Enum(TrophyRequirements);
+                            let reqDone, reqExpl;
+                            switch (totalProps) {
+                                case TrophyRequirements.SubscriptionsCurrency:
+                                case TrophyRequirements.Currency:
+                                    reqDone = PrettyCurrency(guild, value[totalProps]);
+                                    break;
+                                case TrophyRequirements.DarkCurrency:
+                                    reqDone = PrettyCurrency(guild, value[totalProps], { name: "DarkCurrency" });
+                                    break;
+                                default:
+                                    reqDone = bold(value[totalProps].toLocaleString("es-CO"));
+                            }
+
+                            switch (totalProps) {
+                                case TrophyRequirements.Warns:
+                                    reqExpl = `${TrophyEnums.translate(totalProps)} **totales**`;
+                                    break;
+                                case TrophyRequirements.DarkCurrency:
+                                    reqExpl = `${TrophyEnums.translate(totalProps)} **totales** invertidos`;
+                                    break;
+                                case TrophyRequirements.Currency:
+                                    reqExpl = `${TrophyEnums.translate(totalProps)} **totales** ganados`;
+                                    break;
+                                case TrophyRequirements.Blackjack:
+                                    reqExpl = `${TrophyEnums.translate(totalProps)}(s) ganados`;
+                                    break;
+                                case TrophyRequirements.Roulette:
+                                    reqExpl = `Jugada(s) en la ${TrophyEnums.translate(totalProps)}`;
+                                    break;
+                                case TrophyRequirements.SubscriptionsCurrency:
+                                    reqExpl = `${TrophyEnums.translate(totalProps)} gastado`;
+                                    break;
+                                default:
+                                    reqExpl = TrophyEnums.translate(totalProps);
+                            }
+
+                            this.reqsDone.push(`${reqExpl} **≥** ${reqDone}`)
+                        }
+                    });
+                    break;
+                case "moment":
+                    Object.keys(value).forEach(totalProps => {
+                        if (value[totalProps]) {
+                            const TrophyEnums = new Enum(TrophyRequirements);
+                            let reqDone, reqExpl;
+                            switch (totalProps) {
+                                case TrophyRequirements.SubscriptionsCurrency:
+                                case TrophyRequirements.Currency:
+                                    reqDone = PrettyCurrency(guild, value[totalProps]);
+                                    break;
+                                case TrophyRequirements.DarkCurrency:
+                                    reqDone = PrettyCurrency(guild, value[totalProps], { name: "DarkCurrency" });
+                                    break;
+                                default:
+                                    reqDone = bold(value[totalProps].toLocaleString("es-CO"));
+                            }
+
+                            switch (totalProps) {
+                                case TrophyRequirements.DarkCurrency:
+                                    reqExpl = `${TrophyEnums.translate(totalProps)} actualmente en inversión`;
+                                    break;
+                                case TrophyRequirements.Currency:
+                                    reqExpl = `${TrophyEnums.translate(totalProps)} en tu cuenta`;
+                                    break;
+                                default:
+                                    reqExpl = TrophyEnums.translate(totalProps);
+                            }
+
+                            this.reqsDone.push(`${reqExpl} **≥** ${reqDone}`)
+                        }
+                    });
+                    break;
+            }
+        }
+    }
+
     async #rewardsWork(trophy) {
         const givenList = trophy.given;
         const guild = this.interaction instanceof Guild ? this.interaction : this.interaction.guild;
@@ -500,6 +599,22 @@ class CustomTrophy {
                 .defFooter({ text: "Se mostrará en tu perfil al usar /stats", icon: member.guild.iconURL({ dynamic: true }) }),
         ]
 
+        // requerimentos
+        let reqs = new Embed()
+            .defTitle(`Lo conseguiste por...`)
+            .defColor(Colores.nocolor);
+
+        reqs.data.description = "";
+
+
+        let automatic = false;
+
+        this.reqsDone.forEach(req => {
+            automatic = true;
+            reqs.data.description += `▸ ${req}.\n`
+        })
+
+
         // recompensas
         let rew = new Embed()
             .defTitle(`Recibiste...`)
@@ -515,6 +630,7 @@ class CustomTrophy {
         })
 
         if (rewarded) embeds.push(rew);
+        if (automatic) embeds.push(reqs);
 
         await SendDirect(this.interaction, member, DirectMessageType.Trophies, { embeds });
     }
