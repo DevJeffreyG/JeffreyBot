@@ -3,7 +3,6 @@ const { CommandInteraction, Guild, GuildMember } = require("discord.js");
 const { PetNotices, DirectMessageType } = require("./Enums");
 const { Colores } = require("../resources");
 const Embed = require("./Embed");
-const { SendDirect } = require("./functions");
 
 const { PetShops } = require("mongoose").models;
 
@@ -140,6 +139,9 @@ class Pet {
      */
     async notice(type) {
         if (this.inCombat) return;
+
+        const SendDirect = require("./functions").SendDirect;
+
         try {
             switch (type) {
                 case PetNotices.HalfHp:

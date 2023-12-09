@@ -99,7 +99,7 @@ module.exports = async (client) => {
                 console.log("🔴 Hubo un error con las GlobalDatas");
                 console.error(err);
             }
-        }, null, process.env.DEV === "TRUE", "America/Bogota", null, true);
+        }, null, true, "America/Bogota", null, process.env.DEV === "TRUE");
 
         new CronJob("*/30 * * * * *", async function () {
             try {
@@ -108,7 +108,7 @@ module.exports = async (client) => {
                 console.log("🔴 Hubo un error con las notificaciones")
                 console.error(err);
             }
-        }, null, process.env.DEV === "TRUE", "America/Bogota", null, true)
+        }, null, true, "America/Bogota", null, process.env.DEV === "TRUE")
 
         // Cada hora
         new CronJob("0 0 */1 * * *", async function () {
@@ -118,7 +118,7 @@ module.exports = async (client) => {
                 console.log("🔴 Hubo un error con las Mascotas")
                 console.error(err);
             }
-        }, null, process.env.DEV === "TRUE", "America/Bogota", null, false)
+        }, null, true, "America/Bogota", null, false)
 
         // Cada semana
         new CronJob("0 0 0 * * 0", async function () {
