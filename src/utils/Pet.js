@@ -1,8 +1,9 @@
 const { CommandInteraction, Guild, GuildMember } = require("discord.js");
 
-const { PetNotices } = require("./Enums");
+const { PetNotices, DirectMessageType } = require("./Enums");
 const { Colores } = require("../resources");
 const Embed = require("./Embed");
+const { SendDirect } = require("./functions");
 
 const { PetShops } = require("mongoose").models;
 
@@ -143,50 +144,73 @@ class Pet {
             switch (type) {
                 case PetNotices.HalfHp:
                     if (!this.notices.halfhp) {
-                        await (this.member ?? this.interaction.member).send({
-                            embeds: [
-                                new Embed()
-                                    .defTitle(`⚠️ Tu mascota ${this.name} tiene la mitad de su vida`)
-                                    .defDesc(`Dale algo de comer para evitar que siga bajando`)
-                                    .defColor(Colores.nocolor)
-                            ]
-                        })
-                        this.notices.halfhp = new Date();
+                        try {
+                            await SendDirect(null, this.member ?? this.interaction.member, DirectMessageType.Pets, {
+                                embeds: [
+                                    new Embed()
+                                        .defTitle(`⚠️ Tu mascota ${this.name} tiene la mitad de su vida`)
+                                        .defDesc(`Dale algo de comer para evitar que siga bajando`)
+                                        .defColor(Colores.nocolor)
+                                ]
+                            })
+
+                            this.notices.halfhp = new Date();
+
+                        } catch (err) {
+                            console.error("🔴", err);
+                        }
                     }
                     break;
                 case PetNotices.Dead:
-                    await (this.member ?? this.interaction.member).send({
-                        embeds: [
-                            new Embed()
-                                .defDesc(`# ${this.name} ha muerto.`)
-                                .defColor(Colores.rojooscuro)
-                        ]
-                    })
+                    try {
+                        await SendDirect(null, this.member ?? this.interaction.member, DirectMessageType.Pets, {
+                            embeds: [
+                                new Embed()
+                                    .defDesc(`# ${this.name} ha muerto.`)
+                                    .defColor(Colores.rojooscuro)
+                            ]
+                        })
+
+                        this.notices.halfhp = new Date();
+
+                    } catch (err) {
+                        console.error("🔴", err);
+                    }
                     break;
                 case PetNotices.LowHp:
                     if (!this.notices.lowhp) {
-                        await (this.member ?? this.interaction.member).send({
-                            embeds: [
-                                new Embed()
-                                    .defTitle(`⚠️ Tu mascota ${this.name} tiene muy poca vida`)
-                                    .defDesc(`¡Cúrala o dale de comer!`)
-                                    .defColor(Colores.rojo)
-                            ]
-                        })
-                        this.notices.lowhp = new Date();
+                        try {
+                            await SendDirect(null, this.member ?? this.interaction.member, DirectMessageType.Pets, {
+                                embeds: [
+                                    new Embed()
+                                        .defTitle(`⚠️ Tu mascota ${this.name} tiene muy poca vida`)
+                                        .defDesc(`¡Cúrala o dale de comer!`)
+                                        .defColor(Colores.rojo)
+                                ]
+                            })
+
+                            this.notices.lowhp = new Date();
+                        } catch (err) {
+                            console.error("🔴", err);
+                        }
                     }
                     break;
                 case PetNotices.Hungry:
                     if (!this.notices.hungry) {
-                        await (this.member ?? this.interaction.member).send({
-                            embeds: [
-                                new Embed()
-                                    .defTitle(`Tu mascota ${this.name} tiene hambre`)
-                                    .defDesc(`Dale de comer para evitar que llegue a 100 y **baje su vida**.`)
-                                    .defColor(Colores.nocolor)
-                            ]
-                        })
-                        this.notices.hungry = new Date();
+                        try {
+                            await SendDirect(null, this.member ?? this.interaction.member, DirectMessageType.Pets, {
+                                embeds: [
+                                    new Embed()
+                                        .defTitle(`Tu mascota ${this.name} tiene hambre`)
+                                        .defDesc(`Dale de comer para evitar que llegue a 100 y **baje su vida**.`)
+                                        .defColor(Colores.nocolor)
+                                ]
+                            })
+
+                            this.notices.hungry = new Date();
+                        } catch (err) {
+                            console.error("🔴", err);
+                        }
                     }
                     break;
             }
