@@ -86,8 +86,6 @@ class PetCombat {
                 wait: true
             }).wait();
 
-            await collector.deferUpdate();
-
             this.#users.set(playerNo, {
                 user,
                 doc,
@@ -106,6 +104,7 @@ class PetCombat {
     }
 
     async #updateDocs() {
+        // TODO: https://discord.com/channels/482989052136652800/1091486353272877199/1182906548486406147
         for await (const n of [0, 1]) {
             let get = this.#users.get(n)
             const { user_id, guild_id } = get.doc
@@ -286,7 +285,7 @@ ${this.#bet ? `### — Se le dan ${PrettyCurrency(this.#interaction.guild, this.
                         .setCustomId("petFlee")
                         .setLabel("Relevo")
                         .setEmoji("🏃")
-                        .setDisabled(this.#playing.doc.data.pets.length === 1)
+                        .setDisabled(true/*this.#playing.doc.data.pets.length === 1*/) // TODO: RELEVOS
                         .setStyle(ButtonStyle.Secondary)
                 ),
             new ActionRowBuilder()
@@ -309,7 +308,7 @@ ${this.#bet ? `### — Se le dan ${PrettyCurrency(this.#interaction.guild, this.
 ## 🗡️ ${this.pet.stats.attack} — 🛡️ ${this.pet.stats.defense}
 ### ❤️ ${ProgressBar(this.pet.hp / this.pet.shop_info.stats.hp * 100)} — **${this.pet.hp}**
 ### 🍗 ${ProgressBar(this.pet.hunger)} — **${this.pet.hunger}**
-### ⚡ ${ProgressBar(this.pet.ultCharge)} — **ULT ${this.pet.ultCharge}**`)
+### ⚡ ${ProgressBar(this.pet.ultCharge)} — **ULT ${this.pet.ultCharge}%**`)
             .defColor(Colores.verde)
             .defFooter({ text: `Movimiento #${this.#movementNo} — Contra ${this.#rival.user.username}`, icon: this.#interaction.guild.iconURL({ dynamic: true }) });
 
@@ -352,7 +351,7 @@ ${this.#bet ? `### — Se le dan ${PrettyCurrency(this.#interaction.guild, this.
             )
 
         for (const [i, attack] of this.pet.attacks.entries()) {
-            if (attack.type === PetAttacksType.Ultimate && this.pet.ultCharge != 100) continue;
+            if (attack.type === PetAttacksType.Ultimate && this.pet.ultCharge < 100) continue;
 
             this.#components[1].components[0]
                 .addOptions(
@@ -437,7 +436,7 @@ ${this.#bet ? `### — Se le dan ${PrettyCurrency(this.#interaction.guild, this.
         await this.rivalpet.save();
 
         let attackEmbed = new Embed()
-            .defTitle(`${this.pet.name} Attacks!`)
+            .defTitle(`${this.pet.name} usó ${attack.name}!`)
             .defColor(Colores.verde);
 
         this.#messages.forEach(msg => {
@@ -517,7 +516,7 @@ ${this.#bet ? `### — Se le dan ${PrettyCurrency(this.#interaction.guild, this.
             itemsAdded.push(item.item.id);
         }
 
-        await this.#lastMsg.editReply({ components: this.#components });
+        await this.#lastMsg.edit({ components: this.#components });
         const collector = await new Collector(this.#interaction, {
             wait: true,
             filter: (inter) => inter.customId === "itemSelection" && inter.user.id === this.#playing.user.id,

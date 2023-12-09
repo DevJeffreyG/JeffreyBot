@@ -16,6 +16,7 @@ command.addOption({
 command.addOption({
     type: "integer",
     name: "apuesta",
+    min: 1,
     desc: "Apostar por el combate"
 })
 
