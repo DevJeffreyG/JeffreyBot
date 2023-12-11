@@ -65,6 +65,7 @@ class Shop {
                 type: ShopTypes.Shop
             },
             currency: {
+                raw_emoji: null,
                 emoji: null,
                 user_path: null
             }
@@ -81,7 +82,7 @@ class Shop {
 
         switch (type) {
             case ShopTypes.Shop:
-                this.setCurrency(this.client.getCustomEmojis(this.interaction.guild.id).Currency)
+                this.setCurrency("Currency")
                 this.setInfo({
                     name: `Tienda de ${this.interaction.guild.name}`,
                     desc: `**—** ¡Bienvenid@ a la tienda! para comprar items usa ${this.client.mentionCommand("buy")}.`,
@@ -92,7 +93,7 @@ class Shop {
                 break;
 
             case ShopTypes.DarkShop:
-                this.setCurrency(this.client.getCustomEmojis(this.interaction.guild.id).DarkCurrency, "economy.dark.currency")
+                this.setCurrency("DarkCurrency", "economy.dark.currency")
                 this.setInfo({
                     name: `DarkShop de ${this.interaction.guild.name}`,
                     desc: `**—** Bienvenid@ a la DarkShop. Para comprar items usa ${this.client.mentionCommand("dsbuy")}.`,
@@ -104,7 +105,7 @@ class Shop {
                 break;
 
             case ShopTypes.PetShop:
-                this.setCurrency(this.client.getCustomEmojis(this.interaction.guild.id).Currency)
+                this.setCurrency("Currency")
                 this.setInfo({
                     name: `Tienda de mascotas de ${this.interaction.guild.name}`,
                     desc: `**—** ¡Bienvenid@ a la tienda de mascotas! Para comprar items usa ${this.client.mentionCommand("petbuy")}.`,
@@ -115,7 +116,7 @@ class Shop {
                 break;
 
             case ShopTypes.EXShop:
-                this.setCurrency(this.client.getCustomEmojis(this.interaction.guild.id).Currency)
+                this.setCurrency("Currency")
                 this.setInfo({
                     name: `Tienda Externa de ${this.interaction.guild.name}`,
                     desc: `**—** ¡Bienvenid@ a la tienda externa! Para comprar items usa ${this.client.mentionCommand("exbuy")}.\n**—** Puedes interactuar con cosas en la vida real con estos items.`,
@@ -130,10 +131,13 @@ class Shop {
     }
 
     /**
-     * @param {Emoji} CurrencyEmoji El Emoji que será usado para mostrar el dinero
+     * @param {String} CurrencyName El nombre del Emoji que será usado para mostrar el dinero
      * @param {String} path La ruta de donde se sacará el dinero del usuario
      */
-    setCurrency(CurrencyEmoji, path) {
+    setCurrency(CurrencyName, path) {
+        const CurrencyEmoji = this.client.getCustomEmojis(this.interaction.guild.id)[CurrencyName];
+
+        this.config.currency.raw_emoji = CurrencyName;
         this.config.currency.emoji = CurrencyEmoji;
         this.config.currency.user_path = path ?? "economy.global.currency";
 
@@ -565,6 +569,8 @@ ${codeBlock(item.description)}
                             .addInput({ id: "hunger", value: "0", label: "Hambre mitigada", placeholder: "Escribe un número entero positivo", style: TextInputStyle.Short })
                             .show()
 
+                            // TODO: Carga de ULT
+
                         let c = await inter.awaitModalSubmit({ filter: (i) => i.customId === "petStatsModifier" && i.user.id === this.interaction.user.id, time: ms("1m") });
                         await c.deferUpdate();
                         return new Modal(c).read();
@@ -632,7 +638,7 @@ ${codeBlock(item.description)}
             await this.interaction.editReply({ components })
 
             const filter = (inter) => inter.isStringSelectMenu() || inter.isButton() && inter.user.id === this.interaction.user.id;
-            const collector = await new Collector(this.interaction, { filter, wait: true, max: 1 })
+            const collector = await new Collector(this.interaction, { filter, wait: true, max: 1 }, false, false)
                 .wait(() => {
                     this.interaction.deleteReply();
                 })
