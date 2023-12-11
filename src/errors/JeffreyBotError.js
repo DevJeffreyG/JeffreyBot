@@ -4,12 +4,24 @@ const ErrorEmbed = require("../utils/ErrorEmbed");
 class JeffreyBotError extends Error {
     /**
      * @param {BaseInteraction | CommandInteraction} interaction 
+     * @param {String | String[]} help Ayuda opcional
+     * @param {String} message Resumen de lo que pasó opcional
      */
-    constructor(interaction, message) {
+    constructor(interaction, help = "JeffreyG ya lo sabe", message = "Algo salió muy mal") {
         super(message)
         this.interaction = interaction;
         this.name = "JeffreyBotError";
-        this.embed = new ErrorEmbed(interaction).defDesc("Algo salió muy mal");
+
+        let guide = typeof help === "string" ? [help] : help;
+
+        this.embed = new ErrorEmbed(interaction, {
+            type: this.name,
+            data: {
+                message,
+                guide
+            }
+        })
+
         this.ephemeral = false;
         this.followup = false;
     }

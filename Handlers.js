@@ -10,6 +10,7 @@ const JeffreyBotError = require("./src/errors/JeffreyBotError");
 
 const ms = require("ms");
 const moment = require("moment-timezone");
+const { Error } = require("mongoose");
 
 const slashCooldown = ms("5s");
 
@@ -804,6 +805,11 @@ class Handlers {
                 return await error.send();
             } else if (error instanceof DiscordAPIError) {
                 return await new DiscordLimitationError(this.interaction, `${this.interaction.commandName ?? this.interaction.customId ?? "execute"}`, error.message).send();
+            } else if (error instanceof Error.VersionError) {
+                return await new JeffreyBotError(this.interaction, [
+                    "Ocurrió un error intentando actualizar la base de datos",
+                    "Puede que se hayan perdido datos..."
+                ]).send();
             } else {
                 return await new BadCommandError(this.interaction, error).send();
             }

@@ -272,6 +272,10 @@ Schema.static("getWork", async function ({ user_id, guild_id }) {
     }).save();
 })
 
+Schema.method("lastVersion", async function () {
+    return await this.constructor.getWork({ user_id, guild_id } = this);
+})
+
 Schema.method("getNextLevelExp", function (level = null) {
     if (level === null) level = this.economy.global.level;
     else if (level < 0) level = 0;
@@ -308,7 +312,7 @@ Schema.method("getCount", function (module) {
 
 Schema.method("addCurrency", async function (count, save = true, alltime = true) {
     this.economy.global.currency += count;
-    if(alltime) this.addCount("normal_currency", count, false);
+    if (alltime) this.addCount("normal_currency", count, false);
     if (save) await this.save();
 
     console.log("🗨 %s tiene %s Currency", this.user_id, this.getCurrency());

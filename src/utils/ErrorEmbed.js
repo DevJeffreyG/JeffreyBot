@@ -150,6 +150,12 @@ ${codeBlock("json", data.error)}`])
                 this.#errorDesc("Ya está en progreso", data.guide)
                 break;
 
+            case "JeffreyBotError":
+                this.#errorName("Error de Jeffrey Bot")
+                this.#errorAuthor(21),
+                this.#errorDesc(data.message, data.commandName ?? this.interaction?.commandName ?? "⚠️", data.guide)
+                break;
+
             default:
                 console.log(options)
                 console.error("⚠️🔴 No existe %s como tipo de Error ❗❗", type);
