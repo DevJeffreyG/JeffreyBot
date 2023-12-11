@@ -57,9 +57,7 @@ class Item {
         this.actived = new ExecutionError(interaction, "Ya está activado este item");
         this.roleDeleted = new ExecutionError(interaction, "Ya se ha eliminado temporalmente este rol");
 
-        this.canceled = new Embed()
-            .defDesc(`Cancelado.`)
-            .defColor(Colores.negro);
+        this.canceled = new Embed({ type: "cancel" });
     }
 
     async build(user, doc) {

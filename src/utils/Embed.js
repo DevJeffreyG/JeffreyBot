@@ -182,6 +182,19 @@ ${bdString}`)
 
                 break;
 
+            case "cancel":
+                this.defDesc(`## Cancelado.`);
+                this.defColor(Colores.rojooscuro)
+
+                if (data?.desc) {
+                    const sep = data?.separator ?? "▸"
+                    const desc = data.desc;
+
+                    this.fillDesc(desc, sep);
+                }
+
+                if (data?.footer) this.defFooter({ text: data.footer, icon: data.footer_icon, timestamp: data.timestamp })
+                break;
             default:
                 console.log("🔴 UNKOWN TYPE %s EMBED", type)
         }

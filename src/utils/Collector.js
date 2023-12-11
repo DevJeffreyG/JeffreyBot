@@ -110,7 +110,7 @@ class Collector {
      * @param {Function} catcher Función a ejecutar cuando se acaba el tiempo, y no se recibió nada
      */
     async wait(catcher) {
-        if (!this.hasToWait) throw new JeffreyBotError(this.interaction, "...");
+        if (!this.hasToWait) throw new JeffreyBotError(this.interaction);
 
         return new Promise(async (res, rej) => {
             this.collector.on("collect", async i => {

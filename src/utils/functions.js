@@ -1277,9 +1277,9 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction, user
   let embeds = [confirmation];
   if (egEmbed) embeds.push(egEmbed);
 
-  let cancelEmbed = new Embed()
-    .defDesc(`Cancelado.`)
-    .defColor(Colores.negro);
+  let cancelEmbed = new Embed({
+    type: "cancel"
+  })
 
   // componentes
   let components = [];
