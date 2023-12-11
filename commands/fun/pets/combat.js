@@ -53,8 +53,11 @@ command.execute = async (interaction, models, params, client) => {
     if (!rivalConfirmation) return;
     if (apuesta && !combat.rivalDoc.affords(apuesta.value)) throw new EconomyError(interaction, "No tienes tanto dinero", combat.rivalDoc.getCurrency());
 
-    await combat.changePet(interaction.user);
-    await combat.changePet(usuario.user)
+    let pet1 = await combat.changePet(interaction.user);
+    if (!pet1) return;
+
+    let pet2 = await combat.changePet(usuario.user);
+    if (!pet2) return;
 
     return await combat.start(apuesta?.value);
 }

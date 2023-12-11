@@ -105,6 +105,8 @@ class Pet {
     async save() {
         let i = this.#user.data.pets.findIndex(x => x.id === this.#id);
 
+        this.#user = await this.#user.lastVersion();
+
         if (this.isDead) {
             this.#user.data.pets.splice(i, 1);
             return await this.#user.save();

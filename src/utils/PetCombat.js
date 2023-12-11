@@ -52,6 +52,7 @@ class PetCombat {
     /**
      * Cambia la mascota inicial del usuario antes de iniciar el combate
      * @param {User} user 
+     * @return {Promise<Boolean>} Si se selecionó correctamente
      */
     async changePet(user) {
         const playerNo = user.id === this.#interaction.user.id ? 0 : 1;
@@ -83,8 +84,18 @@ class PetCombat {
                     return inter.isStringSelectMenu() && inter.customId === "petCombat" && inter.user.id === user.id
                 },
                 user,
-                wait: true
-            }).wait();
+                wait: true,
+                time: ms("1m")
+            }).wait(() => {
+                this.#interaction.editReply({
+                    embeds: [
+                        new Embed({ type: "cancel" }),
+                    ],
+                    components: []
+                });
+            });
+
+            if (!collector) return false;
 
             this.#users.set(playerNo, {
                 user,
@@ -101,10 +112,10 @@ class PetCombat {
         }
 
         this.#interaction.client.petCombats.set(user.id, this.#users.get(playerNo));
+        return true;
     }
 
     async #updateDocs() {
-        // TODO: https://discord.com/channels/482989052136652800/1091486353272877199/1182906548486406147
         for await (const n of [0, 1]) {
             let get = this.#users.get(n)
             const { user_id, guild_id } = get.doc
@@ -163,17 +174,20 @@ class PetCombat {
                 await this.#turn()
                 await Sleep(1000);
             } catch (err) {
-                if (err != EndReasons.TimeOut) throw err;
+                if (err != EndReasons.TimeOut) {
+                    await this.endgame();
+                    //throw err;
+                } else {
+                    await this.changeStatus({
+                        content: `## ${this.#interaction.client.Emojis.Check} Gana el combate **${this.#rival.user}**.\n## ${this.#interaction.client.Emojis.Error} ${this.#playing.user} tardó demasiado en jugar.`,
+                        allowedMentions: {
+                            users: [this.#rival.user.id]
+                        }
+                    })
 
-                await this.changeStatus({
-                    content: `## ${this.#interaction.client.Emojis.Check} Gana el combate **${this.#rival.user}**.\n## ${this.#interaction.client.Emojis.Error} ${this.#playing.user} tardó demasiado en jugar.`,
-                    allowedMentions: {
-                        users: [this.#rival.user.id]
-                    }
-                })
-
-                this.pet.changeHp(-this.pet.hp);
-                await this.pet.save();
+                    this.pet.changeHp(-this.pet.hp);
+                    await this.pet.save();
+                }
             }
         }
     }
@@ -188,7 +202,7 @@ class PetCombat {
             embed
                 .defTitle("🏳️ Fue un empate")
                 .defDesc(`## Ambos quedaron en **0 HP** ‼️
-${this.#bet ? `### A cada uno se le regresan ${PrettyCurrency(this.#interaction.guild, this.#bet)}` : ``}
+${this.#bet ? `### Nadie perdió ${PrettyCurrency(this.#interaction.guild, this.#bet)}` : ``}
 ### No cambiaron las métricas de victorias o derrotas`)
                 .defColor(Colores.nocolor);
             player1.pet.changeHp(1);
@@ -207,7 +221,7 @@ ${this.#bet ? `### — Se le dan ${PrettyCurrency(this.#interaction.guild, this.
                 await player2.doc.addCurrency(this.#bet, false);
                 await player1.doc.removeCurrency(this.#bet);
             }
-        } else { // perdio el retado
+        } else if (player2.pet.wasDefeated) { // perdio el retado
             embed
                 .defTitle(`🏆 Gana ${player1.user.username}`)
                 .defDesc(`## 💔 ${player2.pet.name} se quedó en **0 HP**.
@@ -222,6 +236,12 @@ ${this.#bet ? `### — Se le dan ${PrettyCurrency(this.#interaction.guild, this.
                 await player1.doc.addCurrency(this.#bet, false);
                 await player2.doc.removeCurrency(this.#bet);
             }
+        } else { // No perdio nadie
+            embed
+                .defTitle(`🕳️ Se canceló el combate`)
+                .defDesc(`## No se determinó un ganador.
+${this.#bet ? `### Nadie perdió ${PrettyCurrency(this.#interaction.guild, this.#bet)}` : ``}`)
+                .defColor(Colores.blanco);
         }
 
         await this.changeStatus({ embeds: [embed], components: [], content: null })
@@ -229,14 +249,14 @@ ${this.#bet ? `### — Se le dan ${PrettyCurrency(this.#interaction.guild, this.
         this.#interaction.client.petCombats.delete(player1.user.id)
         this.#interaction.client.petCombats.delete(player2.user.id)
 
+        await Sleep(5000);
+
+        await this.thread.setLocked(true);
+        await this.thread.setArchived(true);
+
         // actualizar la base de datos
         await player1.pet.save();
         await player2.pet.save();
-
-        await Sleep(5000);
-
-        this.thread.setLocked(true);
-        this.thread.setArchived(true);
     }
 
     async #turn() {
