@@ -2162,6 +2162,18 @@ const SendDirect = async function (interaction, member, type, options) {
   await member.send({ ...options, flags });
 }
 
+/**
+ * 
+ * @param {String} line 
+ * @returns String
+ */
+const FinalPeriod = function (line) {
+  let d = line;
+  if (!line.endsWith(".") && !(line.endsWith(":") || line.endsWith("!") || line.endsWith("```") || line.endsWith("?"))) d += `.`;
+
+  return d;
+}
+
 module.exports = {
   GetChangesAndCreateFields,
   FetchAuditLogs,
@@ -2203,5 +2215,6 @@ module.exports = {
   PrettifyNumber,
   MultiplePercentages,
   CreateInteractionFilter,
-  SendDirect
+  SendDirect,
+  FinalPeriod
 }

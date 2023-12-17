@@ -3,9 +3,12 @@ const { PermissionFlagsBits, SlashCommandBuilder, SlashCommandSubcommandGroupBui
 const Embed = require("./Embed");
 const Colores = require("../resources/colores.json");
 const { Categories } = require('./Enums');
+const InteractivePages = require('./InteractivePages');
+const { FinalPeriod } = require('./functions');
 
 class Command {
     #rawData;
+    #flatData;
     constructor(data = { name: "foo", desc: "bar", helpdesc: null, category: Categories.General }) {
         if (!(data.name && data.desc)) return console.error("No están todos los datos para crear un comando:", data)
 
@@ -27,10 +30,35 @@ class Command {
             interaction.editReply("Hola mundo!")
         };
         this.getHelp = async (interaction) => {
-            let embed = this.#getHelpEmbed(interaction);
+            const counts = this.#getCounts()
 
-            return interaction.editReply({ content: null, embeds: [embed] });
+            let items = new Map();
+
+            for (const [i, item] of this.#flatData.entries()) {
+                let name;
+
+                if (item.group) name = interaction.client.mentionCommand(`${this.name} ${item.group} ${item.name}`);
+                else name = interaction.client.mentionCommand(`${this.name} ${item.name}`);
+
+                items.set(i, {
+                    name,
+                    info: FinalPeriod(item.description)
+                })
+            }
+
+            const interactive = new InteractivePages({
+                title: `Ayuda: /${this.name}`,
+                footer: `Página {ACTUAL} de {TOTAL}`,
+                color: Colores.verde,
+                thumbnail: interaction.client.user.avatarURL(),
+                description: `> **ℹ️ ${this.info}**\nHay \`${counts.subcommands}\` subcomandos en este comando.\nCon \`${counts.groups}\` subgrupos.`,
+                addon: `**— {name}**
+**▸** {info}\n\n`
+            }, items, 3);
+
+            return await interactive.init(interaction)
         }
+
         this.methodsCount = 0;
     }
 
@@ -295,17 +323,32 @@ class Command {
         return option;
     }
 
-    #getHelpEmbed(interaction) {
-        // TODO: Mostrar los parámetros, junto a subcomandos y subgrupos
-        let embed = new Embed()
-            .defAuthor({ text: `Ayuda: /${this.name}`, icon: interaction.guild.iconURL(), title: true })
-            .defDesc(`▸ ${this.info}`)
-            .setColor(Colores.verde)
-            .defFooter({ text: "Esto será más completo en el futuro de Jeffrey Bot 🦊" })
-            .defThumbnail(interaction.client.user.avatarURL())
+    #getCounts() {
+        let subcommands = 0, groups = 0;
 
-        return embed;
+        this.#flatData = this.data.options.flatMap(first => {
+            let inside = [];
+            if (first instanceof SlashCommandSubcommandGroupBuilder) {
+                groups++;
+                inside = first.options.flatMap(second => {
+                    if (second instanceof SlashCommandSubcommandBuilder) {
+                        subcommands++;
+                        second.group = first.name;
+                        return second;
+                    }
+                })
+            }
+
+            if (first instanceof SlashCommandSubcommandBuilder) subcommands++;
+
+            return [first, ...inside];
+        })
+
+        return {
+            subcommands, groups
+        }
     }
+
 
     #warning() {
         this.methodsCount++
