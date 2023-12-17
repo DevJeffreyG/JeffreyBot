@@ -215,8 +215,9 @@ ${bdString}`)
         if (!isArray) data = [data];
 
         data.forEach(line => {
-            d += `\n${separator} ${line}`
+            d += `\n${separator} ${line}`;
             if (!line.endsWith(".") && !(line.endsWith(":") || line.endsWith("!") || line.endsWith("```") || line.endsWith("?"))) d += `.`;
+
         })
 
         this.defDesc(d);

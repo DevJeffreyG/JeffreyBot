@@ -142,6 +142,13 @@ command.data
             .setDescription("Edita un item creado")
     )
 
+command.addOptionsTo(["edit", "toggle", "use-info", "del-item"], [
+    new SlashCommandIntegerOption()
+        .setName("id")
+        .setDescription("La ID del item")
+        .setRequired(true)
+], true)
+
 command.addOptionsTo(["item-list", "add-discount", "add-item", "del-item", "use-info", "toggle", "edit"], [
     new SlashCommandIntegerOption()
         .setName("tipo")
@@ -150,18 +157,11 @@ command.addOptionsTo(["item-list", "add-discount", "add-item", "del-item", "use-
         .setRequired(true)
 ])
 
-command.addOptionsTo(["edit", "toggle", "use-info", "del-item"], [
-    new SlashCommandIntegerOption()
-        .setName("id")
-        .setDescription("La ID del item")
-        .setRequired(true)
-], true)
-
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
 
     const { subcommand } = params;
-    const { nivel, descuento, id, tipo } = params[subcommand];
+    const { nivel, descuento, id, tipo, duracion } = params[subcommand];
 
     const shop = await new Shop(interaction)
         .setType(tipo.value)
