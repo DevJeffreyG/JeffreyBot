@@ -223,7 +223,7 @@ class Item {
             await this.user.save()
         }
 
-        this.removeItemFromInv()
+        await this.removeItemFromInv();
         return true
     }
 
@@ -245,7 +245,7 @@ class Item {
             await this.user.save()
         }
 
-        this.removeItemFromInv()
+        await this.removeItemFromInv();
         return true;
     }
 
@@ -290,17 +290,7 @@ class Item {
                     shop_type: this.shopType
                 }, this.duration, this.price, this.name)
             } catch (err) {
-                console.log(err);
-
-                await new Log(this.interaction)
-                    .setReason(LogReasons.Error)
-                    .setTarget(ChannelModules.StaffLogs)
-                    .send({
-                        embeds: [
-                            new ErrorEmbed()
-                                .defDesc(`\`ITEM ${this.itemId}\`: **Las suscripciones aún no están terminadas en la versión 2.0.0.**`)
-                        ]
-                    });
+                console.error("🔴", err);
 
                 this.notfound.send().catch(e => console.error(e));
                 return false;
@@ -308,7 +298,7 @@ class Item {
         }
         else this.member.roles.add(role);
 
-        this.removeItemFromInv()
+        await this.removeItemFromInv()
         return true;
     }
 
@@ -350,7 +340,7 @@ class Item {
 
         this.member.roles.remove(role);
 
-        this.removeItemFromInv()
+        await this.removeItemFromInv()
         return true;
     }
 
@@ -370,7 +360,7 @@ class Item {
                 if (this.user.economy.dark.accuracy > 90) this.user.economy.dark.accuracy = 90;
                 await this.user.save()
 
-                this.removeItemFromInv()
+                await this.removeItemFromInv();
                 return true;
 
             case ItemTypes.Firewall:
@@ -427,7 +417,7 @@ class Item {
                 this.user.data.purchases.splice(purchaseIndex, 1);
                 await this.user.save()
 
-                this.removeItemFromInv();
+                await this.removeItemFromInv();
                 return true;
             }
 
@@ -461,7 +451,7 @@ class Item {
                 // Crear mascota
                 this.user.data.pets.push(newpet)
                 await this.user.save();
-                this.removeItemFromInv();
+                await this.removeItemFromInv();
                 return true;
             case ItemTypes.PetStatsModifier:
                 console.log("🟩 Estadísticas de mascota!");
@@ -503,7 +493,7 @@ class Item {
                 if (this.item.stats.hunger >= 0) pet.changeHunger(-this.item.stats.hunger)
 
                 await pet.save();
-                this.removeItemFromInv();
+                await this.removeItemFromInv();
                 return true;
 
             case ItemTypes.EXMedia:
@@ -522,6 +512,7 @@ class Item {
 
                     if (!q.body) throw new JeffreyBotError(this.interaction, "No hubo cliente a quien enviar la respuesta");
 
+                    await this.removeItemFromInv();
                     return true;
                 } catch (err) {
                     if (!(err instanceof JeffreyBotError)) console.error(err);
@@ -533,7 +524,6 @@ class Item {
                     })
                     return false;
                 }
-                break;
             default:
                 console.log("Item simple! %s", itemType)
                 return await this.#activateItem();
@@ -608,22 +598,29 @@ class Item {
             this.hasboost.send().catch(e => console.error(e));;
             return false
         }
+        try {
+            if (this.isSub) {
+                await Subscription(this.member, role?.id, {
+                    type: this.boost_type,
+                    objetive: this.boost_objetive,
+                    value: this.boost_value,
+                }, {
+                    item_id: this.itemId,
+                    shop_type: this.shopType
+                }, this.duration, this.price, this.item.name);
 
-        if (this.isSub) {
-            await Subscription(this.member, role?.id, {
-                type: this.boost_type,
-                objetive: this.boost_objetive,
-                value: this.boost_value,
-            }, {
-                item_id: this.itemId,
-                shop_type: this.shopType
-            }, this.duration, this.price, this.item.name);
-        } else {
-            // llamar la funcion para hacer un globaldata y dar el role con boost
-            await LimitedTime(this.member, role?.id, this.duration, {
-                item_id: this.itemId,
-                shop_type: this.shopType
-            }, this.boost_type, this.boost_objetive, this.boost_value);
+            } else {
+                // llamar la funcion para hacer un globaldata y dar el role con boost
+                await LimitedTime(this.member, role?.id, this.duration, {
+                    item_id: this.itemId,
+                    shop_type: this.shopType
+                }, this.boost_type, this.boost_objetive, this.boost_value);
+            }
+        } catch (err) {
+            console.error("🔴", err);
+
+            this.notfound.send().catch(e => console.error(e));
+            return false;
         }
         this.removeItemFromInv()
         return true;

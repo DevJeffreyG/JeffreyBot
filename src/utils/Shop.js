@@ -569,7 +569,7 @@ ${codeBlock(item.description)}
                             .addInput({ id: "hunger", value: "0", label: "Hambre mitigada", placeholder: "Escribe un número entero positivo", style: TextInputStyle.Short })
                             .show()
 
-                            // TODO: Carga de ULT
+                        // TODO: Carga de ULT
 
                         let c = await inter.awaitModalSubmit({ filter: (i) => i.customId === "petStatsModifier" && i.user.id === this.interaction.user.id, time: ms("1m") });
                         await c.deferUpdate();
@@ -689,8 +689,11 @@ ${codeBlock(item.description)}
         const subError = new BadParamsError(this.interaction, [
             "Si es una suscripción, **debe tener**: `duracion`",
             "**No puede ser** `especial`",
-            "`duracion` **debe ser** mayor o igual a 1 minuto"
+            "`duracion` **debe ser** mayor o igual a 1 minuto",
+            "`objetivo` **debe ser** BOOST o ROLE",
+            "`accion` **debe** AGREGAR"
         ]);
+
         const roleError = new BadParamsError(this.interaction, "Si se usa un tipo Role, **debe tener**: `role`");
         const boostError = new BadParamsError(this.interaction, [
             "Si se usa un tipo Boost __agregando__, **debe tener**: `boostobj`, `boosttype`, `boostval` y `duracion`",
@@ -743,6 +746,8 @@ ${codeBlock(item.description)}
             if (params.especial?.value) throw subError;
             if (!use.item_info.duration) throw subError;
             if (use.item_info.duration < ms("1m")) throw subError;
+            if (!(use.objetive === ItemObjetives.Boost || use.objetive === ItemObjetives.Role)) throw subError;
+            if (use.action != ItemActions.Add) throw subError;
         }
 
         // boost verification
