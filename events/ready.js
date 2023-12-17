@@ -42,8 +42,8 @@ module.exports = async (client) => {
 
         let command = client.application.commands.cache.find(x => x.name === name);
         if (!command) {
-            console.error("🔴 No se encontró el comando %s", format)
-            return `\`/${name}\``;
+            if(process.env.DEV === "FALSE") console.error("🔴 No se encontró el comando %s", format)
+            return `\`/${format}\``;
         }
 
         if (inside) return chatInputApplicationCommandMention(name, sub, inside, command.id)

@@ -209,6 +209,8 @@ ${bdString}`)
      * @returns {this}
      */
     fillDesc(data, separator = "▸") {
+        const { FinalPeriod } = require("./functions");
+
         let d = this.description ?? this.data.description ?? "";
         let isArray = Array.isArray(data);
 
@@ -216,8 +218,7 @@ ${bdString}`)
 
         data.forEach(line => {
             d += `\n${separator} ${line}`;
-            if (!line.endsWith(".") && !(line.endsWith(":") || line.endsWith("!") || line.endsWith("```") || line.endsWith("?"))) d += `.`;
-
+            d = FinalPeriod(d);
         })
 
         this.defDesc(d);

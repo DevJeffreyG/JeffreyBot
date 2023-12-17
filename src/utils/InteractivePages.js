@@ -13,7 +13,7 @@ const ms = require("ms");
 class InteractivePages {
     /**
      * 
-     * @param {{title: string, author_icon: string, color: string, description: string, addon: string, footer: string, footer_icon: string}} structure The base for the embed
+     * @param {{title: string, author_icon: string, color: string, thumbnail: string, description: string, addon: string, footer: string, footer_icon: string}} structure The base for the embed
      * @param {Map<Id, values>} items Mapped by Id's, the {x.y} used on the 'addon', 'y' would be the values inside the key
      * @param {Number} itemsNum The number of items that will be in one page.
      */
@@ -39,9 +39,9 @@ class InteractivePages {
         title: "Titulo",
         footer: `Comentario | Página {ACTUAL} de {TOTAL}`,
         color: "#fff",
+        thumbnail: interaction.guild.iconURL()
         description: `Una descripción que no cambiará.`,
-        addon: `
-**— {name}**
+        addon: `**— {name}**
 **▸ Foo**: {foo}
 **▸ Bar**: {bar}
 **▸ ID**: {id}\n\n`
@@ -72,6 +72,7 @@ class InteractivePages {
         this.base.description = this.base.description ?? "";
         this.base.footer = this.base.footer ?? `Página {ACTUAL} de {TOTAL}`;
         this.base.footer_icon = this.base.footer_icon ?? null;
+        this.base.thumbnail = this.base.thumbnail ?? null;
     }
 
     #generatePages() {
@@ -137,6 +138,7 @@ class InteractivePages {
             .defDesc(`${this.base.description}\n\n${this.pages.get(this.pag).join("")}`)
             .defFooter({ text: this.base.footer.replace(new RegExp("{ACTUAL}", "g"), this.pag).replace(new RegExp("{TOTAL}", "g"), `${this.pages.size}`), icon: this.base.icon_footer });
 
+        if (this.base.thumbnail) embed.defThumbnail(this.base.thumbnail);
         this.firstEmbed = embed;
         return embed;
     }
@@ -240,6 +242,8 @@ class InteractivePages {
                     .defColor(this.base.color)
                     .defDesc(`${this.base.description}\n\n${this.pages.get(pagn).join("")}`)
                     .defFooter({ text: this.base.footer.replace(new RegExp("{ACTUAL}", "g"), `${pagn}`).replace(new RegExp("{TOTAL}", "g"), `${this.pages.size}`), icon: this.base.icon_footer });
+
+                if (this.base.thumbnail) embed.defThumbnail(this.base.thumbnail);
 
                 await interaction.editReply({ embeds: [embed], components: [row] });
             } catch (err) {
