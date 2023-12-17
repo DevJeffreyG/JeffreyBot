@@ -35,10 +35,13 @@ class Command {
             let items = new Map();
 
             for (const [i, item] of this.#flatData.entries()) {
+                if(!item) continue;
                 let name;
 
                 if (item.group) name = interaction.client.mentionCommand(`${this.name} ${item.group} ${item.name}`);
                 else name = interaction.client.mentionCommand(`${this.name} ${item.name}`);
+
+                if(item instanceof SlashCommandSubcommandGroupBuilder) name = `[GRUPO] ${interaction.client.mentionCommand(`${this.name} ${item.name}`)}`;
 
                 items.set(i, {
                     name,
@@ -328,6 +331,7 @@ class Command {
 
         this.#flatData = this.data.options.flatMap(first => {
             let inside = [];
+
             if (first instanceof SlashCommandSubcommandGroupBuilder) {
                 groups++;
                 inside = first.options.flatMap(second => {
@@ -341,7 +345,8 @@ class Command {
 
             if (first instanceof SlashCommandSubcommandBuilder) subcommands++;
 
-            return [first, ...inside];
+            if ((first instanceof SlashCommandSubcommandBuilder || first instanceof SlashCommandSubcommandGroupBuilder))
+                return [first, ...inside];
         })
 
         return {

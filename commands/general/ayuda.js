@@ -1,4 +1,4 @@
-const { Command, Categories, Embed, MemberHasAnyRole, isDeveloper, ContextMenu, ValidateDarkShop, Collector, CreateInteractionFilter, InteractivePages, Enum } = require("../../src/utils");
+const { Command, Categories, Embed, MemberHasAnyRole, isDeveloper, ContextMenu, Collector, CreateInteractionFilter, InteractivePages, Enum, FinalPeriod } = require("../../src/utils");
 const { Colores } = require("../../src/resources/");
 const { CommandNotFoundError, PermissionError } = require("../../src/errors/");
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
@@ -151,7 +151,7 @@ command.execute = async (interaction, models, params, client) => {
         for (const [i, command] of commands.entries()) {
             items.set(i, {
                 command: client.mentionCommand(command.name),
-                info: command.info
+                info: FinalPeriod(command.info)
             })
         }
 
@@ -202,6 +202,7 @@ command.execute = async (interaction, models, params, client) => {
             author_icon: interaction.guild.iconURL(),
             footer: `Página {ACTUAL} de {TOTAL}`,
             color,
+            thumbnail: interaction.client.user.displayAvatarURL(),
             description: ``,
             addon: `### {command}
     > ℹ️ {info}\n\n`
