@@ -8,6 +8,8 @@ const command = new Command({
     desc: "Todo lo que tenga que ver con AutoRoles está aquí"
 })
 
+// TODO: Hacerlos con MENUS.
+
 command.data
     .addSubcommand(add =>
         add

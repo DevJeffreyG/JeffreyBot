@@ -333,6 +333,7 @@ const GuildSchema = new Schema({
             },
             twitch: String,
             darkshop: String,
+            // TODO: Hacer que se pueda mencionar cualquier rol
             polls: String,
             bets: String
         }

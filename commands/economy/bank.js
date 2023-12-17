@@ -8,6 +8,8 @@ const command = new Command({
 command.execute = async (interaction, models, params, client) => {
     if (!interaction.deferred) await interaction.deferReply();
     const { subcommand } = params;
+
+    // TODO: 
 }
 
 module.exports = command;
