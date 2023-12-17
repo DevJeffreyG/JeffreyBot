@@ -1,6 +1,8 @@
-const { Command, Categories, ErrorEmbed, Embed, MemberHasAnyRole, isDeveloper, ContextMenu, ValidateDarkShop } = require("../../src/utils");
+const { Command, Categories, Embed, MemberHasAnyRole, isDeveloper, ContextMenu, ValidateDarkShop, Collector, CreateInteractionFilter, InteractivePages, Enum } = require("../../src/utils");
 const { Colores } = require("../../src/resources/");
-const { CommandNotFoundError } = require("../../src/errors/");
+const { CommandNotFoundError, PermissionError } = require("../../src/errors/");
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const ms = require("ms");
 
 const command = new Command({
     name: "ayuda",
@@ -11,9 +13,13 @@ const command = new Command({
 command.addOption({
     type: "string", name: "comando", desc: "Recibe ayuda de un comando específico"
 });
+command.addOption({
+    type: "string", name: "categoria", desc: "Recibe los comandos de una categoría",
+    choices: new Enum(Categories).complexArray()
+});
 
 command.execute = async (interaction, models, params, client) => {
-    const { comando } = params;
+    const { comando, categoria } = params;
     if (comando) return command.execGetHelp(interaction, comando, client);
 
     await interaction.deferReply({ ephemeral: true });
@@ -21,159 +27,188 @@ command.execute = async (interaction, models, params, client) => {
     const helpEmojiURL = client.EmojisObject.Check.url
     const doc = params.getDoc();
 
-    // get all commands
-    const commands = client.commands.map(slash => slash);
-
-    commands.sort((a, b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0)); // me lo robe y no entiendo como funciona :D
-
-    // roles
     const adminRoles = doc.getAdmins();
     const staffRoles = doc.getStaffs();
-
-    // codigo
-
-    let general = new Embed()
-        .defAuthor({ text: `Comandos generales`, icon: helpEmojiURL })
-        .defColor(Colores.verde);
-
-    let fun = new Embed()
-        .defAuthor({ text: `Comandos de diversión`, icon: helpEmojiURL })
-        .defColor(Colores.verde);
-
-    let music = new Embed()
-        .defAuthor({ text: `Comandos de música ! MANTENIMIENTO !`, icon: helpEmojiURL })
-        .defColor(Colores.verde);
-
-    let economy = new Embed()
-        .defAuthor({ text: `Comandos de economía`, icon: helpEmojiURL })
-        .defColor(Colores.verde);
-
-    let darkshop = new Embed()
-        .defAuthor({ text: `Comandos de la DarkShop`, icon: helpEmojiURL })
-        .defColor(Colores.negro);
-
-    let moderation = new Embed()
-        .defAuthor({ text: `Comandos de moderación`, icon: helpEmojiURL })
-        .defColor(Colores.rojo);
-
-    let staff = new Embed()
-        .defAuthor({ text: `Comandos de STAFF`, icon: helpEmojiURL })
-        .defColor(Colores.rojo);
-
-    let admin = new Embed()
-        .defAuthor({ text: `Comandos de Administrador`, icon: helpEmojiURL })
-        .defColor(Colores.rojo);
-
-    let dev = new Embed()
-        .defAuthor({ text: `Comandos de desarrollador`, icon: helpEmojiURL })
-        .defColor(Colores.nocolor);
-
-    let [generalDesc, funDesc, musicDesc, economyDesc, darkshopDesc, moderationDesc, staffDesc, adminDesc, devDesc] = ["", "", "", "", "", "", "", "", ""];
-
-    for (let i = 0; i < commands.length; i++) {
-        const helpCommand = commands[i];
-        if (helpCommand instanceof ContextMenu) continue;
-
-        let slashMention = client.mentionCommand(helpCommand.name);
-
-        const toAdd = `▸ ${slashMention}: ${helpCommand.info}${helpCommand.info.endsWith("!") || helpCommand.info.endsWith("?") ? "" : "."}\n`;
-
-        switch (helpCommand.category) {
-            case Categories.General:
-                generalDesc += toAdd;
-                break;
-
-            case Categories.Fun:
-                funDesc += toAdd;
-                break;
-
-            case Categories.Music:
-                musicDesc += toAdd;
-                break;
-
-            case Categories.Economy:
-                economyDesc += toAdd;
-                break;
-
-            case Categories.DarkShop:
-                darkshopDesc += toAdd;
-                break;
-
-            case Categories.Moderation:
-                moderationDesc += toAdd;
-                break;
-
-            case Categories.Staff:
-                staffDesc += toAdd;
-                break;
-
-            case Categories.Administration:
-                adminDesc += toAdd;
-                break;
-
-            case Categories.Developer:
-                devDesc += toAdd;
-                break;
-
-            default:
-                console.error("HAY UN COMANDO CON CATEGORÍA INCORRECTA !!", helpCommand);
-        }
-
-    }
-
-    general.defDesc(generalDesc);
-    fun.defDesc(funDesc);
-    music.defDesc(musicDesc);
-    economy.defDesc(economyDesc);
-    darkshop.defDesc(darkshopDesc);
-    moderation.defDesc(moderationDesc);
-    staff.defDesc(staffDesc);
-    admin.defDesc(adminDesc);
-    dev.defDesc(devDesc);
-
-    //let isAdmin = member.roles.cache.find(x => x === adminRole) ? true : false;
 
     const isStaff = MemberHasAnyRole(member, staffRoles);
     const isAdmin = MemberHasAnyRole(member, adminRoles);
     const isDev = isDeveloper(member)
 
-    let arrayEmbeds = [];
+    if (!categoria?.value) {
+        const { Currency, DarkCurrency } = client.getCustomEmojis(interaction.guild.id);
 
-    if (general.description) arrayEmbeds.push(general);
-    if (fun.description) arrayEmbeds.push(fun);
-    if (music.description) arrayEmbeds.push(music);
-    if (economy.description) arrayEmbeds.push(economy);
-    if (darkshop.description) {
-        let user = params.getUser();
-        let validation = await ValidateDarkShop(user, interaction.user);
+        let Buttons = [
+            new ButtonBuilder()
+                .setCustomId(Categories.General)
+                .setLabel("Generales")
+                .setEmoji(client.Emojis.Check)
+                .setStyle(ButtonStyle.Success),
+            new ButtonBuilder()
+                .setCustomId(Categories.Fun)
+                .setLabel("Diversión")
+                .setEmoji("😂")
+                .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+                .setCustomId(Categories.Economy)
+                .setLabel("Economía")
+                .setEmoji(Currency.id)
+                .setStyle(ButtonStyle.Secondary),
+            new ButtonBuilder()
+                .setCustomId(Categories.DarkShop)
+                .setLabel("DarkShop")
+                .setEmoji(DarkCurrency.id)
+                .setStyle(ButtonStyle.Secondary),
+            new ButtonBuilder()
+                .setCustomId(Categories.DM)
+                .setLabel("Mensajes Directos")
+                .setEmoji("📥")
+                .setStyle(ButtonStyle.Secondary),
+        ];
 
-        if (doc.moduleIsActive("functions.darkshop") && validation.valid) arrayEmbeds.push(darkshop);
+        let SpecialButtons = []
+
+        if (isStaff) SpecialButtons.push(
+            new ButtonBuilder()
+                .setCustomId(Categories.Staff)
+                .setLabel("STAFF")
+                .setEmoji("👥")
+                .setStyle(ButtonStyle.Danger),
+            new ButtonBuilder()
+                .setCustomId(Categories.Moderation)
+                .setLabel("Moderación")
+                .setEmoji("🛡️")
+                .setStyle(ButtonStyle.Danger)
+        )
+
+        if (isAdmin) SpecialButtons.push(
+            new ButtonBuilder()
+                .setCustomId(Categories.Administration)
+                .setLabel("Administración")
+                .setEmoji("🛠️")
+                .setStyle(ButtonStyle.Danger)
+        )
+
+        if (isDev) SpecialButtons.push(
+            new ButtonBuilder()
+                .setCustomId(Categories.Developer)
+                .setLabel("DEV")
+                .setEmoji(client.Emojis.JeffreyBot)
+                .setStyle(ButtonStyle.Danger)
+        )
+
+        let msg = await interaction.editReply({
+            embeds: [
+                new Embed()
+                    .defTitle("Ayuda con Jeffrey Bot")
+                    .fillDesc([
+                        "Puedes ver los comandos separados por sus categorías usando los botones a continuación",
+                        `Usa el parámetro \`comando\` con ${client.mentionCommand("ayuda")} para obtener ayuda específica de un comando`,
+                        `Usa el parámetro \`categoria\` para evitar seleccionarla con los botones`
+                    ])
+                    .defColor(Colores.cake)
+                    .defThumbnail(client.user.displayAvatarURL())
+            ],
+            components: [
+                new ActionRowBuilder()
+                    .setComponents(Buttons),
+                new ActionRowBuilder()
+                    .setComponents(SpecialButtons)
+            ]
+        })
+
+        const collector = await new Collector(interaction, {
+            filter: CreateInteractionFilter(interaction, msg, interaction.user),
+            wait: true,
+            time: ms("1m")
+        }).wait(() => {
+            interaction.deleteReply();
+        })
+        if (!collector) return;
+        return await showHelp(collector.customId);
+    } else {
+        const category = categoria.value;
+        if ((category === Categories.STAFF || category === Categories.Moderation) && !isStaff)
+            throw new PermissionError(interaction);
+
+        if ((category === Categories.Administration) && !isAdmin)
+            throw new PermissionError(interaction);
+
+        if ((category === Categories.DEV) && !isDev)
+            throw new PermissionError(interaction);
+
+        return await showHelp(category);
     }
 
-    if (isDev) {
-        if (moderation.description) arrayEmbeds.push(moderation);
-        if (staff.description) arrayEmbeds.push(staff);
-        if (admin.description) arrayEmbeds.push(admin);
-        if (dev.description) arrayEmbeds.push(dev);
-    } else if (isStaff) {
-        if (moderation.description) arrayEmbeds.push(moderation);
-        if (staff.description) arrayEmbeds.push(staff);
-        if (isAdmin && admin.description) arrayEmbeds.push(admin);
-    }
+    async function showHelp(categoryToShow) {
+        let createFilter = (category) => (s => s.category === category && !(s instanceof ContextMenu));
 
-    // TODO: Mejorar la ayuda especifica
-    /* let sug = new Embed({
-        type: "didYouKnow",
-        data: {
-            text: `Puedes obtener ayuda de un comando específico usando este mismo comando:\n\`/ayuda comando:(nombre)\``,
-            likelihood: 50
+        let title, color;
+
+        const commands = client.commands.filter(createFilter(categoryToShow)).map(c => c);
+        commands.sort((a, b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0));
+
+        let items = new Map();
+        for (const [i, command] of commands.entries()) {
+            items.set(i, {
+                command: client.mentionCommand(command.name),
+                info: command.info
+            })
         }
-    })
 
-    
-    if (sug.likelihood) arrayEmbeds.push(sug); */
+        switch (categoryToShow) {
+            case Categories.General:
+                title = "Comandos generales";
+                color = Colores.verdejeffrey;
+                break;
+            case Categories.Fun:
+                title = "Comandos de diversión";
+                color = Colores.verdeclaro;
+                break;
+            case Categories.Economy:
+                title = "Comandos de economía";
+                color = Colores.verde;
+                break;
+            case Categories.DarkShop:
+                title = "Comandos de DarkShop";
+                color = Colores.negro;
+                break;
+            case Categories.Staff:
+                title = "Comandos de STAFF";
+                color = Colores.rojo;
+                break;
+            case Categories.Administration:
+                title = "Comandos de ADMIN";
+                color = Colores.rojooscuro;
+                break;
+            case Categories.Moderation:
+                title = "Comandos de Moderación";
+                color = Colores.rojo;
+                break;
+            case Categories.Developer:
+                title = "Comandos de DEV";
+                color = Colores.verdejeffrey;
+                break;
+            case Categories.DM:
+                title = "Comandos de MDs";
+                color = Colores.nocolor;
+                break;
+            default:
+                title = "Comandos";
+                color = Colores.nocolor;
+        }
 
-    return interaction.editReply({ embeds: arrayEmbeds, ephemeral: true });
+        const interactive = new InteractivePages({
+            title,
+            author_icon: interaction.guild.iconURL(),
+            footer: `Página {ACTUAL} de {TOTAL}`,
+            color,
+            description: ``,
+            addon: `### {command}
+    > ℹ️ {info}\n\n`
+        }, items, 5);
+
+        return await interactive.init(interaction);
+    }
 }
 
 command.execGetHelp = async (interaction, commandHelp, client) => {

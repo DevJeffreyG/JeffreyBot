@@ -65,7 +65,13 @@ class Enum {
             Staff: "STAFF",
             Birthdays: "Cumpleaños",
             Incomes: "Ingresos",
-            SubscriptionsCurrency: `${this.customize && CurrencyName ? CurrencyName : "Dinero"} en Suscripciones`
+            SubscriptionsCurrency: `${this.customize && CurrencyName ? CurrencyName : "Dinero"} en Suscripciones`,
+            Developer: "Desarrollador",
+            Administration: "Administración",
+            Economy: "Economía",
+            Fun: "Diversión",
+            Music: "Música",
+            DM: "Mensajes Directos"
         }
 
         for (const prop of Object.keys(this.values)) {

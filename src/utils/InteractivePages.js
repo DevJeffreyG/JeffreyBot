@@ -25,7 +25,7 @@ class InteractivePages {
         let name = item.name;
         let foo = item.foo;
         let bar = item.bar ?? "Bar";
-        let id = rule.id;
+        let id = item.id;
 
         items.set(id, {
             name,
@@ -45,9 +45,9 @@ class InteractivePages {
 **▸ Foo**: {foo}
 **▸ Bar**: {bar}
 **▸ ID**: {id}\n\n`
-    }, items, 3);\
+    }, items, 3);
 
-    return await interactive.init()*/
+    return await interactive.init(interaction)*/
     constructor(structure, items, itemsNum = 3, options) {
         this.base = structure;
         this.options = options;
@@ -134,7 +134,7 @@ class InteractivePages {
         let embed = new Embed()
             .defAuthor({ text: this.base.title, icon: this.base.author_icon })
             .defColor(this.base.color)
-            .defDesc(`${this.base.description}\n\n${this.pages.get(this.pag).join(" ")}`)
+            .defDesc(`${this.base.description}\n\n${this.pages.get(this.pag).join("")}`)
             .defFooter({ text: this.base.footer.replace(new RegExp("{ACTUAL}", "g"), this.pag).replace(new RegExp("{TOTAL}", "g"), `${this.pages.size}`), icon: this.base.icon_footer });
 
         this.firstEmbed = embed;
@@ -238,7 +238,7 @@ class InteractivePages {
                 let embed = new Embed()
                     .defAuthor({ text: this.base.title, icon: this.base.author_icon })
                     .defColor(this.base.color)
-                    .defDesc(`${this.base.description}\n\n${this.pages.get(pagn).join(" ")}`)
+                    .defDesc(`${this.base.description}\n\n${this.pages.get(pagn).join("")}`)
                     .defFooter({ text: this.base.footer.replace(new RegExp("{ACTUAL}", "g"), `${pagn}`).replace(new RegExp("{TOTAL}", "g"), `${this.pages.size}`), icon: this.base.icon_footer });
 
                 await interaction.editReply({ embeds: [embed], components: [row] });
