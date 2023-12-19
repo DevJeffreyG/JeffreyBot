@@ -130,17 +130,17 @@ command.execute = async (interaction, models, params, client) => {
                 emote = id ? guild.emojis.cache.get(id) : { id: emoji.value, guild: null };
                 noemoji = false;
 
-                console.log(guild, emote);
+                //console.log(guild, emote);
 
                 try {
                     emote instanceof Emoji ? await interaction.message.react(emote) : await interaction.message.react(emote.id);
                 } catch (err) {
-                    console.log(err)
+                    console.error("🔴 %s", err);
                     noemoji = true;
                 }
             }
 
-            console.log(guild, emote);
+            //console.log(guild, emote);
 
             await doc.addAutoRole(nombre.value, role.value, emote, newId);
 

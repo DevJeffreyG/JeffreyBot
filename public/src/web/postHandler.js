@@ -112,8 +112,8 @@ module.exports = (app) => {
                 try {
                     await doc.save()
                 } catch (err) {
-                    console.log(changes)
-                    console.log(err)
+                    console.log("⚪ Cambios: %s", changes)
+                    console.error("🔴 %s", err);
                     response = false;
                 }
 
@@ -148,7 +148,7 @@ module.exports = (app) => {
 
             res.send(true);
         } catch (err) {
-            console.log("🌎", err);
+            console.error("🌎", err);
             res.send(false);
         }
     })

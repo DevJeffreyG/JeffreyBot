@@ -195,14 +195,14 @@ ${codeBlock("json", data.error)}`])
                     return await this.interaction.reply({ content: null, embeds: [this], components: [], ephemeral: true })
                 } catch (err) {
                     console.log("Oops!")
-                    console.log(err)
+                    console.error("🔴 %s", err);
                 }
             } else if (followup) {
                 try {
                     return await this.interaction.followUp({ content: null, embeds: [this], components: [], ephemeral: ephemeral })
                 } catch (err) {
                     console.log("Oops!")
-                    console.log(err)
+                    console.error("🔴 %s", err);
                 }
             }
 

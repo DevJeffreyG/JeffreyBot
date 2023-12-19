@@ -241,7 +241,7 @@ class Blackjack {
             if (this.ended) try {
                 return i.update();
             } catch (err) {
-                console.log(err)
+                console.error("🔴 %s", err);
             }
 
             switch (i.customId) {

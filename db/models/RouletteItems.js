@@ -17,11 +17,11 @@ Schema.static("new", async function (data, id) {
 
     let newExtra = {};
 
-    console.log(extra)
+    //console.log(extra)
 
     for(prop in extra) {
         let isNaN = extra[prop].toString() === "NaN";
-        console.log(prop, isNaN);
+        //console.log(prop, isNaN);
         newExtra[prop] = isNaN ? null : extra[prop];
     }
 

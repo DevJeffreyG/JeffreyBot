@@ -37,7 +37,7 @@ class Handlers {
         if (this.interaction.client.isOnLockdown && !this.#isDev()) try {
             return await this.interaction.reply({ ephemeral: true, embeds: [new ErrorEmbed().defDesc(`Jeffrey Bot está bloqueado ahora mismo, lamentamos los inconvenientes.`)] });
         } catch (err) {
-            console.log(err)
+            console.error("🔴 %s", err);
         }
 
         if (this.interaction.customId?.toUpperCase().includes("TICKET")) this.ticket = new Ticket(this.interaction);
@@ -58,7 +58,7 @@ class Handlers {
                     process.exit(0);
                 }
             } catch (err) {
-                console.log(err)
+                console.error("🔴 %s", err);
             }
 
             return;
@@ -817,7 +817,7 @@ class Handlers {
             }
         } catch (err) {
             console.log("⚠️ Un comando quiso ser usado y Discord no respondió:", this.client.lastInteraction)
-            console.log(err);
+            console.error("🔴 %s", err);
         }
     }
 

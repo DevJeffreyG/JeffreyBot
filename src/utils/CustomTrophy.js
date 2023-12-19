@@ -100,7 +100,7 @@ class CustomTrophy {
                 ]
             })
         } catch (err) {
-            console.log(err);
+            console.error("🔴 %s", err);
             throw new DoesntExistsError(this.interaction, `El Trofeo con ID \`${id}\``, "este servidor");
         }
     }
@@ -242,7 +242,7 @@ class CustomTrophy {
                 console.log("digamos que le mandé el dm a %s", member.user.username);
                 // TODO: await this.#sendDM(member, trophy);
             } catch (err) {
-                console.log(err);
+                console.error("🔴 %s", err);
             }
         }
 
@@ -288,7 +288,7 @@ class CustomTrophy {
             try {
                 await this.#sendDM(member, trophy);
             } catch (err) {
-                console.log(err);
+                console.error("🔴 %s", err);
             }
         }
 
@@ -346,8 +346,6 @@ class CustomTrophy {
             }
 
             if (!value) continue;
-
-            console.log(value, typeof value);
 
             // validation
             switch (prop) {
@@ -573,7 +571,7 @@ class CustomTrophy {
                     break;
                 case "role":
                     await this.member.roles.add(value)
-                        .catch(err => console.log(err));
+                        .catch(err => console.error("🔴 %s", err));;
 
                     this.rewardsGiven.push(`**El rol @${this.member.roles.cache.get(value).name}**`);
 

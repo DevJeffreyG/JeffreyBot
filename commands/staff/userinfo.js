@@ -163,7 +163,7 @@ ${member.roles.cache.toJSON().sort().join(", ")}`)
         try {
             await interaction.editReply({ embeds: [embeds[pagn]], components: [row] });
         } catch (err) {
-            console.log(err);
+            console.error("🔴 %s", err);
         }
 
     });

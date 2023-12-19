@@ -225,7 +225,7 @@ class Shop {
         try {
             await interactive.init(this.interaction);
         } catch (err) {
-            console.log(err);
+            console.error("🔴 %s", err);
         }
     }
 
@@ -240,7 +240,7 @@ class Shop {
         try {
             await interactive.init(this.interaction);
         } catch (err) {
-            console.log(err);
+            console.error("🔴 %s", err);
         }
     }
     /**

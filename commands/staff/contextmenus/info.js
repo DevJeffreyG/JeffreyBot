@@ -17,7 +17,7 @@ command.execute = async (interaction, models, params, client) => {
     try {
         await userinfo.execute(interaction, models, params, client)
     } catch (err) {
-        console.log(err);
+        console.error("🔴 %s", err);
     }
 }
 

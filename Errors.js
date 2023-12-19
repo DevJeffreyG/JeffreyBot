@@ -41,7 +41,7 @@ module.exports = async (client) => {
 
     process.on('uncaughtException', err => {
         updateInteractionHandler();
-        console.log(err);
+        console.error("🔴 %s", err);
         console.log(`Uncaught Exception: ${err.message}`)
 
         new Log()

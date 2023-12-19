@@ -35,7 +35,7 @@ command.execute = async (interaction, models, params, client) => {
 
     return await interaction.editReply({ content: null, embeds: [embed] });
   } catch (err) {
-    console.log(err)
+    console.error("🔴 %s", err);
   }
 }
 

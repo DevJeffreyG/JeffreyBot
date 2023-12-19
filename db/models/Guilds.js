@@ -443,8 +443,8 @@ GuildSchema.method("manageLevelUp", async function (level, userDoc) {
         }
     }
 
-    if (!member.roles.cache.hasAll(...roles.keys())) await member.roles.add(roles).catch(err => console.log(err)); // Si le falta algun role, agregarlo
-    if (toRemoveRoles.size > 0) member.roles.remove(toRemoveRoles).catch(err => console.log(err)); // Si hay roles para eliminar, hacerlo
+    if (!member.roles.cache.hasAll(...roles.keys())) await member.roles.add(roles).catch(err => console.error("🔴 %s", err));; // Si le falta algun role, agregarlo
+    if (toRemoveRoles.size > 0) member.roles.remove(toRemoveRoles).catch(err => console.error("🔴 %s", err));; // Si hay roles para eliminar, hacerlo
 })
 
 GuildSchema.method("getCooldown", function (modulo, toString = false) {

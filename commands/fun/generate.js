@@ -44,7 +44,7 @@ command.execute = async (interaction, models, params, client) => {
                     .defAuthor({ text: GetRandomItem(msgs), icon: client.EmojisObject.Loading.url })
                     .defColor(Colores.verde)
             ]
-        }).catch(err => console.log(err));
+        }).catch(err => console.error("🔴 %s", err));;
     }
     
     masterpieces();
@@ -55,8 +55,8 @@ command.execute = async (interaction, models, params, client) => {
             prompt: descripcion.value
         })
     } catch (err) {
-        console.log(err);
-        return interaction.editReply({ content: "No se pudieron crear tus obras maestras por un error con el servidor :(", embeds: [] }).catch(err => console.log(err))
+        console.error("🔴 %s", err);
+        return interaction.editReply({ content: "No se pudieron crear tus obras maestras por un error con el servidor :(", embeds: [] }).catch(err => console.error("🔴 %s", err));
     }
 
     clearInterval(interval)
@@ -67,7 +67,7 @@ command.execute = async (interaction, models, params, client) => {
                 .defAuthor({ text: "Guardando los resultados...", icon: client.EmojisObject.Loading.url })
                 .defColor(Colores.verde)
         ]
-    }).catch(err => console.log(err));
+    }).catch(err => console.error("🔴 %s", err));;
 
     const images = generated.images;
     const files = [];
@@ -82,7 +82,7 @@ command.execute = async (interaction, models, params, client) => {
     try {
         await interactive.init(interaction);
     } catch(err) {
-        console.log(err)
+        console.error("🔴 %s", err);
     }
 }
 

@@ -39,7 +39,7 @@ class JeffreyBotError extends Error {
 
             await this.embed.send(options);
         } catch (error) {
-            console.log(err)
+            console.error("🔴 %s", err);
         }
     }
 

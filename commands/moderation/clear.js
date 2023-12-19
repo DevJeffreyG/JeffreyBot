@@ -53,7 +53,7 @@ command.execute = async (interaction, models, params, client) => {
             toremove -= removed.size;
             count += removed.size;
         } catch (err) {
-            console.log(err)
+            console.error("🔴 %s", err);
             break;
         }
     }

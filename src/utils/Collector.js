@@ -73,7 +73,7 @@ class Collector {
                     if (reason === EndReasons.Deleted) return;
                     if (this.evalOnEnd) this.evalOnEnd(collected, reason);
                 } catch (err) {
-                    console.log("Error %s", err)
+                    console.error("🔴 %s", err)
                 }
             })
         }
@@ -117,7 +117,7 @@ class Collector {
                 try {
                     if (!i.deferred && this.defer) await i.deferUpdate();
                 } catch (err) {
-                    console.log("⚠️ %s", err)
+                    console.error("⚠️ %s", err)
                 };
 
                 this.collector.stop(EndReasons.Done);
@@ -136,11 +136,11 @@ class Collector {
                 if (reason === EndReasons.OldCollector || reason === EndReasons.StoppedByUser) {
                     try {
                         await this.interaction.deleteReply();
-                    } catch (e) {
-                        console.log("Error %s", e);
+                    } catch (err) {
+                        console.error("🔴 %s", err);
                     }
                     res(null);
-                } else if(reason != EndReasons.Done && reason != "limit"){
+                } else if (reason != EndReasons.Done && reason != "limit") {
                     if (catcher) {
                         catcher();
                         res(null);

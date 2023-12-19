@@ -162,7 +162,7 @@ class Commands {
             try {
                 getRequest = await this.rest.get(data.route);
             } catch (err) {
-                console.log(err)
+                console.error("🔴 %s", err);
             }
 
             if (!dev) {
@@ -172,7 +172,7 @@ class Commands {
                     this.rest.put(data.route, { body: [] })
                         .then(async () => {
                             await GlobalDatas.removeGuildCommand(data.route);
-                        }).catch(err => console.log(err))
+                        }).catch(err => console.error("🔴 %s", err));
                 }
             }
 
@@ -181,7 +181,7 @@ class Commands {
                 this.rest.put(data.route, { body: [] })
                     .then(async () => {
                         await GlobalDatas.removeGuildCommand(data.route);
-                    }).catch(err => console.log(err));
+                    }).catch(err => console.error("🔴 %s", err));;
             }
         })
 

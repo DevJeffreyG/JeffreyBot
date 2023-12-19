@@ -218,8 +218,8 @@ class Pet {
                     }
                     break;
             }
-        } catch (e) {
-            console.log(e);
+        } catch (err) {
+            console.error("🔴 %s", err);
         }
     }
 }

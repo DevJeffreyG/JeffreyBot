@@ -36,7 +36,7 @@ module.exports = async (client, oldMember, newMember) => {
 
 
                     console.log(`🔴 No se pudo agregar el role (${roleId})`);
-                    console.log(err);
+                    console.error("🔴 %s", err);
                 })
         })
     }

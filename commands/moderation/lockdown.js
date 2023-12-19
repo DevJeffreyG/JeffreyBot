@@ -36,7 +36,7 @@ command.execute = async (interaction, models, params, client) => {
         await lock()
         return interaction.editReply({ content: `${client.Emojis.Check} Listo` })
     } catch (err) {
-        console.log(err);
+        console.error("🔴 %s", err);
         throw discordError;
     }
 
@@ -157,7 +157,7 @@ command.execute = async (interaction, models, params, client) => {
         // actualizarlo con la informacion traducida a la original
         await channel.edit({ permissionOverwrites: oldPermissions, reason: `[BULK] Se terminó el lockdown (${interaction.user.username})` })
             .catch(err => {
-                console.log(err)
+                console.error("🔴 %s", err);
                 throw discordError;
             })
 

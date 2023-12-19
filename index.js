@@ -70,12 +70,12 @@ connection.then(async (c) => {
 
   } catch (err) {
     console.log("🔴 Hubo un error iniciando el cliente y sus handlers")
-    console.log(err)
+    console.error("🔴 %s", err);
   }
 })
   .catch(err => {
     console.log("🔴 Hubo un error conectandose a la base de datos")
-    console.log(err);
+    console.error("🔴 %s", err);
   })
 
 module.exports = client;

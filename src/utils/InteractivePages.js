@@ -182,7 +182,7 @@ class InteractivePages {
         try {
             var msg = await interaction.editReply({ content: "", components: [row], embeds: [this.firstEmbed] });
         } catch (err) {
-            console.log(err)
+            console.error("🔴 %s", err);
             return;
         }
 
@@ -221,7 +221,7 @@ class InteractivePages {
                     else if (num > this.pages.size) pagn = this.pages.size;
                     else pagn = num;
                 } catch (err) {
-                    console.log(err);
+                    console.error("🔴 %s", err);
                 }
             } else {
                 if (!i.deferred) await i.deferUpdate();
@@ -247,7 +247,7 @@ class InteractivePages {
 
                 await interaction.editReply({ embeds: [embed], components: [row] });
             } catch (err) {
-                console.log(err)
+                console.error("🔴 %s", err);
             }
 
         });

@@ -22,7 +22,7 @@ Schema.static("create", async function (info, changes) {
         }).save()
         return true;
     } catch (err) {
-        console.log(err)
+        console.error("🔴 %s", err);
         return false;
     }
 })

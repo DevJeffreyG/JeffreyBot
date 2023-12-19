@@ -200,7 +200,7 @@ command.execute = async (interaction, models, params, client) => {
         try {
             await interaction.editReply({ embeds: [embeds[selectedEmbed]], components });
         } catch (err) {
-            console.log(err);
+            console.error("🔴 %s", err);
         }
 
     });

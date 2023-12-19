@@ -122,8 +122,6 @@ class CustomButton extends ButtonBuilder {
         if (!embed)
             throw new DoesntExistsError(this.interaction, `El Embed con ID \`${embedId}\``, "este servidor");
 
-        console.log(embed);
-
         if (embed.linkedids?.find(x => x.id === buttonId && x.isAutoRole === autorole)) {
             let confirmation = await Confirmation("Desvincular Elemento", [
                 "A partir de ahora, cuando se envíe este Embed no se incluirá el Elemento"
