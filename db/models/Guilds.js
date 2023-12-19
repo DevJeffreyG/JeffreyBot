@@ -63,7 +63,8 @@ const GuildSchema = new Schema({
                         ]
                     }
                 ],
-                message_id: { type: String, required: true }
+                message_id: { type: String, required: true },
+                channel_id: { type: String, required: true }
             }
         ],
         autoroles: [
@@ -334,10 +335,7 @@ const GuildSchema = new Schema({
                 shorts: String,
             },
             twitch: String,
-            darkshop: String,
-            // TODO: Hacer que se pueda mencionar cualquier rol
-            polls: String,
-            bets: String
+            darkshop: String
         }
     },
     channels: {
@@ -361,11 +359,13 @@ const GuildSchema = new Schema({
             twitch_notif: { type: String },
         },
         general: {
+            // Esto no sería necesario cuando los mensajes de bienvenida sean custom
             rules: { type: String },
-            information: { type: String },
-            faq: { type: String },
-            announcements: { type: String },
+            information: { type: String }, //
+            faq: { type: String }, //
+            announcements: { type: String }, //
             halloffame: { type: String },
+            jeffreybot_news: { type: String } // TODO: Anuncios globales de DEV
         }
     },
     categories: {

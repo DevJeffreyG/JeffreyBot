@@ -710,12 +710,25 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
 
   // buscar encuestas
   let polls = await GlobalDatas.find({ type: "temporalPoll", "info.guild_id": guild.id });
+  let pollsIndex = 0;
+
+  staffPolls:
   for await (const poll of polls) {
     const pollInfo = poll.info;
 
     if (moment().isAfter(pollInfo.until)) {
       let c = guild.channels.cache.find(x => x.id === pollInfo.channel_id);
+      if (!c) {
+        doc.data.bets.splice(pollsIndex, 1);
+        continue staffPolls;
+      }
+
       let msg = await c.messages.fetch(pollInfo.message_id);
+
+      if (msg.size > 1) {
+        doc.data.bets.splice(pollsIndex, 1);
+        continue staffPolls;
+      }
 
       const { yes, no } = pollInfo;
 
@@ -748,6 +761,8 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
 
       await poll.deleteOne();
     }
+
+    pollsIndex++;
   }
 
   // buscar apuestas
@@ -755,12 +770,17 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
   staffBets:
   for await (const bet of doc.data.bets) {
     if (moment().isAfter(bet.closes_in) && !bet.closed) {
-      const ch = guild.channels.cache.get(doc.getChannel("general.announcements"));
+      const ch = guild.channels.cache.get(bet.channel_id);
+      if (!ch) {
+        doc.data.bets.splice(betsIndex, 1);
+        continue staffBets;
+      }
+
       const message = await ch.messages.fetch(bet.message_id);
 
       if (message.size > 1) {
         doc.data.bets.splice(betsIndex, 1);
-        break staffBets;
+        continue staffBets;
       }
       const embed = new Embed(message.embeds[0]);
       embed.defDesc(`# ${bet.title}\n**Esperando la respuesta del STAFF...**`);

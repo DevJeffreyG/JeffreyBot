@@ -152,7 +152,7 @@ ${codeBlock("json", data.error)}`])
 
             case "JeffreyBotError":
                 this.#errorName("Error de Jeffrey Bot")
-                this.#errorAuthor(21),
+                this.#errorAuthor(21)
                 this.#errorDesc(data.message, data.commandName ?? this.interaction?.commandName ?? "⚠️", data.guide)
                 break;
 
@@ -212,8 +212,12 @@ ${codeBlock("json", data.error)}`])
             try {
                 await this.interaction.reply({ content: null, embeds: [this], components: [], ephemeral: true });
             } catch (replyerr) {
-                console.log(replyerr);
-                console.log("🔴 NO se envió el ErrorEmbed!")
+                try {
+                    await this.interaction.followUp({ content: null, embeds: [this], components: [], ephemeral: true })
+                } catch (followuperr) {
+                    console.log(followuperr);
+                    console.log("🔴 NO se envió el ErrorEmbed!")
+                }
             }
         }
     }

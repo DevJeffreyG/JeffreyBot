@@ -1,5 +1,5 @@
-const { TextInputStyle, ActionRowBuilder, ButtonBuilder, ButtonStyle, time, TimestampStyles } = require("discord.js");
-const { Command, Categories, Modal, Embed, TimeoutIf, ProgressBar } = require("../../src/utils");
+const { TextInputStyle, ActionRowBuilder, ButtonBuilder, ButtonStyle, time, TimestampStyles, BaseGuildTextChannel } = require("discord.js");
+const { Command, Categories, Modal, Embed, ProgressBar } = require("../../src/utils");
 const ms = require("ms");
 const moment = require("moment-timezone");
 const { Colores } = require("../../src/resources");
@@ -21,8 +21,21 @@ command.addOption({
 command.addOption({
     type: "string",
     name: "tiempo",
-    desc: "En cuanto tiempo se deja de poder apostar",
+    desc: "El tiempo que estará abierta la apuesta",
     req: true
+})
+
+command.addOption({
+    type: "channel",
+    name: "canal",
+    desc: "El canal donde se va a enviar la apuesta",
+    req: true
+})
+
+command.addOption({
+    type: "mentionable",
+    name: "mencion",
+    desc: "Mención incluida en el mensaje de la apuesta"
 })
 
 command.execute = async (interaction, models, params, client) => {
@@ -94,21 +107,31 @@ command.execute = async (interaction, models, params, client) => {
         )
     }
 
-    const channel = interaction.guild.channels.cache.get(doc.getChannel("general.announcements"));
-    const role = interaction.guild.roles.cache.get(doc.getRole("announcements.bets")) ?? "";
+    const channel = params.canal.channel;
+    const mention = params.mencion?.role ?? "";
+
+    if (!(channel instanceof BaseGuildTextChannel))
+        throw new BadParamsError(interaction, ["El `canal` debe ser un canal de texto"]);
 
     await r.editReply({ embeds: [new Embed({ type: "success" })] });
     let msg = await channel.send({
-        content: role.toString(),
+        content: mention.toString(),
         embeds: [embed],
-        components: [row]
+        components: [row],
+        allowedMentions: {
+            parse: [
+                'roles',
+                'everyone'
+            ]
+        }
     })
 
     doc.data.bets.push({
         title: params.titulo.value,
         closes_in,
         options: optionsObj,
-        message_id: msg.id
+        message_id: msg.id,
+        channel_id: channel.id
     })
 
     await doc.save();
