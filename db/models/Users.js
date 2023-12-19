@@ -83,7 +83,8 @@ const Schema = new mongoose.Schema({
         }],
         lastGained: {
             exp: { type: Number },
-            currency: { type: Number }
+            currency: { type: Number },
+            messages: [{ type: String }]
         },
         unlockedVaults: { type: Array },
         birthday: {
@@ -257,7 +258,8 @@ Schema.pre("save", function () {
     if (realLvl <= 0 || isNaN(realLvl)) realLvl = 0;
 
     // Cambio de nivel
-    if (this.economy.global.level != realLvl) mongoose.models.Guilds.getWork(this.guild_id).then(doc => doc.manageLevelUp(realLvl, this));
+    if (this.economy.global.level != realLvl)
+        mongoose.models.Guilds.getWork(this.guild_id).then(doc => doc.manageLevelUp(realLvl, this));
 
     this.economy.global.level = realLvl // la ecuacion se toma como si la exp ahora fuese la exp necesaria para el siguiente nivel
 })

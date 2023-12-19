@@ -119,18 +119,18 @@ module.exports = async (client, message) => {
     await GlobalDatasWork(guild, true); // verificar si existen BOOSTS.
     const boost = BoostWork(user);
 
-    let currencyToAdd = MinMaxInt(minMoney, maxMoney, {guild, msg: `No se ha podido agregar ${client.getCustomEmojis(guild.id).Currency.name}`})* toMultiply;
-    let expToAdd = MinMaxInt(minExp, maxExp, {guild, msg: `No se ha podido agregar EXP`})* toMultiply;
+    let currencyToAdd = MinMaxInt(minMoney, maxMoney, { guild, msg: `No se ha podido agregar ${client.getCustomEmojis(guild.id)?.Currency.name} ?? Dinero` }) * toMultiply;
+    let expToAdd = MinMaxInt(minExp, maxExp, { guild, msg: `No se ha podido agregar EXP` }) * toMultiply;
 
-    if(doc.toAdjust("chat_rewards")) {
+    if (doc.toAdjust("chat_rewards")) {
       let average = doc.data.average_currency;
 
-      if(average / currencyToAdd > 10000) {
+      if (average / currencyToAdd > 10000) {
         currencyToAdd += Math.round(average * 0.001);
       }
     }
 
-    if(boost.hasMultiplierChanges()) {
+    if (boost.hasMultiplierChanges()) {
       currencyToAdd *= boost.multiplier.currency_value;
       expToAdd *= boost.multiplier.exp_value;
     }
@@ -138,10 +138,12 @@ module.exports = async (client, message) => {
     await user.addCurrency(currencyToAdd)
     user.economy.global.exp += expToAdd;
 
-    console.log("🟢 %s ganó %s EXP y %s %s en #%s", author.username, expToAdd, currencyToAdd, client.getCustomEmojis(guild.id).Currency.name, message.channel.name);
+    console.log("🟢 %s ganó %s EXP y %s %s en #%s", author.username, expToAdd, currencyToAdd, client.getCustomEmojis(guild.id)?.Currency.name ?? "Dinero", message.channel.name);
 
+    if(user.data.lastGained.messages.length >= 5) user.data.lastGained.messages.splice(0, 1);
     user.data.lastGained.currency = currencyToAdd;
     user.data.lastGained.exp = expToAdd;
+    user.data.lastGained.messages.push(message.id);
     await user.save();
   }
 }

@@ -1,5 +1,5 @@
 const { AuditLogEvent } = require("discord.js");
-const { Bases, Colores } = require("../src/resources/");
+const { Colores } = require("../src/resources/");
 const { FetchAuditLogs, GenerateLog, EndReasons, FetchThisGuild } = require("../src/utils");
 const { Users } = require("mongoose").models;
 
@@ -28,24 +28,15 @@ module.exports = async (client, message) => {
 
     let user = await Users.getWork({ user_id: author.id, guild_id: message.guild.id });
 
-    if (user.data.cooldowns.chat_rewards) {
-      if (message.channel.id != Bases.owner.channels.mainChannel) return; // TODO: arreglar esto ############################################
+    // Si el usuario tiene Cooldown
+    // Y el mensaje eliminado se encuentra entre los últimos enviados...
+    if (user.data.cooldowns.chat_rewards && user.data.lastGained.messages.find(x => x === message.id)) {
+      user.removeCurrency(user.data.lastGained.currency);
+      user.economy.global.exp -= user.data.lastGained.exp;
 
-      let global = user.economy.global
-
-      let nxtLvl = 10 * ((global.level - 1) ** 2) + 50 * (global.level - 1) + 100; // fórmula de MEE6.
-
-      global.currency -= user.data.lastGained.currency;
-
-
-      if (global.exp - user.data.lastGained.exp >= nxtLvl) console.log("Subió de nivel");
-      else {
-        global.exp -= user.data.lastGained.exp;
-      }
+      console.log("🟡 %s perdió %s EXP y %s %s en #%s", author.username, user.data.lastGained.exp, user.data.lastGained.currency, client.getCustomEmojis(message.guild.id).Currency.name, message.channel.name);
 
       await user.save();
-
-      console.log(global.currency, global.exp, author.username);
     }
   }
 
