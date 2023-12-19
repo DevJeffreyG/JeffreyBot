@@ -1,4 +1,4 @@
-const { SlashCommandStringOption, ButtonStyle, SlashCommandIntegerOption, DiscordAPIError, codeBlock, ActionRowBuilder, TextInputStyle, SlashCommandRoleOption, ButtonBuilder } = require("discord.js");
+const { SlashCommandStringOption, ButtonStyle, SlashCommandIntegerOption, DiscordAPIError, codeBlock, ActionRowBuilder, TextInputStyle, SlashCommandRoleOption, ButtonBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require("discord.js");
 const { Command, CustomEmbed, Confirmation, InteractivePages, CustomButton, Modal, CustomTrophy, Embed, FindNewId } = require("../../../src/utils");
 const { Colores } = require("../../../src/resources");
 const { DiscordLimitationError, DoesntExistsError } = require("../../../src/errors");
@@ -196,32 +196,31 @@ command.execute = async (interaction, models, params, client) => {
 
             let embed = new CustomEmbed(interaction).create(dbEmbed)
             let components = [];
-            let row = new ActionRowBuilder();
 
-            for (const linked of dbEmbed.buttonids) {
-                const bId = linked.id;
-                let button = custom.getButton(bId);
+            let row = new ActionRowBuilder();
+            let row_autoroles = new ActionRowBuilder();
+
+            for (const linked of dbEmbed.linkedids) {
+                const linkId = linked.id;
+                let button = custom.getButton(linkId);
 
                 if (linked.isAutoRole) {
-                    let autorole = doc.getAutoRole(bId);
-                    let emote = autorole.emote;
-                    button = {
-                        texto: autorole.name,
-                        emote,
-                        style: ButtonStyle.Primary,
-                        autorole: true
-                    }
-                }
-
-                if (button) {
+                    row_autoroles.setComponents(
+                        new ButtonBuilder()
+                            .setCustomId(`AUTOROLE-${id.value}`)
+                            .setLabel("Mostrar AutoRoles")
+                            .setStyle(ButtonStyle.Secondary)
+                    )
+                } else if (button) {
                     let buttonObj = new CustomButton(interaction).create(button);
-                    if (!buttonObj.data.url) buttonObj.setCustomId(`BUTTON-${bId}-${linked.isAutoRole}`);
+                    if (!buttonObj.data.url) buttonObj.setCustomId(`BUTTON-${linkId}-${linked.isAutoRole}`);
 
                     row.addComponents(buttonObj);
                 }
             }
 
-            if (row.components.length > 0) components.push(row);
+            if (row.components.length > 0 && components.length < 5) components.push(row);
+            if (row_autoroles.components.length > 0 && components.length < 5) components.push(row_autoroles);
 
             await interaction.channel.send({ embeds: [embed], components });
             return interaction.deleteReply();
@@ -240,7 +239,7 @@ command.execute = async (interaction, models, params, client) => {
 
                     for (embed of custom.embeds) {
                         let buttons = "";
-                        embed.buttonids.forEach(x => {
+                        embed.linkedids.forEach(x => {
                             buttons += `\n- \`${x.id}\` ${x.isAutoRole ? "**(AutoRole)**" : ""}`
                         })
 

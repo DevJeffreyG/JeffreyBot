@@ -148,9 +148,11 @@ const GuildSchema = new Schema({
             others: { type: Number, default: 0, validate: [integerValidator, positiveWithZeroValidator] }
         },
         client: {
-            pin: { type: Number, default: () => {
-                return new Chance().integer({min: 1000, max: 9999})
-            }}
+            pin: {
+                type: Number, default: () => {
+                    return new Chance().integer({ min: 1000, max: 9999 })
+                }
+            }
         }
     },
     settings: {
@@ -243,8 +245,8 @@ const GuildSchema = new Schema({
                         max: { type: Number, default: 20, validate: [positiveValidator, integerValidator] }
                     },
                     rob: {
-                        min: { type: Number, default: 40, validate: [positiveValidator, integerValidator]},
-                        max: { type: Number, default: 100, validate: [positiveValidator, integerValidator]},
+                        min: { type: Number, default: 40, validate: [positiveValidator, integerValidator] },
+                        max: { type: Number, default: 100, validate: [positiveValidator, integerValidator] },
                     }
                 },
                 pets: {
@@ -398,7 +400,7 @@ GuildSchema.static("getById", async function (id) {
     return await this.findOne({ guild_id: id })
 });
 
-GuildSchema.method("checkStaff", function(member) {
+GuildSchema.method("checkStaff", function (member) {
     return member.roles.cache.hasAny(...this.getStaffs());
 })
 
@@ -471,7 +473,15 @@ GuildSchema.method("getAutoRole", function (id) {
 })
 
 GuildSchema.method("getOrCreateToggleGroup", function (id) {
-    return this.data.togglegroups.find(x => x.id === id) ?? this.data.togglegroups.push({ group_name: `Grupo ${id}`, id });
+    let find = this.data.togglegroups.find(x => x.id === id);
+
+    if (find) return find;
+    else {
+        find = { group_name: `Grupo ${id}`, id };
+        this.data.togglegroups.push(find)
+
+        return find;
+    }
 })
 
 GuildSchema.method("getBankValue", function (modulo = null) {

@@ -122,27 +122,29 @@ class CustomButton extends ButtonBuilder {
         if (!embed)
             throw new DoesntExistsError(this.interaction, `El Embed con ID \`${embedId}\``, "este servidor");
 
-        if (embed.buttonids?.find(x => x.id === buttonId && x.isAutoRole === autorole)) {
-            let confirmation = await Confirmation("Desvincular Botón", [
-                "A partir de ahora, cuando se envíe este Embed no se incluirá el Botón"
+        console.log(embed);
+
+        if (embed.linkedids?.find(x => x.id === buttonId && x.isAutoRole === autorole)) {
+            let confirmation = await Confirmation("Desvincular Elemento", [
+                "A partir de ahora, cuando se envíe este Embed no se incluirá el Elemento"
             ], this.interaction)
 
             if (!confirmation) return;
-            embed.splice(embed.buttonids.findIndex(x => x.id === buttonId && x.isAutoRole === autorole), 1);
+            embed.linkedids.splice(embed.linkedids.findIndex(x => x.id === buttonId && x.isAutoRole === autorole), 1);
         } else {
-            let confirmation = await Confirmation("Vincular Botón", [
-                "Se pondrá este botón abajo del Embed al enviarse a partir de ahora"
+            let confirmation = await Confirmation("Vincular Elemento", [
+                "Se pondrá este Elemento abajo del Embed al enviarse a partir de ahora"
             ], this.interaction)
 
-            if (!confirmation);
+            if (!confirmation) return;
 
-            if (embed.buttonids.length === 5)
+            if (embed.linkedids.length === 5 && !autorole)
                 throw new DiscordLimitationError(this.interaction, ">5 Botones", [
                     "No pueden haber más de 5 botones por mensaje",
                     "Para continuar, desvincula un botón antes (usando este mismo comando)"
                 ])
 
-            embed.buttonids.push({ id: buttonId, isAutoRole: autorole });
+            embed.linkedids.push({ id: buttonId, isAutoRole: autorole });
         }
 
         await this.doc.save();

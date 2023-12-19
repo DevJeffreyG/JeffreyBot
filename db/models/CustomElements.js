@@ -10,7 +10,7 @@ const Schema = mongoose.Schema({
             desc: { type: String },
             color: { type: Number },
             footer: { type: String },
-            buttonids: [
+            linkedids: [
                 {
                     id: { type: Number },
                     isAutoRole: { type: Boolean, default: false }

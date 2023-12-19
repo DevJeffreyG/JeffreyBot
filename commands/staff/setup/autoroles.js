@@ -118,7 +118,7 @@ command.execute = async (interaction, models, params, client) => {
 
     switch (subcommand) {
         case "add":
-            let guild = interaction.client.guilds.cache.get(server?.value) ?? null;
+            let guild = interaction.client.guilds.cache.get(server?.value) ?? interaction.guild;
             let newId = FindNewId(await Guilds.find(), "data.autoroles", "id");
 
             let id, emote, noemoji;
@@ -127,7 +127,7 @@ command.execute = async (interaction, models, params, client) => {
             if (emoji) {
                 id = emoji.value.match(/\d/g)?.join("");
 
-                if (!id) id = guild.emojis.cache.find(x => x.name === emoji.value)?.id;
+                if (!id && guild) id = guild.emojis.cache.find(x => x.name === emoji.value)?.id;
 
                 emote = id ? guild.emojis.cache.get(id) : { id: emoji.value, guild: null };
                 noemoji = false;
@@ -143,12 +143,6 @@ command.execute = async (interaction, models, params, client) => {
             }
 
             console.log(guild, emote);
-
-            if (emote instanceof Collection || noemoji)
-                throw new BadParamsError(interaction, [
-                    `No encontré el emote ${emote instanceof Emoji ? emote : emote.id} en el servidor '${config.guild ?? interaction.guild}'`,
-                    `Usa ${client.mentionCommand("autoroles config")} para verificar tu configuración`
-                ])
 
             await doc.addAutoRole(nombre.value, role.value, emote, newId);
 

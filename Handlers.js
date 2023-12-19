@@ -1,6 +1,6 @@
 const { BaseInteraction, InteractionType, time, CommandInteraction, MessageComponentInteraction, ModalSubmitInteraction, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction, DiscordAPIError, ActionRowBuilder, codeBlock, TextInputStyle, ButtonBuilder, ButtonStyle, TimestampStyles, hyperlink, MessageFlags } = require("discord.js");
 
-const { Ticket, Suggestion, Button, ManagePreferences } = require("./src/handlers/");
+const { Ticket, Suggestion, Button, ManagePreferences, AutoRole } = require("./src/handlers/");
 const { Bases, Colores } = require("./src/resources");
 const { ErrorEmbed, Embed, Categories, ValidateDarkShop, Confirmation, HumanMs, Modal, CustomEmbed, CustomTrophy, Enum, ShopTypes, Shop, PrettyCurrency, MinMaxInt, PrettifyNumber, Collector, MultiplePercentages, ProgressBar, SendDirect, DirectMessageType } = require("./src/utils");
 
@@ -44,6 +44,7 @@ class Handlers {
         if (this.interaction.customId?.toUpperCase().includes("SUGGESTION")) this.suggestion = new Suggestion(this.interaction);
         if (this.interaction.customId?.toUpperCase().includes("BUTTON")) this.button = new Button(this.interaction);
         if (this.interaction.customId?.toUpperCase().includes("PREFERENCES")) this.preferences = new ManagePreferences(this.interaction);
+        if (this.interaction.customId?.toUpperCase().includes("AUTOROLE")) this.autorole = new AutoRole(this.interaction);
         if (this.interaction.customId?.toUpperCase().includes("KILL") && this.#isDev()) {
             try {
                 const killInfo = this.interaction.customId.split("-");
@@ -190,8 +191,9 @@ class Handlers {
     async componentHandler() {
         await this.ticket?.handle(this.user, this.doc);
         await this.suggestion?.handle(this.user, this.doc);
-        await this.button?.handle(this.doc);
+        await this.button?.handle();
         await this.preferences?.handle(this.user_preferences);
+        await this.autorole?.handle(this.doc);
 
         const splittedId = this.interaction.customId.split("-");
         const { Currency, DarkCurrency } = this.client.getCustomEmojis(this.interaction.guild.id);
