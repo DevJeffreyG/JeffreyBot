@@ -1,10 +1,10 @@
 const { Command, Embed, FindNewId, Confirmation, InteractivePages, FetchThisGuild, CustomButton } = require("../../../src/utils")
 const { Colores } = require("../../../src/resources")
-const { Collection, Emoji } = require("discord.js")
-const { BadParamsError, DoesntExistsError } = require("../../../src/errors")
+const { Emoji } = require("discord.js")
+const { DoesntExistsError } = require("../../../src/errors")
 
 const command = new Command({
-    name: "autoroles",
+    name: "admin-autoroles",
     desc: "Todo lo que tenga que ver con AutoRoles está aquí"
 })
 
@@ -19,11 +19,17 @@ command.data
                     .setDescription("El role que se va a dar/quitar al usar el AutoRole")
                     .setRequired(true)
             )
+
             .addStringOption(nombre =>
                 nombre
                     .setName("nombre")
                     .setDescription("El texto que aparecerá en el botón")
                     .setRequired(true)
+            )
+            .addRoleOption(role =>
+                role
+                    .setName("req")
+                    .setDescription("El role que se requiere para poder agregarse/quitarse el 'role'")
             )
             .addStringOption(emoji =>
                 emoji
@@ -108,7 +114,7 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { Guilds } = models
     const { subcommand } = params;
-    const { embed, server, nombre, emoji, role, autorole, toggle, nuevo } = params[subcommand];
+    const { embed, server, nombre, emoji, role, req, autorole, toggle, nuevo } = params[subcommand];
 
     if (server && !client.isThisFetched(server.value)) await FetchThisGuild(client, server.value);
 
@@ -142,7 +148,7 @@ command.execute = async (interaction, models, params, client) => {
 
             //console.log(guild, emote);
 
-            await doc.addAutoRole(nombre.value, role.value, emote, newId);
+            await doc.addAutoRole(nombre.value, role.value, req?.value, emote, newId);
 
             return await interaction.editReply({
                 content: null, embeds: [

@@ -39,7 +39,7 @@ class InteractivePages {
         title: "Titulo",
         footer: `Comentario | Página {ACTUAL} de {TOTAL}`,
         color: "#fff",
-        thumbnail: interaction.guild.iconURL()
+        thumbnail: interaction.guild.iconURL(),
         description: `Una descripción que no cambiará.`,
         addon: `**— {name}**
 **▸ Foo**: {foo}

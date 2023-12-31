@@ -71,6 +71,7 @@ const GuildSchema = new Schema({
             {
                 name: { type: String, required: true },
                 role_id: { type: String, required: true },
+                req_id: { type: String, default: null },
                 emote: { type: String },
                 guild_emote: { type: String, default: null },
                 toggle_group: { type: Number, default: null },
@@ -502,7 +503,7 @@ GuildSchema.method("addToBank", async function (count, modulo, save = true) {
     return this
 })
 
-GuildSchema.method("addAutoRole", async function (name, role_id, emoteInfo, id) {
+GuildSchema.method("addAutoRole", async function (name, role_id, req_id, emoteInfo, id) {
     let emote = emoteInfo;
     let guild_emote = null;
 
@@ -516,6 +517,7 @@ GuildSchema.method("addAutoRole", async function (name, role_id, emoteInfo, id) 
         emote,
         name,
         role_id,
+        req_id,
         id
     });
     return await this.save();

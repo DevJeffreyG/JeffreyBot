@@ -6,7 +6,7 @@ class DoesntExistsError extends JeffreyBotError {
     /**
      * @param {BaseInteraction} interaction 
      * @param {String} missing Lo que no existe
-     * @param {String} context El contexto donde ya existe
+     * @param {String} context El contexto donde no existe
      * @example 
      * ```js
      * throw new DoesntExistsError(interaction, "El usuario con id 2", "la base de datos");

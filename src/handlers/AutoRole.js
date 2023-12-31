@@ -1,5 +1,5 @@
 const { StringSelectMenuInteraction, codeBlock, ButtonInteraction, ActionRowBuilder, StringSelectMenuOptionBuilder, StringSelectMenuBuilder } = require("discord.js");
-const { DoesntExistsError } = require("../errors");
+const { DoesntExistsError, PermissionError } = require("../errors");
 const { Log, LogReasons, ChannelModules, ErrorEmbed, Embed } = require("../utils");
 const { CustomElements } = require("mongoose").models;
 
@@ -11,12 +11,17 @@ class AutoRole {
         this.interaction = interaction;
     }
 
+    setDoc(doc) {
+        this.doc = doc;
+        return this;
+    }
+
     async handle(doc) {
         this.doc = doc;
         await this.interaction.deferReply({ ephemeral: true });
 
         if (this.interaction instanceof ButtonInteraction) await this.#showAutoRoles();
-        else if (this.interaction instanceof StringSelectMenuInteraction) await this.#work();
+        else if (this.interaction instanceof StringSelectMenuInteraction) await this.work();
     }
 
     async #showAutoRoles() {
@@ -38,6 +43,8 @@ class AutoRole {
             const linkId = linked.id;
 
             let autorole = this.doc.getAutoRole(linkId);
+            if (!autorole) continue;
+
             let emote = autorole.emote;
 
             (typeof autorole.toggle_group === "number" ? toggles : autoroles).addOptions(
@@ -68,8 +75,12 @@ class AutoRole {
         return await this.interaction.editReply({ content: null, embeds: [], components })
     }
 
-    async #work() {
-        const values = this.interaction.values;
+    /**
+     * @param {String[]|null} IDS Las Ids de los AutoRoles a manejar
+     */
+    async work(IDS) {
+        const values = IDS ?? this.interaction.values;
+        let res = false; // Se envió una respuesta al usuario
 
         for (const autoroleId of values) {
             if (autoroleId === "0") continue;
@@ -79,12 +90,17 @@ class AutoRole {
                 throw new DoesntExistsError(this.interaction, "Este AutoRole ya", "el servidor");
 
             const role = this.interaction.guild.roles.cache.get(autorole.role_id);
+            const reqRole = this.interaction.guild.roles.cache.get(autorole.req_id);
 
             if (!role)
                 throw new DoesntExistsError(this.interaction, "El role que te da este AutoRole", "este servidor")
 
+            if (reqRole && !this.interaction.member.roles.cache.has(reqRole.id))
+                throw new PermissionError(this.interaction);
+
             try {
                 if (this.interaction.member.roles.cache.get(role.id)) {
+                    res = true;
                     await this.interaction.member.roles.remove(role);
                     await this.interaction.followUp({
                         ephemeral: true,
@@ -98,6 +114,7 @@ class AutoRole {
 
                     console.log(`💬 Se eliminó por AUTOROLES ${role.name} a ${this.interaction.user.username}`);
                 } else {
+                    res = true;
                     await this.interaction.member.roles.add(role);
                     await this.interaction.followUp({
                         ephemeral: true,
@@ -142,6 +159,8 @@ class AutoRole {
                     });
             }
         }
+
+        if (!res) await this.interaction.deleteReply();
     }
 }
 
