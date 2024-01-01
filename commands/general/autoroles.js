@@ -61,7 +61,7 @@ command.work = async (interaction, models, params, client) => {
     const doc = params.getDoc();
     const autorole = doc.getAutoRole(id);
     if (!autorole)
-        throw new DoesntExistsError(interaction, `AutoRole con ID ${id}`, "la base de datos");
+        throw new DoesntExistsError(interaction, `AutoRole con ID \`${id}\``, "la base de datos");
 
     await new AutoRole(interaction)
         .setDoc(doc)

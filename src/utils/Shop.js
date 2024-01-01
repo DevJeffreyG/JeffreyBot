@@ -1,4 +1,4 @@
-const { Emoji, CommandInteraction, User, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, TextInputStyle } = require("discord.js");
+const { Emoji, CommandInteraction, User, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, TextInputStyle, DiscordjsErrorCodes } = require("discord.js");
 const { Shops, DarkShops, PetShops, EXShops, Users } = require("mongoose").models;
 const { Colores } = require("../resources");
 const { ShopTypes, Enum, ItemTypes, ItemObjetives, ItemActions, YesNo } = require("./Enums");
@@ -556,7 +556,14 @@ ${codeBlock(item.description)}
                             .addInput({ id: "defense", label: "Max Defensa", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
                             .show()
 
-                        let c = await inter.awaitModalSubmit({ filter: (i) => i.customId === "petStats" && i.user.id === this.interaction.user.id, time: ms("1m") });
+                        let c = await inter.awaitModalSubmit({
+                            filter: (i) => i.customId === "petStats" && i.user.id === this.interaction.user.id,
+                            time: ms("1m")
+                        }).catch(async err => {
+                            if (err.code === DiscordjsErrorCodes.InteractionCollectorError) await interaction.deleteReply();
+                            else throw err;
+                        });
+                        if (!c) return;
                         await c.deferUpdate();
                         return new Modal(c).read();
                     }
@@ -571,7 +578,15 @@ ${codeBlock(item.description)}
 
                         // TODO: Carga de ULT
 
-                        let c = await inter.awaitModalSubmit({ filter: (i) => i.customId === "petStatsModifier" && i.user.id === this.interaction.user.id, time: ms("1m") });
+                        let c = await inter.awaitModalSubmit({
+                            filter: (i) => i.customId === "petStatsModifier" && i.user.id === this.interaction.user.id,
+                            time: ms("1m")
+                        }).catch(async err => {
+                            if (err.code === DiscordjsErrorCodes.InteractionCollectorError) await interaction.deleteReply();
+                            else throw err;
+                        });
+                        if (!c) return;
+
                         await c.deferUpdate();
                         return new Modal(c).read();
                     }
@@ -600,7 +615,15 @@ ${codeBlock(item.description)}
                             .addInput({ id: "individualUseDelay", value: "10m", label: "Delay de uso individual", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
                             .show()
 
-                        let c = await inter.awaitModalSubmit({ filter: (i) => i.customId === "exKeysItemConfig" && i.user.id === this.interaction.user.id, time: ms("5m") });
+                        let c = await inter.awaitModalSubmit({
+                            filter: (i) => i.customId === "exKeysItemConfig" && i.user.id === this.interaction.user.id,
+                            time: ms("5m")
+                        }).catch(async err => {
+                            if (err.code === DiscordjsErrorCodes.InteractionCollectorError) await interaction.deleteReply();
+                            else throw err;
+                        });
+                        if (!c) return;
+
                         await c.deferUpdate();
                         return new Modal(c).read();
                     }
@@ -614,7 +637,15 @@ ${codeBlock(item.description)}
                             .addInput({ id: "individualUseDelay", value: "10m", label: "Delay de uso individual", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
                             .show()
 
-                        let c = await inter.awaitModalSubmit({ filter: (i) => i.customId === "exMediaItemConfig" && i.user.id === this.interaction.user.id, time: ms("5m") });
+                        let c = await inter.awaitModalSubmit({
+                            filter: (i) => i.customId === "exMediaItemConfig" && i.user.id === this.interaction.user.id,
+                            time: ms("5m")
+                        }).catch(async err => {
+                            if (err.code === DiscordjsErrorCodes.InteractionCollectorError) await interaction.deleteReply();
+                            else throw err;
+                        });
+                        if (!c) return;
+
                         await c.deferUpdate();
                         return new Modal(c).read();
                     }

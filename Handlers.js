@@ -1,4 +1,4 @@
-const { BaseInteraction, InteractionType, time, CommandInteraction, MessageComponentInteraction, ModalSubmitInteraction, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction, DiscordAPIError, ActionRowBuilder, codeBlock, TextInputStyle, ButtonBuilder, ButtonStyle, TimestampStyles, hyperlink, MessageFlags } = require("discord.js");
+const { BaseInteraction, InteractionType, time, CommandInteraction, MessageComponentInteraction, ModalSubmitInteraction, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction, DiscordAPIError, ActionRowBuilder, codeBlock, TextInputStyle, ButtonBuilder, ButtonStyle, TimestampStyles, hyperlink, MessageFlags, DiscordjsErrorCodes } = require("discord.js");
 
 const { Ticket, Suggestion, Button, ManagePreferences, AutoRole } = require("./src/handlers/");
 const { Bases, Colores } = require("./src/resources");
@@ -496,7 +496,14 @@ class Handlers {
                         .addInput({ id: "bet", label: "Apuesta", style: TextInputStyle.Short, req: true, min: 1, placeholder: "Número entero positivo" })
                         .show();
 
-                    let c = await collector.awaitModalSubmit({ filter: (i) => i.customId === "customPush" && i.user.id === this.interaction.user.id, time: ms("1m") });
+                    let c = await collector.awaitModalSubmit({
+                        filter: (i) => i.customId === "customPush" && i.user.id === this.interaction.user.id,
+                        time: ms("1m")
+                    }).catch(async err => {
+                        if (err.code === DiscordjsErrorCodes.InteractionCollectorError) await interaction.deleteReply();
+                        else throw err;
+                    });
+                    if (!c) return;
                     await c.deferUpdate();
 
                     customVal = Math.round(new Modal(c).read().bet);

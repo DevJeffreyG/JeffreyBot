@@ -1,4 +1,4 @@
-const { TextInputStyle, ActionRowBuilder, ButtonBuilder, ButtonStyle, time, TimestampStyles, BaseGuildTextChannel } = require("discord.js");
+const { TextInputStyle, ActionRowBuilder, ButtonBuilder, ButtonStyle, time, TimestampStyles, BaseGuildTextChannel, DiscordjsErrorCodes } = require("discord.js");
 const { Command, Categories, Modal, Embed, ProgressBar } = require("../../src/utils");
 const ms = require("ms");
 const moment = require("moment-timezone");
@@ -63,7 +63,14 @@ command.execute = async (interaction, models, params, client) => {
     }
 
     await modal.show()
-    let r = await interaction.awaitModalSubmit({ filter: (i) => i.customId === "betCreation" && i.userId === interaction.userId, time: ms("5m") });
+    let r = await interaction.awaitModalSubmit({
+        filter: (i) => i.customId === "betCreation" && i.userId === interaction.userId,
+        time: ms("5m")
+    }).catch(async err => {
+        if (err.code === DiscordjsErrorCodes.InteractionCollectorError) await interaction.deleteReply();
+        else throw err;
+    });
+    if (!r) return;
     await r.deferReply();
 
     const row = new ActionRowBuilder();
