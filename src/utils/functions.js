@@ -1695,7 +1695,7 @@ const FindNewId = function (generalQuery, specificQuery, toCheck) {
 /**
  * 
  * @param {GuildMember} member The Discord.JS Member to check for benefit
- * @param {Array} [objetivesToCheck=["any"]] The objetive of boost to check.
+ * @param {Array} [objetivesToCheck] The objetive of boost to check.
  * - BoostObjetives
  * - any
  * @returns {Promise<Boolean>} This Member already has a temp role with the objetive searched for.

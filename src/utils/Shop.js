@@ -1,10 +1,10 @@
 const { Emoji, CommandInteraction, User, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, TextInputStyle, DiscordjsErrorCodes } = require("discord.js");
 const { Shops, DarkShops, PetShops, EXShops, Users } = require("mongoose").models;
 const { Colores } = require("../resources");
-const { ShopTypes, Enum, ItemTypes, ItemObjetives, ItemActions, YesNo } = require("./Enums");
+const { ShopTypes, Enum, ItemTypes, ItemObjetives, ItemActions, YesNo, DirectMessageType } = require("./Enums");
 const InteractivePages = require("./InteractivePages");
 const { BadCommandError, DoesntExistsError, EconomyError, AlreadyExistsError, BadParamsError } = require("../errors");
-const { Confirmation, FindNewId, PrettyCurrency } = require("./functions");
+const { Confirmation, FindNewId, PrettyCurrency, SendDirect } = require("./functions");
 const Embed = require("./Embed");
 const HumanMs = require("./HumanMs");
 const Collector = require("./Collector");
@@ -908,10 +908,28 @@ ${codeBlock(item.description)}
                             price: item.price,
                             interval: item.use_info.item_info.duration
                         })
-
-                        // TODO: SendDirect();
-
                         await user.save();
+
+                        const subInfo = user.data.temp_roles[index].sub_info;
+
+                        const member = this.interaction.guild.members.cache.get(user.user_id);
+
+                        await SendDirect(this.interaction, member, DirectMessageType.Staff, {
+                            embeds: [
+                                new Embed()
+                                    .defTitle("Cambio en una suscripción")
+                                    .defDesc("Una suscripción a la que estás suscrit@ cambió.")
+                                    .fillDesc([
+                                        `**${subInfo.name}**`,
+                                        `${PrettyCurrency(this.interaction.guild, subInfo.price, {
+                                            name: user.data.temp_roles[index].activation_info.shop_type === ShopTypes.DarkShop ?
+                                                "DarkCurrency" : "Currency"
+                                        })} cada ${new HumanMs(subInfo.interval).human}`
+                                    ])
+                                    .defFooter({ text: this.interaction.guild.name, icon: this.interaction.guild.iconURL() })
+                                    .defColor(Colores.verdejeffrey)
+                            ]
+                        }).catch(err => console.error("🔴 %s", err));
                     }
                 }
             }

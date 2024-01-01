@@ -4,7 +4,7 @@ const ms = require("ms")
 const superagent = require("superagent");
 const Chance = require("chance");
 
-const { ItemTypes, ItemObjetives, ItemActions, ItemEffects, LogReasons, ChannelModules, ShopTypes, PetAttacksType, Enum } = require("./Enums");
+const { ItemTypes, ItemObjetives, ItemActions, ItemEffects, LogReasons, ChannelModules, ShopTypes, PetAttacksType, Enum, BoostObjetives } = require("./Enums");
 const { BadCommandError, AlreadyExistsError, DoesntExistsError, FetchError, ExecutionError } = require("../errors");
 
 const { FindNewId, LimitedTime, Subscription, WillBenefit, GetRandomItem } = require("./functions");
@@ -592,7 +592,7 @@ class Item {
             return false;
         }
 
-        const willBenefit = await WillBenefit(this.member, [this.boost_objetive, "any"])
+        const willBenefit = await WillBenefit(this.member, [this.boost_objetive, BoostObjetives.All])
         if (willBenefit && (this.item.use_info.effect === ItemEffects.Positive || !this.isDarkShop)) {
             console.log("🔴 Se beneficiaría aún más")
             this.hasboost.send().catch(e => console.error(e));;

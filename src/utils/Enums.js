@@ -468,7 +468,7 @@ const YesNo = new Enum({
  * - Welcome
  * - Payments
  * - Trophies
- * - STAFF
+ * - Staff
  * - Birthdays
  * - Incomes
  */

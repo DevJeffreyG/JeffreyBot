@@ -48,7 +48,7 @@ command.execute = async (interaction, models, params, client) => {
         if (f) {
             let id = inlineCode(temp_role.id);
 
-            items.set(shop_item.id, {
+            items.set(temp_role.id, {
                 name: shop_item.name,
                 desc: shop_item.description,
                 price: PrettyCurrency(interaction.guild, temp_role.sub_info.price, { name: shop.config.currency.raw_emoji }),
