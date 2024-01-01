@@ -300,13 +300,14 @@ ${this.#bet ? `### Nadie perdió ${PrettyCurrency(this.#interaction.guild, this.
                         .setLabel("Item")
                         .setDisabled(this.#playing.doc.data.inventory.filter(x => x.shopType === ShopTypes.PetShop).length === 0)
                         .setEmoji("🥫")
-                        .setStyle(ButtonStyle.Secondary),
+                        .setStyle(ButtonStyle.Secondary)/* ,
+                    // TODO: RELEVOS
                     new ButtonBuilder()
                         .setCustomId("petFlee")
                         .setLabel("Relevo")
                         .setEmoji("🏃")
-                        .setDisabled(true/*this.#playing.doc.data.pets.length === 1*/) // TODO: RELEVOS
-                        .setStyle(ButtonStyle.Secondary)
+                        .setDisabled(this.#playing.doc.data.pets.length === 1) 
+                        .setStyle(ButtonStyle.Secondary) */
                 ),
             new ActionRowBuilder()
                 .setComponents(

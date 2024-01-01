@@ -9,7 +9,9 @@ command.execute = async (interaction, models, params, client) => {
     if (!interaction.deferred) await interaction.deferReply();
     const { subcommand } = params;
 
-    // TODO: 
+    await interaction.deleteReply();
+
+    // TODO: Jeffrey Bot será el banco de un servidor
 }
 
 module.exports = command;
