@@ -18,6 +18,12 @@ EXSchema.items[0].use_info.external_info = {
     }
 }
 
+EXSchema.cooldowns = [{
+    user_id: { type: String, default: null },
+    until: { type: Date, required: true },
+    item_id: { type: Number, required: true }
+}]
+
 const Schema = new mongoose.Schema(EXSchema);
 Schema.loadClass(ShopClass);
 

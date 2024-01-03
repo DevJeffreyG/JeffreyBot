@@ -1,4 +1,4 @@
-const { GuildMember, StringSelectMenuBuilder, ActionRowBuilder, BaseInteraction, CommandInteraction, Collection } = require("discord.js")
+const { GuildMember, StringSelectMenuBuilder, ActionRowBuilder, BaseInteraction, CommandInteraction, Collection, time } = require("discord.js")
 const moment = require("moment-timezone");
 const ms = require("ms")
 const superagent = require("superagent");
@@ -17,6 +17,7 @@ const Colores = require("../resources/colores.json");
 const Collector = require("./Collector");
 const Pet = require("./Pet");
 const JeffreyBotError = require("../errors/JeffreyBotError");
+const HumanMs = require("./HumanMs");
 
 const models = require("mongoose").models;
 const { Shops, DarkShops, Users, PetShops, EXShops, GlobalDatas } = models;
@@ -80,6 +81,7 @@ class Item {
         }
 
         this.item = this.shop.findItem(this.itemId, false);
+        this.itemIndex = this.shop.items.findIndex(x => x === this.item);
 
         const inventory = this.user.data.inventory;
         const inventoryFilter = x => x.item_id === this.itemId && x.shopType === this.shopType;
@@ -500,6 +502,30 @@ class Item {
             case ItemTypes.EXKeyboard:
                 console.log("🟩 EX Item!");
 
+                const cooldowns = this.shop.cooldowns.filter(x => x.item_id === this.item.id);
+
+                // Existe información de un cooldown para este item
+                const userCooldown = cooldowns.find(x => x.user_id === this.interaction.user.id);
+                const globalCooldown = cooldowns.find(x => x.user_id === null);
+
+                const hasIndividual = userCooldown && moment().isBefore(userCooldown.until);
+                const hasGlobal = globalCooldown && moment().isBefore(globalCooldown.until);
+
+                if (userCooldown && !hasIndividual)
+                    this.shop.cooldowns.splice(this.shop.cooldowns.findIndex(x => x === userCooldown), 1);
+                if (globalCooldown && !hasGlobal)
+                    this.shop.cooldowns.splice(this.shop.cooldowns.findIndex(x => x === globalCooldown), 1);
+                if (hasIndividual || hasGlobal) {
+                    await this.interaction.editReply({
+                        embeds: [
+                            new ErrorEmbed()
+                                .defDesc(`Podrás usar este item ${time(globalCooldown?.until ?? userCooldown?.until, "R")}.`)
+                                .defFooter({ text: `Cooldown ${hasGlobal ? "GLOBAL" : "INDIVIDUAL"} de ${new HumanMs(this.item.use_info.external_info.delays[hasGlobal ? "global" : "individual"]).human}.`, icon: this.interaction.guild.iconURL() })
+                        ]
+                    })
+                    return false;
+                }
+
                 try {
                     let q = await superagent
                         .post(`${process.env.HOME_PAGE}/api/ws/item-use`)
@@ -511,6 +537,28 @@ class Item {
                         .set("auth", process.env.TOKEN)
 
                     if (!q.body) throw new JeffreyBotError(this.interaction, "No hubo cliente a quien enviar la respuesta");
+
+                    // Cooldowns
+                    const { global, individual } = this.item.use_info.external_info.delays;
+
+                    if (individual > 0) {
+                        this.shop.cooldowns.push({
+                            user_id: this.interaction.user.id,
+                            until: moment().add(individual, "ms"),
+                            item_id: this.item.id
+                        })
+                    }
+
+                    if (global > 0) {
+                        this.shop.cooldowns.push({
+                            until: moment().add(global, "ms"),
+                            item_id: this.item.id
+                        })
+                    }
+
+                    // Por alguna razón se necesita esto, no sé por qué, sólo debe ser así
+                    this.shop.items[this.itemIndex]._id = this.item._id;
+                    await this.shop.save();
 
                     await this.removeItemFromInv();
                     return true;
