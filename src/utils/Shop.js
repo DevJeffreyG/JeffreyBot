@@ -16,6 +16,7 @@ const { codeBlock } = require("discord.js");
 const Item = require("./Item");
 const Modal = require("./Modal");
 const { Error } = require("mongoose");
+const DarkShop = require("./DarkShop");
 
 class Shop {
     #build = false;
@@ -161,6 +162,9 @@ class Shop {
 
         this.shopdoc = await this.config.info.model.obj.getWork(this.config.info.model.query);
         this.average = this.#doc.data.average_currency;
+
+        this.DarkShop = new DarkShop(this.interaction.guild, this.interaction);
+        this.dsOneEquals = await this.DarkShop.oneEquals();
 
         this.#interactive.base = {
             title: `${this.config.info.name}`,
@@ -867,23 +871,21 @@ ${codeBlock(item.description)}
         const interestPrice = originalPrice + (totalpurchases * interest);
         let precio = interestPrice;
 
-        // para calmar a los mr inversiones
-        if (this.#doc.toAdjust(new Enum(ShopTypes).translate(this.config.info.type).toLowerCase())) {
-            let media = 0;
-            this.shopdoc.items.forEach(i => media += i.price);
-            media /= this.shopdoc.items.length;
+        if (this.#doc.toAdjust(new Enum(ShopTypes).translate(this.config.info.type, false).toLowerCase())) {
+            let shop_average = 0;
+            this.shopdoc.items.forEach(i => shop_average += i.price);
+            shop_average /= this.shopdoc.items.length;
 
-            let multidiff = Math.floor(this.average / media);
+            const fix = this.#isDarkShop ? Math.floor((this.average / this.dsOneEquals) / shop_average) : Math.floor(this.average / shop_average);
 
-            console.log("🏳️ El promedio de precios es %s", media)
-            console.log("🏳️ dinero/media = %s", multidiff)
+            console.log("⚪ El promedio del server es %s", this.average)
+            console.log("⚪ (DARKCURRENCY) El promedio del server es %s", this.average / this.dsOneEquals)
+            console.log("⚪ El promedio de la tienda es %s", shop_average)
+            console.log("🟢 Precio base: %s", precio)
+            console.log("🟢 Fix: %s", fix)
 
-            if (multidiff > 100) {
-                let fix = this.#isDarkShop ? multidiff / 50 : multidiff * 0.5;
-                console.log("🟩 Fixing %s with %s", precio, fix)
-                //console.log(this.average*0.1, "es el maximo")
+            if (fix > this.#doc.settings.quantities.adjust_ratio)
                 precio *= fix;
-            }
         }
 
         let work = this.#discountsWork(user, precio);

@@ -428,7 +428,8 @@ ${this.#bet ? `### Nadie perdió ${PrettyCurrency(this.#interaction.guild, this.
                     `# **${this.pet.name}** QUIERE TERMINAR CON ESTO`,
                     `# **${this.pet.name}** LO DA TODO`
                 ]))
-                attackValue = max;
+                attackValue = new Chance().integer({ min: max, max: max * 1.1 });
+                this.pet.ultCharge = 0;
                 break;
         }
 

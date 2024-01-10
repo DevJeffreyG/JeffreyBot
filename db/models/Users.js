@@ -132,7 +132,6 @@ const Schema = new mongoose.Schema({
             claim_rep: { type: Date, default: null },
             roulette: { type: Date, default: null },
             blackjack: { type: Date, default: null },
-            currency_to_exp: { type: Date, default: null },
             inflation_prediction: { type: Date, default: null },
             rob: { type: Date, default: null },
         },

@@ -25,8 +25,9 @@ command.execute = async (interaction, models, params, client) => {
 
     let perRep = doc.settings.quantities.currency_per_rep;
     if (doc.toAdjust("claim_rep")) {
-        if (doc.data.average_currency / perRep > 1000)
-            perRep += Math.round(doc.data.average_currency * 0.01);
+        if (doc.data.average_currency / perRep > doc.settings.quantities.adjust_ratio)
+            perRep = Math.round(doc.data.average_currency / perRep / 4);
+        console.log("⚪ PerRep: %s", perRep);
     }
 
     const boost = BoostWork(user);

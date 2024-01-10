@@ -43,7 +43,7 @@ command.execute = async (interaction, models, params, client) => {
     let stonksEmbed = new Embed()
         .defAuthor({ text: `Cálculo`, icon: EmojisObject.DarkShop.url })
         .defDesc(`📊 **— ${inflation}%**.
-**— ${PrettyCurrency(interaction.guild, toCalc, { name: "DarkCurrency" })} = ${PrettyCurrency(interaction.guild, calculation)}.`)
+**—** ${PrettyCurrency(interaction.guild, toCalc, { name: "DarkCurrency" })} = ${PrettyCurrency(interaction.guild, calculation)}.`)
         .setColor(Colores.negro);
 
     embeds.push(stonksEmbed)

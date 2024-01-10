@@ -1,4 +1,4 @@
-const { Command, Categories, Embed } = require("../../src/utils");
+const { Command, Categories, Embed, PrettyCurrency } = require("../../src/utils");
 const { Colores } = require("../../src/resources");
 const { time } = require("discord.js");
 
@@ -8,9 +8,9 @@ const command = new Command({
 })
 
 command.execute = async (interaction, models, params, client) => {
-    const guild = params.getDoc();
-    const adminroles = guild.getAdmins();
-    const staffroles = guild.getStaffs();
+    const doc = params.getDoc();
+    const adminroles = doc.getAdmins();
+    const staffroles = doc.getStaffs();
 
     let serverembed = new Embed()
         .defAuthor({ text: `Información del server — ${interaction.guild.name}`, title: true })
@@ -21,7 +21,8 @@ command.execute = async (interaction, models, params, client) => {
 **— Miembros totales:** ${interaction.guild.memberCount}
 **— El dueño es: ${await interaction.guild.members.fetch(interaction.guild.ownerId)}**
 **— Tiene ${interaction.guild.emojis.cache.size} emojis**
-**— Tiene ${interaction.guild.stickers.cache.size} stickers**`)
+**— Tiene ${interaction.guild.stickers.cache.size} stickers**
+**— El promedio de ${client.getCustomEmojis(interaction.guild.id).Currency.name} es** ${PrettyCurrency(interaction.guild, Math.round(doc.data.average_currency))}`)
 
     let admins = "";
     adminroles.forEach(roleId => {

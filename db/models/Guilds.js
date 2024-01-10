@@ -166,7 +166,6 @@ const GuildSchema = new Schema({
                 birthdays: { type: Boolean, default: false },
                 darkshop: { type: Boolean, default: false },
                 rep_to_currency: { type: Boolean, default: false },
-                currency_to_exp: { type: Boolean, default: false },
                 staff_reminders: { type: Boolean, default: true }
             },
             logs: {
@@ -216,6 +215,7 @@ const GuildSchema = new Schema({
                 baseprice: { type: Number, default: 200, validate: [positiveValidator, integerValidator] }
             },
             currency_per_rep: { type: Number, default: 500, validate: [positiveValidator, integerValidator] },
+            adjust_ratio: { type: Number, default: 100, validate: [positiveValidator] },
             awards: {
                 tier1: {
                     price: { type: Number, default: 100, validate: [positiveValidator, integerValidator] },
@@ -294,6 +294,8 @@ const GuildSchema = new Schema({
             adjust: {
                 shop: { type: Boolean, default: false },
                 darkshop: { type: Boolean, default: false },
+                petshop: { type: Boolean, default: false },
+                exshop: { type: Boolean, default: false },
                 coins: { type: Boolean, default: false },
                 chat_rewards: { type: Boolean, default: false },
                 claim_rep: { type: Boolean, default: false },
@@ -312,7 +314,6 @@ const GuildSchema = new Schema({
             claim_rep: { type: String, default: "3h" },
             roulette: { type: String, default: "1d" },
             blackjack: { type: String, default: "5m" },
-            currency_to_exp: { type: String, default: "1w" },
             rob: { type: String, default: "15m" },
         },
         modifiers: [modifiers]
@@ -360,11 +361,11 @@ const GuildSchema = new Schema({
             twitch_notif: { type: String },
         },
         general: {
-            // Esto no sería necesario cuando los mensajes de bienvenida sean custom
+            // TODO: Esto no sería necesario cuando los mensajes de bienvenida sean custom
             rules: { type: String },
-            information: { type: String }, //
-            faq: { type: String }, //
-            announcements: { type: String }, //
+            information: { type: String }, // del
+            faq: { type: String }, // del
+            announcements: { type: String }, // del
             halloffame: { type: String },
             jeffreybot_news: { type: String } // TODO: Anuncios globales de DEV
         }

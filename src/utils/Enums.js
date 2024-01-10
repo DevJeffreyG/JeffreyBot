@@ -362,7 +362,6 @@ const ApiUpdate = new Enum({
  * - ClaimRep
  * - Roulette
  * - Blackjack
- * - CurrencyToExp
  * - InflationPrediction
  * - Rob
  */
@@ -373,7 +372,6 @@ const Cooldowns = new Enum({
     ClaimRep: "claim_rep",
     Roulette: "roulette",
     Blackjack: "blackjack",
-    CurrencyToExp: "currency_to_exp",
     InflationPrediction: "inflation_prediction",
     Rob: "rob"
 }).values;

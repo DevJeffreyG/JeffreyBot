@@ -89,7 +89,17 @@ module.exports = async (client, message) => {
     const { multiplier } = configured;
 
     const minMoney = doc.settings.quantities.limits.chat_rewards.currency.min;
-    const maxMoney = doc.settings.quantities.limits.chat_rewards.currency.max;
+    let maxMoney = doc.settings.quantities.limits.chat_rewards.currency.max;
+
+    if (doc.toAdjust("chat_rewards")) {
+      const average = doc.data.average_currency;
+
+      if (average / maxMoney > doc.settings.quantities.adjust_ratio)
+        maxMoney = Math.round(average / maxMoney / 2);
+
+      console.log("⚪ Máximo: %s", maxMoney);
+
+    }
 
     const minExp = doc.settings.quantities.limits.chat_rewards.exp.min;
     const maxExp = doc.settings.quantities.limits.chat_rewards.exp.max;
@@ -119,28 +129,18 @@ module.exports = async (client, message) => {
     await GlobalDatasWork(guild, true); // verificar si existen BOOSTS.
     const boost = BoostWork(user);
 
-    let currencyToAdd = MinMaxInt(minMoney, maxMoney, { guild, msg: `No se ha podido agregar ${client.getCustomEmojis(guild.id)?.Currency.name} ?? Dinero` }) * toMultiply;
-    let expToAdd = MinMaxInt(minExp, maxExp, { guild, msg: `No se ha podido agregar EXP` }) * toMultiply;
+    let currencyToAdd = MinMaxInt(minMoney, maxMoney * boost.probability.currency_value, { guild, msg: `No se ha podido agregar ${client.getCustomEmojis(guild.id)?.Currency.name} ?? Dinero` }) * toMultiply;
+    let expToAdd = MinMaxInt(minExp, maxExp * boost.probability.exp_value, { guild, msg: `No se ha podido agregar EXP` }) * toMultiply;
 
-    if (doc.toAdjust("chat_rewards")) {
-      let average = doc.data.average_currency;
-
-      if (average / currencyToAdd > 10000) {
-        currencyToAdd += Math.round(average * 0.001);
-      }
-    }
-
-    if (boost.hasMultiplierChanges()) {
-      currencyToAdd *= boost.multiplier.currency_value;
-      expToAdd *= boost.multiplier.exp_value;
-    }
+    currencyToAdd *= boost.multiplier.currency_value;
+    expToAdd *= boost.multiplier.exp_value;
 
     await user.addCurrency(currencyToAdd)
     user.economy.global.exp += expToAdd;
 
     console.log("🟢 %s ganó %s EXP y %s %s en #%s", author.username, expToAdd, currencyToAdd, client.getCustomEmojis(guild.id)?.Currency.name ?? "Dinero", message.channel.name);
 
-    if(user.data.lastGained.messages.length >= 5) user.data.lastGained.messages.splice(0, 1);
+    if (user.data.lastGained.messages.length >= 5) user.data.lastGained.messages.splice(0, 1);
     user.data.lastGained.currency = currencyToAdd;
     user.data.lastGained.exp = expToAdd;
     user.data.lastGained.messages.push(message.id);

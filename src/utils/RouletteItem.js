@@ -60,9 +60,11 @@ class RouletteItem {
         if (this.doc.toAdjust("roulette")) {
             this.numbers = Number(this.numbers);
 
-            let average = this.doc.data.average_currency;
-            if (average / this.numbers > 1000)
+            const average = this.doc.data.average_currency;
+            if (average / this.numbers > this.doc.settings.quantities.adjust_ratio)
                 this.numbers *= Math.round(average / (average / this.numbers));
+
+            this.frontend_numbers = PrettyCurrency(this.interaction.guild, this.numbers);
         }
     }
 
@@ -135,7 +137,7 @@ class RouletteItem {
                         response = this.addedTemp;
                         save = false
 
-                        await LimitedTime(this.interaction.member, null, ms(this.item.extra.duration), this.item.extra.boosttype, this.item.extra.boostobj, this.item.extra.boostvalue);
+                        await LimitedTime(this.interaction.member, null, ms(this.item.extra.duration), {}, this.item.extra.boosttype, this.item.extra.boostobj, this.item.extra.boostvalue);
                     } else
                         this.target.push(this.numbers)
                 }

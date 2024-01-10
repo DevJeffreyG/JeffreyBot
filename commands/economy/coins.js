@@ -30,33 +30,33 @@ command.execute = async (interaction, models, params, client) => {
 
     let maximum = doc.settings.quantities.limits.currency.coins.max;
     let min = doc.settings.quantities.limits.currency.coins.min;
-    let fakeAdd = maximum * 50;
 
     if (doc.toAdjust("coins")) {
         const average = doc.data.average_currency;
-        fakeAdd = average * 0.5;
-        if ((average - maximum) > 10000) maximum = average * 0.1;
+
+        if (average / maximum > doc.settings.quantities.adjust_ratio)
+            maximum = Math.round(average / maximum / 2);
+
+        console.log("⚪ Máximo: %s", maximum);
     }
+
+    let fakeAdd = maximum * 50;
 
     // buscar si tiene boost
     const boost = BoostWork(user);
 
     let money = MinMaxInt(min, maximum * boost.probability.currency_value, { guild, msg: `No se ha podido determinar la recompensa de ${client.mentionCommand("coins")}` });
-    let randommember = guild.members.cache.random();
-
-    while (randommember.user.id === member.id) { // el randommember NO puede ser el mismo usuario
-        console.log("'/coins', Es el mismo usuario, buscar otro random")
+    let randommember;
+    do {
         randommember = guild.members.cache.random()
-    }
+    } while (randommember.user.id === member.id);
 
     randommember = `**${randommember.displayName}**`;
 
     let fakemoney = `${new Chance().integer({ min: fakeAdd, max: fakeAdd * 2 }).toLocaleString("es-CO")} ${Currency.name}`;
 
-    if (boost.hasAnyChanges())
-        money = Number((money * Number(boost.multiplier.currency_value)).toFixed(2));
-
-    let tmoney = PrettyCurrency(guild, money, { boostemoji: boost.emojis.currency })
+    money = Number((money * Number(boost.multiplier.currency_value)).toFixed(2));
+    let tmoney = PrettyCurrency(guild, money, { boostemoji: boost.hasCurrencyChanges() ? boost.emojis.currency : null })
 
     let index = GetRandomItem(Responses.coins);
     let textString = index.text;

@@ -1155,6 +1155,7 @@ const handleNotification = async function (guild) {
         )
     ]
 
+    // Si no se encontró ese vídeo ya notificado, y hay canal de anuncios de YouTube configurado
     if (!data.youtube[prop].find(x => x === itemId) && youtubeChannel) {
       data.youtube[prop].push(itemId);
       await doc.save();
@@ -1173,7 +1174,8 @@ const handleNotification = async function (guild) {
 
   let streaming = await isStreaming(config.twitch_username);
 
-  if (streaming && twitchChannel) { // si está directo
+  // Si está en directo, y hay canal de anuncios de Twitch configurado
+  if (streaming && twitchChannel) {
     const stream = await getStream(config.twitch_username);
     const streamId = stream.id;
     const streamTitle = stream.title;
@@ -2003,7 +2005,8 @@ const BoostWork = function (user) {
     },
     hasMultiplierChanges: () => { return boost.multiplier.changed.currency || boost.multiplier.changed.exp },
     hasProbabilityChanges: () => { return boost.probability.changed.currency || boost.probability.changed.exp },
-    hasAnyChanges: () => { return boost.multiplier.changed.currency || boost.multiplier.changed.exp || boost.probability.changed.currency || boost.probability.changed.exp }
+    hasAnyChanges: () => { return boost.multiplier.changed.currency || boost.multiplier.changed.exp || boost.probability.changed.currency || boost.probability.changed.exp },
+    hasCurrencyChanges: () => { return boost.probability.changed.currency || boost.multiplier.changed.currency },
   }
 
   for (const userboost of user.data.temp_roles) {

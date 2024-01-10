@@ -28,7 +28,7 @@ class EmojisManager {
                     identifier: emoji.identifier,
                     mention: `<${emoji.animated ? "a" : ""}:${emoji.name}:${emoji.id}>`,
                     animated: emoji.animated,
-                    url: emoji.url,
+                    url: emoji.imageURL({ extension: emoji.animated ? "gif" : "png" }),
                 }
             }
         }

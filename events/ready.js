@@ -134,7 +134,7 @@ module.exports = async (client) => {
                 console.log("🔴 Hubo un error con las semanales")
                 console.error(err);
             }
-        }, null, true, "America/Bogota", null, true)
+        }, null, true, "America/Bogota", null, process.env.DEV === "TRUE")
     }
 
     // Cada minuto
