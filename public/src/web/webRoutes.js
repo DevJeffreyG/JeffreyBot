@@ -1,4 +1,4 @@
-const { Guilds, ChangeLogs } = require("mongoose").models;
+const { Guilds, ChangeLogs, GlobalDatas } = require("mongoose").models;
 const { Verify } = require("../js/Functions");
 
 module.exports = (app) => {
@@ -18,6 +18,16 @@ module.exports = (app) => {
         if (!Verify(req)) res.status(403).send({ message: "Not authorized" });
         try {
             let query = await ChangeLogs.find();
+            res.send(query);
+        } catch (err) {
+            console.error("🌎", err);
+        }
+    });
+
+    app.get("/api/db/get-tos", async (req, res) => {
+        if (!Verify(req)) res.status(403).send({ message: "Not authorized" });
+        try {
+            let query = await GlobalDatas.findOne({ type: "tos" });
             res.send(query);
         } catch (err) {
             console.error("🌎", err);
