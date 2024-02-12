@@ -2,6 +2,7 @@ const { GuildMember, StringSelectMenuBuilder, ActionRowBuilder, BaseInteraction,
 const moment = require("moment-timezone");
 const ms = require("ms")
 const superagent = require("superagent");
+const jwt = require("jsonwebtoken");
 const Chance = require("chance");
 
 const { ItemTypes, ItemObjetives, ItemActions, ItemEffects, LogReasons, ChannelModules, ShopTypes, PetAttacksType, Enum, BoostObjetives } = require("./Enums");
@@ -534,7 +535,7 @@ class Item {
                             item: this.item,
                             guild: this.interaction.guild
                         })
-                        .set("auth", process.env.TOKEN)
+                        .set("auth", jwt.sign({ jb: true }, process.env.TOKEN))
 
                     if (!q.body) throw new JeffreyBotError(this.interaction, "No hubo cliente a quien enviar la respuesta");
 
