@@ -36,7 +36,10 @@ class Embed extends Discord.EmbedBuilder {
      * @returns {this}
      */
     defDesc(desc = " ") {
-        if (desc < 1 && desc) return console.error("🔴 NO SE CAMBIÓ LA DESCRIPCIÓN, ESTÁ VACÍA")
+        if (desc < 1 && desc) {
+            console.error("🔴 NO SE CAMBIÓ LA DESCRIPCIÓN, ESTÁ VACÍA")
+            return this;
+        }
         this.setDescription(desc)
         this.description = desc;
         return this

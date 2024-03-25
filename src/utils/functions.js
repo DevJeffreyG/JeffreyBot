@@ -291,7 +291,7 @@ const FetchAuditLogs = async function (client, guild, types) {
 }
 
 /**
- * 
+ * @deprecated
  * @param {Guild} guild 
  * @param options 
  * @returns {Promise<Message|null>}
