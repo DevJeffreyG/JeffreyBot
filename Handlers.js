@@ -395,7 +395,7 @@ class Handlers {
 
             case "betOption": {
                 await this.interaction.deferReply({ ephemeral: true });
-                if (this.doc.checkStaff(this.interaction.member))
+                if (this.doc.checkStaff(this.interaction.member) && process.env.DEV != "TRUE")
                     throw new PermissionError(this.interaction);
 
                 const index = Number(splittedId[1]);
@@ -509,7 +509,7 @@ class Handlers {
                         throw new EconomyError(this.interaction, [`Debes apostar un valor mayor a ${PrettyCurrency(this.interaction.guild, min)}`], this.user.getCurrency());
                 }
                 //await collector.deferUpdate();
-                let value = customVal ?? Number(collector.customId.replaceAll(".", ""));
+                const value = customVal ?? Number(collector.customId.replaceAll(".", ""));
                 if (!this.user.affords(value))
                     throw new EconomyError(this.interaction, ["No tienes tanto dinero para apostar"], this.user.getCurrency())
 
@@ -522,12 +522,10 @@ class Handlers {
                     ], this.user.getCurrency())
 
                 userBet.quantity += value;
-
                 bettings[userBetI] = userBet;
 
                 await this.user.removeCurrency(value);
                 await this.user.save();
-                await this.doc.save();
                 await this.interaction.editReply({ embeds: [new Embed({ type: "success" })], components: [] });
 
                 // Actualizar la barra de progreso
@@ -535,24 +533,43 @@ class Handlers {
                 let elements = [];
                 let embed = new Embed(this.interaction.message.embeds[0])
                 embed.data.fields = [];
-                let betInfo = new Map();
+                let optionsInfo = new Map();
                 bet.options.forEach((option, i) => {
                     total += option.betting.length;
 
-                    betInfo.set(i, {
+                    optionsInfo.set(i, {
                         square: option.square,
-                        betting: option.betting
+                        betting: option.betting,
+                        emoji: option.emoji,
+                        name: option.name,
+                        usersCount: option.betting.length
                     })
 
-                    embed.defField(`${option.emoji} ${option.name}`, `Usuarios: ${option.betting.length}`);
                 })
 
-                betInfo.forEach((value) => {
+                optionsInfo.forEach((actualOption, i) => {
+                    let elseBets = 0;
+                    let thisBets = 0;
+
+                    optionsInfo.forEach((option) => {
+                        if (actualOption != option)
+                            option.betting.forEach((bet) => elseBets += bet.quantity);
+                        else
+                            option.betting.forEach((bet) => thisBets += bet.quantity);
+                    })
+
+                    let ratio = Number(((elseBets + thisBets) * (1 / thisBets)).toFixed(3));
+                    if (ratio === Infinity || ratio < 0) ratio = 0;
+                    bet.options[i].ratio = ratio;
+
+                    embed.defField(`${actualOption.emoji} ${actualOption.name} (1:${ratio.toLocaleString("es-CO")})`, `Usuarios: ${actualOption.usersCount} (${PrettyCurrency(this.interaction.guild, thisBets)})`);
                     elements.push({
-                        percentage: value.betting.length / total * 100,
-                        square: value.square
+                        percentage: actualOption.betting.length / total * 100,
+                        square: actualOption.square
                     });
                 })
+
+                await this.doc.save();
 
                 let progressbar = MultiplePercentages(elements, 10);
                 embed.defDesc(`# ${bet.title}\n### Las apuestas se cierran ${time(bet.closes_in, TimestampStyles.RelativeTime)}\n## ${progressbar}`)
@@ -586,7 +603,8 @@ class Handlers {
                 // Devolver el dinero a los ganadores
                 for await (const winner of winnerOption.betting) {
                     let u = await Users.getWork({ user_id: winner.user_id, guild_id: this.interaction.guildId });
-                    const won = (winnerTotal + loserTotal) / (winner.quantity / winnerTotal);
+                    const winningProportion = winner.quantity / winnerTotal;
+                    const won = (winnerTotal + loserTotal) * (winningProportion);
 
                     console.log("%s ganó %s Currency", u.user_id, won);
 
@@ -621,6 +639,7 @@ class Handlers {
 
                 const filter = x => x.message_id === this.interaction.message.id;
                 const bet = this.doc.data.bets.find(filter);
+                const betIndex = this.doc.data.bets.findIndex(filter);
 
                 for (const option of bet.options) {
                     for await (const user of option.betting) {
@@ -654,6 +673,10 @@ class Handlers {
                     ],
                     components: []
                 })
+
+                this.doc.data.bets.splice(betIndex, 1);
+                await this.doc.save();
+
                 break;
             }
 

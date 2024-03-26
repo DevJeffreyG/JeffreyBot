@@ -53,11 +53,13 @@ const GuildSchema = new Schema({
                 title: { type: String, required: true },
                 closes_in: { type: Date, required: true },
                 closed: { type: Boolean, default: false },
+                last_reminded: { type: Date, default: null },
                 options: [
                     {
                         name: String,
                         emoji: String,
                         square: String,
+                        ratio: { type: Number, default: 0 },
                         betting: [
                             { user_id: String, quantity: Number }
                         ]
@@ -301,10 +303,13 @@ const GuildSchema = new Schema({
                 claim_rep: { type: Boolean, default: false },
                 roulette: { type: Boolean, default: false }
             },
+            staff_reminders: {
+                suggestions: { type: Number, default: 7, validate: [positiveValidator, integerValidator] },
+                tickets: { type: Number, default: 7, validate: [positiveValidator, integerValidator] },
+                bets: { type: Number, default: 1, validate: [positiveValidator, integerValidator] },
+            },
             levels_deleteOldRole: { type: Boolean, default: false },
-            save_roles_onleft: { type: Boolean, default: true },
-            sug_remind: { type: Number, default: 7, validate: [positiveValidator, integerValidator] },
-            ticket_remind: { type: Number, default: 7, validate: [positiveValidator, integerValidator] },
+            save_roles_onleft: { type: Boolean, default: true }
         },
         cooldowns: {
             coins: { type: String, default: "10m" },

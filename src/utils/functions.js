@@ -796,7 +796,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
         total += option.betting.length;
 
         betInfo.set(i, {
-          title: `${option.emoji} ${option.name}`,
+          title: `${option.emoji} ${option.name} (1:${option.ratio.toLocaleString("es-CO")})`,
           emoji: option.emoji,
           square: option.square,
           betting: option.betting
@@ -850,13 +850,13 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
     if (!doc.moduleIsActive("functions.staff_reminders")) break ticketReminder;
     if (ticket.end_date) continue;
 
-    let lastReminded = ticket.last_reminded ? moment(ticket.last_reminded) : ticket.creation_date;
+    let lastReminded = ticket.last_reminded ? moment(ticket.last_reminded) : moment(ticket.creation_date);
     let dayDiff = moment().diff(lastReminded, "d");
 
-    if (dayDiff >= doc.settings.functions.ticket_remind) { // si la dif se cumple con la config, recordar
+    if (dayDiff >= doc.settings.functions.staff_reminders.tickets) { // si la dif se cumple con la config, recordar
       let embed = new Embed()
         .defAuthor({ text: "Recordatorio de Ticket", icon: guild.iconURL({ dynamic: true }) })
-        .defDesc(`Hay un ticket que no se ha cerrado por más de ${doc.settings.functions.ticket_remind} días (${dayDiff}d).`)
+        .defDesc(`Hay un Ticket que no se ha cerrado por más de ${doc.settings.functions.staff_reminders.tickets} días (${dayDiff}d).`)
         .defField(ticket.type, `**—** Creado por ${guild.members.cache.get(ticket.created_by)}.
 **—** ${guild.channels.cache.get(ticket.channel_id)}, el ${time(ticket.creation_date)}`)
         .defColor(Colores.verde)
@@ -876,15 +876,15 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
     if (!doc.moduleIsActive("functions.staff_reminders")) break suggestionReminder;
     if (typeof suggestion.accepted === "boolean") continue;
 
-    let lastReminded = suggestion.last_reminded ? moment(suggestion.last_reminded) : suggestion.creation_date;
+    let lastReminded = suggestion.last_reminded ? moment(suggestion.last_reminded) : moment(suggestion.creation_date);
     let dayDiff = moment().diff(lastReminded, "d");
     let channel = await guild.channels.fetch(suggestion.channel_id);
     let message = await channel.messages.fetch(suggestion.message_id);
 
-    if (dayDiff >= doc.settings.functions.sug_remind) { // si la dif se cumple con la config, recordar
+    if (dayDiff >= doc.settings.functions.staff_reminders.suggestions) { // si la dif se cumple con la config, recordar
       let embed = new Embed()
         .defAuthor({ text: "Recordatorio de sugerencia", icon: guild.iconURL({ dynamic: true }) })
-        .defDesc(`Hay una sugerencia que no ha sido respondida por más de ${doc.settings.functions.sug_remind} días (${dayDiff}d).`)
+        .defDesc(`Hay una sugerencia que no ha sido respondida por más de ${doc.settings.functions.staff_reminders.suggestions} días (${dayDiff}d).`)
         .defField(`ID: ${suggestion.id}`, `**—** Sugerencia por ${guild.members.cache.get(suggestion.user_id)}.
 **—** ${hyperlink("Mensaje de sugerencia", message.url)}, el ${time(suggestion.creation_date)}`)
         .defColor(Colores.verde)
@@ -896,6 +896,33 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
         .send({ content: `${staffRoles.toJSON().join(", ")}`, embed })
 
       suggestion.last_reminded = new Date();
+    }
+  }
+
+  betReminder:
+  for (const bet of doc.data.bets) {
+    if (!doc.moduleIsActive("functions.staff_reminders")) break betReminder;
+    if (!bet.closed) continue;
+
+    let lastReminded = bet.last_reminded ? moment(bet.last_reminded) : moment(bet.closes_in);
+    let dayDiff = moment().diff(lastReminded, "d");
+    let channel = await guild.channels.fetch(bet.channel_id);
+    let message = await channel.messages.fetch(bet.message_id);
+
+    if (dayDiff >= doc.settings.functions.staff_reminders.bets) { // si la dif se cumple con la config, recordar
+      let embed = new Embed()
+        .defAuthor({ text: "Recordatorio de Apuesta", icon: guild.iconURL({ dynamic: true }) })
+        .defDesc(`Hay una Apuesta que no ha tenido resultado por más de ${doc.settings.functions.staff_reminders.bets} días (${dayDiff}d).`)
+        .defField(`${bet.title}`, `**—** ${hyperlink("Mensaje de Apuesta", message.url)}, desde el ${time(bet.closes_in)}`)
+        .defColor(Colores.verde)
+
+      await new Log()
+        .setTarget(ChannelModules.StaffLogs)
+        .setReason(LogReasons.Logger)
+        .setGuild(guild)
+        .send({ content: `${staffRoles.toJSON().join(", ")}`, embed })
+
+      bet.last_reminded = new Date();
     }
   }
 
