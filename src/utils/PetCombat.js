@@ -301,7 +301,7 @@ ${this.#bet ? `### Nadie perdió ${PrettyCurrency(this.#interaction.guild, this.
                         .setDisabled(this.#playing.doc.data.inventory.filter(x => x.shopType === ShopTypes.PetShop).length === 0)
                         .setEmoji("🥫")
                         .setStyle(ButtonStyle.Secondary)/* ,
-                    // TODO: RELEVOS
+                    // TODO: 2.2.X - RELEVOS
                     new ButtonBuilder()
                         .setCustomId("petFlee")
                         .setLabel("Relevo")

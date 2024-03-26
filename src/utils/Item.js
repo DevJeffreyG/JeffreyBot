@@ -8,7 +8,7 @@ const Chance = require("chance");
 const { ItemTypes, ItemObjetives, ItemActions, ItemEffects, LogReasons, ChannelModules, ShopTypes, PetAttacksType, Enum, BoostObjetives } = require("./Enums");
 const { BadCommandError, AlreadyExistsError, DoesntExistsError, FetchError, ExecutionError } = require("../errors");
 
-const { FindNewId, LimitedTime, Subscription, WillBenefit, GetRandomItem } = require("./functions");
+const { FindNewId, LimitedTime, Subscription, WillBenefit, GetRandomItem, isDeveloper } = require("./functions");
 
 const Log = require("./Log");
 const Embed = require("./Embed");
@@ -542,7 +542,7 @@ class Item {
                     // Cooldowns
                     const { global, individual } = this.item.use_info.external_info.delays;
 
-                    if (individual > 0) {
+                    if (individual > 0 && process.env.DEV != "TRUE" || (process.env.DEV === "TRUE" && !isDeveloper(this.interaction.member))) {
                         this.shop.cooldowns.push({
                             user_id: this.interaction.user.id,
                             until: moment().add(individual, "ms"),
@@ -550,7 +550,7 @@ class Item {
                         })
                     }
 
-                    if (global > 0) {
+                    if (global > 0 && process.env.DEV != "TRUE" || (process.env.DEV === "TRUE" && !isDeveloper(this.interaction.member))) {
                         this.shop.cooldowns.push({
                             until: moment().add(global, "ms"),
                             item_id: this.item.id
@@ -561,7 +561,8 @@ class Item {
                     this.shop.items[this.itemIndex]._id = this.item._id;
                     await this.shop.save();
 
-                    await this.removeItemFromInv();
+                    if (process.env.DEV != "TRUE")
+                        await this.removeItemFromInv();
                     return true;
                 } catch (err) {
                     if (!(err instanceof JeffreyBotError)) console.error(err);

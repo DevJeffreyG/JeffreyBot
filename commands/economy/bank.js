@@ -11,7 +11,7 @@ command.execute = async (interaction, models, params, client) => {
 
     await interaction.deleteReply();
 
-    // TODO: Jeffrey Bot será el banco de un servidor
+    // TODO: 2.2.X? - Jeffrey Bot será el banco de un servidor
 }
 
 module.exports = command;

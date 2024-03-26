@@ -511,6 +511,9 @@ ${codeBlock(item.description)}
         let actions = [];
         let delays = {};
 
+        const item = this.shopdoc.findItem(params.id.value, false);
+        if (!item) throw this.#noItemError;
+
         if (params.especial?.value) { // Sí es un item especial
             let select = new StringSelectMenuBuilder()
                 .setCustomId("specialItemSelect")
@@ -552,19 +555,21 @@ ${codeBlock(item.description)}
                         )
 
                     petStats = async (inter) => {
+                        const actual = item.stats;
+
                         await new Modal(inter)
                             .setCustomId("petStats")
                             .setTitle("Estadísticas base de Mascota")
-                            .addInput({ id: "hp", label: "HP", placeholder: "Escribe un número entero positivo", style: TextInputStyle.Short })
-                            .addInput({ id: "attack", label: "Max Ataque", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
-                            .addInput({ id: "defense", label: "Max Defensa", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
+                            .addInput({ id: "hp", value: `${actual.hp ?? ""}`, label: "HP", placeholder: "Escribe un número entero positivo", style: TextInputStyle.Short })
+                            .addInput({ id: "attack", value: `${actual.attack ?? ""}`, label: "Max Ataque", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
+                            .addInput({ id: "defense", value: `${actual.defense ?? ""}`, label: "Max Defensa", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
                             .show()
 
                         let c = await inter.awaitModalSubmit({
                             filter: (i) => i.customId === "petStats" && i.user.id === this.interaction.user.id,
                             time: ms("1m")
                         }).catch(async err => {
-                            if (err.code === DiscordjsErrorCodes.InteractionCollectorError) await interaction.deleteReply();
+                            if (err.code === DiscordjsErrorCodes.InteractionCollectorError) await this.interaction.deleteReply();
                             else throw err;
                         });
                         if (!c) return;
@@ -573,20 +578,22 @@ ${codeBlock(item.description)}
                     }
 
                     itemConfig = async (inter) => {
+                        const actual = item.stats;
+
                         await new Modal(inter)
                             .setCustomId("petStatsModifier")
                             .setTitle("Configuración del item")
-                            .addInput({ id: "hp", value: "0", label: "HP Dada", placeholder: "Escribe un número entero positivo", style: TextInputStyle.Short })
-                            .addInput({ id: "hunger", value: "0", label: "Hambre mitigada", placeholder: "Escribe un número entero positivo", style: TextInputStyle.Short })
+                            .addInput({ id: "hp", value: `${actual.hp ?? "0"}`, label: "HP Dada", placeholder: "Escribe un número entero positivo", style: TextInputStyle.Short })
+                            .addInput({ id: "hunger", value: `${actual.hunger ?? "0"}`, label: "Hambre mitigada", placeholder: "Escribe un número entero positivo", style: TextInputStyle.Short })
                             .show()
 
-                        // TODO: Carga de ULT
+                        // TODO: 2.2.X - ¿Carga de ULT?
 
                         let c = await inter.awaitModalSubmit({
                             filter: (i) => i.customId === "petStatsModifier" && i.user.id === this.interaction.user.id,
                             time: ms("1m")
                         }).catch(async err => {
-                            if (err.code === DiscordjsErrorCodes.InteractionCollectorError) await interaction.deleteReply();
+                            if (err.code === DiscordjsErrorCodes.InteractionCollectorError) await this.interaction.deleteReply();
                             else throw err;
                         });
                         if (!c) return;
@@ -610,20 +617,22 @@ ${codeBlock(item.description)}
                         )
 
                     getKeyActions = async (inter) => {
+                        const actual = item.use_info.external_info;
+
                         await new Modal(inter)
                             .setCustomId("exKeysItemConfig")
                             .setTitle("Configuración del item")
-                            .addInput({ id: "actions", value: "ALT TAB\nt\ne\nx\nt\no", label: "Teclas pulsadas", placeholder: "Teclas presionadas al tiempo en una sola linea. Teclas separadas por espacios.", style: TextInputStyle.Paragraph })
-                            .addInput({ id: "keysDelay", value: "50", label: "Delay de teclas (ms)", placeholder: "Escribe un número entero positivo", style: TextInputStyle.Short })
-                            .addInput({ id: "globalUseDelay", value: "10m", label: "Delay de uso global", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
-                            .addInput({ id: "individualUseDelay", value: "10m", label: "Delay de uso individual", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
+                            .addInput({ id: "actions", value: `${actual.actions.length > 0 ? actual.actions.join("\n") : "ALT TAB\ntexto"}`, label: "Teclas pulsadas", placeholder: "Teclas presionadas al tiempo en una sola linea. Teclas separadas por espacios.", style: TextInputStyle.Paragraph })
+                            .addInput({ id: "keysDelay", value: `${actual.delays.keys ?? "50"}`, label: "Delay de teclas (ms)", placeholder: "Escribe un número entero positivo", style: TextInputStyle.Short })
+                            .addInput({ id: "globalUseDelay", value: `${actual.delays.global ? ms(actual.delays.global) : "10m"}`, label: "Delay de uso global", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
+                            .addInput({ id: "individualUseDelay", value: `${actual.delays.individual ? ms(actual.delays.individual) : "10m"}`, label: "Delay de uso individual", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
                             .show()
 
                         let c = await inter.awaitModalSubmit({
                             filter: (i) => i.customId === "exKeysItemConfig" && i.user.id === this.interaction.user.id,
                             time: ms("5m")
                         }).catch(async err => {
-                            if (err.code === DiscordjsErrorCodes.InteractionCollectorError) await interaction.deleteReply();
+                            if (err.code === DiscordjsErrorCodes.InteractionCollectorError) await this.interaction.deleteReply();
                             else throw err;
                         });
                         if (!c) return;
@@ -633,19 +642,21 @@ ${codeBlock(item.description)}
                     }
 
                     getMediaActions = async (inter) => {
+                        const actual = item.use_info.external_info;
+
                         await new Modal(inter)
                             .setCustomId("exMediaItemConfig")
                             .setTitle("Configuración del item")
-                            .addInput({ id: "urls", label: "Multimedia(s)", style: TextInputStyle.Paragraph })
-                            .addInput({ id: "globalUseDelay", value: "10m", label: "Delay de uso global", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
-                            .addInput({ id: "individualUseDelay", value: "10m", label: "Delay de uso individual", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
+                            .addInput({ id: "urls", value: `${actual.actions.join("\n")}`, label: "Multimedia(s)", style: TextInputStyle.Paragraph })
+                            .addInput({ id: "globalUseDelay", value: `${actual.delays.global ? ms(actual.delays.global) : "10m"}`, label: "Delay de uso global", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
+                            .addInput({ id: "individualUseDelay", value: `${actual.delays.individual ? ms(actual.delays.individual) : "10m"}`, label: "Delay de uso individual", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
                             .show()
 
                         let c = await inter.awaitModalSubmit({
                             filter: (i) => i.customId === "exMediaItemConfig" && i.user.id === this.interaction.user.id,
                             time: ms("5m")
                         }).catch(async err => {
-                            if (err.code === DiscordjsErrorCodes.InteractionCollectorError) await interaction.deleteReply();
+                            if (err.code === DiscordjsErrorCodes.InteractionCollectorError) await this.interaction.deleteReply();
                             else throw err;
                         });
                         if (!c) return;
@@ -685,9 +696,13 @@ ${codeBlock(item.description)}
                 switch (specialType) {
                     case ItemTypes.Pet:
                         stats = await petStats(collector);
+                        if(!stats) return false;
+
                         break;
                     case ItemTypes.PetStatsModifier:
                         stats = await itemConfig(collector);
+                        if(!stats) return false;
+
                         stats.attack = 0;
                         stats.defense = 0;
                         break;
@@ -697,6 +712,7 @@ ${codeBlock(item.description)}
                     switch (specialType) {
                         case ItemTypes.EXKeyboard:
                             let userActions = await getKeyActions(collector);
+                            if(!userActions) return false;
 
                             actions = userActions.actions?.split("\n") ?? [];
 
@@ -706,6 +722,7 @@ ${codeBlock(item.description)}
                             break;
                         case ItemTypes.EXMedia:
                             let mediaActions = await getMediaActions(collector);
+                            if(!mediaActions) return false;
 
                             actions = mediaActions.urls?.split("\n") ?? [];
 
@@ -737,9 +754,6 @@ ${codeBlock(item.description)}
         const notValidCombination = new BadParamsError(this.interaction, "Si se usa un tipo Item, **no puede eliminarse**");
         const dsError = new BadParamsError(this.interaction, "Si el item es de la DarkShop, **debe tener**: `efecto` y verdadero en `uso-manual`");
         const notItemPetError = new BadParamsError(this.interaction, "Si el item es de la Tienda de Mascotas, su **objetivo** debe ser **Item** y ser **especial**");
-
-        const item = this.shopdoc.findItem(params.id.value, false);
-        if (!item) throw this.#noItemError;
 
         if (stats) item.stats = Object.assign({}, item.stats, stats);
         if (this.config.info.type === ShopTypes.EXShop) {

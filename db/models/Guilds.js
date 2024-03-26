@@ -363,11 +363,11 @@ const GuildSchema = new Schema({
         general: {
             // TODO: Esto no sería necesario cuando los mensajes de bienvenida sean custom
             rules: { type: String },
-            information: { type: String }, // del
-            faq: { type: String }, // del
-            announcements: { type: String }, // del
+            information: { type: String }, // 2.2 del
+            faq: { type: String }, // 2.2 del
+            announcements: { type: String }, // 2.2 del
             halloffame: { type: String },
-            jeffreybot_news: { type: String } // TODO: Anuncios globales de DEV
+            jeffreybot_news: { type: String } // TODO: 2.2.X - Anuncios globales de DEV
         }
     },
     categories: {
