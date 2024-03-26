@@ -299,8 +299,7 @@ const GuildSchema = new Schema({
                 coins: { type: Boolean, default: false },
                 chat_rewards: { type: Boolean, default: false },
                 claim_rep: { type: Boolean, default: false },
-                roulette: { type: Boolean, default: false },
-                staff_bets: { type: Boolean, default: false },
+                roulette: { type: Boolean, default: false }
             },
             levels_deleteOldRole: { type: Boolean, default: false },
             save_roles_onleft: { type: Boolean, default: true },

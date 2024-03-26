@@ -434,9 +434,7 @@ class Handlers {
                 if (valid === 0)
                     throw new InsuficientSetupError(this.interaction, "Mínimos y máximo de apuestas", ["Los mínimos y máximos deben ser menores y mayores los unos con los otros"])
 
-                const av = this.doc.data.average_currency;
-                const mult = this.doc.toAdjust("staff_bets") && av - max > 10000 ? av * 0.01 : 1;
-                const middleNum = mult * (max - min) / 5;
+                const middleNum = (max - min) / 5;
 
                 await this.interaction.editReply({
                     embeds: [
@@ -449,8 +447,8 @@ class Handlers {
                         new ActionRowBuilder()
                             .setComponents(
                                 new ButtonBuilder()
-                                    .setCustomId(PrettifyNumber(Math.round(mult * min), 0, 3).toLocaleString("es-CO"))
-                                    .setLabel(PrettifyNumber(Math.round(mult * min), 0, 3).toLocaleString("es-CO"))
+                                    .setCustomId(PrettifyNumber(Math.round(min), 0, 3).toLocaleString("es-CO"))
+                                    .setLabel(PrettifyNumber(Math.round(min), 0, 3).toLocaleString("es-CO"))
                                     .setEmoji("➕")
                                     .setStyle(ButtonStyle.Secondary),
                                 new ButtonBuilder()
@@ -483,7 +481,7 @@ class Handlers {
                     },
                     time: ms("1m"),
                     wait: true
-                }).wait(() => {
+                }, false, false).wait(() => {
                     this.interaction.deleteReply();
                 })
                 if (!collector) return;
@@ -506,15 +504,25 @@ class Handlers {
                     if (!c) return;
                     await c.deferUpdate();
 
-                    customVal = Math.round(new Modal(c).read().bet);
-                    if (customVal < 0)
-                        throw new EconomyError(this.interaction, ["Debes apostar un valor mayor a 0"], this.user.getCurrency());
+                    customVal = Math.round(new Modal(c).read().bet.replaceAll(".", ""));
+                    if (customVal < min)
+                        throw new EconomyError(this.interaction, [`Debes apostar un valor mayor a ${PrettyCurrency(this.interaction.guild, min)}`], this.user.getCurrency());
                 }
                 //await collector.deferUpdate();
-                const value = customVal ?? Number(collector.customId.replaceAll(".", ""));
+                let value = customVal ?? Number(collector.customId.replaceAll(".", ""));
                 if (!this.user.affords(value))
                     throw new EconomyError(this.interaction, ["No tienes tanto dinero para apostar"], this.user.getCurrency())
+
+                if (userBet.quantity + value > max)
+                    throw new EconomyError(this.interaction, [
+                        "No puedes apostar tanto dinero",
+                        `Apostaste ya ${PrettyCurrency(this.interaction.guild, userBet.quantity)}`,
+                        `El tope es ${PrettyCurrency(this.interaction.guild, max)}`,
+                        `Puedes apostar ${PrettyCurrency(this.interaction.guild, (max - userBet.quantity))} para llegar al tope`
+                    ], this.user.getCurrency())
+
                 userBet.quantity += value;
+
                 bettings[userBetI] = userBet;
 
                 await this.user.removeCurrency(value);
