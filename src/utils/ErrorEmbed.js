@@ -141,7 +141,7 @@ ${codeBlock("json", data.error)}`])
             case "BadSetup":
                 this.#errorName("Mala configuración")
                 this.#errorAuthor(19)
-                this.#errorDesc("Hay un error en la configuración del bot", "Avísa a los administradores")
+                this.#errorDesc("Hay un error en la configuración del bot", "Avísa a los administradores", data.guide)
                 break;
 
             case "AlreadyUsing":
