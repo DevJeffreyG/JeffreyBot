@@ -1,9 +1,11 @@
 const { ApplicationCommandType, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageContextMenuCommandInteraction, Client, hyperlink, codeBlock } = require("discord.js");
 const { Colores } = require("../../../src/resources");
-const { ContextMenu, Embed, Confirmation, ErrorEmbed, Log, LogReasons, ChannelModules, GetRandomItem, PrettyCurrency } = require("../../../src/utils");
+const { ContextMenu, Embed, Confirmation, ErrorEmbed, Log, LogReasons, ChannelModules, PrettyCurrency, MinMaxInt } = require("../../../src/utils");
 
 const ms = require("ms");
-const { EconomyError, FetchError, ExecutionError } = require("../../../src/errors");
+const Chance = require("chance");
+
+const { EconomyError, FetchError, ExecutionError, BadSetupError } = require("../../../src/errors");
 
 const command = new ContextMenu({
     name: "Dar Award",
@@ -86,6 +88,12 @@ command.execute = async (interaction, models, params, client) => {
     const quantityProperty = `tier${tierNum}`;
     const { price, gift } = doc.settings.quantities.awards[quantityProperty]
 
+    let trial = MinMaxInt(gift, price, { guild: interaction.guild, msg: `No se ha podido determinar los precios para dar un Award (Tier ${tierNum}), el beneficio debe ser menor al precio de este` });
+    if (trial === 0)
+        throw new BadSetupError(interaction, [
+            `El Award de Tier ${tierNum} no está bien configurado`
+        ])
+
     const confirmation = await Confirmation("Dar premio", [
         `Esto serán ${PrettyCurrency(interaction.guild, price)}`,
         `El autor del mensaje recibirá ${PrettyCurrency(interaction.guild, gift)}`,
@@ -129,13 +137,13 @@ command.execute = async (interaction, models, params, client) => {
     } else if (message.system) content = "[ Mensaje de sistema ]";
 
     let titulos = [
-        "Una vez una fuente de sabiduría dijo:",
+        "Una vez, una fuente de sabiduría dijo:",
         "Y entonces la verdad habló y dijo:",
         "La verdad se dijo, y fue:",
         "Fue cuando la verdad se alzó:"
     ]
 
-    let text = GetRandomItem(titulos);
+    let text = new Chance().pickone(titulos);
 
     hallEmbed.defAuthor({ text, icon: client.EmojisObject[`Tier${tierNum}`].url });
     hallEmbed.defDesc(`${star} ${content}`);
@@ -168,10 +176,10 @@ command.execute = async (interaction, models, params, client) => {
 
         new ExecutionError(interaction, [
             "No se pudo enviar el mensaje al canal",
-            "El autor del mensaje **sí** recibió el precio",
+            "El autor del mensaje **sí** recibió el beneficio",
             "Avísa a los Administradores"
         ]).send({ ephemeral: true, followup: true })
-        .catch(e => console.error(e))
+            .catch(e => console.error(e))
     }
 
     return interaction.editReply({
