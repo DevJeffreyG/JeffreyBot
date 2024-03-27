@@ -394,6 +394,12 @@ GuildSchema.pre("save", function () {
     }
 })
 
+GuildSchema.pre("validate", function () {
+    if (!this.settings.quantities.limits.bets.blackjack.max) {
+        this.settings.quantities.limits.bets.blackjack.max = Infinity;
+    }
+})
+
 GuildSchema.static("getWork", async function (id) {
     return await this.findOne({
         guild_id: id
