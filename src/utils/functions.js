@@ -1371,7 +1371,7 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction, user
     const collector = new Collector(interaction, { filter, max: 1 }).onEnd((collected, reason) => {
       if (collected.size === 0) {
         interaction.editReply({ embeds: [cancelEmbed], components: [] })
-        return resolve(false)
+        resolve(false)
       }
     }).raw();
 
@@ -1383,11 +1383,11 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction, user
 
         await interaction.editReply({ embeds: [confirmation], components: [] });
 
-        return resolve(interaction);
+        resolve(interaction);
       } else {
         await interaction.editReply({ content: null, embeds: [cancelEmbed], components: [] });
 
-        return resolve(false);
+        resolve(false);
       }
     })
   })

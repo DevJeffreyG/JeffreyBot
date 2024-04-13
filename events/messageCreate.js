@@ -79,8 +79,13 @@ module.exports = async (client, message) => {
   const channels = new Map();
 
   for await (const chat_reward of chat_rewards) {
-    let ch = await guild.channels.fetch(chat_reward.channel);
-    channels.set(ch.id, { channel: ch, multiplier: chat_reward.multiplier });
+    try {
+      let ch = await guild.channels.fetch(chat_reward.channel);
+      channels.set(ch.id, { channel: ch, multiplier: chat_reward.multiplier });
+    } catch (err) {
+      console.error("🔴 %s", err);
+    }
+
   }
 
   let configured = channels.get(message.channel.id)

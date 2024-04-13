@@ -839,7 +839,6 @@ class Handlers {
 
         try {
             console.log("🔴 No se pudo ejecutar el comando: %s", error.name)
-            console.error(error);
 
             if (error instanceof JeffreyBotError) {
                 return await error.send();
@@ -851,6 +850,7 @@ class Handlers {
                     "Puede que se hayan perdido datos..."
                 ]).send();
             } else {
+                console.error(error);
                 return await new BadCommandError(this.interaction, error).send();
             }
         } catch (err) {
