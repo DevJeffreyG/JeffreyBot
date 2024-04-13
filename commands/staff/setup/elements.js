@@ -1,4 +1,4 @@
-const { SlashCommandStringOption, ButtonStyle, SlashCommandIntegerOption, DiscordAPIError, codeBlock, ActionRowBuilder, TextInputStyle, SlashCommandRoleOption, ButtonBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require("discord.js");
+const { SlashCommandStringOption, ButtonStyle, SlashCommandIntegerOption, DiscordAPIError, codeBlock, ActionRowBuilder, TextInputStyle, SlashCommandRoleOption, ButtonBuilder } = require("discord.js");
 const { Command, CustomEmbed, Confirmation, InteractivePages, CustomButton, Modal, CustomTrophy, Embed, FindNewId } = require("../../../src/utils");
 const { Colores } = require("../../../src/resources");
 const { DiscordLimitationError, DoesntExistsError } = require("../../../src/errors");
@@ -178,11 +178,10 @@ command.addOptionsTo(["trofeos create", "trofeos edit"], [
 
 command.execute = async (interaction, models, params, client) => {
     const { subgroup, subcommand } = params;
-    const { CustomElements, Guilds } = models;
+    const { CustomElements } = models;
 
     if (subcommand && !subgroup) await interaction.deferReply();
     const custom = await CustomElements.getWork(interaction.guild.id);
-    const doc = await Guilds.getWork(interaction.guild.id);
 
     params.customDoc = custom;
 
@@ -223,7 +222,7 @@ command.execute = async (interaction, models, params, client) => {
             if (row_autoroles.components.length > 0 && components.length < 5) components.push(row_autoroles);
 
             await interaction.channel.send({ embeds: [embed], components });
-            return interaction.deleteReply();
+            return await interaction.deleteReply();
         }
 
         case "list": {
@@ -237,7 +236,7 @@ command.execute = async (interaction, models, params, client) => {
                     title = "Lista de Embeds";
                     addon = `**— {show}**\n**▸ (IDs) {linkedType} vínculados**: {linked}\n**▸ Element ID: {id}**\n\n`
 
-                    for (embed of custom.embeds) {
+                    for (const embed of custom.embeds) {
                         let buttons = "";
                         embed.linkedids.forEach(x => {
                             buttons += `\n- \`${x.id}\` ${x.isAutoRole ? "**(AutoRole)**" : ""}`
@@ -291,7 +290,8 @@ command.execute = async (interaction, models, params, client) => {
                 color: Colores.verde,
                 addon
             }, items, 5)
-            return interactive.init(interaction);
+            
+            return await interactive.init(interaction);
         }
     }
 

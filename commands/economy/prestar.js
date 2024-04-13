@@ -1,6 +1,8 @@
-const { Command, Confirmation, HumanMs, ErrorEmbed, FindNewId, Embed, GetRandomItem, PrettyCurrency } = require("../../src/utils");
+const { Command, Confirmation, HumanMs, ErrorEmbed, FindNewId, Embed, PrettyCurrency } = require("../../src/utils");
 const ms = require("ms");
 const moment = require("moment-timezone");
+const Chance = require("chance");
+
 const { BadParamsError, EconomyError } = require("../../src/errors");
 
 const command = new Command({
@@ -50,14 +52,17 @@ command.execute = async (interaction, models, params, client) => {
     const lend_user = await Users.getWork({ user_id: usuario.value, guild_id: interaction.guild.id });
     const every = ms(tiempo.value)
 
-    if (interaction.user === usuario.user) return new ErrorEmbed(interaction).defDesc("Por mucho que quieras prestarte dinero, no es conveniente.").send();
+    if (interaction.user === usuario.user)
+        return new ErrorEmbed(interaction).defDesc("Por mucho que quieras prestarte dinero, no es conveniente.").send();
 
-    if (every < ms("5m") || isNaN(every)) throw new BadParamsError(interaction, "El tiempo debe ser mayor o igual a 5 minutos");
+    if (every < ms("5m") || isNaN(every))
+        throw new BadParamsError(interaction, "El tiempo debe ser mayor o igual a 5 minutos");
 
     const toLend = dinero.value;
     const deuda = PrettyCurrency(interaction.guild, toLend);
 
-    if (!user.affords(toLend)) throw new EconomyError(interaction, "No tienes tanto dinero", user.getCurrency())
+    if (!user.affords(toLend))
+        throw new EconomyError(interaction, "No tienes tanto dinero", user.getCurrency())
 
     const authorConfirmation = await Confirmation("Prestar dinero", [
         `Le prestarás ${deuda} a ${usuario.member}.`,
@@ -108,7 +113,7 @@ command.execute = async (interaction, models, params, client) => {
         `${deuda} fueron prestados a ${lendMember} por ${messenger}`
     ];
 
-    let description = GetRandomItem(possibleDescriptions);
+    let description = new Chance().pickone(possibleDescriptions);
 
     let doneEmbed = new Embed({
         type: "success",

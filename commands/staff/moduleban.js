@@ -1,4 +1,4 @@
-const { Command, Categories, Embed } = require("../../src/utils");
+const { Command, Embed } = require("../../src/utils");
 
 const command = new Command({
     name: "moduleban",
@@ -45,7 +45,7 @@ command.execute = async (interaction, models, params, client) => {
         }
     })
 
-    return interaction.editReply({ embeds: [embed] });
+    return await interaction.editReply({ embeds: [embed] });
 }
 
 module.exports = command;

@@ -1,14 +1,16 @@
-const { Command, Embed, importImage, FindNewId, GetRandomItem } = require("../../src/utils")
+const { Command, Embed, importImage, FindNewId } = require("../../src/utils")
 const { Colores } = require("../../src/resources")
 
 const ms = require("ms");
 const moment = require("moment-timezone");
+const Chance = require("chance");
+
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, time, BaseGuildTextChannel } = require("discord.js");
 const { BadParamsError } = require("../../src/errors");
 
 const command = new Command({
-    name: "sencuesta",
-    desc: "Encuesta que se pone fuera de las encuestas hechas por la comunidad en el canal de anuncios"
+    name: "encuesta",
+    desc: "Crea una encuesta donde los usuarios responden una pregunta de sí o no"
 })
 
 command.addOption({
@@ -63,7 +65,7 @@ command.execute = async (interaction, models, params, client) => {
         .setImage(image.attachment)
         .defColor(Colores.verdejeffrey)
 
-    const footer = GetRandomItem([
+    const footer = new Chance().pickone([
         "¡Anímate, cada voto cuenta!",
         "¡Vota aquí abajo!",
         "¡Anímate a votar!",

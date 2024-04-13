@@ -29,7 +29,7 @@ command.execute = async (interaction, models, params, client) => {
     const { usuario, cantidad } = params;
     const { EmojisObject } = client;
 
-    const author = interaction.user;
+    const author = interaction.member;
     const recieverMember = usuario.member;
     const quantity = cantidad?.value;
 
@@ -116,7 +116,7 @@ command.execute = async (interaction, models, params, client) => {
         e.defAuthor({ text: "Por favor, aléjate", icon: EmojisObject.Error.url })
             .defColor(Colores.rojo)
             .defDesc("No puedes pagarte dinero a ti mismo.")
-        return interaction.editReply({ embeds: [e] });
+        return await interaction.editReply({ embeds: [e] });
     }
 
     if (debt != -1) {
@@ -159,7 +159,7 @@ command.execute = async (interaction, models, params, client) => {
     })
     await interaction.editReply({ embeds: [new Embed({ type: "success" })] });
     return await interaction.followUp({
-        content: isDonation ? `**${author.username}** ➡️ **${guild.name}**.` : `**${author.username}** ➡️ **${recieverMember}**.`,
+        content: isDonation ? `**${author.displayName}** ➡️ **${guild.name}**.` : `**${author.displayName}** ➡️ **${recieverMember}**.`,
         embeds: [doneEmbed]
     });
 }

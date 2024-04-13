@@ -1,4 +1,4 @@
-const { Command, Categories, Embed, ErrorEmbed, Confirmation, FindNewId, AfterInfraction, Log, LogReasons, ChannelModules, Collector } = require("../../src/utils")
+const { Command, Embed, Confirmation, FindNewId, AfterInfraction, Log, LogReasons, ChannelModules, Collector } = require("../../src/utils")
 const { Colores } = require("../../src/resources/");
 const { StringSelectMenuBuilder, ActionRowBuilder, AttachmentBuilder, DiscordAPIError } = require("discord.js");
 const { DMNotSentError, FetchError } = require("../../src/errors");
@@ -85,13 +85,13 @@ command.execute = async (interaction, models, params, client) => {
         let ruleTxt = doc.data.rules.find(x => x.id === rule).name;
 
         let toConfirm = [
-            `¿Estás segur@ de warnear a **${member.user.username}**?`,
+            `¿Estás segur@ de warnear a **${member.displayName} (${member.user.username})**?`,
             `Razón: Infringir la regla N°${ruleNo} (${ruleTxt})`,
             `Pruebas:`,
             pruebasEmbed
         ];
         let confirmation = await Confirmation("Agregar warn", toConfirm, interaction);
-        if (!confirmation) return interaction.deleteReply();
+        if (!confirmation) return await interaction.deleteReply();
 
         const softwarns = user.softwarns;
         const warns = user.warns;
@@ -109,12 +109,12 @@ command.execute = async (interaction, models, params, client) => {
         if (!hasSoft) {
             let skipConfirmation = [
                 `**${member.user.username}** __NO__ tiene el **softwarn** de la regla "${ruleTxt}"`,
-                `¿Estás segur@ de warnear a **${member.user.username}**?`,
+                `¿Estás segur@ de warnear a **${member.displayName} (${member.user.username})**?`,
                 `Razón: Infringir la regla N°${ruleNo} (${ruleTxt})`,
                 pruebasEmbed
             ];
             confirmation = await Confirmation("Continuar", skipConfirmation, interaction);
-            if (!confirmation) return interaction.deleteReply();
+            if (!confirmation) return await interaction.deleteReply();
         }
 
         // guardar el nuevo attachment para evitar que se pierda
@@ -167,7 +167,7 @@ command.execute = async (interaction, models, params, client) => {
             .send({ embeds: [log, proofE] })
 
         await interaction.followUp({ embeds: [new Embed({ type: "success" })], components: [] });
-        if (after instanceof DiscordAPIError) new DMNotSentError(interaction, member, after).send().catch(e => console.error(e));
+        if (after instanceof DiscordAPIError) await new DMNotSentError(interaction, member, after).send().catch(e => console.error(e));
     })
 }
 

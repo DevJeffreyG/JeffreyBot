@@ -1,5 +1,7 @@
-const { Command, Categories, Embed } = require("../../src/utils");
+const { Command, Embed } = require("../../src/utils");
 const { Colores } = require("../../src/resources");
+
+const Chance = require("chance");
 
 const command = new Command({
     name: "8ball",
@@ -17,16 +19,14 @@ command.addOption({
 command.execute = async (interaction, models, params, client) => {
     let replies = ["Sí.", "No.", "No lo sé", "Te mentiría si no.", "¿Estamos tontos?", "Obvio.", "Bastante claro que no.", "La verdad es que no.", "La verdad, sí."];
 
-    let answer = Math.floor(Math.random() * replies.length);
     const { pregunta } = params;
 
     let pregEmbed = new Embed()
         .defColor(Colores.verde)
-        .defAuthor({ text: `${interaction.user.username}`, icon: interaction.member.displayAvatarURL() })
-        .defField("Pregunta", pregunta.value)
-        .defField("Respuesta", replies[answer]);
+        .defAuthor({ text: `${interaction.member.displayName} pregunta:`, icon: interaction.member.displayAvatarURL() })
+        .defDesc(`# ${pregunta.value}...\n### ${client.Emojis.JeffreyBot} ${client.user.displayName}: "${new Chance().pickone(replies)}"`);
 
-    return interaction.deferred ? interaction.editReply({ embeds: [pregEmbed] }) : interaction.reply({ embeds: [pregEmbed] });
+    return interaction.deferred ? await interaction.editReply({ embeds: [pregEmbed] }) : await interaction.reply({ embeds: [pregEmbed] });
 }
 
 module.exports = command;

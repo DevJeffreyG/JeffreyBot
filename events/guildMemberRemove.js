@@ -1,6 +1,8 @@
 const { Embed, FetchThisGuild } = require("../src/utils");
 const { Users, Guilds } = require("mongoose").models;
 
+const Chance = require("chance");
+
 module.exports = async (client, member) => {
     if (!client.isThisFetched(member.guild.id)) await FetchThisGuild(client, member.guild);
 
@@ -24,7 +26,7 @@ module.exports = async (client, member) => {
     if (member.user.bot) return;
     if (member.pending) return;
 
-    const fBye = despedidas[Math.floor(Math.random() * despedidas.length)];
+    const fBye = new Chance().pickone(despedidas);
     let embed = new Embed()
         .defDesc(fBye)
         .defColor("#66a0ff");

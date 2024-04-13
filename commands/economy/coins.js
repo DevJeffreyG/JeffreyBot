@@ -1,4 +1,4 @@
-const { Command, Embed, Cooldowns, GetRandomItem, BoostWork, PrettyCurrency, MinMaxInt } = require("../../src/utils");
+const { Command, Embed, Cooldowns, BoostWork, PrettyCurrency, MinMaxInt } = require("../../src/utils");
 const { Responses } = require("../../src/resources/");
 
 const Chance = require("chance");
@@ -58,7 +58,7 @@ command.execute = async (interaction, models, params, client) => {
     money = Number((money * Number(boost.multiplier.currency_value)).toFixed(2));
     let tmoney = PrettyCurrency(guild, money, { boostemoji: boost.hasCurrencyChanges() ? boost.emojis.currency : null })
 
-    let index = GetRandomItem(Responses.coins);
+    let index = new Chance().pickone(Responses.coins);
     let textString = index.text;
     let text = textString.replace(
         new RegExp("{ MONEY }", "g"),
@@ -86,14 +86,14 @@ command.execute = async (interaction, models, params, client) => {
 
     if (index.author) {
         let rAuthor = guild.members.cache.find(x => x.id === index.author);
-        let suggestor = rAuthor ? rAuthor.user.username : "un usuario";
+        let suggestor = rAuthor ? rAuthor.displayName : "un usuario";
         let img = rAuthor ? rAuthor.displayAvatarURL() : guild.iconURL();
         embed.defFooter({ text: `• Respuesta sugerida por ${suggestor}`, icon: img })
     }
 
     await user.addCurrency(money);
 
-    return interaction.editReply({ embeds: [embed] });
+    return await interaction.editReply({ embeds: [embed] });
 }
 
 module.exports = command;

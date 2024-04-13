@@ -1,4 +1,4 @@
-const { Command, Categories, Embed, PrettyCurrency } = require("../../src/utils");
+const { Command, Embed, PrettyCurrency } = require("../../src/utils");
 const { Colores } = require("../../src/resources");
 const { time } = require("discord.js");
 
@@ -26,7 +26,7 @@ command.execute = async (interaction, models, params, client) => {
 
     let admins = "";
     adminroles.forEach(roleId => {
-        let r = interaction.guild.roles.cache.find(x => x.id === roleId);
+        let r = interaction.guild.roles.cache.get(roleId);
         if (!r) return;
         if (r.members.map(user => user).length === 0) return;
 
@@ -36,7 +36,7 @@ command.execute = async (interaction, models, params, client) => {
 
     let mods = "";
     staffroles.forEach(roleId => {
-        let r = interaction.guild.roles.cache.find(x => x.id === roleId);
+        let r = interaction.guild.roles.cache.get(roleId);
         if (!r) return;
         if (r.members.map(user => user).length === 0) return;
 
@@ -44,7 +44,7 @@ command.execute = async (interaction, models, params, client) => {
         serverembed.defField(`— @${r.name}`, mods);
     })
 
-    return interaction.reply({ content: null, embeds: [serverembed] });
+    return await interaction.reply({ content: null, embeds: [serverembed] });
 }
 
 module.exports = command;

@@ -1,4 +1,4 @@
-const { Command, Categories, Embed } = require("../../src/utils")
+const { Command, Embed } = require("../../src/utils")
 const { Colores } = require("../../src/resources");
 
 const command = new Command({
@@ -21,7 +21,7 @@ command.execute = async (interaction, models, params, client) => {
 
     let error = new Embed()
         .defColor(Colores.rojo)
-        .defAuthor({ text: `${member.user.username}`, icon: member.displayAvatarURL() })
+        .defAuthor({ text: `${member.displayName}`, icon: member.displayAvatarURL() })
         .defDesc(`No tienes warns.`);
 
     const user = params.getUser();
@@ -30,16 +30,16 @@ command.execute = async (interaction, models, params, client) => {
     const softwarns = user.softwarns;
 
     if (!warns || warns.length === 0) {
-        return interaction.editReply({ embeds: [error], ephemeral: true })
+        return await interaction.editReply({ embeds: [error], ephemeral: true })
     }
 
     let warnsE = new Embed()
-        .defAuthor({ text: `${member.user.username}'s warns`, icon: member.displayAvatarURL() })
+        .defAuthor({ text: `Tus Warns`, icon: member.displayAvatarURL() })
         .defDesc(`**Número de warns ** ❛ \`${warns.length}\` ❜`)
         .defColor(Colores.verde);
 
     let softwarnsE = new Embed()
-        .defAuthor({ text: `${member.user.username}'s softwarns`, icon: member.displayAvatarURL() })
+        .defAuthor({ text: `Tus Softwarns`, icon: member.displayAvatarURL() })
         .defDesc(`**Número de softwarns ** ❛ \`${softwarns.length}\` ❜`)
         .defColor(Colores.verde);
 
@@ -66,7 +66,7 @@ command.execute = async (interaction, models, params, client) => {
         softwarnsE.defField(`— ${regla} : Regla N°${softwarn.rule_id}`, `**— [Pruebas](${softwarn.proof})\n— ID: ${softwarn.id}**`)
     });
 
-    return interaction.editReply({ embeds: [warnsE/* , softwarnsE */], ephemeral: true });
+    return await interaction.editReply({ embeds: [warnsE/* , softwarnsE */], ephemeral: true });
 }
 
 module.exports = command;

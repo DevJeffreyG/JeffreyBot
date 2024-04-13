@@ -16,7 +16,7 @@ command.execute = async (interaction, models, params, client) => {
 
     let embed = new Embed()
       .defTitle(`🔔 Pong!`)
-      .defDesc(`### ${client.user.username} v${client.version} Online desde ${time(client.readyAt, "R")}`)
+      .defDesc(`### ${client.Emojis.JeffreyBot} ${client.user.displayName} v${client.version} Online desde ${time(client.readyAt, "R")}`)
       .defField("📶 Ping", `${diff}ms`, true)
       .defField("💻 API", `${API}ms`, true)
 

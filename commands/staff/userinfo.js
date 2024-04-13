@@ -1,9 +1,7 @@
 const { ActionRowBuilder, ButtonBuilder, time, ButtonStyle, PermissionFlagsBits } = require("discord.js")
 
-const { Command, Categories, Embed, Collector } = require("../../src/utils")
+const { Command, Embed, Collector } = require("../../src/utils")
 const { Colores } = require("../../src/resources")
-
-const ms = require("ms");
 
 const command = new Command({
     name: "userinfo",

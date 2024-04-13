@@ -2,7 +2,7 @@ const { CommandInteraction, ActionRowBuilder, StringSelectMenuBuilder, StringSel
 const Pet = require("./Pet");
 const Collector = require("./Collector");
 const Embed = require("./Embed");
-const { ProgressBar, Sleep, GetRandomItem, PrettyCurrency, CreateInteractionFilter } = require("./functions");
+const { ProgressBar, Sleep, PrettyCurrency, CreateInteractionFilter } = require("./functions");
 const { Colores } = require("../resources");
 const { PetAttacksType, ShopTypes, EndReasons } = require("./Enums");
 const { FetchError } = require("../errors");
@@ -55,6 +55,7 @@ class PetCombat {
      * @return {Promise<Boolean>} Si se selecionó correctamente
      */
     async changePet(user) {
+        const member = this.#interaction.guild.members.cache.get(user.id);
         const playerNo = user.id === this.#interaction.user.id ? 0 : 1;
         let doc = playerNo === 0 ? this.userDoc : this.rivalDoc
 
@@ -64,7 +65,7 @@ class PetCombat {
                 .setComponents(
                     new StringSelectMenuBuilder()
                         .setCustomId("petCombat")
-                        .setPlaceholder(`Selecciona tu mascota, ${user.username}`)
+                        .setPlaceholder(`Selecciona tu mascota, ${member.displayName}`)
                 )
         ]
 
@@ -403,7 +404,7 @@ ${this.#bet ? `### Nadie perdió ${PrettyCurrency(this.#interaction.guild, this.
             case PetAttacksType.Basic:
                 let unlocked = new Chance().bool({ likelihood: this.#doc.settings.quantities.percentages.pets.basic_unlocked });
 
-                if (unlocked) this.#messages.push(GetRandomItem([
+                if (unlocked) this.#messages.push(new Chance().pickone([
                     `# **${this.pet.name}** se viene arriba`,
                     `# **${this.pet.name}** enloquece`,
                     `# **${this.pet.name}** se inspira`,
@@ -422,7 +423,7 @@ ${this.#bet ? `### Nadie perdió ${PrettyCurrency(this.#interaction.guild, this.
                 break;
 
             case PetAttacksType.Ultimate:
-                this.#messages.push(GetRandomItem([
+                this.#messages.push(new Chance().pickone([
                     `# **${this.pet.name}** FINALMENTE LO HACE`,
                     `# **${this.pet.name}** NO ESTÁ JUGANDO`,
                     `# **${this.pet.name}** QUIERE TERMINAR CON ESTO`,
@@ -479,7 +480,8 @@ ${this.#bet ? `### Nadie perdió ${PrettyCurrency(this.#interaction.guild, this.
             this.#messages.push(`### **${this.rivalpet.name}** -${removedHunger.toLocaleString("es-CO")} 🍗`);
         }
 
-        this.#messages.push(GetRandomItem([
+        // TODO: Agregar más dialogos de defensa
+        this.#messages.push(new Chance().pickone([
             `# **${this.pet.name}** tapa su cara`
         ]))
 

@@ -1,6 +1,6 @@
 const ms = require("ms");
 
-const { Command, Categories, Embed, GlobalDatasWork, DarkShop } = require("../../src/utils")
+const { Command, Embed, GlobalDatasWork, DarkShop } = require("../../src/utils")
 const { Colores } = require("../../src/resources")
 
 const command = new Command({
@@ -38,14 +38,14 @@ command.execute = async (interaction, models, params, client) => {
     if (tipo?.value) {
         let q = await GlobalDatas.getAll(tipo.value);
 
-        interaction.editReply({ embeds: [new Embed({ type: "success", data: { title: "Revisa la consola" } })] })
+        await interaction.editReply({ embeds: [new Embed({ type: "success", data: { title: "Revisa la consola" } })] })
 
         console.log("-- Consulta: '%s' --", tipo.value)
         return console.log(q)
     }
 
     if (!update) {
-        return interaction.editReply({ content: null, embeds: [embed] });
+        return await interaction.editReply({ content: null, embeds: [embed] });
     } else {
         let ds = new DarkShop(interaction.guild, interaction);
 
@@ -55,9 +55,13 @@ command.execute = async (interaction, models, params, client) => {
         return interaction.editReply({ content: "Interval de global datas ejecutado." })
             .then(m => {
                 setTimeout(() => {
-                    m.delete()
+                    m.delete().catch(err => {
+                        console.error("🔴 %s", err);
+                    });
                 }, ms("10s"));
-            });
+            }).catch(err => {
+                console.error("🔴 %s", err);
+            });;
     }
 }
 

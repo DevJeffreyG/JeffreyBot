@@ -156,6 +156,8 @@ class AutoRole {
                             new ErrorEmbed()
                                 .defDesc(`Hubo un error usando un AutoRole (\`${autoroleId}\`) por ${this.interaction.user.username}:${codeBlock("js", err)}`)
                         ]
+                    }).catch(err => {
+                        console.error("🔴 %s", err);
                     });
             }
         }

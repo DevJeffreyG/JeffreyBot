@@ -20,11 +20,10 @@ command.addOption({
 
 command.execute = async (interaction, models, params, client) => {
     const { comando, categoria } = params;
-    if (comando) return command.execGetHelp(interaction, comando, client);
+    if (comando) return await command.execGetHelp(interaction, comando, client);
 
     await interaction.deferReply({ ephemeral: true });
     const member = interaction.member;
-    const helpEmojiURL = client.EmojisObject.Check.url
     const doc = params.getDoc();
 
     const adminRoles = doc.getAdmins();
@@ -218,7 +217,7 @@ command.execGetHelp = async (interaction, commandHelp, client) => {
 
     if (!comando) throw new CommandNotFoundError(interaction, commandHelp.value);
 
-    return comando.getHelp(interaction);
+    return await comando.getHelp(interaction);
 }
 
 module.exports = command;

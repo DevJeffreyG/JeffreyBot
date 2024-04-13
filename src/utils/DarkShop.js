@@ -462,7 +462,7 @@ class DarkShop {
 
                 let memberDJ = this.guild.members.cache.find(x => x.id === user.user_id);
 
-                let deleted = memberDJ?.user.username ?? `<AUSENTE> (${user.user_id})`
+                let deleted = memberDJ?.displayName ?? `<AUSENTE> (${user.user_id})`
 
                 let log = new Embed()
                     .defColor(Colores.verde)

@@ -255,7 +255,7 @@ class Ticket {
         // CREAR CANAL  
         let channel = await category.children.create({
             name: channelName,
-            topic: `**—** Ticket creado por **${this.interaction.user.username}** (${time()})`,
+            topic: `**—** Ticket creado por **${this.interaction.member.displayName} (${this.interaction.user.username})** (${time()})`,
             permissionOverwrites: this.permissions
         });
 
@@ -320,7 +320,7 @@ class Ticket {
         ticket.end_reason = "FORCED";
         ticket.ended_by = interaction.user.id;
 
-        this.docGuild.save();
+        await this.docGuild.save();
         //interaction.message.channel.delete();
 
         // eliminar al autor del ticket del canal
@@ -331,9 +331,9 @@ class Ticket {
 
         await new Log(interaction)
             .setTarget(ChannelModules.StaffLogs)
-            .send({ content: `- **${interaction.user.username}** ha forzado el cierre del ticket: ${channel}` });
+            .send({ content: `- **${interaction.member.displayName}** ha forzado el cierre del ticket: ${channel}` });
 
-        return interaction.editReply({ content: `${this.client.Emojis.Check} Se cerró el Ticket.`, embeds: [], components: [] });
+        return await interaction.editReply({ content: `${this.client.Emojis.Check} Se cerró el Ticket.`, embeds: [], components: [] });
     }
 
     async #resolveTicket() {
@@ -371,16 +371,16 @@ class Ticket {
         ticket.end_reason = "RESOLVED";
         ticket.ended_by = interaction.user.id;
 
-        this.docGuild.save();
+        await this.docGuild.save();
 
-        interaction.editReply({ content: `${this.client.Emojis.Check} El Ticket se marcó como resuelto.`, embeds: [], components: [] });
+        await interaction.editReply({ content: `${this.client.Emojis.Check} El Ticket se marcó como resuelto.`, embeds: [], components: [] });
 
         await new Log(interaction)
             .setTarget(ChannelModules.StaffLogs)
             .send({ content: `- **${interaction.user.username}** ha marcado como resuelto el ticket: ${channel}` });
 
         // eliminar al autor del ticket del canal
-        return channel.permissionOverwrites.edit(ticket.created_by, {
+        return await channel.permissionOverwrites.edit(ticket.created_by, {
             "ViewChannel": false,
             "SendMessages": false
         });
@@ -429,11 +429,11 @@ class Ticket {
 
         let originalCreator = this.guild.members.cache.find(x => x.id === ticket.created_by);
 
-        interaction.editReply({ content: `${this.client.Emojis.Check} Se reabrió el ticket.`, embeds: [], components: [] });
+        await interaction.editReply({ content: `${this.client.Emojis.Check} Se reabrió el ticket.`, embeds: [], components: [] });
 
         await new Log(interaction)
             .setTarget(ChannelModules.StaffLogs)
-            .send({ content: `- **${interaction.user.username}** ha reabierto el ticket: ${channel}` });
+            .send({ content: `- **${interaction.member.displayName}** ha reabierto el ticket: ${channel}` });
 
         // mencionar al creador original
         return channel.send(`¡${originalCreator}! El STAFF ha vuelto a abrir tu ticket.`);

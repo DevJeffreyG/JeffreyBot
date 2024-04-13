@@ -1,4 +1,4 @@
-const { Command, Categories, Embed } = require("../../src/utils")
+const { Command, Embed } = require("../../src/utils")
 const { Colores } = require("../../src/resources")
 
 const command = new Command({
@@ -61,7 +61,7 @@ command.execute = async (interaction, models, params, client) => {
     switch (subcommand) {
         case "emoji": {
             const emoji = guild.emojis.cache.find(x => x.name === name);
-            if (!emoji) return interaction.editReply({ content: `No encontré ese emoji, verifica que hayas escrito bien el nombre.` });
+            if (!emoji) return await interaction.editReply({ content: `No encontré ese emoji, verifica que hayas escrito bien el nombre.` });
 
             let finalEmbed = new Embed()
                 .defImage(emoji.url)
@@ -72,7 +72,7 @@ command.execute = async (interaction, models, params, client) => {
 **—** Emoji del server: \`${guild.name}\`.`)
                 .defColor(Colores.verde);
 
-            return interaction.editReply({ content: null, embeds: [finalEmbed] });
+            return await interaction.editReply({ content: null, embeds: [finalEmbed] });
         }
 
         case "role": {
@@ -86,7 +86,7 @@ command.execute = async (interaction, models, params, client) => {
 **—** Role del servidor: \`${guild.name}\`.`)
                 .defColor(role.hexColor);
 
-            return interaction.editReply({ content: null, embeds: [finalEmbed] });
+            return await interaction.editReply({ content: null, embeds: [finalEmbed] });
         }
     }
 }

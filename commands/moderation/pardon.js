@@ -1,6 +1,6 @@
-const { Command, Categories, Embed, Confirmation, Log, LogReasons, ChannelModules, SendDirect, DirectMessageType } = require("../../src/utils")
+const { Command, Embed, Confirmation, Log, LogReasons, ChannelModules, SendDirect, DirectMessageType } = require("../../src/utils")
 const { Colores } = require("../../src/resources");
-const { DMNotSentError, FetchError, DoesntExistsError } = require("../../src/errors");
+const { FetchError, DoesntExistsError } = require("../../src/errors");
 const command = new Command({
     name: "pardon",
     desc: "Eliminar un softwarn o un warn por su id"

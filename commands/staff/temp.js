@@ -93,11 +93,11 @@ command.execute = async (interaction, models, params, client) => {
                 ])
             }
 
-            return interaction.editReply({
+            return await interaction.editReply({
                 embeds: [
                     new Embed({
                         type: "success", data: {
-                            desc: `Agregado el Rol Temporal a **${usuario.user.username}** por ${new HumanMs(duration).human}`
+                            desc: `Agregado el Rol Temporal a **${usuario.member.displayName}** por ${new HumanMs(duration).human}`
                         }
                     })
                 ]
@@ -113,7 +113,7 @@ command.execute = async (interaction, models, params, client) => {
             let multi = valor.value;
 
             let toConfirm = [
-                `**${usuario.user.username}** será BENEFICIADO AÚN MÁS si aplica este boost`,
+                `**${usuario.member.displayName} (${usuario.user.username})** será BENEFICIADO AÚN MÁS si aplica este boost`,
                 `¿Estás segur@ de proseguir aún así?`
             ];
 
@@ -137,11 +137,11 @@ command.execute = async (interaction, models, params, client) => {
                 ])
             }
 
-            return interaction.editReply({
+            return await interaction.editReply({
                 embeds: [
                     new Embed({
                         type: "success", data: {
-                            desc: `Agregado el Boost a **${usuario.user.username}** por ${new HumanMs(duration).human}`
+                            desc: `Agregado el Boost a **${usuario.member.displayName}** por ${new HumanMs(duration).human}`
                         }
                     })
                 ]

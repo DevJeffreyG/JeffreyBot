@@ -4,7 +4,7 @@ const { CustomElements, Users } = require("mongoose").models;
 const { CommandInteraction, ModalSubmitInteraction, GuildMember, Guild, bold } = require("discord.js");
 
 const Embed = require("./Embed");
-const { BadParamsError, DoesntExistsError, DMNotSentError } = require("../errors");
+const { BadParamsError, DoesntExistsError } = require("../errors");
 const { Enum, BoostTypes, BoostObjetives, ShopTypes, DirectMessageType, TrophyRequirements } = require("./Enums");
 const { LimitedTime, FindNewId, PrettyCurrency, SendDirect } = require("./functions");
 const { Colores } = require("../resources");

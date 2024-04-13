@@ -1,5 +1,5 @@
 const { ChannelType, PermissionsBitField, OverwriteType } = require("discord.js");
-const { Command, Categories, Confirmation, Log, LogReasons, ChannelModules, ErrorEmbed } = require("../../src/utils");
+const { Command, Confirmation, Log, LogReasons, ChannelModules, ErrorEmbed } = require("../../src/utils");
 const { DiscordLimitationError } = require("../../src/errors");
 
 const command = new Command({
@@ -34,7 +34,7 @@ command.execute = async (interaction, models, params, client) => {
 
     try {
         await lock()
-        return interaction.editReply({ content: `${client.Emojis.Check} Listo` })
+        return await interaction.editReply({ content: `${client.Emojis.Check} Listo` })
     } catch (err) {
         console.error("🔴 %s", err);
         throw discordError;
@@ -111,12 +111,15 @@ command.execute = async (interaction, models, params, client) => {
         await channel.edit({ permissionOverwrites: newChannelPerms, reason: `[BULK] Lockdown por ${interaction.user.username}` })
 
         doc.data.locked_channels.push(newLock);
-        doc.save();
+        await doc.save();
 
         await new Log(interaction)
             .setReason(LogReasons.Settings)
             .setTarget(ChannelModules.ModerationLogs)
-            .send({ content: `- **${interaction.user.username}** inició lockdown en ${interaction.channel}.` });
+            .send({ content: `- **${interaction.user.username}** inició lockdown en ${interaction.channel}.` })
+            .catch(err => {
+                console.error("🔴 %s", err);
+            });
     }
 
     async function unlock() {
@@ -125,7 +128,7 @@ command.execute = async (interaction, models, params, client) => {
         /* interaction.editReply({ content: `${Loading} Habilitando invitaciones` })
         try { await guild.edit({ features: interaction.guild.features.filter(x => x != GuildFeature.InvitesDisabled) }); } catch (err) { } */
 
-        interaction.editReply({ content: `${Loading} Regresando los permisos al canal` })
+        await interaction.editReply({ content: `${Loading} Regresando los permisos al canal` })
 
         const channel = interaction.channel;
 
@@ -142,6 +145,8 @@ command.execute = async (interaction, models, params, client) => {
                     new ErrorEmbed()
                         .defDesc(`**No se encontró información de lockdown para este canal en la base de datos**`)
                 ]
+            }).catch(err => {
+                console.error("🔴 %s", err);
             });
 
         // traducir lo que está en la base de datos para poder cambiarlo
@@ -165,14 +170,14 @@ command.execute = async (interaction, models, params, client) => {
         let lockedIndex = locked.findIndex(x => x.channel_id === channel.id);
 
         doc.data.locked_channels.splice(lockedIndex);
-        doc.save();
+        await doc.save();
 
         await new Log(interaction)
             .setReason(LogReasons.Settings)
             .setTarget(ChannelModules.ModerationLogs)
             .send({ content: `- **${interaction.user.username}** detuvo el lockdown en ${interaction.channel}.` });
 
-        return interaction.editReply({ content: `${client.Emojis.Check} Listo` })
+        return await interaction.editReply({ content: `${client.Emojis.Check} Listo` })
     }
 }
 

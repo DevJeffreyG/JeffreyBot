@@ -45,6 +45,7 @@ command.execute = async (interaction, models, params, client) => {
             ]
         }
     })
+    
     embeds.push(success);
 
     if (total > money) throw new EconomyError(interaction, [

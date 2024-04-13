@@ -1,4 +1,4 @@
-const { Command, Categories, Embed } = require("../../src/utils")
+const { Command, Embed } = require("../../src/utils")
 const ms = require("ms");
 const { codeBlock } = require("discord.js");
 const { DiscordLimitationError } = require("../../src/errors");
@@ -44,7 +44,7 @@ command.execute = async (interaction, models, params, client) => {
         throw new DiscordLimitationError(interaction, "timeout", ["Hubo un error intentando expulsar temporalmente a este usuario", codeBlock(err)]);
     }
 
-    return interaction.editReply({
+    await interaction.editReply({
         embeds: [
             new Embed({
                 type: "success",

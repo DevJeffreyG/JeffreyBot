@@ -120,7 +120,7 @@ class Shop {
                 this.setCurrency("Currency")
                 this.setInfo({
                     name: `Tienda Externa de ${this.interaction.guild.name}`,
-                    desc: `**—** ¡Bienvenid@ a la tienda externa! Para comprar items usa ${this.client.mentionCommand("exbuy")}.\n**—** Puedes interactuar con cosas en la vida real con estos items.`,
+                    desc: `**—** ¡Bienvenid@ a la tienda externa! Para comprar items usa ${this.client.mentionCommand("exbuy")}.\n**—** Interactúa con un PC remotamente con estos items.`,
                     color: Colores.verde,
                     model: EXShops,
                     query: this.interaction.guild.id

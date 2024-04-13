@@ -67,11 +67,11 @@ command.execute = async (interaction, models, params, client) => {
 
     switch (subgroup) {
         case "currency":
-            command.execCurrency(interaction, models, { subcommand, currency }, client)
+            await command.execCurrency(interaction, models, { subcommand, currency }, client)
             break;
 
         case "darkcurrency":
-            command.execDarkCurrency(interaction, models, { subcommand, darkcurrency }, client)
+            await command.execDarkCurrency(interaction, models, { subcommand, darkcurrency }, client)
             break;
     }
 }
@@ -86,13 +86,13 @@ command.execCurrency = async (interaction, models, params, client) => {
     await user.addCurrency(cantidad.value)
 
     let embed = new Embed()
-        .defAuthor({ text: `¡Dinero para ti, ${usuario.member.user.username}!`, icon: usuario.member.guild.iconURL() })
+        .defAuthor({ text: `¡Dinero para ti, ${usuario.member.displayName}!`, icon: usuario.member.guild.iconURL() })
         .defDesc(`**+** ${PrettyCurrency(interaction.guild, cantidad.value)}
 — ${PrettyCurrency(interaction.guild, user.getCurrency())}`)
         .defColor(Colores.verde)
         .defThumbnail(usuario.member.displayAvatarURL());
 
-    return interaction.editReply({ content: null, embeds: [embed] });
+    return await interaction.editReply({ content: null, embeds: [embed] });
 }
 
 command.execDarkCurrency = async (interaction, models, params, client) => {
@@ -104,13 +104,13 @@ command.execDarkCurrency = async (interaction, models, params, client) => {
     await user.addDarkCurrency(cantidad.value);
 
     let embed = new Embed()
-        .defAuthor({ text: `¡Dinero para ti, ${usuario.member.user.username}!`, icon: usuario.member.guild.iconURL() })
+        .defAuthor({ text: `¡Dinero para ti, ${usuario.member.displayName}!`, icon: usuario.member.guild.iconURL() })
         .defDesc(`**+** ${PrettyCurrency(interaction.guild, cantidad.value, { name: "DarkCurrency" })}
 — ${PrettyCurrency(interaction.guild, user.getDarkCurrency(), { name: "DarkCurrency" })}`)
         .defColor(Colores.verde)
         .defThumbnail(usuario.member.displayAvatarURL());
 
-    return interaction.editReply({ content: null, embeds: [embed] });
+    return await interaction.editReply({ content: null, embeds: [embed] });
 }
 
 module.exports = command;

@@ -1,4 +1,4 @@
-const { Command, Categories, Confirmation, Embed, ErrorEmbed } = require("../../src/utils");
+const { Command, Confirmation, Embed, ErrorEmbed } = require("../../src/utils");
 const moment = require("moment-timezone");
 const { time } = require("discord.js");
 
@@ -45,12 +45,12 @@ command.execute = async (interaction, models, params, client) => {
     switch (subcommand) {
         case "edit":
             const { edit } = params;
-            command.execEdit(interaction, models, { user, dia: edit.dia.value, mes: edit.mes.value }, client);
+            await command.execEdit(interaction, models, { user, dia: edit.dia.value, mes: edit.mes.value }, client);
             break;
 
         case "lock":
-            if (user.data.birthday.locked) return interaction.editReply({ embeds: [new ErrorEmbed().defDesc("Aún no ha pasado un año, no puedes continuar.")] });
-            command.lock(interaction, models, user, client)
+            if (user.data.birthday.locked) return await interaction.editReply({ embeds: [new ErrorEmbed().defDesc("Aún no ha pasado un año, no puedes continuar.")] });
+            await command.lock(interaction, models, user, client)
             break;
     }
 }
@@ -80,9 +80,9 @@ command.lock = async (interaction, models, user, client) => {
     userBD.month = momentBD.month();
     userBD.locked = true;
     userBD.locked_since = hoy;
-    user.save();
+    await user.save();
 
-    confirmation.editReply({
+    await confirmation.editReply({
         content: null, embeds: [
             new Embed({
                 type: "success",
@@ -101,14 +101,14 @@ command.execEdit = async (interaction, models, data, client) => {
     let lockedSince = userBD.locked_since;
 
     if (moment().isAfter(moment(lockedSince).add(1, "year"))) {
-        interaction.editReply(`${client.Emojis.Thinking} Hmmm, si estás usando este comando, ¿será para cambiar algo? he quitado el bloqueo de tu fecha de cumpleaños, reactívala cuando gustes.`);
+        await interaction.editReply(`${client.Emojis.Thinking} Hmmm, si estás usando este comando, ¿será para cambiar algo? he quitado el bloqueo de tu fecha de cumpleaños, reactívala cuando gustes.`);
 
         userBD.locked = false;
         userBD.locked_since = null;
         await data.user.save();
     }
 
-    if (userBD.locked) return interaction.editReply({ embeds: [new ErrorEmbed().defDesc("Aún no ha pasado un año, no puedes continuar.")] });
+    if (userBD.locked) return await interaction.editReply({ embeds: [new ErrorEmbed().defDesc("Aún no ha pasado un año, no puedes continuar.")] });
 
     let monthString = data.mes.charAt(0).toUpperCase() + data.mes.slice(1);
 
@@ -121,7 +121,7 @@ command.execEdit = async (interaction, models, data, client) => {
 
     await data.user.save();
 
-    return interaction.editReply({
+    return await interaction.editReply({
         content: null, embeds: [
             new Embed({
                 type: "success"

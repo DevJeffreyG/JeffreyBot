@@ -1,6 +1,8 @@
-const { Command, Categories, ErrorEmbed, Embed, Cooldowns, GetRandomItem } = require("../../src/utils")
+const { Command, Embed, Cooldowns } = require("../../src/utils")
 const { Colores } = require("../../src/resources");
 const { SelfExec } = require("../../src/errors");
+
+const Chance = require("chance");
 
 const command = new Command({
     name: "rep",
@@ -18,7 +20,7 @@ command.addOption({
 
 command.execute = async (interaction, models, params, client) => {
     const guild = interaction.guild;
-    const author = interaction.user;
+    const author = interaction.member;
 
     const { usuario } = params;
     const { Users } = models;
@@ -32,7 +34,7 @@ command.execute = async (interaction, models, params, client) => {
 
     let cool = await user_author.cooldown(Cooldowns.Rep);
 
-    if (cool) return interaction.reply({
+    if (cool) return await interaction.reply({
         content: null, embeds: [
             new Embed({ type: "cooldown", data: { cool } })
         ]
@@ -47,12 +49,12 @@ command.execute = async (interaction, models, params, client) => {
         "Lo merecerán, eso está claro"
     ];
 
-    return interaction.reply({
+    await interaction.reply({
         content: `${author} ➡️ ${member} ✨`, embeds: [
             new Embed()
                 .defAuthor({ text: "☄️ +Rep", title: true })
-                .defDesc(`**¡${author} le ha dado un punto de reputación a ${member}!**
-__✨ ${GetRandomItem(messages)} ✨__`)
+                .defDesc(`**¡${author.displayName} le ha dado un punto de reputación a ${member.displayName}!**
+__✨ ${new Chance().pickone(messages)} ✨__`)
                 .defColor(Colores.verde)
                 .defThumbnail(member.displayAvatarURL())
         ]

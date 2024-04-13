@@ -1,6 +1,5 @@
 const { PermissionFlagsBits, SlashCommandBuilder, SlashCommandSubcommandGroupBuilder, SlashCommandSubcommandBuilder } = require('discord.js');
 
-const Embed = require("./Embed");
 const Colores = require("../resources/colores.json");
 const { Categories } = require('./Enums');
 const InteractivePages = require('./InteractivePages');

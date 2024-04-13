@@ -1,4 +1,4 @@
-const { Command, Categories, Embed } = require("../../src/utils")
+const { Command, Embed } = require("../../src/utils")
 
 const command = new Command({
     name: "hackban",
@@ -29,7 +29,7 @@ command.execute = async (interaction, models, params, client) => {
 
     await interaction.guild.members.ban(user, { reason })
 
-    return interaction.editReply({
+    return await interaction.editReply({
         embeds: [
             new Embed({
                 type: "success",

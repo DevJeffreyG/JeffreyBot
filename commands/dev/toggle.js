@@ -49,11 +49,11 @@ command.execute = async (interaction, models, params, client) => {
             reason: reason
         }).save();
 
-        return interaction.editReply({ embeds: [added] })
+        return await interaction.editReply({ embeds: [added] })
     } else {
         toggle.deleteOne();
 
-        return interaction.editReply({ embeds: [removed] })
+        return await interaction.editReply({ embeds: [removed] })
     }
 }
 

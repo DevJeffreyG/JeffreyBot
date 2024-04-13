@@ -1,4 +1,4 @@
-const { Command, Embed, GetRandomItem, Cooldowns, ErrorEmbed, PrettyCurrency, MinMaxInt } = require("../../src/utils")
+const { Command, Embed, Cooldowns, ErrorEmbed, PrettyCurrency, MinMaxInt } = require("../../src/utils")
 const Chance = require("chance");
 const { Responses, Colores } = require("../../src/resources");
 
@@ -51,8 +51,8 @@ command.execute = async (interaction, models, params, client) => {
     const failedValue = Math.round(user.getCurrency() * failedPerc);
 
     // Embed Text
-    const successResponse = GetRandomItem(Responses.rob.success);
-    const failResponse = GetRandomItem(Responses.rob.fail);
+    const successResponse = new Chance().pickone(Responses.rob.success);
+    const failResponse = new Chance().pickone(Responses.rob.fail);
     const successText = replace(successResponse.text)
     const failedText = replace(failResponse.text)
 
@@ -84,7 +84,7 @@ command.execute = async (interaction, models, params, client) => {
 
     if (suggester)
         embed.defFooter({
-            text: `• Respuesta sugerida por ${suggester.user?.username ?? "un usuario"}`,
+            text: `• Respuesta sugerida por ${suggester?.displayName ?? "un usuario"}`,
             icon: typeof suggester != "boolean" ? suggester.displayAvatarURL({ dynamic: true }) : interaction.guild.iconURL({ dynamic: true })
         });
 

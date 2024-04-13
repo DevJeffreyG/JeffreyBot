@@ -252,7 +252,7 @@ command.execute = async (interaction, models, params, client) => {
 
             await docGuild.save();
 
-            interaction.editReply({
+            await interaction.editReply({
                 embeds: [new Embed({
                     type: "success",
                     data: {
@@ -273,7 +273,7 @@ command.execute = async (interaction, models, params, client) => {
 
             await docGuild.save();
 
-            interaction.editReply({
+            await interaction.editReply({
                 embeds: [new Embed({
                     type: "success"
                 })]
@@ -339,7 +339,7 @@ ${codeBlock("markdown", expl.value)}`,
 
             await doc.save();
 
-            return confirmation.editReply({
+            return await confirmation.editReply({
                 embeds: [
                     new Embed({
                         type: "success",
@@ -400,7 +400,7 @@ ${codeBlock("markdown", expl.value)}`,
                 if (deleted) totalUsers += 1
             }
 
-            return confirmation.editReply({
+            return await confirmation.editReply({
                 embeds: [
                     new Embed({
                         type: "success",
@@ -423,7 +423,7 @@ ${codeBlock("markdown", expl.value)}`,
             regla.position = pos.value;
             await doc.save();
 
-            return interaction.editReply({
+            return await interaction.editReply({
                 embeds: [
                     new Embed({
                         type: "success",
@@ -440,7 +440,7 @@ ${codeBlock("markdown", expl.value)}`,
             regla.desc = desc.value;
             await doc.save();
 
-            return interaction.editReply({
+            return await interaction.editReply({
                 embeds: [
                     new Embed({
                         type: "success",
@@ -458,7 +458,7 @@ ${codeBlock("markdown", expl.value)}`,
             regla.expl = expl.value;
             await doc.save();
 
-            return interaction.editReply({
+            return await interaction.editReply({
                 embeds: [
                     new Embed({
                         type: "success",
@@ -498,7 +498,7 @@ ${codeBlock("markdown", expl.value)}`,
                 addon: `**— {name}**\n**▸ Explicación**: {expl}\n**▸ Descripción**: {desc}\n**▸ Posición**: {pos}\n**▸ ID**: {id}\n\n`
             }, items, 3);
 
-            return interactive.init(interaction);
+            return await interactive.init(interaction);
         }
     }
 }
@@ -513,7 +513,7 @@ command.execCooldowns = async (interaction, models, doc, params) => {
             // modulo, cooldown
             doc.settings.cooldowns[modulo.value] = cooldown.value;
 
-            interaction.editReply({
+            await interaction.editReply({
                 embeds: [new Embed({
                     type: "success"
                 })]
@@ -540,7 +540,7 @@ command.execCooldowns = async (interaction, models, doc, params) => {
                 id: newId
             })
 
-            interaction.editReply({
+            await interaction.editReply({
                 embeds: [new Embed({
                     type: "success",
                     data: {

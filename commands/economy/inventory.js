@@ -1,6 +1,5 @@
 const { time, inlineCode } = require("discord.js")
-const { Command, Embed, ShopTypes, Enum, Shop, InteractivePages, ItemTypes, HumanMs, PrettyCurrency } = require("../../src/utils")
-const { FetchError } = require("../../src/errors");
+const { Command, ShopTypes, Enum, Shop, InteractivePages, HumanMs, PrettyCurrency } = require("../../src/utils");
 
 const command = new Command({
     name: "inventario",

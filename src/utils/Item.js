@@ -8,7 +8,7 @@ const Chance = require("chance");
 const { ItemTypes, ItemObjetives, ItemActions, ItemEffects, LogReasons, ChannelModules, ShopTypes, PetAttacksType, Enum, BoostObjetives } = require("./Enums");
 const { BadCommandError, AlreadyExistsError, DoesntExistsError, FetchError, ExecutionError } = require("../errors");
 
-const { FindNewId, LimitedTime, Subscription, WillBenefit, GetRandomItem, isDeveloper } = require("./functions");
+const { FindNewId, LimitedTime, Subscription, WillBenefit, isDeveloper } = require("./functions");
 
 const Log = require("./Log");
 const Embed = require("./Embed");
@@ -130,7 +130,7 @@ class Item {
 
     /**
      * @param {GuildMember} [qvictim = null] The member affected (darkshop)
-     * @returns 
+     * @returns {Promise<void>}
      */
     async use(qvictim = this.interaction.member) {
         if (!this.#verify()) return false;
@@ -157,11 +157,23 @@ class Item {
         if (work) {
             if (this.isDarkShop) {
                 await this.interaction.editReply({ content: `${this.interaction.client.Emojis.Loading} Usando...` })
-                await this.interaction.followUp({ ephemeral: true, embeds: [this.success], components: [], content: null });
+                    .catch(err => {
+                        console.error("🔴 %s", err);
+                    });
+                await this.interaction.followUp({ ephemeral: true, embeds: [this.success], components: [], content: null })
+                    .catch(err => {
+                        console.error("🔴 %s", err);
+                    });
 
-                this.interaction.deleteReply()
+                await this.interaction.deleteReply()
+                    .catch(err => {
+                        console.error("🔴 %s", err);
+                    });
             } else {
-                this.interaction.editReply({ embeds: [this.success], components: [], content: null });
+                await this.interaction.editReply({ embeds: [this.success], components: [], content: null })
+                    .catch(err => {
+                        console.error("🔴 %s", err);
+                    });;
             }
             console.log("🟩 Item usado con éxito.")
         }
@@ -680,7 +692,7 @@ class Item {
         if (!await this.#darkshopWork()) return false;
 
         let filtered = this.boost_objetive ? this.user.data.temp_roles.filter(x => x.special.objetive === this.boost_objetive) : this.user.data.temp_roles;
-        const temprole = GetRandomItem(filtered);
+        const temprole = new Chance().pickone(filtered);
 
         const role = this.interaction.guild.roles.cache.find(x => x.id === temprole.role_id);
 
@@ -729,19 +741,19 @@ class Item {
 
         let skipped = new Embed()
             .defAuthor({ text: `Interacción`, icon: this.interaction.client.EmojisObject.DarkShop.url })
-            .defDesc(`**—** ¡**${this.interaction.user.username}** se ha volado la Firewall  y ha usado el item \`${this.item.name}\` en **${this.member.user.username}**!`)
+            .defDesc(`**—** ¡**${this.interaction.member.displayName}** se ha volado la Firewall  y ha usado el item \`${this.item.name}\` en **${this.member.displayName}**!`)
             .defColor(Colores.negro)
             .defFooter({ text: `${this.item.name} para ${this.member.user.username}`, timestamp: true });
 
         let success = new Embed()
             .defAuthor({ text: `Interacción`, icon: this.interaction.client.EmojisObject.DarkShop.url })
-            .defDesc(`**—** ¡**${this.interaction.user.username}** ha usado el item \`${this.item.name}\` en **${this.member.user.username}**!`)
+            .defDesc(`**—** ¡**${this.interaction.member.displayName}** ha usado el item \`${this.item.name}\` en **${this.member.displayName}**!`)
             .defColor(Colores.negro)
             .defFooter({ text: `${this.item.name} para ${this.member.user.username}`, timestamp: true });
 
         let fail = new Embed()
             .defAuthor({ text: `Interacción`, icon: this.interaction.client.EmojisObject.DarkShop.url })
-            .defDesc(`**—** ¡**${this.interaction.user.username}** ha querido usar el item \`${this.item.name}\` en **${this.member.user.username}** pero NO HA FUNCIONADO!`)
+            .defDesc(`**—** ¡**${this.interaction.member.displayName}** ha querido usar el item \`${this.item.name}\` en **${this.member.displayName}** pero NO HA FUNCIONADO!`)
             .defColor(Colores.negro)
             .defFooter({ text: `${this.item.name} para ${this.member.user.username}`, timestamp: true });
 
@@ -772,21 +784,29 @@ class Item {
                 await this.victim.save();
 
                 // enviar embed
-                dsEvents?.send({ content: `**${this.interaction.user.username}** ➡️ **${this.member}**.`, embeds: [fail] })
+                dsEvents?.send({ content: `**${this.interaction.user.username}** ➡️ **${this.member}**.`, embeds: [fail] }).catch(err => {
+                    console.error("🔴 %s", err);
+                });
 
                 await this.removeItemFromInv() // como es fallido, no llega al codigo base para que se elimine el item
                 return false;
             } else { // se salta la firewall
                 console.log("🟢 Se ha saltado la Firewall")
-                dsEvents?.send({ content: `**${this.interaction.user.username}** ➡️ **${this.member}**.`, embeds: [skipped] })
+                dsEvents?.send({ content: `**${this.interaction.user.username}** ➡️ **${this.member}**.`, embeds: [skipped] }).catch(err => {
+                    console.error("🔴 %s", err);
+                });
                 return true
             }
         } else { // no tiene firewall
             if (this.victim.economy.global.level >= this.doc.settings.quantities.darkshop_level) {
-                dsEvents?.send({ content: `**${this.interaction.user.username}** ➡️ **${this.member}**.`, embeds: [success] })
+                dsEvents?.send({ content: `**${this.interaction.user.username}** ➡️ **${this.member}**.`, embeds: [success] }).catch(err => {
+                    console.error("🔴 %s", err);
+                });
                 return true
             } else { // ni siquiera es parte de la red de la darkshop
-                dsEvents?.send({ content: `**${this.interaction.user.username}** ➡️ **${this.member}**.`, embeds: [fail] })
+                dsEvents?.send({ content: `**${this.interaction.user.username}** ➡️ **${this.member}**.`, embeds: [fail] }).catch(err => {
+                    console.error("🔴 %s", err);
+                });
 
                 return false // para que no se elimine el item
             }

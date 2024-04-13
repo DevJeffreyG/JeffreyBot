@@ -169,13 +169,13 @@ command.execute = async (interaction, models, params, client) => {
 
     switch (subcommand) {
         case "item-list":
-            return shop.showAllItems();
+            return await shop.showAllItems();
 
         case "add-discount":
-            return shop.addDiscount(nivel.value, descuento.value);
+            return await shop.addDiscount(nivel.value, descuento.value);
 
         case "add-item":
-            return shop.addItem(params[subcommand]);
+            return await shop.addItem(params[subcommand]);
 
         case "del-item":
             let confirmation = await Confirmation("Eliminar item", [
@@ -185,7 +185,7 @@ command.execute = async (interaction, models, params, client) => {
             ], interaction)
 
             if (!confirmation) return;
-            return shop.removeItem(id.value);
+            return await shop.removeItem(id.value);
         case "use-info":
             return await shop.editUse(params[subcommand])
 

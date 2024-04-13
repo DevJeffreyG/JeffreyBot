@@ -1,5 +1,5 @@
 const { codeBlock } = require("discord.js");
-const { Command, Categories } = require("../../src/utils")
+const { Command } = require("../../src/utils")
 
 const command = new Command({
     name: "dbuser",
@@ -35,7 +35,7 @@ command.execute = async (interaction, models, params, client) => {
         }
     }
 
-    interaction.editReply({ content: `**${miembro.user.username}**\n${codeBlock("json", query)}` });
+    await interaction.editReply({ content: `**${miembro.member.displayName} (${miembro.user.username})**\n${codeBlock("json", query)}` });
 }
 
 module.exports = command;

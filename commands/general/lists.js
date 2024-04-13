@@ -58,7 +58,7 @@ command.execute = async (interaction, models, params, client) => {
             }
 
             const interactive = new InteractivePages({
-                title: `Cooldowns de ${interaction.user.username}`,
+                title: `Tus Cooldowns`,
                 author_icon: interaction.user.avatarURL({ dynamic: true }),
                 color: Colores.verde,
                 addon: `**— {name}**\n▸ {mention}\n▸ Eso es en **{exact}**.\n\n`,

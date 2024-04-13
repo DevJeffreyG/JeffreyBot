@@ -1,6 +1,6 @@
 const { Command, Embed, VaultWork, PrettyCurrency } = require("../../src/utils");
 const { Colores } = require("../../src/resources");
-const chance = require("chance");
+const Chance = require("chance");
 
 const command = new Command({
     name: "vault",
@@ -39,14 +39,14 @@ command.execute = async (interaction, models, params, client) => {
             "Y a día de hoy siguen los mismos códigos."
         ];
 
-        let relleno = respRelleno[Math.floor(Math.random() * respRelleno.length)];
+        let relleno = new Chance().pickone(respRelleno);
 
         let notCodeEmbed = new Embed()
             .defDesc(relleno)
             .defColor(Colores.blanco);
 
-        if (!isACode) return interaction.editReply({ embeds: [notCodeEmbed] });
-        return VaultWork(vault, user, interaction, notCodeEmbed);
+        if (!isACode) return await interaction.editReply({ embeds: [notCodeEmbed] });
+        return await VaultWork(vault, user, interaction, notCodeEmbed);
     }
 
     let nope = [
@@ -73,7 +73,7 @@ command.execute = async (interaction, models, params, client) => {
         `Seguro que con ${client.mentionCommand("roulette")} te va mejor, anda`
     ];
 
-    let reply = nope[Math.floor(Math.random() * nope.length)];
+    let reply = new Chance().pickone(nope);
 
     reply = new Embed()
         .defColor(Colores.negro)
@@ -87,15 +87,15 @@ command.execute = async (interaction, models, params, client) => {
         "Tuviste suerte, pero la próxima no será tan fácil conseguir { PRIZE }."
     ];
 
-    let finale = gg[Math.floor(Math.random() * gg.length)];
+    let finale = new Chance().pickone(gg);
 
     const f = x => x.code === code.toUpperCase();
 
     const codeInVault = vault.find(f);
-    if (!codeInVault) return interaction.editReply({ embeds: [reply] });
+    if (!codeInVault) return await interaction.editReply({ embeds: [reply] });
 
     // revisar que no tenga ya el code
-    if (user.data.unlockedVaults.find(x => x === codeInVault.id)) return interaction.editReply({ embeds: [reply] }); // lo tiene
+    if (user.data.unlockedVaults.find(x => x === codeInVault.id)) return await interaction.editReply({ embeds: [reply] }); // lo tiene
 
     // no lo tiene...
     await user.addCurrency(codeInVault.reward);
@@ -108,7 +108,7 @@ command.execute = async (interaction, models, params, client) => {
     user.data.unlockedVaults.push(codeInVault.id);
     await user.save();
 
-    return interaction.editReply({ embeds: [ggEmbed] });
+    return await interaction.editReply({ embeds: [ggEmbed] });
 }
 
 module.exports = command;

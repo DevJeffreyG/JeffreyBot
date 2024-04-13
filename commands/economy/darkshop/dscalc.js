@@ -57,7 +57,7 @@ command.execute = async (interaction, models, params, client) => {
 
     if (!darkcurrency && total > 0 && !inflacion && moment().day() === 0) embeds.push(allConversion)
 
-    return interaction.editReply({ embeds });
+    return await interaction.editReply({ embeds });
 }
 
 module.exports = command;

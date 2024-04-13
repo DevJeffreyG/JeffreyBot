@@ -1,6 +1,6 @@
 const { AlreadyExistsError, DoesntExistsError } = require("../../../src/errors");
 const { Colores } = require("../../../src/resources");
-const { Command, Confirmation, InteractivePages, PrettyCurrency } = require("../../../src/utils");
+const { Command, Confirmation, InteractivePages, PrettyCurrency, Embed } = require("../../../src/utils");
 
 const command = new Command({
     name: "admin-vault",
@@ -93,7 +93,7 @@ command.execute = async (interaction, models, params, client) => {
                     ]
                 }
             })
-            return interaction.editReply({ content: null, embeds: [e] })
+            return await interaction.editReply({ content: null, embeds: [e] })
         }
 
         case "remove": {
@@ -115,7 +115,7 @@ command.execute = async (interaction, models, params, client) => {
             doc.data.vault_codes.splice(index, 1);
             await doc.save();
 
-            return interaction.editReply({
+            return await interaction.editReply({
                 embeds: [
                     new Embed({
                         type: "success",
@@ -138,7 +138,7 @@ command.execute = async (interaction, models, params, client) => {
 **—** ID: \`${vaultCode.id}\`.`)
                     .defColor(Colores.verde);
 
-                return interaction.editReply({ embeds: [e] })
+                return await interaction.editReply({ embeds: [e] })
             }
 
             if (pista) {
@@ -164,7 +164,7 @@ command.execute = async (interaction, models, params, client) => {
 
             await doc.save();
 
-            return interaction.editReply({
+            return await interaction.editReply({
                 embeds: [
                     new Embed({
                         type: "success",
@@ -193,7 +193,7 @@ command.execute = async (interaction, models, params, client) => {
                 addon: `**— {code}**\n**Premio: {reward}**\n**Pistas:** \`\`\`{hints}\`\`\`\n**ID:** {id}\n\n`
             }, items, 3)
 
-            return interactive.init(interaction);
+            return await interactive.init(interaction);
         }
     }
 }

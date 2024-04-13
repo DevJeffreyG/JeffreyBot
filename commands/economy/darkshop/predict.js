@@ -1,4 +1,4 @@
-const { Command, Embed, DarkShop, GetRandomItem, Cooldowns, ErrorEmbed } = require("../../../src/utils")
+const { Command, Embed, DarkShop, Cooldowns, ErrorEmbed } = require("../../../src/utils")
 const { Colores } = require("../../../src/resources")
 
 const Chance = require("chance")
@@ -17,7 +17,7 @@ command.addOption({
 
 command.execute = async (interaction, models, params, client) => {
     if (moment().day() === 0) {
-        return interaction.reply({ ephemeral: true, embeds: [new ErrorEmbed().defDesc("No es buena idea hacer eso el domingo.")] })
+        return await interaction.reply({ ephemeral: true, embeds: [new ErrorEmbed().defDesc("No es buena idea hacer eso el domingo.")] })
     }
 
     const { compartir } = params;
@@ -26,7 +26,7 @@ command.execute = async (interaction, models, params, client) => {
 
     const user = params.getUser();
 
-    if (user.getDarkCurrency() === 0) return interaction.editReply({ embeds: [new ErrorEmbed().defDesc(`No tienes nada invertido, mejor esperar al domingo y usar ${client.mentionCommand("dschange")}.`)] })
+    if (user.getDarkCurrency() === 0) return await interaction.editReply({ embeds: [new ErrorEmbed().defDesc(`No tienes nada invertido, mejor esperar al domingo y usar ${client.mentionCommand("dschange")}.`)] })
 
     const darkshop = new DarkShop(interaction.guild, interaction)
     const values = await darkshop.getAllValues();
@@ -72,17 +72,17 @@ command.execute = async (interaction, models, params, client) => {
     let force_cooldown = moment().weekday(7).hour(0).minutes(0).seconds(0).millisecond(0).toDate();
 
     let cool = await user.cooldown(Cooldowns.InflationPrediction, { force_cooldown, precise: true })
-    if (cool) return interaction.editReply({
+    if (cool) return await interaction.editReply({
         content: null, embeds: [
             new Embed({ type: "cooldown", data: { cool } })
         ]
     });
 
-    if (!r || !user.economy.dark?.accuracy) return interaction.editReply({
+    if (!r || !user.economy.dark?.accuracy) return await interaction.editReply({
         embeds: [
             new Embed()
                 .defAuthor({ text: "Algo te dice que...", title: true })
-                .defDesc(`**No deberías vender con ${now}%**:\n${GetRandomItem([
+                .defDesc(`**No deberías vender con ${now}%**:\n${new Chance().pickone([
                     "Tal vez se una buena idea esperar...",
                     "Si confías en ti, puedes esperar otro poco.",
                     "Cierra los ojos y espera un poco más.",
@@ -95,11 +95,11 @@ command.execute = async (interaction, models, params, client) => {
         ]
     })
 
-    return interaction.editReply({
+    return await interaction.editReply({
         embeds: [
             new Embed()
                 .defAuthor({ text: "Algo te dice que...", title: true })
-                .defDesc(`**Deberías vender con ${now}%**:\n${GetRandomItem([
+                .defDesc(`**Deberías vender con ${now}%**:\n${new Chance().pickone([
                     "Venga, inténtalo, hazlo ya.",
                     "Como veo la cosa, cámbialos ya.",
                     "Contra todo pronostico, es momento.",

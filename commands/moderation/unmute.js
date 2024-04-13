@@ -1,4 +1,4 @@
-const { Command, Categories, Embed } = require("../../src/utils")
+const { Command, Embed } = require("../../src/utils")
 
 const command = new Command({
     name: "unmute",
@@ -21,7 +21,7 @@ command.execute = async (interaction, models, params, client) => {
 
     await user.timeout(null);
 
-    return interaction.editReply({
+    return await interaction.editReply({
         embeds: [
             new Embed({
                 type: "success",

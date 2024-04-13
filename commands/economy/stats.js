@@ -1,7 +1,7 @@
 const moment = require("moment-timezone");
 const { time, ActionRowBuilder, ButtonBuilder, ButtonStyle, inlineCode } = require("discord.js");
 
-const { Command, Categories, Embed, Enum, BoostObjetives, Collector, BoostTypes, BoostWork, ProgressBar } = require("../../src/utils");
+const { Command, Embed, Enum, BoostObjetives, Collector, BoostTypes, BoostWork, ProgressBar } = require("../../src/utils");
 const { Colores } = require("../../src/resources");
 
 const command = new Command({
@@ -59,11 +59,11 @@ command.execute = async (interaction, models, params, client) => {
 
     let boostEmbed = new Embed(embed)
         .defColor(Colores.verdeclaro)
-        .defAuthor({ text: `Boosts de ${member.user.username}`, icon: member.guild.iconURL({ dynamic: true }) })
+        .defAuthor({ text: `Boosts de ${member.displayName}`, icon: member.guild.iconURL({ dynamic: true }) })
         .defDesc(null)
 
     let trophiesEmbed = new Embed(embed)
-        .defAuthor({ text: `Trofeos de ${member.user.username}`, icon: member.guild.iconURL({ dynamic: true }) })
+        .defAuthor({ text: `Trofeos de ${member.displayName}`, icon: member.guild.iconURL({ dynamic: true }) })
         .defColor(Colores.verde)
         .defDesc(null)
 
@@ -179,7 +179,7 @@ command.execute = async (interaction, models, params, client) => {
 
     if (sug.likelihood && !selectedUser) firstEmbeds.push(sug);
 
-    if (components.length === 0) return interaction.editReply({ embeds: firstEmbeds });
+    if (components.length === 0) return await interaction.editReply({ embeds: firstEmbeds });
 
     let msg = await interaction.editReply({ embeds: firstEmbeds, components });
 

@@ -1,4 +1,4 @@
-const { Command, Categories, Embed, Cooldowns, Enum } = require("../../src/utils")
+const { Command, Embed, Cooldowns, Enum } = require("../../src/utils")
 const ms = require("ms")
 
 const command = new Command({
@@ -37,7 +37,7 @@ command.execute = async (interaction, models, params, client) => {
     if (cooldown.value != "0") await user.cooldown(modulo.value, { force_cooldown: ms(cooldown.value), save: true, check: false });
     else user.delCooldown(modulo.value);
 
-    interaction.editReply({ content: null, embeds: [new Embed({ type: "success" })] });
+    await interaction.editReply({ content: null, embeds: [new Embed({ type: "success" })] });
 }
 
 module.exports = command;

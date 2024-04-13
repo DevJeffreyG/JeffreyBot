@@ -1,6 +1,6 @@
 const { codeBlock } = require("discord.js");
 const { DiscordLimitationError } = require("../../src/errors");
-const { Command, Categories, Embed } = require("../../src/utils")
+const { Command, Embed } = require("../../src/utils")
 
 const command = new Command({
     name: "unban",
@@ -30,7 +30,7 @@ command.execute = async (interaction, models, params, client) => {
 
     try {
         await interaction.guild.members.unban(user)
-        return interaction.editReply({
+        await interaction.editReply({
             embeds: [
                 new Embed({
                     type: "success",

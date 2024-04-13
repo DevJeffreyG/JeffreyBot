@@ -265,13 +265,13 @@ class Top {
         });
 
         if (rank === 1) {
-            txt = `# **🏆 ${member.user.username}**${toadd}`;
+            txt = `# **🏆 ${member.displayName}**${toadd}`;
         } else if (rank === 2) {
-            txt = `\n## **🥈 ${member.user.username}**${toadd}`;
+            txt = `\n## **🥈 ${member.displayName}**${toadd}`;
         } else if (rank === 3) {
-            txt = `\n### **🥉 ${member.user.username}**${toadd}\n\n`;
+            txt = `\n### **🥉 ${member.displayName}**${toadd}\n\n`;
         } else {
-            txt = `${rank}. **${member.user.username}**${toadd}\n\n`;
+            txt = `${rank}. **${member.displayName}**${toadd}\n\n`;
         }
 
         return txt;

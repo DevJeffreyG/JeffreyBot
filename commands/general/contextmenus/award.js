@@ -148,7 +148,7 @@ command.execute = async (interaction, models, params, client) => {
     hallEmbed.defAuthor({ text, icon: client.EmojisObject[`Tier${tierNum}`].url });
     hallEmbed.defDesc(`${star} ${content}`);
     hallEmbed.defColor(message.member.displayHexColor);
-    hallEmbed.defFooter({ text: `Mensaje por ${message.author.username}・Premio de Tier ${tierNum} por ${interaction.user === message.author ? `ellos mismos, ${interaction.user.username}` : interaction.user.username}`, icon: message.author.displayAvatarURL({ dynamic: true }) });
+    hallEmbed.defFooter({ text: `Mensaje por ${message.member.displayName}・Premio de Tier ${tierNum} por ${interaction.user === message.author ? `ellos mismos, ${interaction.member.displayName}` : interaction.member.displayName}`, icon: message.author.displayAvatarURL({ dynamic: true }) });
 
     // Pagar
     if (user.user_id === message_user.user_id) {
@@ -172,6 +172,8 @@ command.execute = async (interaction, models, params, client) => {
                     new ErrorEmbed()
                         .defDesc(`**No se pudo enviar el mensaje al canal de los Awards.**${codeBlock("json", err)}`)
                 ]
+            }).catch(err => {
+                console.error("🔴 %s", err);
             });
 
         new ExecutionError(interaction, [
@@ -179,10 +181,12 @@ command.execute = async (interaction, models, params, client) => {
             "El autor del mensaje **sí** recibió el beneficio",
             "Avísa a los Administradores"
         ]).send({ ephemeral: true, followup: true })
-            .catch(e => console.error(e))
+            .catch(err => {
+                console.error("🔴 %s", err);
+            });
     }
 
-    return interaction.editReply({
+    return await interaction.editReply({
         embeds: [
             new Embed({
                 type: "success",

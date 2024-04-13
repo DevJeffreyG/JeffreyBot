@@ -1,13 +1,11 @@
-const Discord = require("discord.js");
+const { time } = require("discord.js");
 
-const { time } = Discord;
-const { GenerateLog, DaysUntilToday, Embed, GetRandomItem, FetchThisGuild, SendDirect, DirectMessageType } = require("../src/utils/");
+const { GenerateLog, DaysUntilToday, FetchThisGuild } = require("../src/utils/");
 const { Colores } = require("../src/resources");
 
 const { Users, Guilds } = require("mongoose").models;
 
 module.exports = async (client, member) => {
-  let tag = member.user.username;
   const guild = member.guild;
 
   if (!client.isThisFetched(guild.id)) await FetchThisGuild(client, guild);
@@ -22,21 +20,29 @@ module.exports = async (client, member) => {
 
   // cargar los roles que tenia antes
   if (doc.moduleIsActive("functions.save_roles_onleft", doc.settings)) user.data.backup_roles.forEach(roleId => {
-    const role = guild.roles.cache.find(x => x.id === roleId);
-    if (role) member.roles.add(role);
+    const role = guild.roles.cache.get(roleId);
+    if (role) member.roles.add(role).catch(err => {
+      console.error("🔴 %s", err);
+    });
 
     user.data.backup_roles = [];
-    user.save();
   })
 
-  let reglasC = guild.channels.cache.get(doc.getChannel("general.rules")) ?? "#reglas";
-  let infoC = guild.channels.cache.get(doc.getChannel("general.information")) ?? "#info";
+  await user.save();
 
   if (member.user.bot) {
     let botRoles = doc.getBots();
-    botRoles.forEach(role => member.roles.add(role))
+    botRoles.forEach(role => member.roles.add(role)
+      .catch(err => {
+        console.error("🔴 %s", err);
+      }));
   }
 
+  /* TODO: En algún momento, debería ser posible configurar enviar un mensaje a los nuevos usuarios
+  
+  let reglasC = guild.channels.cache.get(doc.getChannel("general.rules")) ?? "#reglas";
+  let infoC = guild.channels.cache.get(doc.getChannel("general.information")) ?? "#info";
+  
   let bienvenidas = [
     `Bienvenid@ a \`${guild.name}\`, **${tag}**. Pásate por ${reglasC} e ${infoC} para aclarar las dudas frecuentes! ¡Disfruta!`,
     `¡Hola, **${tag}**! Muchas gracias por unirte a \`${guild.name}\`, ve a los canales: ${reglasC} e ${infoC} para evitar inconvenientes, y ¡pásala bien!`,
@@ -44,7 +50,7 @@ module.exports = async (client, member) => {
     `¡Hey! Hola **${tag}**, gracias por unirte a \`${guild.name}\` 😄 ¡Pásate por ${reglasC} e ${infoC} para que te hagas una idea de como funciona el server!`
   ];
 
-  let fBienv = GetRandomItem(bienvenidas);
+  let fBienv = new Chance().pickone(bienvenidas);
 
   let embed = new Embed()
     .defDesc(fBienv)
@@ -55,7 +61,7 @@ module.exports = async (client, member) => {
     await SendDirect(null, member, DirectMessageType.Welcome, { embeds: [embed] })
   } catch (err) {
     console.error("🔴 %s", err.message());
-  }
+  } */
 
   member.guild.invites.fetch().then((invites) => {
     invites.forEach(async invite => {
@@ -70,8 +76,12 @@ module.exports = async (client, member) => {
           ],
           footer_icon: member.displayAvatarURL({ dynamic: true }),
           color: Colores.verde
+        }).catch(err => {
+          console.error("🔴 %s", err);
         });
       }
     })
-  })
+  }).catch(err => {
+    console.error("🔴 %s", err);
+  });
 }

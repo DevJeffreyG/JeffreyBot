@@ -79,7 +79,7 @@ command.execute = async (interaction, models, params, client) => {
             break
     }
 
-    interaction.editReply({ embeds: [new Embed({ type: "success" })] });
+    await interaction.editReply({ embeds: [new Embed({ type: "success" })] });
 }
 
 module.exports = command;

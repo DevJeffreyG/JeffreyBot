@@ -22,7 +22,7 @@ command.execute = async (interaction, models, params, client) => {
     const doc = params.getDoc();
     const autoroles = doc.data.autoroles;
 
-    if (id) return command.work(interaction, models, params, client);
+    if (id) return await command.work(interaction, models, params, client);
 
     let items = new Map();
 

@@ -158,7 +158,7 @@ module.exports = async (client) => {
     }, null, true, "America/Bogota", null, true);
 
     console.log("============================================================");
-    console.log(`❗❗❗ 💚 ${client.user.username} ONLINE 💚 ❗❗❗`);
+    console.log(`❗❗❗ 💚 ${client.user.displayName} ONLINE 💚 ❗❗❗`);
 
     new Log()
         .setChannel(client.logChannel)

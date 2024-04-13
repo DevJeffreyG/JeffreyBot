@@ -1,5 +1,5 @@
 const { ButtonStyle, ActionRowBuilder, ButtonBuilder } = require("discord.js");
-const { Command, Categories, isBannedFrom, FindNewId, Embed, Log, ChannelModules, LogReasons } = require("../../src/utils");
+const { Command, isBannedFrom, FindNewId, Embed, Log, ChannelModules, LogReasons } = require("../../src/utils");
 const { Colores } = require("../../src/resources");
 const { codeBlock } = require("discord.js");
 const { ModuleBannedError, ModuleDisabledError } = require("../../src/errors");
@@ -48,10 +48,8 @@ command.execute = async (interaction, models, params, client) => {
         )
 
     let embed = new Embed()
-        .defAuthor({ text: interaction.user.username, icon: interaction.member.displayAvatarURL() })
-        .defTitle("Sugerencia")
-        .defDesc(`**—** ${interaction.member} Sugiere:
-${codeBlock(sugerencia)}
+        .defAuthor({ text: `${interaction.member.displayName} sugiere:`, icon: interaction.member.displayAvatarURL() })
+        .defDesc(`${codeBlock(sugerencia)}
 **—** ID: \`${newId}\`.`)
         .defColor(Colores.verdejeffrey);
 
@@ -75,7 +73,7 @@ ${codeBlock(sugerencia)}
 
     await docGuild.save();
 
-    return interaction.editReply({ content: `${client.Emojis.Check} ¡Gracias!` });
+    await interaction.editReply({ content: `${client.Emojis.Check} ¡Gracias!` });
 
 }
 

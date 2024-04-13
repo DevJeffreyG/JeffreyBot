@@ -1,4 +1,4 @@
-const { Command, Categories, Embed, ErrorEmbed, Confirmation, FindNewId, Log, LogReasons, ChannelModules } = require("../../src/utils")
+const { Command, Embed, Confirmation, FindNewId, Log, LogReasons, ChannelModules } = require("../../src/utils")
 const { Colores } = require("../../src/resources/");
 const { ActionRowBuilder, AttachmentBuilder, StringSelectMenuBuilder } = require("discord.js");
 const { AlreadyExistsError, FetchError } = require("../../src/errors");
@@ -33,7 +33,7 @@ command.execute = async (interaction, models, params, client) => {
         .setCustomId("selectRule")
         .setPlaceholder("Selecciona la regla infringida");
 
-    if (doc.data.rules?.length === 0) 
+    if (doc.data.rules?.length === 0)
         throw new FetchError(interaction, "reglas", ["No se encontraron reglas registradas", `Para agregar reglas usa ${client.mentionCommand("config reglas")}`])
 
     const prueba = new AttachmentBuilder()
@@ -75,7 +75,7 @@ command.execute = async (interaction, models, params, client) => {
 
         await collected.deferUpdate();
 
-        if (!rule) return interaction.deleteReply();
+        if (!rule) return await interaction.deleteReply();
 
         const user = await Users.getWork({
             user_id: member.id,
@@ -92,7 +92,7 @@ command.execute = async (interaction, models, params, client) => {
             pruebasEmbed
         ];
         let confirmation = await Confirmation("Agregar softwarn", toConfirm, interaction);
-        if (!confirmation) return interaction.deleteReply();
+        if (!confirmation) return await interaction.deleteReply();
 
         const softwarns = user.softwarns;
 
@@ -106,7 +106,8 @@ command.execute = async (interaction, models, params, client) => {
             }
         });
 
-        if (hasSoft) return new AlreadyExistsError(interaction, `El softwarn para la regla N°${ruleNo}`, `los softwarns del usuario, **procede con ${client.mentionCommand("warn")}**`).send().catch(e => console.error(e));
+        if (hasSoft)
+            throw new AlreadyExistsError(interaction, `El softwarn para la regla N°${ruleNo}`, `los softwarns del usuario, **procede con ${client.mentionCommand("warn")}**`).send().catch(e => console.error(e));
 
         // guardar el nuevo attachment para evitar que se pierda
         let msg = await interaction.followUp({ content: `⚠️ Este mensaje se usará para tener la imagen de las pruebas, si se elimina se perderá.`, files: [prueba.attachment] });
@@ -139,12 +140,15 @@ command.execute = async (interaction, models, params, client) => {
             .setImage(msg.attachments.first().url)
             .defColor(Colores.nocolor);
 
-        new Log(interaction)
+        await new Log(interaction)
             .setReason(LogReasons.Pardon)
             .setTarget(ChannelModules.ModerationLogs)
             .send({ embeds: [log, proofE] })
+            .catch(err => {
+                console.error("🔴 %s", err);
+            });
 
-        return interaction.editReply({ embeds: [new Embed({ type: "success" })], components: [] });
+        return await interaction.editReply({ embeds: [new Embed({ type: "success" })], components: [] });
     })
 }
 

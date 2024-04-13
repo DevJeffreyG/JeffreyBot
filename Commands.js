@@ -1,4 +1,4 @@
-const { Collection, Routes, REST } = require("discord.js");
+const { Routes, REST } = require("discord.js");
 
 const { GlobalDatas } = require("mongoose").models;
 

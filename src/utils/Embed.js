@@ -172,7 +172,7 @@ class Embed extends Discord.EmbedBuilder {
                 const expToGet = expDiff === 0 ? user.getNextLevelExp() : expDiff; // la exp que hay que ganar en este nivel
                 const expSoFar = expDiff === 0 ? user.economy.global.exp : user.economy.global.exp - user.getNextLevelExp(user.economy.global.level - 1); // la exp que se lleva hasta ahora
 
-                this.defAuthor({ text: `Estadísticas de ${member.user.username}`, icon: member.guild.iconURL({ dynamic: true }) })
+                this.defAuthor({ text: `Estadísticas de ${member.displayName}`, icon: member.guild.iconURL({ dynamic: true }) })
                     .defDesc(`**— Nivel**: ${curLvl}
 **— EXP**: ${ProgressBar(expSoFar / expToGet * 100, { blocks: 5 })} ${inlineCode(`${curExp} / ${nxtLvlExp}`)}
 **— ${Currency.name}**: ${PrettyCurrency(data.member.guild, actualCurrency)}
@@ -181,7 +181,7 @@ ${bdString}`)
                     .defThumbnail(member.displayAvatarURL())
                     .defColor(member.displayHexColor);
 
-                if (user.isBirthday()) this.defAuthor({ text: `Hoy es el cumpleaños de ${member.user.username} 🎉`, icon: member.guild.iconURL({ dynamic: true }) })
+                if (user.isBirthday()) this.defAuthor({ text: `Hoy es el cumpleaños de ${member.displayName} 🎉`, icon: member.guild.iconURL({ dynamic: true }) })
 
                 break;
 

@@ -1,4 +1,4 @@
-const { Command, Categories, Top } = require("../../src/utils")
+const { Command, Top } = require("../../src/utils")
 
 const command = new Command({
     name: "top",
@@ -32,7 +32,7 @@ command.execute = async (interaction, models, params, client) => {
 
     // codigo
     const top = new Top(await Users.find({ guild_id: interaction.guild.id }), interaction, subcommand)
-    return top.init();
+    return await top.init();
 }
 
 module.exports = command;

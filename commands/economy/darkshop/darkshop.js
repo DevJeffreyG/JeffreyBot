@@ -13,7 +13,7 @@ command.execute = async (interaction, models, params, client) => {
         .setType(ShopTypes.DarkShop)
         .build(params.getDoc(), params.getUser());
 
-    return ds.show()
+    return await ds.show()
 }
 
 module.exports = command;

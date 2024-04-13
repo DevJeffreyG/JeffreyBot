@@ -162,7 +162,7 @@ command.execute = async (interaction, models, params) => {
             doc.data.keys.splice(i, 1)
             await doc.save();
 
-            return interaction.editReply({ embeds: [new Embed({ type: "success", data: { desc: "Se ha eliminado la llave" } })] });
+            return await interaction.editReply({ embeds: [new Embed({ type: "success", data: { desc: "Se ha eliminado la llave" } })] });
     }
 
     let added = new Embed({ type: "success" })
@@ -170,7 +170,7 @@ command.execute = async (interaction, models, params) => {
 **—** \`${generatedCode}\`.
 **—** ID: \`${generatedID}\`.`)
 
-    return interaction.editReply({ embeds: [added] });
+    return await interaction.editReply({ embeds: [added] });
 }
 
 function generateCode() {

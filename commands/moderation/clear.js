@@ -1,5 +1,5 @@
 const { DiscordLimitationError } = require("../../src/errors");
-const { Command, Categories, Embed, Log, LogReasons, ChannelModules } = require("../../src/utils")
+const { Command, Embed, Log, LogReasons, ChannelModules } = require("../../src/utils")
 const moment = require("moment-timezone");
 
 const command = new Command({
@@ -64,9 +64,12 @@ command.execute = async (interaction, models, params, client) => {
     new Log(interaction)
         .setReason(LogReasons.MsgClear)
         .setTarget(ChannelModules.ModerationLogs)
-        .send({ content: `- **${interaction.user.username}** ha eliminado ${count} mensajes en ${interaction.channel}.` })
+        .send({ content: `- **${interaction.member.displayName} (${interaction.user.username})** ha eliminado ${count} mensajes en ${interaction.channel}.` })
+        .catch(err => {
+            console.error("🔴 %s", err);
+        });
 
-    return interaction.editReply({
+    return await interaction.editReply({
         embeds: [
             new Embed({
                 type: "success",

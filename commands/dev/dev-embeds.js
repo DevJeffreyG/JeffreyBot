@@ -1,5 +1,5 @@
 const { ButtonStyle, ButtonBuilder, ActionRowBuilder, time } = require("discord.js");
-const { Command, Categories, Embed, importImage } = require("../../src/utils");
+const { Command, Embed, importImage } = require("../../src/utils");
 const { Colores, Bases } = require("../../src/resources");
 
 const command = new Command({
@@ -720,7 +720,7 @@ https://discord.gg/${process.env.SUPPORT_INVITE} • Servidor **exclusivo** de p
             break;
     }
 
-    return interaction.editReply({
+    return await interaction.editReply({
         content: null, embeds: [
             new Embed({
                 type: "success"

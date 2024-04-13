@@ -13,7 +13,6 @@ const ms = require("ms");
 const moment = require("moment-timezone");
 
 /* ##### MONGOOSE ######## */
-
 const { Users, Guilds, DarkShops, Shops, GlobalDatas, CustomElements, Preferences } = require("mongoose").models;
 
 // JEFFREY BOT NOTIFICATIONS
@@ -30,13 +29,12 @@ const { Chance } = require("chance");
 const { DMNotSentError } = require("../errors");
 
 /* ##### MONGOOSE ######## */
+
 const RandomCumplido = function (force = null) {
-  return force ? Cumplidos.c[force] : Cumplidos.c[Math.floor(Math.random() * Cumplidos.c.length)];
+  return force ? Cumplidos.c[force] : new Chance().pickone(Cumplidos.c);
 }
 
 const GetChangesAndCreateFields = async function (logsFetched) {
-
-
   let fields = [];
   let separator = "**—**";
 
@@ -568,7 +566,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
                 .defAuthor({ text: `Hola`, icon: EmojisObject.Hola.url })
                 .defDesc(`¡Vengo a recordarte que ${birthday_member} está de cumpleaños hoy!`)
                 .defFooter({
-                  text: `Recibiste este mensaje porque quisiste que te lo recordara, para dejar de recibir esto usa /stats usuario:@${birthday_member.user.username} y presiona el botón de recordatorios`,
+                  text: `Recibiste este mensaje porque quisiste que te lo recordara, para dejar de recibir esto usa /stats usuario:@${birthday_member.displayName} y presiona el botón de recordatorios`,
                   icon: guild.iconURL({ dynamic: true }),
                   timestamp: true
                 })
@@ -1084,16 +1082,16 @@ const Subscription = async function (member, roleID = 0, tempInfo, activation_in
   return user
 }
 
-const VaultWork = function (vault, user, interaction, notCodeEmbed) { // mostrar y buscar un codigo no descifrado aún por el usuario
-  if (user.data.unlockedVaults.length === vault.length) return interaction.editReply({ embeds: [notCodeEmbed.defFooter({ text: "Tienes todos los códigos en tus manos, impresionante..." })] })
+const VaultWork = async function (vault, user, interaction, notCodeEmbed) { // mostrar y buscar un codigo no descifrado aún por el usuario
+  if (user.data.unlockedVaults.length === vault.length) return await interaction.editReply({ embeds: [notCodeEmbed.defFooter({ text: "Tienes todos los códigos en tus manos, impresionante..." })] })
 
   const unlocked = user.data.unlockedVaults;
 
-  let code = vault[Math.floor(Math.random() * vault.length)];
+  let code = new Chance().pickone(vault);
 
 
   while (unlocked.find(x => x === code.id)) {
-    code = vault[Math.floor(Math.random() * vault.length)];
+    code = new Chance().pickone(vault);
   }
 
   let itemMap = new Map();
@@ -1109,7 +1107,7 @@ const VaultWork = function (vault, user, interaction, notCodeEmbed) { // mostrar
     footer: `Pista {ACTUAL} de {TOTAL} | /vault [codigo] para descifrar`
   }, itemMap, 1);
 
-  return interactive.init(interaction);
+  return await interactive.init(interaction);
 }
 
 /**
@@ -1178,7 +1176,7 @@ const handleNotification = async function (guild) {
             .setStyle(ButtonStyle.Link)
             .setURL(isShort ? shortLink : videoLink)
             .setEmoji(isShort ? guild.client.Emojis.YouTubeShorts : guild.client.Emojis.YouTube)
-            .setLabel(GetRandomItem(textos.labels))
+            .setLabel(new Chance().pickone(textos.labels))
         )
     ]
 
@@ -1187,7 +1185,7 @@ const handleNotification = async function (guild) {
       data.youtube[prop].push(itemId);
       await doc.save();
 
-      embed.defDesc(GetRandomItem(textos.emojis) + " " + GetRandomItem(textos[prop]))
+      embed.defDesc(new Chance().pickone(textos.emojis) + " " + new Chance().pickone(textos[prop]))
 
       await youtubeChannel.send({ content: (isShort ? shortsRole : ytRole).toString(), embeds: [embed], components });
     }
@@ -1211,7 +1209,7 @@ const handleNotification = async function (guild) {
         .defTitle("¡Jeffrey está en directo!")
         .defDesc(streamTitle)
         .defColor("#9146FF")
-        .defFooter({ text: `${GetRandomItem(textos.emojis)} ${GetRandomItem(textos.twitch)}` })
+        .defFooter({ text: `${new Chance().pickone(textos.emojis)} ${new Chance().pickone(textos.twitch)}` })
         .defImage(await getUserPicture(config.twitch_username));
 
       let components = [
@@ -1221,7 +1219,7 @@ const handleNotification = async function (guild) {
               .setStyle(ButtonStyle.Link)
               .setURL(streamLink)
               .setEmoji(guild.client.Emojis.Twitch)
-              .setLabel(GetRandomItem(textos.labels))
+              .setLabel(new Chance().pickone(textos.labels))
           )
       ]
 
@@ -1485,7 +1483,7 @@ const AfterInfraction = async function (user, data) {
       if (totalWarns >= 2) {
         let infoEmbed = new Embed()
           .defAuthor({ text: `Información`, icon: client.EmojisObject.Danger.url })
-          .defDesc(`**—** ${member.user.username}, este es tu **warn número ❛ \`2\` ❜**
+          .defDesc(`**—** ${member.displayName}, este es tu **warn número ❛ \`2\` ❜**
 *— ¿Qué impacto tendrá este warn?*
 **—** Tranquil@. Este warn no afectará en nada tu estadía en el servidor, sin embargo; el siguiente warn será un **ban de un día**.
 **—** Te sugiero comprar un **-1 Warn** en la tienda del servidor. *( \`/shop\` para más info de precios, etc. )*`)
@@ -1541,7 +1539,7 @@ const ValidateDarkShop = async function (user, author) {
     "Aún no, {you}."
   ];
 
-  let res = r[Math.floor(Math.random() * r.length)];
+  let res = new Chance().pickone(r);
 
   const desc = res.replace(
     new RegExp("{you}", "g"),
@@ -1569,66 +1567,6 @@ const DaysUntilToday = async function (date) {
 
   if (isNaN(response)) return "?";
   else return Number(response.toFixed(1));
-}
-
-/**
- * @deprecated
- * @param {*} user The user's document inside the database
- * @param {*} item The item's object inside the database
- * @param {Boolean} [returnString=false] The function returns an String with the original price and the new one?
- * @param {Boolean} [isDarkShop=false] This is for the DarkShop?
- * @returns {String | Number} Returns a String or a Number in the case
- */
-const DeterminePrice = async function (user, item, returnString, isDarkShop) {
-  isDarkShop = isDarkShop || false;
-  returnString = returnString || false;
-
-  const discounts = [
-    {
-      forDarkShop: false,
-      level: 20,
-      discount: 15
-    }
-  ]
-
-  const originalPrice = item.price;
-  const user_level = user.economy.global.level;
-
-  // nuevo precio a partir de interés
-  const interest = item.interest;
-  const searchInterest = x => (x.isDarkShop === isDarkShop) && (x.item_id === item.id);
-  const totalpurchases = user.data.purchases.find(searchInterest) ? user.data.purchases.find(searchInterest).quantity : 0;
-
-  const interestPrice = originalPrice + (totalpurchases * interest);
-  let precio = interestPrice;
-
-  // descuentos
-  let query = discounts.filter(x => user_level >= x.level && x.forDarkShop === isDarkShop).sort(function (a, b) { // ordenar el array mayor a menor, por array.level
-    if (a.level > b.level) {
-      return -1;
-    }
-    if (a.level < b.level) {
-      return 1;
-    }
-
-    return 0;
-  });
-
-  let discounted = false;
-
-  if (query[0]) {
-    discounted = true;
-    precio -= ((precio) / 100) * query[0].discount;
-  }
-
-
-  precio = Math.floor(precio) > 0 ? Math.floor(precio) : Math.ceil(precio);
-
-  if (returnString && discounted) {
-    return `~~${interestPrice.toLocaleString("es-CO")}~~ ${precio.toLocaleString("es-CO")}`;
-  } else {
-    return precio;
-  }
 }
 
 /**
@@ -1789,16 +1727,6 @@ const importImage = function (filename) {
 const Sleep = ms => new Promise(r => setTimeout(r, ms));
 
 /**
- * Obtén un item aleatorio de un Array
- * @param {Array} array The Array of items to find
- * @deprecated Usar new Chance().pickone()
- * @returns {any}
- */
-const GetRandomItem = (array) => {
-  return array[Math.floor(Math.random() * array.length)];
-}
-
-/**
  * 
  * @param {BaseInteraction} interaction 
  * @returns 
@@ -1843,7 +1771,7 @@ const ActivityWork = async function (client) {
   let act;
 
   if (!activities.info.fixed) {
-    act = GetRandomItem(activities.info.list)
+    act = new Chance().pickone(activities.info.list)
   } else {
     act = activities.info.list.find(x => x.id === activities.info.fixed)
   }
@@ -1945,7 +1873,10 @@ const DeleteLink = async function (message) {
 
   if (!link && message.embeds.length < 1) return false;
 
-  message.delete();
+  message.delete().catch(err => {
+    console.error("🔴 %s", err);
+  });
+
   message.author.send({
     embeds: [
       new Embed()
@@ -1957,10 +1888,16 @@ ${codeBlock(message.content)}`)
     ]
   })
     .catch(async err => {
-      let msg = await message.channel.send(`No envíes links, **${message.author.username}**.`)
+      let msg = await message.channel.send(`No envíes links, **${message.member.displayName}**.`)
+        .catch(err => {
+          console.error("🔴 %s", err);
+        });
 
       setTimeout(() => {
-        msg.delete();
+        msg.delete()
+          .catch(err => {
+            console.error("🔴 %s", err);
+          });
       })
     });
 
@@ -2186,7 +2123,7 @@ const SendDirect = async function (interaction, member, type, options) {
         embeds: [
           new Embed()
             .defThumbnail(member.client.user.displayAvatarURL({ dynamic: true }))
-            .defDesc(`# ¡Hola, ${member.user.username}!\nSoy ${member.client.user.username}, puedes configurar tus preferencias para mensajes directos con ${member.client.mentionCommand("preferencias")}.\n**No volverás a recibir este mensaje en un futuro!**`)
+            .defDesc(`# ¡Hola, ${member.member.displayName}!\nSoy ${member.client.Emojis.JeffreyBot} ${member.client.user.displayName}, puedes configurar tus preferencias para mensajes directos con ${member.client.mentionCommand("preferencias")}.\n**No volverás a recibir este mensaje en un futuro!**`)
             .defColor(Colores.verdejeffrey)
         ]
       })
@@ -2238,7 +2175,6 @@ module.exports = {
   AfterInfraction,
   InteractivePages,
   ValidateDarkShop,
-  DeterminePrice,
   FindNewId,
   DaysUntilToday,
   WillBenefit,
@@ -2247,7 +2183,6 @@ module.exports = {
   isOnMobible,
   RandomCumplido,
   Sleep,
-  GetRandomItem,
   MemberHasAnyRole,
   isDeveloper,
   ActivityWork,

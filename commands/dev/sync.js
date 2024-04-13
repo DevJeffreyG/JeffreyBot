@@ -1,7 +1,6 @@
-const { Command, Categories, Confirmation, Embed, FindNewId, ItemObjetives, ShopTypes } = require("../../src/utils")
+const { Command, Confirmation, Embed, FindNewId, ItemObjetives, ShopTypes } = require("../../src/utils")
 
 const { PermissionsBitField } = require("discord.js");
-const moment = require("moment-timezone");
 
 const command = new Command({
     name: "sync",
@@ -150,7 +149,7 @@ command.execute = async (interaction, models, params, client) => {
                 if (confirmation) actual.deleteOne();
             }
 
-            return interaction.editReply({ embeds: [new Embed({ type: "success" })] });
+            return await interaction.editReply({ embeds: [new Embed({ type: "success" })] });
         }
 
         case "inventarios": {

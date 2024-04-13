@@ -31,7 +31,8 @@ command.execute = async (interaction, models, params, client) => {
     let desc = mensaje.value
         .replace(new RegExp('{server}', "g"), `**${interaction.guild.name}**`)
         .replace(new RegExp('{ent}', "g"), `\n`)
-        .replace(new RegExp('{user}', "g"), `**${usuario.user.username}**`);
+        .replace(new RegExp('{user}', "g"), `**${usuario.user.username}**`)
+        .replace(new RegExp('{displ}', "g"), `**${usuario.member.displayName}**`);
 
     let embed = new Embed()
         .defAuthor({ text: "v:", icon: client.EmojisObject.Hola.url })
@@ -47,6 +48,7 @@ command.execute = async (interaction, models, params, client) => {
                     .defDesc(`# Ayuda con ${client.mentionCommand("dmuser")}`)
                     .fillDesc([
                         `Puedes usar varios **tags** al usar este comando y serán reemplazados así:`,
+                        `\`{displ}\`: El nickname/nombre para mostrar que tiene el \`usuario\`. En este caso se reemplazaría por: **${usuario.member.displayName}**.`,
                         `\`{user}\`: El nombre de usuario que esté en \`usuario\`. En este caso se reemplazaría por: **${usuario.user.username}**.`,
                         `\`{server}\`: Nombre del servidor de donde se está enviado el mensaje. Útil para que el usuario sepa de donde viene el mensaje.`,
                         `\`{ent}\`: Para dejar una línea y escribir en la siguiente.`

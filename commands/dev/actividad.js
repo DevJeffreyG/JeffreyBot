@@ -1,4 +1,4 @@
-const { Command, Categories, Embed, FindNewId, ActivityWork, InteractivePages } = require("../../src/utils")
+const { Command, Embed, FindNewId, ActivityWork, InteractivePages } = require("../../src/utils")
 const { Colores } = require("../../src/resources")
 
 const command = new Command({
@@ -107,7 +107,7 @@ command.execute = async (interaction, models, params, client) => {
                 addon: `**{value}**\n▸ Tipo: {tipo}\n▸ ID: {id}\n\n`
             }, items, 3)
 
-            return interactive.init(interaction);
+            return await interactive.init(interaction);
 
         case "set":
             let i = activities.info.list.find(x => x.id === id.value)
@@ -118,7 +118,7 @@ command.execute = async (interaction, models, params, client) => {
                 activities.info.fixed = null;
                 activities.markModified("info");
             }
-            else return interaction.editReply({ content: "ESA ID NO EXISTE" });
+            else return await interaction.editReply({ content: "ESA ID NO EXISTE" });
             break;
 
         case "cycle":
@@ -127,7 +127,7 @@ command.execute = async (interaction, models, params, client) => {
     }
 
     await activities.save()
-    return interaction.editReply({ embeds: [new Embed({ type: "success" })] });
+    return await interaction.editReply({ embeds: [new Embed({ type: "success" })] });
 }
 
 module.exports = command;
