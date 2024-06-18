@@ -1,4 +1,4 @@
-const { GuildMember, StringSelectMenuBuilder, ActionRowBuilder, BaseInteraction, CommandInteraction, Collection, time } = require("discord.js")
+const { GuildMember, StringSelectMenuBuilder, ActionRowBuilder, BaseInteraction, CommandInteraction, Collection, time, TextInputStyle, ButtonBuilder, ButtonStyle } = require("discord.js")
 const moment = require("moment-timezone");
 const ms = require("ms")
 const superagent = require("superagent");
@@ -8,7 +8,7 @@ const Chance = require("chance");
 const { ItemTypes, ItemObjetives, ItemActions, ItemEffects, LogReasons, ChannelModules, ShopTypes, PetAttacksType, Enum, BoostObjetives } = require("./Enums");
 const { BadCommandError, AlreadyExistsError, DoesntExistsError, FetchError, ExecutionError } = require("../errors");
 
-const { FindNewId, LimitedTime, Subscription, WillBenefit, isDeveloper } = require("./functions");
+const { FindNewId, LimitedTime, Subscription, WillBenefit, isDeveloper, CreateInteractionFilter } = require("./functions");
 
 const Log = require("./Log");
 const Embed = require("./Embed");
@@ -19,6 +19,7 @@ const Collector = require("./Collector");
 const Pet = require("./Pet");
 const JeffreyBotError = require("../errors/JeffreyBotError");
 const HumanMs = require("./HumanMs");
+const Modal = require("./Modal");
 
 const models = require("mongoose").models;
 const { Shops, DarkShops, Users, PetShops, EXShops, GlobalDatas } = models;
@@ -511,9 +512,51 @@ class Item {
                 await this.removeItemFromInv();
                 return true;
 
+            case ItemTypes.EXTTS:
+                console.log("🟩 EX TTS!");
+                await this.interaction.editReply({ content: `${this.interaction.client.Emojis.Loading} Usando...` });
+
+                let follow = await this.interaction.followUp({
+                    ephemeral: true, components: [
+                        new ActionRowBuilder()
+                            .setComponents(
+                                new ButtonBuilder()
+                                    .setEmoji("🗣️")
+                                    .setCustomId("ttsInteractionCreator")
+                                    .setStyle(ButtonStyle.Primary)
+                            )
+                    ]
+                });
+
+                let ttsInteraction = await follow.awaitMessageComponent({ filter: CreateInteractionFilter(this.interaction, follow, this.interaction.user), time: ms("1m") });
+
+                if (!ttsInteraction) {
+                    return false;
+                }
+
+                await new Modal(ttsInteraction)
+                    .defId("ttsInput")
+                    .defTitle("TTS")
+                    .addInput({ id: "tts", label: "¿Qué quieres decir?", placeholder: "Exprésate...", style: TextInputStyle.Paragraph, req: true, min: 1, max: 500 })
+                    .show();
+
+                let c = await ttsInteraction.awaitModalSubmit({
+                    filter: (i) => i.customId === "ttsInput" && i.user.id === this.interaction.user.id,
+                    time: ms("3m")
+                }).catch(async err => {
+                    if (err.code === DiscordjsErrorCodes.InteractionCollectorError) await this.interaction.deleteReply();
+                    else throw err;
+                });
+                if (!c) break;
+                await c.deferUpdate();
+                let ttsData = new Modal(c).read();
+
             case ItemTypes.EXMedia:
             case ItemTypes.EXKeyboard:
+            case ItemTypes.EXTTS:
                 console.log("🟩 EX Item!");
+
+                console.log(ttsData);
 
                 const cooldowns = this.shop.cooldowns.filter(x => x.item_id === this.item.id);
 
@@ -545,6 +588,7 @@ class Item {
                         .send({
                             type: itemType,
                             item: this.item,
+                            tts: ttsData?.tts ?? null,
                             guild: this.interaction.guild
                         })
                         .set("auth", jwt.sign({ jb: true }, process.env.TOKEN))
@@ -573,13 +617,14 @@ class Item {
                     this.shop.items[this.itemIndex]._id = this.item._id;
                     await this.shop.save();
 
-                    if (process.env.DEV != "TRUE")
+                    if (process.env.DEV === "FALSE" || (process.env.DEV === "TRUE" && !isDeveloper(this.interaction.member)))
                         await this.removeItemFromInv();
                     return true;
                 } catch (err) {
                     if (!(err instanceof JeffreyBotError)) console.error(err);
 
                     await this.interaction.editReply({
+                        content: "",
                         embeds: [
                             new ErrorEmbed().defDesc(`No se encontró un Cliente conectado para usar este item.`)
                         ]

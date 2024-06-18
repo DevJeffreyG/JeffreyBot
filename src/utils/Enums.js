@@ -162,6 +162,7 @@ const Categories = new Enum({
  * - PetStatsModifier
  * - EXKeyboard
  * - EXMedia
+ * - EXTTS
  */
 const ItemTypes = new Enum({
     StackOverflow: 1,
@@ -173,7 +174,8 @@ const ItemTypes = new Enum({
     Pet: 7,
     PetStatsModifier: 8,
     EXKeyboard: 9,
-    EXMedia: 10
+    EXMedia: 10,
+    EXTTS: 11
 }).values
 
 /**

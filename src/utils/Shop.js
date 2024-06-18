@@ -507,7 +507,7 @@ ${codeBlock(item.description)}
         let stats = null;
 
         // external
-        let getKeyActions = null, getMediaActions = null;
+        let getKeyActions = null, getMediaActions = null, getTTSActions = null;
         let actions = [];
         let delays = {};
 
@@ -613,7 +613,11 @@ ${codeBlock(item.description)}
                             new StringSelectMenuOptionBuilder()
                                 .setLabel("Multimedia")
                                 .setDescription("Reproduce multimedia a un PC remotamente")
-                                .setValue(String(ItemTypes.EXMedia))
+                                .setValue(String(ItemTypes.EXMedia)),
+                            new StringSelectMenuOptionBuilder()
+                                .setLabel("TTS")
+                                .setDescription("Permite que se reproduzca un texto con Text-to-Speech")
+                                .setValue(String(ItemTypes.EXTTS))
                         )
 
                     getKeyActions = async (inter) => {
@@ -664,6 +668,31 @@ ${codeBlock(item.description)}
                         await c.deferUpdate();
                         return new Modal(c).read();
                     }
+
+                    getTTSActions = async (inter) => {
+                        const actual = item.use_info.external_info;
+
+                        await new Modal(inter)
+                            .setCustomId("exTTSItemConfig")
+                            .setTitle("Configuración del item")
+                            .addInput({ id: "voice", value: `${actual.actions.join("\n")}`, label: "Voz a usar en TTS", style: TextInputStyle.Short })
+                            .addInput({ id: "globalUseDelay", value: `${actual.delays.global ? ms(actual.delays.global) : "10m"}`, label: "Delay de uso global", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
+                            .addInput({ id: "individualUseDelay", value: `${actual.delays.individual ? ms(actual.delays.individual) : "10m"}`, label: "Delay de uso individual", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
+                            .show()
+
+                        let c = await inter.awaitModalSubmit({
+                            filter: (i) => i.customId === "exTTSItemConfig" && i.user.id === this.interaction.user.id,
+                            time: ms("5m")
+                        }).catch(async err => {
+                            if (err.code === DiscordjsErrorCodes.InteractionCollectorError) await this.interaction.deleteReply();
+                            else throw err;
+                        });
+                        if (!c) return;
+
+                        await c.deferUpdate();
+                        return new Modal(c).read();
+                    }
+
                     break;
 
                 default:
@@ -728,6 +757,16 @@ ${codeBlock(item.description)}
 
                             if (mediaActions.globalUseDelay) delays["global"] = ms(mediaActions.globalUseDelay);
                             if (mediaActions.individualUseDelay) delays["individual"] = ms(mediaActions.individualUseDelay);
+                            break;
+                        
+                        case ItemTypes.EXTTS:
+                            let ttsActions = await getTTSActions(collector);
+                            if(!ttsActions) return false;
+
+                            actions = ttsActions.voice?.split("\n") ?? [];
+
+                            if (ttsActions.globalUseDelay) delays["global"] = ms(ttsActions.globalUseDelay);
+                            if (ttsActions.individualUseDelay) delays["individual"] = ms(ttsActions.individualUseDelay);
                             break;
                     }
 
