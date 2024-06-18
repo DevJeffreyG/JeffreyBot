@@ -4,13 +4,14 @@
   "description": "A multi-function Discord.JS bot",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon -x \"cls && node\" index.js",
-    "server": "nodemon -x \"cls && node\" server.js",
+    "start": "node ./src/index.js",
+    "trace": "nodemon -x \"cls && node --trace-warnings\" ./src/index.js",
+    "dev": "nodemon -x \"cls && node\" ./src/index.js",
+    "server": "nodemon -x \"cls && node\" ./src/server.js",
     "devcls": "nodemon ."
   },
   "engines": {
-    "node": "^18.2.0"
+    "node": "^20.12.2"
   },
   "repository": {
     "type": "git",
@@ -28,16 +29,16 @@
     "body-parser": "^1.20.2",
     "chance": "^1.1.11",
     "cookie-parser": "^1.4.6",
-    "cron": "^3.1.6",
-    "discord.js": "^14.14.1",
+    "cron": "^3.1.7",
+    "discord.js": "^14.15.3",
     "dotenv": "^16.4.5",
-    "ejs": "^3.1.9",
+    "ejs": "^3.1.10",
     "express": "^4.19.2",
-    "googleapis": "^134.0.0",
+    "googleapis": "^140.0.0",
     "jsonwebtoken": "^9.0.2",
     "moment-timezone": "^0.5.45",
-    "mongoose": "^8.2.3",
+    "mongoose": "^8.4.3",
     "path": "^0.12.7",
-    "superagent": "^8.1.2"
+    "superagent": "^9.0.2"
   }
 }

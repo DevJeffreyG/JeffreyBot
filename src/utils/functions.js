@@ -22,7 +22,7 @@ const { AppTokenAuthProvider } = require("@twurple/auth");
 const { BoostObjetives, ChannelModules, LogReasons, BoostTypes, PetNotices, Enum, DirectMessageType } = require("./Enums");
 const Log = require("./Log");
 const { Bases } = require("../resources");
-const Commands = require("../../Commands");
+const Commands = require("../app/Commands");
 const Collector = require("./Collector");
 const HumanMs = require("./HumanMs");
 const { Chance } = require("chance");
@@ -1712,7 +1712,7 @@ const WillBenefit = async function (member, objetivesToCheck) {
 }
 
 const importImage = function (filename) {
-  let file = new AttachmentBuilder(`./src/resources/imgs/${filename.toUpperCase()}.png`, { name: `${filename.toLowerCase()}.png` });
+  let file = new AttachmentBuilder(`./resources/imgs/${filename.toUpperCase()}.png`, { name: `${filename.toLowerCase()}.png` });
   return {
     attachment: `attachment://${filename.toLowerCase()}.png`,
     file: file
@@ -1844,7 +1844,7 @@ const MultiplePercentages = function (elements = [{ percentage, square }], block
  * @param {Client} client 
  */
 const UpdateCommands = async function (client) {
-  const ClientCommands = new Commands(["./commands/"]);
+  const ClientCommands = new Commands();
   return new Promise(async (res, rej) => {
     try {
       let resp = await ClientCommands.prepare(client, ["482989052136652800"])
@@ -2173,7 +2173,6 @@ module.exports = {
   isBannedFrom,
   Confirmation,
   AfterInfraction,
-  InteractivePages,
   ValidateDarkShop,
   FindNewId,
   DaysUntilToday,

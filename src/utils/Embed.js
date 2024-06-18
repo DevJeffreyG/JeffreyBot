@@ -107,7 +107,7 @@ class Embed extends Discord.EmbedBuilder {
     }
 
     #setup(options) {
-        const client = require("../../index");
+        const client = require("../index");
         const { RandomCumplido, ProgressBar, PrettyCurrency } = require("./functions");
         const { type, data } = options
 

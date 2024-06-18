@@ -26,7 +26,7 @@ class ErrorEmbed extends Embed {
         this.defColor(Colores.rojo)
 
         if (this.interaction?.client) this.client = this.interaction.client;
-        else this.client = require("../../index")
+        else this.client = require("../index")
 
         if (!options) return this.#customError();
 

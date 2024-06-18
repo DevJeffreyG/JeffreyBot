@@ -28,7 +28,7 @@ class Enum {
     }
 
     #loadTranslations() {
-        const client = require("../../");
+        const client = require("../");
 
         const CurrencyName = client.getCustomEmojis(client.lastInteraction?.guild.id)?.Currency?.name;
         const DarkCurrencyName = client.getCustomEmojis(client.lastInteraction?.guild.id)?.DarkCurrency?.name;
