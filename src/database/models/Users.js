@@ -35,6 +35,9 @@ const Schema = new mongoose.Schema({
             suggestions: { type: Boolean, required: true, default: false },
             customrole: { type: Boolean, required: true, default: false },
             tickets: { type: Boolean, required: true, default: false },
+            exshop: {
+                tts: { type: Boolean, required: true, default: false }
+            },
             events: [ // eventos
                 {
                     event_name: { type: String },
@@ -387,18 +390,15 @@ Schema.method("affords", function (price, path) {
 })
 
 Schema.method("isBannedFrom", function (module) {
-    return this.data.isBanned[module];
+    return this.get(`data.isBanned.${module}`);
 })
 
 Schema.method("toggleBan", async function (module) {
-    let info = this.data.isBanned[module]
-
-    if (info) this.data.isBanned[module] = false
-    else this.data.isBanned[module] = true;
+    this.set(`data.isBanned.${module}`, !this.get(`data.isBanned.${module}`));
 
     await this.save();
 
-    return this.data.isBanned[module];
+    return this.get(`data.isBanned.${module}`);
 })
 
 /**

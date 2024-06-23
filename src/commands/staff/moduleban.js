@@ -1,4 +1,4 @@
-const { Command, Embed } = require("../../utils");
+const { Command, Embed, Enum, ModuleBans } = require("../../utils");
 
 const command = new Command({
     name: "moduleban",
@@ -9,7 +9,7 @@ command.addOption({
     type: "string",
     name: "modulo",
     desc: "El módulo en el que se baneará",
-    choices: ["Tickets", "Sugerencias"],
+    choices: new Enum(ModuleBans).complexArray({valueString: true}),
     req: true
 })
 
@@ -28,20 +28,12 @@ command.execute = async (interaction, models, params, client) => {
 
     const user = await Users.getWork({ user_id: usuario.value, guild_id: interaction.guild.id });
 
-    switch (modulo.value) {
-        case "sugerencias":
-            action = await user.toggleBan("suggestions");
-            break;
-
-        case "tickets":
-            action = await user.toggleBan("tickets");
-            break;
-    }
+    let action = await user.toggleBan(modulo.value);
 
     const embed = new Embed({
         type: "success",
         data: {
-            desc: `Se ha ${action ? "baneado" : "desbaneado"} del módulo "\`${modulo.value}\`"`
+            desc: `Se ha ${action ? "baneado" : "desbaneado"} del módulo "\`${new Enum(ModuleBans).translate(modulo.value)}\`"`
         }
     })
 

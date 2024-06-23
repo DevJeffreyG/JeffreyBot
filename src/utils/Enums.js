@@ -71,7 +71,9 @@ class Enum {
             Economy: "Economía",
             Fun: "Diversión",
             Music: "Música",
-            DM: "Mensajes Directos"
+            DM: "Mensajes Directos",
+            Suggestions: "Sugerencias",
+            EXShopTTS: "EXShop: TTS"
         }
 
         for (const prop of Object.keys(this.values)) {
@@ -500,6 +502,17 @@ const TrophyRequirements = new Enum({
     SubscriptionsCurrency: "subscriptions_currency"
 }).values;
 
+/**
+ * - Suggestions
+ * - Tickets
+ * - EXShopTTS
+ */
+const ModuleBans = new Enum({
+    Suggestions: "suggestions",
+    Tickets: "tickets",
+    EXShopTTS: "exshop.tts"
+}).values;
+
 module.exports = {
     Enum,
     Categories,
@@ -525,5 +538,6 @@ module.exports = {
     PetNotices,
     YesNo,
     DirectMessageType,
-    TrophyRequirements
+    TrophyRequirements,
+    ModuleBans
 }

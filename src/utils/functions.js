@@ -1264,36 +1264,6 @@ const handleNotification = async function (guild) {
 
 /**
  * 
- * @param {*} interaction The Discord.JS Interaction that triggers the command
- * @param {String} query The Banning to search to this user in the Guild
- * @returns 
- */
-const isBannedFrom = async function (interaction, query) {
-  const user = await Users.getWork({ user_id: interaction.user.id, guild_id: interaction.guild.id });
-
-  let response = false;
-
-  switch (query.toUpperCase()) {
-    case "SUGGESTIONS":
-    case "SUGGEST":
-      response = user.isBannedFrom("suggestions");
-      break;
-
-    case "TICKETS":
-      response = user.isBannedFrom("tickets");
-      break;
-
-    default:
-      response = null;
-  }
-
-  if (response === null) return `COULD'T DETERMINE BANNED FROM '${query.toUpperCase()}'`;
-  else
-    return response;
-}
-
-/**
- * 
  * @param {String} toConfirm Lo que se está confirmando
  * @param {Array} dataToConfirm El texto que aparece separado por "▸"
  * @param {CommandInteraction} interaction La interacción que ejecuta esta confirmación
@@ -2170,7 +2140,6 @@ module.exports = {
   LimitedTime,
   Subscription,
   handleNotification,
-  isBannedFrom,
   Confirmation,
   AfterInfraction,
   ValidateDarkShop,

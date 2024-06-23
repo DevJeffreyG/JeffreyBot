@@ -10,7 +10,7 @@ const { Guilds } = require("mongoose").models;
 
 const ms = require("ms");
 const Log = require("../utils/Log");
-const { ChannelModules } = require("../utils/Enums");
+const { ChannelModules, ModuleBans } = require("../utils/Enums");
 const { DoesntExistsError, ModuleBannedError, ModuleDisabledError, PermissionError } = require("../errors");
 
 const ticketCooldown = ms("1m");
@@ -77,7 +77,7 @@ class Ticket {
         const doc = this.docGuild;
 
         // baneado de crear tickets
-        if (await isBannedFrom(this.interaction, "TICKETS")) throw new ModuleBannedError(this.interaction);
+        if (this.user.isBannedFrom(ModuleBans.Tickets)) throw new ModuleBannedError(this.interaction);
 
         // tiene cooldown
         if (activeCreatingTicket.has(this.interaction.user.id)) return this.interaction.editReply(`Alto ahí velocista, por favor espera ${ms((ticketCooldown) - (new Date().getTime() - activeCreatingTicket.get(this.interaction.user.id)))} antes de volver a darle al botón.`);
