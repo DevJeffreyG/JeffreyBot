@@ -5,8 +5,8 @@ const superagent = require("superagent");
 const jwt = require("jsonwebtoken");
 const Chance = require("chance");
 
-const { ItemTypes, ItemObjetives, ItemActions, ItemEffects, LogReasons, ChannelModules, ShopTypes, PetAttacksType, Enum, BoostObjetives } = require("./Enums");
-const { BadCommandError, AlreadyExistsError, DoesntExistsError, FetchError, ExecutionError } = require("../errors");
+const { ItemTypes, ItemObjetives, ItemActions, ItemEffects, LogReasons, ChannelModules, ShopTypes, PetAttacksType, Enum, BoostObjetives, ModuleBans } = require("./Enums");
+const { BadCommandError, AlreadyExistsError, DoesntExistsError, FetchError, ExecutionError, ModuleBannedError } = require("../errors");
 
 const { FindNewId, LimitedTime, Subscription, WillBenefit, isDeveloper, CreateInteractionFilter } = require("./functions");
 
@@ -365,6 +365,8 @@ class Item {
         if (!await this.#darkshopWork()) return false;
         const itemType = this.type
 
+        let ttsData;
+
         switch (itemType) {
             case ItemTypes.StackOverflow:
                 console.log("🟩 Stack overflow!")
@@ -514,6 +516,10 @@ class Item {
 
             case ItemTypes.EXTTS:
                 console.log("🟩 EX TTS!");
+                if(this.user.isBannedFrom(ModuleBans.EXShopTTS)) {
+                    await new ModuleBannedError(this.interaction).send()
+                    return false;
+                }
                 await this.interaction.editReply({ content: `${this.interaction.client.Emojis.Loading} Usando...` });
 
                 let follow = await this.interaction.followUp({
@@ -549,15 +555,12 @@ class Item {
                 });
                 if (!c) break;
                 await c.deferUpdate();
-                let ttsData = new Modal(c).read();
+                ttsData = new Modal(c).read();
 
             case ItemTypes.EXMedia:
             case ItemTypes.EXKeyboard:
             case ItemTypes.EXTTS:
                 console.log("🟩 EX Item!");
-
-                console.log(ttsData);
-
                 const cooldowns = this.shop.cooldowns.filter(x => x.item_id === this.item.id);
 
                 // Existe información de un cooldown para este item
@@ -589,7 +592,8 @@ class Item {
                             type: itemType,
                             item: this.item,
                             tts: ttsData?.tts ?? null,
-                            guild: this.interaction.guild
+                            guild: this.interaction.guild,
+                            user: this.interaction.member.toJSON()
                         })
                         .set("auth", jwt.sign({ jb: true }, process.env.TOKEN))
 

@@ -141,13 +141,14 @@ module.exports = (app) => {
 
         try {
             let all = req.body;
-            const { item, guild } = all;
+            const { item, guild, user } = all;
 
             delete all.item;
             delete all.guild;
+            delete all.user;
 
             const Client = WSServer.Clients.get(guild.id);
-            Client.send({ message: "Se usó un item desde el servidor configurado!" })
+            Client.send({ message: `${user.displayName} (${user.userId}) Usó un item desde el servidor configurado!` })
             Client.send({ ...all, message: JSON.stringify(item), json: true })
 
             res.send(true);
