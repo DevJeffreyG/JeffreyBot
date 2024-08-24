@@ -26,12 +26,16 @@ jobs:
           npm install
           npm run build --if-present
           npm run test --if-present
+
+      - name: Zip artifact to upload
+        run: 7z a jb.zip .
       
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: .
+          path: ./jb.zip
+          retention-days: 1
 
   deploy:
     runs-on: ubuntu-latest
@@ -61,5 +65,5 @@ jobs:
         with:
           app-name: 'jeffreybot'
           slot-name: 'Production'
-          package: .
+          package: ./jb.zip
           
