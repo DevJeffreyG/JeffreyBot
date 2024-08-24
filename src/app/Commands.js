@@ -1,11 +1,15 @@
 const { Routes, REST } = require("discord.js");
+const path = require("path");
 
 const { GlobalDatas } = require("mongoose").models;
 
 const fs = require("fs")
 
 class Commands {
-    constructor(paths = [__dirname + "../../commands"]) {
+    constructor(paths = [path.join(__dirname, "../commands")]) {
+        console.log(__dirname);
+        console.log(paths);
+        
         this.paths = paths;
         this.routes = [];
         this.commands = [];

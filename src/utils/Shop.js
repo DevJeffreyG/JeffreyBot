@@ -1,4 +1,4 @@
-const { Emoji, CommandInteraction, User, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, TextInputStyle, DiscordjsErrorCodes } = require("discord.js");
+const { CommandInteraction, User, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, TextInputStyle, DiscordjsErrorCodes } = require("discord.js");
 const { Shops, DarkShops, PetShops, EXShops, Users } = require("mongoose").models;
 const { Colores } = require("../resources");
 const { ShopTypes, Enum, ItemTypes, ItemObjetives, ItemActions, YesNo, DirectMessageType } = require("./Enums");
@@ -515,6 +515,11 @@ ${codeBlock(item.description)}
         if (!item) throw this.#noItemError;
 
         if (params.especial?.value) { // Sí es un item especial
+            const specialError = new BadParamsError(this.interaction, [
+                "Si es un item `especial`, **debe** agregar un **item**"
+            ]);
+            
+            if(params.accion.value != ItemActions.Add || params.objetivo.value != ItemObjetives.Item) throw specialError;
             let select = new StringSelectMenuBuilder()
                 .setCustomId("specialItemSelect")
                 .setPlaceholder("Escoge el tipo de Item")

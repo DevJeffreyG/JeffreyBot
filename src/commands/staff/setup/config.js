@@ -225,7 +225,7 @@ command.execute = async (interaction, models, params, client) => {
     switch (subcommand) {
         case "dashboard":
             await interaction.editReply({
-                content: `${process.env.HOME_PAGE}/dashboard/${interaction.guild.id}`
+                content: `${process.env.DASHBOARD}/dashboard/${interaction.guild.id}`
             })
             break
 

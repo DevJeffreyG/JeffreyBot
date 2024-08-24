@@ -587,7 +587,7 @@ class Item {
 
                 try {
                     let q = await superagent
-                        .post(`${process.env.HOME_PAGE}/api/ws/item-use`)
+                        .post(`${process.env.API_ENDPOINT}/api/ws/item-use`)
                         .send({
                             type: itemType,
                             item: this.item,

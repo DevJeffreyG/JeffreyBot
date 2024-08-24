@@ -6,7 +6,7 @@ const command = new Command({
     desc: "Las últimas modificaciones hechas en la versión actual del bot"
 })
 command.execute = async (interaction, models, params, client) => {
-    return await interaction.reply({ content: `${client.Emojis.JeffreyBot} Mira los últimos cambios en la ${hyperlink("página web", `${process.env.HOME_PAGE}/changelog`)} 🦊` });
+    return await interaction.reply({ content: `${client.Emojis.JeffreyBot} Mira los últimos cambios en la ${hyperlink("página web", `${process.env.DASHBOARD}/changelog`)} 🦊` });
 }
 
 module.exports = command;
