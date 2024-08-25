@@ -1,19 +1,21 @@
-const { GuildMemberRoleManager, roleMention } = require("discord.js");
+const { GuildMemberRoleManager, roleMention, CommandInteraction } = require("discord.js");
 const ms = require("ms")
 
-const { LimitedTime } = require("./functions");
-const { ItemObjetives, ItemTypes } = require("./Enums");
+const { LimitedTime, BoostWork, PrettyCurrency } = require("./functions");
+const { ItemObjetives, BoostObjetives, Enum, BoostTypes } = require("./Enums");
 const Embed = require("./Embed");
-const ErrorEmbed = require("./ErrorEmbed");
 
-const { Users } = require("mongoose").models;
+const { Users, Guilds } = require("mongoose").models;
 
 class RouletteItem {
+    /**
+     * 
+     * @param {CommandInteraction} interaction 
+     * @param {*} globalinfo 
+     */
     constructor(interaction, globalinfo) {
-        console.log(globalinfo)
         this.interaction = interaction;
         this.item = globalinfo;
-
     }
 
     #embeds() {
@@ -52,39 +54,42 @@ class RouletteItem {
                 footer: `Había un ${this.item.prob}% de probabilidad de que esta fuera tu recompensa`
             }
         });
-        this.hasRole = new ErrorEmbed(this.interaction, {
-            type: "alreadyExists",
-            data: {
-                action: "add role",
-                existing: roleMention(this.numbers),
-                context: "este usuario"
-            }
-        })
     }
 
-    async build(user) {
-        let interaction = this.interaction;
+    #adjust() {
+        if (this.doc.toAdjust("roulette")) {
+            this.numbers = Number(this.numbers);
+
+            const average = this.doc.data.average_currency;
+            if (average / this.numbers > this.doc.settings.quantities.adjust_ratio)
+                this.numbers *= Math.round(average / (average / this.numbers));
+
+            this.frontend_numbers = PrettyCurrency(this.interaction.guild, this.numbers);
+        }
+    }
+
+    /**
+     * Genera la información necesaria para empezar con el Item
+     * @param {Users} user 
+     * @param {Guilds} doc 
+     * @returns {this}
+     */
+    build(user, doc) {
         this.user = user;
+        this.doc = doc;
 
         this.numbers = this.item.value.match(/[0-9\.]/g).join("");
         this.nonumbers = this.item.value.replace(/[0-9\.]/g, "");
 
-        const { Currency } = this.interaction.client.getCustomEmojis(this.interaction.guild.id);
-
         switch (Number(this.item.target)) {
             case ItemObjetives.Currency:
-                this.target = this.user.economy.global.currency;
+                this.target = this.user.getCurrency();
 
-                this.frontend_target = `**${Currency}${this.target.toLocaleString("es-CO")}**`;
-                this.frontend_numbers = `**${Currency}${this.numbers.toLocaleString("es-CO")}**`;
-
+                this.frontend_target = PrettyCurrency(this.interaction.guild, this.target);
+                this.frontend_numbers = PrettyCurrency(this.interaction.guild, this.numbers);
                 break;
 
-            case ItemObjetives.Role:
-                this.target = interaction.member.roles;
-                break;
-
-            case ItemObjetives.TempRole:
+            case ItemObjetives.Boost:
                 this.target = this.user.data.temp_roles;
                 break;
 
@@ -109,6 +114,8 @@ class RouletteItem {
         console.log("🟢 Números:", this.numbers)
         console.log("🟢 No-Números:", this.nonumbers)
 
+        await this.user.addCount("roulette", 1, false);
+
         switch (this.target.constructor) {
             case GuildMemberRoleManager:
                 if (this.nonumbers === '-') this.target.remove(this.numbers)
@@ -118,7 +125,7 @@ class RouletteItem {
                 break;
 
             case Array:
-                let temproles = Number(this.item.target) === ItemObjetives.TempRole;
+                let temproles = Number(this.item.target) === ItemObjetives.Boost;
                 if (this.nonumbers === '-') {
                     response = temproles ? this.removedTemp : this.success;
                     let i = this.target.findIndex(x => x === this.numbers)
@@ -127,17 +134,10 @@ class RouletteItem {
                     this.target.splice(i, 1);
                 } else if (this.nonumbers === '+') {
                     if (temproles) {
-                        if (this.interaction.member.roles.cache.find(x => x.id === this.numbers)) return this.hasRole.send();
                         response = this.addedTemp;
                         save = false
 
-                        if (this.item.extra.special === ItemObjetives.Boost)
-                            await LimitedTime(this.interaction.member, null, ms(this.item.extra.duration), this.item.extra.boosttype, this.item.extra.boostobj, this.item.extra.boostvalue);
-                        /* else if(this.item.extra.special === ItemTypes.Subscription)
-                            await Subscription(this.interaction.member, this.numbers, ms(this.item.extra.duration), this.item.extra.subprice, this.item.extra.subname);
-                         */
-                        else
-                            await LimitedTime(this.interaction.member, null, ms(this.item.extra.duration))
+                        await LimitedTime(this.interaction.member, null, ms(this.item.extra.duration), {}, this.item.extra.boosttype, this.item.extra.boostobj, this.item.extra.boostvalue);
                     } else
                         this.target.push(this.numbers)
                 }
@@ -146,14 +146,30 @@ class RouletteItem {
             case Number:
                 this.numbers = Number(this.numbers);
 
+                const boost = BoostWork(this.user);
+
                 if (this.nonumbers === "-") {
+                    this.#adjust();
                     this.nonumbers = "Se descontaron";
-                    this.user.economy.global.currency -= this.numbers;
+
+                    if (boost.multiplier.changed.currency) {
+                        this.numbers = Number((this.numbers * boost.multiplier.currency_value).toFixed(2))
+                        this.frontend_numbers = PrettyCurrency(this.interaction.guild, this.numbers, { boostemoji: boost.emojis.currency });
+                    }
+
+                    await this.user.removeCurrency(this.numbers);
+                    await this.doc.addToBank(this.numbers, "gambling");
                 }
                 else if (this.nonumbers === "+") {
-                    save = false;
+                    this.#adjust();
                     this.nonumbers = "Se agregaron";
-                    await this.user.addCurrency(this.numbers);
+
+                    if (boost.multiplier.changed.currency) {
+                        this.numbers = Number((this.numbers * boost.multiplier.currency_value).toFixed(2))
+                        this.frontend_numbers = PrettyCurrency(this.interaction.guild, this.numbers, { boostemoji: boost.emojis.currency });
+                    }
+
+                    await this.user.addCurrency(this.numbers, false);
                 }
                 else if (this.nonumbers === "*") {
                     this.nonumbers = "Se multiplicó por"
@@ -176,8 +192,68 @@ class RouletteItem {
         if (save) await this.user.save().catch(e => console.log(e));
 
         await this.interaction.editReply({ embeds: [response] })
-
         return this;
+    }
+
+    /**
+     * Saca la información del item User-Friendly
+     * @returns
+     */
+    info() {
+        let translated = {
+            action: null,
+            quantity: this.numbers,
+            likelihood: this.item.prob,
+            text: null,
+            boost: {
+                value: null,
+                objetive: null,
+                type: null
+            }
+        };
+
+        switch (this.nonumbers) {
+            case "+":
+                this.#adjust();
+                translated.quantity = this.numbers;
+
+                translated.action = "Agrega"
+                break;
+            case "-":
+                this.#adjust();
+                translated.quantity = this.numbers;
+
+                translated.action = "Resta"
+                break;
+            case "*":
+                translated.action = "Multiplica"
+                break;
+            case "%":
+                translated.action = "Saca el"
+                break;
+        }
+
+        switch (Number(this.item.target)) {
+            case ItemObjetives.Currency:
+                if (this.nonumbers === "%") {
+                    translated.text = `${translated.action} **${translated.quantity.toLocaleString("es-CO")}%** a ${PrettyCurrency(this.interaction.guild, this.target)}`;
+                } else if (this.nonumbers === "*") {
+                    translated.text = `${translated.action} por **${translated.quantity.toLocaleString("es-CO")}** a ${PrettyCurrency(this.interaction.guild, this.target)}`;
+                } else {
+                    translated.text = `${translated.action} ${PrettyCurrency(this.interaction.guild, translated.quantity)} a ${PrettyCurrency(this.interaction.guild, this.target)}`;
+                }
+                break;
+            case ItemObjetives.Boost:
+                translated.boost = {
+                    value: this.item.extra.boostvalue,
+                    objetive: new Enum(BoostObjetives).translate(this.item.extra.boostobj),
+                    type: new Enum(BoostTypes).translate(this.item.extra.boosttype)
+                }
+                translated.text = `${translated.action} **Un Boost ${translated.boost.type} x${translated.boost.value.toLocaleString("es-CO")} para ${translated.boost.objetive}**`
+                break;
+        }
+
+        return translated;
     }
 }
 

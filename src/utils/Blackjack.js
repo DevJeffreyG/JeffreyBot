@@ -2,12 +2,13 @@ const { CommandInteraction, ActionRowBuilder, ButtonBuilder, ButtonStyle } = req
 const Chance = require("chance");
 const ms = require("ms");
 
-const { CardType, EndReasons } = require("./Enums");
+const { CardType, EndReasons, Cooldowns } = require("./Enums");
 const Embed = require("./Embed");
-const ErrorEmbed = require("./ErrorEmbed");
 const { Colores } = require("../resources");
 
 const Collector = require("./Collector");
+const { ExecutionError, AlreadyUsingError } = require("../errors");
+const { PrettyCurrency } = require("./functions");
 
 /**
  * TY UnbelievaBoat 💚 !
@@ -200,7 +201,7 @@ class Blackjack {
         //console.log("⚪ Se debería mostrar las cartas del Dealer? %s", showDealer)
         this.embed = new Embed()
             .defAuthor({ text: "Blackjack", icon: this.client.EmojisObject.BackCard.url })
-            .defDesc(`Hay **${this.Emojis.Currency}${this.bet.toLocaleString("es-CO")}** en juego.`)
+            .defDesc(`Hay ${PrettyCurrency(this.interaction.guild, this.bet)} en juego.`)
             .defField("Tu mano", this.#translateCards(this.player_hand), true)
             .defField("Mano del Dealer", this.#translateCards(this.dealer_hand, showDealer ? false : true), true)
             .defFooter({ text: `Quedan ${this.deck.length} cartas en la baraja` })
@@ -220,7 +221,11 @@ class Blackjack {
 
         this.collector = new Collector(this.interaction, { filter, time: ms("10m") }, true);
         this.collector.onActive(async () => {
-            this.interaction.followUp({ ephemeral: true, embeds: [new ErrorEmbed().defDesc("Ya estás en un juego de Blackjack, terminalo antes de iniciar otro.")] });
+            this.interaction.followUp({
+                ephemeral: true, embeds: [
+                    new AlreadyUsingError(interaction, "Ya estás en un juego de Blackjack, terminalo antes de iniciar otro.").embed
+                ]
+            });
         }).onEnd(() => {
             this.row.components.forEach(c => c.setDisabled());
             this.supportRow.components.find(c => c.data.custom_id === "giveup").setDisabled();
@@ -236,7 +241,7 @@ class Blackjack {
             if (this.ended) try {
                 return i.update();
             } catch (err) {
-                console.log(err)
+                console.error("🔴 %s", err);
             }
 
             switch (i.customId) {
@@ -282,7 +287,8 @@ class Blackjack {
             }
         })
 
-        this.collector.on("end", async () => {
+        this.collector.on("end", async (c, reason) => {
+            if (reason === EndReasons.OldCollector) return;
             if (!this.ended) {
                 await this.endgame(false, EndReasons.TimeOut);
             }
@@ -290,7 +296,7 @@ class Blackjack {
     }
 
     async #hit() {
-        console.log("🟢 %s ha pedido otra carta", this.interaction.user.tag)
+        console.log("🟢 %s ha pedido otra carta", this.interaction.user.username)
 
         let card = this.#borrowCards(1);
         this.player_hand = this.player_hand.concat(card); // agregar la nueva carta a la mano
@@ -305,7 +311,7 @@ class Blackjack {
     }
 
     async #stand() {
-        console.log("🟢 %s se ha plantado", this.interaction.user.tag)
+        console.log("🟢 %s se ha plantado", this.interaction.user.username)
 
         let hit = true;
         let saved = 0;
@@ -352,7 +358,7 @@ class Blackjack {
     }
 
     async #double() {
-        console.log("🟢 %s ha doblado decidió doblar su apuesta", this.interaction.user.tag);
+        console.log("🟢 %s ha doblado decidió doblar su apuesta", this.interaction.user.username);
 
         this.bet *= 2
 
@@ -399,15 +405,14 @@ class Blackjack {
         this.user = user;
         this.doc = doc;
 
-        if (this.bet < this.doc.settings.quantities.blackjack_bet) {
-            return new ErrorEmbed(this.interaction, {
-                type: "execError",
-                data: {
-                    command: this.interaction.commandName,
-                    guide: `La apuesta debe ser **${this.Emojis.Currency}${this.doc.settings.quantities.blackjack_bet.toLocaleString("es-CO")}** o mayor.`
-                }
-            }).send()
-        }
+        if (this.bet < this.doc.settings.quantities.limits.bets.blackjack.min)
+            throw new ExecutionError(this.interaction,
+                `La apuesta debe ser mayor a ${PrettyCurrency(this.interaction.guild, this.doc.settings.quantities.limits.bets.blackjack.min)}`
+            )
+        else if (this.bet > this.doc.settings.quantities.limits.bets.blackjack.max)
+            throw new ExecutionError(this.interaction,
+                `La apuesta debe ser menor a ${PrettyCurrency(this.interaction.guild, this.doc.settings.quantities.limits.bets.blackjack.max)}`
+            )
 
         console.log("🟢 Hay %s cartas en la baraja", this.deck.length)
 
@@ -445,41 +450,42 @@ class Blackjack {
         let save = true;
 
         console.log("🟢 Se terminó el juego con resultado %s", won)
-        await this.#generateEmbed(reason != EndReasons.Over21 && reason != EndReasons.Blackjack)
+        await this.#generateEmbed(reason != EndReasons.Blackjack)
 
         if (won === -1) {
             this.embed
-                .defDesc(`Se te regresan **${this.Emojis.Currency}${this.bet.toLocaleString("es-CO")}**.`)
+                .defDesc(`Se te regresan ${PrettyCurrency(this.interaction.guild, this.bet)}.`)
                 .defColor(Colores.cake)
         } else
 
             if (!won) {
                 this.embed
-                    .defDesc(`Perdiste **${this.Emojis.Currency}${this.bet.toLocaleString("es-CO")}**.`)
+                    .defDesc(`Perdiste ${PrettyCurrency(this.interaction.guild, this.bet)}.`)
                     .defColor(Colores.rojo)
 
                 if (reason === EndReasons.GaveUp) {
                     this.embed
-                        .defDesc(`Perdiste **${this.Emojis.Currency}${this.bet.toLocaleString("es-CO")}** al rendirte.`)
+                        .defDesc(`Perdiste ${PrettyCurrency(this.interaction.guild, this.bet)} al rendirte.`)
                         .defColor(Colores.rojooscuro)
                 } else if (reason === EndReasons.TimeOut) {
                     this.embed
-                        .defDesc(`Perdiste **${this.Emojis.Currency}${this.bet.toLocaleString("es-CO")}** porque pasó mucho tiempo.`)
+                        .defDesc(`Perdiste ${PrettyCurrency(this.interaction.guild, this.bet)} porque pasó mucho tiempo.`)
                         .defColor(Colores.rojooscuro)
                 }
 
-                this.user.economy.global.currency -= this.bet;
+                await this.user.removeCurrency(this.bet);
+                await this.doc.addToBank(this.bet, "gambling");
 
-                console.log("🔴 %s perdió %s %s en el Blackjack", this.interaction.user.tag, this.bet.toLocaleString("es-CO"), this.Emojis.Currency.name);
+                console.log("🔴 %s perdió %s %s en el Blackjack", this.interaction.user.username, this.bet.toLocaleString("es-CO"), this.Emojis.Currency.name);
             } else {
                 save = false;
                 this.embed
-                    .defDesc(`Ganaste **${this.Emojis.Currency}${this.bet.toLocaleString("es-CO")}**.`)
+                    .defDesc(`Ganaste ${PrettyCurrency(this.interaction.guild, this.bet)}.`)
                     .defColor(Colores.verdejeffrey)
 
                 if (reason === EndReasons.Blackjack) {
                     this.embed
-                        .defDesc(`Ganaste **${this.Emojis.Currency}${this.bet.toLocaleString("es-CO")}** instantáneamente.`)
+                        .defDesc(`Ganaste ${PrettyCurrency(this.interaction.guild, this.bet)} instantáneamente.`)
                         .defAuthor({ text: "BLACKJACK!", icon: this.client.EmojisObject.BackCard.url })
                 }
 
@@ -490,6 +496,8 @@ class Blackjack {
                     guild: this.interaction.guild.id,
                     count: 1
                 })
+
+                if (countQ?.count === this.doc.settings.quantities.blackjack.consecutive_wins) await this.user.cooldown(Cooldowns.Blackjack, { save: false });
 
                 this.user.addCount("blackjack", 1, false);
                 await this.user.addCurrency(this.bet)

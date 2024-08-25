@@ -1,16 +1,87 @@
 const { PermissionFlagsBits, SlashCommandBuilder, SlashCommandSubcommandGroupBuilder, SlashCommandSubcommandBuilder } = require('discord.js');
 
-const Embed = require("./Embed");
 const Colores = require("../resources/colores.json");
 const { Categories } = require('./Enums');
+const InteractivePages = require('./InteractivePages');
+const { FinalPeriod } = require('./functions');
 
 class Command {
-    constructor(data = { name: "foo", desc: "bar", helpdesc: null, category: "0" }) {
-        if (!(data.name && data.desc && data.category)) return console.error("No están todos los datos para crear un comando:", data)
+    #rawData;
+    #flatData;
+    constructor(data = { name: "foo", desc: "bar", helpdesc: null, category: Categories.General }) {
+        if (!(data.name && data.desc)) return console.error("No están todos los datos para crear un comando:", data)
 
+        this.#rawData = data;
+
+        this.data = new SlashCommandBuilder()
+            .setName(data.name.toLowerCase());
+
+        this.#prefixWork(data.category);
+
+        this.name = this.data.name;
+        this.info = data.helpdesc ?? data.desc;
+        this.category = data.category;
+        this.subcategory = null;
+
+        this.#setPerms();
+        this.execute = async (interaction, models, params, client) => {
+            await interaction.deferReply()
+            interaction.editReply("Hola mundo!")
+        };
+        this.getHelp = async (interaction) => {
+            const counts = this.#getCounts()
+
+            let items = new Map();
+
+            for (const [i, item] of this.#flatData.entries()) {
+                if(!item) continue;
+                let name;
+
+                if (item.group) name = interaction.client.mentionCommand(`${this.name} ${item.group} ${item.name}`);
+                else name = interaction.client.mentionCommand(`${this.name} ${item.name}`);
+
+                if(item instanceof SlashCommandSubcommandGroupBuilder) name = `[GRUPO] ${interaction.client.mentionCommand(`${this.name} ${item.name}`)}`;
+
+                items.set(i, {
+                    name,
+                    info: FinalPeriod(item.description)
+                })
+            }
+
+            const interactive = new InteractivePages({
+                title: `Ayuda: /${this.name}`,
+                footer: `Página {ACTUAL} de {TOTAL}`,
+                color: Colores.verde,
+                thumbnail: interaction.client.user.avatarURL(),
+                description: `> **ℹ️ ${this.info}**\nHay \`${counts.subcommands}\` subcomandos en este comando.\nCon \`${counts.groups}\` subgrupos.`,
+                addon: `**— {name}**
+**▸** {info}\n\n`
+            }, items, 3);
+
+            return await interactive.init(interaction)
+        }
+
+        this.methodsCount = 0;
+    }
+
+    setCategory(category) {
+        this.#prefixWork(category);
+        this.category = category;
+        this.#setPerms();
+
+        return this
+    }
+
+    setSubCategory(sub) {
+        this.subcategory = sub;
+
+        return this
+    }
+
+    #prefixWork(category) {
         let prefix = "";
 
-        switch (data.category) {
+        switch (category) {
             case Categories.General:
                 prefix = "GENERAL";
                 break;
@@ -46,26 +117,14 @@ class Command {
             case Categories.Music:
                 prefix = "MUSIC";
                 break;
+
+            case Categories.DM:
+                prefix = "DM";
+                break;
         }
 
-        this.data = new SlashCommandBuilder()
-            .setName(data.name.toLowerCase())
-            .setDescription(`[${prefix}] ${data.desc}`)
-
-        this.name = this.data.name;
-        this.info = data.helpdesc ?? data.desc;
-        this.category = data.category;
-        this.#setPerms();
-        this.execute = async (interaction, models, params, client) => {
-            await interaction.deferReply()
-            interaction.editReply("Hola mundo!")
-        };
-        this.getHelp = async (interaction) => {
-            let embed = this.#getHelpEmbed(interaction);
-
-            return interaction.editReply({ content: null, embeds: [embed] });
-        }
-        this.methodsCount = 0;
+        this.data.setDescription(`[${prefix}] ${this.#rawData.desc}`)
+        return this;
     }
 
     #toAddWorker(data) {
@@ -88,7 +147,7 @@ class Command {
         return returnable;
     }
 
-    async addEach(data = { filter: null, type: "string", name: "foo", desc: "bar", req: false }) {
+    addEach(data = { filter: null, type: "string", name: "foo", desc: "bar", req: false }) {
         const options = data.filter ? this.data.options.filter(x => x.name === data.filter && x instanceof SlashCommandSubcommandGroupBuilder) : this.data.options;
         options.forEach(option => {
             if (option instanceof SlashCommandSubcommandGroupBuilder) {
@@ -102,7 +161,7 @@ class Command {
         })
     }
 
-    async addOption(data = { type: "string", name: "foo", desc: "bar", req: false, sub: null, choices: [] }) {
+    addOption(data = { type: "string", name: "foo", desc: "bar", req: false, sub: null, choices: [] }) {
         this.#warning();
         if (!(data.type && data.name && data.desc)) return console.error("No están todos los datos para crear una opción:", this.data, data)
 
@@ -152,7 +211,7 @@ class Command {
         }
     }
 
-    async addSubcommand(data = { name: "foo", desc: "bar", group: null }) {
+    addSubcommand(data = { name: "foo", desc: "bar", group: null }) {
         this.#warning();
         if (!(data.name && data.desc)) return console.error("No están todos los datos para crear un subcommand:", this.data, data)
 
@@ -173,7 +232,7 @@ class Command {
             )
     }
 
-    async addSubcommandGroup(data = { name: "foo", desc: "bar" }) {
+    addSubcommandGroup(data = { name: "foo", desc: "bar" }) {
         this.#warning();
         if (!(data.name && data.desc)) return console.error("No están todos los datos para crear un subcommandgroup:", this.data, data)
 
@@ -182,6 +241,56 @@ class Command {
                 .setName(data.name)
                 .setDescription(data.desc)
         )
+    }
+
+    /**
+     * 
+     * @param {Array<String>} paths Array de Strings que contienen la ubicación a la cual se agregarán las opciones
+     * @param {Array} options 
+     * @param {Boolean} insertFirst Agregar lo antes posible en las opciones?
+     */
+    addOptionsTo(paths, options, insertFirst = false) {
+        for (const path of paths) {
+            let arrayPath = path.split(" ")
+            let subcommand = this.data.options;
+
+            arrayPath.forEach(i => {
+                subcommand = subcommand.find(x => x.name === i).options;
+            })
+
+            options.sort((a, b) => {
+                if (a.required && !b.required) return -1
+                if (!a.required && b.required) return 1
+                else return 0;
+            })
+
+            let lastRequired = subcommand.findLastIndex(x => x.required);
+            let lastNonRequired = subcommand.findLastIndex(x => !x.required);
+
+            if (insertFirst) {
+                // hay que agregar los requeridos antes que todo
+                let requireds = options.filter(x => x.required);
+                let nonrequireds = options.filter(x => !x.required);
+
+                subcommand.splice(0, 0, ...requireds); // agregar las opciones requeridas antes de todo
+
+                if (lastRequired != -1) // existe una opcion requerida, agregar las no requeridas después de esta
+                    subcommand.splice(lastRequired + 1, 0, ...nonrequireds);
+                else if (lastNonRequired != -1) // no existen opciones requeridas, pero sí hay no requeridas, agregar las no requeridas antes de todo
+                    subcommand.slice(0, 0, ...nonrequireds);
+                else // no existen opciones
+                    subcommand.push(...nonrequireds);
+
+            } else {
+                if (lastRequired != -1) // existe una opcion requerida, agregar las opciones ordenadas después de esta
+                    subcommand.splice(lastRequired + 1, 0, ...options);
+                else if (lastNonRequired != -1) // no hay una opcion requerida, pero sí existen no requeridas, agregar las opciones ordenadas antes de estas
+                    subcommand.slice(0, 0, ...options);
+                else // no existen opciones
+                    subcommand.push(...options);
+            }
+
+        }
     }
 
     #setPerms() {
@@ -202,9 +311,9 @@ class Command {
         if ((data.type === "integer" || data.type === "number")) {
             if (data.min) option.setMinValue(data.min)
             if (data.max) option.setMaxValue(data.max)
-        } else if(data.type === "string"){
-            if(data.max) option.setMaxLength(data.max)
-            if(data.min) option.setMinLength(data.min)
+        } else if (data.type === "string") {
+            if (data.max) option.setMaxLength(data.max)
+            if (data.min) option.setMinLength(data.min)
         }
 
         if (data.choices) {
@@ -216,17 +325,34 @@ class Command {
         return option;
     }
 
-    #getHelpEmbed(interaction) {
-        // TODO: Mostrar los parámetros, junto a subcomandos y subgrupos
-        let embed = new Embed()
-            .defAuthor({ text: `Ayuda: /${this.name}`, icon: interaction.guild.iconURL(), title: true })
-            .defDesc(`▸ ${this.info}`)
-            .setColor(Colores.verde)
-            .defFooter({ text: "Esto será más completo en el futuro de Jeffrey Bot 🦊" })
-            .defThumbnail(interaction.client.user.avatarURL())
+    #getCounts() {
+        let subcommands = 0, groups = 0;
 
-        return embed;
+        this.#flatData = this.data.options.flatMap(first => {
+            let inside = [];
+
+            if (first instanceof SlashCommandSubcommandGroupBuilder) {
+                groups++;
+                inside = first.options.flatMap(second => {
+                    if (second instanceof SlashCommandSubcommandBuilder) {
+                        subcommands++;
+                        second.group = first.name;
+                        return second;
+                    }
+                })
+            }
+
+            if (first instanceof SlashCommandSubcommandBuilder) subcommands++;
+
+            if ((first instanceof SlashCommandSubcommandBuilder || first instanceof SlashCommandSubcommandGroupBuilder))
+                return [first, ...inside];
+        })
+
+        return {
+            subcommands, groups
+        }
     }
+
 
     #warning() {
         this.methodsCount++

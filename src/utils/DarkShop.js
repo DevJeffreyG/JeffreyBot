@@ -9,7 +9,7 @@ const { Tendencies, Enum, ChannelModules, LogReasons } = require("./Enums");
 const Embed = require("./Embed");
 const { Colores } = require("../resources");
 const Log = require("./Log");
-const ErrorEmbed = require("./ErrorEmbed");
+const { InsuficientSetupError } = require("../errors");
 
 class DarkShop {
     /**
@@ -24,6 +24,7 @@ class DarkShop {
         this.now = moment();
 
         this.Emojis = this.client.getCustomEmojis(this.guild.id);
+        this.darkshopDisabled = false;
     }
 
     async #sunday() {
@@ -41,25 +42,62 @@ class DarkShop {
 
         // ANUNCIARLO
         if (!this.guilddoc) await this.#getGuildDoc();
-        const dsChannel = await this.guild.channels.fetch(this.guilddoc.getDarkShopChannel("events"));
-        const dsNewsRole = await this.guild.roles.fetch(this.guilddoc.getRoleByModule("darkshop_news"))
 
-        dsChannel?.send({
-            content: dsNewsRole?.toString() ?? null, embeds: [
-                new Embed()
-                    .defAuthor({ text: "Domingo", icon: this.client.EmojisObject.DarkShop.url })
-                    .defDesc(`**—** Se termina una semana, y empieza la búsqueda de beneficios.
+        const dsNewsRole = this.guild.roles.cache.get(this.guilddoc.getRole("announcements.darkshop")) ?? "";
+
+        const messages = [
+            "Se termina una semana, y empieza la búsqueda de beneficios.",
+            "Me pregunto qué pasará esta semana...",
+            "Veamos quiénes son l@s valientes.",
+            "Una nueva semana está entre nosotros, veamos qué hacen.",
+            "Finalmente, ¿te atreverás a hacer algo esta semana?",
+            "La semana pasada fue interesante, seguro esta lo es más."
+        ];
+
+        try {
+            return await new Log(this.interaction)
+                .setGuild(this.guild)
+                .setTarget(ChannelModules.DarkShopLogs)
+                .setReason(LogReasons.DSSunday)
+                .send({
+                    content: dsNewsRole.toString(),
+                    embeds: [
+                        new Embed()
+                            .defAuthor({ text: "Domingo", icon: this.client.EmojisObject.DarkShop.url })
+                            .defDesc(`**—** ${new Chance().pickone(messages)}
 **—** La inflación hoy estará en **${this.baseValue}%**. Ya veremos **qué pasa en la semana...**`)
-                    .defColor(Colores.negro)
-            ]
-        })
+                            .defColor(Colores.negro)
+                    ]
+                })
+        } catch (err) {
+            if (err instanceof InsuficientSetupError) {
+                new Log()
+                    .setGuild(this.guild)
+                    .setTarget(ChannelModules.StaffLogs)
+                    .setReason(LogReasons.Error)
+                    .send({ embed: err.embed })
+                    .catch(console.error);
+            }
+        }
     }
 
     async #weekWork() {
         await this.#fetchInfo()
     }
 
+    async checkDisabled() {
+        if (!this.guilddoc) await this.#getGuildDoc();
+        this.darkshopDisabled = !this.guilddoc.moduleIsActive("functions.darkshop");
+        return this.darkshopDisabled;
+    }
+
     async #fetchInfo() {
+        await this.checkDisabled();
+        if (this.darkshopDisabled) return;
+        
+        const FetchThisGuild = this.#requireFetch();
+        if (!this.client.isThisFetched(this.guild.id)) await FetchThisGuild(this.client, this.guild);
+
         if (!this.doc || !this.doc?.inflation.tendency_type) return this.#createTendency()
 
         this.values = this.doc.inflation.values;
@@ -392,9 +430,25 @@ class DarkShop {
     }
 
     async removeDarkCurrency() {
+        const PrettyCurrency = this.#requirePretty();
         const users = await Users.find({
             guild_id: this.guild.id
         });
+
+        const PublicLogger = new Log()
+            .setGuild(this.guild)
+            .setTarget(ChannelModules.DarkShopLogs)
+            .setReason(LogReasons.AutomatedChange)
+
+        const ErrorLogger = new Log(this.interaction)
+            .setGuild(this.guild)
+            .setTarget(ChannelModules.StaffLogs)
+            .setReason(LogReasons.Error)
+
+        const Logger = new Log()
+            .setGuild(this.guild)
+            .setTarget(ChannelModules.StaffLogs)
+            .setReason(LogReasons.AutomatedChange)
 
         users.forEach(async user => {
             const darkdata = user.economy.dark;
@@ -402,24 +456,20 @@ class DarkShop {
             if (moment().isBefore(until)) return;
 
             if (darkdata.currency != 0) {
+                const had = PrettyCurrency(this.guild, darkdata.currency, { name: "DarkCurrency" });
                 // enviar mensaje al usuario
                 console.log(`🟥 ${user.user_id} se eliminarán sus DarkCurrency por haber pasado una semana.`)
 
                 let memberDJ = this.guild.members.cache.find(x => x.id === user.user_id);
 
-                let deletedTag = memberDJ?.user.tag ?? `<AUSENTE> (${user.user_id})`
+                let deleted = memberDJ?.displayName ?? `<AUSENTE> (${user.user_id})`
 
                 let log = new Embed()
                     .defColor(Colores.verde)
-                    .defDesc(`**—** Se han eliminado los ${this.Emojis.DarkCurrency.name} de **${deletedTag}**.
-**—** Desde: ${time(moment(darkdata.until).subtract(1, "w").toDate())}.
-**—** Tenía: **${this.Emojis.DarkCurrency}${darkdata.currency.toLocaleString("es-CO")}**`)
+                    .defDesc(`**—** Se han eliminado los ${this.Emojis.DarkCurrency.name} de **${deleted}**.
+**—** Desde: ${time(moment(darkdata.until).subtract(1, "week").toDate())}.
+**—** Tenía: ${had}`)
                     .defFooter({ text: "Mensaje enviado a la vez que al usuario", timestamp: true })
-
-                const ErrorLogger = new Log(this.interaction)
-                    .setGuild(this.guild)
-                    .setTarget(ChannelModules.StaffLogs)
-                    .setReason(LogReasons.Error)
 
                 let embed = new Embed()
                     .defAuthor({ text: `...`, icon: this.client.EmojisObject.DarkShop.url })
@@ -428,25 +478,34 @@ class DarkShop {
 **—** Siempre ten un ojo en la **inflación** con \`/inflacion\` y **recupera tu inversión** con \`/dswith\` en el transcurso de la semana.`)
                     .defFooter("▸ Si crees que se trata de un error, contacta al STAFF.");
 
+                // Enviar la información al usuario
                 memberDJ?.send({ embeds: [embed] })
                     .catch(error => {
                         ErrorLogger.send({
-                            embed: new ErrorEmbed(this.interaction, {
-                                type: "notSent",
-                                data: {
-                                    tag: memberDJ.user.tag,
-                                    error,
-                                    guildId: this.guild.id
-                                }
-                            })
+                            embed: new DMNotSentError(this.interaction, memberDJ, error).embed
                         })
                     })
 
-                new Log(this.interaction)
-                    .setGuild(this.guild)
-                    .setTarget(ChannelModules.StaffLogs)
-                    .setReason(LogReasons.Logger)
-                    .send({ embeds: [log] });
+                // Enviar la información al STAFF
+                await Logger.send({ embeds: [log] });
+
+                // Enviar el evento publicamente;
+                let messages = [
+                    `Parece que **${deleted}** lo olvidó.`,
+                    `Gracias a **${deleted}**, la economía se equilibra un poco más.`,
+                    `**${deleted}** tomó decisiones financieras cuestionables.`,
+                    `Complicado, ¿no, **${deleted}**?`,
+                    `¿Intentamos esto otra vez, **${deleted}**?`,
+                    `¡Piensa **${deleted}**, piensa!`
+                ];
+
+                await PublicLogger.send({
+                    embed: new Embed()
+                        .defAuthor({ text: "Evento", icon: this.client.EmojisObject.DarkShop.url })
+                        .defDesc(`**—** ${new Chance().pickone(messages)}
+**—** No recuperó sus ${had}.`)
+                        .defColor(Colores.negro)
+                })
             }
 
             darkdata.currency = 0;
@@ -457,19 +516,16 @@ class DarkShop {
     }
 
     async #getDoc() {
-        this.doc = await DarkShops.getOrNull(this.guild.id);
+        this.doc = await DarkShops.getWork(this.guild.id);
         return this;
     }
 
     async #getGuildDoc() {
-        this.guilddoc = await Guilds.getOrCreate(this.guild.id);
+        this.guilddoc = await Guilds.getWork(this.guild.id);
         return this
     }
 
     async inflationWork() {
-        if (!this.guilddoc) await this.#getGuildDoc();
-        if (!this.guilddoc.moduleIsActive("functions.darkshop")) return;
-
         if (!this.doc) await this.#getDoc();
         await this.#fetchInfo();
 
@@ -564,7 +620,7 @@ class DarkShop {
     async getBasePrice() {
         if (!this.guilddoc) await this.#getGuildDoc();
 
-        return this.guilddoc.settings.quantities.baseprice_darkshop;
+        return this.guilddoc.settings.quantities.darkshop.baseprice;
     }
 
     /**
@@ -594,6 +650,7 @@ class DarkShop {
      * Recibir la inflación actual en la hora actual en un Embed (SE NECESITA INTERACTION)
      */
     async inflationEmbed() {
+        const PrettyCurrency = this.#requirePretty();
         const { inflation, oldinflation } = await this.getRealInflations();
         const one = await this.oneEquals();
         const { EmojisObject } = this.client;
@@ -607,10 +664,10 @@ class DarkShop {
 
         let stonksEmbed = new Embed()
             .defAuthor({ text: `DarkShop: Inflación`, icon: EmojisObject.DarkShop.url })
-            .defDesc(`**${this.Emojis.DarkCurrency}1 = ${this.Emojis.Currency}${one.toLocaleString('es-CO')}**
+            .defDesc(`**${this.Emojis.DarkCurrency}1 =** ${PrettyCurrency(this.interaction.guild, one)}
 
 ${stonks} **—** La inflación actual de los ${this.Emojis.DarkCurrency.name} es de un \`${inflation}%\`.
-${stonks} **—** Antes era de un \`${oldinflation}%\`: (**${this.Emojis.DarkCurrency}1 = ${this.Emojis.Currency}${(await this.oneEquals(oldinflation))?.toLocaleString("es-CO")}**).
+${stonks} **—** Antes era de un \`${oldinflation}%\`: (**${this.Emojis.DarkCurrency}1 = ${PrettyCurrency(this.interaction.guild, await this.oneEquals(oldinflation))}).
 
 ${tz.now.day() != 0 ? `**—** La inflación inicial fue \`${this.baseValue}%\`.\n` : ""}**—** La inflación cambiará ${time(date, "R")}.`)
             .defColor(Colores.negro);
@@ -637,6 +694,16 @@ ${tz.now.day() != 0 ? `**—** La inflación inicial fue \`${this.baseValue}%\`.
         }) */
 
         return expanded[Math.floor(float * expanded.length)].item;
+    }
+
+    #requirePretty() {
+        const { PrettyCurrency } = require("./functions");
+        return PrettyCurrency;
+    }
+
+    #requireFetch() {
+        const { FetchThisGuild } = require("./functions");
+        return FetchThisGuild;
     }
 
 

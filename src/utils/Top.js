@@ -2,6 +2,7 @@ const { CommandInteraction } = require("discord.js");
 const { Colores } = require("../resources");
 const DarkShop = require("./DarkShop");
 const InteractivePages = require("./InteractivePages");
+const { PrettyCurrency } = require("./functions");
 
 class Top {
     #res = [];
@@ -57,8 +58,9 @@ class Top {
     }
 
     async #currencyTop() {
-        const { Currency, DarkCurrency } = this.interaction.client.getCustomEmojis(this.interaction.guild.id);
+        const { Currency } = this.interaction.client.getCustomEmojis(this.interaction.guild.id);
         const darkshop = new DarkShop(this.interaction.guild);
+        const dsDisabled = await darkshop.checkDisabled();
 
         this.base.title = `Top de ${Currency.name}`;
 
@@ -68,18 +70,20 @@ class Top {
             // agregar la cantidad de darkcurrency
             if (member && !member.user.bot) {
                 let darkcurrency = user.economy.dark?.currency ?? 0;
-                let darkcurrencyValue = user.economy.dark?.currency ? await darkshop.equals(null, user.economy.dark.currency) : 0;
-                let finalQuantity = darkcurrencyValue != 0 ? darkcurrencyValue + user.economy.global.currency : user.economy.global.currency;
+                let darkcurrencyValue = 0;
+                if (!dsDisabled) darkcurrencyValue = await darkshop.equals(null, user.getDarkCurrency()) ?? 0;
+
+                let finalQuantity = darkcurrencyValue != 0 ? darkcurrencyValue + user.getCurrency() : user.getCurrency();
 
                 let toPush = {
                     user_id: member.user.id,
                     currency: darkcurrency, // numero de dj que tiene
                     currencyValue: Math.round(darkcurrencyValue), // lo que valen esos dcurrency en dinero ahora mismo
                     total: Math.round(finalQuantity), // la suma del valor de los dcurrency y el dinero
-                    alltime: user.data.counts.normal_currency
+                    alltime: user.getCount("normal_currency")
                 }
 
-                if(toPush.total > 0) this.#res.push(toPush);
+                if (toPush.total > 0) this.#res.push(toPush);
             }
         }
 
@@ -92,10 +96,10 @@ class Top {
         // determinar el texto a agregar
         for await (const user of this.#res) {
             let darkshopMoney;
-            if (user.currency != 0) darkshopMoney = ` (${DarkCurrency}${user.currency.toLocaleString('es-CO')}➟**${Currency}${user.currencyValue.toLocaleString('es-CO')}**)`
+            if (user.currency != 0) darkshopMoney = ` (${PrettyCurrency(this.interaction.guild, user.currency, { name: "DarkCurrency" })}➟${PrettyCurrency(this.interaction.guild, user.currencyValue)})`
             else darkshopMoney = "";
 
-            const txt = this.#getTxt(user, [`${Currency}**${user.total.toLocaleString('es-CO')}**${darkshopMoney}`, `|| Obtenido desde siempre: **${Currency}${user.alltime.toLocaleString("es-CO")}** ||`])
+            const txt = this.#getTxt(user, [`${PrettyCurrency(this.interaction.guild, user.total)}${darkshopMoney}`, `|| Obtenido desde siempre: ${PrettyCurrency(this.interaction.guild, user.alltime)} ||`])
 
             this.top.set(user.user_id, {
                 txt
@@ -116,7 +120,7 @@ class Top {
                     total: user.economy.global.exp
                 }
 
-                if(toPush.total > 0) this.#res.push(toPush)
+                if (toPush.total > 0) this.#res.push(toPush)
             }
         });
 
@@ -182,7 +186,7 @@ class Top {
             if (member && !member.user.bot) {
                 let toPush = {
                     user_id: member.user.id,
-                    total: user.data.counts.warns
+                    total: user.getCount("warns")
                 }
 
                 if (toPush.total != 0) this.#res.push(toPush)
@@ -261,13 +265,13 @@ class Top {
         });
 
         if (rank === 1) {
-            txt = `**🏆 ${member.user.username}**${toadd}\n\n`;
+            txt = `# **🏆 ${member.displayName}**${toadd}`;
         } else if (rank === 2) {
-            txt = `**🥈 ${member.user.username}**${toadd}\n\n`;
+            txt = `\n## **🥈 ${member.displayName}**${toadd}`;
         } else if (rank === 3) {
-            txt = `**🥉 ${member.user.username}**${toadd}\n\n`;
+            txt = `\n### **🥉 ${member.displayName}**${toadd}\n\n`;
         } else {
-            txt = `**${rank}. ${member.user.username}**${toadd}\n\n`;
+            txt = `${rank}. **${member.displayName}**${toadd}\n\n`;
         }
 
         return txt;

@@ -13,6 +13,7 @@ class Embed extends Discord.EmbedBuilder {
      */
     constructor(options) {
         if (options instanceof Discord.Embed) return super(options.data)
+        else if (options instanceof Embed) return super(options.raw());
         else super()
         if (options) this.#setup(options)
     }
@@ -35,7 +36,10 @@ class Embed extends Discord.EmbedBuilder {
      * @returns {this}
      */
     defDesc(desc = " ") {
-        if (!desc >= 1) return console.error("🔴 NO SE CAMBIÓ LA DESCRIPCIÓN, ESTÁ VACÍA")
+        if (desc < 1 && desc) {
+            console.error("🔴 NO SE CAMBIÓ LA DESCRIPCIÓN, ESTÁ VACÍA")
+            return this;
+        }
         this.setDescription(desc)
         this.description = desc;
         return this
@@ -103,8 +107,8 @@ class Embed extends Discord.EmbedBuilder {
     }
 
     #setup(options) {
-        const client = require("../../index");
-        const { RandomCumplido, ProgressBar } = require("./functions");
+        const client = require("../index");
+        const { RandomCumplido, ProgressBar, PrettyCurrency } = require("./functions");
         const { type, data } = options
 
         switch (type) {
@@ -125,15 +129,7 @@ class Embed extends Discord.EmbedBuilder {
                     const sep = data?.separator ?? "▸"
                     const desc = data.desc;
 
-                    if (typeof desc === "string") this.defDesc(`${sep} ${desc}.`)
-                    else {
-                        let t = ""
-                        desc.forEach(item => {
-                            t += `${sep} ${item}.\n`
-                        })
-
-                        this.defDesc(t);
-                    }
+                    this.fillDesc(desc, sep);
                 }
 
                 if (data?.footer) this.defFooter({ text: data.footer, icon: data.footer_icon, timestamp: data.timestamp })
@@ -150,7 +146,7 @@ class Embed extends Discord.EmbedBuilder {
                 const member = data.member;
                 const { Currency } = client.getCustomEmojis(data.member.guild.id);
 
-                const actualCurrency = user?.economy.global.currency.toLocaleString('es-CO') ?? 0;
+                const actualCurrency = user?.getCurrency() ?? 0;
                 const curExp = user?.economy.global.exp.toLocaleString('es-CO') ?? 0;
                 const curLvl = user?.economy.global.level.toLocaleString('es-CO') ?? 0;
                 const rep = user?.economy.global.reputation.toLocaleString('es-CO') ?? 0;
@@ -176,19 +172,32 @@ class Embed extends Discord.EmbedBuilder {
                 const expToGet = expDiff === 0 ? user.getNextLevelExp() : expDiff; // la exp que hay que ganar en este nivel
                 const expSoFar = expDiff === 0 ? user.economy.global.exp : user.economy.global.exp - user.getNextLevelExp(user.economy.global.level - 1); // la exp que se lleva hasta ahora
 
-                this.defAuthor({ text: `Estadísticas de ${member.user.tag}`, icon: member.guild.iconURL({ dynamic: true }) })
+                this.defAuthor({ text: `Estadísticas de ${member.displayName}`, icon: member.guild.iconURL({ dynamic: true }) })
                     .defDesc(`**— Nivel**: ${curLvl}
 **— EXP**: ${ProgressBar(expSoFar / expToGet * 100, { blocks: 5 })} ${inlineCode(`${curExp} / ${nxtLvlExp}`)}
-**— ${Currency.name}**: ${Currency}${actualCurrency}
+**— ${Currency.name}**: ${PrettyCurrency(data.member.guild, actualCurrency)}
 **— Puntos de reputación**: ${rep}
 ${bdString}`)
                     .defThumbnail(member.displayAvatarURL())
                     .defColor(member.displayHexColor);
 
-                if (user.isBirthday()) this.defAuthor({ text: `Hoy es el cumpleaños de ${member.user.tag} 🎉`, icon: member.guild.iconURL({ dynamic: true }) })
+                if (user.isBirthday()) this.defAuthor({ text: `Hoy es el cumpleaños de ${member.displayName} 🎉`, icon: member.guild.iconURL({ dynamic: true }) })
 
                 break;
 
+            case "cancel":
+                this.defDesc(`## Cancelado.`);
+                this.defColor(Colores.rojooscuro)
+
+                if (data?.desc) {
+                    const sep = data?.separator ?? "▸"
+                    const desc = data.desc;
+
+                    this.fillDesc(desc, sep);
+                }
+
+                if (data?.footer) this.defFooter({ text: data.footer, icon: data.footer_icon, timestamp: data.timestamp })
+                break;
             default:
                 console.log("🔴 UNKOWN TYPE %s EMBED", type)
         }
@@ -196,6 +205,27 @@ ${bdString}`)
         if (this.data) {
             this.description = this.data.description;
         }
+    }
+
+    /**
+     * @param {String | String[]} data 
+     * @returns {this}
+     */
+    fillDesc(data, separator = "▸") {
+        const { FinalPeriod } = require("./functions");
+
+        let d = this.description ?? this.data.description ?? "";
+        let isArray = Array.isArray(data);
+
+        if (!isArray) data = [data];
+
+        data.forEach(line => {
+            d += `\n${separator} ${line}`;
+            d = FinalPeriod(d);
+        })
+
+        this.defDesc(d);
+        return this
     }
 }
 

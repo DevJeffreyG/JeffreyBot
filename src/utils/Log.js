@@ -2,17 +2,12 @@ const { CommandInteraction, GuildChannel, Guild, Message } = require("discord.js
 const Embed = require("./Embed");
 const { ChannelModules, Enum, LogReasons } = require("./Enums");
 const ErrorEmbed = require("./ErrorEmbed");
+const { BadCommandError, InsuficientSetupError } = require("../errors");
 const { Guilds } = require("mongoose").models;
 
 class Log {
     #doc;
     #fetched = false;
-
-    #jeffreyError;
-    #jeffreyMessageError;
-    #jeffreyReasonError;
-
-    #configError;
     #handled = false;
 
     /**
@@ -31,65 +26,27 @@ class Log {
         this.enabled = true;
     }
 
-    #embeds() {
-        this.#jeffreyError = new ErrorEmbed(this.interaction, {
-            type: "badCommand",
-            data: {
-                error: "INVALID LOG TARGET",
-                guildId: this.guild?.id
-            }
-        }, true)
-
-        this.#jeffreyMessageError = new ErrorEmbed(this.interaction, {
-            type: "badCommand",
-            data: {
-                error: "INVALID CONTENT & EMBED",
-                guildId: this.guild?.id
-            }
-        }, true)
-
-        this.#jeffreyMessageError = new ErrorEmbed(this.interaction, {
-            type: "badCommand",
-            data: {
-                error: "INVALID REASON",
-                guildId: this.guild?.id
-            }
-        }, true)
-
-        this.#configError = new ErrorEmbed(this.interaction, {
-            type: "insuficientSetup",
-            data: {
-                needed: new Enum(ChannelModules).translate(this.target),
-                guildId: this.guild?.id
-            }
-        }, true)
-
-    }
 
     async #fetch() {
         if (this.target === ChannelModules.ClientLogs) return;
 
-        this.#embeds();
         // prepara lo necesario
-        if (this.guild) this.#doc = await Guilds.getOrCreate(this.guild.id);
+        if (this.guild) this.#doc = await Guilds.getWork(this.guild.id);
 
         if (!await this.#reasonWorker()) return;
-        if (!this.target || !new Enum(ChannelModules).exists(this.target)) return this.#jeffreyError.send();
+        if (!this.target || !new Enum(ChannelModules).exists(this.target)) throw new BadCommandError(this.interaction, "INVALID LOG TARGET");
 
         let configured = this.#doc.getLogChannel(this.target);
         this.channel = configured ? await this.guild.channels.fetch(configured) : null;
 
-        if (!this.channel) return this.#configError.send();
+        if (!this.channel) throw new InsuficientSetupError(this.interaction, new Enum(ChannelModules).translate(this.target))
 
         this.#fetched = true;
     }
 
     async #reasonWorker() {
         if (!this.reason) return true;
-        if (!new Enum(LogReasons).exists(this.reason)) {
-            this.#jeffreyReasonError.send();
-            return false;
-        }
+        if (!new Enum(LogReasons).exists(this.reason)) throw new BadCommandError(this.interaction, "INVALID REASON")
 
         if (!this.#doc.moduleIsActive("functions.logs")) {
             this.enabled = false;
@@ -140,6 +97,17 @@ class Log {
 
             case LogReasons.Error:
                 isEnabled = this.#doc.moduleIsActive("logs.staff.errors");
+                break;
+
+            case LogReasons.DSSunday:
+                isEnabled = this.#doc.moduleIsActive("logs.darkshop.sunday");
+                break;
+            case LogReasons.AutomatedChange:
+                if (this.target === ChannelModules.DarkShopLogs) {
+                    isEnabled = this.#doc.moduleIsActive("logs.darkshop.removed_currency");
+                } else {
+                    isEnabled = this.#doc.moduleIsActive("logs.staff.automated_changes");
+                }
                 break;
         }
 
@@ -194,7 +162,11 @@ class Log {
         let { content, embeds, components, embed } = options;
 
         return new Promise(async (res, rej) => {
-            if (!this.#fetched) await this.#fetch();
+            try {
+                if (!this.#fetched) await this.#fetch()
+            } catch (err) {
+                rej(err)
+            }
             if (!this.enabled) res(null);
 
             let msg;
@@ -206,8 +178,7 @@ class Log {
                 this.channel = null;
             });
 
-            if (!msg && this.channel)
-                await this.#jeffreyMessageError.send()
+            if (!msg && this.channel) throw new BadCommandError(this.interaction, "INVALID CONTENT & EMBED");
             else if (msg) this.#handled = true;
 
             if (this.#handled) res(msg)

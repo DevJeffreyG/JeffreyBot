@@ -1,4 +1,4 @@
-const { ActivityType, ButtonStyle, OverwriteType, PermissionsBitField, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, Guild, GuildMember, CommandInteraction, BaseInteraction, Message, Client, time, hyperlink, codeBlock, PresenceUpdateStatus } = require("discord.js");
+const { ActivityType, ButtonStyle, OverwriteType, PermissionsBitField, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, Guild, GuildMember, CommandInteraction, BaseInteraction, Message, Client, time, hyperlink, codeBlock, PresenceUpdateStatus, User, MessageFlags } = require("discord.js");
 
 const Colores = require("../resources/colores.json");
 const Cumplidos = require("../resources/cumplidos.json");
@@ -7,32 +7,34 @@ const ErrorEmbed = require("../utils/ErrorEmbed");
 const Embed = require("../utils/Embed");
 const InteractivePages = require("../utils/InteractivePages");
 const DarkShop = require("../utils/DarkShop");
+const Pet = require("../utils/Pet");
 
 const ms = require("ms");
 const moment = require("moment-timezone");
 
 /* ##### MONGOOSE ######## */
-
-const { Users, Guilds, DarkShops, Shops, GlobalDatas } = require("mongoose").models;
+const { Users, Guilds, DarkShops, Shops, GlobalDatas, CustomElements, Preferences } = require("mongoose").models;
 
 // JEFFREY BOT NOTIFICATIONS
 const { google } = require("googleapis");
 const { ApiClient } = require("@twurple/api");
 const { AppTokenAuthProvider } = require("@twurple/auth");
-const { BoostObjetives, ChannelModules, LogReasons } = require("./Enums");
+const { BoostObjetives, ChannelModules, LogReasons, BoostTypes, PetNotices, Enum, DirectMessageType } = require("./Enums");
 const Log = require("./Log");
 const { Bases } = require("../resources");
-const Commands = require("../../Commands");
+const Commands = require("../app/Commands");
 const Collector = require("./Collector");
+const HumanMs = require("./HumanMs");
+const { Chance } = require("chance");
+const { DMNotSentError } = require("../errors");
 
 /* ##### MONGOOSE ######## */
+
 const RandomCumplido = function (force = null) {
-  return force ? Cumplidos.c[force] : Cumplidos.c[Math.floor(Math.random() * Cumplidos.c.length)];
+  return force ? Cumplidos.c[force] : new Chance().pickone(Cumplidos.c);
 }
 
 const GetChangesAndCreateFields = async function (logsFetched) {
-
-
   let fields = [];
   let separator = "**—**";
 
@@ -287,7 +289,7 @@ const FetchAuditLogs = async function (client, guild, types) {
 }
 
 /**
- * 
+ * @deprecated
  * @param {Guild} guild 
  * @param options 
  * @returns {Promise<Message|null>}
@@ -335,7 +337,7 @@ const GenerateLog = async function (guild, options = {
       .setReason(logReason)
       .send({ embeds: [embed] })
   } catch (err) {
-    console.log(err);
+    console.log("🔴 No se envió el Log a %s: %s", guild.name, err.name);
   }
 
 }
@@ -344,13 +346,14 @@ const GenerateLog = async function (guild, options = {
  * GlobalData work
  * @param {Guild} guild The Guild where the interval shall be executed
  * @param {boolean} [justTempRoles=false] Just execute interval of temporal roles
- * @returns void
+ * @returns {Promise<void>}
  */
 const GlobalDatasWork = async function (guild, justTempRoles = false) {
-  const { Emojis, EmojisObject } = guild.client;
-  const doc = await Guilds.getOrCreate(guild.id);
+  const { EmojisObject } = guild.client;
+  const doc = await Guilds.getWork(guild.id);
+  const customDoc = await CustomElements.getWork(guild.id);
 
-  const bdRole = doc.getRoleByModule("birthday") ? await guild.roles.fetch(doc.getRoleByModule("birthday")).catch(err => {
+  const bdRole = doc.getRole("birthday") ? await guild.roles.fetch(doc.getRole("birthday")).catch(err => {
     new Log()
       .setGuild(guild)
       .setReason(LogReasons.Error)
@@ -373,7 +376,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
   for await (const member of members.values()) {
     if (member.user.bot) continue
 
-    let dbUser = await Users.getOrCreate({
+    let dbUser = await Users.getWork({
       user_id: member.id,
       guild_id: guild.id
     });
@@ -382,88 +385,123 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
     let birthday = dbUser?.data.birthday.locked;
     let birthday_reminders = dbUser?.getBirthdayReminders() ?? [];
     let temproledeletions = await GlobalDatas.getTempRoleDeletions(member.id, guild.id) ?? [];
+    let debts = dbUser?.data.debts ?? [];
 
-    for (let i = 0; i < temp_roles.length; i++) {
-      const temprole = temp_roles[i];
+    let tempRoleIndex = 0;
+    for await (const temprole of temp_roles) {
       let role = guild.roles.cache.find(x => x.id === temprole.role_id);
       let until = temprole.active_until;
 
-      if (moment().isAfter(until)) {
+      const Logger = new Log()
+        .setGuild(guild)
+        .setReason(LogReasons.Error)
+        .setTarget(ChannelModules.StaffLogs);
 
+      const removingRoleErr = (err) => new ErrorEmbed().defDesc(`**No se pudo eliminar el role de un temprole**\n${codeBlock("json", err)}`);
+
+      // Ya pasó el tiempo definido
+      if (moment().isAfter(until)) {
+        // No es una suscripción
         if (!temprole.isSub) {
-          // sacarle el role
           console.log("🟢 Ha pasado el tiempo del temprole %s", temprole);
+
           try {
             if (role) await member.roles.remove(role);
           } catch (err) {
-            new Log()
-              .setGuild(guild)
-              .setReason(LogReasons.Error)
-              .setTarget(ChannelModules.StaffLogs)
-              .send({
-                embeds: [
-                  new ErrorEmbed().defDesc(`**No se pudo eliminar el role de un temprole**\n${codeBlock("json", err)}`)
-                ]
-              })
+            Logger.send({ embed: removingRoleErr(err) })
           }
 
-          // eliminar el temprole de la db
-          dbUser.data.temp_roles.splice(i, 1);
-          dbUser.save();
-        } else { // es una suscripción
-          // TODO: REWORK NEEDED
-          return console.log("REWORK DE LAS SUBS")
-          let price = Number(temprole.sub_info.price);
+          dbUser.data.temp_roles.splice(tempRoleIndex, 1);
+        } else { // Es una suscripción, y ya es momento de cobrarle
+          let price = temprole.sub_info.price;
           let subName = temprole.sub_info.name;
-          let isCancelled = temprole.sub_info.isCancelled;
+          let { interval, isCancelled } = temprole.sub_info;
 
-          let notEnough = new ErrorEmbed(interaction)
-            .defDesc(`**—** No tienes suficientes Jeffros **(${Emojis.Jeffros}${price.toLocaleString('es-CO')})** para pagar la suscripción a \`${subName}\`.
-**—** Tu saldo ha quedado en **alerta roja**.`);
+          let notEnough = new ErrorEmbed()
+            .defDesc(`**—** No pudiste pagar tu suscripción **${subName}** (${PrettyCurrency(guild, price)}). Se canceló automáticamente.`);
 
+          // Ya fue cancelada, eliminar el temprole
           if (isCancelled) {
-            member.roles.remove(role);
-
-            // eliminar el temprole de la db
-            dbUser.data.temp_roles.splice(i, 1);
-            dbUser.save();
-          } else {
-            // cobrar jeffros
-            let jeffros = dbUser.economy.global;
-
-            let paidEmbed = new Embed({
-              type: "success",
-              data: {
-                title: "Pagado",
-                desc: [
-                  `Se han restado **${Emojis.Jeffros}${price.toLocaleString('es-CO')}** para pagar la suscripción a \`${subName}\`.`,
-                  `Tu saldo ha quedado en **${Emojis.Jeffros}${(jeffros.jeffros - price).toLocaleString('es-CO')}**.`
-                ]
-              }
-            })
-
-            if (!jeffros || jeffros.jeffros < price) {
-              // quitarle los jeffros, y dejarlo en negativo
-              console.log(jeffros.userID, "ha quedado en negativos por no poder pagar", subName);
-              jeffros.jeffros -= price;
-              member.send({ embeds: [notEnough] });
-
-              // eliminar el temprole de la db
-              dbUser.data.temp_roles.splice(i, 1);
-
-              member.roles.remove(role);
-              dbUser.save();
-            } else { // cobrar
-              jeffros.jeffros -= price;
-              dbUser.save();
-
-              // actualizar el globaldata
-              temprole.active_since = today;
-              dbUser.save();
-
-              member.send({ embeds: [paidEmbed] });
+            try {
+              if (role) await member.roles.remove(role);
+            } catch (err) {
+              Logger.send({ embed: removingRoleErr(err) })
             }
+
+            dbUser.data.temp_roles.splice(tempRoleIndex, 1);
+          } else {
+            // Como aún está activa, cobrar la sub
+            let newTotal = dbUser.getCurrency() - price;
+
+            if (!dbUser.affords(price)) {
+              try {
+                await SendDirect(null, member, DirectMessageType.Payments, { embeds: [notEnough] });
+              } catch (err) {
+                console.error("🔴 %s", err.message());
+              }
+
+              try {
+                if (role) await member.roles.remove(role);
+              } catch (err) {
+                Logger.send({ embed: removingRoleErr(err) })
+              }
+
+              dbUser.data.temp_roles.splice(tempRoleIndex, 1);
+            } else {
+              temprole.active_until = moment().add(interval, "ms").startOf("minute").toDate();
+              dbUser.markModified("data.temp_roles");
+              try {
+                await SendDirect(null, member, DirectMessageType.Payments, {
+                  embeds: [
+                    new Embed({
+                      type: "success",
+                      data: {
+                        title: "Pagado",
+                        desc: [
+                          `Se han restado ${PrettyCurrency(guild, price)} para pagar la suscripción a **${subName}**`,
+                          `Ahora tienes ${PrettyCurrency(guild, newTotal)}`,
+                          `Administra tus suscripciones usando ${guild.client.mentionCommand("subs")} en un servidor`
+                        ],
+                        footer: guild.name,
+                        footer_icon: guild.iconURL()
+                      }
+                    })
+                  ]
+                })
+              } catch (err) {
+                console.error("🔴 %s", err.message());
+              }
+
+              await dbUser.addCount("subscriptions_currency", price, false);
+            }
+
+            await dbUser.removeCurrency(price);
+
           }
+        }
+      }
+
+      tempRoleIndex++;
+    }
+
+    try {
+      if (justTempRoles) return await dbUser.save();
+    } catch (err) {
+      console.error("🔴 Error guardando en GlobalDatas siendo solo temproles", err);
+    }
+
+    // Actualizar lista de Trofeos
+    let trophyList = customDoc.trophies;
+    if (trophyList.length > 0) {
+      const CustomTrophy = require("./CustomTrophy");
+
+      for await (const trophy of trophyList) {
+        try {
+          let newId = FindNewId(await Users.find(), "data.trophies", "id");
+          dbUser = await new CustomTrophy(guild).manage(trophy.id, member, dbUser, newId, false)
+          //console.log(dbUser.data.temp_roles);
+        } catch (err) {
+          console.error("🔴 %s", err);
         }
       }
     }
@@ -510,7 +548,6 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
         if (temproleIndex != -1) {
           dbUser.data.temp_roles[temproleIndex].special.disabled = false;
           dbUser.markModified("data")
-          dbUser.save();
         }
 
         deletion.deleteOne();
@@ -520,46 +557,88 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
     for (const reminder_info of birthday_reminders) {
       const reminder = reminder_info.id
       const birthday_member = guild.members.cache.get(reminder);
-      let birthday_query = await Users.getOrCreate({ user_id: reminder, guild_id: guild.id });
+      let birthday_query = await Users.getWork({ user_id: reminder, guild_id: guild.id });
       if (birthday_query?.isBirthday() && !reminder_info.reminded) {
-        member.send({
-          embeds: [
-            new Embed()
-              .defAuthor({ text: `Hola`, icon: EmojisObject.Hola.url })
-              .defDesc(`¡Vengo a recordarte que ${birthday_member} está de cumpleaños hoy!`)
-              .defFooter({
-                text: `Recibiste este mensaje porque quisiste que te lo recordara, para dejar de recibir esto usa /stats usuario:@${birthday_member.user.username} y presiona el botón de recordatorios`,
-                icon: guild.iconURL({ dynamic: true }),
-                timestamp: true
-              })
-              .defColor(Colores.verdeclaro)
-          ]
-        })
-          .then(() => {
-            console.log("🟢 Se recordó a %s del cumpleaños de %s", member.user.tag, reminder)
+        try {
+          await SendDirect(null, member, DirectMessageType.Birthdays, {
+            embeds: [
+              new Embed()
+                .defAuthor({ text: `Hola`, icon: EmojisObject.Hola.url })
+                .defDesc(`¡Vengo a recordarte que ${birthday_member} está de cumpleaños hoy!`)
+                .defFooter({
+                  text: `Recibiste este mensaje porque quisiste que te lo recordara, para dejar de recibir esto usa /stats usuario:@${birthday_member.displayName} y presiona el botón de recordatorios`,
+                  icon: guild.iconURL({ dynamic: true }),
+                  timestamp: true
+                })
+                .defColor(Colores.verdeclaro)
+            ]
           })
-          .catch(err => {
-            console.log(err)
-            console.log("⚠️ No se pudo enviar el recordatorio a %s", member.user.tag)
-            console.log("⚠️ Se eliminará el recordatorio")
+        } catch (err) {
+          console.log("⚠️ No se pudo enviar el recordatorio a %s", member.user.username)
+          console.log("⚠️ Se eliminará el recordatorio")
 
-            dbUser.data.birthday_reminders.splice(dbUser.getBirthdayReminders().findIndex(x => x === reminder), 1)
-            dbUser.save();
-          })
+          dbUser.data.birthday_reminders.splice(dbUser.getBirthdayReminders().findIndex(x => x === reminder), 1)
+        }
 
         reminder_info.reminded = true;
-        dbUser.save();
       } else if (!birthday_query?.isBirthday() && reminder_info.reminded) {
         reminder_info.reminded = false;
-        dbUser.save();
       }
     }
+
+    for await (const debt of debts) {
+      if (moment().isAfter(debt.pay_in)) {
+        // cobrar intereses y actualizar la fecha
+        let topay = Math.round(debt.debt * (debt.interest / 100));
+        let memberToPay = guild.members.cache.get(debt.user);
+        debt.pay_in = moment().add(debt.every, "ms").startOf("minute");
+        await dbUser.removeCurrency(topay);
+
+        let userToPay = await Users.getWork({ user_id: memberToPay.id, guild_id: guild.id });
+        await userToPay.addCurrency(topay);
+
+        try {
+          await SendDirect(null, member, DirectMessageType.Payments, {
+            embeds: [
+              new Embed()
+                .defColor(Colores.verde)
+                .defTitle(`Intereses del ${debt.interest}% cada ${new HumanMs(debt.every).human}`)
+                .defDesc(`**—** Se te cobró ${PrettyCurrency(guild, topay)} por el préstamo que tienes pendiente con ${memberToPay}.
+**—** Usa \`/pay\` para pagarle los ${PrettyCurrency(guild, debt.debt)} que le debes.`)
+            ]
+          })
+        } catch (err) {
+          console.error("🔴 %s", err);
+        }
+
+        try {
+          await SendDirect(null, memberToPay, DirectMessageType.Incomes, {
+            embeds: [
+              new Embed()
+                .defColor(Colores.verde)
+                .defTitle(`Intereses del ${debt.interest}% cada ${new HumanMs(debt.every).human}`)
+                .defDesc(`**—** Se depositaron ${PrettyCurrency(guild, topay)} por el préstamo que tienes con ${member}.
+**—** Aún te deben ${PrettyCurrency(guild, debt.debt)}.`)
+            ]
+          })
+        } catch (err) {
+          console.error("🔴 %s", err);
+        }
+
+      }
+    }
+
+    try {
+      //console.log("$", dbUser.data.temp_roles);
+      await dbUser.save()
+    } catch (err) {
+      console.error("🔴 %s", err)
+    }
+
   }
 
-  if (justTempRoles) return;
-
   // buscar items deshabilitados temporalmente
-  Shops.getOrCreate(guild.id).then((shop) => {
+  Shops.getWork(guild.id).then((shop) => {
     for (const item of shop.items) {
       if (moment().isAfter(item.disabled_until)) {
         item.disabled = false;
@@ -570,7 +649,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
     shop.save();
   })
 
-  DarkShops.getOrNull(guild.id).then((shop) => {
+  DarkShops.getWork(guild.id).then((shop) => {
     if (!shop) return
     for (const item of shop?.items) {
       if (moment().isAfter(item.disabled_until)) {
@@ -584,13 +663,12 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
 
   // buscar temp bans
   let tempBans = await GlobalDatas.find({
-    "info.type": "temporalGuildBan",
+    type: "temporalGuildBan",
     "info.guild_id": guild.id
   });
 
   if (tempBans) {
-    for (let i = 0; i < tempBans.length; i++) {
-      let ban = tempBans[i];
+    for await (const ban of tempBans) {
       let userID = ban.info.userID;
       let since = ban.info.since;
       let realDuration = ban.info.duration;
@@ -599,12 +677,13 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
       if (today - since >= realDuration) {
         // ya pasó el tiempo, unban
         try {
-          guild.members.unban(userID);
+          await guild.members.unban(userID);
           console.log("🟢 Se ha desbaneado a %s", userID)
         } catch (err) {
-          console.log(err);
+          console.error("🔴 %s", err);
         }
-        ban.deleteOne();
+
+        await ban.deleteOne();
 
         let unBEmbed = new Embed()
           .defAuthor({ text: `Unban`, icon: guild.iconURL() })
@@ -621,54 +700,40 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
             .setReason(LogReasons.Ban)
             .send({ embeds: [unBEmbed] })
         } catch (err) {
-          console.log(err)
+          console.error("🔴 %s", err);
         }
       }
     }
   }
 
   // buscar encuestas
-  let polls = await GlobalDatas.find({ "info.type": "temporalPoll", "info.guild_id": guild.id });
-  for (let i = 0; i < polls.length; i++) {
-    const poll = polls[i].info;
+  let polls = await GlobalDatas.find({ type: "temporalPoll", "info.guild_id": guild.id });
+  let pollsIndex = 0;
 
-    if (moment().isAfter(poll.until)) {
-      let c = guild.channels.cache.find(x => x.id === poll.channel_id);
-      let msg = await c.messages.fetch(poll.message_id);
+  staffPolls:
+  for await (const poll of polls) {
+    const pollInfo = poll.info;
 
+    if (moment().isAfter(pollInfo.until)) {
+      let c = guild.channels.cache.find(x => x.id === pollInfo.channel_id);
+      if (!c) {
+        doc.data.bets.splice(pollsIndex, 1);
+        continue staffPolls;
+      }
 
+      let msg = await c.messages.fetch(pollInfo.message_id);
 
-      /* const reactions = msg.reactions.cache;
+      if (msg.size > 1) {
+        doc.data.bets.splice(pollsIndex, 1);
+        continue staffPolls;
+      }
 
-      let reactionsInPoll = await new Promise(async (resolve, reject) => {
-        let count = {
-          no: [],
-          yes: []
-        }
-
-        for (const reaction of reactions) {
-
-          let usersInThis = await reaction[1].users.fetch();
-
-          if (reaction[0] === "❌") {
-            usersInThis.forEach(async user => {
-              if (!user.bot) count.no.push(user.id)
-            });
-          } else {
-            usersInThis.forEach(async user => {
-              if (!user.bot) count.yes.push(user.id)
-            });
-          }
-        }
-        resolve(count);
-      }) */
-
-      const { yes, no } = poll;
+      const { yes, no } = pollInfo;
 
       let textEmbed = new Embed()
         .defColor(Colores.verdeclaro)
         .defAuthor({ text: "La encuesta del STAFF terminó:", title: true })
-        .defDesc(poll.poll + `\n\n**LOS USUARIOS DICEN:**`)
+        .defDesc(pollInfo.poll + `\n\n**LOS USUARIOS DICEN:**`)
         .defField(`${msg.client.Emojis.Check} SÍ:`, `${yes.length}`, true)
         .defField(`${msg.client.Emojis.Cross} NO:`, `${no.length}`, true);
 
@@ -687,13 +752,94 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
         )
 
       try {
-        msg.edit({ components: [row] });
+        await msg.edit({ components: [row] });
       } catch (err) {
-        console.log(err)
+        console.error("🔴 %s", err);
       }
 
-      polls[i].deleteOne();
+      await poll.deleteOne();
     }
+
+    pollsIndex++;
+  }
+
+  // buscar apuestas
+  let betsIndex = 0;
+  staffBets:
+  for await (const bet of doc.data.bets) {
+    if (moment().isAfter(bet.closes_in) && !bet.closed) {
+      const ch = guild.channels.cache.get(bet.channel_id);
+      if (!ch) {
+        doc.data.bets.splice(betsIndex, 1);
+        continue staffBets;
+      }
+
+      const message = await ch.messages.fetch(bet.message_id);
+
+      if (message.size > 1) {
+        doc.data.bets.splice(betsIndex, 1);
+        continue staffBets;
+      }
+      const embed = new Embed(message.embeds[0]);
+      embed.defDesc(`# ${bet.title}\n**Esperando la respuesta del STAFF...**`);
+
+      const fields = [];
+      const elements = [];
+      const betInfo = new Map();
+      let total = 0;
+
+      const newRow = new ActionRowBuilder();
+
+      bet.options.forEach((option, i) => {
+        total += option.betting.length;
+
+        betInfo.set(i, {
+          title: `${option.emoji} ${option.name} (1:${option.ratio.toLocaleString("es-CO")})`,
+          emoji: option.emoji,
+          square: option.square,
+          betting: option.betting
+        })
+
+        newRow.addComponents(
+          new ButtonBuilder()
+            .setCustomId(`betWinner-${i}`)
+            .setLabel(option.name)
+            .setEmoji(option.emoji)
+            .setStyle(ButtonStyle.Secondary)
+        )
+      })
+
+      betInfo.forEach((value) => {
+        elements.push({
+          percentage: value.betting.length / total * 100,
+          square: value.square
+        });
+
+        fields.push({
+          up: value.title,
+          down: `Usuarios: ${String(value.betting.length)} (${PrettyCurrency(guild, value.betting.map(x => x.quantity).reduce((prev, cur) => prev + cur, 0))})`
+        })
+      })
+
+      embed.data.description += "\n## " + MultiplePercentages(elements, 10);;
+      embed.defFields(fields)
+
+      await message.edit({
+        embeds: [embed], components: [
+          newRow,
+          new ActionRowBuilder()
+            .setComponents(
+              new ButtonBuilder()
+                .setCustomId("cancelBet")
+                .setLabel("Cancelar")
+                .setStyle(ButtonStyle.Danger)
+            )
+        ]
+      })
+      bet.closed = true;
+    }
+
+    betsIndex++;
   }
 
   // buscar tickets sin respuesta
@@ -702,13 +848,13 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
     if (!doc.moduleIsActive("functions.staff_reminders")) break ticketReminder;
     if (ticket.end_date) continue;
 
-    let lastReminded = ticket.last_reminded ? moment(ticket.last_reminded) : ticket.creation_date;
+    let lastReminded = ticket.last_reminded ? moment(ticket.last_reminded) : moment(ticket.creation_date);
     let dayDiff = moment().diff(lastReminded, "d");
 
-    if (dayDiff >= doc.settings.functions.ticket_remind) { // si la dif se cumple con la config, recordar
+    if (dayDiff >= doc.settings.functions.staff_reminders.tickets) { // si la dif se cumple con la config, recordar
       let embed = new Embed()
         .defAuthor({ text: "Recordatorio de Ticket", icon: guild.iconURL({ dynamic: true }) })
-        .defDesc(`Hay un ticket que no se ha cerrado por más de ${doc.settings.functions.ticket_remind} días (${dayDiff}d).`)
+        .defDesc(`Hay un Ticket que no se ha cerrado por más de ${doc.settings.functions.staff_reminders.tickets} días (${dayDiff}d).`)
         .defField(ticket.type, `**—** Creado por ${guild.members.cache.get(ticket.created_by)}.
 **—** ${guild.channels.cache.get(ticket.channel_id)}, el ${time(ticket.creation_date)}`)
         .defColor(Colores.verde)
@@ -728,15 +874,15 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
     if (!doc.moduleIsActive("functions.staff_reminders")) break suggestionReminder;
     if (typeof suggestion.accepted === "boolean") continue;
 
-    let lastReminded = suggestion.last_reminded ? moment(suggestion.last_reminded) : suggestion.creation_date;
+    let lastReminded = suggestion.last_reminded ? moment(suggestion.last_reminded) : moment(suggestion.creation_date);
     let dayDiff = moment().diff(lastReminded, "d");
     let channel = await guild.channels.fetch(suggestion.channel_id);
     let message = await channel.messages.fetch(suggestion.message_id);
 
-    if (dayDiff >= doc.settings.functions.sug_remind) { // si la dif se cumple con la config, recordar
+    if (dayDiff >= doc.settings.functions.staff_reminders.suggestions) { // si la dif se cumple con la config, recordar
       let embed = new Embed()
         .defAuthor({ text: "Recordatorio de sugerencia", icon: guild.iconURL({ dynamic: true }) })
-        .defDesc(`Hay una sugerencia que no ha sido respondida por más de ${doc.settings.functions.sug_remind} días (${dayDiff}d).`)
+        .defDesc(`Hay una sugerencia que no ha sido respondida por más de ${doc.settings.functions.staff_reminders.suggestions} días (${dayDiff}d).`)
         .defField(`ID: ${suggestion.id}`, `**—** Sugerencia por ${guild.members.cache.get(suggestion.user_id)}.
 **—** ${hyperlink("Mensaje de sugerencia", message.url)}, el ${time(suggestion.creation_date)}`)
         .defColor(Colores.verde)
@@ -751,8 +897,81 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
     }
   }
 
+  betReminder:
+  for (const bet of doc.data.bets) {
+    if (!doc.moduleIsActive("functions.staff_reminders")) break betReminder;
+    if (!bet.closed) continue;
+
+    let lastReminded = bet.last_reminded ? moment(bet.last_reminded) : moment(bet.closes_in);
+    let dayDiff = moment().diff(lastReminded, "d");
+    let channel = await guild.channels.fetch(bet.channel_id);
+    let message = await channel.messages.fetch(bet.message_id);
+
+    if (dayDiff >= doc.settings.functions.staff_reminders.bets) { // si la dif se cumple con la config, recordar
+      let embed = new Embed()
+        .defAuthor({ text: "Recordatorio de Apuesta", icon: guild.iconURL({ dynamic: true }) })
+        .defDesc(`Hay una Apuesta que no ha tenido resultado por más de ${doc.settings.functions.staff_reminders.bets} días (${dayDiff}d).`)
+        .defField(`${bet.title}`, `**—** ${hyperlink("Mensaje de Apuesta", message.url)}, desde el ${time(bet.closes_in)}`)
+        .defColor(Colores.verde)
+
+      await new Log()
+        .setTarget(ChannelModules.StaffLogs)
+        .setReason(LogReasons.Logger)
+        .setGuild(guild)
+        .send({ content: `${staffRoles.toJSON().join(", ")}`, embed })
+
+      bet.last_reminded = new Date();
+    }
+  }
+
   await doc.save();
   return;
+}
+
+/**
+ * 
+ * @param {Guild} guild 
+ * @return {Promise<void>}
+ */
+const PetWork = async function (guild) {
+  const doc = await Guilds.getWork(guild.id);
+  const members = guild.members.cache;
+
+  for await (const member of members.values()) {
+    const user = await Users.getWork({ user_id: member.id, guild_id: guild.id });
+    const pets = user.data.pets;
+    if (pets.length === 0) continue
+
+    // Bajar las stats de hunger a cada mascota
+    for await (const p of pets) {
+      const pet = await new Pet(null, p.id).setMember(member).build(doc, user)
+      const maxHp = pet.shop_info.stats.hp;
+      const maxHungerGiven = doc.settings.quantities.limits.pets.hunger.max;
+      const minHungerGiven = doc.settings.quantities.limits.pets.hunger.min;
+
+      const giveHunger = MinMaxInt(minHungerGiven, maxHungerGiven, { guild, msg: "No se ha podido agregar hambre a las mascotas" });
+      pet.changeHunger(giveHunger);
+
+      // ----------- Hunger ----------- 
+      if (pet.hunger >= 60) await pet.notice(PetNotices.Hungry);
+
+      if (pet.hunger === 100) {
+        let removal = new Chance().integer({ min: 1, max: Math.ceil(maxHp * 0.05) });
+        pet.changeHp(-removal);
+      }
+
+      // ----------- HP ----------- 
+      if (pet.hp <= maxHp / 2) await pet.notice(PetNotices.HalfHp)
+      else if (pet.hp <= maxHp / 4) await pet.notice(PetNotices.LowHp)
+
+      if (pet.hp === 0) {
+        pet.kill();
+        await pet.notice(PetNotices.Dead)
+      }
+
+      await pet.save();
+    }
+  }
 }
 
 /**
@@ -760,34 +979,34 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
  * @param {GuildMember} victimMember - The Discord.JS Member
  * @param {string} roleID - The ID of the temporary role
  * @param {(number | string)} duration The duration of the temporary role in ms.
- * - "permanent" for not being an temporary role.
+ * @param {any} activation_info La del item de la tienda
  * @param {Number} [specialType=false] The special type of this temporary role.
  * @param {Number} [specialObjective=false] The objetive for this special type of temporary role.
  * @param {number} [specialValue=false] The value for the objetive of this special temporary role.
  * @returns Mongoose User document
  */
-const LimitedTime = async function (victimMember, roleID = 0, duration, specialType = null, specialObjective = null, specialValue = null) {
+const LimitedTime = async function (victimMember, roleID = 0, duration, activation_info, specialType = null, specialObjective = null, specialValue = null) {
   let role = victimMember.guild.roles.cache.find(x => x.id === roleID);
-  let user = await Users.getOrCreate({ user_id: victimMember.id, guild_id: victimMember.guild.id });
+  let user = await Users.getWork({ user_id: victimMember.id, guild_id: victimMember.guild.id });
 
-  if (duration === Infinity) return victimMember.roles.add(role); // es un role permanente???
-
-  let until = moment().add(duration, "ms").toDate();
+  let active_until = moment().add(duration === Infinity ? ms("999y") : duration, "ms").startOf("minute").toDate();
 
   let toPush = {
     role_id: roleID,
-    active_until: until,
+    active_until,
+    activation_info,
     special: {
       type: specialType,
       objetive: specialObjective,
       value: specialValue
-    }
+    },
+    id: FindNewId(await Users.find({ guild_id: victimMember.guild.id }), "data.temp_roles", "id")
   }
 
   try {
     if (role) await victimMember.roles.add(role);
   } catch (err) {
-    throw new Error(err);
+    console.error("🔴 %s", err);
   }
 
   user.data.temp_roles.push(toPush);
@@ -796,7 +1015,7 @@ const LimitedTime = async function (victimMember, roleID = 0, duration, specialT
   let lastAddedIndex = user.data.temp_roles.length - 1;
 
   // timeout, por si pasa el tiempo antes de que el bot pueda reiniciarse
-  if (duration <= 2147483647) setTimeout(async function () {
+  TimeoutIf(duration, async function () {
     try {
       if (role) await victimMember.roles.remove(role);
 
@@ -805,57 +1024,74 @@ const LimitedTime = async function (victimMember, roleID = 0, duration, specialT
     } catch (err) {
       throw new Error(err);
     }
-  }, duration);
+  })
 
   return user
 }
 
 /**
- * @deprecated TODO: Rework
- * 
- * Adds a new subscription to the database and adds the role to the user.
- * @param {GuildMember} victimMember The Discord.JS GuildMember
- * @param {string} roleID The ID for the role given by the suscription
- * @param {Number} interval The interval of time in which the user will pay (ms)
- * @param {Number} jeffrosPerInterval The price the user will pay every interval
- * @param {string} subscriptionName The name of the suscription
+ * Se ejecuta un timeout si es posible
+ * @param {Number} time En MS
+ * @param {Function} func 
  */
-const Subscription = async function (victimMember, roleID, interval, jeffrosPerInterval, subscriptionName) {
-  return new Error("Subscriptions are not enabled in 2.0.0");
+const TimeoutIf = function (time, func) {
+  if (time > 2147483647) return;
+  setTimeout(func, time);
+}
 
-  let role = victimMember.guild.roles.cache.find(x => x.id === roleID);
-  let user = await Users.getOrCreate({ user_id: victimMember.id, guild_id: victimMember.guild.id });
+/**
+ * Adds a new subscription to the database and adds the role to the user.
+ * @param {GuildMember} member 
+ * @param {string} roleID - The ID of the temporary role
+ * @param {any} tempInfo La información de temprole necesaria
+ * @param {any} activation_info La del item de la tienda
+ * @param {Number} interval El intervalo de cada cuanto va a pagar (ms)
+ * @param {Number} price Lo que va a pagar cada vez
+ * @param {string} subscriptionName El nombre de la suscripción 
+ */
+const Subscription = async function (member, roleID = 0, tempInfo, activation_info, interval, price, subscriptionName) {
+  let role = member.guild.roles.cache.get(roleID);
+  let user = await Users.getWork({ user_id: member.id, guild_id: member.guild.id });
+  let active_until = moment().add(interval, ms).startOf("minute").toDate();
 
   let toPush = {
-    role_id: role.id,
-    active_since: new Date(),
-    duration: interval,
+    role_id: role?.id,
+    active_until,
     isSub: true,
+    activation_info,
+    special: {
+      ...tempInfo
+    },
     sub_info: {
-      price: jeffrosPerInterval,
+      price,
       name: subscriptionName,
+      interval,
       isCancelled: false
-    }
+    },
+    id: FindNewId(await Users.find({ guild_id: member.guild.id }), "data.temp_roles", "id")
   }
+  try {
+    if (role) await member.roles.add(role);
+    user.data.temp_roles.push(toPush);
 
-  await victimMember.roles.add(role);
-  user.data.temp_roles.push(toPush);
-
-  await user.save();
+    await user.save();
+  } catch (err) {
+    console.log("🔴 No se pudo agregar la sub", err);
+  }
 
   return user
 }
 
-const VaultWork = function (vault, user, interaction, notCodeEmbed) { // mostrar y buscar un codigo no descifrado aún por el usuario
-  if (user.data.unlockedVaults.length === vault.length) return interaction.editReply({ embeds: [notCodeEmbed.defFooter({ text: "Tienes todos los códigos en tus manos, impresionante..." })] })
+const VaultWork = async function (vault, user, interaction, notCodeEmbed) { // mostrar y buscar un codigo no descifrado aún por el usuario
+  if (user.data.unlockedVaults.length === vault.length) return await interaction.editReply({ embeds: [notCodeEmbed.defFooter({ text: "Tienes todos los códigos en tus manos, impresionante..." })] })
 
   const unlocked = user.data.unlockedVaults;
 
-  let code = vault[Math.floor(Math.random() * vault.length)];
+  let code = new Chance().pickone(vault);
 
 
   while (unlocked.find(x => x === code.id)) {
-    code = vault[Math.floor(Math.random() * vault.length)];
+    code = new Chance().pickone(vault);
   }
 
   let itemMap = new Map();
@@ -871,213 +1107,181 @@ const VaultWork = function (vault, user, interaction, notCodeEmbed) { // mostrar
     footer: `Pista {ACTUAL} de {TOTAL} | /vault [codigo] para descifrar`
   }, itemMap, 1);
 
-  return interactive.init(interaction);
+  return await interactive.init(interaction);
 }
 
 /**
- * @param {Client} client 
+ * 
+ * @param {Guild} guild 
  */
-const handleUploads = async function (client) {
+const handleNotification = async function (guild) {
+  if (guild.id != Bases.owner.guildId && guild.id != Bases.dev.guild) return;
+  const doc = await Guilds.getWork(guild.id);
 
-  for await (const guild of client.guilds.cache.values()) {
-    if (guild.id != Bases.owner.guildId && guild.id != Bases.dev.guild) continue;
+  const youtubeChannel = guild.channels.cache.get(doc.getChannel("notifier.youtube_notif"));
+  const twitchChannel = guild.channels.cache.get(doc.getChannel("notifier.twitch_notif"));
 
-    const doc = await Guilds.getOrCreate(guild.id);
+  const ytRole = guild.roles.cache.get(doc.getRole("announcements.youtube.videos")) ?? "¡Gente!";
+  const shortsRole = guild.roles.cache.get(doc.getRole("announcements.youtube.shorts")) ?? "¡Gente!";
+  const twitchRole = guild.roles.cache.get(doc.getRole("announcements.twitch")) ?? "¡Gente!";
 
-    const bellytChannel = client.channels.cache.get(doc.getChannel("notifier.youtube_notif"));
-    const belltvChannel = client.channels.cache.get(doc.getChannel("notifier.twitch_notif"));
+  let data = doc.data.social_notifications;
 
-    const ytRole = guild.roles.cache.get(doc.getRole("notifications.youtube"));
-    const ytShortsRole = guild.roles.cache.get(doc.getRole("notifications.youtube_shorts"));
-    const tvRole = guild.roles.cache.get(doc.getRole("notifications.twitch"));
-
-    // revisar si existe el globaldata
-    let interval = ms("30s");
-    let noti = await GlobalDatas.findOne({
-      "info.type": "bellNotification"
-    });
-
-    if (!noti) {
-      const newNotification = new GlobalDatas({
-        info: {
-          type: "bellNotification",
-          lastVideo: null,
-          lastTweet: null,
-          lastLive: null
-        }
-      })
-
-      await newNotification.save();
-      noti = await GlobalDatas.findOne({
-        "info.type": "bellNotification"
-      });
-    }
-
-    const config = {
-      youtube_channelId: "UCCYiF7GGja7iJgsc4LN0oHw",
-      twitter_screenname: "JeffreyG__",
-      twitch_username: "jeffreyg_"
-    }
-
-    if (bellytChannel && belltvChannel) setInterval(async () => {
-      let changed = false;
-
-      // youtube
-      let comentarios = ["Ha llegado el momento, chécalo para evitar que Jeffrey entre en depresión", "Dale like o comenta algo si te gustó lo suficiente :D", "Espero que nos veamos en la próxima, ¡y que no sea en 3 meses!", "BROOOO Está rebueno míralo, a lo bien.", "No sabría decir si es lamentable, espero que no, ¿por qué no lo ves para comprobarlo y me dices qué tal?"]
-      let short_comentarios = ["Venga va, que es menos de un minuto chécalo."]
-
-      let comentario = GetRandomItem(comentarios);
-      let short_comentario = GetRandomItem(short_comentarios);
-
-      google.youtube("v3").activities.list({
-        key: process.env.YOUTUBE_TOKEN,
-        part: "snippet, contentDetails",
-        channelId: config.youtube_channelId
-      })
-        .then(async response => {
-          let item;
-
-          itemLoop:
-          for (let i = 0; i < response.data.items.length; i++) {
-            const _item = response.data.items[i];
-
-            if (_item.snippet.type === "upload") {
-              item = _item;
-              break itemLoop;
-            } else {
-              item = null;
-            }
-          }
-          if (!item) return;
-
-          const itemId = item.id;
-          const videoId = item.contentDetails.upload.videoId;
-          const videoLink = `https://www.youtube.com/watch?v=${videoId}`;
-          const shortLink = `https://www.youtube.com/shorts/${videoId}`;
-
-          if (noti.info.lastVideo != itemId) {
-            fetch(shortLink, { redirect: "manual" }).then(res => {
-              let isShort = res.headers.get("Location") === videoLink ? false : true;
-
-              changed = true;
-              noti.info.lastVideo = itemId;
-
-              if (isShort) {
-                bellytChannel.send({ content: `**¡NUEVO SHORT, ${ytShortsRole}!**\n\n${short_comentario}\n\n➟ ${shortLink}` });
-              } else {
-                bellytChannel.send({ content: `**:fire::zap:️¡NUEVO VÍDEO, ${ytRole}!:zap:️:fire:**\n\n${comentario}\n\n➟ ${videoLink}` });
-              }
-            });
-          }
-        })
-        .catch(err => console.log("YOUTUBE", err));
-
-      // twitch
-      let saludos = ["Di hola", "Ven y saluda", "Llégate", "Esto no pasa todo el tiempo, ven"]
-      let saludo = GetRandomItem(saludos);
-      const streamLink = `https://twitch.tv/${config.twitch_username}`;
-
-      const authProvider = new AppTokenAuthProvider(process.env.TWITCH_CLIENT, process.env.TWITCH_SECRET);
-      const apiClient = new ApiClient({ authProvider });
-
-      let streaming = await isStreaming(config.twitch_username);
-
-      if (streaming) { // si está directo
-        const stream = await getStream(config.twitch_username);
-
-        const streamId = stream.id;
-        const streamTitle = stream.title;
-
-        if (noti.info.lastLive === streamId) return console.log("ESTÁ EN DIRECTO, PERO YA SE HA PUBLICADO");
-        else {
-          changed = true;
-          noti.info.lastLive = streamId;
-
-          belltvChannel.send(`**🔴 ¡Jeffrey está en directo, ${tvRole}!** 🔴\n\`➟\` **${streamTitle}**\n\n**${saludo} ➟ ${streamLink} !! :D**`);
-        }
-      }
-
-      async function isStreaming(username) {
-        try {
-          const user = await apiClient.users.getUserByName(username);
-
-          if (!user) return false;
-          return await user.getStream() !== null;
-        } catch (err) {
-          console.log(err)
-        }
-      }
-
-      async function getStream(username) {
-        const user = await apiClient.users.getUserByName(username);
-
-        if (!user) return null;
-
-        const stream = await user.getStream()
-
-        if (!stream) return null;
-
-        return stream;
-      }
-
-      if (changed) {
-        noti.markModified("info")
-        await noti.save().then(res => {
-          console.log(res.info);
-        });
-      }
-    }, interval);
+  const config = {
+    youtube_channelId: "UCCYiF7GGja7iJgsc4LN0oHw",
+    twitch_username: "jeffreyg_"
   }
 
+  const textos = {
+    videos: ["Ha llegado el momento, chécalo para evitar que Jeffrey entre en depresión.", "Dale like o comenta algo si te gustó lo suficiente :D", "Espero que nos veamos en la próxima, ¡y que no sea en 3 meses!", "BROOOO Está rebueno míralo, a lo bien.", "No sabría decir si es lamentable, espero que no, ¿por qué no lo ves para comprobarlo y me dices qué tal?"],
+    shorts: ["Venga va, que es menos de un minuto chécalo.", "¡Viva el contenido rápido!", "¿Sólo unos días más para que salga un vídeo real?", "¡Otro vídeo de menos de un minuto!"],
+    twitch: ["¡Ven y di hola!", "¡Ven y saluda!", "¡Pásate!", "¡Esto no pasa todo el tiempo, ven!"],
+    emojis: ["⚡", "🔥", "✨", "💚", "🦊", guild.client.Emojis.Badge, "✅"],
+    labels: ["¡Me interesa!", "¡Veamos!", "¡Interesante!", "¡Click!", "¡Me sirve!", "¡A ver!"]
+  }
+
+  // YouTube
+  const googleRes = await google.youtube("v3").activities.list({
+    key: process.env.YOUTUBE_TOKEN,
+    part: "snippet, contentDetails",
+    channelId: config.youtube_channelId
+  })
+
+  for (const item of googleRes.data.items) {
+    if (item.snippet.type != "upload") continue;
+
+    const itemId = item.id;
+    const videoId = item.contentDetails.upload.videoId;
+    const videoLink = `https://www.youtube.com/watch?v=${videoId}`;
+    const shortLink = `https://www.youtube.com/shorts/${videoId}`;
+
+    let checkIfShort = async () => {
+      let res = await fetch(shortLink, { redirect: "manual" });
+      return res.headers.get("Location") === videoLink ? false : true;
+    }
+
+    let isShort = await checkIfShort();
+    let prop = isShort ? "shorts" : "videos";
+
+    let embed = new Embed()
+      .defTitle(isShort ? "¡NUEVO SHORT!" : "¡NUEVO VÍDEO!")
+      .defColor(Colores.verde)
+      .defFooter({ text: `— ${item.snippet.title}` })
+      .defImage(item.snippet.thumbnails.maxres.url ?? item.snippet.thumbnails.default.url);
+
+    let components = [
+      new ActionRowBuilder()
+        .setComponents(
+          new ButtonBuilder()
+            .setStyle(ButtonStyle.Link)
+            .setURL(isShort ? shortLink : videoLink)
+            .setEmoji(isShort ? guild.client.Emojis.YouTubeShorts : guild.client.Emojis.YouTube)
+            .setLabel(new Chance().pickone(textos.labels))
+        )
+    ]
+
+    // Si no se encontró ese vídeo ya notificado, y hay canal de anuncios de YouTube configurado
+    if (!data.youtube[prop].find(x => x === itemId) && youtubeChannel) {
+      data.youtube[prop].push(itemId);
+      await doc.save();
+
+      embed.defDesc(new Chance().pickone(textos.emojis) + " " + new Chance().pickone(textos[prop]))
+
+      await youtubeChannel.send({ content: (isShort ? shortsRole : ytRole).toString(), embeds: [embed], components });
+    }
+  }
+
+  // Twitch
+  const streamLink = `https://twitch.tv/${config.twitch_username}`;
+
+  const authProvider = new AppTokenAuthProvider(process.env.TWITCH_CLIENT, process.env.TWITCH_SECRET);
+  const apiClient = new ApiClient({ authProvider });
+
+  let streaming = await isStreaming(config.twitch_username);
+
+  // Si está en directo, y hay canal de anuncios de Twitch configurado
+  if (streaming && twitchChannel) {
+    const stream = await getStream(config.twitch_username);
+    const streamId = stream.id;
+    const streamTitle = stream.title;
+    if (!data.twitch.find(x => x === streamId)) {
+      let embed = new Embed()
+        .defTitle("¡Jeffrey está en directo!")
+        .defDesc(streamTitle)
+        .defColor("#9146FF")
+        .defFooter({ text: `${new Chance().pickone(textos.emojis)} ${new Chance().pickone(textos.twitch)}` })
+        .defImage(await getUserPicture(config.twitch_username));
+
+      let components = [
+        new ActionRowBuilder()
+          .setComponents(
+            new ButtonBuilder()
+              .setStyle(ButtonStyle.Link)
+              .setURL(streamLink)
+              .setEmoji(guild.client.Emojis.Twitch)
+              .setLabel(new Chance().pickone(textos.labels))
+          )
+      ]
+
+      data.twitch.push(streamId);
+      await doc.save();
+
+      await twitchChannel.send({ content: twitchRole.toString(), embeds: [embed], components });
+    }
+  }
+
+  async function isStreaming(username) {
+    try {
+      const user = await apiClient.users.getUserByName(username);
+
+      if (!user) return false;
+      return await user.getStream() !== null;
+    } catch (err) {
+      console.error("🔴 %s", err);
+    }
+  }
+
+  async function getStream(username) {
+    const user = await apiClient.users.getUserByName(username);
+
+    if (!user) return null;
+
+    const stream = await user.getStream()
+
+    if (!stream) return null;
+
+    return stream;
+  }
+
+  async function getUserPicture(username) {
+    const user = await apiClient.users.getUserByName(username);
+    if (!user) return null
+
+    return user.profilePictureUrl;
+  }
 
 }
 
 /**
  * 
- * @param {*} interaction The Discord.JS Interaction that triggers the command
- * @param {String} query The Banning to search to this user in the Guild
- * @returns 
- */
-const isBannedFrom = async function (interaction, query) {
-  const user = await Users.getOrCreate({ user_id: interaction.user.id, guild_id: interaction.guild.id });
-
-  let response = false;
-
-  switch (query.toUpperCase()) {
-    case "SUGGESTIONS":
-    case "SUGGEST":
-      response = user.isBannedFrom("suggestions");
-      break;
-
-    case "TICKETS":
-      response = user.isBannedFrom("tickets");
-      break;
-
-    default:
-      response = null;
-  }
-
-  if (response === null) return `COULD'T DETERMINE BANNED FROM '${query.toUpperCase()}'`;
-  else
-    return response;
-}
-
-/**
- * 
- * @param {String} toConfirm What is trying to be confirmed
- * @param {Array} dataToConfirm The text that will apear on the embed separated by "▸"
- * @param {CommandInteraction} interaction The Discord.JS Interaction that triggers the command
+ * @param {String} toConfirm Lo que se está confirmando
+ * @param {Array} dataToConfirm El texto que aparece separado por "▸"
+ * @param {CommandInteraction} interaction La interacción que ejecuta esta confirmación
+ * @param {User} user El usuario que usará esta confirmación
  * @returns {Promise<BaseInteraction | false>} Discord.JS Message if the confirmation is positive, if not, returns false
  */
-const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
+const Confirmation = async function (toConfirm, dataToConfirm, interaction, user = interaction.user) {
   const client = interaction.client;
 
   let DescriptionString = "";
   let egEmbed = null;
+  let egButton = null;
 
   dataToConfirm.forEach(data => {
     if (data instanceof Embed) {
       egEmbed = data;
+    } else if (data instanceof ButtonBuilder) {
+      egButton = data;
     } else
       DescriptionString += `\`▸\` ${data}\n`;
   });
@@ -1090,11 +1294,21 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
   let embeds = [confirmation];
   if (egEmbed) embeds.push(egEmbed);
 
-  let cancelEmbed = new Embed()
-    .defDesc(`Cancelado.`)
-    .defColor(Colores.negro);
+  let cancelEmbed = new Embed({
+    type: "cancel"
+  })
 
   // componentes
+  let components = [];
+  if (egButton) {
+    components.push(
+      new ActionRowBuilder()
+        .addComponents(
+          egButton
+        )
+    )
+  }
+
   const row = new ActionRowBuilder()
     .addComponents(
       new ButtonBuilder()
@@ -1109,13 +1323,15 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
         .setEmoji(client.EmojisObject.Cross.id)
     )
 
-  let msg = await interaction.editReply({ content: null, embeds, components: [row] }).catch(err => { console.log(err) }); // enviar mensaje de confirmación
+  components.push(row)
 
+  // enviar mensaje de confirmación
+  let msg = await interaction.editReply({ embeds, components });
   if (!msg) return null;
 
   return new Promise(async (resolve, reject) => {
     const filter = async i => {
-      return i.user.id === interaction.user.id &&
+      return i.user.id === user.id &&
         (i.customId === "confirmAction" || i.customId === "cancelAction") &&
         i.message.id === msg.id;
     }
@@ -1123,7 +1339,7 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
     const collector = new Collector(interaction, { filter, max: 1 }).onEnd((collected, reason) => {
       if (collected.size === 0) {
         interaction.editReply({ embeds: [cancelEmbed], components: [] })
-        return resolve(false)
+        resolve(false)
       }
     }).raw();
 
@@ -1135,11 +1351,11 @@ const Confirmation = async function (toConfirm, dataToConfirm, interaction) {
 
         await interaction.editReply({ embeds: [confirmation], components: [] });
 
-        return resolve(interaction);
+        resolve(interaction);
       } else {
-        await interaction.editReply({ embeds: [cancelEmbed], components: [] });
+        await interaction.editReply({ content: null, embeds: [cancelEmbed], components: [] });
 
-        return resolve(false);
+        resolve(false);
       }
     })
   })
@@ -1204,8 +1420,7 @@ const AfterInfraction = async function (user, data) {
 
 
       let guildBan = await GlobalDatas.findOne({
-        "info.type": "temporalGuildBan",
-        "info.userID": member.id,
+        type: "temporalGuildBan",
         "info.guild_id": guild.id
       });
 
@@ -1213,9 +1428,9 @@ const AfterInfraction = async function (user, data) {
 
       if (!guildBan) {
         const newBan = new GlobalDatas({
+          type: "temporalGuildBan",
           info: {
-            type: "temporalGuildBan",
-            userID: member.id,
+            user_id: member.id,
             guild_id: guild.id,
             reason: `AutoMod. (Infringir "${rule}")`,
             since: now,
@@ -1238,7 +1453,7 @@ const AfterInfraction = async function (user, data) {
       if (totalWarns >= 2) {
         let infoEmbed = new Embed()
           .defAuthor({ text: `Información`, icon: client.EmojisObject.Danger.url })
-          .defDesc(`**—** ${member.user.tag}, este es tu **warn número ❛ \`2\` ❜**
+          .defDesc(`**—** ${member.displayName}, este es tu **warn número ❛ \`2\` ❜**
 *— ¿Qué impacto tendrá este warn?*
 **—** Tranquil@. Este warn no afectará en nada tu estadía en el servidor, sin embargo; el siguiente warn será un **ban de un día**.
 **—** Te sugiero comprar un **-1 Warn** en la tienda del servidor. *( \`/shop\` para más info de precios, etc. )*`)
@@ -1253,30 +1468,13 @@ const AfterInfraction = async function (user, data) {
   if (banMember) member.ban({ reason: `AutoMod. (Infringir "${rule}")` });
 
   try {
-    await member.send({ embeds: arrayEmbeds })
-    return true
+    await SendDirect(null, member, DirectMessageType.Moderation, {
+      embeds: arrayEmbeds
+    })
+    return true;
   } catch (e) {
-    await interaction.editReply({ embeds: [new ErrorEmbed({ type: "notSent", data: { tag: member.user.tag, error: e } })] })
-    return false
+    return e;
   }
-
-  /*  else {
-  const { member, rule, proof } = data;
-
-  let warnedEmbed = new Embed()
-    .defAuthor(`¡Cuidado! (Softwarn)`, "https://cdn.discordapp.com/emojis/494267320097570837.png")
-    .defDesc(`
-**—** Esto es sólo un llamado de atención.
-**—** Por infringir la regla: **${rule}**.
-**—** [Pruebas](${proof.url})`)
-    .defColor(Colores.rojo)
-    .defFooter({text: `Si vuelves a cometer esta misma falla serás warneado, ten cuidado.`, icon: 'https://cdn.discordapp.com/attachments/464810032081666048/503669825826979841/DiscordLogo.png'});
-
-  member.send({ embeds: [warnedEmbed] })
-    .catch(e => {
-      interaction.editReply({ embeds: [new ErrorEmbed({ type: "notSent", data: { tag: member.user.tag, error: e } })] })
-    });
-} */
 }
 
 /**
@@ -1289,7 +1487,7 @@ const ManageDarkShops = async function (client) {
   for await (const guild of client.guilds.cache.values()) {
     const darkshop = new DarkShop(guild);
 
-    darkshop.inflationWork();
+    await darkshop.inflationWork();
   }
 }
 
@@ -1300,7 +1498,7 @@ const ManageDarkShops = async function (client) {
  * @returns 
  */
 const ValidateDarkShop = async function (user, author) {
-  let guild = await Guilds.getOrCreate(user.guild_id);
+  let guild = await Guilds.getWork(user.guild_id);
 
   const r = [
     "{you}... No estás listo.",
@@ -1311,11 +1509,11 @@ const ValidateDarkShop = async function (user, author) {
     "Aún no, {you}."
   ];
 
-  let res = r[Math.floor(Math.random() * r.length)];
+  let res = new Chance().pickone(r);
 
   const desc = res.replace(
     new RegExp("{you}", "g"),
-    `**${author.tag}**`
+    `**${author.username}**`
   );
 
   const notReady = new Embed()
@@ -1323,7 +1521,7 @@ const ValidateDarkShop = async function (user, author) {
     .defDesc(desc)
     .defFooter({ text: `▸ Vuelve cuando seas nivel ${guild.settings.quantities.darkshop_level}.` });
 
-  if (user.economy.global.level < guild.settings.quantities.darkshop_level) return { valid: false, embed: notReady }
+  if (user.economy.global.level < guild.settings.quantities.darkshop.level) return { valid: false, embed: notReady }
   else return { valid: true, embed: null };
 }
 
@@ -1342,73 +1540,14 @@ const DaysUntilToday = async function (date) {
 }
 
 /**
- * @deprecated
- * @param {*} user The user's document inside the database
- * @param {*} item The item's object inside the database
- * @param {Boolean} [returnString=false] The function returns an String with the original price and the new one?
- * @param {Boolean} [isDarkShop=false] This is for the DarkShop?
- * @returns {String | Number} Returns a String or a Number in the case
- */
-const DeterminePrice = async function (user, item, returnString, isDarkShop) {
-  isDarkShop = isDarkShop || false;
-  returnString = returnString || false;
-
-  const discounts = [
-    {
-      forDarkShop: false,
-      level: 20,
-      discount: 15
-    }
-  ]
-
-  const originalPrice = item.price;
-  const user_level = user.economy.global.level;
-
-  // nuevo precio a partir de interés
-  const interest = item.interest;
-  const searchInterest = x => (x.isDarkShop === isDarkShop) && (x.item_id === item.id);
-  const totalpurchases = user.data.purchases.find(searchInterest) ? user.data.purchases.find(searchInterest).quantity : 0;
-
-  const interestPrice = originalPrice + (totalpurchases * interest);
-  let precio = interestPrice;
-
-  // descuentos
-  let query = discounts.filter(x => user_level >= x.level && x.forDarkShop === isDarkShop).sort(function (a, b) { // ordenar el array mayor a menor, por array.level
-    if (a.level > b.level) {
-      return -1;
-    }
-    if (a.level < b.level) {
-      return 1;
-    }
-
-    return 0;
-  });
-
-  let discounted = false;
-
-  if (query[0]) {
-    discounted = true;
-    precio -= ((precio) / 100) * query[0].discount;
-  }
-
-
-  precio = Math.floor(precio) > 0 ? Math.floor(precio) : Math.ceil(precio);
-
-  if (returnString && discounted) {
-    return `~~${interestPrice.toLocaleString("es-CO")}~~ ${precio.toLocaleString("es-CO")}`;
-  } else {
-    return precio;
-  }
-}
-
-/**
  * Balance de precios para todos los usuarios
  * @param {Guild} guild 
  */
 const FindAverage = async function (guild) {
-  //const doc_guild = await Guilds.getOrCreate(guild.id);
+  //const doc_guild = await Guilds.getWork(guild.id);
   const users = await Users.find({ guild_id: guild.id });
   const darkshop = new DarkShop(guild);
+  const disabled = await darkshop.checkDisabled();
 
   let top = [];
 
@@ -1418,8 +1557,11 @@ const FindAverage = async function (guild) {
 
     if (member && !member.user.bot) {
       let darkcurrency = user.economy.dark?.currency ?? 0;
-      let darkcurrencyValue = await darkshop.equals(null, darkcurrency) ?? 0;
-      let finalQuantity = Math.round(darkcurrencyValue + user.economy.global.currency);
+      let darkcurrencyValue = 0;
+
+      if (!disabled) darkcurrencyValue = await darkshop.equals(null, darkcurrency) ?? 0;
+
+      let finalQuantity = Math.round(darkcurrencyValue + user.getCurrency());
 
       if (finalQuantity > 0 || (finalQuantity === 0 && !top.find(x => x.money === 0))) top.push({
         member,
@@ -1490,19 +1632,20 @@ const FindNewId = function (generalQuery, specificQuery, toCheck) {
 /**
  * 
  * @param {GuildMember} member The Discord.JS Member to check for benefit
- * @param {Array} [objetivesToCheck=["any"]] The objetive of boost to check.
+ * @param {Array} [objetivesToCheck] The objetive of boost to check.
  * - BoostObjetives
  * - any
  * @returns {Promise<Boolean>} This Member already has a temp role with the objetive searched for.
  */
 const WillBenefit = async function (member, objetivesToCheck) {
-  objetivesToCheck = objetivesToCheck ?? ["any"];
+  objetivesToCheck = objetivesToCheck ?? [BoostObjetives.Currency, BoostObjetives.Exp, BoostObjetives.All];
 
-  const user = await Users.findOne({
+  const user = await Users.getWork({
     user_id: member.id,
     guild_id: member.guild.id
   });
 
+  const boostInfo = BoostWork(user);
   const temp_roles = user.data.temp_roles;
 
   let hasBoost = false;
@@ -1513,15 +1656,18 @@ const WillBenefit = async function (member, objetivesToCheck) {
       objetivesToCheck.forEach(objetiveToCheck => {
         switch (objetiveToCheck) {
           case BoostObjetives.Currency:
-          case BoostObjetives.Exp:
-          case BoostObjetives.All:
-            if (special.objetive === objetiveToCheck) hasBoost = true;
+            if (boostInfo.multiplier.changed.currency && boostInfo.multiplier.currency_value > 1) hasBoost = true;
+            if (boostInfo.probability.changed.currency && boostInfo.probability.currency_value > 1) hasBoost = true;
             break;
-
-          case "any":
-            if (special.objetive === BoostObjetives.Currency ||
-              special.objetive === BoostObjetives.Exp ||
-              special.objetive === BoostObjetives.All) hasBoost = true;
+          case BoostObjetives.Exp:
+            if (boostInfo.multiplier.changed.exp && boostInfo.multiplier.exp_value > 1) hasBoost = true;
+            if (boostInfo.probability.changed.exp && boostInfo.probability.exp_value > 1) hasBoost = true;
+            break;
+          case BoostObjetives.All:
+            if (boostInfo.multiplier.changed.currency && boostInfo.multiplier.currency_value > 1) hasBoost = true;
+            if (boostInfo.probability.changed.currency && boostInfo.probability.currency_value > 1) hasBoost = true;
+            if (boostInfo.multiplier.changed.exp && boostInfo.multiplier.exp_value > 1) hasBoost = true;
+            if (boostInfo.probability.changed.exp && boostInfo.probability.exp_value > 1) hasBoost = true;
             break;
 
           default:
@@ -1536,7 +1682,7 @@ const WillBenefit = async function (member, objetivesToCheck) {
 }
 
 const importImage = function (filename) {
-  let file = new AttachmentBuilder(`./src/resources/imgs/${filename.toUpperCase()}.png`, { name: `${filename.toLowerCase()}.png` });
+  let file = new AttachmentBuilder(`./resources/imgs/${filename.toUpperCase()}.png`, { name: `${filename.toLowerCase()}.png` });
   return {
     attachment: `attachment://${filename.toLowerCase()}.png`,
     file: file
@@ -1549,15 +1695,6 @@ const importImage = function (filename) {
  * @returns {Promise<void>}
  */
 const Sleep = ms => new Promise(r => setTimeout(r, ms));
-
-/**
- * Obtén un item aleatorio de un Array
- * @param {Array} array The Array of items to find
- * @returns {any}
- */
-const GetRandomItem = (array) => {
-  return array[Math.floor(Math.random() * array.length)];
-}
 
 /**
  * 
@@ -1604,10 +1741,12 @@ const ActivityWork = async function (client) {
   let act;
 
   if (!activities.info.fixed) {
-    act = GetRandomItem(activities.info.list)
+    act = new Chance().pickone(activities.info.list)
   } else {
     act = activities.info.list.find(x => x.id === activities.info.fixed)
   }
+
+  if (!act) return;
 
   let acttype = act.type?.charAt(0).toUpperCase() + act.type?.slice(1);
   let type = ActivityType[acttype] ?? ActivityType.Playing;
@@ -1638,19 +1777,20 @@ const UpdateObj = function (obj, prop, value) {
  * @param {{blocks: Number, emptyChr: String, fullChr: String}} options 
  */
 const ProgressBar = function (percentage, options = { max: 100, blocks: 10, emptyChr: "⬜", fullChr: "🟩" }) {
+  if (!percentage || isNaN(percentage)) percentage = 0;
   const empty = options.emptyChr ?? "⬜";
   const full = options.fullChr ?? "🟩";
   const blocks = options.blocks ?? 10;
   const max = options.max ?? 100;
 
   let fullNum = Math.floor(blocks * percentage / max);
-  if(fullNum < 0) fullNum = 0;
+  if (fullNum < 0) fullNum = 0;
 
   let emptyNum = Math.floor(blocks - fullNum);
-  if(emptyNum < 0) emptyNum = 0;
-  
-  if(fullNum > blocks) fullNum = blocks;
-  if(emptyNum > blocks) emptyNum = blocks;
+  if (emptyNum < 0) emptyNum = 0;
+
+  if (fullNum > blocks) fullNum = blocks;
+  if (emptyNum > blocks) emptyNum = blocks;
 
   let fullBlocks = full.repeat(fullNum)
   let emptyBlocks = empty.repeat(emptyNum)
@@ -1658,11 +1798,23 @@ const ProgressBar = function (percentage, options = { max: 100, blocks: 10, empt
   return fullBlocks + emptyBlocks;
 }
 
+const MultiplePercentages = function (elements = [{ percentage, square }], blocks = 10) {
+  let prog = "";
+
+  elements.forEach(element => {
+    prog += ProgressBar(element.percentage, { fullChr: element.square, emptyChr: "", blocks })
+  })
+
+  prog += ProgressBar((blocks - prog.length) / blocks * 100, { fullChr: "⬜", emptyChr: "" });
+
+  return prog;
+}
+
 /**
  * @param {Client} client 
  */
 const UpdateCommands = async function (client) {
-  const ClientCommands = new Commands(["./commands/", "./contextmenus/"]);
+  const ClientCommands = new Commands();
   return new Promise(async (res, rej) => {
     try {
       let resp = await ClientCommands.prepare(client, ["482989052136652800"])
@@ -1682,7 +1834,7 @@ const DeleteLink = async function (message) {
     "https", "http", "www.", "discord.gg", "discord.gift"
   ];
 
-  const doc = await Guilds.getOrCreate(message.guild.id);
+  const doc = await Guilds.getWork(message.guild.id);
   const member = message.member;
   const link = Links.some(x => message.content.includes(x));
 
@@ -1691,7 +1843,10 @@ const DeleteLink = async function (message) {
 
   if (!link && message.embeds.length < 1) return false;
 
-  message.delete();
+  message.delete().catch(err => {
+    console.error("🔴 %s", err);
+  });
+
   message.author.send({
     embeds: [
       new Embed()
@@ -1703,10 +1858,16 @@ ${codeBlock(message.content)}`)
     ]
   })
     .catch(async err => {
-      let msg = await message.channel.send(`No envíes links, **${message.author.tag}**.`)
+      let msg = await message.channel.send(`No envíes links, **${message.member.displayName}**.`)
+        .catch(err => {
+          console.error("🔴 %s", err);
+        });
 
       setTimeout(() => {
-        msg.delete();
+        msg.delete()
+          .catch(err => {
+            console.error("🔴 %s", err);
+          });
       })
     });
 
@@ -1717,19 +1878,257 @@ ${codeBlock(message.content)}`)
       .send({
         embeds: [
           new Embed()
-            .defAuthor({ text: `Se eliminó un mensaje de ${message.author.tag}`, icon: member.displayAvatarURL({ dynamic: true }) })
+            .defAuthor({ text: `Se eliminó un mensaje de ${message.author.username}`, icon: member.displayAvatarURL({ dynamic: true }) })
             .defDesc(`${codeBlock(message.content)}`)
             .defColor(Colores.verde)
             .defFooter({ text: "NO se aplicaron sanciones", timestamp: true })
         ]
       })
   } catch (err) {
-    console.log(err);
+    console.error("🔴 %s", err);
   }
 
   return true;
 
 
+}
+
+/**
+ * @param {Client} client 
+ * @param {Guild | String} guild 
+ */
+const FetchThisGuild = async function (client, guild) {
+  await client.guilds.fetch(guild.id ?? guild);
+  await guild.channels.fetch();
+  await guild.roles.fetch();
+  await guild.members.fetch();
+  await guild.emojis.fetch();
+  await guild.commands.fetch();
+
+  client.fetchedGuilds.push(guild.id);
+
+  console.log("💚 %s fetched!", guild.name)
+}
+
+/**
+ * 
+ * @param {Users} user Mongoose Document
+ * @returns 
+ */
+const BoostWork = function (user) {
+  let boost = {
+    multiplier: {
+      changed: {
+        currency: false,
+        exp: false
+      },
+      currency_value: 1,
+      exp_value: 1
+    },
+    probability: {
+      changed: {
+        currency: false,
+        exp: false
+      },
+      currency_value: 1,
+      exp_value: 1
+    },
+    emojis: {
+      currency: "🚀",
+      exp: "🚀"
+    },
+    hasMultiplierChanges: () => { return boost.multiplier.changed.currency || boost.multiplier.changed.exp },
+    hasProbabilityChanges: () => { return boost.probability.changed.currency || boost.probability.changed.exp },
+    hasAnyChanges: () => { return boost.multiplier.changed.currency || boost.multiplier.changed.exp || boost.probability.changed.currency || boost.probability.changed.exp },
+    hasCurrencyChanges: () => { return boost.probability.changed.currency || boost.multiplier.changed.currency },
+  }
+
+  for (const userboost of user.data.temp_roles) {
+    const boostinfo = userboost.special;
+
+    let propToChange;
+    switch (boostinfo.type) {
+      case BoostTypes.Multiplier:
+        propToChange = "multiplier";
+        break;
+      case BoostTypes.Probability:
+        propToChange = "probability";
+        break;
+    }
+
+    switch (boostinfo.objetive) {
+      case BoostObjetives.Currency:
+        boost[propToChange].changed.currency = true;
+        boost[propToChange].currency_value *= boostinfo.value;
+        break;
+
+      case BoostObjetives.Exp:
+        boost[propToChange].changed.exp = true;
+        boost[propToChange].exp_value *= boostinfo.value;
+        break;
+
+      case BoostObjetives.All:
+        boost[propToChange].changed.currency = true;
+        boost[propToChange].changed.exp = true;
+        boost[propToChange].exp_value *= boostinfo.value;
+        boost[propToChange].currency_value *= boostinfo.value;
+        break;
+    }
+  }
+
+  if (boost.hasMultiplierChanges() && boost.hasProbabilityChanges()) {
+    boost.emojis.currency = boost.multiplier.currency_value * boost.probability.currency_value <= 1 ? "😟" : "🚀";
+    boost.emojis.exp = boost.multiplier.exp_value * boost.probability.exp_value <= 1 ? "😟" : "🚀";
+  } else {
+    if (boost.hasMultiplierChanges()) {
+      boost.emojis.currency = boost.multiplier.currency_value <= 1 && boost.multiplier.changed.currency ? "😟" : "🚀";
+      boost.emojis.exp = boost.multiplier.exp_value <= 1 && boost.multiplier.changed.exp ? "😟" : "🚀";
+    }
+
+    if (boost.hasProbabilityChanges()) {
+      boost.emojis.currency = boost.probability.currency_value <= 1 && boost.probability.changed.currency ? "😟" : "🚀";
+      boost.emojis.exp = boost.probability.exp_value <= 1 && boost.probability.changed.exp ? "😟" : "🚀";
+    }
+  }
+
+  return boost;
+}
+
+/**
+ * 
+ * @param {Guild} guild 
+ * @param {Number | String} quantity 
+ * @param {String} param2 
+ * @returns 
+ */
+const PrettyCurrency = function (guild, quantity, { name, boostemoji } = { name: null, boostemoji: null }) {
+  const client = guild.client;
+  const emojis = client.getCustomEmojis(guild.id);
+
+  return `**${emojis[name ?? "Currency"]}${Number(quantity).toLocaleString("es-CO")}${boostemoji ?? ""}**`;
+}
+
+
+const MinMaxInt = function (min, max, { guild, msg }) {
+  let value = 0;
+  try {
+    value = new Chance().integer({ min, max });
+  } catch (err) {
+    if (err instanceof RangeError) {
+      new Log()
+        .setGuild(guild)
+        .setReason(LogReasons.Error)
+        .setTarget(ChannelModules.StaffLogs)
+        .send({
+          embeds: [
+            new ErrorEmbed()
+              .defDesc(`${msg}. Mínimos y máximos deben ser menores y mayores los unos con los otros. ${guild.client.mentionCommand("config dashboard")}.`)
+              .defFields([
+                { up: "Min", down: String(min), inline: true },
+                { up: "Max", down: String(max), inline: true },
+              ])
+              .raw()
+          ]
+        });
+    }
+  }
+
+  return value;
+}
+
+/**
+ * Vuelve lo de la derecha ceros
+ * @param {Number} number El número a tratar
+ * @param {Number} initials Los primeros qué números se mantienen
+ * @param {Number} zeros Cuantos ceros se quieren al final (sobreescribe los initials)
+ * @returns {Number}
+ */
+const PrettifyNumber = function (number, initials = 1, zeros = null) {
+  const original = String(number);
+  if (!zeros) {
+    let firstPart = original.substring(0, initials - 1);
+    let secondPart = "0".repeat(original.length - firstPart.length);
+
+    return Number(firstPart + secondPart);
+  } else {
+    let firstPart = original.substring(0, original.length - zeros - 1);
+    let secondPart = "0".repeat(zeros);
+
+    return Number(firstPart + secondPart);
+  }
+}
+
+/**
+ * @param {BaseInteraction} interaction 
+ * @param {Message} message 
+ * @param {User} user
+ */
+const CreateInteractionFilter = function (interaction, message, user) {
+  return (inter) => {
+    let flat = message.components.flatMap((row) => {
+      return row.components.flatMap((comp) => {
+        return comp.customId
+      });
+    })
+
+    return flat.find(x => x === inter.customId) && inter.user.id === (user?.id ?? interaction.user.id);
+  }
+}
+
+/**
+ * 
+ * @param {BaseInteraction} interaction 
+ * @param {GuildMember} member 
+ * @param {Enum} type 
+ * @param {import("discord.js").MessageCreateOptions} options 
+ */
+const SendDirect = async function (interaction, member, type, options) {
+  const preferences = await Preferences.getWork(member.id);
+  let flags = [];
+
+  // Es el primer DM que se le envía al usuario
+  if (!preferences.direct_messages.firstDmSent) {
+    try {
+      await member.send({
+        embeds: [
+          new Embed()
+            .defThumbnail(member.client.user.displayAvatarURL({ dynamic: true }))
+            .defDesc(`# ¡Hola, ${member.member.displayName}!\nSoy ${member.client.Emojis.JeffreyBot} ${member.client.user.displayName}, puedes configurar tus preferencias para mensajes directos con ${member.client.mentionCommand("preferencias")}.\n**No volverás a recibir este mensaje en un futuro!**`)
+            .defColor(Colores.verdejeffrey)
+        ]
+      })
+
+      preferences.direct_messages.firstDmSent = true;
+      await preferences.save();
+    } catch (err) {
+      console.error("🔴", err);
+    }
+  }
+
+  if (!preferences.direct_messages.options.allowed)
+    throw new DMNotSentError(interaction, member, "El usuario deshabilitó los mensajes directos para Jeffrey Bot")
+
+  if (preferences.direct_messages.options.supressed) flags.push(MessageFlags.SuppressNotifications);
+
+  let path = "direct_messages.allowed." + new Enum(DirectMessageType).translate(type, false).toLowerCase();
+  const allowed = preferences.get(path);
+
+  if (!allowed)
+    throw new DMNotSentError(interaction, member, `El usuario deshabilitó este módulo (${new Enum(DirectMessageType).translate(type)})`);
+
+  await member.send({ ...options, flags });
+}
+
+/**
+ * 
+ * @param {String} line 
+ * @returns String
+ */
+const FinalPeriod = function (line) {
+  let d = line;
+  if (!line.endsWith(".") && !(line.endsWith(":") || line.endsWith("!") || line.endsWith("```") || line.endsWith("?"))) d += `.`;
+
+  return d;
 }
 
 module.exports = {
@@ -1740,13 +2139,10 @@ module.exports = {
   VaultWork,
   LimitedTime,
   Subscription,
-  handleUploads,
-  isBannedFrom,
+  handleNotification,
   Confirmation,
   AfterInfraction,
-  InteractivePages,
   ValidateDarkShop,
-  DeterminePrice,
   FindNewId,
   DaysUntilToday,
   WillBenefit,
@@ -1755,7 +2151,6 @@ module.exports = {
   isOnMobible,
   RandomCumplido,
   Sleep,
-  GetRandomItem,
   MemberHasAnyRole,
   isDeveloper,
   ActivityWork,
@@ -1763,5 +2158,16 @@ module.exports = {
   ProgressBar,
   UpdateCommands,
   DeleteLink,
-  FindAverage
+  FindAverage,
+  FetchThisGuild,
+  BoostWork,
+  PetWork,
+  PrettyCurrency,
+  TimeoutIf,
+  MinMaxInt,
+  PrettifyNumber,
+  MultiplePercentages,
+  CreateInteractionFilter,
+  SendDirect,
+  FinalPeriod
 }

@@ -2,20 +2,87 @@
  * Crea Enumeradores porque no sé como hacerlos en JavaScript.
  */
 class Enum {
+    #translations;
+
     /**
      * @param {Object} values Los valores del enumerador, pueden usarse los default para usar los métodos
+     * @param {Boolean} customize Si se deberían cambiar los valores estandarizados por los personalizados
      */
-    constructor(values) {
+    constructor(values, customize = true) {
         this.values = values
+        this.customize = customize
     }
 
     /**
      * Busca el nombre del enumerador por su valor
-     * @param {String} input El valor a consultar
-     * @returns String
+     * @param {String | Number} input El valor a consultar
+     * @param {Boolean} human Si debería traducirse friendly si existe
+     * @returns {String}
      */
-    translate(input) {
-        return Object.keys(this.values).find(key => this.values[key] === input);
+    translate(input, human = true) {
+        const custom = this.#loadTranslations();
+        let name = Object.keys(this.values).find(key => this.values[key] === input);
+
+        if (custom && human) return custom[name] ?? name
+        return name;
+    }
+
+    #loadTranslations() {
+        const client = require("../");
+
+        const CurrencyName = client.getCustomEmojis(client.lastInteraction?.guild.id)?.Currency?.name;
+        const DarkCurrencyName = client.getCustomEmojis(client.lastInteraction?.guild.id)?.DarkCurrency?.name;
+
+        this.#translations = {
+            Multiplier: "Multiplicador",
+            Probability: "Probabilístico",
+            All: "Todo",
+            Currency: this.customize && CurrencyName ? CurrencyName : "Dinero",
+            DarkCurrency: this.customize && DarkCurrencyName ? DarkCurrencyName : "Dinero de DarkShop",
+            ChatRewards: "Recompensas de Chat",
+            CurrencyToExp: "Dinero a EXP",
+            InflationPrediction: "Predicción Inflación",
+            Level: "Nivel",
+            Shop: "Tienda",
+            PetShop: "Tienda de Mascotas",
+            EXShop: "Tienda Externa",
+            Positive: "Positivo",
+            Negative: "Negativo",
+            Add: "Agrega",
+            Remove: "Elimina",
+            Basic: "Básico",
+            Critical: "Crítico",
+            Advanced: "Avanzado",
+            Ultimate: "Definitivo",
+            Roulette: "Ruleta",
+            ClaimRep: "Reclamar Rep",
+            Yes: "Sí",
+            Moderation: "Moderación",
+            Pets: "Mascotas",
+            Welcome: "Bienvenida",
+            Subscriptions: "Suscripciones",
+            Trophies: "Trofeos",
+            Staff: "STAFF",
+            Birthdays: "Cumpleaños",
+            Incomes: "Ingresos",
+            SubscriptionsCurrency: `${this.customize && CurrencyName ? CurrencyName : "Dinero"} en Suscripciones`,
+            Developer: "Desarrollador",
+            Administration: "Administración",
+            Economy: "Economía",
+            Fun: "Diversión",
+            Music: "Música",
+            DM: "Mensajes Directos",
+            Suggestions: "Sugerencias",
+            EXShopTTS: "EXShop: TTS"
+        }
+
+        for (const prop of Object.keys(this.values)) {
+            if (!this.#translations[prop]) continue;
+
+            return this.#translations;
+        }
+
+        return null
     }
 
     /**
@@ -33,7 +100,7 @@ class Enum {
      */
     exists(query) {
         let a = this.array();
-        return a.find(x => x === this.translate(query)) ? true : false;
+        return a.find(x => x === this.translate(query, false)) ? true : false;
     }
 
     /**
@@ -41,15 +108,18 @@ class Enum {
      * #### Predeterminado: [{name: nombre, value: valor}]
      * @returns Array
      */
-    complexArray(first = "name", second = "value") {
+    complexArray(options = { first: "name", second: "value", valueString: false }) {
         let arr = [];
+        const first = options.first ?? "name";
+        const second = options.second ?? "value";
+        const valueString = options.valueString ?? false;
 
         let names = this.array();
 
         for (const name of names) {
             let obj = {};
-            obj[first] = String(name);
-            obj[second] = String(this.values[name]);
+            obj[first] = this.translate(this.values[name]);
+            obj[second] = valueString ? String(this.values[name]) : this.values[name];
 
             arr.push(obj)
         }
@@ -68,6 +138,7 @@ class Enum {
  * - Moderation
  * - Developer
  * - Music
+ * - DM
  */
 const Categories = new Enum({
     General: "GENERAL",
@@ -78,7 +149,8 @@ const Categories = new Enum({
     Administration: "ADMIN",
     Moderation: "MODERATION",
     Developer: "DEV",
-    Music: "MUSIC"
+    Music: "MUSIC",
+    DM: "DM"
 }).values
 
 /**
@@ -88,6 +160,11 @@ const Categories = new Enum({
  * - Subscription
  * - Temporal
  * - SkipFirewall
+ * - Pet
+ * - PetStatsModifier
+ * - EXKeyboard
+ * - EXMedia
+ * - EXTTS
  */
 const ItemTypes = new Enum({
     StackOverflow: 1,
@@ -95,7 +172,12 @@ const ItemTypes = new Enum({
     Firewall: 3,
     Subscription: 4,
     Temporal: 5,
-    SkipFirewall: 6
+    SkipFirewall: 6,
+    Pet: 7,
+    PetStatsModifier: 8,
+    EXKeyboard: 9,
+    EXMedia: 10,
+    EXTTS: 11
 }).values
 
 /**
@@ -137,11 +219,11 @@ const ItemObjetives = new Enum({
 
 /**
  * - Multiplier
- * - Probabilities
+ * - Probability
  */
 const BoostTypes = new Enum({
     Multiplier: 1,
-    Probabilities: 2
+    Probability: 2
 }).values
 
 /**
@@ -162,6 +244,8 @@ const BoostObjetives = new Enum({
  * - Blackjack
  * - Deleted
  * - TimeOut
+ * - StoppedByUser
+ * - Done
  */
 const EndReasons = new Enum({
     OldCollector: 1,
@@ -169,7 +253,9 @@ const EndReasons = new Enum({
     GaveUp: 3,
     Blackjack: 4,
     Deleted: 5,
-    TimeOut: 6
+    TimeOut: 6,
+    StoppedByUser: 7,
+    Done: 8
 }).values
 
 /**
@@ -208,13 +294,15 @@ const Tendencies = new Enum({
  * - StaffLogs - Interacciones de usuarios en el server (tickets, recordatorios, etc) o simplemente logs/info para Staffs
  * - ClientLogs - Logs para Developer
  * - SuggestionLogs - Donde se envían las sugerencias 
+ * - DarkShopLogs - Donde se envian los eventos de la DarkShop de un servidor
  */
 const ChannelModules = new Enum({
     GuildLogs: "guild_logs",
     ModerationLogs: "moderation_logs",
     StaffLogs: "staff_logs",
     ClientLogs: "client_logs",
-    SuggestionLogs: "suggestions"
+    SuggestionLogs: "suggestions",
+    DarkShopLogs: "darkshop_logs"
 }).values
 
 /**
@@ -230,6 +318,8 @@ const ChannelModules = new Enum({
  * - Logger
  * - Settings
  * - Error
+ * - DSSunday
+ * - AutomatedChange
  */
 const LogReasons = new Enum({
     Ticket: 1,
@@ -243,7 +333,9 @@ const LogReasons = new Enum({
     AutoMod: 9,
     Logger: 10,
     Settings: 11,
-    Error: 12
+    Error: 12,
+    DSSunday: 13,
+    AutomatedChange: 14
 }).values
 
 /**
@@ -274,7 +366,6 @@ const ApiUpdate = new Enum({
  * - ClaimRep
  * - Roulette
  * - Blackjack
- * - CurrencyToExp
  * - InflationPrediction
  * - Rob
  */
@@ -285,7 +376,6 @@ const Cooldowns = new Enum({
     ClaimRep: "claim_rep",
     Roulette: "roulette",
     Blackjack: "blackjack",
-    CurrencyToExp: "currency_to_exp",
     InflationPrediction: "inflation_prediction",
     Rob: "rob"
 }).values;
@@ -326,6 +416,103 @@ const ChangelogTypes = new Enum({
     Removed: 3
 }).values;
 
+/**
+ * - Shop
+ * - DarkShop
+ * - PetShop
+ * - EXShop
+ */
+const ShopTypes = new Enum({
+    Shop: 1,
+    DarkShop: 2,
+    PetShop: 3,
+    EXShop: 4
+}).values;
+
+/**
+ * - Basic
+ * - Critical
+ * - Advanced
+ * - Ultimate
+ */
+const PetAttacksType = new Enum({
+    Basic: 1,
+    Critical: 2,
+    Advanced: 3,
+    Ultimate: 4
+}).values;
+
+/**
+ * - HalfHp
+ * - Dead
+ * - LowHp
+ * - Hungry
+ */
+const PetNotices = new Enum({
+    HalfHp: 1,
+    Dead: 2,
+    LowHp: 3,
+    Hungry: 4
+}).values;
+
+/**
+ * - Yes
+ * - No
+ */
+const YesNo = new Enum({
+    Yes: 1,
+    No: 2
+}).values;
+
+/**
+ * - Moderation
+ * - Pets
+ * - Welcome
+ * - Payments
+ * - Trophies
+ * - Staff
+ * - Birthdays
+ * - Incomes
+ */
+const DirectMessageType = new Enum({
+    Moderation: 1,
+    Pets: 2,
+    Welcome: 3,
+    Payments: 4,
+    Trophies: 5,
+    Staff: 6,
+    Birthdays: 7,
+    Incomes: 8
+}).values;
+
+/**
+ * - Warns
+ * - Currency
+ * - DarkCurrency
+ * - Blackjack
+ * - Roulette
+ * - SubscriptionsCurrency
+ */
+const TrophyRequirements = new Enum({
+    Warns: "warns",
+    Currency: "currency",
+    DarkCurrency: "darkcurrency",
+    Blackjack: "blackjack",
+    Roulette: "roulette",
+    SubscriptionsCurrency: "subscriptions_currency"
+}).values;
+
+/**
+ * - Suggestions
+ * - Tickets
+ * - EXShopTTS
+ */
+const ModuleBans = new Enum({
+    Suggestions: "suggestions",
+    Tickets: "tickets",
+    EXShopTTS: "exshop.tts"
+}).values;
+
 module.exports = {
     Enum,
     Categories,
@@ -345,5 +532,12 @@ module.exports = {
     RequirementType,
     ModifierType,
     Multipliers,
-    ChangelogTypes
+    ChangelogTypes,
+    ShopTypes,
+    PetAttacksType,
+    PetNotices,
+    YesNo,
+    DirectMessageType,
+    TrophyRequirements,
+    ModuleBans
 }

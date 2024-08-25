@@ -16,6 +16,11 @@ const Log = require("./Log");
 const CustomEmojis = require("./CustomEmojis");
 const Modal = require("./Modal");
 const Collector = require("./Collector");
+const CustomEmbed = require("./CustomEmbed");
+const CustomButton = require("./CustomButton");
+const CustomTrophy = require("./CustomTrophy");
+const Pet = require("./Pet");
+const PetCombat = require("./PetCombat");
 
 const Enums = require("./Enums");
 const Functions = require("./functions");
@@ -28,8 +33,8 @@ module.exports = {
     ErrorEmbed,
     InteractivePages,
     FilePages,
-    Shop,
     DarkShop,
+    Shop,
     Top,
     Item,
     RouletteItem,
@@ -39,6 +44,11 @@ module.exports = {
     CustomEmojis,
     Modal,
     Collector,
+    CustomEmbed,
+    CustomButton,
+    CustomTrophy,
+    Pet,
+    PetCombat,
 
     ...Enums,
     ...Functions

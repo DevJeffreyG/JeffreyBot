@@ -1,4 +1,4 @@
-const Emojis = require("../../Emojis");
+const Emojis = require("../app/Emojis");
 
 class Managers {
     constructor(client) {

@@ -111,3 +111,5 @@ dist
 commands/layout.txt
 package-lock.json
 admin.bat
+/.vscode
+/.vscode

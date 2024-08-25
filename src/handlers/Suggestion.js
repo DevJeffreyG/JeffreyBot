@@ -1,6 +1,7 @@
 const { MessageComponentInteraction, TextInputStyle, ModalSubmitInteraction, codeBlock, time, hyperlink } = require("discord.js");
 const { Colores } = require("../resources");
 const { ErrorEmbed, Modal, Log, Embed, ChannelModules, LogReasons } = require("../utils");
+const { FetchError, ModuleDisabledError, PermissionError } = require("../errors");
 
 class Suggestion {
     /**
@@ -18,18 +19,15 @@ class Suggestion {
         this.user = user;
         this.doc = doc;
 
-        if (!this.doc) return;
-        let staffRoles = this.doc.getStaffs();
-
-        if (!this.interaction.member.roles.cache.hasAny(...staffRoles)) return new ErrorEmbed(this.interaction, { type: "notPerms" }).send({ ephemeral: true })
-        if (!this.doc.moduleIsActive("functions.suggestions")) return new ErrorEmbed(this.interaction, { type: "moduleDisabled" }).send({ ephemeral: true });
-        if (this.interaction instanceof ModalSubmitInteraction) return this.#modalHandler();
+        if (!this.doc.checkStaff(this.interaction.member)) throw new PermissionError(this.interaction);
+        if (!this.doc.moduleIsActive("functions.suggestions")) throw new ModuleDisabledError(interaction);
+        if (this.interaction instanceof ModalSubmitInteraction) return await this.#modalHandler();
 
         //if (!this.interaction.deferred) await this.interaction.deferReply({ ephemeral: true });
 
         switch (this.interaction.customId) {
             case "acceptSuggestion": {
-                this.modal
+                await this.modal
                     .defTitle("Aceptar sugerencia")
                     .addInput({
                         id: "reasonInput",
@@ -44,7 +42,7 @@ class Suggestion {
             }
 
             case "denySuggestion": {
-                this.modal
+                await this.modal
                     .defTitle("Denegar sugerencia")
                     .addInput({
                         id: "reasonInput",
@@ -59,7 +57,7 @@ class Suggestion {
             }
 
             case "invalidateSuggestion": {
-                this.modal
+                await this.modal
                     .defTitle("Invalidar sugerencia")
                     .addInput({
                         id: "reasonInput",
@@ -76,21 +74,18 @@ class Suggestion {
     }
 
     async #modalHandler() {
-        const suggestionNotFound = new ErrorEmbed(this.interaction, {
-            type: "errorFetch",
-            data: {
-                type: "suggestion",
-                guide: "Eso no debió pasar... no encontré esa sugerencia en la base de datos"
-            }
-        })
+        const suggestionNotFound = new FetchError(this.interaction, "sugerencia", [
+            "Eso no debió pasar...", "No encontré esa sugerencia en la base de datos"
+        ])
+            .setEphemeral(true);
 
         const suggestion = this.doc.data.suggestions.find(x => x.message_id === this.interaction.message.id);
         if (!suggestion) {
-            this.interaction.message.edit({ components: [] })
-            return suggestionNotFound.send({ ephemeral: true })
+            await this.interaction.message.edit({ components: [] })
+            throw suggestionNotFound;
         }
 
-        const suggesterRole = await this.interaction.guild.roles.fetch(this.doc.getRoleByModule("suggester_role"));
+        const suggesterRole = await this.interaction.guild.roles.fetch(this.doc.getRole("suggester_role"));
         const suggester = await this.interaction.guild.members.fetch(suggestion.user_id);
 
         const recievedModal = new Modal(this.interaction).read();
@@ -104,11 +99,11 @@ class Suggestion {
 
                 let newembed = new Embed(this.interaction.message.embeds[0])
                     .defTitle(`Sugerencia aprobada el ${time(new Date(), "d")}`)
-                    .defFields([{ up: `Aprobada por ${this.interaction.user.tag}`, down: recievedModal.reasonInput }])
+                    .defFields([{ up: `Aprobada por ${this.interaction.member.displayName}`, down: recievedModal.reasonInput }])
                     .defFooter({ text: "Aprobada", icon: this.interaction.client.EmojisObject.Check.url, timestamp: true })
                     .defColor(Colores.verdeclaro);
 
-                this.interaction.message.edit({ embeds: [newembed] });
+                await this.interaction.message.edit({ embeds: [newembed] });
 
                 embed
                     .defAuthor({ text: "¡Se ha aprobado tu sugerencia!", icon: this.interaction.client.EmojisObject.Check.url })
@@ -134,7 +129,7 @@ ${codeBlock(suggestion.suggestion)}`)
 
                     embed.defDesc(embed.data.description + `**—** Nos tomamos la libertad de agregarte un role como forma de agradecimiento 😉`);
                 }
-                this.interaction.reply({ ephemeral: true, content: "Se ha aceptado la sugerencia, se ha enviado un mensaje al usuario y se le ha dado el rol de colaborador." });
+                await this.interaction.reply({ ephemeral: true, content: "Se ha aceptado la sugerencia, se ha enviado un mensaje al usuario y se le ha dado el rol de colaborador." });
                 break;
             }
 
@@ -143,11 +138,11 @@ ${codeBlock(suggestion.suggestion)}`)
 
                 let newembed = new Embed(this.interaction.message.embeds[0])
                     .defTitle(`Sugerencia rechazada el ${time(new Date(), "d")}`)
-                    .defFields([{ up: `Rechazada por ${this.interaction.user.tag}`, down: recievedModal.reasonInput }])
+                    .defFields([{ up: `Rechazada por ${this.interaction.member.displayName}`, down: recievedModal.reasonInput }])
                     .defFooter({ text: "Rechazada", icon: this.interaction.client.EmojisObject.Cross.url, timestamp: true })
                     .defColor(Colores.rojo);
 
-                this.interaction.message.edit({ embeds: [newembed] });
+                await this.interaction.message.edit({ embeds: [newembed] });
 
                 embed
                     .defAuthor({ text: "¡Gracias por el interés!", icon: this.interaction.client.EmojisObject.Cross.url })
@@ -157,7 +152,7 @@ ${codeBlock(suggestion.suggestion)}
                     .defColor(Colores.rojo)
                     .defFooter({ text: this.interaction.guild.name, icon: this.interaction.guild.iconURL({ dynamic: true }), timestamp: true });
 
-                this.interaction.reply({ ephemeral: true, content: "Se ha rechazado la sugerencia, se ha enviado un mensaje al usuario informándole." });
+                await this.interaction.reply({ ephemeral: true, content: "Se ha rechazado la sugerencia, se ha enviado un mensaje al usuario informándole." });
                 break;
             }
 
@@ -166,11 +161,11 @@ ${codeBlock(suggestion.suggestion)}
 
                 let newembed = new Embed(this.interaction.message.embeds[0])
                     .defTitle(`Sugerencia invalidada el ${time(new Date(), "d")}`)
-                    .defFields([{ up: `Invalidada por ${this.interaction.user.tag}`, down: recievedModal.reasonInput }])
+                    .defFields([{ up: `Invalidada por ${this.interaction.member.displayName}`, down: recievedModal.reasonInput }])
                     .defFooter({ text: "Inválida", icon: this.interaction.client.EmojisObject.Error.url, timestamp: true })
                     .defColor(Colores.rojo)
 
-                this.interaction.message.edit({ embeds: [newembed] });
+                await this.interaction.message.edit({ embeds: [newembed] });
 
                 embed
                     .defAuthor({ text: "¡Gracias por el interés!", icon: this.interaction.client.EmojisObject.Error.url })
@@ -181,7 +176,7 @@ ${codeBlock(suggestion.suggestion)}
                     .defColor(Colores.rojo)
                     .defFooter({ text: this.interaction.guild.name, icon: this.interaction.guild.iconURL({ dynamic: true }), timestamp: true });
 
-                this.interaction.reply({ ephemeral: true, content: "Se ha invalidado la sugerencia, se ha enviado un mensaje al usuario informándole." });
+                await this.interaction.reply({ ephemeral: true, content: "Se ha invalidado la sugerencia, se ha enviado un mensaje al usuario informándole." });
                 break;
             }
         }
