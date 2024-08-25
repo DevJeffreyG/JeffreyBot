@@ -57,11 +57,6 @@ module.exports = async (client) => {
     client.crashChannel = devChannels?.get(Bases.dev.crashes);
     client.logChannel = devChannels?.get(Bases.dev.logs);
 
-    if (!client.mapped) {
-        const CommandsLoad = new Commands();
-        client = CommandsLoad.map(client);
-    }
-
     // default emojis
     let managers = await new Managers(client).prepare();
     client.EmojisObject = managers.emojis;
@@ -71,8 +66,8 @@ module.exports = async (client) => {
     // para cada guild fetchear(?
     let guilds = await client.guilds.fetch();
 
-    // conteo
-    for (const partial of guilds.values()) {
+    // conteo & cron jobs + emotes
+    for await (const partial of guilds.values()) {
         const guild = await partial.fetch();
         await guild.members.fetch();
 
@@ -132,6 +127,11 @@ module.exports = async (client) => {
                 console.error(err);
             }
         }, null, true, "America/Bogota", null, process.env.DEV === "TRUE")
+    }
+
+    if (!client.mapped) {
+        const CommandsLoad = new Commands();
+        client = await CommandsLoad.map(client);
     }
 
     // Cada minuto

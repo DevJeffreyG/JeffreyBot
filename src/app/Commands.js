@@ -7,8 +7,8 @@ const fs = require("fs")
 
 class Commands {
     constructor(paths = [path.join(__dirname, "../commands")]) {
-        console.log(__dirname);
-        console.log(paths);
+        console.log("dir", __dirname);
+        console.log("Paths:", paths);
         
         this.paths = paths;
         this.routes = [];
@@ -24,7 +24,7 @@ class Commands {
 
     /**
      * @param {Client} client 
-     * @returns {Client}
+     * @returns {Promise<Client>}
      */
     async map(client) {
         this.client = client;

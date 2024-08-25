@@ -13,7 +13,7 @@
 # ⭐ Acerca de
 Jeffrey Bot es un bot de Discord **multipropósitos** programado por y para el servidor de Discord de [@DevJeffreyG](https://github.com/DevJeffreyG).
 
-Más información próximamente en la [página web](https://jeffreybot.azurewebsites.net/) del bot.
+Más información próximamente en la página web del bot.
 
 ## 🦊 Más de Jeffrey Bot
 - ### [Dashboard](https://github.com/DevJeffreyG/JeffreyBotDashboard)
