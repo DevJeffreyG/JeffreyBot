@@ -113,3 +113,5 @@ package-lock.json
 admin.bat
 /.vscode
 /.vscode
+/src/iisnode
+web.config
