@@ -54,12 +54,12 @@ module.exports = async (client) => {
     var devChannels = await client.devGuild.channels.fetch()
         .catch(err => console.log("⚠️ NOT POSSIBLE TO FETCH CHANNELS!", err));
 
-    client.crashChannel = await devChannels.get(Bases.dev.crashes);
-    client.logChannel = await devChannels.get(Bases.dev.logs);
+    client.crashChannel = devChannels?.get(Bases.dev.crashes);
+    client.logChannel = devChannels?.get(Bases.dev.logs);
 
     if (!client.mapped) {
         const CommandsLoad = new Commands();
-        client = await CommandsLoad.map(client);
+        client = CommandsLoad.map(client);
     }
 
     // default emojis
