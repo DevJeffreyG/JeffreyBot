@@ -618,7 +618,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
                 .defColor(Colores.verde)
                 .defTitle(`Intereses del ${debt.interest}% cada ${new HumanMs(debt.every).human}`)
                 .defDesc(`**—** Se depositaron ${PrettyCurrency(guild, topay)} por el préstamo que tienes con ${member}.
-**—** Aún te deben ${PrettyCurrency(guild, debt.debt)}.`)
+**—** Aún te debe ${PrettyCurrency(guild, debt.debt)}.`)
             ]
           })
         } catch (err) {

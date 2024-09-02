@@ -58,6 +58,7 @@ command.execute = async (interaction, models, params, client) => {
     money = Number((money * Number(boost.multiplier.currency_value)).toFixed(2));
     let tmoney = PrettyCurrency(guild, money, { boostemoji: boost.hasCurrencyChanges() ? boost.emojis.currency : null })
 
+    // TODO: 2.2.X HACER QUE LAS RESPUESTAS ESTÉN EN LA BASE DE DATOS
     let index = new Chance().pickone(Responses.coins);
     let textString = index.text;
     let text = textString.replace(

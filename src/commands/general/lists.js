@@ -71,8 +71,10 @@ command.execute = async (interaction, models, params, client) => {
 
         case "modificadores": {
             let items = new Map();
+            let modifiers = doc.settings.modifiers;
+            modifiers.sort((a, b) => b.multiplier - a.multiplier);
 
-            for (modifier of doc.settings.modifiers) {
+            for (const modifier of modifiers) {
                 const tipo = new Enum(ModifierType).translate(modifier.type);
                 const valor = (modifier.multiplier).toLocaleString("es-CO");
                 const req = modifier.requirement;
@@ -110,8 +112,10 @@ command.execute = async (interaction, models, params, client) => {
                 .build(doc, user);
 
             let items = new Map();
+            let discounts = shop.shopdoc.discounts;
+            discounts.sort((a, b) => b.discount - a.discount);
 
-            for (discount of shop.shopdoc.discounts) {
+            for (const discount of discounts) {
                 items.set(discount.id, {
                     level: discount.level.toLocaleString("es-CO"),
                     discount: discount.discount,
@@ -133,6 +137,7 @@ command.execute = async (interaction, models, params, client) => {
         case "roulette": {
             let items = new Map();
             let roulleteItems = await RouletteItems.getAll();
+            roulleteItems.sort((a, b) => b.prob - a.prob);
 
             for (const item of roulleteItems) {
                 const itemObj = new RouletteItem(interaction, item).build(user, doc).info();

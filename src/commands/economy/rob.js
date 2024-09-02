@@ -43,14 +43,27 @@ command.execute = async (interaction, models, params, client) => {
 
     const { success, fail } = doc.settings.quantities.percentages.limits.rob;
 
-    const likelihood = user.getAllMoney() / (victim.getAllMoney() + user.getAllMoney()) * 100;
+    let likelihood;
+
+    if(victim.getAllMoney() < 0){
+        likelihood = 100;
+    } else if(user.getAllMoney() < 0) {
+        likelihood = 20;
+    } else {
+        likelihood = user.getAllMoney() / (victim.getAllMoney() + user.getAllMoney()) * 100;
+    }
+
+    if(likelihood > 100) likelihood = 100;
+    else if(likelihood < 0) likelihood = 0;
+
     const robFail = new Chance().bool({ likelihood });
-    const successValue = Math.round((100 - likelihood) / 100 * victim.getCurrency() * (MinMaxInt(success.min, success.max, { guild: interaction.guild, msg: "No se ha podido determinar recompensa" }) / 100));
+    const successValue = Math.round((100 - likelihood) / 100 * Math.abs(victim.getCurrency()) * (MinMaxInt(success.min, success.max, { guild: interaction.guild, msg: "No se ha podido determinar recompensa" }) / 100));
 
     const failedPerc = MinMaxInt(fail.min, fail.max, { guild: interaction.guild, msg: "No se ha podido determinar castigos" }) / 100;
-    const failedValue = Math.round(user.getCurrency() * failedPerc);
+    const failedValue = Math.round(Math.abs(user.getCurrency()) * failedPerc);
 
     // Embed Text
+    // TODO: 2.2.X HACER QUE LAS RESPUESTAS ESTÉN EN LA BASE DE DATOS
     const successResponse = new Chance().pickone(Responses.rob.success);
     const failResponse = new Chance().pickone(Responses.rob.fail);
     const successText = replace(successResponse.text)

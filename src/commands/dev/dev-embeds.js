@@ -86,10 +86,9 @@ command.execute = async (interaction, models, params, client) => {
 > ${Emojis.Badge} • https://discord.gg/fJvVgkN
 
 **Y aquí están las redes de Jeffrey**:
-> ${Emojis.YouTube} • https://www.youtube.com/JeffreyG
+> ${Emojis.YouTube} • https://www.youtube.com/@JeffreyG
 > ${Emojis.Twitch} • https://twitch.tv/JeffreyG_
-> ${Emojis.Twitter} • https://www.twitter.com/JeffreyG__
-> ${Emojis.Twitter} • https://www.twitter.com/fakeJeffreyG`)
+> ${Emojis.Twitter} • https://www.twitter.com/eljeffrowo`)
                         .defColor(Colores.verdeclaro)
                 ], files: [saludo.file]
             });
@@ -371,7 +370,7 @@ ${adminRoles.toJSON().join(", ")} • ${modRole}.
                         .setImage(colores.attachment)
                         .defColor(Colores.verde),
                     new Embed()
-                        .defDesc(`**—** ¡Mira cuantos colores...! ¡Y con sólo reaccionar aquí abajo puedes colorear tu nombre!
+                        .defDesc(`**—** ¡Mira cuántos colores...! ¡Y con sólo reaccionar aquí abajo puedes colorear tu nombre!
 **—** Me pregunto si habrán más...`)
                         .defColor(Colores.nocolor)
                 ], files: [colores.file]

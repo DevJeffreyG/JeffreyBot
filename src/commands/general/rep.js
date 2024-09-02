@@ -43,10 +43,10 @@ command.execute = async (interaction, models, params, client) => {
     await user.addRep(1)
 
     const messages = [
-        "Deben de ser buenos",
-        "Seguro no están tramando nada",
-        "¡Qué buenos que son!",
-        "Lo merecerán, eso está claro"
+        "Debe de ser buen@",
+        "Seguro no está tramando nada",
+        "¡Qué buen@ que es!",
+        "Lo merecerá, eso está claro"
     ];
 
     await interaction.reply({

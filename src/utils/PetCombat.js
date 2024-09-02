@@ -400,6 +400,8 @@ ${this.#bet ? `### Nadie perdió ${PrettyCurrency(this.#interaction.guild, this.
 
         let attackValue = 1;
 
+        // TODO: 2.2.X QUE LOS MENSAJES SEAN CONFIGURABLES, MENSAJES AGREGABLES EN LA BASE DE DATOS
+
         switch (attack.type) {
             case PetAttacksType.Basic:
                 let unlocked = new Chance().bool({ likelihood: this.#doc.settings.quantities.percentages.pets.basic_unlocked });
@@ -480,9 +482,12 @@ ${this.#bet ? `### Nadie perdió ${PrettyCurrency(this.#interaction.guild, this.
             this.#messages.push(`### **${this.rivalpet.name}** -${removedHunger.toLocaleString("es-CO")} 🍗`);
         }
 
-        // TODO: Agregar más dialogos de defensa
         this.#messages.push(new Chance().pickone([
-            `# **${this.pet.name}** tapa su cara`
+            `# **${this.pet.name}** tapa su cara`,
+            `# **${this.pet.name}** se prepara para resistir el siguiente ataque`,
+            `# **${this.pet.name}** cierra sus ojos y espera`,
+            `# **${this.pet.name}** hace un mortal hacia atrás`,
+            `# **${this.pet.name}** se aparta y empieza a girar`
         ]))
 
         this.pet.isDefending = true;

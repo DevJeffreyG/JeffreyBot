@@ -239,8 +239,7 @@ class CustomTrophy {
             if (save) await this.user.save();
 
             try {
-                console.log("digamos que le mandé el dm a %s", member.user.username);
-                // TODO: await this.#sendDM(member, trophy);
+                await this.#sendDM(member, trophy);
             } catch (err) {
                 console.error("🔴 %s", err);
             }
