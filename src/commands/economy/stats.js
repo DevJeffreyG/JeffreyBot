@@ -86,7 +86,7 @@ command.execute = async (interaction, models, params, client) => {
                 .setCustomId("stats")
         );
 
-    if (user.economy.global.level >= doc.settings.quantities.darkshop_level) {
+    if (user.economy.global.level >= doc.settings.quantities.darkshop.level) {
         row.addComponents(
             new ButtonBuilder()
                 .setLabel("DarkStats")

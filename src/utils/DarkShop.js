@@ -667,7 +667,7 @@ class DarkShop {
             .defDesc(`**${this.Emojis.DarkCurrency}1 =** ${PrettyCurrency(this.interaction.guild, one)}
 
 ${stonks} **—** La inflación actual de los ${this.Emojis.DarkCurrency.name} es de un \`${inflation}%\`.
-${stonks} **—** Antes era de un \`${oldinflation}%\`: (**${this.Emojis.DarkCurrency}1 = ${PrettyCurrency(this.interaction.guild, await this.oneEquals(oldinflation))}).
+${stonks} **—** Antes era de un \`${oldinflation}%\`: (**${this.Emojis.DarkCurrency}1 =** ${PrettyCurrency(this.interaction.guild, await this.oneEquals(oldinflation))}).
 
 ${tz.now.day() != 0 ? `**—** La inflación inicial fue \`${this.baseValue}%\`.\n` : ""}**—** La inflación cambiará ${time(date, "R")}.`)
             .defColor(Colores.negro);
