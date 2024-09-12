@@ -120,7 +120,7 @@ command.execute = async (interaction, models, params, client) => {
             `**${victimMember.displayName}**`
         ).replace(
             new RegExp("{ FAKE MONEY }", "g"),
-            `${new Chance().integer({ min: victim.getAllMoney(), max: victim.getAllMoney() * 5 }).toLocaleString("es-CO")} ${Currency.name}`
+            `${new Chance().integer({ min: Math.abs(victim.getAllMoney()), max: Math.abs(victim.getAllMoney() * 5) }).toLocaleString("es-CO")} ${Currency.name}`
         ).replace(
             new RegExp("{ MONEY NAME }", "g"), Currency.name
         ).replace(
