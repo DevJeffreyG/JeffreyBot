@@ -59,10 +59,10 @@ command.execute = async (interaction, models, params, client) => {
 
             const interactive = new InteractivePages({
                 title: `Tus Cooldowns`,
-                author_icon: interaction.user.avatarURL({ dynamic: true }),
+                author_icon: interaction.user.avatarURL(),
                 color: Colores.verde,
                 addon: `**— {name}**\n▸ {mention}\n▸ Eso es en **{exact}**.\n\n`,
-                footer_icon: interaction.guild.iconURL({ dynamic: true })
+                footer_icon: interaction.guild.iconURL()
             }, items, 5)
 
             await interactive.init(interaction)
@@ -97,7 +97,7 @@ command.execute = async (interaction, models, params, client) => {
 
             const interactive = new InteractivePages({
                 title: "Lista de modidificadores",
-                author_icon: interaction.guild.iconURL({ dynamic: true }),
+                author_icon: interaction.guild.iconURL(),
                 color: Colores.verde,
                 addon: `**— {tipo}**\n**▸ {guide}: {valor}**\n**▸ Modifica: {objetive}**\n**▸ Necesita ({req_type}):** \`{requirement}\`\n||**▸ ID: {id}**||\n\n`
             }, items, 5)
@@ -125,7 +125,7 @@ command.execute = async (interaction, models, params, client) => {
 
             const interactive = new InteractivePages({
                 title: `Lista de descuentos (${new Enum(ShopTypes).translate(shop.config.info.type)})`,
-                author_icon: interaction.guild.iconURL({ dynamic: true }),
+                author_icon: interaction.guild.iconURL(),
                 color: Colores.verde,
                 addon: `**— ID: {id}**\n**▸ Nivel:** {level}\n**▸ Descuento:** {discount}%\n\n`
             }, items, 5)
@@ -150,7 +150,7 @@ command.execute = async (interaction, models, params, client) => {
 
             const interactive = new InteractivePages({
                 title: "Lista de Items de la Ruleta",
-                author_icon: client.user.displayAvatarURL({ dynamic: true }),
+                author_icon: client.user.displayAvatarURL(),
                 color: Colores.verde,
                 addon: `**▸** {text}\n**▸** Probabilidad del **{prop}%** para que se detenga.\n\n`
             }, items, 5)

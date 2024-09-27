@@ -98,7 +98,7 @@ command.execute = async (interaction, models, params, client) => {
     if (suggester)
         embed.defFooter({
             text: `• Respuesta sugerida por ${suggester?.displayName ?? "un usuario"}`,
-            icon: typeof suggester != "boolean" ? suggester.displayAvatarURL({ dynamic: true }) : interaction.guild.iconURL({ dynamic: true })
+            icon: typeof suggester != "boolean" ? suggester.displayAvatarURL() : interaction.guild.iconURL()
         });
 
     return await interaction.editReply({ embeds: [embed] });

@@ -167,7 +167,7 @@ command.execute = async (interaction, models, params, client) => {
 
                     new Embed()
                         .defTitle(`— A continuación se explicarán las categorías dentro del servidor y sus canales:`)
-                        .defFooter({ text: "Recuerda siempre leer las descripciones de los canales!", icon: interaction.guild.iconURL({ dynamic: true }) })
+                        .defFooter({ text: "Recuerda siempre leer las descripciones de los canales!", icon: interaction.guild.iconURL() })
                         .defColor(Colores.verdeclaro),
 
                     new Embed()

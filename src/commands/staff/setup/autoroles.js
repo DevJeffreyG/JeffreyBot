@@ -240,7 +240,7 @@ command.execute = async (interaction, models, params, client) => {
 
             const interactive = new InteractivePages({
                 title: "Lista de AutoRoles",
-                author_icon: interaction.guild.iconURL({ dynamic: true }),
+                author_icon: interaction.guild.iconURL(),
                 color: Colores.verde,
                 addon: `**— {nombre}**\n▸ **ID**: {id}.\n▸ **Toggle**: {toggle}.\n▸ {role}.\n▸ **Emote**: {emote}.\n\n`
             }, items, 3)

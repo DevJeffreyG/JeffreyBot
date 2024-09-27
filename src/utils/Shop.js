@@ -168,12 +168,12 @@ class Shop {
 
         this.#interactive.base = {
             title: `${this.config.info.name}`,
-            author_icon: this.interaction.guild.iconURL({ dynamic: true }),
+            author_icon: this.interaction.guild.iconURL(),
             color: this.config.info.color,
             description: this.config.info.description + `\n**—** Tienes **${this.config.currency.emoji}${this.#user.get(this.config.currency.user_path).toLocaleString("es-CO")}**`,
             addon: `**\`{item_id}\` — {item_name}**\n▸ {item_desc}\n▸ **${this.config.currency.emoji}{item_price}**\n\n`,
             footer: `Página {ACTUAL} de {TOTAL}`,
-            icon_footer: this.interaction.member.displayAvatarURL({ dynamic: true })
+            icon_footer: this.interaction.member.displayAvatarURL()
         }
 
         this.#adminInteractive.base = Object.assign({}, this.#interactive.base);
@@ -986,7 +986,6 @@ ${codeBlock(item.description)}
                                                 "DarkCurrency" : "Currency"
                                         })} cada ${new HumanMs(subInfo.interval).human}`
                                     ])
-                                    .defFooter({ text: this.interaction.guild.name, icon: this.interaction.guild.iconURL() })
                                     .defColor(Colores.verdejeffrey)
                             ]
                         }).catch(err => console.error("🔴 %s", err));

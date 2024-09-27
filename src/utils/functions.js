@@ -303,7 +303,7 @@ const GenerateLog = async function (guild, options = {
   logType = logType ?? ChannelModules.GuildLogs;
   logReason = logReason ?? LogReasons.Logger;
   description = description ?? [];
-  header_icon = header_icon ?? guild.iconURL({ dynamic: true });
+  header_icon = header_icon ?? guild.iconURL();
 
   const embed = new Embed()
     .defAuthor({ text: header, icon: header_icon })
@@ -462,13 +462,11 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
                           `Se han restado ${PrettyCurrency(guild, price)} para pagar la suscripción a **${subName}**`,
                           `Ahora tienes ${PrettyCurrency(guild, newTotal)}`,
                           `Administra tus suscripciones usando ${guild.client.mentionCommand("subs")} en un servidor`
-                        ],
-                        footer: guild.name,
-                        footer_icon: guild.iconURL()
+                        ]
                       }
                     })
                   ]
-                })
+                }, true)
               } catch (err) {
                 console.error("🔴 %s", err.message());
               }
@@ -568,7 +566,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
                 .defDesc(`¡Vengo a recordarte que ${birthday_member} está de cumpleaños hoy!`)
                 .defFooter({
                   text: `Recibiste este mensaje porque quisiste que te lo recordara, para dejar de recibir esto usa /stats usuario:@${birthday_member.displayName} y presiona el botón de recordatorios`,
-                  icon: guild.iconURL({ dynamic: true }),
+                  icon: guild.iconURL(),
                   timestamp: true
                 })
                 .defColor(Colores.verdeclaro)
@@ -672,7 +670,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
   }
 
   // Si se pagaron los intereses de dinero protegido
-  if(chargedSecuredFee) doc.data.last_interests.secured = new Date();
+  if (chargedSecuredFee) doc.data.last_interests.secured = new Date();
 
   // buscar items deshabilitados temporalmente
   Shops.getWork(guild.id).then((shop) => {
@@ -890,7 +888,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
 
     if (dayDiff >= doc.settings.functions.staff_reminders.tickets) { // si la dif se cumple con la config, recordar
       let embed = new Embed()
-        .defAuthor({ text: "Recordatorio de Ticket", icon: guild.iconURL({ dynamic: true }) })
+        .defAuthor({ text: "Recordatorio de Ticket", icon: guild.iconURL() })
         .defDesc(`Hay un Ticket que no se ha cerrado por más de ${doc.settings.functions.staff_reminders.tickets} días (${dayDiff}d).`)
         .defField(ticket.type, `**—** Creado por ${guild.members.cache.get(ticket.created_by)}.
 **—** ${guild.channels.cache.get(ticket.channel_id)}, el ${time(ticket.creation_date)}`)
@@ -918,7 +916,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
 
     if (dayDiff >= doc.settings.functions.staff_reminders.suggestions) { // si la dif se cumple con la config, recordar
       let embed = new Embed()
-        .defAuthor({ text: "Recordatorio de sugerencia", icon: guild.iconURL({ dynamic: true }) })
+        .defAuthor({ text: "Recordatorio de sugerencia", icon: guild.iconURL() })
         .defDesc(`Hay una sugerencia que no ha sido respondida por más de ${doc.settings.functions.staff_reminders.suggestions} días (${dayDiff}d).`)
         .defField(`ID: ${suggestion.id}`, `**—** Sugerencia por ${guild.members.cache.get(suggestion.user_id)}.
 **—** ${hyperlink("Mensaje de sugerencia", message.url)}, el ${time(suggestion.creation_date)}`)
@@ -946,7 +944,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
 
     if (dayDiff >= doc.settings.functions.staff_reminders.bets) { // si la dif se cumple con la config, recordar
       let embed = new Embed()
-        .defAuthor({ text: "Recordatorio de Apuesta", icon: guild.iconURL({ dynamic: true }) })
+        .defAuthor({ text: "Recordatorio de Apuesta", icon: guild.iconURL() })
         .defDesc(`Hay una Apuesta que no ha tenido resultado por más de ${doc.settings.functions.staff_reminders.bets} días (${dayDiff}d).`)
         .defField(`${bet.title}`, `**—** ${hyperlink("Mensaje de Apuesta", message.url)}, desde el ${time(bet.closes_in)}`)
         .defColor(Colores.verde)
@@ -1425,7 +1423,7 @@ const AfterInfraction = async function (user, data) {
 **—** **[Pruebas](${proof})**.
 **—** ID de Warn: \`${id}\`.`)
     .defColor(Colores.rojo)
-    .defFooter({ text: `Ten más cuidado la próxima vez!`, icon: interaction.guild.iconURL({ dynamic: true }) });
+    .defFooter({ text: `Ten más cuidado la próxima vez!`, icon: interaction.guild.iconURL() });
 
   arrayEmbeds.push(warnedEmbed);
   let banMember = false;
@@ -1890,7 +1888,7 @@ const DeleteLink = async function (message) {
         .defAuthor({ text: `No envíes links`, title: true })
         .defDesc(`Detecté que incluiste un link en tu mensaje:
 ${codeBlock(message.content)}`)
-        .defFooter({ text: `Discúlpame si fue un error :)`, icon: message.guild.iconURL({ dynamic: true }) })
+        .defFooter({ text: `Discúlpame si fue un error :)`, icon: message.guild.iconURL() })
         .defColor(Colores.rojo)
     ]
   })
@@ -1915,7 +1913,7 @@ ${codeBlock(message.content)}`)
       .send({
         embeds: [
           new Embed()
-            .defAuthor({ text: `Se eliminó un mensaje de ${message.author.username}`, icon: member.displayAvatarURL({ dynamic: true }) })
+            .defAuthor({ text: `Se eliminó un mensaje de ${message.author.username}`, icon: member.displayAvatarURL() })
             .defDesc(`${codeBlock(message.content)}`)
             .defColor(Colores.verde)
             .defFooter({ text: "NO se aplicaron sanciones", timestamp: true })
@@ -2118,8 +2116,9 @@ const CreateInteractionFilter = function (interaction, message, user) {
  * @param {GuildMember} member 
  * @param {Enum} type 
  * @param {import("discord.js").MessageCreateOptions} options 
+ * @param {Boolean} guildInfo Incluir información de dónde se envía el mensaje directo en el último embed dentro de options
  */
-const SendDirect = async function (interaction, member, type, options) {
+const SendDirect = async function (interaction, member, type, options, guildInfo = true) {
   const preferences = await Preferences.getWork(member.id);
   let flags = [];
 
@@ -2129,7 +2128,7 @@ const SendDirect = async function (interaction, member, type, options) {
       await member.send({
         embeds: [
           new Embed()
-            .defThumbnail(member.client.user.displayAvatarURL({ dynamic: true }))
+            .defThumbnail(member.client.user.displayAvatarURL())
             .defDesc(`# ¡Hola, ${member.displayName}!\nSoy ${member.client.Emojis.JeffreyBot} ${member.client.user.displayName}, puedes configurar tus preferencias para mensajes directos con ${member.client.mentionCommand("preferencias")}.\n**No volverás a recibir este mensaje en un futuro!**`)
             .defColor(Colores.verdejeffrey)
         ]
@@ -2152,6 +2151,18 @@ const SendDirect = async function (interaction, member, type, options) {
 
   if (!allowed)
     throw new DMNotSentError(interaction, member, `El usuario deshabilitó este módulo (${new Enum(DirectMessageType).translate(type)})`);
+
+  if (guildInfo) {
+    if (!options.embeds.at(-1).data.footer || !options.embeds.at(-1).data.footer.text) {
+      options.embeds.at(-1).data.footer = {
+        text: member.guild.name,
+        icon_url: member.guild.iconURL()
+      }
+    } else {
+      options.embeds.at(-1).data.footer.text = options.embeds.at(-1).data.footer.text ? options.embeds.at(-1).data.footer.text + " • " + member.guild.name : member.guild.name;
+      if (!options.embeds.at(-1).data.footer.icon_url) options.embeds.at(-1).data.footer.icon_url = member.guild.iconURL();
+    }
+  }
 
   await member.send({ ...options, flags });
 }

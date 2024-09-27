@@ -102,7 +102,7 @@ command.execute = async (interaction, models, params, client) => {
 
             const interactive = new InteractivePages({
                 title: "Lista de actividades",
-                author_icon: interaction.guild.iconURL({dynamic: true}),
+                author_icon: interaction.guild.iconURL(),
                 color: Colores.verde,
                 addon: `**{value}**\n▸ Tipo: {tipo}\n▸ ID: {id}\n\n`
             }, items, 3)

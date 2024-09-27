@@ -4,6 +4,7 @@ const { FetchAuditLogs, GenerateLog, EndReasons, FetchThisGuild } = require("../
 const { Users } = require("mongoose").models;
 
 module.exports = async (client, message) => {
+  if (!message.inGuild()) return;
   if (!client.isThisFetched(message.guild.id)) await FetchThisGuild(client, message.guild);
   const author = message.author;
   const logs = await FetchAuditLogs(client, message.guild, [AuditLogEvent.MessageDelete, AuditLogEvent.MessageBulkDelete]);
@@ -18,8 +19,8 @@ module.exports = async (client, message) => {
         `${message.content ?? message.embeds[0]?.description ?? "Sin información del mensaje"}`,
         `ID: \`${message.id}\`.`
       ],
-      header_icon: info?.target.displayAvatarURL({ dynamic: true }) ?? message.guild.iconURL({ dynamic: true }),
-      footer_icon: info?.executor.displayAvatarURL({ dynamic: true }),
+      header_icon: info?.target.displayAvatarURL() ?? message.guild.iconURL(),
+      footer_icon: info?.executor.displayAvatarURL(),
       color: Colores.verdejeffrey
     })
   }

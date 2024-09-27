@@ -58,7 +58,7 @@ command.execute = async (interaction, models, params, client) => {
     const interactive = new InteractivePages({
         title: `Tu inventario (${shop.config.info.name})`,
         author_icon: interaction.member.displayAvatarURL(),
-        footer_icon: interaction.guild.iconURL({ dynamic: true }),
+        footer_icon: interaction.guild.iconURL(),
         description: `### — Usa ${client.mentionCommand("use")} para usar un item.\n— Tienes...`,
         color: shop.config.info.color,
         addon: `**— ({count}) {name}**

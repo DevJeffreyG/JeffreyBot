@@ -113,7 +113,7 @@ command.execute = async (interaction, models, params, client) => {
         .defDesc(`**—** Se ha eliminado el ${textInfraction} con ID "**${id.value}**".
 **—** ${textInfraction + "s"} actuales: **${infractions.length}**.`)
         .defColor(Colores.verde)
-        .defFooter({ text: `Un abrazo, el STAFF.`, icon: interaction.guild.iconURL({ dynamic: true }) });
+        .defFooter({ text: `Un abrazo, el STAFF.`, icon: interaction.guild.iconURL() });
 
     new Log(interaction)
         .setReason(LogReasons.Pardon)

@@ -54,16 +54,16 @@ command.execute = async (interaction, models, params, client) => {
         .defAuthor({ text: `DarkStats del usuario N°${member.id}`, icon: client.EmojisObject.DarkShop.url })
         .defDesc(`**— ${DarkCurrency.name}**: **${DarkCurrency}${user.getDarkCurrency()}**.
 **— Precisión**: ${ProgressBar(user.economy.dark.accuracy, { max: 80 })} ${inlineCode(user.economy.dark.accuracy + "%")}.`)
-        .defThumbnail(member.displayAvatarURL({ dynamic: true }))
+        .defThumbnail(member.displayAvatarURL())
         .defColor(Colores.negro);
 
     let boostEmbed = new Embed(embed)
         .defColor(Colores.verdeclaro)
-        .defAuthor({ text: `Boosts de ${member.displayName}`, icon: member.guild.iconURL({ dynamic: true }) })
+        .defAuthor({ text: `Boosts de ${member.displayName}`, icon: member.guild.iconURL() })
         .defDesc(null)
 
     let trophiesEmbed = new Embed(embed)
-        .defAuthor({ text: `Trofeos de ${member.displayName}`, icon: member.guild.iconURL({ dynamic: true }) })
+        .defAuthor({ text: `Trofeos de ${member.displayName}`, icon: member.guild.iconURL() })
         .defColor(Colores.verde)
         .defDesc(null)
 

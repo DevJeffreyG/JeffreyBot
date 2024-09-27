@@ -56,7 +56,7 @@ command.execute = async (interaction, models, params, client) => {
 
     const interactive = new InteractivePages({
         title: "Mascotas",
-        author_icon: interaction.member.displayAvatarURL({ dynamic: true }),
+        author_icon: interaction.member.displayAvatarURL(),
         color: Colores.verde,
         addon: `# **{storename} — {name}**
 > {storedesc}

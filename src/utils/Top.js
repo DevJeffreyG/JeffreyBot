@@ -21,7 +21,7 @@ class Top {
         this.Emojis = this.interaction.client.Emojis;
 
         this.base = {
-            author_icon: this.interaction.guild.iconURL({ dynamic: true }) ?? this.interaction.member.displayAvatarURL(),
+            author_icon: this.interaction.guild.iconURL() ?? this.interaction.member.displayAvatarURL(),
             color: Colores.verdejeffrey,
             description: ``,
             addon: `{txt}`,

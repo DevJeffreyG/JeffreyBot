@@ -286,7 +286,7 @@ command.execute = async (interaction, models, params, client) => {
 
             const interactive = new InteractivePages({
                 title,
-                author_icon: interaction.guild.iconURL({ dynamic: true }),
+                author_icon: interaction.guild.iconURL(),
                 color: Colores.verde,
                 addon
             }, items, 5)

@@ -493,7 +493,7 @@ ${codeBlock("markdown", expl.value)}`,
                 title: "Lista de reglas",
                 footer: `Hay ${doc.data.rules.length} regla(s) | Página {ACTUAL} de {TOTAL}`,
                 color: Colores.verde,
-                footer_icon: interaction.guild.iconURL({ dynamic: true }),
+                footer_icon: interaction.guild.iconURL(),
                 description: `Usa los comandos en ${interaction.client.mentionCommand("config reglas")} para administrar lo que ves aquí.`,
                 addon: `**— {name}**\n**▸ Explicación**: {expl}\n**▸ Descripción**: {desc}\n**▸ Posición**: {pos}\n**▸ ID**: {id}\n\n`
             }, items, 3);

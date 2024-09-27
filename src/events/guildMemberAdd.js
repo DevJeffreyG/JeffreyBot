@@ -74,7 +74,7 @@ module.exports = async (client, member) => {
             `Su cuenta tiene **${Math.floor(await DaysUntilToday(member.user.createdAt))}** días de edad (${time(member.user.createdAt)}).`,
             `¡Ahora somos **${member.guild.memberCount}** miembros en el servidor!`
           ],
-          footer_icon: member.displayAvatarURL({ dynamic: true }),
+          footer_icon: member.displayAvatarURL(),
           color: Colores.verde
         }).catch(err => {
           console.error("🔴 %s", err);

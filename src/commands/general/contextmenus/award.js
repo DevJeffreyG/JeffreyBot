@@ -148,7 +148,7 @@ command.execute = async (interaction, models, params, client) => {
     hallEmbed.defAuthor({ text, icon: client.EmojisObject[`Tier${tierNum}`].url });
     hallEmbed.defDesc(`${star} ${content}`);
     hallEmbed.defColor(message.member.displayHexColor);
-    hallEmbed.defFooter({ text: `Mensaje por ${message.member.displayName}・Premio de Tier ${tierNum} por ${interaction.user === message.author ? `ellos mismos, ${interaction.member.displayName}` : interaction.member.displayName}`, icon: message.author.displayAvatarURL({ dynamic: true }) });
+    hallEmbed.defFooter({ text: `Mensaje por ${message.member.displayName}・Premio de Tier ${tierNum} por ${interaction.user === message.author ? `ellos mismos, ${interaction.member.displayName}` : interaction.member.displayName}`, icon: message.author.displayAvatarURL() });
 
     // Pagar
     if (user.user_id === message_user.user_id) {

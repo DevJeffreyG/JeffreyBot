@@ -64,7 +64,7 @@ command.execute = async (interaction, models, params, client) => {
     const interactive = new InteractivePages({
         title: `Tus suscripciones (${shop.config.info.name})`,
         author_icon: interaction.member.displayAvatarURL(),
-        footer_icon: interaction.guild.iconURL({ dynamic: true }),
+        footer_icon: interaction.guild.iconURL(),
         description: `### — Usa este mismo comando para administrar una sub por su ID.\n— Tienes...`,
         color: shop.config.info.color,
         addon: `**— {name}**

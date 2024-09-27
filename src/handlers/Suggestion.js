@@ -150,7 +150,7 @@ ${codeBlock(suggestion.suggestion)}`)
 ${codeBlock(suggestion.suggestion)}
 **—** ¡Gracias por ayudarnos a mejorar, siempre te tendremos en cuenta!`)
                     .defColor(Colores.rojo)
-                    .defFooter({ text: this.interaction.guild.name, icon: this.interaction.guild.iconURL({ dynamic: true }), timestamp: true });
+                    .defFooter({ text: this.interaction.guild.name, icon: this.interaction.guild.iconURL(), timestamp: true });
 
                 await this.interaction.reply({ ephemeral: true, content: "Se ha rechazado la sugerencia, se ha enviado un mensaje al usuario informándole." });
                 break;
@@ -174,7 +174,7 @@ ${codeBlock(suggestion.suggestion)}
 **—** Puede que esta haya sido una sugerencia repetida, o una ya denegada anteriormente.
 **—** ¡Gracias por ayudarnos a mejorar, siempre te tendremos en cuenta!`)
                     .defColor(Colores.rojo)
-                    .defFooter({ text: this.interaction.guild.name, icon: this.interaction.guild.iconURL({ dynamic: true }), timestamp: true });
+                    .defFooter({ text: this.interaction.guild.name, icon: this.interaction.guild.iconURL(), timestamp: true });
 
                 await this.interaction.reply({ ephemeral: true, content: "Se ha invalidado la sugerencia, se ha enviado un mensaje al usuario informándole." });
                 break;

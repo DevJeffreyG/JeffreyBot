@@ -66,7 +66,7 @@ command.execute = async (interaction, models, params, client) => {
                                 `Le debes desde ${time(author_user.data.debts[debt].since)} (${time(author_user.data.debts[debt].since, "R")})`,
                             ])
                             .defColor(Colores.rojooscuro)
-                            .defFooter({ text: "Desde", icon: interaction.guild.iconURL({ dynamic: true }), timestamp: author_user.data.debts[debt].since })
+                            .defFooter({ text: "Desde", icon: interaction.guild.iconURL(), timestamp: author_user.data.debts[debt].since })
                     ]
                 })
             }
@@ -74,7 +74,7 @@ command.execute = async (interaction, models, params, client) => {
             embeds: [
                 new Embed()
                     .defTitle("Estás limpi@")
-                    .defFooter({ text: "No le debes nada a este usuario", icon: recieverMember.displayAvatarURL({ dynamic: true }) })
+                    .defFooter({ text: "No le debes nada a este usuario", icon: recieverMember.displayAvatarURL() })
                     .defColor(Colores.verde)
             ]
         });

@@ -607,7 +607,7 @@ class CustomTrophy {
                 .defTitle(`Desbloqueaste un Trofeo en ${member.guild.name}`)
                 .defColor(Colores.verdejeffrey)
                 .defDesc(`**"${trophy.name}"**\n**—** ${trophy.desc}`)
-                .defFooter({ text: "Se mostrará en tu perfil al usar /stats", icon: member.guild.iconURL({ dynamic: true }) }),
+                .defFooter({ text: "Se mostrará en tu perfil al usar /stats", icon: member.guild.iconURL() }),
         ]
 
         // requerimentos

@@ -23,8 +23,8 @@ module.exports = async (client, oldMessage, message) => {
       `Antes: ${codeBlock(oldMessage.content) ?? codeBlock("js", "null")}`,
       `ID: \`${message.id}\`.`
     ],
-    header_icon: message.guild.iconURL({ dynamic: true }),
-    footer_icon: member.displayAvatarURL({ dynamic: true }),
+    header_icon: message.guild.iconURL(),
+    footer_icon: member.displayAvatarURL(),
     color: Colores.verdejeffrey
   })
 

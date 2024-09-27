@@ -102,6 +102,14 @@ class Handlers {
         const commandName = this.interaction.commandName;
         this.executedCommand = this.client.commands.get(commandName);
 
+        // Se intenta ejecutar un comando antes de que el bot inicialice la información necesaria
+        if(!this.executedCommand){
+            throw new ExecutionError(this.interaction, [
+                `${this.client.user.displayName} aún se está iniciando y no puede procesar tu acción`,
+                "Intentálo de nuevo."
+            ])
+        }
+
         let toggledQuery = await ToggledCommands.getToggle(commandName);
 
         if (toggledQuery && !this.#isDev()) throw new ToggledCommandError(this.interaction, toggledQuery);

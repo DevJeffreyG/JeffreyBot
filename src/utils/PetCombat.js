@@ -325,14 +325,14 @@ ${this.#bet ? `### Nadie perdió ${PrettyCurrency(this.#interaction.guild, this.
         ]
 
         let e = new Embed()
-            .defAuthor({ text: `Es el turno de ${this.#playing.user.username}`, icon: this.#playing.user.displayAvatarURL({ dynamic: true }) })
+            .defAuthor({ text: `Es el turno de ${this.#playing.user.username}`, icon: this.#playing.user.displayAvatarURL() })
             .defDesc(`# ${this.pet.name}
 ## 🗡️ ${this.pet.stats.attack} — 🛡️ ${this.pet.stats.defense}
 ### ❤️ ${ProgressBar(this.pet.hp / this.pet.shop_info.stats.hp * 100)} — **${this.pet.hp}**
 ### 🍗 ${ProgressBar(this.pet.hunger)} — **${this.pet.hunger}**
 ### ⚡ ${ProgressBar(this.pet.ultCharge)} — **ULT ${this.pet.ultCharge}%**`)
             .defColor(Colores.verde)
-            .defFooter({ text: `Movimiento #${this.#movementNo} — Contra ${this.#rival.user.username}`, icon: this.#interaction.guild.iconURL({ dynamic: true }) });
+            .defFooter({ text: `Movimiento #${this.#movementNo} — Contra ${this.#rival.user.username}`, icon: this.#interaction.guild.iconURL() });
 
         this.#lastMsg = await this.changeStatus({ content: this.#playing.user.toString(), components: this.#components, embeds: [e] })
 
