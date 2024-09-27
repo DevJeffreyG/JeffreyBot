@@ -151,6 +151,9 @@ const GuildSchema = new Schema({
             user_actions: { type: Number, default: 0, validate: [integerValidator, positiveWithZeroValidator] },
             others: { type: Number, default: 0, validate: [integerValidator, positiveWithZeroValidator] }
         },
+        last_interests: {
+            secured: { type: Date, default: null } // TODO: Cobrar cada X tiempo configurado
+        },
         client: {
             pin: {
                 type: Number, default: () => {
@@ -272,7 +275,8 @@ const GuildSchema = new Schema({
             },
             percentages: {
                 interests: {
-                    secured: { type: Number, default: 1, validate: positiveWithZeroValidator },
+                    transaction_secured: { type: Number, default: 10, validate: positiveWithZeroValidator },
+                    secured: { type: Number, default: 5, validate: positiveWithZeroValidator },
                 },
                 skipfirewall: { type: Number, default: 100, validate: positiveWithZeroValidator },
                 pets: {

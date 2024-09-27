@@ -175,7 +175,7 @@ class Embed extends Discord.EmbedBuilder {
                 this.defAuthor({ text: `Estadísticas de ${member.displayName}`, icon: member.guild.iconURL({ dynamic: true }) })
                     .defDesc(`**— Nivel**: ${curLvl}
 **— EXP**: ${ProgressBar(expSoFar / expToGet * 100, { blocks: 5 })} ${inlineCode(`${curExp} / ${nxtLvlExp}`)}
-**— ${Currency.name}**: ${PrettyCurrency(data.member.guild, actualCurrency)}
+**— ${Currency.name}**: ${PrettyCurrency(data.member.guild, actualCurrency)}${user.getSecured() > 0 ? ` (🔒${PrettyCurrency(data.member.guild, user.getSecured())})` : ""}
 **— Puntos de reputación**: ${rep}
 ${bdString}`)
                     .defThumbnail(member.displayAvatarURL())
