@@ -29,12 +29,13 @@ command.execute = async (interaction, models, params, client) => {
             user.getSecured()
         )
 
-    let transFee = Math.ceil(cantidad.value * doc.settings.quantities.percentages.interests.transaction_secured / 100);
+    let transFee = Math.round(cantidad.value * doc.settings.quantities.percentages.interests.transaction_secured / 100);
+    const realWith = cantidad.value - transFee;
 
     let conf = [
-        `⚠️ Sacarás solo ${PrettyCurrency(interaction.guild, cantidad.value - transFee)}`,
+        transFee > 0 ? `⚠️ Sacarás solo ${PrettyCurrency(interaction.guild, realWith)}` : `Sacarás ${PrettyCurrency(interaction.guild, realWith)}`,
         `⚠️ Pagarás el **${doc.settings.quantities.percentages.interests.transaction_secured}%** de la cantidad a sacar (${PrettyCurrency(interaction.guild, transFee)} no irán a tu cuenta).`,
-        `Tienes ${PrettyCurrency(interaction.guild, user.getSecured())} protegidos.`
+        `Tienes ${PrettyCurrency(interaction.guild, user.getSecured())} protegidos actualmente.`
     ]
 
     let confirmation = await Confirmation("Sacar", conf, interaction);

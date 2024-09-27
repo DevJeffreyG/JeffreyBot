@@ -371,6 +371,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
   })
 
   const members = guild.members.cache;
+  let chargedSecuredFee = false;
   //console.log(members.values())
   // buscar roles temporales & cumpleaños
   for await (const member of members.values()) {
@@ -628,6 +629,39 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
       }
     }
 
+    // Dinero protegido
+    const lastPaidSecured = moment(doc.data.last_interests.secured);
+    if (moment().isAfter(lastPaidSecured.add(doc.settings.quantities.interest_days.secured, "days"))) {
+      chargedSecuredFee = true;
+
+      if (dbUser.getSecured() > 0) {
+        const securedFee = Math.round(dbUser.getSecured() * doc.settings.quantities.percentages.interests.secured / 100);
+
+        if (securedFee > 0) {
+          console.log("Pasó el tiempo suficiente para cobrar intereses");
+          console.log(member.user.username);
+          console.log(securedFee);
+
+          dbUser.removeSecured(securedFee);
+          doc.addToBank(securedFee, false);
+
+          try {
+            await SendDirect(null, member, DirectMessageType.Payments, {
+              embeds: [
+                new Embed()
+                  .defColor(Colores.verde)
+                  .defTitle(`Intereses del ${doc.settings.quantities.percentages.interests.secured}% cada ${doc.settings.quantities.interest_days.secured} días`)
+                  .defDesc(`**—** Se te cobró __${PrettyCurrency(guild, securedFee)}__ por tener ${PrettyCurrency(guild, dbUser.getSecured())} protegidos.
+**—** Usa \`/with\` para sacar tu dinero protegido.`)
+              ]
+            })
+          } catch (err) {
+            console.error("🔴 %s", err);
+          }
+        }
+      }
+    }
+
     try {
       //console.log("$", dbUser.data.temp_roles);
       await dbUser.save()
@@ -636,6 +670,9 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
     }
 
   }
+
+  // Si se pagaron los intereses de dinero protegido
+  if(chargedSecuredFee) doc.data.last_interests.secured = new Date();
 
   // buscar items deshabilitados temporalmente
   Shops.getWork(guild.id).then((shop) => {
@@ -2077,7 +2114,7 @@ const CreateInteractionFilter = function (interaction, message, user) {
 
 /**
  * 
- * @param {BaseInteraction} interaction 
+ * @param {BaseInteraction|null} interaction 
  * @param {GuildMember} member 
  * @param {Enum} type 
  * @param {import("discord.js").MessageCreateOptions} options 
@@ -2093,7 +2130,7 @@ const SendDirect = async function (interaction, member, type, options) {
         embeds: [
           new Embed()
             .defThumbnail(member.client.user.displayAvatarURL({ dynamic: true }))
-            .defDesc(`# ¡Hola, ${member.member.displayName}!\nSoy ${member.client.Emojis.JeffreyBot} ${member.client.user.displayName}, puedes configurar tus preferencias para mensajes directos con ${member.client.mentionCommand("preferencias")}.\n**No volverás a recibir este mensaje en un futuro!**`)
+            .defDesc(`# ¡Hola, ${member.displayName}!\nSoy ${member.client.Emojis.JeffreyBot} ${member.client.user.displayName}, puedes configurar tus preferencias para mensajes directos con ${member.client.mentionCommand("preferencias")}.\n**No volverás a recibir este mensaje en un futuro!**`)
             .defColor(Colores.verdejeffrey)
         ]
       })

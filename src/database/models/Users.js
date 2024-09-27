@@ -333,6 +333,15 @@ Schema.method("removeCurrency", async function (count, save = false) {
     return this;
 })
 
+Schema.method("removeSecured", async function (count, save = false) {
+    this.economy.global.secured -= count;
+    if (save) await this.save();
+
+    console.log("🗨 %s tiene %s Currency guardados", this.user_id, this.getCurrency());
+
+    return this;
+})
+
 Schema.method("secure", async function (count, save = true) {
     this.removeCurrency(count);
     this.economy.global.secured += count;

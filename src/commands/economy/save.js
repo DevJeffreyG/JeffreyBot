@@ -1,3 +1,5 @@
+const moment = require("moment-timezone");
+const { time } = require("discord.js");
 const { EconomyError } = require("../../errors");
 const { Command, Confirmation, PrettyCurrency, Embed } = require("../../utils");
 
@@ -29,21 +31,23 @@ command.execute = async (interaction, models, params, client) => {
             user.getCurrency()
         )
 
-    let transFee = Math.ceil(cantidad.value * doc.settings.quantities.percentages.interests.transaction_secured / 100);
+    let transFee = Math.round(cantidad.value * doc.settings.quantities.percentages.interests.transaction_secured / 100);
+    const realProtect = cantidad.value - transFee;
+    const relativeDateFee = time(moment(doc.data.last_interests.secured).add(doc.settings.quantities.interest_days.secured, "days").toDate(), "R");
 
     let conf = [
-        `⚠️ Protegerás solo ${PrettyCurrency(interaction.guild, cantidad.value - transFee)}`,
+        transFee > 0 ? `⚠️ Protegerás solo ${PrettyCurrency(interaction.guild, realProtect)}` : `Protegerás ${PrettyCurrency(interaction.guild, realProtect)}`,
         `⚠️ Estarás pagando el **${doc.settings.quantities.percentages.interests.transaction_secured}%** de la cantidad a guardar para poder proteger tu dinero (${PrettyCurrency(interaction.guild, transFee)} no se protegerán).`,
-        `Se te cobrará el **${doc.settings.quantities.percentages.interests.secured}%** cada **${doc.settings.quantities.interest_days.secured} días**`,
+        `Se te cobrará el **${doc.settings.quantities.percentages.interests.secured}%** **${relativeDateFee}**`,
     ]
 
     if (user.getSecured() > 0)
-        conf.push(`Tienes ${PrettyCurrency(interaction.guild, user.getSecured())} protegidos \`(\`${PrettyCurrency(interaction.guild, Math.ceil(user.getSecured() * doc.settings.quantities.percentages.interests.secured / 100))}/${doc.settings.quantities.interest_days.secured} día(s)\`)\`.`);
+        conf.push(`Tienes ${PrettyCurrency(interaction.guild, user.getSecured())} protegidos \`(\`${PrettyCurrency(interaction.guild, Math.round(user.getSecured() * doc.settings.quantities.percentages.interests.secured / 100))} ${relativeDateFee}\`)\`.`);
 
     let confirmation = await Confirmation("Proteger", conf, interaction);
     if (!confirmation) return;
 
-    user.secure(cantidad.value - transFee, false);
+    user.secure(realProtect, false);
     await user.removeCurrency(transFee, true)
     await doc.addToBank(transFee, "interests")
 

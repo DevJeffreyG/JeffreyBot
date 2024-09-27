@@ -152,7 +152,7 @@ const GuildSchema = new Schema({
             others: { type: Number, default: 0, validate: [integerValidator, positiveWithZeroValidator] }
         },
         last_interests: {
-            secured: { type: Date, default: null } // TODO: Cobrar cada X tiempo configurado
+            secured: { type: Date, default: () => { return new Date() } }
         },
         client: {
             pin: {
@@ -390,6 +390,8 @@ const GuildSchema = new Schema({
 });
 
 GuildSchema.pre("save", function () {
+    if(!this.data.last_interests.secured) this.data.last_interests.secured = new Date();
+    
     if (this.settings.functions.adjust) {
         let obj = this.settings.functions.toObject();
         delete obj.adjust_shop, obj.adjust_darkshop, obj.adjust_coins;
