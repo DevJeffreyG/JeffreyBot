@@ -53,10 +53,11 @@ class ErrorEmbed extends Embed {
                 break;
 
             case "BadCommand":
+                // TODO: ¿Hacer que se guarde en la base de datos, y con un dev command ver los últimos crasheos?
                 this.#errorName("Error en el codigo")
                 this.#errorAuthor(3);
-                this.#errorDesc("Hubo un error ejecutando este comando", `(\`${data.commandName ?? this.interaction?.commandName}\`)`, ["Avisa a JeffreyG.", `**Y también dile que...**
-${codeBlock("json", data.error)}`])
+                this.#errorDesc("Hubo un error inesperado ejecutando este comando", `(\`${data.commandName ?? this.interaction?.commandName}\`)`, ["Avísale a Jeffrey.", `**Y envíale esto:**
+|| ${codeBlock("js", data.error.stack)} ||`])
                 break;
 
             case "SelfExec":

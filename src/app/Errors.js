@@ -1,4 +1,4 @@
-const { Client, time } = require("discord.js");
+const { Client, time, codeBlock } = require("discord.js");
 const { Bases } = require("../resources/");
 const { ChannelModules } = require("../utils/");
 
@@ -19,14 +19,14 @@ module.exports = async (client) => {
     var crashChannel = devChannels?.get(Bases.dev.crashes);
 
     var lastinter;
-    var title = `**⚠️ ¡JEFFREY BOT HA CRASHEADO!** ⚠️\n`
+    var title = `# **⚠️ ¡JEFFREY BOT HA CRASHEADO!** ⚠️\n`
 
     function updateInteractionHandler() {
         let guild = client.lastInteraction?.guild;
         let user = client.lastInteraction?.user;
         let channel = client.lastInteraction?.channel;
 
-        lastinter = `\n\nLa última interacción registrada fue:
+        lastinter = `\n### La última interacción registrada fue:
 **—** En el servidor \`${guild?.name}\` (\`${guild?.id}\`)
 **—** Por \`${user?.username}\` (\`${user?.id}\`)
 **—** En \`#${channel?.name}\` (\`${channel?.id}\`)
@@ -35,32 +35,18 @@ module.exports = async (client) => {
 **—** Tipo de componente: \`${client.lastInteraction?.componentType}\`
 **—** CustomId: \`${client.lastInteraction?.customId}\`
 **—** ID: \`${client.lastInteraction?.id}\`
-**—** ${time(client.lastInteraction?.createdAt)}
-**—** **v${client.version}**`
+
+-# ${time(client.lastInteraction?.createdAt)} **— v${client.version}**`
     }
 
-    process.on('uncaughtException', err => {
+    process.on('uncaughtException', (err, origin) => {
         updateInteractionHandler();
-        console.error("🔴 %s", err);
-        console.log(`Uncaught Exception: ${err.message}`)
+        console.error("🔴 (%s) %s", origin, err.stack);
 
         new Log()
             .setChannel(crashChannel)
             .setTarget(ChannelModules.ClientLogs)
-            .send({ content: `${title}**uncaughtException** con el error: **${err}**.${lastinter}` })
-            .then(() => {
-                process.exit(1)
-            })
-    })
-
-    process.on('unhandledRejection', (reason, promise) => {
-        updateInteractionHandler();
-        console.log('Unhandled rejection at', promise, `reason: ${reason.message}`)
-
-        new Log()
-            .setChannel(crashChannel)
-            .setTarget(ChannelModules.ClientLogs)
-            .send({ content: `${title}**Unhandled rejection** con la razón: **${reason}**.${lastinter}` })
+            .send({ content: `${title}\`${origin}\`: **${err}**\n${codeBlock("js", err.stack)}${lastinter}` })
             .then(() => {
                 process.exit(1)
             })

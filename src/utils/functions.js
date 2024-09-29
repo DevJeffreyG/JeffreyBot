@@ -388,8 +388,8 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
     let temproledeletions = await GlobalDatas.getTempRoleDeletions(member.id, guild.id) ?? [];
     let debts = dbUser?.data.debts ?? [];
 
-    let tempRoleIndex = 0;
     for await (const temprole of temp_roles) {
+      let tempRoleIndex = dbUser.data.temp_roles.findIndex(x => x.id === temprole.id);
       let role = guild.roles.cache.find(x => x.id === temprole.role_id);
       let until = temprole.active_until;
 
@@ -479,8 +479,6 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
           }
         }
       }
-
-      tempRoleIndex++;
     }
 
     try {
@@ -2174,7 +2172,7 @@ const SendDirect = async function (interaction, member, type, options, guildInfo
  */
 const FinalPeriod = function (line) {
   let d = line;
-  if (!line.endsWith(".") && !(line.endsWith(":") || line.endsWith("!") || line.endsWith("```") || line.endsWith("?"))) d += `.`;
+  if (!line.endsWith(".") && !(line.endsWith(":") || line.endsWith("!") || line.endsWith("```") || line.endsWith("?") || line.endsWith("||"))) d += `.`;
 
   return d;
 }
