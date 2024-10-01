@@ -7,7 +7,17 @@ const command = new Command({
 
 command.addSubcommand({
     name: "dinero",
-    desc: "Revisa el top del dinero"
+    desc: "Revisa el top del dinero usable"
+})
+
+command.addSubcommand({
+    name: "patrimonios",
+    desc: "Revisa el top de los patrimonios"
+})
+
+command.addSubcommand({
+    name: "protegido",
+    desc: "Revisa el top del dinero protegido"
 })
 
 command.addSubcommand({
@@ -28,10 +38,9 @@ command.addSubcommand({
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { Users } = models
-    const { subcommand } = params
 
     // codigo
-    const top = new Top(await Users.find({ guild_id: interaction.guild.id }), interaction, subcommand)
+    const top = new Top(await Users.find({ guild_id: interaction.guild.id }), interaction, params)
     return await top.init();
 }
 

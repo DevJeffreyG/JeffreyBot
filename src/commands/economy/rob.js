@@ -4,7 +4,7 @@ const { Responses, Colores } = require("../../resources");
 
 const command = new Command({
     name: "rob",
-    desc: "Intenta robarle dinero normal a un usuario"
+    desc: "Intenta robarle a un usuario su dinero usable"
 })
 
 command.addOption({

@@ -1,8 +1,9 @@
-const { CommandInteraction } = require("discord.js");
+const { CommandInteraction, time } = require("discord.js");
 const { Colores } = require("../resources");
 const DarkShop = require("./DarkShop");
 const InteractivePages = require("./InteractivePages");
 const { PrettyCurrency } = require("./functions");
+const moment = require("moment-timezone");
 
 class Top {
     #res = [];
@@ -11,12 +12,14 @@ class Top {
      * 
      * @param {*} users Mongoose Documents
      * @param {CommandInteraction} interaction 
-     * @param {String} type 
+     * @param {any} params 
      */
-    constructor(users, interaction, type) {
-        this.type = type;
+    constructor(users, interaction, params) {
+        this.doc = params.getDoc();
+        this.type = params.subcommand;
         this.users = users;
         this.interaction = interaction;
+        this.items = 5;
 
         this.Emojis = this.interaction.client.Emojis;
 
@@ -39,6 +42,14 @@ class Top {
                 await this.#currencyTop();
                 break;
 
+            case "patrimonios":
+                await this.#allCurrencyTop();
+                break;
+
+            case "protegido":
+                await this.#securedTop();
+                break;
+
             case "exp":
                 await this.#expTop();
                 break;
@@ -53,33 +64,71 @@ class Top {
         }
 
         //interactive pages
-        const interactive = new InteractivePages(this.base, this.top, 5);
+        const interactive = new InteractivePages(this.base, this.top, this.items);
         return interactive.init(this.interaction);
     }
 
     async #currencyTop() {
         const { Currency } = this.interaction.client.getCustomEmojis(this.interaction.guild.id);
+
+        this.base.title = `Top de ${Currency.name}`;
+
+        this.users.forEach(user => {
+            const member = this.interaction.guild.members.cache.get(user.user_id) ?? null;
+
+            if (member && !member.user.bot) {
+                let toPush = {
+                    user_id: member.user.id,
+                    total: user.getCurrency()
+                }
+
+                if (toPush.total > 0) this.#res.push(toPush);
+            }
+        })
+
+        // ordenar de mayor a menor
+        this.#sort();
+
+        const userRank = this.#getRank(this.#res, this.interaction.user.id);
+        this.base.footer = `Eres el ${userRank.textRank} en el top • Página {ACTUAL} de {TOTAL}`
+
+        for await (const user of this.#res) {
+            const txt = this.#getTxt(user, [
+                `${PrettyCurrency(this.interaction.guild, user.total)}`
+            ])
+
+            this.top.set(user.user_id, {
+                txt
+            })
+        }
+    }
+
+    async #allCurrencyTop() {
+        this.items = 3
+        const { Currency } = this.interaction.client.getCustomEmojis(this.interaction.guild.id);
         const darkshop = new DarkShop(this.interaction.guild);
         const dsDisabled = await darkshop.checkDisabled();
 
-        this.base.title = `Top de ${Currency.name}`;
+        this.base.title = `Top de los patrimonios (en ${Currency.name})`;
 
         for await (const user of this.users) {
             const member = this.interaction.guild.members.cache.get(user.user_id) ?? null;
 
-            // agregar la cantidad de darkcurrency
             if (member && !member.user.bot) {
                 let darkcurrency = user.economy.dark?.currency ?? 0;
                 let darkcurrencyValue = 0;
                 if (!dsDisabled) darkcurrencyValue = await darkshop.equals(null, user.getDarkCurrency()) ?? 0;
 
-                let finalQuantity = darkcurrencyValue != 0 ? darkcurrencyValue + user.getCurrency() : user.getCurrency();
+                // sumar todos los capitales
+                let finalQuantity = darkcurrencyValue + user.getCurrency() + user.getSecured();
 
                 let toPush = {
                     user_id: member.user.id,
-                    currency: darkcurrency, // numero de dj que tiene
-                    currencyValue: Math.round(darkcurrencyValue), // lo que valen esos dcurrency en dinero ahora mismo
-                    total: Math.round(finalQuantity), // la suma del valor de los dcurrency y el dinero
+                    dark_currency: darkcurrency, // numero de dj que tiene
+                    dark_value: Math.round(darkcurrencyValue), // lo que valen esos dcurrency en dinero ahora mismo
+                    secured: user.getSecured(), // dinero protegido
+                    currency: user.getCurrency(), // dinero desprotegido
+                    total: Math.round(finalQuantity), // la suma del valor de todo
                     alltime: user.getCount("normal_currency")
                 }
 
@@ -96,10 +145,55 @@ class Top {
         // determinar el texto a agregar
         for await (const user of this.#res) {
             let darkshopMoney;
-            if (user.currency != 0) darkshopMoney = ` (${PrettyCurrency(this.interaction.guild, user.currency, { name: "DarkCurrency" })}➟${PrettyCurrency(this.interaction.guild, user.currencyValue)})`
+            if (user.currency != 0) darkshopMoney = ` (`
             else darkshopMoney = "";
 
-            const txt = this.#getTxt(user, [`${PrettyCurrency(this.interaction.guild, user.total)}${darkshopMoney}`, `|| Obtenido desde siempre: ${PrettyCurrency(this.interaction.guild, user.alltime)} ||`])
+            const txt = this.#getTxt(user, [
+                `💰 Patrimonio: ${PrettyCurrency(this.interaction.guild, user.total)}`,
+                `💵 Usable: ${PrettyCurrency(this.interaction.guild, user.currency)}`,
+                `🔒 Protegido: ${PrettyCurrency(this.interaction.guild, user.secured)}`,
+                `💹 Invertido: ${PrettyCurrency(this.interaction.guild, user.dark_currency, { name: "DarkCurrency" })}➟${PrettyCurrency(this.interaction.guild, user.dark_value)}`,
+                `|| Obtenido desde siempre: ${PrettyCurrency(this.interaction.guild, user.alltime)} ||`])
+
+            this.top.set(user.user_id, {
+                txt
+            })
+        }
+    }
+
+    async #securedTop() {
+        const { Currency } = this.interaction.client.getCustomEmojis(this.interaction.guild.id);
+
+        this.base.title = `Top de ${Currency.name} protegidos`;
+
+        this.users.forEach(user => {
+            const member = this.interaction.guild.members.cache.get(user.user_id) ?? null;
+
+            if (member && !member.user.bot) {
+                let toPush = {
+                    user_id: member.user.id,
+                    interests: Math.round(user.getSecured() * this.doc.settings.quantities.percentages.interests.secured / 100),
+                    payDate: moment(this.doc.data.last_interests.secured).add(this.doc.settings.quantities.interest_days.secured, "days").toDate(),
+                    total: user.getSecured()
+                }
+
+                if (toPush.total > 0) this.#res.push(toPush)
+            }
+        });
+
+        // ordenar de mayor a menor
+        this.#sort();
+
+        const userRank = this.#getRank(this.#res, this.interaction.user.id);
+        this.base.footer = `Eres el ${userRank.textRank} en el top • Página {ACTUAL} de {TOTAL}`
+
+        // determinar el texto a agregar
+        for await (const user of this.#res) {
+            const txt = this.#getTxt(user, [
+                `Protegido: 🔒${PrettyCurrency(this.interaction.guild, user.total)}`,
+                `Estará pagando ${PrettyCurrency(this.interaction.guild, user.interests)}`,
+                time(user.payDate, "R")
+            ])
 
             this.top.set(user.user_id, {
                 txt

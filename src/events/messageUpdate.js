@@ -1,6 +1,4 @@
-const { Colores } = require("../resources");
-const { GenerateLog, DeleteLink, FetchThisGuild } = require("../utils/functions");
-const { codeBlock } = require("discord.js");
+const { DeleteLink, FetchThisGuild } = require("../utils/functions");
 
 module.exports = async (client, oldMessage, message) => {
   const prefix = "/";
@@ -15,7 +13,8 @@ module.exports = async (client, oldMessage, message) => {
 
   if (!client.isThisFetched(message.guild.id)) await FetchThisGuild(client, message.guild);
 
-  await GenerateLog(message.guild, {
+  // TODO: Fix Audit logs 2.2.X
+  /* await GenerateLog(message.guild, {
     header: `Se ha editado un mensaje`,
     footer: `${member.user.username}`,
     description: [
@@ -26,7 +25,7 @@ module.exports = async (client, oldMessage, message) => {
     header_icon: message.guild.iconURL(),
     footer_icon: member.displayAvatarURL(),
     color: Colores.verdejeffrey
-  })
+  }) */
 
   DeleteLink(message)
 }

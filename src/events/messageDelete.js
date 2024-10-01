@@ -1,13 +1,13 @@
-const { AuditLogEvent } = require("discord.js");
-const { Colores } = require("../resources/");
-const { FetchAuditLogs, GenerateLog, EndReasons, FetchThisGuild } = require("../utils");
+const { EndReasons, FetchThisGuild } = require("../utils");
 const { Users } = require("mongoose").models;
 
 module.exports = async (client, message) => {
   if (!message.inGuild()) return;
   if (!client.isThisFetched(message.guild.id)) await FetchThisGuild(client, message.guild);
   const author = message.author;
-  const logs = await FetchAuditLogs(client, message.guild, [AuditLogEvent.MessageDelete, AuditLogEvent.MessageBulkDelete]);
+  
+  // TODO: Fix Audit logs 2.2.X
+  /* const logs = await FetchAuditLogs(client, message.guild, [AuditLogEvent.MessageDelete, AuditLogEvent.MessageBulkDelete]);
   if (logs) {
     let info = logs[0]
 
@@ -23,7 +23,7 @@ module.exports = async (client, message) => {
       footer_icon: info?.executor.displayAvatarURL(),
       color: Colores.verdejeffrey
     })
-  }
+  } */
 
   if (author && message.guild) {
 
