@@ -1582,34 +1582,27 @@ const FindAverage = async function (guild) {
   const darkshop = new DarkShop(guild);
   const disabled = await darkshop.checkDisabled();
 
-  let top = [];
+  let patrimonios = [];
 
   for await (const user of users) {
     // agregar la cantidad de darkcurrency
     const member = guild.members.cache.get(user.user_id);
 
     if (member && !member.user.bot) {
-      let darkcurrency = user.economy.dark?.currency ?? 0;
+      let darkcurrency = user.getDarkCurrency();
       let darkcurrencyValue = 0;
 
       if (!disabled) darkcurrencyValue = await darkshop.equals(null, darkcurrency) ?? 0;
 
-      let finalQuantity = Math.round(darkcurrencyValue + user.getCurrency());
+      // Sumar Jeffros invertidos, usables, y protegidos
+      let finalQuantity = Math.round(darkcurrencyValue + user.getAllMoney());
 
-      if (finalQuantity > 0 || (finalQuantity === 0 && !top.find(x => x.money === 0))) top.push({
-        member,
-        money: finalQuantity
-      })
+      if (finalQuantity > 0 || (finalQuantity === 0 && !patrimonios.find(x => x === 0))) patrimonios.push(finalQuantity);
     }
   }
 
-  let sum = 0;
-
-  top.forEach(info => {
-    sum += info.money;
-  })
-
-  return sum / top.length;
+  let sum = patrimonios.reduce((acc, patrimonio) => acc + patrimonio, 0);
+  return sum / patrimonios.length;
 }
 
 /**

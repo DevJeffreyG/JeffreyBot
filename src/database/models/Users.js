@@ -300,7 +300,7 @@ Schema.method("getAllMoney", function () {
 })
 
 Schema.method("getDarkCurrency", function () {
-    return this.economy.dark.currency
+    return this.economy.dark.currency ?? 0
 })
 
 Schema.method("addCount", async function (module, count = 1, save = true) {

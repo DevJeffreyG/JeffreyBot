@@ -115,7 +115,7 @@ class Top {
             const member = this.interaction.guild.members.cache.get(user.user_id) ?? null;
 
             if (member && !member.user.bot) {
-                let darkcurrency = user.economy.dark?.currency ?? 0;
+                let darkcurrency = user.getDarkCurrency();
                 let darkcurrencyValue = 0;
                 if (!dsDisabled) darkcurrencyValue = await darkshop.equals(null, user.getDarkCurrency()) ?? 0;
 
