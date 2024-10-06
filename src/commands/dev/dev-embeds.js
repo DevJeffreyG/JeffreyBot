@@ -42,7 +42,7 @@ command.execute = async (interaction, models, params, client) => {
     let rulesChannel = interaction.guild.channels.cache.get(doc.getChannel("general.rules"));
     let newsChannel = interaction.guild.channels.cache.get(doc.getChannel("general.announcements"));
     let infoChannel = interaction.guild.channels.cache.get(doc.getChannel("general.information"));
-    let dsNewsChannel = interaction.guild.channels.cache.get(doc.getChannel("darkshop.events"));
+    let dsNewsChannel = interaction.guild.channels.cache.get(doc.getChannel("logs.darkshop_logs"));
     let sugsChannel = interaction.guild.channels.cache.get(doc.getChannel("logs.suggestions"));
     let faqChannel = interaction.guild.channels.cache.get(doc.getChannel("general.faq"));
     let hallOfFameChannel = interaction.guild.channels.cache.get(doc.getChannel("general.halloffame"));

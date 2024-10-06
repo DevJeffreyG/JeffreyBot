@@ -1,6 +1,6 @@
 const { ApplicationCommandType, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageContextMenuCommandInteraction, Client, hyperlink, codeBlock } = require("discord.js");
 const { Colores } = require("../../../resources");
-const { ContextMenu, Embed, Confirmation, ErrorEmbed, Log, LogReasons, ChannelModules, PrettyCurrency, MinMaxInt } = require("../../../utils");
+const { ContextMenu, Embed, Confirmation, ErrorEmbed, Log, LogReasons, ChannelModules, PrettyCurrency, MinMaxInt, Collector, CreateInteractionFilter } = require("../../../utils");
 
 const ms = require("ms");
 const Chance = require("chance");
@@ -54,9 +54,13 @@ command.execute = async (interaction, models, params, client) => {
         ], components: [tierRow]
     });
 
-    const filter = (inter) => inter.user.id === interaction.user.id;
-
-    const component = await msg.awaitMessageComponent({ filter, time: ms("1m") }).catch(err => { });
+    const component = await new Collector(interaction, {
+        filter: CreateInteractionFilter(interaction, msg),
+        time: ms("1m"),
+        wait: true
+    }, false, false).wait(() => {
+        interaction.deleteReply();
+    })
     if (!component) return;
 
     component.deferUpdate();

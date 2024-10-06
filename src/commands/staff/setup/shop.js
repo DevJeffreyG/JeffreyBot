@@ -99,7 +99,8 @@ command.data
             .addIntegerOption(option =>
                 option
                     .setName("cantidad")
-                    .setDescription("¿Cuántos 'items' se agregarán al inventario?")
+                    .setDescription("¿Cuántos 'objetivos' se agregarán/eliminarán?")
+                    .setMinValue(1)
             )
             .addStringOption(option =>
                 option

@@ -1,4 +1,4 @@
-const { GuildMember, StringSelectMenuBuilder, ActionRowBuilder, BaseInteraction, CommandInteraction, Collection, time, TextInputStyle, ButtonBuilder, ButtonStyle } = require("discord.js")
+const { GuildMember, StringSelectMenuBuilder, ActionRowBuilder, BaseInteraction, CommandInteraction, Collection, time, TextInputStyle, ButtonBuilder, ButtonStyle, DiscordjsErrorCodes } = require("discord.js")
 const moment = require("moment-timezone");
 const ms = require("ms")
 const superagent = require("superagent");
@@ -8,7 +8,7 @@ const Chance = require("chance");
 const { ItemTypes, ItemObjetives, ItemActions, ItemEffects, LogReasons, ChannelModules, ShopTypes, PetAttacksType, Enum, BoostObjetives, ModuleBans } = require("./Enums");
 const { BadCommandError, AlreadyExistsError, DoesntExistsError, FetchError, ExecutionError, ModuleBannedError } = require("../errors");
 
-const { FindNewId, LimitedTime, Subscription, WillBenefit, isDeveloper, CreateInteractionFilter } = require("./functions");
+const { FindNewId, LimitedTime, Subscription, WillBenefit, isDeveloper, CreateInteractionFilter, FindNewIds } = require("./functions");
 
 const Log = require("./Log");
 const Embed = require("./Embed");
@@ -230,13 +230,18 @@ class Item {
         console.log("🗨️ Agregando %s warn(s)", this.given);
 
         const warns = this.user.warns;
+        const ids = FindNewIds(await Users.find(), "warns", "id", this.given);
 
         for (let i = 0; i < this.given; i++) {
-            const id = FindNewId(await Users.find(), "warns", "id");
+            const id = ids.shift();
             this.user.addCount("warns", 1, false);
             warns.push({ rule_id: 0, id });
+        }
 
+        try {
             await this.user.save()
+        } catch (err) {
+            console.error("🔴 %s", err);
         }
 
         await this.removeItemFromInv();
@@ -255,10 +260,17 @@ class Item {
             return false;
         }
 
+        if (this.given > warns.length) this.given = warns.length;
+
         // eliminar warn(s) random
         for (let i = 0; i < this.given; i++) {
-            this.user.warns.splice(Math.floor(Math.random() * warns.length), 1); // eliminar un warn random
+            this.user.warns.splice(Math.floor(Math.random() * warns.length), 1); // eliminar un warn random            
+        }
+
+        try {
             await this.user.save()
+        } catch (err) {
+            console.error("🔴 %s", err);
         }
 
         await this.removeItemFromInv();
@@ -398,8 +410,9 @@ class Item {
 
                 row.addComponents(selector)
 
+                let modifiedPurchases = false;
                 for (const purchase of purchases) {
-                    if (purchase.shopType != ShopTypes.Shop) continue
+                    if (purchase.shopType === ShopTypes.DarkShop) continue
 
                     let itemId = purchase.item_id;
 
@@ -407,20 +420,41 @@ class Item {
                     let shop = await Shops.getWork(this.interaction.guild.id);
                     let item = shop.findItem(itemId);
 
-                    console.log(item)
+                    // Si no encuentra el item en la tienda significa que ya no existe
+                    if (!item) {
+                        modifiedPurchases = true;
+                        this.user.data.purchases.splice(purchases.findIndex(x => x === purchase), 1)
+                        continue
+                    }
 
-                    selector.addOptions({ label: item.name, value: String(item.id) })
+                    selector.addOptions({ description: `Item de la ${new Enum(ShopTypes).translate(purchase.shopType)}`, label: item.name, value: String(item.id) });
                 }
 
                 selector.addOptions({ label: "Cancelar", value: "cancel", emoji: this.interaction.client.Emojis.Cross })
 
-                await this.interaction.editReply({ components: [row] });
+                let resetMsg = await this.interaction.editReply({ components: [row] });
 
-                let filter = (i) => i.isStringSelectMenu() && i.customId === "resetInterestMenu" && i.user.id === this.interaction.user.id;
-                const resetCollector = await this.interaction.channel.awaitMessageComponent({ filter, time: ms("1m") }).catch(() => { });
-
-                if (!resetCollector || resetCollector.values[0] === "cancel") {
+                const resetCollector = await new Collector(this.interaction, {
+                    filter: CreateInteractionFilter(this.interaction, resetMsg),
+                    time: ms("1m"),
+                    wait: true
+                }, false, false).wait(() => {
                     this.interaction.editReply({ embeds: [this.canceled], components: [] });
+                    try {
+                        if (modifiedPurchases) this.user.save()
+                    } catch (err) {
+                        console.error("🔴 %s", err);
+                    }
+                })
+                if (!resetCollector) return;
+
+                if (resetCollector.values[0] === "cancel") {
+                    this.interaction.editReply({ embeds: [this.canceled], components: [] });
+                    try {
+                        if (modifiedPurchases) await this.user.save()
+                    } catch (err) {
+                        console.error("🔴 %s", err);
+                    }
                     return false
                 }
 
@@ -516,29 +550,41 @@ class Item {
 
             case ItemTypes.EXTTS:
                 console.log("🟩 EX TTS!");
-                if(this.user.isBannedFrom(ModuleBans.EXShopTTS)) {
+
+                const ttsRow = new ActionRowBuilder()
+                    .setComponents(
+                        new ButtonBuilder()
+                            .setEmoji("🗣️")
+                            .setCustomId("ttsInteractionCreator")
+                            .setStyle(ButtonStyle.Primary)
+                    )
+                if (this.user.isBannedFrom(ModuleBans.EXShopTTS)) {
                     await new ModuleBannedError(this.interaction).send()
                     return false;
                 }
-                await this.interaction.editReply({ content: `${this.interaction.client.Emojis.Loading} Usando...` });
 
-                let follow = await this.interaction.followUp({
-                    ephemeral: true, components: [
-                        new ActionRowBuilder()
-                            .setComponents(
-                                new ButtonBuilder()
-                                    .setEmoji("🗣️")
-                                    .setCustomId("ttsInteractionCreator")
-                                    .setStyle(ButtonStyle.Primary)
-                            )
-                    ]
+                let follow = await this.interaction.editReply({
+                    embeds: [
+                        new Embed()
+                            .defDesc(`### ${this.interaction.member}, usa el botón de abajo para usar el TTS. Tendrás **5 minutos** para escribir a partir de que pulses el botón.
+-# Tienes 1 minuto para presionar el botón antes de que se cancele el uso.`)
+                            .defColor(Colores.nocolor)
+                    ],
+                    components: [ttsRow]
                 });
 
-                let ttsInteraction = await follow.awaitMessageComponent({ filter: CreateInteractionFilter(this.interaction, follow, this.interaction.user), time: ms("1m") });
+                let ttsInteraction = await new Collector(this.interaction, {
+                    filter: CreateInteractionFilter(this.interaction, follow, this.interaction.user),
+                    time: ms("1m"),
+                    wait: true
+                }, true, false).onEnd(() => {
+                    ttsRow.components.forEach(c => c.setDisabled());
+                    this.interaction.editReply({ components: [ttsRow] });
+                }).handle().wait(() => {
+                    this.interaction.deleteReply();
+                });
 
-                if (!ttsInteraction) {
-                    return false;
-                }
+                if (!ttsInteraction) return false;
 
                 await new Modal(ttsInteraction)
                     .defId("ttsInput")
@@ -548,7 +594,7 @@ class Item {
 
                 let c = await ttsInteraction.awaitModalSubmit({
                     filter: (i) => i.customId === "ttsInput" && i.user.id === this.interaction.user.id,
-                    time: ms("3m")
+                    time: ms("5m")
                 }).catch(async err => {
                     if (err.code === DiscordjsErrorCodes.InteractionCollectorError) await this.interaction.deleteReply();
                     else throw err;

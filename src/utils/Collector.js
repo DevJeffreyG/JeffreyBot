@@ -126,6 +126,8 @@ class Collector {
 
             this.collector.on("end", async (collected, reason) => {
                 let index = this.client.activeCollectors.findIndex(x => x.collector === this.collector && x.userid === this.user.id);
+                if (this.evalOnEnd) this.evalOnEnd(collected, reason);
+
                 if (index != -1) {
                     this.client.activeCollectors.splice(index, 1);
                 } else {
@@ -142,7 +144,11 @@ class Collector {
                     res(null);
                 } else if (reason != EndReasons.Done && reason != "limit") {
                     if (catcher) {
-                        catcher();
+                        try {
+                            catcher();
+                        } catch (err) {
+                            console.error("🔴 %s", err);
+                        }
                         res(null);
                     } else {
                         rej(EndReasons.TimeOut);

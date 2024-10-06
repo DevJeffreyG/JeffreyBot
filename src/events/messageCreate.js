@@ -148,6 +148,10 @@ module.exports = async (client, message) => {
     user.data.lastGained.currency = currencyToAdd;
     user.data.lastGained.exp = expToAdd;
     user.data.lastGained.messages.push(message.id);
-    await user.save();
+    try {
+      await user.save();
+    } catch (err) {
+      console.error("🔴 %s", err);
+    }
   }
 }

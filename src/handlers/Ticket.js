@@ -2,7 +2,7 @@ const { ButtonStyle, ActionRowBuilder, ButtonBuilder, PermissionsBitField, time,
 
 const Embed = require("../utils/Embed");
 
-const { Confirmation, FindNewId, isBannedFrom } = require("../utils/functions");
+const { Confirmation, FindNewId, isBannedFrom, CreateInteractionFilter } = require("../utils/functions");
 
 const Colores = require("../resources/colores.json");
 
@@ -11,7 +11,8 @@ const { Guilds } = require("mongoose").models;
 const ms = require("ms");
 const Log = require("../utils/Log");
 const { ChannelModules, ModuleBans } = require("../utils/Enums");
-const { DoesntExistsError, ModuleBannedError, ModuleDisabledError, PermissionError } = require("../errors");
+const { DoesntExistsError, ModuleBannedError, ModuleDisabledError, PermissionError, BadSetupError } = require("../errors");
+const { Collector } = require("../utils");
 
 const ticketCooldown = ms("1m");
 const activeCreatingTicket = new Map();
@@ -51,7 +52,7 @@ class Ticket {
         this.docGuild = doc;
         this.user = user;
 
-        if (!this.docGuild.moduleIsActive("functions.tickets")) throw new ModuleDisabledError(interaction).setEphemeral(true);
+        if (!this.docGuild.moduleIsActive("functions.tickets")) throw new ModuleDisabledError(this.interaction).setEphemeral(true);
         if (!this.interaction.deferred) await this.interaction.deferReply({ ephemeral: true });
 
         switch (this.customId) {
@@ -79,14 +80,6 @@ class Ticket {
         // baneado de crear tickets
         if (this.user.isBannedFrom(ModuleBans.Tickets)) throw new ModuleBannedError(this.interaction);
 
-        // tiene cooldown
-        if (activeCreatingTicket.has(this.interaction.user.id)) return this.interaction.editReply(`Alto ahí velocista, por favor espera ${ms((ticketCooldown) - (new Date().getTime() - activeCreatingTicket.get(this.interaction.user.id)))} antes de volver a darle al botón.`);
-
-        activeCreatingTicket.set(this.interaction.user.id, new Date());
-        let ticketTimeout = setTimeout(() => {
-            activeCreatingTicket.delete(this.interaction.user.id)
-        }, ticketCooldown)
-
         let selectMenuTopic = new StringSelectMenuBuilder()
             .setCustomId("selectTopic")
             .setPlaceholder("¿Qué necesitas hablar con el STAFF?")
@@ -103,18 +96,25 @@ class Ticket {
 
         let selectingTopic = new ActionRowBuilder().addComponents([selectMenuTopic]);
 
-        await this.interaction.editReply({ content: "¿Qué necesitas?", components: [selectingTopic] });
+        let topicMsg = await this.interaction.editReply({
+            embeds: [
+                new Embed()
+                    .defTitle("¿Qué necesitas?")
+                    .defColor(Colores.verde)
+            ], components: [selectingTopic]
+        });
 
-        let filter = (i) => i.isStringSelectMenu() && i.customId === "selectTopic" && i.user.id === this.interaction.user.id;
-        let topicCollector = await this.interaction.channel.awaitMessageComponent({ filter, time: ticketCooldown }).catch(() => { });
+        let topicCollector = await new Collector(this.interaction, {
+            filter: CreateInteractionFilter(this.interaction, topicMsg),
+            wait: true,
+            time: ticketCooldown
+        }, false, false).wait(() => this.interaction.editReply({ embeds: [new Embed({ type: "cancel" })], components: [] }));
+        if (!topicCollector) return;
 
-        if (!topicCollector) return this.interaction.editReply({ content: "Cancelado.", components: [] });
         await topicCollector.deferUpdate();
 
         const topic = topicCollector.values[0];
-        if (topic === "cancel") return this.interaction.editReply({ content: "Cancelado.", components: [] });
-        // reiniciar el cooldown
-        this.#resetCooldown(ticketTimeout, activeCreatingTicket);
+        if (topic === "cancel") return this.interaction.editReply({ embeds: [new Embed({ type: "cancel" })], components: [] });
 
         let toConfirm = [];
         let giveDetails = "Explícale al STAFF tu situación"; // lo que se envía junto al mensaje de creacion del ticket
@@ -123,6 +123,8 @@ class Ticket {
         const channelName = `ticket${newId}-${topic}-${this.userId}`;
         const category = this.guild.channels.cache.get(this.docGuild.getCategory("tickets"));
         const ticketType = topic.toUpperCase();
+
+        if(!category) throw new BadSetupError(this.interaction, "La categoría de **Tickets** no está definida")
 
         let general = new Embed()
             .defFooter({ text: `ID del Ticket: ${newId}`, icon: this.guild.iconURL() })
@@ -153,9 +155,7 @@ class Ticket {
 
             general.defAuthor({ text: `Reporte a un usuario.`, title: true });
             giveDetails = `Explica la situación, ¿a quién estás reportando? ¿cuáles son las pruebas y razones del reporte?\nEres libre de mencionarlos si crees que es urgente y pasa mucho tiempo.`
-        } else if (topic === "warn") {
-            filter = (i) => i.isStringSelectMenu() && i.customId === "selectWarn" && i.user.id === this.interaction.user.id; // cambiar el filtro de la customId
-
+        } else if (topic === "warn") {            
             // mostrar los WARNS
             let selectMenuWarn = new StringSelectMenuBuilder()
                 .setCustomId("selectWarn")
@@ -177,15 +177,26 @@ class Ticket {
             }
             selectMenuWarn.addOptions({ label: "Cancelar", value: "cancel", emoji: this.client.Emojis.Cross });
 
-            let selectingWarn = new ActionRowBuilder().addComponents([selectMenuWarn]);
+            let warnRow = new ActionRowBuilder().addComponents([selectMenuWarn]);
 
-            await topicCollector.editReply({ content: "¿Cuál es el warn por el cuál quieres hacer el ticket?", components: [selectingWarn] });
+            let warnMsg = await topicCollector.editReply({
+                embeds: [
+                    new Embed()
+                        .defTitle("¿Cuál es el warn por el cuál quieres hacer el ticket?")
+                        .defColor(Colores.verde)
+                ],
+                components: [warnRow]
+            });
 
-            let warnCollector = await this.interaction.channel.awaitMessageComponent({ filter, time: ticketCooldown }).catch(() => { });
-            if (!warnCollector) return this.interaction.editReply({ content: "Cancelado.", components: [] });
+            let warnCollector = await new Collector(this.interaction, {
+                filter: CreateInteractionFilter(this.interaction, warnMsg),
+                wait: true,
+                time: ticketCooldown
+            }, false, false).wait(() => this.interaction.editReply({ embeds: [new Embed({ type: "cancel" })], components: [] }));
+            if (!warnCollector) return;
 
             await warnCollector.deferUpdate();
-            if (warnCollector.values[0] === "cancel") return warnCollector.editReply({ content: "Cancelado.", components: [] });
+            if (warnCollector.values[0] === "cancel") return warnCollector.editReply({ embeds: [new Embed({ type: "cancel" })], components: [] });
             let selectedWarn = this.user.warns.find(x => x.id === Number(warnCollector.values[0]));
 
             if (!selectedWarn.proof) return warnCollector.editReply({ content: `⚠️ El **warn**" con ID: \`${selectedWarn.id}\`, lo tienes gracias a un item de las tiendas**, no podemos ayudarte.\n\n**Si crees que se trata de un error, contacta directamente al STAFF.**`, embeds: [], components: [] });
@@ -193,15 +204,13 @@ class Ticket {
             toConfirm = [
                 `Crear un nuevo ticket para el warn con id \`${selectedWarn.id}\`.`,
                 `Regla N°${doc.data.rules.find(x => x.id === selectedWarn.rule_id).position} (${doc.data.rules.find(x => x.id === selectedWarn.rule_id).name}).`,
-                `Las pruebas dadas por el STAFF las puedes ver usando ${client.mentionCommand("warns")}.`
+                `Las pruebas dadas por el STAFF las puedes ver usando ${this.client.mentionCommand("warns")}.`
             ];
             general.defAuthor({ text: `Apelar WARN.`, title: true });
             giveDetails = "Explica ¿por qué crees que la acción de moderación es injusta o debe quitarse?"
 
             selectedWarn.madeTicket = true;
         } else if (topic === "softwarn") {
-            filter = (i) => i.isStringSelectMenu() && i.customId === "selectSoftWarn" && i.user.id === this.interaction.user.id; // cambiar el filtro de la customId
-
             // mostrar los WARNS
             let selectMenuSoftWarn = new StringSelectMenuBuilder()
                 .setCustomId("selectSoftWarn")
@@ -218,14 +227,25 @@ class Ticket {
 
             let selectingWarn = new ActionRowBuilder().addComponents([selectMenuSoftWarn]);
 
-            await topicCollector.editReply({ content: "¿Cuál es el softwarn por el cuál quieres hacer el ticket?", components: [selectingWarn] });
+            let softwarnMsg = await topicCollector.editReply({
+                embeds: [
+                    new Embed()
+                        .defTitle("¿Cuál es el softwarn por el cuál quieres hacer el ticket?")
+                        .defColor(Colores.verde)
+                ],
+                components: [selectingWarn]
+            });
 
-            let softwarnCollector = await this.interaction.channel.awaitMessageComponent({ filter, time: ticketCooldown }).catch(() => { });
-            if (!softwarnCollector) return this.interaction.editReply({ content: "Cancelado.", components: [] });
+            let softwarnCollector = await new Collector(this.interaction, {
+                filter: CreateInteractionFilter(this.interaction, softwarnMsg),
+                wait: true,
+                time: ticketCooldown
+            }, false, false).wait(() => this.interaction.editReply({ embeds: [new Embed({ type: "cancel" })], components: [] }));
+            if (!softwarnCollector) return;
 
             await softwarnCollector.deferUpdate();
 
-            if (softwarnCollector.values[0] === "cancel") return softwarnCollector.editReply({ content: "Cancelado.", components: [] });
+            if (softwarnCollector.values[0] === "cancel") return softwarnCollector.editReply({ embeds: [new Embed({ type: "cancel" })], components: [] });
 
             let selectedSoftWarn = user.softwarns.find(x => x.id === Number(softwarnCollector.values[0]));
 
@@ -482,15 +502,6 @@ class Ticket {
             type: split[1],
             userId: split[2]
         }
-    }
-
-    #resetCooldown(timeout, map) {
-        map.set(this.userId, new Date());
-        clearTimeout(timeout);
-
-        timeout = setTimeout(() => {
-            map.delete(this.userId)
-        }, ticketCooldown)
     }
 }
 

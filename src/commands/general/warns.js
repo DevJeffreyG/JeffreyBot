@@ -1,4 +1,4 @@
-const { Command, Embed } = require("../../utils")
+const { Command, InteractivePages } = require("../../utils")
 const { Colores } = require("../../resources");
 
 const command = new Command({
@@ -17,56 +17,43 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ ephemeral: true })
 
     const { id } = params;
-    const member = interaction.member;
-
-    let error = new Embed()
-        .defColor(Colores.rojo)
-        .defAuthor({ text: `${member.displayName}`, icon: member.displayAvatarURL() })
-        .defDesc(`No tienes warns.`);
 
     const user = params.getUser();
+    const doc = params.getDoc();
 
+    const reglas = doc.data.rules;
     const warns = user.warns;
-    const softwarns = user.softwarns;
 
-    if (!warns || warns.length === 0) {
-        return await interaction.editReply({ embeds: [error], ephemeral: true })
+    let items = new Map();
+
+    for (const warn of warns) {
+        const regla = reglas.find(x => x.id === warn.rule_id)?.name ?? "Warn por un item";
+
+        if (id && warn.id != id.value) continue;
+
+        const itemWarn = warn.rule_id === 0 ? true : false;
+
+        items.set(warn.id, {
+            name: regla,
+            number: itemWarn ? "" : ` : Regla N°${warn.rule_id}`,
+            proof: itemWarn ? "" : `**— [Pruebas](${warn.proof})**`,
+            id: warn.id,
+            itemWarn
+        })
     }
 
-    let warnsE = new Embed()
-        .defAuthor({ text: `Tus Warns`, icon: member.displayAvatarURL() })
-        .defDesc(`**Número de warns ** ❛ \`${warns.length}\` ❜`)
-        .defColor(Colores.verde);
+    const interactive = new InteractivePages({
+        title: `Tus Warns (${warns.length})`,
+        author_icon: interaction.member.displayAvatarURL(),
+        footer_icon: interaction.guild.iconURL(),
+        description: `**—** Tienes...`,
+        color: Colores.verde,
+        addon: `**— {name}{number}**
+{proof}
+**▸ ID**: {id}.\n\n`
+    }, items, 5);
 
-    let softwarnsE = new Embed()
-        .defAuthor({ text: `Tus Softwarns`, icon: member.displayAvatarURL() })
-        .defDesc(`**Número de softwarns ** ❛ \`${softwarns.length}\` ❜`)
-        .defColor(Colores.verde);
-
-    if (id) warnsE.defAuthor({ text: `Para la ID: ${id.value}`, title: true });
-
-    const doc = params.getDoc();
-    const reglas = doc.data.rules;
-
-    // foreach
-    warns.forEach(warn => {
-        // sacar la regla
-        let regla = reglas.find(x => x.id === warn.rule_id)?.name ?? "Warn por un item";
-
-        if (id && warn.id != id.value) return;
-        if (warn.rule_id != 0) warnsE.defField(`— ${regla} : Regla N°${warn.rule_id}`, `**— [Pruebas](${warn.proof})\n— ID: ${warn.id}**`)
-        else warnsE.defField(`— ${regla}`, `**— ID: ${warn.id}**`)
-    });
-
-    softwarns.forEach(softwarn => {
-        // sacar la regla
-        let regla = reglas.find(x => x.id === softwarn.rule_id).name;
-
-        if (id && softwarn.id != id.value) return;
-        softwarnsE.defField(`— ${regla} : Regla N°${softwarn.rule_id}`, `**— [Pruebas](${softwarn.proof})\n— ID: ${softwarn.id}**`)
-    });
-
-    return await interaction.editReply({ embeds: [warnsE/* , softwarnsE */], ephemeral: true });
+    return await interactive.init(interaction)
 }
 
 module.exports = command;

@@ -321,7 +321,7 @@ class Shop {
             "Pago realizado con éxito",
             `Compraste: \`${itemName}\` por **${this.config.currency.emoji}${itemPrice}**${user ? ` para ${user}` : ""}`,
             useHelp,
-            `Ahora tienes: ${PrettyCurrency(this.interaction.guild, this.#isDarkShop ? this.#user.getDarkCurrency() : this.#user.getCurrency())}`
+            `Ahora tienes: ${PrettyCurrency(this.interaction.guild, this.#isDarkShop ? this.#user.getDarkCurrency() : this.#user.getCurrency(), { name: this.#isDarkShop ? "DarkCurrency" : "Currency" })}`
         ]
 
         if (user) await inventoryUser.save();
@@ -471,14 +471,32 @@ ${codeBlock(item.description)}
         // eliminar de los inventarios
         const users = await Users.find({ guild_id: this.interaction.guild.id });
         for await (const user of users) {
-            let i = user.data.inventory.findIndex(x => x.item_id === itemId && x.shopType === this.config.info.type)
+            let modified = false;
+            let inventoryIndex = user.data.inventory.findIndex(x => x.item_id === itemId && x.shopType === this.config.info.type)
+            let purchaseIndex = user.data.purchases.findIndex(x => x.item_id === itemId && x.shopType === this.config.info.type)
 
-            if (i != -1) {
+            if (inventoryIndex != -1) {
                 console.log("🗑️ Eliminando del inventario de %s", user.user_id)
-                user.data.inventory.splice(i, 1);
+                user.data.inventory.splice(inventoryIndex, 1);
+                modified = true;
                 await user.save();
             }
+
+            if (purchaseIndex != -1) {
+                console.log("🗑️ Eliminando del inventario de %s", user.user_id)
+                user.data.inventory.splice(inventoryIndex, 1);
+                modified = true;
+            }
+
+            if (modified) {
+                try {
+                    await user.save();
+                } catch (err) {
+                    console.error("🔴 %s", err);
+                }
+            }
         }
+
         return this.interaction.editReply({ embeds: [new Embed({ type: "success", data: { title: "¡Eliminado!" } })] });
     }
 
@@ -518,8 +536,8 @@ ${codeBlock(item.description)}
             const specialError = new BadParamsError(this.interaction, [
                 "Si es un item `especial`, **debe** agregar un **item**"
             ]);
-            
-            if(params.accion.value != ItemActions.Add || params.objetivo.value != ItemObjetives.Item) throw specialError;
+
+            if (params.accion.value != ItemActions.Add || params.objetivo.value != ItemObjetives.Item) throw specialError;
             let select = new StringSelectMenuBuilder()
                 .setCustomId("specialItemSelect")
                 .setPlaceholder("Escoge el tipo de Item")
@@ -538,7 +556,7 @@ ${codeBlock(item.description)}
                                 .setValue(String(ItemTypes.StackOverflow)),
                             new StringSelectMenuOptionBuilder()
                                 .setLabel("Reset Interés")
-                                .setDescription("Elimina los intereses de un item de la tienda normal")
+                                .setDescription("Elimina los intereses de un item que no sea de la DarkShop")
                                 .setValue(String(ItemTypes.ResetInterest)),
                             new StringSelectMenuOptionBuilder()
                                 .setLabel("Firewall Skipper")
@@ -730,12 +748,12 @@ ${codeBlock(item.description)}
                 switch (specialType) {
                     case ItemTypes.Pet:
                         stats = await petStats(collector);
-                        if(!stats) return false;
+                        if (!stats) return false;
 
                         break;
                     case ItemTypes.PetStatsModifier:
                         stats = await itemConfig(collector);
-                        if(!stats) return false;
+                        if (!stats) return false;
 
                         stats.attack = 0;
                         stats.defense = 0;
@@ -746,7 +764,7 @@ ${codeBlock(item.description)}
                     switch (specialType) {
                         case ItemTypes.EXKeyboard:
                             let userActions = await getKeyActions(collector);
-                            if(!userActions) return false;
+                            if (!userActions) return false;
 
                             actions = userActions.actions?.split("\n") ?? [];
 
@@ -756,17 +774,17 @@ ${codeBlock(item.description)}
                             break;
                         case ItemTypes.EXMedia:
                             let mediaActions = await getMediaActions(collector);
-                            if(!mediaActions) return false;
+                            if (!mediaActions) return false;
 
                             actions = mediaActions.urls?.split("\n") ?? [];
 
                             if (mediaActions.globalUseDelay) delays["global"] = ms(mediaActions.globalUseDelay);
                             if (mediaActions.individualUseDelay) delays["individual"] = ms(mediaActions.individualUseDelay);
                             break;
-                        
+
                         case ItemTypes.EXTTS:
                             let ttsActions = await getTTSActions(collector);
-                            if(!ttsActions) return false;
+                            if (!ttsActions) return false;
 
                             actions = ttsActions.voice?.split("\n") ?? [];
 
@@ -795,6 +813,10 @@ ${codeBlock(item.description)}
             "Si se usa un tipo Boost __agregando__, **debe tener**: `boostobj`, `boosttype`, `boostval` y `duracion`",
             "Si es __eliminando__, **sólo debe tener**: `duracion`"
         ])
+        const givenQuantityError = new BadParamsError(this.interaction, [
+            "Si el objetivo es Item no especial su `cantidad` **debe** ser `1`",
+            "Si el objetivo es Warn **debe tener** `cantidad`",
+        ])
         const notValidCombination = new BadParamsError(this.interaction, "Si se usa un tipo Item, **no puede eliminarse**");
         const dsError = new BadParamsError(this.interaction, "Si el item es de la DarkShop, **debe tener**: `efecto` y verdadero en `uso-manual`");
         const notItemPetError = new BadParamsError(this.interaction, "Si el item es de la Tienda de Mascotas, su **objetivo** debe ser **Item** y ser **especial**");
@@ -810,8 +832,9 @@ ${codeBlock(item.description)}
 
         const use = item.use_info;
 
-        if (this.#isDarkShop && typeof params["uso-manual"].value === "boolean" && !params["uso-manual"].value) throw dsError;
-        else use.manualUse = params["uso-manual"]?.value ?? use.manualUse;
+        use.manualUse = params["uso-manual"]?.value ?? use.manualUse
+
+        if (this.#isDarkShop && !use.manualUse) throw dsError;
 
         use.action = Number(params.accion.value);
         use.objetive = Number(params.objetivo.value);
@@ -858,6 +881,11 @@ ${codeBlock(item.description)}
 
         if (use.objetive === ItemObjetives.Item) {
             if (use.action === ItemActions.Remove) throw notValidCombination;
+            if ((!use.given || use.given === 0 || use.given > 1) && !params.especial?.value) throw givenQuantityError;
+        }
+
+        if (use.objetive === ItemObjetives.Warns) {
+            if (!use.given) throw givenQuantityError;
         }
 
         // ds verification

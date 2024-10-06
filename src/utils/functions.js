@@ -1498,7 +1498,13 @@ const AfterInfraction = async function (user, data) {
   // mensaje de warn normal
   // embed que se le envía al usuario por el warn
 
-  if (banMember) member.ban({ reason: `AutoMod. (Infringir "${rule}")` });
+  if (banMember) {
+    try {
+      await member.ban({ reason: `AutoMod. (Infringir "${rule}")` });
+    } catch (err) {
+      console.error("🔴 %s", err);
+    }
+  }
 
   try {
     await SendDirect(null, member, DirectMessageType.Moderation, {
@@ -1653,6 +1659,65 @@ const FindNewId = function (generalQuery, specificQuery, toCheck) {
   }
 
   return newId;
+}
+
+/**
+ * 
+ * @param {*} generalQuery Mongoose documents
+ * @param {String} specificQuery The data inside that document 
+ * @param {String} toCheck The parameter to check inside the specific query
+ * @param {Number} quantity Number of Ids to return
+ * @example
+ * ```javascript
+ * let query = await Model.find();
+ * const availableIds = FindNewIds(query, "data.example", "id", 5);
+ * const generalAvailableIds = FindNewIds(query, "", "id", 5);
+ * ```
+ * @returns {[Number]} Unique ID within the query
+ */
+const FindNewIds = function (generalQuery, specificQuery, toCheck, quantity) {
+  // id
+  let idsNow = []; // ids en uso actualmente
+  let returnable = [];
+  let newId = 1;
+
+  if (!Array.isArray(generalQuery)) generalQuery = [generalQuery];
+
+  for (let i = 0; i < generalQuery.length; i++) {
+    const document = generalQuery[i];
+
+    let forEachLoop = document;
+    let split = specificQuery.split(".");
+
+    if (split && split.length >= 1 && split[0].length > 0) {
+      for (let i = 0; i < split.length; i++) {
+        const queryQ = split[i];
+
+        forEachLoop = forEachLoop[queryQ]
+      }
+
+      if (Array.isArray(forEachLoop)) forEachLoop.forEach(i => {
+        idsNow.push(i[toCheck]); // pushear cada id en uso
+      });
+      else idsNow.push(forEachLoop[toCheck]);
+
+    } else {
+      idsNow.push(forEachLoop[toCheck])
+    }
+  }
+
+  for (let i = 1; i <= quantity; i++) {
+    do {
+      newId++;
+    } while (idsNow.find(x => x === newId))
+
+
+    returnable.push(newId);
+  }
+
+  console.log(returnable);
+
+  return returnable;
 }
 
 /**
@@ -2208,5 +2273,6 @@ module.exports = {
   MultiplePercentages,
   CreateInteractionFilter,
   SendDirect,
-  FinalPeriod
+  FinalPeriod,
+  FindNewIds
 }
