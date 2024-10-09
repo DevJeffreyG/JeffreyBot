@@ -1,8 +1,8 @@
-const { Command, Embed, Cooldowns, Enum } = require("../../utils")
+const { Command, Embed, Cooldowns, Enum } = require("../../../utils")
 const ms = require("ms")
 
 const command = new Command({
-    name: "cooldown",
+    name: "manage-cooldown",
     desc: "Elimina o agrega un cooldown a un módulo"
 });
 
@@ -24,7 +24,7 @@ command.addOption({
 command.addOption({
     type: "string",
     name: "cooldown",
-    desc: "0 para eliminarlo",
+    desc: "1d, 1m, 30s, etc. '0' para eliminarlo",
     req: true
 })
 

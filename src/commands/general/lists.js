@@ -1,5 +1,6 @@
+const { time } = require("discord.js");
 const { Colores } = require("../../resources");
-const { Command, Cooldowns, Enum, InteractivePages, ModifierType, RequirementType, Shop, RouletteItem, Multipliers, ShopTypes } = require("../../utils");
+const { Command, Cooldowns, Enum, InteractivePages, ModifierType, RequirementType, Shop, RouletteItem, Multipliers, ShopTypes, PrettyCurrency } = require("../../utils");
 
 const command = new Command({
     name: "lists",
@@ -34,13 +35,23 @@ command.data
             .setName("roulette")
             .setDescription("Lista de todos los items de la Ruleta")
     )
+    .addSubcommand(sub =>
+        sub
+            .setName("deudas")
+            .setDescription("Lista de todas las deudas que tienes")
+    )
+    .addSubcommand(sub =>
+        sub
+            .setName("prestamos")
+            .setDescription("Lista de todas los préstamos que tienes")
+    )
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ ephemeral: true });
 
     const user = params.getUser();
     const doc = params.getDoc();
-    const { RouletteItems } = models;
+    const { RouletteItems, Users } = models;
     const { subcommand } = params;
 
     switch (subcommand) {
@@ -153,6 +164,68 @@ command.execute = async (interaction, models, params, client) => {
                 author_icon: client.user.displayAvatarURL(),
                 color: Colores.verde,
                 addon: `**▸** {text}\n**▸** Probabilidad del **{prop}%** para que se detenga.\n\n`
+            }, items, 5)
+
+            await interactive.init(interaction);
+            break;
+        }
+
+        case "deudas": {
+            let items = new Map();
+            let debts = user.data.debts;
+            debts.sort((a, b) => b.debt - a.debt);
+
+            for (const debt of debts) {
+                items.set(debt.id, {
+                    member: interaction.guild.members.cache.get(debt.user),
+                    debt: PrettyCurrency(interaction.guild, debt.debt),
+                    paying: PrettyCurrency(interaction.guild, Math.round(loan.debt * loan.interest / 100)),
+                    interest: debt.interest,
+                    next: time(debt.pay_in, "R"),
+                    since: time(debt.since, "F")
+                })
+            }
+
+            const interactive = new InteractivePages({
+                title: "Lista de deudas que tienes",
+                author_icon: interaction.member.displayAvatarURL(),
+                color: Colores.verde,
+                addon: `**▸** {debt} a **{interest}%** ({paying}).\n**▸** Con {member} desde {since}.\n**▸** Pago de intereses {next}.\n\n`
+            }, items, 5)
+
+            await interactive.init(interaction);
+            break;
+        }
+
+        case "prestamos": {
+            let items = new Map();
+            let usersWithLoan = await Users.find({
+                guild_id: interaction.guild.id,
+                "data.debts": {
+                    $all: [
+                        { "$elemMatch": { user: interaction.user.id } },
+                    ]
+                }
+            });
+
+            for (const user of usersWithLoan) {
+                const loan = user.data.debts.find(x => x.user === interaction.user.id)
+                items.set(loan.id, {
+                    member: interaction.guild.members.cache.get(user.user_id),
+                    debt: PrettyCurrency(interaction.guild, loan.debt),
+                    paying: PrettyCurrency(interaction.guild, Math.round(loan.debt * loan.interest / 100)),
+                    interest: loan.interest,
+                    next: time(loan.pay_in, "R"),
+                    since: time(loan.since, "T")
+                })
+            }
+
+            const interactive = new InteractivePages({
+                title: "Lista de préstamos que tienes",
+                footer: `Puedes cancelar un préstamo usando /perdonar - Página {ACTUAL} de {TOTAL}`,
+                author_icon: interaction.member.displayAvatarURL(),
+                color: Colores.verde,
+                addon: `**▸** {debt} a **{interest}%** ({paying}).\n**▸** Con {member} desde {since}.\n**▸** Pago de intereses {next}.\n\n`
             }, items, 5)
 
             await interactive.init(interaction);

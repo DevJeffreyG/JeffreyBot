@@ -1,8 +1,8 @@
-const { Command, Embed, PrettyCurrency } = require("../../utils")
-const { Colores } = require("../../resources")
+const { Command, Embed, PrettyCurrency } = require("../../../utils")
+const { Colores } = require("../../../resources")
 
 const command = new Command({
-    name: "manageeconomy",
+    name: "manage-economy",
     desc: "Administra los balances de un usuario"
 });
 

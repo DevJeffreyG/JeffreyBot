@@ -467,7 +467,6 @@ class DarkShop {
                 let log = new Embed()
                     .defColor(Colores.verde)
                     .defDesc(`**—** Se han eliminado los ${this.Emojis.DarkCurrency.name} de **${deleted}**.
-**—** Desde: ${time(moment(darkdata.until).subtract(1, "week").toDate())}.
 **—** Tenía: ${had}`)
                     .defFooter({ text: "Mensaje enviado a la vez que al usuario", timestamp: true })
 
