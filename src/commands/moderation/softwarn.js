@@ -42,7 +42,7 @@ command.execute = async (interaction, models, params, client) => {
         .setDescription("La prueba que el STAFF proporcionó para este warn");
 
     const pruebasEmbed = new Embed()
-        .setImage(prueba.attachment.url)
+        .defImage(prueba.attachment.url)
         .defColor(Colores.verde);
 
     for (const regla of doc.data.rules) {
@@ -137,7 +137,7 @@ command.execute = async (interaction, models, params, client) => {
         let proofE = new Embed()
             .defAuthor({ text: "Pruebas", title: true })
             .defDesc(msg.attachments.first().url)
-            .setImage(msg.attachments.first().url)
+            .defImage(msg.attachments.first().url)
             .defColor(Colores.nocolor);
 
         await new Log(interaction)

@@ -12,6 +12,28 @@ const Schema = new mongoose.Schema({
     id: { type: Number, required: true, sparse: true },
 })
 
+Schema.static("findEqual", async function (data) {
+    const { target, value, prob, extra } = data;
+
+    let newExtra = {};
+
+    //console.log(extra)
+
+    for (prop in extra) {
+        let isNaN = extra[prop].toString() === "NaN";
+        if(!isNaN) newExtra[prop] = extra[prop];
+    }
+
+    delete newExtra.special
+
+    return await this.findOne({
+        target,
+        value,
+        prob,
+        extra: newExtra
+    });
+})
+
 Schema.static("new", async function (data, id) {
     const { target, value, prob, extra } = data;
 
@@ -19,7 +41,7 @@ Schema.static("new", async function (data, id) {
 
     //console.log(extra)
 
-    for(prop in extra) {
+    for (prop in extra) {
         let isNaN = extra[prop].toString() === "NaN";
         //console.log(prop, isNaN);
         newExtra[prop] = isNaN ? null : extra[prop];

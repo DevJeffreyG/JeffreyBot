@@ -1,5 +1,6 @@
 const { Command, Embed } = require("../../utils")
-const { Colores } = require("../../resources")
+const { Colores } = require("../../resources");
+const { Emoji } = require("discord.js");
 
 const command = new Command({
     name: "find",
@@ -54,19 +55,21 @@ command.execute = async (interaction, models, params, client) => {
     const name = params[subcommand].nombre.value;
     const id = params[subcommand].id;
 
-    const guild = id && id.value ? client.guilds.cache.find(x => x.id === id.value) : interaction.guild;
-
+    const guild = id && id.value ? client.guilds.cache.get(id.value) ?? interaction.guild : interaction.guild;
     // Comando
 
     switch (subcommand) {
         case "emoji": {
-            const emoji = guild.emojis.cache.find(x => x.name === name);
+            const emoji = client.EmojisObject[name] ?? guild.emojis.cache.find(x => x.name === name);
             if (!emoji) return await interaction.editReply({ content: `No encontré ese emoji, verifica que hayas escrito bien el nombre.` });
 
+            const emojiURL = emoji instanceof Emoji ? emoji.imageURL() : emoji.url;
+
             let finalEmbed = new Embed()
-                .defImage(emoji.url)
-                .defAuthor({ text: `Emoji: ${name}`, icon: emoji.url })
-                .defDesc(`**—** Nombre del Role: \`${name}\`.
+                .defImage(emojiURL)
+                .defAuthor({ text: `Emoji: ${name}`, icon: emojiURL })
+                .defDesc(`**—** Mención del Emoji: \`${emoji.mention ?? emoji.toString()}\`.
+**—** Nombre del Emoji: \`${name}\`.
 **—** ID: \`${emoji.id}\`.
 **—** Es animado: \`${emoji.animated ? "Sí" : "No"}\`.
 **—** Emoji del server: \`${guild.name}\`.`)

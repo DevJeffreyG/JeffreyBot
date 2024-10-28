@@ -117,17 +117,17 @@ command.execute = async (interaction, models, params, client) => {
         const firstAttachment = message.attachments.first();
         content = `${message.content} ${hyperlink("archivo", firstAttachment.url)}`;
 
-        hallEmbed.setImage(firstAttachment.url);
+        hallEmbed.defImage(firstAttachment.url);
     } else if (message.embeds.length != 0) { // El mensaje tiene embeds
         let firstEmbed = message.embeds[0];
 
         if (!firstEmbed.video && firstEmbed.url) { // es una imagen
-            hallEmbed.setImage(firstEmbed.url)
+            hallEmbed.defImage(firstEmbed.url)
             content = firstEmbed.url;
         } else if (firstEmbed.video && !firstEmbed.thumbnail) { // es un link, que general un video reproducible
             content = firstEmbed.url + "\n(vídeo)";
         } else if (firstEmbed.video && firstEmbed.thumbnail) { // es un gif
-            hallEmbed.setImage(firstEmbed.thumbnail.url)
+            hallEmbed.defImage(firstEmbed.thumbnail.url)
             content = firstEmbed.url;
         } else { // cualquier otra cosa
             let incaseofField = "";

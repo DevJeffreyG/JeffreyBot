@@ -1158,7 +1158,7 @@ const handleNotification = async function (guild) {
   const shortsRole = guild.roles.cache.get(doc.getRole("announcements.youtube.shorts")) ?? "¡Gente!";
   const twitchRole = guild.roles.cache.get(doc.getRole("announcements.twitch")) ?? "¡Gente!";
 
-  let data = doc.data.social_notifications;
+  let dataNotified = doc.data.social_notifications;
 
   const config = {
     youtube_channelId: "UCCYiF7GGja7iJgsc4LN0oHw",
@@ -1166,10 +1166,10 @@ const handleNotification = async function (guild) {
   }
 
   const textos = {
-    videos: ["Ha llegado el momento, chécalo para evitar que Jeffrey entre en depresión.", "Dale like o comenta algo si te gustó lo suficiente :D", "Espero que nos veamos en la próxima, ¡y que no sea en 3 meses!", "BROOOO Está rebueno míralo, a lo bien.", "No sabría decir si es lamentable, espero que no, ¿por qué no lo ves para comprobarlo y me dices qué tal?"],
-    shorts: ["Venga va, que es menos de un minuto chécalo.", "¡Viva el contenido rápido!", "¿Sólo unos días más para que salga un vídeo real?", "¡Otro vídeo de menos de un minuto!"],
-    twitch: ["¡Ven y di hola!", "¡Ven y saluda!", "¡Pásate!", "¡Esto no pasa todo el tiempo, ven!"],
-    emojis: ["⚡", "🔥", "✨", "💚", "🦊", guild.client.Emojis.Badge, "✅"],
+    videos: ["Ha llegado el momento, chécalo para evitar que Jeffrey se ponga triste.", "Dale like o comenta algo si te gustó lo suficiente :D", "Espero que nos veamos en la próxima, ¡y que no sea en ██ meses!", "Hazme caso, está bueno. Míralo, a lo bien.", "No sabría decir si es lamentable, espero que no, ¿por qué no lo ves para comprobarlo y me dices qué tal?"],
+    shorts: ["Venga va, que es de los cortos chécalo.", "¡Viva el contenido rápido!", "¿Sólo unos días más para que salga un vídeo real?", "¡Otro vídeo corto para hacer presencia!"],
+    twitch: ["¡Ven y di hola!", "¡Ven y saluda!", "¡Pásate!", "¡Esto no pasa todo el tiempo, ven!", "¿QUÉ? LLEGA"],
+    emojis: ["⚡", "🔥", "✨", "💚", "🦊", guild.client.Emojis.Badge, "✅", "👀"],
     labels: ["¡Me interesa!", "¡Veamos!", "¡Interesante!", "¡Click!", "¡Me sirve!", "¡A ver!"]
   }
 
@@ -1183,17 +1183,27 @@ const handleNotification = async function (guild) {
   for (const item of googleRes.data.items) {
     if (item.snippet.type != "upload") continue;
 
-    const itemId = item.id;
     const videoId = item.contentDetails.upload.videoId;
+
+    // Si ya fue notificado ignorar
+    if (dataNotified.youtube.shorts.find(x => x === videoId) || dataNotified.youtube.videos.find(x => x === videoId)) {
+      // console.log("🟢 Ignoring %s: Already notified", videoId);
+      continue;
+    }
+
     const videoLink = `https://www.youtube.com/watch?v=${videoId}`;
     const shortLink = `https://www.youtube.com/shorts/${videoId}`;
 
-    let checkIfShort = async () => {
-      let res = await fetch(shortLink, { redirect: "manual" });
-      return res.headers.get("Location") === videoLink ? false : true;
+    let isShort, shortRes;
+    try {
+      shortRes = await fetch(shortLink, { redirect: "manual" });
+      if (shortRes.status === 404) throw Error(`404 Checking if short: ${shortLink}`)
+      isShort = shortRes.status === 303 ? false : true;
+    } catch (err) {
+      console.error("🔴 %s", err);
+      continue;
     }
 
-    let isShort = await checkIfShort();
     let prop = isShort ? "shorts" : "videos";
 
     let embed = new Embed()
@@ -1213,14 +1223,18 @@ const handleNotification = async function (guild) {
         )
     ]
 
-    // Si no se encontró ese vídeo ya notificado, y hay canal de anuncios de YouTube configurado
-    if (!data.youtube[prop].find(x => x === itemId) && youtubeChannel) {
-      data.youtube[prop].push(itemId);
+    // Hay canal de anuncios de YouTube configurado
+    if (youtubeChannel) {
+      dataNotified.youtube[prop].push(videoId);
       await doc.save();
 
       embed.defDesc(new Chance().pickone(textos.emojis) + " " + new Chance().pickone(textos[prop]))
 
       await youtubeChannel.send({ content: (isShort ? shortsRole : ytRole).toString(), embeds: [embed], components });
+      
+      console.log("🟢 Announced %s", videoId)
+      console.log("🟢 ShortRes: %s", shortRes);
+      console.log("🟢 IsShort: %s", isShort);
     }
   }
 
@@ -1237,7 +1251,7 @@ const handleNotification = async function (guild) {
     const stream = await getStream(config.twitch_username);
     const streamId = stream.id;
     const streamTitle = stream.title;
-    if (!data.twitch.find(x => x === streamId)) {
+    if (!dataNotified.twitch.find(x => x === streamId)) {
       let embed = new Embed()
         .defTitle("¡Jeffrey está en directo!")
         .defDesc(streamTitle)
@@ -1256,10 +1270,11 @@ const handleNotification = async function (guild) {
           )
       ]
 
-      data.twitch.push(streamId);
+      dataNotified.twitch.push(streamId);
       await doc.save();
 
       await twitchChannel.send({ content: twitchRole.toString(), embeds: [embed], components });
+      console.log("🟢 Announced Twitch stream")
     }
   }
 
@@ -1558,7 +1573,7 @@ const ValidateDarkShop = async function (user, author) {
   const notReady = new Embed()
     .defColor(Colores.rojo)
     .defDesc(desc)
-    .defFooter({ text: `▸ Vuelve cuando seas nivel ${guild.settings.quantities.darkshop_level}.` });
+    .defFooter({ text: `▸ Vuelve cuando seas nivel ${guild.settings.quantities.darkshop.level}.` });
 
   if (user.economy.global.level < guild.settings.quantities.darkshop.level) return { valid: false, embed: notReady }
   else return { valid: true, embed: null };

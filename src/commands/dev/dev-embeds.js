@@ -51,26 +51,6 @@ command.execute = async (interaction, models, params, client) => {
     let tvChannel = interaction.guild.channels.cache.get(doc.getChannel("notifier.twitch_notif"));
 
     switch (embed) {
-        case "faq":
-            let faq = importImage("preguntas");
-
-            await interaction.channel.send({
-                embeds: [
-                    new Embed()
-                        .setImage(faq.attachment)
-                        .defColor(Colores.verdejeffrey),
-                    new Embed()
-                        .defTitle(`— Preguntas más frecuentes`)
-                        .defThumbnail(client.EmojisObject.Thinking.url)
-                        .defDesc(`➟ Como puedes imaginar, veremos las preguntas frecuentes que se hacen en este servidor. Se irán actualizando a medida que hayan más preguntas frecuentes :)`)
-                        .defColor(Colores.verde)
-                ], files: [faq.file]
-            })
-            await interaction.channel.send({ embeds: [new Embed().defTitle("DarkShop").defColor(Colores.negro)] });
-            await interaction.channel.send({ embeds: [new Embed().defTitle("Server").defColor(Colores.verde)] });
-            await interaction.channel.send({ embeds: [new Embed().defTitle("Jeffrey").defColor(Colores.verdejeffrey)] });
-            break;
-
         case "información":
             // bienvenida
             let saludo = importImage("hola");
@@ -99,7 +79,7 @@ command.execute = async (interaction, models, params, client) => {
             await interaction.channel.send({
                 embeds: [
                     new Embed()
-                        .setImage(niveles.attachment)
+                        .defImage(niveles.attachment)
                         .defColor(Colores.verdejeffrey),
                     new Embed()
                         .defDesc(`<@&${Bases.owner.roles.levels.lvl1}>
@@ -162,7 +142,7 @@ command.execute = async (interaction, models, params, client) => {
             await interaction.channel.send({
                 embeds: [
                     new Embed()
-                        .setImage(canales.attachment)
+                        .defImage(canales.attachment)
                         .defColor(Colores.verdejeffrey),
 
                     new Embed()
@@ -235,7 +215,7 @@ ${sugsChannel} •  Aquí se enviarán las sugerencias que hagan los usuarios (\
             await interaction.channel.send({
                 embeds: [
                     new Embed()
-                        .setImage(basicos.attachment)
+                        .defImage(basicos.attachment)
                         .defColor(Colores.verdejeffrey),
                     new Embed()
                         .defTitle(`Se obtienen sin esfuerzo alguno.`)
@@ -247,7 +227,7 @@ ${sugsChannel} •  Aquí se enviarán las sugerencias que hagan los usuarios (\
 _**${client.Emojis.Error} Algunos roles se consiguen en la sección <id:customize> arriba del todo.**_`)
                         .defColor(Colores.verde),
                     new Embed()
-                        .setImage(especiales.attachment)
+                        .defImage(especiales.attachment)
                         .defColor(Colores.verdejeffrey),
                     new Embed()
                         .defTitle(`Tienen cierto impacto en el server. Es más difícil conseguirlos.`)
@@ -277,13 +257,13 @@ ${vipRole} • Usuario que ha ascendido en el servidor, tendrá colores exclusiv
             await interaction.channel.send({
                 embeds: [
                     new Embed()
-                        .setImage(economia.attachment)
+                        .defImage(economia.attachment)
                         .defColor(Colores.verdejeffrey),
                     new Embed()
                         .defTitle(`— Hay un sistema de economía en el servidor y así funciona:`)
                         .defColor(Colores.nocolor),
                     new Embed()
-                        .setImage(jeffros.attachment)
+                        .defImage(jeffros.attachment)
                         .defColor(Colores.verdeclaro),
                     new Embed()
                         .defTitle(`— ¿Qué son los ${Emojis.Jeffros}Jeffros?`)
@@ -294,7 +274,7 @@ ${vipRole} • Usuario que ha ascendido en el servidor, tendrá colores exclusiv
                         .defFooter({ text: `Los canales que dan EXP y Jeffros lo dirán en su descripción!`, icon: EmojisObject.Error.url })
                         .defColor(Colores.verde),
                     new Embed()
-                        .setImage(awards.attachment)
+                        .defImage(awards.attachment)
                         .defColor(Colores.verdeclaro),
                     new Embed()
                         .defTitle(`— ¿Qué son los Awards?`)
@@ -309,7 +289,7 @@ ${gold} • Cuesta **${Emojis.Jeffros}500**, se envía el mensaje a ${hallOfFame
 ${platinium} • Cuesta **${Emojis.Jeffros}1.800**, se envía el mensaje a ${hallOfFameChannel}, se le da __**${Emojis.Jeffros}700**__ al autor del mensaje premiado.`)
                         .defColor(Colores.verde),
                     new Embed()
-                        .setImage(darkjeffros.attachment)
+                        .defImage(darkjeffros.attachment)
                         .defColor(Colores.verdeclaro),
                     new Embed()
                         .defTitle(`— ¿Qué son los ${Emojis.DarkJeffros}DarkJeffros?`)
@@ -330,13 +310,13 @@ ${platinium} • Cuesta **${Emojis.Jeffros}1.800**, se envía el mensaje a ${hal
             await interaction.channel.send({
                 embeds: [
                     new Embed()
-                        .setImage(staff.attachment)
+                        .defImage(staff.attachment)
                         .defColor(Colores.verdejeffrey),
                     new Embed()
-                        .setImage(sentinels.attachment)
+                        .defImage(sentinels.attachment)
                         .defColor(Colores.verdeclaro),
                     new Embed()
-                        .setImage(guardians.attachment)
+                        .defImage(guardians.attachment)
                         .defColor(Colores.verdeclaro),
                     new Embed()
                         .defDesc(`${staffRoles.toJSON().join(", ")} • Todo aquel que tenga este rol, es parte del equipo del STAFF.
@@ -367,7 +347,7 @@ ${adminRoles.toJSON().join(", ")} • ${modRole}.
             await interaction.channel.send({
                 embeds: [
                     new Embed()
-                        .setImage(colores.attachment)
+                        .defImage(colores.attachment)
                         .defColor(Colores.verde),
                     new Embed()
                         .defDesc(`**—** ¡Mira cuántos colores...! ¡Y con sólo reaccionar aquí abajo puedes colorear tu nombre!
@@ -384,7 +364,7 @@ ${adminRoles.toJSON().join(", ")} • ${modRole}.
             await interaction.channel.send({
                 embeds: [
                     new Embed()
-                        .setImage(ecolores.attachment)
+                        .defImage(ecolores.attachment)
                         .defColor(Colores.verde),
                     new Embed()
                         .defDesc(`**—** ¿¡Más colores!? Creo que es tu día de suerte.
@@ -432,7 +412,7 @@ ${adminRoles.toJSON().join(", ")} • ${modRole}.
             await interaction.channel.send({
                 embeds: [
                     new Embed()
-                        .setImage(reglas.attachment)
+                        .defImage(reglas.attachment)
                         .defColor(Colores.verdejeffrey),
                     ...reglasEmbeds,
                     new Embed()
@@ -452,7 +432,7 @@ ${adminRoles.toJSON().join(", ")} • ${modRole}.
             await interaction.channel.send({
                 embeds: [
                     new Embed()
-                        .setImage(autoroles.attachment)
+                        .defImage(autoroles.attachment)
                         .defColor(Colores.verde)
                 ], files: [autoroles.file]
             });
@@ -479,7 +459,7 @@ ${adminRoles.toJSON().join(", ")} • ${modRole}.
             await interaction.channel.send({
                 embeds: [
                     new Embed()
-                        .setImage(viproles.attachment)
+                        .defImage(viproles.attachment)
                         .defColor(Colores.verde),
                     new Embed()
                         .defDesc(`**—** ¡No puede ser! ¡Más roles exclusivos!
@@ -511,7 +491,7 @@ ${adminRoles.toJSON().join(", ")} • ${modRole}.
 Hoy ${time()}, tenemos un nuevo/mejorado sistema de moderación gracias a Jeffrey Bot. Algunas cosas han cambiado y te lo explicaré ahora:`),
                     new Embed()
                         .defColor(Colores.verde)
-                        .setImage(loNuevo.attachment),
+                        .defImage(loNuevo.attachment),
                     new Embed()
                         .defColor(Colores.nocolor)
                         .defTitle("Hay algunos comandos nuevos:")
@@ -556,7 +536,7 @@ Hoy ${time()}, tenemos un nuevo/mejorado sistema de moderación gracias a Jeffre
 **—** Si se intenta usar el Warn antes que el Softwarn, Jeffrey Bot te lo hará saber. No siempre es bueno dejar pasar las cosas, te lo dejo a tu criterio.`),
                     new Embed()
                         .defColor(Colores.verde)
-                        .setImage(req.attachment),
+                        .defImage(req.attachment),
                     new Embed()
                         .defColor(Colores.nocolor)
                         .defAuthor({ text: "Requisitos para mantenerte como STAFF", title: true })

@@ -5,9 +5,14 @@ const Schema = mongoose.Schema({
     guild_id: { type: String, required: true },
     embeds: [
         {
+            name: { type: String, default: null },
             title: { type: String },
-            icon: { type: String },
             desc: { type: String },
+            urls: {
+                icon: { type: String },
+                image: { type: String },
+                footer: { type: String }
+            },
             color: { type: Number },
             footer: { type: String },
             linkedids: [
@@ -73,24 +78,33 @@ Schema.static("getWork", async function (guild_id) {
     return await this.findOne({ guild_id }) ?? await new this({ guild_id }).save();
 })
 
-Schema.method("addEmbed", function (embed, id) {
-    let embedToPush = {};
+Schema.method("addEmbed", function (embed, id, identifier) {
+    let embedToPush = {
+        urls: {
+            icon: null,
+            image: null,
+            footer: null
+        }
+    };
 
     embedToPush.id = id;
+    embedToPush.name = identifier;
 
     if (embed.author || embed.title) {
         embedToPush.title = embed.author?.name ?? embed.title;
-        embedToPush.icon = embed.author?.icon_url;
+        embedToPush.urls.icon = embed.author?.icon_url;
     }
 
     if (embed.description) embedToPush.desc = embed.description;
     if (embed.timestamp) embedToPush.time = true;
     if (embed.footer) {
         embedToPush.footer = embed.footer.text;
-        embedToPush.footer_icon = embed.footer.icon_url;
+        embedToPush.urls.footer = embed.footer.icon_url;
     }
 
     if (embed.color) embedToPush.color = embed.color;
+    if (embed.image)
+        embedToPush.urls.image = embed.image.url;
 
     this.embeds.push(embedToPush);
     return this;
@@ -101,7 +115,7 @@ Schema.method("getEmbed", function (id) {
 })
 
 Schema.method("deleteEmbed", function (id) {
-    let index = this.embeds.findIndex(x => x === this.getEmbed(id));
+    let index = this.embeds.findIndex(x => x.id === id);
 
     if (index != -1) {
         this.embeds.splice(index, 1)
@@ -111,15 +125,10 @@ Schema.method("deleteEmbed", function (id) {
     }
 })
 
-Schema.method("addButton", function (button, id, embedIds = []) {
-    let buttonToPush = {};
+Schema.method("addButton", function (button, id) {
+    let buttonToPush = {...button};
 
     buttonToPush.id = id;
-    buttonToPush.embedids = embedIds;
-
-    if (button.emoji) buttonToPush.emoji = button.emoji.id ?? button.emoji.name;
-    if (button.label) buttonToPush.texto = button.label;
-    if (button.style) buttonToPush.style = button.style;
 
     this.buttons.push(buttonToPush);
     return this;

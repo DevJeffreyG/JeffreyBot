@@ -58,11 +58,6 @@ class Modal extends ModalBuilder {
         if (!this.data.custom_id || !this.data.title)
             throw new BadCommandError(this.interaction, new JeffreyBotError(null, "Falta CustomId o título en el Modal"))
         return await this.interaction.showModal(this)
-            .catch(err => {
-                throw new BadCommandError(this.interaction, err.message)
-                    .setEphemeral(true)
-                    .setFollowUp(true);
-            });
     }
 
     read() {

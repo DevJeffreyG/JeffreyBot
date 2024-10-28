@@ -15,6 +15,12 @@ command.data
         .addSubcommand(create => create
             .setName("create")
             .setDescription("Crea un nuevo Embed")
+            .addStringOption(o =>
+                o
+                    .setName("identifier")
+                    .setDescription("Identificador al usar la lista de elementos y saber qué Embed es")
+                    .setMaxLength(40)
+            )
         )
         .addSubcommand(edit => edit
             .setName("edit")
@@ -118,6 +124,15 @@ command.data
         .addIntegerOption(id => id
             .setName("id")
             .setDescription("La ID del Embed")
+            .setRequired(true)
+        )
+    )
+    .addSubcommand(send => send
+        .setName("bulksend")
+        .setDescription("Envia varios Embeds por su ID")
+        .addStringOption(id => id
+            .setName("ids")
+            .setDescription("Las IDs de los Embeds")
             .setRequired(true)
         )
     )
@@ -225,6 +240,58 @@ command.execute = async (interaction, models, params, client) => {
             return await interaction.deleteReply();
         }
 
+        case "bulksend": {
+            let { ids } = params[subcommand];
+
+            let embedIds = []
+            let transl = ids.value.split(",")
+            transl.forEach(i => {
+                let n = Number(i);
+                if(!isNaN(n))
+                    embedIds.push(n)
+            })
+
+            let embeds = []
+            let components = [];
+            embedIds.forEach(id => {
+                let dbEmbed = custom.getEmbed(id)
+                if (!dbEmbed)
+                    throw new DoesntExistsError(interaction, `El Embed con ID \`${id}\``, "este servidor");
+
+                let embed = new CustomEmbed(interaction).create(dbEmbed)
+
+                let row = new ActionRowBuilder();
+                let row_autoroles = new ActionRowBuilder();
+
+                for (const linked of dbEmbed.linkedids) {
+                    const linkId = linked.id;
+                    let button = custom.getButton(linkId);
+
+                    if (linked.isAutoRole) {
+                        row_autoroles.setComponents(
+                            new ButtonBuilder()
+                                .setCustomId(`AUTOROLE-${id}`)
+                                .setLabel("Mostrar AutoRoles")
+                                .setStyle(ButtonStyle.Secondary)
+                        )
+                    } else if (button) {
+                        let buttonObj = new CustomButton(interaction).create(button);
+                        if (!buttonObj.data.url) buttonObj.setCustomId(`BUTTON-${linkId}-${linked.isAutoRole}`);
+
+                        row.addComponents(buttonObj);
+                    }
+                }
+
+                if (row.components.length > 0 && components.length < 5) components.push(row);
+                if (row_autoroles.components.length > 0 && components.length < 5) components.push(row_autoroles);
+
+                embeds.push(embed);
+            })
+
+            await interaction.channel.send({ embeds, components });
+            return await interaction.deleteReply();
+        }
+
         case "list": {
             let { tipo } = params[subcommand];
 
@@ -243,7 +310,7 @@ command.execute = async (interaction, models, params, client) => {
                         })
 
                         items.set(embed.id, {
-                            show: embed.title ?? embed.desc,
+                            show: embed.name ?? embed.title ?? embed.desc,
                             linkedType: "Botones",
                             linked: buttons,
                             id: embed.id
@@ -290,7 +357,7 @@ command.execute = async (interaction, models, params, client) => {
                 color: Colores.verde,
                 addon
             }, items, 5)
-            
+
             return await interactive.init(interaction);
         }
     }
@@ -309,13 +376,13 @@ command.execEmbeds = async (interaction, models, params, client) => {
     const { subcommand, embeds } = params;
 
     const modal = new Modal(interaction)
-        .defId("createCustomEmbed")
+        .defId(`createCustomEmbed-${embeds.identifier?.value ?? "null"}`)
         .defTitle("Crear Embed")
         .addInput({ id: "title", label: "El título", placeholder: "Texto que se muestra arriba del todo", style: TextInputStyle.Short })
-        .addInput({ id: "icon", label: "URL Icono", placeholder: "Imagen que se muesta a la izquierda del título", style: TextInputStyle.Short })
         .addInput({ id: "desc", label: "La descripción", placeholder: "Texto que sale en la descripción de este Embed", style: TextInputStyle.Paragraph })
         .addInput({ id: "color", label: "El color del Embed (#HEX)", placeholder: "#00ff00, #ff0000, #f0f0f0, #fff", style: TextInputStyle.Short })
-        .addInput({ id: "footer", label: "El footer", placeholder: "Texto que se muestra debajo del Embed", style: TextInputStyle.Short });
+        .addInput({ id: "footer", label: "El footer", placeholder: "Texto que se muestra debajo del Embed", style: TextInputStyle.Short })
+        .addInput({ id: "urls", label: "URLs del embed", placeholder: "IMGURL, ICONURL, FOOTERURL", style: TextInputStyle.Paragraph })
 
     switch (subcommand) {
         case "create": {
@@ -325,11 +392,21 @@ command.execEmbeds = async (interaction, models, params, client) => {
         case "edit": {
             let { id } = embeds;
             modal.defId("editCustomEmbed-" + id.value);
+            modal.components.forEach(row => {
+                let actualValue = params.customDoc.getEmbed(id.value)[row.components[0].data.custom_id]
+                if (isNaN(actualValue)) {
+                    if (typeof actualValue === "object") {
+                        actualValue = (Object.keys(actualValue).map((key) => actualValue[key])).join(", ");
+                    }
+                    row.components[0].setValue(actualValue ?? "")
+                }
+            })
             await modal.show()
             break;
         }
         case "del": {
             let { id } = embeds;
+            await interaction.deferReply();
             return await new CustomEmbed(interaction).delete(id.value);
         }
     }

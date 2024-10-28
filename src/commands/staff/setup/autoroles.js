@@ -167,6 +167,7 @@ command.execute = async (interaction, models, params, client) => {
 
             let confirm = [
                 `AutoRole con ID \`${autoRole.id}\`.`,
+                `**NO** se desvinculará de cualquier Elemento Embed creado. Usa ${client.mentionCommand("autoroles link")} para eso.`
                 `Esto no se puede deshacer.`
             ]
             let toggletxt = `Toggle Group: **${doc.getOrCreateToggleGroup(autoRole.toggle_group).group_name}**, ID: \`${autoRole.toggle_group}\`.`

@@ -72,7 +72,14 @@ class AutoRole {
         if (row_autoroles.components.length > 0 && components.length < 5) components.push(row_autoroles);
         if (row_toggles.components.length > 0 && components.length < 5) components.push(row_toggles);
 
-        return await this.interaction.editReply({ content: null, embeds: [], components })
+        try {
+            return await this.interaction.editReply({ content: null, embeds: [], components })
+        } catch (err) {
+            this.interaction.deleteReply().catch(err => {
+                console.error("🔴 %s", err);
+            });
+            console.error("🔴 %s", err);
+        }
     }
 
     /**
@@ -100,8 +107,8 @@ class AutoRole {
 
             try {
                 if (this.interaction.member.roles.cache.get(role.id)) {
-                    res = true;
                     await this.interaction.member.roles.remove(role);
+                    res = true;
                     await this.interaction.followUp({
                         ephemeral: true,
                         embeds: [
@@ -114,8 +121,8 @@ class AutoRole {
 
                     console.log(`💬 Se eliminó por AUTOROLES ${role.name} a ${this.interaction.user.username}`);
                 } else {
-                    res = true;
                     await this.interaction.member.roles.add(role);
+                    res = true;
                     await this.interaction.followUp({
                         ephemeral: true,
                         embeds: [
@@ -147,6 +154,7 @@ class AutoRole {
 
                 }
             } catch (err) {
+                res = false;
                 console.error(err);
                 new Log(this.interaction)
                     .setReason(LogReasons.Error)

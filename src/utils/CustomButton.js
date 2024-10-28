@@ -23,7 +23,7 @@ class CustomButton extends ButtonBuilder {
 
         const id = FindNewId(await CustomElements.find(), "buttons", "id")
 
-        this.doc.addButton(this.raw(), id, this.linked);
+        this.doc.addButton(this.raw(), id);
         await this.doc.save();
 
         return await this.interaction.editReply({
@@ -32,7 +32,7 @@ class CustomButton extends ButtonBuilder {
                     type: "success",
                     data: {
                         desc: [
-                            `Se ha creado el Botón. Usa ${this.interaction.client.mentionCommand("elements buttons edit")} para hacerle cambios`,
+                            `Se ha creado el Botón. Usa ${this.interaction.client.mentionCommand("elements botones edit")} para hacerle cambios`,
                             `ID: ${id}`
                         ]
                     }
@@ -56,7 +56,7 @@ class CustomButton extends ButtonBuilder {
         let buttonObj = new CustomButton(this.interaction).create(cstmButton);
         let button = new CustomButton(this.interaction).create({
             texto: params.texto?.value ?? buttonObj.data.label,
-            emoji: params.emoji?.value ?? buttonObj.data.emoji?.id ?? buttonObj.data.emoji?.name,
+            emoji: params.emoji?.value ?? cstmButton.emoji,
             style: params.style?.value ?? buttonObj.data.style,
             link: params.link?.value ?? buttonObj.data.url,
             embedids: params.embedids?.value ?? cstmButton.embedids
@@ -73,7 +73,7 @@ class CustomButton extends ButtonBuilder {
                     type: "success",
                     data: {
                         desc: [
-                            `Se ha editado el Botón. Usa ${this.interaction.client.mentionCommand("elements buttons link")} para vincularlo a un Embed`,
+                            `Se ha editado el Botón. Usa ${this.interaction.client.mentionCommand("elements botones link")} para vincularlo a un Embed`,
                             `ID: ${id}`
                         ]
                     }
@@ -150,7 +150,13 @@ class CustomButton extends ButtonBuilder {
     }
 
     raw() {
-        return this.data;
+        return {
+            style: this.data.style,
+            texto: this.data.label,
+            emoji: this.data.emoji?.id ?? this.data.emoji?.name,
+            link: this.data.url,
+            embedids: this.linked
+        };
     }
 
     /**

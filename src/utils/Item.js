@@ -893,7 +893,7 @@ class Item {
                 return true
             }
         } else { // no tiene firewall
-            if (this.victim.economy.global.level >= this.doc.settings.quantities.darkshop_level) {
+            if (this.victim.economy.global.level >= this.doc.settings.quantities.darkshop.level) {
                 dsEvents?.send({ content: `**${this.interaction.user.username}** ➡️ **${this.member}**.`, embeds: [success] }).catch(err => {
                     console.error("🔴 %s", err);
                 });

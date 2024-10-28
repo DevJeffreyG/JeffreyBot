@@ -133,20 +133,33 @@ command.execute = async (interaction, models, params, client) => {
                 delete info.type;
                 let newInfo = info;
 
-                if (type != "lastExpJeffros" && type != "rouletteItem") {
+                if (type != "bellNotification" && type != "rouletteItem") {
                     if (!(await GlobalDatas.findOne({ info: newInfo }))) new GlobalDatas({
                         type,
                         info: newInfo
                     }).save();
-                } else if (type === "lastExpJeffros") {
-                    actual.deleteOne();
+                } else if (type === "bellNotification") {
+                    actual.deleteOne().catch(err => {
+                        console.error("🔴 %s", err);
+                    });
                 } else if (type === "rouletteItem") {
                     if (newInfo.target === ItemObjetives.TempRole) newInfo.target = ItemObjetives.Boost;
-                    if (!(await RouletteItems.findOne(newInfo)))
-                        await RouletteItems.new(newInfo, FindNewId(await RouletteItems.getAll(), "", "id"));
+                    if (!(await RouletteItems.findEqual(newInfo))) {
+                        try {
+                            await RouletteItems.new(newInfo, FindNewId(await RouletteItems.getAll(), "", "id"));
+                        } catch (err) {
+                            console.error("🔴 %s", err);
+                        }
+                    }
                 }
 
-                if (confirmation) actual.deleteOne();
+                if (confirmation) {
+                    try {
+                        await actual.deleteOne();
+                    } catch (err) {
+                        console.error("🔴 %s", err);
+                    }
+                }
             }
 
             return await interaction.editReply({ embeds: [new Embed({ type: "success" })] });
@@ -157,29 +170,42 @@ command.execute = async (interaction, models, params, client) => {
 
             const users = await Users.find();
             for await (const user of users) {
-                await user.data.purchases.forEach((p, i) => {
+                let somethingChanged = false;
+                user.data.purchases.forEach((p, i) => {
+                    let m = false;
                     if (p.toObject().hasOwnProperty("isDarkShop")) {
                         let obj = user.data.purchases[i].toObject();
                         obj.shopType = obj.isDarkShop ? ShopTypes.DarkShop : ShopTypes.Shop;
 
-                        delete obj.isDarkShop;
-
                         user.data.purchases[i] = obj;
-                        user.markModified("data.purchases")
+                        somethingChanged = true;
+                        m = true;
                     }
+
+                    if (m) user.markModified("data.purchases")
                 })
 
-                await user.data.inventory.forEach((item, i) => {
+                user.data.inventory.forEach((item, i) => {
+                    let m = false;
                     if (item.toObject().hasOwnProperty("isDarkShop")) {
                         let obj = user.data.inventory[i].toObject();
                         obj.shopType = obj.isDarkShop ? ShopTypes.DarkShop : ShopTypes.Shop;
 
-                        delete obj.isDarkShop;
-
                         user.data.inventory[i] = obj;
-                        user.markModified("data.inventory")
+                        somethingChanged = true;
+                        m = true;
                     }
+
+                    if (m) user.markModified("data.inventory")
                 })
+
+                if (somethingChanged) {
+                    try {
+                        await user.save();
+                    } catch (err) {
+                        console.error("🔴 %s", err);
+                    }
+                }
             }
 
             return await interaction.editReply({ content: `${client.Emojis.Check} Sincronizados.` })

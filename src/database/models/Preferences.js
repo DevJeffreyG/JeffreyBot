@@ -8,7 +8,7 @@ const Schema = new mongoose.Schema({
     direct_messages: {
         firstDmSent: False,
         options: {
-            supressed: False,
+            supressed: True,
             allowed: True
         },
         allowed: {

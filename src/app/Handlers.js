@@ -705,9 +705,10 @@ class Handlers {
 
         switch (customId) {
             case "createCustomEmbed": {
+                let identifier = splittedId[1]
                 await this.interaction.deferReply({ ephemeral: true })
 
-                const newEmbed = new CustomEmbed(this.interaction).create(recieved)
+                const newEmbed = new CustomEmbed(this.interaction).create(recieved, identifier)
                 let confirmation = await Confirmation("Nuevo Embed", [
                     "El Embed se verá así:",
                     newEmbed

@@ -62,7 +62,7 @@ command.execute = async (interaction, models, params, client) => {
         throw new BadParamsError(interaction, ["El `canal` debe ser un canal de texto"]);
 
     let imgEmbed = new Embed()
-        .setImage(image.attachment)
+        .defImage(image.attachment)
         .defColor(Colores.verdejeffrey)
 
     const footer = new Chance().pickone([

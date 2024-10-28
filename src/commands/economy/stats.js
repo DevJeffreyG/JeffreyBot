@@ -77,7 +77,7 @@ command.execute = async (interaction, models, params, client) => {
     let boosts = user.getBoosts();
     let trophies = user.getTrophies();
 
-    if (boosts?.length > 0 || trophies?.length > 0 || user.economy.global.level >= doc.settings.quantities.darkshop_level)
+    if (boosts?.length > 0 || trophies?.length > 0 || user.economy.global.level >= doc.settings.quantities.darkshop.level)
         row.addComponents(
             new ButtonBuilder()
                 .setLabel("Estadísticas")

@@ -11,6 +11,7 @@ class CustomEmbed extends Embed {
     constructor(interaction) {
         super();
         this.interaction = interaction;
+        this.indentifer = null;
     }
 
     /**
@@ -22,7 +23,7 @@ class CustomEmbed extends Embed {
 
         const id = FindNewId(await CustomElements.find(), "embeds", "id")
 
-        this.doc.addEmbed(this.raw(), id);
+        this.doc.addEmbed(this.raw(), id, this.identifier);
         await this.doc.save();
 
         return await this.interaction.editReply({
@@ -55,17 +56,18 @@ class CustomEmbed extends Embed {
 
         if (embed.author || embed.title) {
             cstmEmbed.title = embed.author?.name ?? embed.title;
-            cstmEmbed.icon = embed.author?.icon_url;
+            cstmEmbed.urls.icon = embed.author?.icon_url;
         }
 
         if (embed.description) cstmEmbed.desc = embed.description;
         if (embed.timestamp) cstmEmbed.time = true;
         if (embed.footer) {
             cstmEmbed.footer = embed.footer.text;
-            cstmEmbed.footer_icon = embed.footer.icon_url;
+            cstmEmbed.urls.footer = embed.footer.icon_url;
         }
 
         if (embed.color) cstmEmbed.color = embed.color;
+        if (embed.image) cstmEmbed.urls.image = embed.image.url;
 
         await this.doc.save();
 
@@ -107,32 +109,56 @@ class CustomEmbed extends Embed {
                 ]
             })
         } catch (err) {
+            console.log("🔴 %s", err);
             throw new DoesntExistsError(this.interaction, `El Embed con ID \`${id}\``, "este servidor");
         }
     }
 
     /**
-     * @param {{ title, icon, desc, footer, footer_icon, time, color }} params 
+     * @param {{ title, desc, footer, color, urls }} params 
+     * @param {String} identifier
      */
-    create(params) {
-        const { title, icon, desc, footer, footer_icon, time, color } = params;
+    create(params, identifier = "null") {
+        if (identifier != "null") this.identifier = identifier
+        const { title, desc, footer, color, urls } = params;
 
         const titulo = title?.value ?? title;
-        const icono = icon?.value ?? icon;
         const descr = desc?.value ?? desc;
         const foo = footer?.value ?? footer;
-        const fooicon = footer_icon?.value ?? footer_icon;
-        const tiempo = time?.value ?? time;
         const colorEmbed = color?.value ?? color;
 
-        if (titulo) this.defAuthor({ text: titulo, icon: icono, title: icon ? false : true })
-        if (foo) this.defFooter({ text: foo, icon: fooicon, timestamp: tiempo ?? false })
+        let urlObj = urls ?? {};
+        if (typeof urls === "string") {
+            let URLs = urls ? urls.split(",") : []
+            URLs.forEach((u, i) => {
+                u = u.replaceAll(/\s+/g, "") // quitar todos los espacios
+                if (u.length === 0) u = null;
+
+                URLs[i] = u;
+            });
+
+            console.log(URLs);
+
+            urlObj = {
+                image: URLs[0] ?? null,
+                icon: URLs[1] ?? null,
+                footer: URLs[2] ?? null
+            }
+        }
+
+        const imag = urlObj.image;
+        const icono = urlObj.icon;
+        const fooicon = urlObj.footer;
+
+        if (titulo) this.defAuthor({ text: titulo, icon: icono, title: icono ? false : true })
+        if (foo) this.defFooter({ text: foo, icon: fooicon })
         try {
             if (colorEmbed) this.defColor(colorEmbed)
         } catch (err) {
             this.defColor("#000000")
         }
         if (descr) this.defDesc(descr)
+        if (imag) this.defImage(imag)
 
         return this
     }
