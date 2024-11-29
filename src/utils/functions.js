@@ -1169,7 +1169,7 @@ const handleNotification = async function (guild) {
     videos: ["Ha llegado el momento, chécalo para evitar que Jeffrey se ponga triste.", "Dale like o comenta algo si te gustó lo suficiente :D", "Espero que nos veamos en la próxima, ¡y que no sea en ██ meses!", "Hazme caso, está bueno. Míralo, a lo bien.", "No sabría decir si es lamentable, espero que no, ¿por qué no lo ves para comprobarlo y me dices qué tal?"],
     shorts: ["Venga va, que es de los cortos chécalo.", "¡Viva el contenido rápido!", "¿Sólo unos días más para que salga un vídeo real?", "¡Otro vídeo corto para hacer presencia!"],
     twitch: ["¡Ven y di hola!", "¡Ven y saluda!", "¡Pásate!", "¡Esto no pasa todo el tiempo, ven!", "¿QUÉ? LLEGA"],
-    emojis: ["⚡", "🔥", "✨", "💚", "🦊", guild.client.Emojis.Badge, "✅", "👀"],
+    emojis: ["⚡", "🔥", "✨", "💚", "🦊", guild.client.Emojis.Badge, "👀", guild.client.Emojis.POG],
     labels: ["¡Me interesa!", "¡Veamos!", "¡Interesante!", "¡Click!", "¡Me sirve!", "¡A ver!"]
   }
 
@@ -1184,6 +1184,7 @@ const handleNotification = async function (guild) {
     if (item.snippet.type != "upload") continue;
 
     const videoId = item.contentDetails.upload.videoId;
+    const publishDate = moment(item.snippet.publishedAt)
 
     // Si ya fue notificado ignorar
     if (dataNotified.youtube.shorts.find(x => x === videoId) || dataNotified.youtube.videos.find(x => x === videoId)) {
@@ -1200,16 +1201,23 @@ const handleNotification = async function (guild) {
       if (shortRes.status === 404) throw Error(`404 Checking if short: ${shortLink}`)
       isShort = shortRes.status === 303 ? false : true;
     } catch (err) {
-      console.error("🔴 %s", err);
+      console.error("🔴 Error checking short: %s", err);
+      continue;
+    }
+
+    // Si ya pasó mucho tiempo, ignorar
+    const timePassed = moment().diff(publishDate, "days");
+    if (timePassed > doc.settings.quantities.ignore_notifications[isShort ? "youtube_shorts" : "youtube_videos"]) {
+      // console.log("🟢 Ya pasó mucho tiempo para notificar (%sd): %s", timePassed, item.snippet.title);
       continue;
     }
 
     let prop = isShort ? "shorts" : "videos";
 
     let embed = new Embed()
-      .defTitle(isShort ? "¡NUEVO SHORT!" : "¡NUEVO VÍDEO!")
+      .defDesc(`# ${isShort ? "¡NUEVO SHORT!" : "¡NUEVO VÍDEO!"}\n### ${new Chance().pickone(textos.emojis)} ${item.snippet.title}`)
       .defColor(Colores.verde)
-      .defFooter({ text: `— ${item.snippet.title}` })
+      .defFooter({ text: `— ${new Chance().pickone(textos[prop])}` })
       .defImage(item.snippet.thumbnails.maxres.url ?? item.snippet.thumbnails.default.url);
 
     let components = [
@@ -1228,10 +1236,8 @@ const handleNotification = async function (guild) {
       dataNotified.youtube[prop].push(videoId);
       await doc.save();
 
-      embed.defDesc(new Chance().pickone(textos.emojis) + " " + new Chance().pickone(textos[prop]))
-
       await youtubeChannel.send({ content: (isShort ? shortsRole : ytRole).toString(), embeds: [embed], components });
-      
+
       console.log("🟢 Announced %s", videoId)
       console.log("🟢 ShortRes: %s", shortRes);
       console.log("🟢 IsShort: %s", isShort);
@@ -1253,10 +1259,9 @@ const handleNotification = async function (guild) {
     const streamTitle = stream.title;
     if (!dataNotified.twitch.find(x => x === streamId)) {
       let embed = new Embed()
-        .defTitle("¡Jeffrey está en directo!")
-        .defDesc(streamTitle)
+        .defDesc(`# ¡JEFFREY ESTÁ EN DIRECTO!\n### ${new Chance().pickone(textos.emojis)} ${streamTitle}`)
         .defColor("#9146FF")
-        .defFooter({ text: `${new Chance().pickone(textos.emojis)} ${new Chance().pickone(textos.twitch)}` })
+        .defFooter({ text: `— ${new Chance().pickone(textos.twitch)}` })
         .defImage(await getUserPicture(config.twitch_username));
 
       let components = [

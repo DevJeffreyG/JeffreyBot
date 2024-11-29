@@ -209,6 +209,10 @@ const GuildSchema = new Schema({
             guild_id: { type: String },
         },
         quantities: {
+            ignore_notifications: {
+                youtube_videos: { type: Number, default: 14, validate: [positiveValidator, integerValidator] },
+                youtube_shorts: { type: Number, default: 14, validate: [positiveValidator, integerValidator] }
+            },
             interest_days: {
                 secured: { type: Number, default: 14, validate: [positiveWithZeroValidator, integerValidator] }
             },
@@ -390,8 +394,8 @@ const GuildSchema = new Schema({
 });
 
 GuildSchema.pre("save", function () {
-    if(!this.data.last_interests.secured) this.data.last_interests.secured = new Date();
-    
+    if (!this.data.last_interests.secured) this.data.last_interests.secured = new Date();
+
     if (this.settings.functions.adjust) {
         let obj = this.settings.functions.toObject();
         delete obj.adjust_shop, obj.adjust_darkshop, obj.adjust_coins;
