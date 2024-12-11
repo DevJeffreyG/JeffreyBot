@@ -567,7 +567,8 @@ class Item {
                     embeds: [
                         new Embed()
                             .defDesc(`### ${this.interaction.member}, usa el botón de abajo para usar el TTS. Tendrás **5 minutos** para escribir a partir de que pulses el botón.
--# Tienes 1 minuto para presionar el botón antes de que se cancele el uso.`)
+-# ⚠️ Tienes 1 minuto para presionar el botón antes de que se cancele el uso.
+-# Recuerda que tu nombre (${this.interaction.user}) e ID (\`${this.interaction.user.id}\`) estarán asociados a este mensaje. Evita problemas.`)
                             .defColor(Colores.nocolor)
                     ],
                     components: [ttsRow]
@@ -579,21 +580,25 @@ class Item {
                     wait: true
                 }, true, false).onEnd(() => {
                     ttsRow.components.forEach(c => c.setDisabled());
-                    this.interaction.editReply({ components: [ttsRow] });
+                    this.interaction.editReply({ components: [ttsRow] }).catch(err => {
+                        console.error("🔴 %s", err);
+                    });
                 }).handle().wait(() => {
-                    this.interaction.deleteReply();
+                    this.interaction.deleteReply().catch(err => {
+                        console.error("🔴 %s", err);
+                    });
                 });
 
                 if (!ttsInteraction) return false;
 
-                await new Modal(ttsInteraction)
-                    .defId("ttsInput")
+                let m = await new Modal(ttsInteraction)
+                    .defUniqueId(`ttsInput`)
                     .defTitle("TTS")
                     .addInput({ id: "tts", label: "¿Qué quieres decir?", placeholder: "Exprésate...", style: TextInputStyle.Paragraph, req: true, min: 1, max: 500 })
                     .show();
 
                 let c = await ttsInteraction.awaitModalSubmit({
-                    filter: (i) => i.customId === "ttsInput" && i.user.id === this.interaction.user.id,
+                    filter: (i) => i.customId === m.customId && i.user.id === this.interaction.user.id,
                     time: ms("5m")
                 }).catch(async err => {
                     if (err.code === DiscordjsErrorCodes.InteractionCollectorError) await this.interaction.deleteReply();

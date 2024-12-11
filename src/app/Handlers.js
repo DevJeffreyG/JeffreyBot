@@ -496,14 +496,14 @@ class Handlers {
 
                 let customVal = null;
                 if (collector.customId === "customPush") {
-                    await new Modal(collector)
-                        .defId(collector.customId)
+                    let m = await new Modal(collector)
+                        .defUniqueId(collector.customId)
                         .defTitle("Aumentar apuesta")
                         .addInput({ id: "bet", label: "Apuesta", style: TextInputStyle.Short, req: true, min: 1, placeholder: "Número entero positivo" })
                         .show();
 
                     let c = await collector.awaitModalSubmit({
-                        filter: (i) => i.customId === "customPush" && i.user.id === this.interaction.user.id,
+                        filter: (i) => i.customId === m.customId && i.user.id === this.interaction.user.id,
                         time: ms("1m")
                     }).catch(async err => {
                         if (err.code === DiscordjsErrorCodes.InteractionCollectorError) await interaction.deleteReply();

@@ -202,15 +202,15 @@ class InteractivePages {
         collector.on("collect", async i => {
             if (i.customId === "jump") {
                 try {
-                    await new Modal(i)
-                        .defId("jumpPage")
+                    let m = await new Modal(i)
+                        .defUniqueId("jumpPage")
                         .defTitle("Salta a un página")
                         .addInput(
                             { id: "pag", label: "Página", placeholder: "Escribe un número entero positivo", style: TextInputStyle.Short }
                         )
                         .show()
 
-                    let r = await i.awaitModalSubmit({ filter: (inter) => inter.customId === "jumpPage" && inter.user.id === i.user.id, time: ms("1m") });
+                    let r = await i.awaitModalSubmit({ filter: (inter) => inter.customId === m.customId && inter.user.id === i.user.id, time: ms("1m") });
 
                     await r.deferUpdate();
                     const { pag } = new Modal(r).read();

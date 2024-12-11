@@ -1,4 +1,4 @@
-const { MessageComponentInteraction, ModalBuilder, TextInputBuilder, ActionRowBuilder, ModalSubmitInteraction, CommandInteraction, TextInputStyle } = require("discord.js");
+const { MessageComponentInteraction, ModalBuilder, TextInputBuilder, ActionRowBuilder, ModalSubmitInteraction, CommandInteraction, TextInputStyle, BaseInteraction } = require("discord.js");
 const { BadCommandError } = require("../errors");
 const JeffreyBotError = require("../errors/JeffreyBotError");
 
@@ -15,6 +15,12 @@ class Modal extends ModalBuilder {
 
     defId(id) {
         this.setCustomId(id)
+        this.customId = id;
+        return this
+    }
+
+    defUniqueId(id) {
+        this.defId(id + this.interaction.id ?? this.interaction.createdTimestamp)
         return this
     }
 
@@ -52,12 +58,14 @@ class Modal extends ModalBuilder {
     }
 
     /**
-     * @returns {Promise<void>} 
+     * @returns {Promise<this>} 
      */
     async show() {
         if (!this.data.custom_id || !this.data.title)
             throw new BadCommandError(this.interaction, new JeffreyBotError(null, "Falta CustomId o título en el Modal"))
-        return await this.interaction.showModal(this)
+        await this.interaction.showModal(this)
+
+        return this
     }
 
     read() {

@@ -580,8 +580,8 @@ ${codeBlock(item.description)}
                     petStats = async (inter) => {
                         const actual = item.stats;
 
-                        await new Modal(inter)
-                            .setCustomId("petStats")
+                        let m = await new Modal(inter)
+                            .defUniqueId("petStats")
                             .setTitle("Estadísticas base de Mascota")
                             .addInput({ id: "hp", value: `${actual.hp ?? ""}`, label: "HP", placeholder: "Escribe un número entero positivo", style: TextInputStyle.Short })
                             .addInput({ id: "attack", value: `${actual.attack ?? ""}`, label: "Max Ataque", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
@@ -589,7 +589,7 @@ ${codeBlock(item.description)}
                             .show()
 
                         let c = await inter.awaitModalSubmit({
-                            filter: (i) => i.customId === "petStats" && i.user.id === this.interaction.user.id,
+                            filter: (i) => i.customId === m.customId && i.user.id === this.interaction.user.id,
                             time: ms("1m")
                         }).catch(async err => {
                             if (err.code === DiscordjsErrorCodes.InteractionCollectorError) await this.interaction.deleteReply();
@@ -603,8 +603,8 @@ ${codeBlock(item.description)}
                     itemConfig = async (inter) => {
                         const actual = item.stats;
 
-                        await new Modal(inter)
-                            .setCustomId("petStatsModifier")
+                        let m = await new Modal(inter)
+                            .defUniqueId("petStatsModifier")
                             .setTitle("Configuración del item")
                             .addInput({ id: "hp", value: `${actual.hp ?? "0"}`, label: "HP Dada", placeholder: "Escribe un número entero positivo", style: TextInputStyle.Short })
                             .addInput({ id: "hunger", value: `${actual.hunger ?? "0"}`, label: "Hambre mitigada", placeholder: "Escribe un número entero positivo", style: TextInputStyle.Short })
@@ -613,7 +613,7 @@ ${codeBlock(item.description)}
                         // TODO: 2.2.X - ¿Carga de ULT?
 
                         let c = await inter.awaitModalSubmit({
-                            filter: (i) => i.customId === "petStatsModifier" && i.user.id === this.interaction.user.id,
+                            filter: (i) => i.customId === m.customId && i.user.id === this.interaction.user.id,
                             time: ms("1m")
                         }).catch(async err => {
                             if (err.code === DiscordjsErrorCodes.InteractionCollectorError) await this.interaction.deleteReply();
@@ -646,8 +646,8 @@ ${codeBlock(item.description)}
                     getKeyActions = async (inter) => {
                         const actual = item.use_info.external_info;
 
-                        await new Modal(inter)
-                            .setCustomId("exKeysItemConfig")
+                        let m = await new Modal(inter)
+                            .defUniqueId("exKeysItemConfig")
                             .setTitle("Configuración del item")
                             .addInput({ id: "actions", value: `${actual.actions.length > 0 ? actual.actions.join("\n") : "ALT TAB\ntexto"}`, label: "Teclas pulsadas", placeholder: "Teclas presionadas al tiempo en una sola linea. Teclas separadas por espacios.", style: TextInputStyle.Paragraph })
                             .addInput({ id: "keysDelay", value: `${actual.delays.keys ?? "50"}`, label: "Delay de teclas (ms)", placeholder: "Escribe un número entero positivo", style: TextInputStyle.Short })
@@ -656,7 +656,7 @@ ${codeBlock(item.description)}
                             .show()
 
                         let c = await inter.awaitModalSubmit({
-                            filter: (i) => i.customId === "exKeysItemConfig" && i.user.id === this.interaction.user.id,
+                            filter: (i) => i.customId === m.customId && i.user.id === this.interaction.user.id,
                             time: ms("5m")
                         }).catch(async err => {
                             if (err.code === DiscordjsErrorCodes.InteractionCollectorError) await this.interaction.deleteReply();
@@ -671,8 +671,8 @@ ${codeBlock(item.description)}
                     getMediaActions = async (inter) => {
                         const actual = item.use_info.external_info;
 
-                        await new Modal(inter)
-                            .setCustomId("exMediaItemConfig")
+                        let m = await new Modal(inter)
+                            .defUniqueId("exMediaItemConfig")
                             .setTitle("Configuración del item")
                             .addInput({ id: "urls", value: `${actual.actions.join("\n")}`, label: "Multimedia(s)", style: TextInputStyle.Paragraph })
                             .addInput({ id: "globalUseDelay", value: `${actual.delays.global ? ms(actual.delays.global) : "10m"}`, label: "Delay de uso global", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
@@ -680,7 +680,7 @@ ${codeBlock(item.description)}
                             .show()
 
                         let c = await inter.awaitModalSubmit({
-                            filter: (i) => i.customId === "exMediaItemConfig" && i.user.id === this.interaction.user.id,
+                            filter: (i) => i.customId === m.customId && i.user.id === this.interaction.user.id,
                             time: ms("5m")
                         }).catch(async err => {
                             if (err.code === DiscordjsErrorCodes.InteractionCollectorError) await this.interaction.deleteReply();
@@ -695,8 +695,8 @@ ${codeBlock(item.description)}
                     getTTSActions = async (inter) => {
                         const actual = item.use_info.external_info;
 
-                        await new Modal(inter)
-                            .setCustomId("exTTSItemConfig")
+                        let m = await new Modal(inter)
+                            .defUniqueId("exTTSItemConfig")
                             .setTitle("Configuración del item")
                             .addInput({ id: "voice", value: `${actual.actions.join("\n")}`, label: "Voz a usar en TTS", style: TextInputStyle.Short })
                             .addInput({ id: "globalUseDelay", value: `${actual.delays.global ? ms(actual.delays.global) : "10m"}`, label: "Delay de uso global", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
@@ -704,7 +704,7 @@ ${codeBlock(item.description)}
                             .show()
 
                         let c = await inter.awaitModalSubmit({
-                            filter: (i) => i.customId === "exTTSItemConfig" && i.user.id === this.interaction.user.id,
+                            filter: (i) => i.customId === m.customId && i.user.id === this.interaction.user.id,
                             time: ms("5m")
                         }).catch(async err => {
                             if (err.code === DiscordjsErrorCodes.InteractionCollectorError) await this.interaction.deleteReply();

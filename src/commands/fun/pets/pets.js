@@ -118,14 +118,14 @@ command.admin = async (interaction, models, params, client) => {
     if (!collector) return;
     switch (collector.customId) {
         case "changeName":
-            new Modal(collector)
-                .defId("modalPetName")
+            let m = await new Modal(collector)
+                .defUniqueId("modalPetName")
                 .defTitle("Cambio de nombre")
                 .addInput({ id: "name", label: "Nuevo nombre", style: TextInputStyle.Short, req: true, min: 1, max: 25 })
                 .show()
 
             let r = await interaction.awaitModalSubmit({
-                filter: (i) => i.customId === "modalPetName" && i.userId === interaction.userId,
+                filter: (i) => i.customId === m.customId && i.userId === interaction.userId,
                 time: ms("5m")
             }).catch(async err => {
                 if (err.code === DiscordjsErrorCodes.InteractionCollectorError) await interaction.deleteReply();

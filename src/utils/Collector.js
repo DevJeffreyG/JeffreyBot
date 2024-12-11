@@ -126,7 +126,12 @@ class Collector {
 
             this.collector.on("end", async (collected, reason) => {
                 let index = this.client.activeCollectors.findIndex(x => x.collector === this.collector && x.userid === this.user.id);
-                if (this.evalOnEnd) this.evalOnEnd(collected, reason);
+                
+                try {
+                    if (this.evalOnEnd) this.evalOnEnd(collected, reason);
+                } catch (err) {
+                    console.error("🔴 %s", err);
+                }
 
                 if (index != -1) {
                     this.client.activeCollectors.splice(index, 1);

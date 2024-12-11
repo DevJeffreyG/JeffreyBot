@@ -48,7 +48,7 @@ command.execute = async (interaction, models, params, client) => {
     const closes_in = moment().add(ms(params.tiempo.value), "ms").toDate();
     const modal = new Modal(interaction)
         .defTitle("Nueva apuesta")
-        .defId("betCreation");
+        .defUniqueId("betCreation");
 
     for (let i = 0; i < 5; i++) {
         modal.addInput({
@@ -64,7 +64,7 @@ command.execute = async (interaction, models, params, client) => {
 
     await modal.show()
     let r = await interaction.awaitModalSubmit({
-        filter: (i) => i.customId === "betCreation" && i.userId === interaction.userId,
+        filter: (i) => i.customId === modal.customId && i.userId === interaction.userId,
         time: ms("5m")
     }).catch(async err => {
         if (err.code === DiscordjsErrorCodes.InteractionCollectorError) await interaction.deleteReply();
