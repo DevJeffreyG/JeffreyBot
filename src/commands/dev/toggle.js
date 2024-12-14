@@ -1,59 +1,118 @@
 const { Colores } = require("../../resources");
-const { Command, Embed } = require("../../utils");
+const { Command, Embed, Enum, ToggleableFunctions } = require("../../utils");
 
 const command = new Command({
     name: "toggle",
-    desc: "Habilita o deshabilita un comando del bot"
+    desc: "Habilitar/Desactivar cosas del bot"
 });
+
+command.addSubcommand({
+    name: "command",
+    desc: "Habilita/desactiva algún comando del bot"
+})
+
+
+command.addSubcommand({
+    name: "functions",
+    desc: "Habilita/desactiva alguna de las funciones del bot"
+})
 
 command.addOption({
     type: "string",
     name: "comando",
     desc: "Comando a togglear",
+    sub: "command",
     req: true
 })
 
 command.addOption({
     type: "string",
     name: "razon",
-    desc: "Alguna razón en específico?"
+    desc: "¿Alguna razón en específico?",
+    sub: "command"
+})
+
+command.addOption({
+    type: "integer",
+    name: "funcion",
+    desc: "La función a togglear",
+    choices: new Enum(ToggleableFunctions).complexArray(),
+    sub: "functions",
+    req: true
 })
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
 
     const { EmojisObject } = client
-    const { ToggledCommands } = models;
-    const { comando } = params;
-    const toggled = comando.value;
-    const reason = params.razon ? params.razon.value : "Mantenimiento";
+    const { subcommand } = params;
 
-    let removed = new Embed()
-        .defAuthor({ text: "Eliminado", icon: EmojisObject.Check.url })
-        .defDesc(`**—** Se ha eliminado el comando ${client.mentionCommand(toggled)}.`)
-        .defColor(Colores.verde);
+    let toggles = client.toggles;
 
-    let added = new Embed()
-        .defAuthor({ text: "Toggled", icon: EmojisObject.Check.url })
-        .defDesc(`**—** Se ha agregado el comando ${client.mentionCommand(toggled)}.`)
-        .defColor(Colores.verde);
+    switch (subcommand) {
+        case "command": {
+            const { comando } = params[subcommand];
 
-    // Comando
-    let toggle = await ToggledCommands.findOne({
-        command: toggled
-    });
+            const commandName = comando.value;
+            const reason = params[subcommand].razon ? params[subcommand].razon.value : "Mantenimiento";
 
-    if (!toggle) {
-        new ToggledCommands({
-            command: toggled,
-            reason: reason
-        }).save();
+            let on = new Embed()
+                .defAuthor({ text: "Habilitado", icon: EmojisObject.Check.url })
+                .defDesc(`**—** Se ha habilitado el comando ${client.mentionCommand(commandName)}.`)
+                .defColor(Colores.verde);
 
-        return await interaction.editReply({ embeds: [added] })
-    } else {
-        toggle.deleteOne();
+            let off = new Embed()
+                .defAuthor({ text: "Deshabilitado", icon: EmojisObject.Check.url })
+                .defDesc(`**—** Se ha deshabilitado el comando ${client.mentionCommand(commandName)}.`)
+                .defColor(Colores.verde);
 
-        return await interaction.editReply({ embeds: [removed] })
+            if (toggles.info.commands.find(x => x.name === commandName)) {
+                toggles.info.commands.splice(toggles.info.commands.findIndex(x => x.name === commandName), 1)
+                toggles.markModified("info")
+                
+                await interaction.editReply({ embeds: [on] })
+            } else {
+                toggles.info.commands.push({
+                    name: commandName,
+                    reason,
+                    since: new Date()
+                })
+                toggles.markModified("info")
+
+                await interaction.editReply({ embeds: [off] })
+            }
+
+            return await toggles.save();
+        }
+
+        case "functions": {
+            const { funcion } = params[subcommand];
+            let functionEnumName = new Enum(ToggleableFunctions).translate(funcion.value);
+
+            let on = new Embed()
+                .defAuthor({ text: "Habilitado", icon: EmojisObject.Check.url })
+                .defDesc(`**—** Se ha habilitado la función \`${functionEnumName}\`.`)
+                .defColor(Colores.verde);
+
+            let off = new Embed()
+                .defAuthor({ text: "Deshabilitado", icon: EmojisObject.Check.url })
+                .defDesc(`**—** Se ha deshabilitado la función \`${functionEnumName}\`.`)
+                .defColor(Colores.verde);
+
+            if (toggles.info.functions.find(x => x === funcion.value)) {
+                toggles.info.functions.splice(toggles.info.functions.findIndex(x => x === funcion.value), 1)
+                toggles.markModified("info")
+                
+                await interaction.editReply({ embeds: [on] })
+            } else {
+                toggles.info.functions.push(funcion.value)
+                toggles.markModified("info")
+
+                await interaction.editReply({ embeds: [off] })
+            }
+
+            return await toggles.save();
+        }
     }
 }
 

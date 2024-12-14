@@ -138,4 +138,25 @@ Schema.static("getActivities", async function () {
     }).save();
 })
 
+Schema.static("getToggles", async function () {
+    return await this.findOne({
+        type: "toggles"
+    }) ?? await new this({
+        type: "toggles",
+        info: {
+            lockdown: process.env.INIT_LOCKDOWN === "FALSE" ? false : true,
+            commands: [],
+            functions: []
+        }
+    }).save();
+})
+
+Schema.method("functionDisabled", function(enumVal){
+    return this.info.functions.find(x => x === enumVal) ? true : false;
+})
+
+Schema.method("commandToggled", function(name){
+    return this.info.commands.find(x => x.name === name);
+})
+
 module.exports = mongoose.model("GlobalDatas", Schema);

@@ -30,13 +30,27 @@ module.exports = async (client, message) => {
     }
 
     if (message.content === "~lockdown") {
+      client.toggles.lockdown = true;
       client.isOnLockdown = true;
+
+      try {
+        await client.toggles.save()
+      } catch (err) {
+        console.error("🔴 %s", err);
+      }
 
       message.reply("[DEV] Se activó el lockdown. `~lockdownoff`")
     }
 
     if (message.content === "~lockdownoff") {
+      client.toggles.lockdown = false;
       client.isOnLockdown = false;
+
+      try {
+        await client.toggles.save()
+      } catch (err) {
+        console.error("🔴 %s", err);
+      }
 
       message.reply("[DEV] Se desactivó el lockdown.")
     }
@@ -53,6 +67,12 @@ module.exports = async (client, message) => {
                 .setLabel("Kill")
             )
         ]
+      })
+    }
+
+    if (message.content === "~toggles") {
+      message.reply({
+        content: `${codeBlock("json", JSON.stringify(client.toggles.info))}`
       })
     }
 

@@ -19,7 +19,7 @@ const { Users, Guilds, DarkShops, Shops, GlobalDatas, CustomElements, Preference
 const { google } = require("googleapis");
 const { ApiClient } = require("@twurple/api");
 const { AppTokenAuthProvider } = require("@twurple/auth");
-const { BoostObjetives, ChannelModules, LogReasons, BoostTypes, PetNotices, Enum, DirectMessageType } = require("./Enums");
+const { BoostObjetives, ChannelModules, LogReasons, BoostTypes, PetNotices, Enum, DirectMessageType, ToggleableFunctions } = require("./Enums");
 const Log = require("./Log");
 const { Bases } = require("../resources");
 const Commands = require("../app/Commands");
@@ -349,6 +349,11 @@ const GenerateLog = async function (guild, options = {
  * @returns {Promise<void>}
  */
 const GlobalDatasWork = async function (guild, justTempRoles = false) {
+  if (guild.client.toggles.functionDisabled(ToggleableFunctions.GlobalDatasWork)) {
+    //console.log("⚪ Se intentó ejecutar GlobalDatasWork en %s pero esta función está toggleada", guild.name);
+    return;
+  }
+
   const { EmojisObject } = guild.client;
   const doc = await Guilds.getWork(guild.id);
   const customDoc = await CustomElements.getWork(guild.id);
@@ -863,7 +868,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
           new ActionRowBuilder()
             .setComponents(
               new ButtonBuilder()
-                .setCustomId("cancelBet")
+                .setCustomId("betCancel")
                 .setLabel("Cancelar")
                 .setStyle(ButtonStyle.Danger)
             )
@@ -967,6 +972,11 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
  * @return {Promise<void>}
  */
 const PetWork = async function (guild) {
+  if (guild.client.toggles.functionDisabled(ToggleableFunctions.PetWork)) {
+    // console.log("⚪ Se intentó ejecutar PetWork en %s pero esta función está toggleada", guild.name);
+    return;
+  }
+
   const doc = await Guilds.getWork(guild.id);
   const members = guild.members.cache;
 
@@ -1149,6 +1159,10 @@ const VaultWork = async function (vault, user, interaction, notCodeEmbed) { // m
  */
 const handleNotification = async function (guild) {
   if (guild.id != Bases.owner.guildId && guild.id != Bases.dev.guild) return;
+  if (guild.client.toggles.functionDisabled(ToggleableFunctions.HandleNotification)) {
+    console.log("⚪ Se intentó ejecutar handleNotification pero esta función está toggleada");
+    return;
+  }
   const doc = await Guilds.getWork(guild.id);
 
   const youtubeChannel = guild.channels.cache.get(doc.getChannel("notifier.youtube_notif"));
@@ -1541,6 +1555,11 @@ const AfterInfraction = async function (user, data) {
  * @param {Client} client 
  */
 const ManageDarkShops = async function (client) {
+  if (client.toggles.functionDisabled(ToggleableFunctions.ManageDarkShops)) {
+    console.log("⚪ Se intentó ejecutar ManageDarkShops pero esta función está toggleada");
+    return;
+  }
+
   await client.guilds.fetch()
 
   for await (const guild of client.guilds.cache.values()) {
@@ -2156,17 +2175,25 @@ const MinMaxInt = function (min, max, { guild, msg }) {
  */
 const PrettifyNumber = function (number, initials = 1, zeros = null) {
   const original = String(number);
+  let returning = null;
   if (!zeros) {
     let firstPart = original.substring(0, initials - 1);
     let secondPart = "0".repeat(original.length - firstPart.length);
 
-    return Number(firstPart + secondPart);
+    returning = Number(firstPart + secondPart);
   } else {
-    let firstPart = original.substring(0, original.length - zeros - 1);
-    let secondPart = "0".repeat(zeros);
+    if (zeros < original.length) {
+      let firstPart = original.substring(0, original.length - zeros - 1);
+      let secondPart = "0".repeat(zeros);
 
-    return Number(firstPart + secondPart);
+      returning = Number(firstPart + secondPart);
+    }
   }
+
+  if (isNaN(returning) || returning <= 0)
+    return number
+
+  return returning;
 }
 
 /**
@@ -2193,8 +2220,14 @@ const CreateInteractionFilter = function (interaction, message, user) {
  * @param {Enum} type 
  * @param {import("discord.js").MessageCreateOptions} options 
  * @param {Boolean} guildInfo Incluir información de dónde se envía el mensaje directo en el último embed dentro de options
+ * @returns {void}
  */
 const SendDirect = async function (interaction, member, type, options, guildInfo = true) {
+  if (interaction.client.toggles.functionDisabled(ToggleableFunctions.SendDirect)) {
+    //console.log("⚪ Se intentó enviar un mensaje directo a %s pero esta función está toggleada.", member.user.username);
+    return;
+  }
+
   const preferences = await Preferences.getWork(member.id);
   let flags = [];
 

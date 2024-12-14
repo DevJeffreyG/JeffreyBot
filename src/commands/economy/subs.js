@@ -111,7 +111,9 @@ command.adminSub = async (interaction, models, params, client) => {
         wait: true,
         time: ms("1m")
     }).wait(() => {
-        msg.delete();
+        msg.delete().catch(err => {
+            console.error("🔴 %s", err);
+        });
     });
 
     if (!collector) return;

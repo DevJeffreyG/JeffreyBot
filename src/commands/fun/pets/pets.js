@@ -112,9 +112,11 @@ command.admin = async (interaction, models, params, client) => {
         filter: CreateInteractionFilter(interaction, msg, interaction.user),
         wait: true,
         time: ms("1m")
-    }, false, false).wait(() => {
-        interaction.deleteReply();
-    });
+    }, false, false).onEnd(() => {
+        interaction.deleteReply().catch(err => {
+            console.error("🔴 %s", err);
+        });
+    }).wait();
     if (!collector) return;
     switch (collector.customId) {
         case "changeName":
@@ -165,8 +167,6 @@ command.admin = async (interaction, models, params, client) => {
             });
             break;
     }
-
-    await interaction.deleteReply();
 }
 
 module.exports = command;

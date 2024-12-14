@@ -1,7 +1,7 @@
 const { Bases } = require("../resources");
 
 const { Collection, Client, time, chatInputApplicationCommandMention } = require("discord.js");
-const { Guilds } = require("mongoose").models;
+const { Guilds, GlobalDatas } = require("mongoose").models;
 
 const Managers = require("../utils/Managers");
 const { CustomEmojis, ChannelModules, Log, Embed } = require("../utils/");
@@ -15,7 +15,8 @@ const CronJob = require("cron").CronJob;
  * @param {Client} client 
  */
 module.exports = async (client) => {
-    client.isOnLockdown = process.env.INIT_LOCKDOWN === "FALSE" ? false : true;
+    client.toggles = await GlobalDatas.getToggles();
+    client.isOnLockdown = client.toggles.info.lockdown;
     client.invites = [];
     client.logsFetched = {};
     client.activeCollectors = [];

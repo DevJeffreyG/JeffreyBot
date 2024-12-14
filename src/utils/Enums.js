@@ -513,6 +513,21 @@ const ModuleBans = new Enum({
     EXShopTTS: "exshop.tts"
 }).values;
 
+/**
+ * - SendDirect
+ * - GlobalDatasWork
+ * - HandleNotification
+ * - ManageDarkShops
+ * - PetWork
+ */
+const ToggleableFunctions = new Enum({
+    SendDirect: 1,
+    GlobalDatasWork: 2,
+    HandleNotification: 3,
+    ManageDarkShops: 4,
+    PetWork: 5
+}).values
+
 module.exports = {
     Enum,
     Categories,
@@ -539,5 +554,6 @@ module.exports = {
     YesNo,
     DirectMessageType,
     TrophyRequirements,
-    ModuleBans
+    ModuleBans,
+    ToggleableFunctions
 }

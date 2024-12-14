@@ -124,7 +124,15 @@ command.execute = async (interaction, models, params, client) => {
     let msg = await channel.send({
         content: mention.toString(),
         embeds: [embed],
-        components: [row],
+        components: [row,
+            new ActionRowBuilder()
+                .addComponents(
+                    new ButtonBuilder()
+                        .setCustomId("betClose")
+                        .setLabel("Cerrar")
+                        .setStyle(ButtonStyle.Danger)
+                )
+        ],
         allowedMentions: {
             parse: [
                 'roles',

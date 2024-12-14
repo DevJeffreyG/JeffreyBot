@@ -2,7 +2,7 @@ const { BaseInteraction, InteractionType, time, CommandInteraction, MessageCompo
 
 const { Ticket, Suggestion, Button, ManagePreferences, AutoRole } = require("../handlers");
 const { Bases, Colores } = require("../resources");
-const { ErrorEmbed, Embed, Categories, ValidateDarkShop, Confirmation, HumanMs, Modal, CustomEmbed, CustomTrophy, Enum, ShopTypes, Shop, PrettyCurrency, MinMaxInt, PrettifyNumber, Collector, MultiplePercentages, ProgressBar, SendDirect, DirectMessageType } = require("../utils");
+const { ErrorEmbed, Embed, Categories, ValidateDarkShop, Confirmation, HumanMs, Modal, CustomEmbed, CustomTrophy, Enum, ShopTypes, Shop, PrettyCurrency, MinMaxInt, PrettifyNumber, Collector, MultiplePercentages, ProgressBar, SendDirect, DirectMessageType, CreateInteractionFilter } = require("../utils");
 
 const { CommandNotFoundError, ToggledCommandError, DiscordLimitationError, BadCommandError, SelfExec, ModuleDisabledError, ExecutionError, InsuficientSetupError, EconomyError, PermissionError } = require("../errors");
 
@@ -15,7 +15,7 @@ const { Error } = require("mongoose");
 const slashCooldown = ms("5s");
 
 const models = require("mongoose").models;
-const { ToggledCommands, Users, Guilds, GlobalDatas, Preferences } = models;
+const { Users, Guilds, GlobalDatas, Preferences } = models;
 
 class Handlers {
     /**
@@ -103,14 +103,14 @@ class Handlers {
         this.executedCommand = this.client.commands.get(commandName);
 
         // Se intenta ejecutar un comando antes de que el bot inicialice la información necesaria
-        if(!this.executedCommand){
+        if (!this.executedCommand) {
             throw new ExecutionError(this.interaction, [
                 `${this.client.user.displayName} aún se está iniciando y no puede procesar tu acción`,
                 "Intentálo de nuevo."
             ])
         }
 
-        let toggledQuery = await ToggledCommands.getToggle(commandName);
+        let toggledQuery = this.interaction.client.toggles.commandToggled(commandName);
 
         if (toggledQuery && !this.#isDev()) throw new ToggledCommandError(this.interaction, toggledQuery);
 
@@ -443,8 +443,7 @@ class Handlers {
                     throw new InsuficientSetupError(this.interaction, "Mínimos y máximo de apuestas", ["Los mínimos y máximos deben ser menores y mayores los unos con los otros"])
 
                 const middleNum = (max - min) / 5;
-
-                await this.interaction.editReply({
+                let msg = await this.interaction.editReply({
                     embeds: [
                         new Embed()
                             .defTitle("Aumentar apuesta")
@@ -484,12 +483,10 @@ class Handlers {
                 })
 
                 const collector = await new Collector(this.interaction, {
-                    filter: (i) => {
-                        return i.user.id === this.interaction.user.id
-                    },
+                    filter: CreateInteractionFilter(this.interaction, msg),
                     time: ms("1m"),
                     wait: true
-                }, false, false).wait(() => {
+                }, true, false).handle().wait(() => {
                     this.interaction.deleteReply();
                 })
                 if (!collector) return;
@@ -633,7 +630,7 @@ class Handlers {
                 break;
             }
 
-            case "cancelBet": {
+            case "betCancel": {
                 await this.interaction.deferReply({ ephemeral: true })
                 if (!this.doc.checkStaff(this.interaction.member))
                     throw new PermissionError(this.interaction);
@@ -676,7 +673,7 @@ class Handlers {
                 await this.interaction.message.edit({
                     embeds: [
                         new Embed(this.interaction.message.embeds[0])
-                            .defDesc(`## ${bet.title}: El STAFF canceló esta apuesta\n### Todos los ${Currency.name} fueron devueltos.`)
+                            .defDesc(`## ${bet.title}: El STAFF canceló esta apuesta\n### Todos los ${Currency.name} fueron reembolsados.`)
                             .defColor(Colores.rojo)
                     ],
                     components: []
@@ -684,6 +681,27 @@ class Handlers {
 
                 this.doc.data.bets.splice(betIndex, 1);
                 await this.doc.save();
+
+                break;
+            }
+
+            case "betClose": {
+                await this.interaction.deferReply({ ephemeral: true })
+                if (!this.doc.checkStaff(this.interaction.member))
+                    throw new PermissionError(this.interaction);
+
+                let confirmation = await Confirmation("Cerrar apuesta", [
+                    `Los usuarios no podrán seguir apostando`,
+                    `El mensaje se actualizará en unos segundos`
+                ], this.interaction);
+                if (!confirmation) return;
+
+                const filter = x => x.message_id === this.interaction.message.id;
+                const betIndex = this.doc.data.bets.findIndex(filter);
+
+                this.doc.data.bets[betIndex].closes_in = new Date();
+                await this.doc.save();
+                await this.interaction.editReply({ embeds: [new Embed({ type: "success" })] });
 
                 break;
             }
