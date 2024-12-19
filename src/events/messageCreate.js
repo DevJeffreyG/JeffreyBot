@@ -30,7 +30,9 @@ module.exports = async (client, message) => {
     }
 
     if (message.content === "~lockdown") {
-      client.toggles.lockdown = true;
+      client.toggles.info.lockdown = true;
+      client.toggles.markModified("info");
+      
       client.isOnLockdown = true;
 
       try {
@@ -43,7 +45,9 @@ module.exports = async (client, message) => {
     }
 
     if (message.content === "~lockdownoff") {
-      client.toggles.lockdown = false;
+      client.toggles.info.lockdown = false;
+      client.toggles.markModified("info");
+
       client.isOnLockdown = false;
 
       try {

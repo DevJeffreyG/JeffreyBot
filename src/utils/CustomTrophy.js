@@ -172,7 +172,7 @@ class CustomTrophy {
                     break;
                 case "totals":
                     totalLoop:
-                    for (const totalprop of Object.keys(value)) {
+                    for (const totalprop of Object.keys(value)) { // value es un Object que contiene el resto de propiedades a revisar pero esta vez los totales
                         if (!grant) break totalLoop;
 
                         const totalValue = value[totalprop];
@@ -181,16 +181,17 @@ class CustomTrophy {
                         let moduleCount = "";
 
                         switch (totalprop) {
-                            case "currency":
+                            case TrophyRequirements.Currency:
                                 moduleCount = "normal_currency"
                                 break;
-                            case "darkcurrency":
+                            case TrophyRequirements.DarkCurrency:
                                 moduleCount = "dark_currency"
                                 break;
-                            case "warns":
-                            case "blackjack":
-                            case "roulette":
-                            case "subscriptions_currency":
+                            case TrophyRequirements.Warns:
+                            case TrophyRequirements.Blackjack:
+                            case TrophyRequirements.Roulette:
+                            case TrophyRequirements.SecuredCurrency:
+                            case TrophyRequirements.SubscriptionsCurrency:
                                 moduleCount = totalprop;
                                 break;
                         }
@@ -200,7 +201,7 @@ class CustomTrophy {
                     break;
                 case "moment":
                     momentLoop:
-                    for (const momentprop of Object.keys(value)) {
+                    for (const momentprop of Object.keys(value)) { // Lo mismo que con el de totales, value es un Object
                         if (!grant) break momentLoop;
 
                         const momentValue = value[momentprop];
@@ -208,15 +209,21 @@ class CustomTrophy {
                         entered = true;
 
                         switch (momentprop) {
-                            case "currency":
+                            case TrophyRequirements.Currency:
                                 if (momentValue < 0) {
                                     if (this.user.getCurrency() > momentValue) grant = false;
                                 } else {
                                     if (this.user.getCurrency() < momentValue) grant = false;
                                 }
                                 break;
-                            case "darkcurrency":
+                            case TrophyRequirements.DarkCurrency:
                                 if (this.user.getDarkCurrency() < momentValue) grant = false;
+                                break;
+                            case TrophyRequirements.SecuredCurrency:
+                                if (this.user.getSecured() < momentValue) grant = false;
+                                break;
+                            case TrophyRequirements.Level:
+                                if (this.user.getLevel() < momentValue) grant = false;
                                 break;
                         }
                     }
@@ -234,6 +241,7 @@ class CustomTrophy {
 
             this.user.markModified("data.trophies")
 
+            this.#reqWork(trophy)
             await this.#rewardsWork(trophy);
 
             if (save) await this.user.save();
@@ -281,7 +289,7 @@ class CustomTrophy {
                 id
             })
 
-            await this.#reqWork(trophy)
+            this.#reqWork(trophy)
             await this.#rewardsWork(trophy)
 
             try {
@@ -395,7 +403,7 @@ class CustomTrophy {
 
             // validation
             if (prop === "shopType") {
-                if (value > 3 || value < 1) throw notValid;
+                if (value > 4 || value < 1) throw notValid;
 
                 value = parseInt(value)
             }
@@ -451,7 +459,11 @@ class CustomTrophy {
         return await this.interaction.editReply({ embeds: [new Embed({ type: "success" })] });
     }
 
-    async #reqWork(trophy) {
+    /**
+     * Agrega a this.reqsDone todos los requerimientos de un Trofeo (de forma limpia)
+     * @param {*} trophy 
+     */
+    #reqWork(trophy) {
         const reqList = trophy.req;
         const guild = this.interaction instanceof Guild ? this.interaction : this.interaction.guild;
 
@@ -473,6 +485,7 @@ class CustomTrophy {
                             let reqDone, reqExpl;
                             switch (totalProps) {
                                 case TrophyRequirements.SubscriptionsCurrency:
+                                case TrophyRequirements.SecuredCurrency:
                                 case TrophyRequirements.Currency:
                                     reqDone = PrettyCurrency(guild, value[totalProps]);
                                     break;
@@ -502,6 +515,9 @@ class CustomTrophy {
                                 case TrophyRequirements.SubscriptionsCurrency:
                                     reqExpl = `${TrophyEnums.translate(totalProps)} gastado`;
                                     break;
+                                case TrophyRequirements.SecuredCurrency:
+                                    reqExpl = `${TrophyEnums.translate(totalProps)} **totales**`;
+                                    break;
                                 default:
                                     reqExpl = TrophyEnums.translate(totalProps);
                             }
@@ -517,6 +533,7 @@ class CustomTrophy {
                             let reqDone, reqExpl;
                             switch (totalProps) {
                                 case TrophyRequirements.SubscriptionsCurrency:
+                                case TrophyRequirements.SecuredCurrency:
                                 case TrophyRequirements.Currency:
                                     reqDone = PrettyCurrency(guild, value[totalProps]);
                                     break;
@@ -533,6 +550,12 @@ class CustomTrophy {
                                     break;
                                 case TrophyRequirements.Currency:
                                     reqExpl = `${TrophyEnums.translate(totalProps)} en tu cuenta`;
+                                    break;
+                                case TrophyRequirements.SecuredCurrency:
+                                    reqExpl = `${TrophyEnums.translate(totalProps)} en tu cuenta`;
+                                    break;
+                                case TrophyRequirements.Level:
+                                    reqExpl = `${TrophyEnums.translate(totalProps)} de EXP`;
                                     break;
                                 default:
                                     reqExpl = TrophyEnums.translate(totalProps);

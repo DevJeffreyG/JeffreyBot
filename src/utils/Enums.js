@@ -66,6 +66,7 @@ class Enum {
             Birthdays: "Cumpleaños",
             Incomes: "Ingresos",
             SubscriptionsCurrency: `${this.customize && CurrencyName ? CurrencyName : "Dinero"} en Suscripciones`,
+            SecuredCurrency: `${this.customize && CurrencyName ? CurrencyName : "Dinero"} Protegido`,
             Developer: "Desarrollador",
             Administration: "Administración",
             Economy: "Economía",
@@ -492,6 +493,8 @@ const DirectMessageType = new Enum({
  * - Blackjack
  * - Roulette
  * - SubscriptionsCurrency
+ * - SecuredCurrency
+ * - Level
  */
 const TrophyRequirements = new Enum({
     Warns: "warns",
@@ -499,7 +502,9 @@ const TrophyRequirements = new Enum({
     DarkCurrency: "darkcurrency",
     Blackjack: "blackjack",
     Roulette: "roulette",
-    SubscriptionsCurrency: "subscriptions_currency"
+    SubscriptionsCurrency: "subscriptions_currency",
+    SecuredCurrency: "secured_currency",
+    Level: "level",
 }).values;
 
 /**

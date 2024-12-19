@@ -104,6 +104,22 @@ command.data
             )
         )
     )
+    .addSubcommandGroup(groups => groups
+        .setName("groups")
+        .setDescription("Administración de los Grupos de Embeds")
+        .addSubcommand(create => create
+            .setName("create")
+            .setDescription("Crea un grupo de Embeds")
+        )
+        .addSubcommand(edit => edit
+            .setName("edit")
+            .setDescription("Edita un grupo de Embeds")
+        )
+        .addSubcommand(del => del
+            .setName("del")
+            .setDescription("Elimina un grupo de Embeds")
+        )
+    )
     .addSubcommand(list => list
         .setName("list")
         .setDescription("Obtén una lista actual de los elementos")
@@ -114,6 +130,7 @@ command.data
                 { name: "Embeds", value: "embeds" },
                 { name: "Botones", value: "buttons" },
                 { name: "Trofeos", value: "trophies" },
+                { name: "Grupos (Embeds)", value: "embed_groups" },
             )
             .setRequired(true)
         )
@@ -136,13 +153,32 @@ command.data
             .setRequired(true)
         )
     )
+    .addSubcommand(send => send
+        .setName("groupsend")
+        .setDescription("Envia un grupo de Embeds")
+        .addIntegerOption(id => id
+            .setName("id")
+            .setDescription("La ID del grupo de Embeds")
+            .setRequired(true)
+        )
+    )
 
-command.addOptionsTo(["embeds edit", "botones edit", "embeds del", "botones del", "trofeos del", "trofeos edit", "trofeos toggle", "trofeos req", "trofeos dado"], [
+command.addOptionsTo(["embeds edit", "botones edit", "embeds del", "botones del", "trofeos del", "trofeos edit", "trofeos toggle", "trofeos req", "trofeos dado", "groups edit", "groups del"], [
     new SlashCommandIntegerOption()
         .setName("id")
-        .setDescription("La ID del elemento a editar")
+        .setDescription("La ID del elemento a administrar")
         .setMinValue(1)
         .setRequired(true)
+])
+
+command.addOptionsTo(["groups create", "groups edit"], [
+    new SlashCommandStringOption()
+        .setName("identifier")
+        .setDescription("Identificador al usar la lista de elementos y saber qué grupo es")
+        .setMaxLength(40),
+    new SlashCommandStringOption()
+        .setName("ids")
+        .setDescription("IDs de los Embeds a agrupar")
 ])
 
 command.addOptionsTo(["botones create", "botones edit"], [
@@ -240,55 +276,76 @@ command.execute = async (interaction, models, params, client) => {
             return await interaction.deleteReply();
         }
 
+        case "groupsend":
         case "bulksend": {
-            let { ids } = params[subcommand];
+            let sent = false;
+            let transl;
+            // Probablemente esto es un crimen :shrug:
+            if (subcommand === "groupsend") {
+                let customElements = await CustomElements.getWork(interaction.guild.id);
+                let groupInfo = customElements.getEmbedGroup(params[subcommand].id.value);
 
-            let embedIds = []
-            let transl = ids.value.split(",")
-            transl.forEach(i => {
-                let n = Number(i);
-                if(!isNaN(n))
-                    embedIds.push(n)
-            })
+                if (!groupInfo)
+                    throw new DoesntExistsError(interaction, `El Grupo de Embeds con ID \`${params[subcommand].id.value}\``, "este servidor");
 
-            let embeds = []
-            let components = [];
-            embedIds.forEach(id => {
-                let dbEmbed = custom.getEmbed(id)
-                if (!dbEmbed)
-                    throw new DoesntExistsError(interaction, `El Embed con ID \`${id}\``, "este servidor");
+                transl = groupInfo.ids;
+            } else {
+                transl = params[subcommand].ids.value.split(",").map(Number).filter(x => !isNaN(x));
+            }
 
-                let embed = new CustomEmbed(interaction).create(dbEmbed)
-
-                let row = new ActionRowBuilder();
-                let row_autoroles = new ActionRowBuilder();
-
-                for (const linked of dbEmbed.linkedids) {
-                    const linkId = linked.id;
-                    let button = custom.getButton(linkId);
-
-                    if (linked.isAutoRole) {
-                        row_autoroles.setComponents(
-                            new ButtonBuilder()
-                                .setCustomId(`AUTOROLE-${id}`)
-                                .setLabel("Mostrar AutoRoles")
-                                .setStyle(ButtonStyle.Secondary)
-                        )
-                    } else if (button) {
-                        let buttonObj = new CustomButton(interaction).create(button);
-                        if (!buttonObj.data.url) buttonObj.setCustomId(`BUTTON-${linkId}-${linked.isAutoRole}`);
-
-                        row.addComponents(buttonObj);
+            while (!sent) {
+                let embedIds = []
+                transl.forEach(i => {
+                    if (embedIds.length != 10) {
+                        embedIds.push(i)
                     }
-                }
+                })
 
-                if (row.components.length > 0 && components.length < 5) components.push(row);
-                if (row_autoroles.components.length > 0 && components.length < 5) components.push(row_autoroles);
+                transl = transl.filter(x => !embedIds.includes(x)); // Eliminar los que ya van a ser enviados            
 
-                embeds.push(embed);
-            })
+                let embeds = []
+                let components = [];
+                embedIds.forEach(id => {
+                    let dbEmbed = custom.getEmbed(id)
+                    if (!dbEmbed)
+                        throw new DoesntExistsError(interaction, `El Embed con ID \`${id}\``, "este servidor");
 
-            await interaction.channel.send({ embeds, components });
+                    let embed = new CustomEmbed(interaction).create(dbEmbed)
+
+                    let row = new ActionRowBuilder();
+                    let row_autoroles = new ActionRowBuilder();
+
+                    for (const linked of dbEmbed.linkedids) {
+                        const linkId = linked.id;
+                        let button = custom.getButton(linkId);
+
+                        if (linked.isAutoRole) {
+                            row_autoroles.setComponents(
+                                new ButtonBuilder()
+                                    .setCustomId(`AUTOROLE-${id}`)
+                                    .setLabel("Mostrar AutoRoles")
+                                    .setStyle(ButtonStyle.Secondary)
+                            )
+                        } else if (button) {
+                            let buttonObj = new CustomButton(interaction).create(button);
+                            if (!buttonObj.data.url) buttonObj.setCustomId(`BUTTON-${linkId}-${linked.isAutoRole}`);
+
+                            row.addComponents(buttonObj);
+                        }
+                    }
+
+                    if (row.components.length > 0 && components.length < 5) components.push(row);
+                    if (row_autoroles.components.length > 0 && components.length < 5) components.push(row_autoroles);
+
+                    embeds.push(embed);
+                })
+
+                sent = transl.length === 0;
+
+                if (embeds.length > 0 || components.length > 0)
+                    await interaction.channel.send({ embeds, components });
+            }
+
             return await interaction.deleteReply();
         }
 
@@ -301,7 +358,7 @@ command.execute = async (interaction, models, params, client) => {
             switch (tipo.value) {
                 case "embeds": {
                     title = "Lista de Embeds";
-                    addon = `**— {show}**\n**▸ (IDs) {linkedType} vínculados**: {linked}\n**▸ Element ID: {id}**\n\n`
+                    addon = `**— {show}**\n**▸ (IDs) {linkedType} vínculados**: {linked}\n**▸ ID Elemento: \`{id}\`**\n\n`
 
                     for (const embed of custom.embeds) {
                         let buttons = "";
@@ -320,9 +377,26 @@ command.execute = async (interaction, models, params, client) => {
                     break;
                 }
 
+                case "embed_groups": {
+                    title = "Lista de Grupos (Embeds)";
+                    addon = `**— {identifier}**\n**▸ IDs:** {ids}.\n**▸ ID Grupo: \`{id}\`**\n\n`
+
+                    for (const group of custom.groups.embeds) {
+                        let ids = `\`${group.ids.join(", ")}\``;
+
+                        items.set(group.id, {
+                            identifier: group.identifier,
+                            ids,
+                            id: group.id
+                        })
+                    }
+
+                    break;
+                }
+
                 case "buttons": {
                     title = "Lista de Botones";
-                    addon = `**— {show}**\n**▸ (IDs) {linkedType} vínculados**: {linked}\n**▸ Element ID: {id}**\n\n`
+                    addon = `**— {show}**\n**▸ (IDs) {linkedType} vínculados**: {linked}\n**▸ ID Elemento: \`{id}\`**\n\n`
 
                     for (button of custom.buttons) {
                         items.set(button.id, {
@@ -337,7 +411,7 @@ command.execute = async (interaction, models, params, client) => {
                 }
                 case "trophies": {
                     title = "Lista de Trofeos";
-                    addon = `**— {show}**\n**▸ {desc}**\n**▸ Element ID: {id}**\n\n`
+                    addon = `**— {show}**\n**▸ Descripción:**\`\`\`\n{desc}\n\`\`\`\n**▸ ID Elemento: \`{id}\`**\n\n`
 
                     for (trophy of custom.trophies) {
                         items.set(trophy.id, {
@@ -369,6 +443,8 @@ command.execute = async (interaction, models, params, client) => {
             return await command.execButtons(interaction, models, params, client);
         case "trofeos":
             return await command.execTrophies(interaction, models, params, client);
+        case "groups":
+            return await command.execGroups(interaction, models, params, client);
     }
 }
 
@@ -390,7 +466,7 @@ command.execEmbeds = async (interaction, models, params, client) => {
             break;
         }
         case "edit": {
-            let { id } = embeds;
+            const { id } = embeds;
             modal.defId("editCustomEmbed-" + id.value);
             modal.components.forEach(row => {
                 let actualValue = params.customDoc.getEmbed(id.value)[row.components[0].data.custom_id]
@@ -405,8 +481,15 @@ command.execEmbeds = async (interaction, models, params, client) => {
             break;
         }
         case "del": {
-            let { id } = embeds;
+            const { id } = embeds;
             await interaction.deferReply();
+
+            let confirmation = await Confirmation("Eliminar Embed", [
+                `Se eliminará el Embed con ID \`${id.value}\`.`,
+                `Esta acción no se puede deshacer.`
+            ], interaction);
+            if (!confirmation) return;
+
             return await new CustomEmbed(interaction).delete(id.value);
         }
     }
@@ -573,6 +656,35 @@ command.execTrophies = async (interaction, models, params, client) => {
             })
         }
     }
+}
+
+command.execGroups = async (interaction, models, params, client) => {
+    await interaction.deferReply();
+    const { subcommand, groups } = params;
+
+    switch (subcommand) {
+        case "create": {
+            const { identifier, ids } = groups;
+            return await new CustomEmbed(interaction).group(identifier?.value, ids?.value.split(",").map(Number).filter(x => !isNaN(x)));
+        }
+        case "edit": {
+            const { identifier, ids, id } = groups;
+            return await new CustomEmbed(interaction).group(identifier?.value, ids?.value.split(",").map(Number).filter(x => !isNaN(x)), id.value);
+        }
+        case "del": {
+            const { id } = groups;
+
+            let confirmation = await Confirmation("Eliminar Embed", [
+                `Se eliminará el Grupo de Embed con ID \`${id.value}\`.`,
+                `Esto __NO__ elimina los Embeds que hagan parte del grupo.`,
+                `Esta acción no se puede deshacer.`
+            ], interaction);
+            if (!confirmation) return;
+
+            return await new CustomEmbed(interaction).delete_group(id.value);
+        }
+    }
+
 }
 
 module.exports = command;

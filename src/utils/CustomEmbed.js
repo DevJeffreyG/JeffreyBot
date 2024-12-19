@@ -87,7 +87,7 @@ class CustomEmbed extends Embed {
     }
 
     /**
-     * Elimina un Embed en la base de datos
+     * Elimina un Embed de la base de datos
      * @param {Integer} id La Id del Embed a eliminar
      * @returns {Promise<CommandInteraction>}
      */
@@ -111,6 +111,86 @@ class CustomEmbed extends Embed {
         } catch (err) {
             console.log("🔴 %s", err);
             throw new DoesntExistsError(this.interaction, `El Embed con ID \`${id}\``, "este servidor");
+        }
+    }
+
+    /**
+     * Crea/edita un grupo de Embeds
+     * @param {String} identifier 
+     * @param {Integer[]} ids 
+     * @param {Integer} id ID en caso de estar editando el grupo
+     */
+    async group(identifier, ids, id = null) {
+        this.doc = await CustomElements.getWork(this.interaction.guild.id);
+        if (!id) {
+            const id = FindNewId(await CustomElements.find(), "groups.embeds");
+
+            this.doc.groups.embeds.push({
+                identifier,
+                ids,
+                id
+            })
+
+            await this.interaction.editReply({
+                embeds: [
+                    new Embed({
+                        type: "success",
+                        data: {
+                            desc: [
+                                `Se ha creado el Grupo. Usa ${this.interaction.client.mentionCommand("elements groups edit")} para hacerle cambios`,
+                                `ID: ${id}`
+                            ]
+                        }
+                    })
+                ]
+            })
+        } else {
+            let toEdit = this.doc.getEmbedGroup(id)
+            if (identifier) toEdit.identifier = identifier;
+            if (ids) toEdit.ids = ids;
+
+            await this.interaction.editReply({
+                embeds: [
+                    new Embed({
+                        type: "success",
+                        data: {
+                            desc: [
+                                `Se ha editado el Grupo.`
+                            ]
+                        }
+                    })
+                ]
+            })
+        }
+
+        await this.doc.save();
+    }
+
+    /**
+     * Elimina un Grupo de Embeds de la base de datos
+     * @param {Integer} id La Id del Embed a eliminar
+     * @returns {Promise<CommandInteraction>}
+     */
+    async delete_group(id) {
+        this.doc = await CustomElements.getWork(this.interaction.guild.id);
+
+        try {
+            this.doc.deleteEmbedGroup(id);
+            await this.doc.save();
+
+            return await this.interaction.editReply({
+                embeds: [
+                    new Embed({
+                        type: "success",
+                        data: {
+                            desc: `Se ha eliminado el Grupo de Embeds`
+                        }
+                    })
+                ]
+            })
+        } catch (err) {
+            console.log("🔴 %s", err);
+            throw new DoesntExistsError(this.interaction, `El Grupo de Embeds con ID \`${id}\``, "este servidor");
         }
     }
 

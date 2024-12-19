@@ -305,7 +305,8 @@ class Handlers {
                 await new Modal(this.interaction)
                     .defId(this.interaction.customId)
                     .defTitle("Requerimentos totales: " + trophyId)
-                    .addInput({ id: "subscriptions_currency", label: "Dinero gastado en suscripciones", placeholder: "Escribe un número entero positivo", style: TextInputStyle.Short })
+                    .addInput({ id: "subscriptions_currency", label: `${Currency.name} gastados en suscripciones`, placeholder: "Escribe un número entero positivo", style: TextInputStyle.Short })
+                    .addInput({ id: "secured_currency", label: `${Currency.name} protegidos`, placeholder: "Escribe un número entero positivo", style: TextInputStyle.Short })
                     .show();
                 break;
             }
@@ -320,6 +321,8 @@ class Handlers {
                     .defTitle("Requerimentos del momento: " + trophyId)
                     .addInput({ id: "currency", label: Currency.name, placeholder: "Escribe un número entero", style: TextInputStyle.Short })
                     .addInput({ id: "darkcurrency", label: DarkCurrency.name, placeholder: "Escribe un número entero", style: TextInputStyle.Short })
+                    .addInput({ id: "secured_currency", label: `${Currency.name} protegidos`, placeholder: "Escribe un número entero positivo", style: TextInputStyle.Short })
+                    .addInput({ id: "level", label: `Nivel alcanzado`, placeholder: "Escribe un número entero positivo", style: TextInputStyle.Short })
                     .show();
                 break;
             }
@@ -363,7 +366,7 @@ class Handlers {
                     .defId(this.interaction.customId)
                     .defTitle("Item de recompensa: " + trophyId)
                     .addInput({ id: "id", label: "ID del item", placeholder: "Escribe un número entero", style: TextInputStyle.Short })
-                    .addInput({ id: "shopType", label: "Tienda", placeholder: `Tienda: 1 / DarkShop: 2 / Mascotas: 3`, style: TextInputStyle.Short })
+                    .addInput({ id: "shopType", label: "Tienda", placeholder: `Tienda: 1 / DarkShop: 2 / Mascotas: 3 / Externa: 4`, style: TextInputStyle.Short })
                     .show();
                 break;
             }

@@ -287,6 +287,10 @@ Schema.method("getNextLevelExp", function (level = null) {
     return 10 * (level ** 2) + 50 * level + 100;
 })
 
+Schema.method("getLevel", function () {
+    return this.economy.global.level;
+})
+
 Schema.method("getCurrency", function () {
     return this.economy.global.currency;
 })

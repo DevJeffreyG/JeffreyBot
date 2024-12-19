@@ -24,6 +24,13 @@ const Schema = mongoose.Schema({
             id: { type: Number, required: true, sparse: true },
         }
     ],
+    groups: {
+        embeds: [{
+            identifier: { type: String, required: true, default: "Sin identificador" },
+            ids: [{ type: Number, validate: [integerValidator, positiveValidator] }],
+            id: { type: Number, required: true, sparse: true }
+        }]
+    },
     buttons: [
         {
             texto: { type: String },
@@ -61,11 +68,14 @@ const Schema = mongoose.Schema({
                     darkcurrency: { type: Number, validate: [positiveValidator, integerValidator] },
                     blackjack: { type: Number, validate: [positiveValidator, integerValidator] },
                     roulette: { type: Number, validate: [positiveValidator, integerValidator] },
-                    subscriptions_currency: { type: Number, validate: [positiveValidator, integerValidator] }
+                    subscriptions_currency: { type: Number, validate: [positiveValidator, integerValidator] },
+                    secured_currency: { type: Number, validate: [positiveValidator, integerValidator] },
                 },
                 moment: {
                     currency: { type: Number, validate: integerValidator },
                     darkcurrency: { type: Number, validate: positiveValidator },
+                    secured_currency: { type: Number, validate: [positiveValidator, integerValidator] },
+                    level: { type: Number, validate: [positiveValidator, integerValidator] }
                 }
             },
             enabled: { type: Boolean, default: false },
@@ -110,6 +120,10 @@ Schema.method("addEmbed", function (embed, id, identifier) {
     return this;
 })
 
+Schema.method("getEmbedGroup", function (id) {
+    return this.groups.embeds.find(x => x.id === id);
+})
+
 Schema.method("getEmbed", function (id) {
     return this.embeds.find(x => x.id === id);
 })
@@ -125,8 +139,19 @@ Schema.method("deleteEmbed", function (id) {
     }
 })
 
+Schema.method("deleteEmbedGroup", function (id) {
+    let index = this.groups.embeds.findIndex(x => x.id === id);
+
+    if (index != -1) {
+        this.groups.embeds.splice(index, 1)
+        return this;
+    } else {
+        throw index;
+    }
+})
+
 Schema.method("addButton", function (button, id) {
-    let buttonToPush = {...button};
+    let buttonToPush = { ...button };
 
     buttonToPush.id = id;
 

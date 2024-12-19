@@ -1663,7 +1663,7 @@ const FindAverage = async function (guild) {
  * ```
  * @returns {Number} Unique ID within the query
  */
-const FindNewId = function (generalQuery, specificQuery, toCheck) {
+const FindNewId = function (generalQuery, specificQuery, toCheck = 'id') {
   // id
   let idsNow = []; // ids en uso actualmente
   let newId = 1;
@@ -2220,11 +2220,11 @@ const CreateInteractionFilter = function (interaction, message, user) {
  * @param {Enum} type 
  * @param {import("discord.js").MessageCreateOptions} options 
  * @param {Boolean} guildInfo Incluir información de dónde se envía el mensaje directo en el último embed dentro de options
- * @returns {void}
+ * @returns {Promise<void>}
  */
 const SendDirect = async function (interaction, member, type, options, guildInfo = true) {
   if (interaction.client.toggles.functionDisabled(ToggleableFunctions.SendDirect)) {
-    //console.log("⚪ Se intentó enviar un mensaje directo a %s pero esta función está toggleada.", member.user.username);
+    console.log("⚪ Se intentó enviar un mensaje directo a %s pero esta función está toggleada.", member.user.username);
     return;
   }
 
