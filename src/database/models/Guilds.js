@@ -300,6 +300,10 @@ const GuildSchema = new Schema({
                 }
             }
         },
+        notifications: {
+            youtube: { type: String },
+            twitch: { type: String }
+        },
         functions: {
             adjust: {
                 shop: { type: Boolean, default: false },

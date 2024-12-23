@@ -1160,7 +1160,7 @@ const VaultWork = async function (vault, user, interaction, notCodeEmbed) { // m
 const handleNotification = async function (guild) {
   if (guild.id != Bases.owner.guildId && guild.id != Bases.dev.guild) return;
   if (guild.client.toggles.functionDisabled(ToggleableFunctions.HandleNotification)) {
-    console.log("⚪ Se intentó ejecutar handleNotification pero esta función está toggleada");
+    //console.log("⚪ Se intentó ejecutar handleNotification pero esta función está toggleada");
     return;
   }
   const doc = await Guilds.getWork(guild.id);
@@ -1175,8 +1175,8 @@ const handleNotification = async function (guild) {
   let dataNotified = doc.data.social_notifications;
 
   const config = {
-    youtube_channelId: "UCCYiF7GGja7iJgsc4LN0oHw",
-    twitch_username: "jeffreyg_"
+    youtube_channelId: doc.settings.notifications.youtube,
+    twitch_username: doc.settings.notifications.twitch
   }
 
   const textos = {
@@ -1188,112 +1188,115 @@ const handleNotification = async function (guild) {
   }
 
   // YouTube
-  const googleRes = await google.youtube("v3").activities.list({
-    key: process.env.YOUTUBE_TOKEN,
-    part: "snippet, contentDetails",
-    channelId: config.youtube_channelId
-  })
+  if (config.youtube_channelId) {
+    const googleRes = await google.youtube("v3").activities.list({
+      key: process.env.YOUTUBE_TOKEN,
+      part: "snippet, contentDetails",
+      channelId: config.youtube_channelId
+    })
 
-  for (const item of googleRes.data.items) {
-    if (item.snippet.type != "upload") continue;
+    for (const item of googleRes.data.items) {
+      if (item.snippet.type != "upload") continue;
 
-    const videoId = item.contentDetails.upload.videoId;
-    const publishDate = moment(item.snippet.publishedAt)
+      const videoId = item.contentDetails.upload.videoId;
+      const publishDate = moment(item.snippet.publishedAt)
 
-    // Si ya fue notificado ignorar
-    if (dataNotified.youtube.shorts.find(x => x === videoId) || dataNotified.youtube.videos.find(x => x === videoId)) {
-      // console.log("🟢 Ignoring %s: Already notified", videoId);
-      continue;
-    }
+      // Si ya fue notificado ignorar
+      if (dataNotified.youtube.shorts.find(x => x === videoId) || dataNotified.youtube.videos.find(x => x === videoId)) {
+        // console.log("🟢 Ignoring %s: Already notified", videoId);
+        continue;
+      }
 
-    const videoLink = `https://www.youtube.com/watch?v=${videoId}`;
-    const shortLink = `https://www.youtube.com/shorts/${videoId}`;
+      const videoLink = `https://www.youtube.com/watch?v=${videoId}`;
+      const shortLink = `https://www.youtube.com/shorts/${videoId}`;
 
-    let isShort, shortRes;
-    try {
-      shortRes = await fetch(shortLink, { redirect: "manual" });
-      if (shortRes.status === 404) throw Error(`404 Checking if short: ${shortLink}`)
-      isShort = shortRes.status === 303 ? false : true;
-    } catch (err) {
-      console.error("🔴 Error checking short: %s", err);
-      continue;
-    }
+      let isShort, shortRes;
+      try {
+        shortRes = await fetch(shortLink, { redirect: "manual" });
+        if (shortRes.status === 404) throw Error(`404 Checking if short: ${shortLink}`)
+        isShort = shortRes.status === 303 ? false : true;
+      } catch (err) {
+        console.error("🔴 Error checking short: %s", err);
+        continue;
+      }
 
-    // Si ya pasó mucho tiempo, ignorar
-    const timePassed = moment().diff(publishDate, "days");
-    if (timePassed > doc.settings.quantities.ignore_notifications[isShort ? "youtube_shorts" : "youtube_videos"]) {
-      // console.log("🟢 Ya pasó mucho tiempo para notificar (%sd): %s", timePassed, item.snippet.title);
-      continue;
-    }
+      // Si ya pasó mucho tiempo, ignorar
+      const timePassed = moment().diff(publishDate, "days");
+      if (timePassed > doc.settings.quantities.ignore_notifications[isShort ? "youtube_shorts" : "youtube_videos"]) {
+        // console.log("🟢 Ya pasó mucho tiempo para notificar (%sd): %s", timePassed, item.snippet.title);
+        continue;
+      }
 
-    let prop = isShort ? "shorts" : "videos";
+      let prop = isShort ? "shorts" : "videos";
 
-    let embed = new Embed()
-      .defDesc(`# ${isShort ? "¡NUEVO SHORT!" : "¡NUEVO VÍDEO!"}\n### ${new Chance().pickone(textos.emojis)} ${item.snippet.title}`)
-      .defColor(Colores.verde)
-      .defFooter({ text: `— ${new Chance().pickone(textos[prop])}` })
-      .defImage(item.snippet.thumbnails.maxres.url ?? item.snippet.thumbnails.default.url);
-
-    let components = [
-      new ActionRowBuilder()
-        .setComponents(
-          new ButtonBuilder()
-            .setStyle(ButtonStyle.Link)
-            .setURL(isShort ? shortLink : videoLink)
-            .setEmoji(isShort ? guild.client.Emojis.YouTubeShorts : guild.client.Emojis.YouTube)
-            .setLabel(new Chance().pickone(textos.labels))
-        )
-    ]
-
-    // Hay canal de anuncios de YouTube configurado
-    if (youtubeChannel) {
-      dataNotified.youtube[prop].push(videoId);
-      await doc.save();
-
-      await youtubeChannel.send({ content: (isShort ? shortsRole : ytRole).toString(), embeds: [embed], components });
-
-      console.log("🟢 Announced %s", videoId)
-      console.log("🟢 ShortRes: %s", shortRes);
-      console.log("🟢 IsShort: %s", isShort);
-    }
-  }
-
-  // Twitch
-  const streamLink = `https://twitch.tv/${config.twitch_username}`;
-
-  const authProvider = new AppTokenAuthProvider(process.env.TWITCH_CLIENT, process.env.TWITCH_SECRET);
-  const apiClient = new ApiClient({ authProvider });
-
-  let streaming = await isStreaming(config.twitch_username);
-
-  // Si está en directo, y hay canal de anuncios de Twitch configurado
-  if (streaming && twitchChannel) {
-    const stream = await getStream(config.twitch_username);
-    const streamId = stream.id;
-    const streamTitle = stream.title;
-    if (!dataNotified.twitch.find(x => x === streamId)) {
       let embed = new Embed()
-        .defDesc(`# ¡JEFFREY ESTÁ EN DIRECTO!\n### ${new Chance().pickone(textos.emojis)} ${streamTitle}`)
-        .defColor("#9146FF")
-        .defFooter({ text: `— ${new Chance().pickone(textos.twitch)}` })
-        .defImage(await getUserPicture(config.twitch_username));
+        .defDesc(`# ${isShort ? "¡NUEVO SHORT!" : "¡NUEVO VÍDEO!"}\n### ${new Chance().pickone(textos.emojis)} ${item.snippet.title}`)
+        .defColor(Colores.verde)
+        .defFooter({ text: `— ${new Chance().pickone(textos[prop])}` })
+        .defImage(item.snippet.thumbnails.maxres.url ?? item.snippet.thumbnails.default.url);
 
       let components = [
         new ActionRowBuilder()
           .setComponents(
             new ButtonBuilder()
               .setStyle(ButtonStyle.Link)
-              .setURL(streamLink)
-              .setEmoji(guild.client.Emojis.Twitch)
+              .setURL(isShort ? shortLink : videoLink)
+              .setEmoji(isShort ? guild.client.Emojis.YouTubeShorts : guild.client.Emojis.YouTube)
               .setLabel(new Chance().pickone(textos.labels))
           )
       ]
 
-      dataNotified.twitch.push(streamId);
-      await doc.save();
+      // Hay canal de anuncios de YouTube configurado
+      if (youtubeChannel) {
+        dataNotified.youtube[prop].push(videoId);
+        await doc.save();
 
-      await twitchChannel.send({ content: twitchRole.toString(), embeds: [embed], components });
-      console.log("🟢 Announced Twitch stream")
+        await youtubeChannel.send({ content: (isShort ? shortsRole : ytRole).toString(), embeds: [embed], components });
+
+        console.log("🟢 Announced %s", videoId)
+        console.log("🟢 ShortRes: %s", shortRes);
+        console.log("🟢 IsShort: %s", isShort);
+      }
+    }
+  }
+
+  // Twitch
+  const authProvider = new AppTokenAuthProvider(process.env.TWITCH_CLIENT, process.env.TWITCH_SECRET);
+  const apiClient = new ApiClient({ authProvider });
+
+  if (config.twitch_username) {
+    const streamLink = `https://twitch.tv/${config.twitch_username}`;
+    let streaming = await isStreaming(config.twitch_username);
+
+    // Si está en directo, y hay canal de anuncios de Twitch configurado
+    if (streaming && twitchChannel) {
+      const stream = await getStream(config.twitch_username);
+      const streamId = stream.id;
+      const streamTitle = stream.title;
+      if (!dataNotified.twitch.find(x => x === streamId)) {
+        let embed = new Embed()
+          .defDesc(`# ¡JEFFREY ESTÁ EN DIRECTO!\n### ${new Chance().pickone(textos.emojis)} ${streamTitle}`)
+          .defColor("#9146FF")
+          .defFooter({ text: `— ${new Chance().pickone(textos.twitch)}` })
+          .defImage(await getUserPicture(config.twitch_username));
+
+        let components = [
+          new ActionRowBuilder()
+            .setComponents(
+              new ButtonBuilder()
+                .setStyle(ButtonStyle.Link)
+                .setURL(streamLink)
+                .setEmoji(guild.client.Emojis.Twitch)
+                .setLabel(new Chance().pickone(textos.labels))
+            )
+        ]
+
+        dataNotified.twitch.push(streamId);
+        await doc.save();
+
+        await twitchChannel.send({ content: twitchRole.toString(), embeds: [embed], components });
+        console.log("🟢 Announced Twitch stream")
+      }
     }
   }
 
@@ -1556,7 +1559,7 @@ const AfterInfraction = async function (user, data) {
  */
 const ManageDarkShops = async function (client) {
   if (client.toggles.functionDisabled(ToggleableFunctions.ManageDarkShops)) {
-    console.log("⚪ Se intentó ejecutar ManageDarkShops pero esta función está toggleada");
+    //console.log("⚪ Se intentó ejecutar ManageDarkShops pero esta función está toggleada");
     return;
   }
 
@@ -2224,7 +2227,7 @@ const CreateInteractionFilter = function (interaction, message, user) {
  */
 const SendDirect = async function (interaction, member, type, options, guildInfo = true) {
   if (interaction.client.toggles.functionDisabled(ToggleableFunctions.SendDirect)) {
-    console.log("⚪ Se intentó enviar un mensaje directo a %s pero esta función está toggleada.", member.user.username);
+    //console.log("⚪ Se intentó enviar un mensaje directo a %s pero esta función está toggleada.", member.user.username);
     return;
   }
 
