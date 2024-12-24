@@ -91,7 +91,7 @@ ${member.roles.cache.toJSON().sort().join(", ")}`)
     for (const trophy of trophies) {
         const info = custom.getTrophy(trophy.element_id);
 
-        trophiesEmbed.defField(`🏆 — "${info.name}"`, `▸ ${info.desc}\n▸ Desbloqueado: ${time(trophy.date)}\n▸ ID: \`${trophy.id}\``, true)
+        trophiesEmbed.defField(`🏆 — "${info.name}"`, `▸ ${info.desc}\n▸ Desbloqueado: ${time(trophy.date)}\n▸ ID: \`${info.id}\``, true)
     }
 
     // foreach

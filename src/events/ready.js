@@ -4,7 +4,7 @@ const { Collection, Client, time, chatInputApplicationCommandMention } = require
 const { Guilds, GlobalDatas } = require("mongoose").models;
 
 const Managers = require("../utils/Managers");
-const { CustomEmojis, ChannelModules, Log, Embed } = require("../utils/");
+const { CustomEmojis, ChannelModules, Log, Embed, ToggleableFunctions } = require("../utils/");
 const Functions = require("../utils/functions");
 
 const Commands = require("../app/Commands");
@@ -40,7 +40,7 @@ module.exports = async (client) => {
 
         let command = client.application.commands.cache.find(x => x.name === name);
         if (!command) {
-            if(process.env.DEV === "FALSE") console.error("🔴 No se encontró el comando %s", format)
+            if (process.env.DEV === "FALSE") console.error("🔴 No se encontró el comando %s", format)
             return `\`/${format}\``;
         }
 
@@ -87,7 +87,8 @@ module.exports = async (client) => {
 
         new CronJob("0 */1 * * * *", async function () {
             try {
-                await Functions.GlobalDatasWork(guild);
+                if (!client.toggles.functionDisabled(ToggleableFunctions.GlobalDatasWork))
+                    await Functions.GlobalDatasWork(guild);
             } catch (err) {
                 console.log("🔴 Hubo un error con las GlobalDatas");
                 console.error(err);
@@ -96,7 +97,8 @@ module.exports = async (client) => {
 
         new CronJob("*/30 * * * * *", async function () {
             try {
-                await Functions.handleNotification(guild);
+                if (!client.toggles.functionDisabled(ToggleableFunctions.HandleNotification))
+                    await Functions.handleNotification(guild);
             } catch (err) {
                 console.log("🔴 Hubo un error con las notificaciones")
                 console.error(err);
@@ -106,7 +108,8 @@ module.exports = async (client) => {
         // Cada hora
         new CronJob("0 0 */1 * * *", async function () {
             try {
-                await Functions.PetWork(guild);
+                if (!client.toggles.functionDisabled(ToggleableFunctions.PetWork))
+                    await Functions.PetWork(guild);
             } catch (err) {
                 console.log("🔴 Hubo un error con las Mascotas")
                 console.error(err);
@@ -148,7 +151,8 @@ module.exports = async (client) => {
     // Cada 5 minutos
     new CronJob("0 */5 * * * *", async function () {
         try {
-            await Functions.ManageDarkShops(client)
+            if (!client.toggles.functionDisabled(ToggleableFunctions.ManageDarkShops))
+                await Functions.ManageDarkShops(client)
         } catch (err) {
             console.log("🔴 Hubo un error con las DarkShops")
             console.error(err);

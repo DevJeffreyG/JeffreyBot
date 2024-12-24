@@ -140,12 +140,12 @@ class CustomTrophy {
      * @param {Number} id Trophy ID
      * @param {GuildMember} member 
      * @param {any} userDoc Mongoose User Document
-     * @param {Number} newId Nueva ID al agregarse el trofeo al usuario
+     * @param {any} customDoc Mongoose customDoc Document
      * @param {Boolean} save 
      * @returns {Promise<any>} Mongoose User
      */
-    async manage(id, member, userDoc, newId, save = true) {
-        this.doc = await CustomElements.getWork(this.interaction instanceof Guild ? this.interaction.id : this.interaction.guild.id);
+    async manage(id, member, userDoc, customDoc, save = true) {
+        this.doc = customDoc;
         this.member = member;
         this.user = userDoc;
 
@@ -234,10 +234,7 @@ class CustomTrophy {
 
         if (grant && entered) {
             // añadirlo a la lista de trophies
-            this.user.data.trophies.push({
-                element_id: trophy.id,
-                id: newId
-            })
+            this.user.data.trophies.push({ element_id: trophy.id })
 
             this.user.markModified("data.trophies")
 
@@ -284,10 +281,7 @@ class CustomTrophy {
         } else {
             // No lo tiene
             granted = true;
-            this.user.data.trophies.push({
-                element_id: trophy.id,
-                id
-            })
+            this.user.data.trophies.push({ element_id: trophy.id })
 
             this.#reqWork(trophy)
             await this.#rewardsWork(trophy)
@@ -479,91 +473,96 @@ class CustomTrophy {
                     this.reqsDone.push(`**El rol @${guild.roles.cache.get(value).name}**`);
                     break;
                 case "totals":
-                    Object.keys(value).forEach(totalProps => {
-                        if (value[totalProps]) {
-                            const TrophyEnums = new Enum(TrophyRequirements);
-                            let reqDone, reqExpl;
-                            switch (totalProps) {
-                                case TrophyRequirements.SubscriptionsCurrency:
-                                case TrophyRequirements.SecuredCurrency:
-                                case TrophyRequirements.Currency:
-                                    reqDone = PrettyCurrency(guild, value[totalProps]);
-                                    break;
-                                case TrophyRequirements.DarkCurrency:
-                                    reqDone = PrettyCurrency(guild, value[totalProps], { name: "DarkCurrency" });
-                                    break;
-                                default:
-                                    reqDone = bold(value[totalProps].toLocaleString("es-CO"));
-                            }
+                    totalLoop:
+                    for (const totalProps of Object.keys(value)) {
+                        const totalValue = value[totalProps];
+                        if (!totalValue) continue totalLoop;
 
-                            switch (totalProps) {
-                                case TrophyRequirements.Warns:
-                                    reqExpl = `${TrophyEnums.translate(totalProps)} **totales**`;
-                                    break;
-                                case TrophyRequirements.DarkCurrency:
-                                    reqExpl = `${TrophyEnums.translate(totalProps)} **totales** invertidos`;
-                                    break;
-                                case TrophyRequirements.Currency:
-                                    reqExpl = `${TrophyEnums.translate(totalProps)} **totales** ganados`;
-                                    break;
-                                case TrophyRequirements.Blackjack:
-                                    reqExpl = `${TrophyEnums.translate(totalProps)}(s) ganados`;
-                                    break;
-                                case TrophyRequirements.Roulette:
-                                    reqExpl = `Jugada(s) en la ${TrophyEnums.translate(totalProps)}`;
-                                    break;
-                                case TrophyRequirements.SubscriptionsCurrency:
-                                    reqExpl = `${TrophyEnums.translate(totalProps)} gastado`;
-                                    break;
-                                case TrophyRequirements.SecuredCurrency:
-                                    reqExpl = `${TrophyEnums.translate(totalProps)} **totales**`;
-                                    break;
-                                default:
-                                    reqExpl = TrophyEnums.translate(totalProps);
-                            }
-
-                            this.reqsDone.push(`${reqExpl} **≥** ${reqDone}`)
+                        const TrophyEnums = new Enum(TrophyRequirements);
+                        let reqDone, reqExpl;
+                        switch (totalProps) {
+                            case TrophyRequirements.SubscriptionsCurrency:
+                            case TrophyRequirements.SecuredCurrency:
+                            case TrophyRequirements.Currency:
+                                reqDone = PrettyCurrency(guild, totalValue);
+                                break;
+                            case TrophyRequirements.DarkCurrency:
+                                reqDone = PrettyCurrency(guild, totalValue, { name: "DarkCurrency" });
+                                break;
+                            default:
+                                reqDone = bold(totalValue.toLocaleString("es-CO"));
                         }
-                    });
+
+                        switch (totalProps) {
+                            case TrophyRequirements.Warns:
+                                reqExpl = `${TrophyEnums.translate(totalProps)} **totales**`;
+                                break;
+                            case TrophyRequirements.DarkCurrency:
+                                reqExpl = `${TrophyEnums.translate(totalProps)} **totales** invertidos`;
+                                break;
+                            case TrophyRequirements.Currency:
+                                reqExpl = `${TrophyEnums.translate(totalProps)} **totales** ganados`;
+                                break;
+                            case TrophyRequirements.Blackjack:
+                                reqExpl = `${TrophyEnums.translate(totalProps)}(s) ganados`;
+                                break;
+                            case TrophyRequirements.Roulette:
+                                reqExpl = `Jugada(s) en la ${TrophyEnums.translate(totalProps)}`;
+                                break;
+                            case TrophyRequirements.SubscriptionsCurrency:
+                                reqExpl = `${TrophyEnums.translate(totalProps)} gastado`;
+                                break;
+                            case TrophyRequirements.SecuredCurrency:
+                                reqExpl = `${TrophyEnums.translate(totalProps)} **totales**`;
+                                break;
+                            default:
+                                reqExpl = TrophyEnums.translate(totalProps);
+                        }
+
+                        this.reqsDone.push(`${reqExpl} **≥** ${reqDone}`)
+
+                    }
                     break;
                 case "moment":
-                    Object.keys(value).forEach(totalProps => {
-                        if (value[totalProps]) {
-                            const TrophyEnums = new Enum(TrophyRequirements);
-                            let reqDone, reqExpl;
-                            switch (totalProps) {
-                                case TrophyRequirements.SubscriptionsCurrency:
-                                case TrophyRequirements.SecuredCurrency:
-                                case TrophyRequirements.Currency:
-                                    reqDone = PrettyCurrency(guild, value[totalProps]);
-                                    break;
-                                case TrophyRequirements.DarkCurrency:
-                                    reqDone = PrettyCurrency(guild, value[totalProps], { name: "DarkCurrency" });
-                                    break;
-                                default:
-                                    reqDone = bold(value[totalProps].toLocaleString("es-CO"));
-                            }
+                    momentLoop:
+                    for (const momentProps of Object.keys(value)) {
+                        const momentValue = value[momentProps];
+                        if (!momentValue) continue momentLoop;
 
-                            switch (totalProps) {
-                                case TrophyRequirements.DarkCurrency:
-                                    reqExpl = `${TrophyEnums.translate(totalProps)} actualmente en inversión`;
-                                    break;
-                                case TrophyRequirements.Currency:
-                                    reqExpl = `${TrophyEnums.translate(totalProps)} en tu cuenta`;
-                                    break;
-                                case TrophyRequirements.SecuredCurrency:
-                                    reqExpl = `${TrophyEnums.translate(totalProps)} en tu cuenta`;
-                                    break;
-                                case TrophyRequirements.Level:
-                                    reqExpl = `${TrophyEnums.translate(totalProps)} de EXP`;
-                                    break;
-                                default:
-                                    reqExpl = TrophyEnums.translate(totalProps);
-                            }
-
-                            this.reqsDone.push(`${reqExpl} **≥** ${reqDone}`)
+                        const TrophyEnums = new Enum(TrophyRequirements);
+                        let reqDone, reqExpl;
+                        switch (momentProps) {
+                            case TrophyRequirements.SubscriptionsCurrency:
+                            case TrophyRequirements.SecuredCurrency:
+                            case TrophyRequirements.Currency:
+                                reqDone = PrettyCurrency(guild, momentValue);
+                                break;
+                            case TrophyRequirements.DarkCurrency:
+                                reqDone = PrettyCurrency(guild, momentValue, { name: "DarkCurrency" });
+                                break;
+                            default:
+                                reqDone = bold(momentValue.toLocaleString("es-CO"));
                         }
-                    });
+
+                        switch (momentProps) {
+                            case TrophyRequirements.DarkCurrency:
+                                reqExpl = `${TrophyEnums.translate(momentProps)} actualmente en inversión`;
+                                break;
+                            case TrophyRequirements.Currency:
+                                reqExpl = `${TrophyEnums.translate(momentProps)} en tu cuenta`;
+                                break;
+                            case TrophyRequirements.SecuredCurrency:
+                                reqExpl = `${TrophyEnums.translate(momentProps)} en tu cuenta`;
+                                break;
+                            case TrophyRequirements.Level:
+                                reqExpl = `${TrophyEnums.translate(momentProps)} de EXP`;
+                                break;
+                            default:
+                                reqExpl = TrophyEnums.translate(momentProps);
+                        }
+
+                        this.reqsDone.push(`${reqExpl} **≥** ${reqDone}`)
+                    }
                     break;
             }
         }

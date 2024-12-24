@@ -1,5 +1,5 @@
 const { Bases } = require("../resources/");
-const { Cooldowns, Multipliers, RequirementType, UpdateCommands, DeleteLink, FetchThisGuild, BoostWork, MinMaxInt } = require("../utils");
+const { Cooldowns, Multipliers, RequirementType, UpdateCommands, DeleteLink, FetchThisGuild, BoostWork, MinMaxInt, ToggleableFunctions } = require("../utils");
 
 const { GlobalDatasWork } = require("../utils/");
 const { ChannelType, codeBlock, Client, Message, ActionRowBuilder, ButtonBuilder, ButtonStyle, time } = require("discord.js");
@@ -154,7 +154,8 @@ module.exports = async (client, message) => {
 
     const toMultiply = customMultiplier * multiplier;
 
-    await GlobalDatasWork(guild, true); // verificar si existen BOOSTS.
+    if (!guild.client.toggles.functionDisabled(ToggleableFunctions.GlobalDatasWork))
+      await GlobalDatasWork(guild, true); // verificar si existen BOOSTS.
     const boost = BoostWork(user);
 
     let currencyToAdd = MinMaxInt(minMoney, maxMoney * boost.probability.currency_value, { guild, msg: `No se ha podido agregar ${client.getCustomEmojis(guild.id)?.Currency.name} ?? Dinero` }) * toMultiply;

@@ -349,11 +349,6 @@ const GenerateLog = async function (guild, options = {
  * @returns {Promise<void>}
  */
 const GlobalDatasWork = async function (guild, justTempRoles = false) {
-  if (guild.client.toggles.functionDisabled(ToggleableFunctions.GlobalDatasWork)) {
-    //console.log("⚪ Se intentó ejecutar GlobalDatasWork en %s pero esta función está toggleada", guild.name);
-    return;
-  }
-
   const { EmojisObject } = guild.client;
   const doc = await Guilds.getWork(guild.id);
   const customDoc = await CustomElements.getWork(guild.id);
@@ -498,9 +493,10 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
       const CustomTrophy = require("./CustomTrophy");
 
       for await (const trophy of trophyList) {
+        if (!trophy.enabled) continue;
+
         try {
-          let newId = FindNewId(await Users.find(), "data.trophies", "id");
-          dbUser = await new CustomTrophy(guild).manage(trophy.id, member, dbUser, newId, false)
+          dbUser = await new CustomTrophy(guild).manage(trophy.id, member, dbUser, customDoc, false)
           //console.log(dbUser.data.temp_roles);
         } catch (err) {
           console.error("🔴 %s", err);
@@ -972,11 +968,6 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
  * @return {Promise<void>}
  */
 const PetWork = async function (guild) {
-  if (guild.client.toggles.functionDisabled(ToggleableFunctions.PetWork)) {
-    // console.log("⚪ Se intentó ejecutar PetWork en %s pero esta función está toggleada", guild.name);
-    return;
-  }
-
   const doc = await Guilds.getWork(guild.id);
   const members = guild.members.cache;
 
@@ -1159,10 +1150,6 @@ const VaultWork = async function (vault, user, interaction, notCodeEmbed) { // m
  */
 const handleNotification = async function (guild) {
   if (guild.id != Bases.owner.guildId && guild.id != Bases.dev.guild) return;
-  if (guild.client.toggles.functionDisabled(ToggleableFunctions.HandleNotification)) {
-    //console.log("⚪ Se intentó ejecutar handleNotification pero esta función está toggleada");
-    return;
-  }
   const doc = await Guilds.getWork(guild.id);
 
   const youtubeChannel = guild.channels.cache.get(doc.getChannel("notifier.youtube_notif"));
@@ -1558,11 +1545,6 @@ const AfterInfraction = async function (user, data) {
  * @param {Client} client 
  */
 const ManageDarkShops = async function (client) {
-  if (client.toggles.functionDisabled(ToggleableFunctions.ManageDarkShops)) {
-    //console.log("⚪ Se intentó ejecutar ManageDarkShops pero esta función está toggleada");
-    return;
-  }
-
   await client.guilds.fetch()
 
   for await (const guild of client.guilds.cache.values()) {
@@ -1667,36 +1649,22 @@ const FindAverage = async function (guild) {
  * @returns {Number} Unique ID within the query
  */
 const FindNewId = function (generalQuery, specificQuery, toCheck = 'id') {
-  // id
-  let idsNow = []; // ids en uso actualmente
-  let newId = 1;
+  let idsNow = new Set(); // ids en uso actualmente
 
   if (!Array.isArray(generalQuery)) generalQuery = [generalQuery];
 
-  for (let i = 0; i < generalQuery.length; i++) {
-    const document = generalQuery[i];
+  for (const document of generalQuery) {
+    let property = specificQuery.length > 0 ? document.get(specificQuery) : document;
 
-    let forEachLoop = document;
-    let split = specificQuery.split(".");
-
-    if (split && split.length >= 1 && split[0].length > 0) {
-      for (let i = 0; i < split.length; i++) {
-        const queryQ = split[i];
-
-        forEachLoop = forEachLoop[queryQ]
-      }
-
-      if (Array.isArray(forEachLoop)) forEachLoop.forEach(i => {
-        idsNow.push(i[toCheck]); // pushear cada id en uso
-      });
-      else idsNow.push(forEachLoop[toCheck]);
-
+    if (Array.isArray(property)) {
+      property.forEach(item => idsNow.add(item[toCheck]))
     } else {
-      idsNow.push(forEachLoop[toCheck])
+      idsNow.add(property[toCheck])
     }
   }
 
-  while (idsNow.find(x => x === newId)) { // mientras se encuentre la id en las que ya están en uso sumar una hasta que ya no lo esté
+  let newId = 1;
+  while (idsNow.has(newId)) { // mientras se encuentre la id en las que ya están en uso sumar una hasta que ya no lo esté
     newId++;
   }
 
@@ -1718,46 +1686,30 @@ const FindNewId = function (generalQuery, specificQuery, toCheck = 'id') {
  * @returns {[Number]} Unique ID within the query
  */
 const FindNewIds = function (generalQuery, specificQuery, toCheck, quantity) {
-  // id
-  let idsNow = []; // ids en uso actualmente
   let returnable = [];
-  let newId = 1;
+  let idsNow = new Set(); // ids en uso actualmente
 
   if (!Array.isArray(generalQuery)) generalQuery = [generalQuery];
 
-  for (let i = 0; i < generalQuery.length; i++) {
-    const document = generalQuery[i];
+  for (const document of generalQuery) {
+    let property = specificQuery.length > 0 ? document.get(specificQuery) : document;
 
-    let forEachLoop = document;
-    let split = specificQuery.split(".");
-
-    if (split && split.length >= 1 && split[0].length > 0) {
-      for (let i = 0; i < split.length; i++) {
-        const queryQ = split[i];
-
-        forEachLoop = forEachLoop[queryQ]
-      }
-
-      if (Array.isArray(forEachLoop)) forEachLoop.forEach(i => {
-        idsNow.push(i[toCheck]); // pushear cada id en uso
-      });
-      else idsNow.push(forEachLoop[toCheck]);
-
+    if (Array.isArray(property)) {
+      property.forEach(item => idsNow.add(item[toCheck]))
     } else {
-      idsNow.push(forEachLoop[toCheck])
+      idsNow.add(property[toCheck])
     }
   }
 
+  let newId = 1;
   for (let i = 1; i <= quantity; i++) {
-    do {
+    while (idsNow.has(newId)) {
       newId++;
-    } while (idsNow.find(x => x === newId))
+    }
 
-
+    idsNow.add(newId);
     returnable.push(newId);
   }
-
-  console.log(returnable);
 
   return returnable;
 }

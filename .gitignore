@@ -115,3 +115,4 @@ admin.bat
 /.vscode
 /src/iisnode
 web.config
+*.env

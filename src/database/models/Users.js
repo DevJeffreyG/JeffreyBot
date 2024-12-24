@@ -176,8 +176,7 @@ const Schema = new mongoose.Schema({
         trophies: [
             {
                 element_id: { type: Number, required: true },
-                date: { type: Date, default: () => { return new Date() } },
-                id: { type: Number, required: true, sparse: true }
+                date: { type: Date, default: () => { return new Date() } }
             }
         ]
     },

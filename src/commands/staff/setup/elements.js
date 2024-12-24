@@ -411,12 +411,13 @@ command.execute = async (interaction, models, params, client) => {
                 }
                 case "trophies": {
                     title = "Lista de Trofeos";
-                    addon = `**— {show}**\n**▸ Descripción:**\`\`\`\n{desc}\n\`\`\`\n**▸ ID Elemento: \`{id}\`**\n\n`
+                    addon = `**— "{show}"**\n**▸ Descripción:**\`\`\`\n{desc}\n\`\`\`\n**▸ Activo (Dado automáticamente): \`{enabled}\`**\n**▸ ID Elemento: \`{id}\`**\n\n`
 
                     for (trophy of custom.trophies) {
                         items.set(trophy.id, {
                             show: trophy.name,
                             desc: trophy.desc ?? "Sin descripción",
+                            enabled: trophy.enabled ? "Sí" : "No",
                             id: trophy.id
                         })
                     }
