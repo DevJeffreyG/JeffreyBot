@@ -74,7 +74,9 @@ class Enum {
             Music: "Música",
             DM: "Mensajes Directos",
             Suggestions: "Sugerencias",
-            EXShopTTS: "EXShop: TTS"
+            EXShopTTS: "EXShop: TTS",
+            Pet: "Mascota",
+            PetStatsModifier: "Modificador de estadísticas"
         }
 
         for (const prop of Object.keys(this.values)) {
@@ -106,16 +108,18 @@ class Enum {
 
     /**
      * Convierte los datos en un array de forma.
+     * filterFn filtra los valores, lo que sería 'name'
      * #### Predeterminado: [{name: nombre, value: valor}]
      * @returns Array
      */
-    complexArray(options = { first: "name", second: "value", valueString: false }) {
+    complexArray(options = { first: "name", second: "value", valueString: false, filterFn: null }) {
         let arr = [];
         const first = options.first ?? "name";
         const second = options.second ?? "value";
         const valueString = options.valueString ?? false;
+        const filterFunction = options.filterFn ?? function (x) { return x }
 
-        let names = this.array();
+        let names = this.array().filter(filterFunction);
 
         for (const name of names) {
             let obj = {};

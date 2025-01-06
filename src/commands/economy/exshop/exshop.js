@@ -13,7 +13,7 @@ command.execute = async (interaction, models, params, client) => {
         .setType(ShopTypes.EXShop)
         .build(params.getDoc(), params.getUser());
 
-    return await shop.show()
+    return await shop.show(5)
 }
 
 module.exports = command;

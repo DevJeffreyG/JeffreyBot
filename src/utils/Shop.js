@@ -71,6 +71,8 @@ class Shop {
                 user_path: null
             }
         }
+
+        this.filterFunction = x => { return x };
     }
 
     /** ------------------ SETUP ------------------ */
@@ -155,6 +157,17 @@ class Shop {
         return this;
     }
 
+    /**
+     * Debe usarse antes de build()
+     * @param {function} fn Filtrar los items a mostrar en la tienda
+     * @returns {this}
+     */
+    filter(fn) {
+        if(fn) this.filterFunction = fn;
+
+        return this
+    }
+
     async build(doc, user) {
         this.#build = true;
         this.#doc = doc;
@@ -183,7 +196,7 @@ class Shop {
 
         this.#adminInteractive.base.addon = adminAddon.substring(0, 2) + "{publicInfo} — ID: " + adminAddon.substring(2, adminAddon.length - 4) + `\n+ ${this.config.currency.emoji}{item_interest}** al comprarlo.\n\n`
 
-        this.shopdoc.items.forEach((item, index) => {
+        this.shopdoc.items.filter(this.filterFunction).forEach((item, index) => {
             let price = this.determinePrice(this.#user, item, true);
 
             this.#interactive.items.set(item.id, {
@@ -220,11 +233,12 @@ class Shop {
     /** ------------------ MAIN ------------------ */
     /**
      * Mostrar la tienda con un Embed
+     * @param {integer} count
      */
-    async show() {
+    async show(count = 3) {
         if (!this.#build) throw this.#buildError;
 
-        const interactive = new InteractivePages(this.#interactive.base, this.#interactive.items, 3)
+        const interactive = new InteractivePages(this.#interactive.base, this.#interactive.items, count)
 
         try {
             await interactive.init(this.interaction);
