@@ -76,7 +76,10 @@ class Enum {
             Suggestions: "Sugerencias",
             EXShopTTS: "EXShop: TTS",
             Pet: "Mascota",
-            PetStatsModifier: "Modificador de estadísticas"
+            PetStatsModifier: "Modificador de estadísticas",
+            EXKeyboard: "EX: Teclado",
+            EXMedia: "EX: Multimedia",
+            EXTTS: "EX: TTS"
         }
 
         for (const prop of Object.keys(this.values)) {

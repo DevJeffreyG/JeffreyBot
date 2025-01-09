@@ -88,7 +88,7 @@ class Shop {
                 this.setCurrency("Currency")
                 this.setInfo({
                     name: `Tienda de ${this.interaction.guild.name}`,
-                    desc: `**—** ¡Bienvenid@ a la tienda! para comprar items usa ${this.client.mentionCommand("buy")}.`,
+                    desc: `**—** ¡Bienvenid@ a la Tienda! para comprar items usa ${this.client.mentionCommand("buy")}.`,
                     color: Colores.verdejeffrey,
                     model: Shops,
                     query: this.interaction.guild.id
@@ -111,7 +111,7 @@ class Shop {
                 this.setCurrency("Currency")
                 this.setInfo({
                     name: `Tienda de mascotas de ${this.interaction.guild.name}`,
-                    desc: `**—** ¡Bienvenid@ a la tienda de mascotas! Para comprar items usa ${this.client.mentionCommand("petbuy")}.`,
+                    desc: `**—** ¡Bienvenid@ a la Tienda de Mascotas! Para comprar items usa ${this.client.mentionCommand("petbuy")}.`,
                     color: Colores.verde,
                     model: PetShops,
                     query: this.interaction.guild.id
@@ -122,7 +122,7 @@ class Shop {
                 this.setCurrency("Currency")
                 this.setInfo({
                     name: `Tienda Externa de ${this.interaction.guild.name}`,
-                    desc: `**—** ¡Bienvenid@ a la tienda externa! Para comprar items usa ${this.client.mentionCommand("exbuy")}.\n**—** Interactúa con un PC remotamente con estos items.`,
+                    desc: `**—** ¡Bienvenid@ a la Tienda Externa! Para comprar items usa ${this.client.mentionCommand("exbuy")}.\n**—** Interactúa con un PC remotamente con estos items.`,
                     color: Colores.verde,
                     model: EXShops,
                     query: this.interaction.guild.id
