@@ -28,15 +28,15 @@
     "@twurple/common": "^7.2.1",
     "body-parser": "^1.20.3",
     "chance": "^1.1.12",
-    "cron": "^3.4.0",
+    "cron": "^3.5.0",
     "discord.js": "^14.17.3",
     "dotenv": "^16.4.7",
     "ejs": "^3.1.10",
     "express": "^4.21.2",
     "googleapis": "^144.0.0",
     "jsonwebtoken": "^9.0.2",
-    "moment-timezone": "^0.5.46",
-    "mongoose": "^8.9.3",
+    "moment-timezone": "^0.5.47",
+    "mongoose": "^8.10.0",
     "path": "^0.12.7",
     "superagent": "^10.1.1"
   }

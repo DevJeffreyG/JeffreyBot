@@ -144,8 +144,6 @@ module.exports = (app) => {
             const { item, guild, user } = all;
 
             delete all.item;
-            delete all.guild;
-            delete all.user;
 
             const Client = WSServer.Clients.get(guild.id);
             Client.send({ message: `${user.displayName} (${user.userId}) Usó un item desde el servidor configurado!` })
