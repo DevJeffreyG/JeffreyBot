@@ -1,4 +1,4 @@
-const { BaseInteraction, InteractionType, time, CommandInteraction, MessageComponentInteraction, ModalSubmitInteraction, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction, DiscordAPIError, ActionRowBuilder, codeBlock, TextInputStyle, ButtonBuilder, ButtonStyle, TimestampStyles, hyperlink, DiscordjsErrorCodes } = require("discord.js");
+const { BaseInteraction, InteractionType, time, CommandInteraction, MessageComponentInteraction, ModalSubmitInteraction, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction, DiscordAPIError, ActionRowBuilder, codeBlock, TextInputStyle, ButtonBuilder, ButtonStyle, TimestampStyles, hyperlink, DiscordjsErrorCodes, MessageFlags } = require("discord.js");
 
 const { Ticket, Suggestion, Button, ManagePreferences, AutoRole } = require("../handlers");
 const { Bases, Colores } = require("../resources");
@@ -35,7 +35,7 @@ class Handlers {
         this.params = {}
 
         if (this.interaction.client.isOnLockdown && !this.#isDev()) try {
-            return await this.interaction.reply({ ephemeral: true, embeds: [new ErrorEmbed().defDesc(`Jeffrey Bot está bloqueado ahora mismo, lamentamos los inconvenientes.`)] });
+            return await this.interaction.reply({ flags: [MessageFlags.Ephemeral], embeds: [new ErrorEmbed().defDesc(`Jeffrey Bot está bloqueado ahora mismo, lamentamos los inconvenientes.`)] });
         } catch (err) {
             console.error("🔴 %s", err);
         }
@@ -51,7 +51,7 @@ class Handlers {
                 const timestamp = Number(killInfo[1]);
                 const clientId = killInfo[2];
                 if (this.client.readyTimestamp === timestamp && this.client.user.id === clientId) {
-                    await this.interaction.deferReply({ ephemeral: true }).catch(err => { });
+                    await this.interaction.deferReply({ flags: [MessageFlags.Ephemeral] }).catch(err => { });
                     console.log("DESTRUYENDO! %s", timestamp)
                     await this.interaction.editReply({ content: "Destruyendo cliente." })
                     this.client.destroy();
@@ -231,10 +231,10 @@ class Handlers {
 **—** Si el valor de la mano de Jeffrey Bot es la misma que la tuya se termina el juego como empate y no pierdes nada de lo apostado.
 **—** Si el valor de la mano de Jeffrey Bot es 21 o menor y mayor que la tuya, pierdes.`);
 
-                return await this.interaction.reply({ embeds: [e], ephemeral: true });
+                return await this.interaction.reply({ embeds: [e], flags: [MessageFlags.Ephemeral] });
             }
             case "rememberBirthday": {
-                if (!this.interaction.deferred) await this.interaction.deferReply({ ephemeral: true })
+                if (!this.interaction.deferred) await this.interaction.deferReply({ flags: [MessageFlags.Ephemeral] })
                 const member = this.interaction.guild.members.cache.get(splittedId[1]);
 
                 if (member === this.interaction.member)
@@ -267,18 +267,18 @@ class Handlers {
             }
             case "yesPoll": {
                 let poll = await GlobalDatas.getPoll(this.interaction.message.id);
-                if (!poll) return this.interaction.reply({ ephemeral: true, content: "Esta encuesta ya terminó y no puedes seguir votando" })
+                if (!poll) return this.interaction.reply({ flags: [MessageFlags.Ephemeral], content: "Esta encuesta ya terminó y no puedes seguir votando" })
 
                 poll.pollYes(this.interaction.user.id)
-                return this.interaction.reply({ ephemeral: true, embeds: [new Embed({ type: "success", data: { desc: "Se registró tu voto" } })] });
+                return this.interaction.reply({ flags: [MessageFlags.Ephemeral], embeds: [new Embed({ type: "success", data: { desc: "Se registró tu voto" } })] });
             }
 
             case "noPoll": {
                 let poll = await GlobalDatas.getPoll(this.interaction.message.id);
-                if (!poll) return this.interaction.reply({ ephemeral: true, content: "Esta encuesta ya terminó y no puedes seguir votando" })
+                if (!poll) return this.interaction.reply({ flags: [MessageFlags.Ephemeral], content: "Esta encuesta ya terminó y no puedes seguir votando" })
 
                 poll.pollNo(this.interaction.user.id)
-                return this.interaction.reply({ ephemeral: true, embeds: [new Embed({ type: "success", data: { desc: "Se registró tu voto" } })] });
+                return this.interaction.reply({ flags: [MessageFlags.Ephemeral], embeds: [new Embed({ type: "success", data: { desc: "Se registró tu voto" } })] });
             }
             case "reqTotalTrophy": {
                 if (!this.doc.checkStaff(this.interaction.member))
@@ -405,7 +405,7 @@ class Handlers {
             }
 
             case "betOption": {
-                await this.interaction.deferReply({ ephemeral: true });
+                await this.interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
                 if (this.doc.checkStaff(this.interaction.member) && process.env.DEV != "TRUE")
                     throw new PermissionError(this.interaction);
 
@@ -587,7 +587,7 @@ class Handlers {
             }
 
             case "betWinner": {
-                await this.interaction.deferReply({ ephemeral: true });
+                await this.interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
                 if (!this.doc.checkStaff(this.interaction.member))
                     throw new PermissionError(this.interaction);
 
@@ -634,7 +634,7 @@ class Handlers {
             }
 
             case "betCancel": {
-                await this.interaction.deferReply({ ephemeral: true })
+                await this.interaction.deferReply({ flags: [MessageFlags.Ephemeral] })
                 if (!this.doc.checkStaff(this.interaction.member))
                     throw new PermissionError(this.interaction);
 
@@ -689,7 +689,7 @@ class Handlers {
             }
 
             case "betClose": {
-                await this.interaction.deferReply({ ephemeral: true })
+                await this.interaction.deferReply({ flags: [MessageFlags.Ephemeral] })
                 if (!this.doc.checkStaff(this.interaction.member))
                     throw new PermissionError(this.interaction);
 
@@ -727,7 +727,7 @@ class Handlers {
         switch (customId) {
             case "createCustomEmbed": {
                 let identifier = splittedId[1]
-                await this.interaction.deferReply({ ephemeral: true })
+                await this.interaction.deferReply({ flags: [MessageFlags.Ephemeral] })
 
                 const newEmbed = new CustomEmbed(this.interaction).create(recieved, identifier)
                 let confirmation = await Confirmation("Nuevo Embed", [
@@ -749,7 +749,7 @@ class Handlers {
 
             case "editCustomEmbed": {
                 const id = Number(splittedId[1]);
-                await this.interaction.deferReply({ ephemeral: true });
+                await this.interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
                 return await new CustomEmbed(this.interaction).create(recieved).replace(id)
             }
@@ -757,35 +757,35 @@ class Handlers {
             case "reqTotalTrophy2":
             case "reqTotalTrophy": {
                 const id = Number(splittedId[1]);
-                await this.interaction.deferReply({ ephemeral: true });
+                await this.interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
                 return await new CustomTrophy(this.interaction).changeTotalReq(id, recieved);
             }
 
             case "reqMomentTrophy": {
                 const id = Number(splittedId[1]);
-                await this.interaction.deferReply({ ephemeral: true });
+                await this.interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
                 return await new CustomTrophy(this.interaction).changeMomentReq(id, recieved);
             }
 
             case "givenMoneyTrophy": {
                 const id = Number(splittedId[1]);
-                await this.interaction.deferReply({ ephemeral: true });
+                await this.interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
                 return await new CustomTrophy(this.interaction).changeMoneyGiven(id, recieved)
             }
 
             case "givenBoostTrophy": {
                 const id = Number(splittedId[1]);
-                await this.interaction.deferReply({ ephemeral: true });
+                await this.interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
                 return await new CustomTrophy(this.interaction).changeBoostGiven(id, recieved)
             }
 
             case "givenItemTrophy": {
                 const id = Number(splittedId[1]);
-                await this.interaction.deferReply({ ephemeral: true });
+                await this.interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
                 return await new CustomTrophy(this.interaction).changeItemGiven(id, recieved)
             }
@@ -794,7 +794,7 @@ class Handlers {
             case "itemInfo": {
                 const id = Number(splittedId[1]);
                 const shopType = Number(splittedId[2]);
-                await this.interaction.deferReply({ ephemeral: true });
+                await this.interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
                 const shop = await new Shop(this.interaction)
                     .setType(shopType)
@@ -809,8 +809,8 @@ class Handlers {
         console.log(`-------- ${interaction.commandName} • por ${interaction.user.username} (${interaction.user.id}) • en ${interaction.guild.name} (${interaction.guild.id}) ----------`)
 
         if (!this.executedCommand) throw new CommandNotFoundError(interaction);
-        if (!this.interaction.inGuild() && this.executedCommand.category != Categories.DM) interaction.reply({ ephemeral: true, embeds: [new ErrorEmbed().defDesc("No puedes usar esto en mensajes directos.")] });
-        else if (this.interaction.inGuild() && this.executedCommand.category === Categories.DM && !this.#isDev()) interaction.reply({ ephemeral: true, embeds: [new ErrorEmbed().defDesc("Usa este comando en los mensajes directos con el bot.")] })
+        if (!this.interaction.inGuild() && this.executedCommand.category != Categories.DM) interaction.reply({ flags: [MessageFlags.Ephemeral], embeds: [new ErrorEmbed().defDesc("No puedes usar esto en mensajes directos.")] });
+        else if (this.interaction.inGuild() && this.executedCommand.category === Categories.DM && !this.#isDev()) interaction.reply({ flags: [MessageFlags.Ephemeral], embeds: [new ErrorEmbed().defDesc("Usa este comando en los mensajes directos con el bot.")] })
 
         if (this.executedCommand.category === Categories.DarkShop) {
             if (!this.doc.moduleIsActive("functions.darkshop"))
@@ -821,7 +821,7 @@ class Handlers {
         }
 
         if (this.executedCommand.category === Categories.Developer && !this.#isDev())
-            return interaction.reply({ ephemeral: true, content: "No puedes usar este comando porque no eres desarrollador de Jeffrey Bot" })
+            return interaction.reply({ flags: [MessageFlags.Ephemeral], content: "No puedes usar este comando porque no eres desarrollador de Jeffrey Bot" })
 
         if (this.slashCooldowns.get(this.identifierCooldown) && process.env.DEV === "FALSE") {
             let until = moment(this.slashCooldowns.get(this.identifierCooldown)).add(slashCooldown, "ms")
@@ -846,7 +846,7 @@ class Handlers {
                         }
                     })
                 ],
-                ephemeral: true
+                flags: [MessageFlags.Ephemeral]
             })
         }
 

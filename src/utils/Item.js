@@ -1,4 +1,4 @@
-const { GuildMember, StringSelectMenuBuilder, ActionRowBuilder, BaseInteraction, CommandInteraction, Collection, time, TextInputStyle, ButtonBuilder, ButtonStyle, DiscordjsErrorCodes } = require("discord.js")
+const { GuildMember, StringSelectMenuBuilder, ActionRowBuilder, BaseInteraction, CommandInteraction, Collection, time, TextInputStyle, ButtonBuilder, ButtonStyle, DiscordjsErrorCodes, MessageFlags } = require("discord.js")
 const moment = require("moment-timezone");
 const ms = require("ms")
 const superagent = require("superagent");
@@ -161,7 +161,7 @@ class Item {
                     .catch(err => {
                         console.error("🔴 %s", err);
                     });
-                await this.interaction.followUp({ ephemeral: true, embeds: [this.success], components: [], content: null })
+                await this.interaction.followUp({ flags: [MessageFlags.Ephemeral], embeds: [this.success], components: [], content: null })
                     .catch(err => {
                         console.error("🔴 %s", err);
                     });

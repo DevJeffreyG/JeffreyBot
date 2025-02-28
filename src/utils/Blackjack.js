@@ -1,4 +1,4 @@
-const { CommandInteraction, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const { CommandInteraction, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require("discord.js");
 const Chance = require("chance");
 const ms = require("ms");
 
@@ -222,7 +222,7 @@ class Blackjack {
         this.collector = new Collector(this.interaction, { filter, time: ms("10m") }, true);
         this.collector.onActive(async () => {
             this.interaction.followUp({
-                ephemeral: true, embeds: [
+                flags: [MessageFlags.Ephemeral], embeds: [
                     new AlreadyUsingError(interaction, "Ya estás en un juego de Blackjack, terminalo antes de iniciar otro.").embed
                 ]
             });
@@ -368,7 +368,7 @@ class Blackjack {
     }
 
     #split() {
-        this.interaction.followUp({ content: `Esta opción está en construcción vuelve en 9 años ${this.client.Emojis.Determined}`, ephemeral: true });
+        this.interaction.followUp({ content: `Esta opción está en construcción vuelve en 9 años ${this.client.Emojis.Determined}`, flags: [MessageFlags.Ephemeral] });
         this.played--; // quitarlo despues
     }
 

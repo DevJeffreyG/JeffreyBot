@@ -1,4 +1,4 @@
-const { ContextMenuCommandBuilder, ContextMenuCommandInteraction, Client, PermissionFlagsBits } = require("discord.js");
+const { ContextMenuCommandBuilder, ContextMenuCommandInteraction, Client, PermissionFlagsBits, MessageFlags } = require("discord.js");
 const { Categories } = require("./Enums");
 
 class ContextMenu {
@@ -26,7 +26,7 @@ class ContextMenu {
          * @param {Client} client 
          */
         this.execute = async (interaction, models, params, client) => {
-            await interaction.deferReply({ ephemeral: true });
+            await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
             interaction.editReply({ content: "Hola mundo!" });
         }
     }

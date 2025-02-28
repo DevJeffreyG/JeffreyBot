@@ -1,3 +1,4 @@
+const { MessageFlags } = require("discord.js");
 const { BadCommandError, DoesntExistsError } = require("../../errors");
 const { Command, LimitedTime, WillBenefit, HumanMs, ItemObjetives, BoostTypes, Embed, PrettyCurrency, Enum } = require("../../utils");
 
@@ -14,7 +15,7 @@ command.addOption({
 })
 
 command.execute = async (interaction, models, params, client) => {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
     const _key = params.llave.value;
 

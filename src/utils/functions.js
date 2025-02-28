@@ -1046,18 +1046,19 @@ const LimitedTime = async function (victimMember, roleID = 0, duration, activati
   user.data.temp_roles.push(toPush);
   await user.save();
 
-  let lastAddedIndex = user.data.temp_roles.length - 1;
-
   // timeout, por si pasa el tiempo antes de que el bot pueda reiniciarse
   TimeoutIf(duration, async function () {
     try {
       if (role) await victimMember.roles.remove(role);
 
-      user.data.temp_roles.splice(lastAddedIndex, 1);
-      await user.save();
+      // Re-fetch user
+      let u = await Users.getWork({ user_id: victimMember.id, guild_id: victimMember.guild.id });
+      u.data.temp_roles.splice(u.data.temp_roles.findIndex(x => x.id === toPush.id), 1);
+      await u.save();
     } catch (err) {
-      throw new Error(err);
+      console.error("🔴 %s", err);
     }
+
   })
 
   return user

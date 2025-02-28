@@ -1,4 +1,4 @@
-const { time } = require("discord.js");
+const { time, MessageFlags } = require("discord.js");
 const { Colores } = require("../../resources");
 const { Command, Cooldowns, Enum, InteractivePages, ModifierType, RequirementType, Shop, RouletteItem, Multipliers, ShopTypes, PrettyCurrency } = require("../../utils");
 
@@ -47,7 +47,7 @@ command.data
     )
 
 command.execute = async (interaction, models, params, client) => {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
     const user = params.getUser();
     const doc = params.getDoc();

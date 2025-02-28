@@ -1,4 +1,4 @@
-const { CommandInteraction, User, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, TextInputStyle, DiscordjsErrorCodes } = require("discord.js");
+const { CommandInteraction, User, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, TextInputStyle, DiscordjsErrorCodes, MessageFlags } = require("discord.js");
 const { Shops, DarkShops, PetShops, EXShops, Users } = require("mongoose").models;
 const { Colores } = require("../resources");
 const { ShopTypes, Enum, ItemTypes, ItemObjetives, ItemActions, YesNo, DirectMessageType } = require("./Enums");
@@ -346,7 +346,7 @@ class Shop {
         if (!item.use_info.manualUse) {
             desc.splice(2, 1);
 
-            m = await this.interaction.followUp({ ephemeral: true, content: `${this.#Emojis.Loading} Usando automáticamente...` });
+            m = await this.interaction.followUp({ flags: [MessageFlags.Ephemeral], content: `${this.#Emojis.Loading} Usando automáticamente...` });
 
             const itemObj = await new Item(this.interaction, item.id, this.config.info.type).build(inventoryUser, this.#doc);
             await itemObj.use();

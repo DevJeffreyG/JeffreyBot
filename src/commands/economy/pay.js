@@ -2,7 +2,7 @@ const { Command, Confirmation, Embed, Sleep, PrettyCurrency } = require("../../u
 const { Colores } = require("../../resources");
 const { EconomyError } = require("../../errors");
 const Chance = require("chance");
-const { time } = require("discord.js");
+const { time, MessageFlags } = require("discord.js");
 
 const command = new Command({
     name: "pay",
@@ -24,7 +24,7 @@ command.addOption({
 })
 
 command.execute = async (interaction, models, params, client) => {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
     const { Users } = models
     const { usuario, cantidad } = params;
     const { EmojisObject } = client;

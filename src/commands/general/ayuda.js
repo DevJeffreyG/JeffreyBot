@@ -1,7 +1,7 @@
 const { Command, Categories, Embed, MemberHasAnyRole, isDeveloper, ContextMenu, Collector, CreateInteractionFilter, InteractivePages, Enum, FinalPeriod } = require("../../utils");
 const { Colores } = require("../../resources/");
 const { CommandNotFoundError, PermissionError } = require("../../errors/");
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require("discord.js");
 const ms = require("ms");
 
 const command = new Command({
@@ -22,7 +22,7 @@ command.execute = async (interaction, models, params, client) => {
     const { comando, categoria } = params;
     if (comando) return await command.execGetHelp(interaction, comando, client);
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
     const member = interaction.member;
     const doc = params.getDoc();
 

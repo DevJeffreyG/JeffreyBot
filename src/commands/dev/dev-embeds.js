@@ -1,4 +1,4 @@
-const { ButtonStyle, ButtonBuilder, ActionRowBuilder, time } = require("discord.js");
+const { ButtonStyle, ButtonBuilder, ActionRowBuilder, time, MessageFlags } = require("discord.js");
 const { Command, Embed, importImage } = require("../../utils");
 const { Colores, Bases } = require("../../resources");
 
@@ -16,7 +16,7 @@ command.addOption({
 })
 
 command.execute = async (interaction, models, params, client) => {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
     const { Emojis, EmojisObject } = client;
 

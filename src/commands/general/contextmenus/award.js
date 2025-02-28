@@ -1,4 +1,4 @@
-const { ApplicationCommandType, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageContextMenuCommandInteraction, Client, hyperlink, codeBlock } = require("discord.js");
+const { ApplicationCommandType, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageContextMenuCommandInteraction, Client, hyperlink, codeBlock, MessageFlags } = require("discord.js");
 const { Colores } = require("../../../resources");
 const { ContextMenu, Embed, Confirmation, ErrorEmbed, Log, LogReasons, ChannelModules, PrettyCurrency, MinMaxInt, Collector, CreateInteractionFilter } = require("../../../utils");
 
@@ -20,7 +20,7 @@ const command = new ContextMenu({
  * @param {Client} client 
  */
 command.execute = async (interaction, models, params, client) => {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
     const { message } = params;
     const { Users } = models;
@@ -184,7 +184,7 @@ command.execute = async (interaction, models, params, client) => {
             "No se pudo enviar el mensaje al canal",
             "El autor del mensaje **sí** recibió el beneficio",
             "Avísa a los Administradores"
-        ]).send({ ephemeral: true, followup: true })
+        ]).send({ flags: [MessageFlags.Ephemeral], followup: true })
             .catch(err => {
                 console.error("🔴 %s", err);
             });

@@ -1,6 +1,7 @@
 const { Command, Embed, VaultWork, PrettyCurrency } = require("../../utils");
 const { Colores } = require("../../resources");
 const Chance = require("chance");
+const { MessageFlags } = require("discord.js");
 
 const command = new Command({
     name: "vault",
@@ -15,7 +16,7 @@ command.addOption({
 })
 
 command.execute = async (interaction, models, params, client) => {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
     const { EmojisObject } = client;
 
     const code = params.codigo ? params.codigo.value : null;

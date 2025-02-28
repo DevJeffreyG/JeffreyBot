@@ -1,4 +1,4 @@
-const { MessageComponentInteraction, TextInputStyle, ModalSubmitInteraction, codeBlock, time, hyperlink } = require("discord.js");
+const { MessageComponentInteraction, TextInputStyle, ModalSubmitInteraction, codeBlock, time, hyperlink, MessageFlags } = require("discord.js");
 const { Colores } = require("../resources");
 const { ErrorEmbed, Modal, Log, Embed, ChannelModules, LogReasons } = require("../utils");
 const { FetchError, ModuleDisabledError, PermissionError } = require("../errors");
@@ -23,7 +23,7 @@ class Suggestion {
         if (!this.doc.moduleIsActive("functions.suggestions")) throw new ModuleDisabledError(interaction);
         if (this.interaction instanceof ModalSubmitInteraction) return await this.#modalHandler();
 
-        //if (!this.interaction.deferred) await this.interaction.deferReply({ ephemeral: true });
+        //if (!this.interaction.deferred) await this.interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
         switch (this.interaction.customId) {
             case "acceptSuggestion": {
@@ -129,7 +129,7 @@ ${codeBlock(suggestion.suggestion)}`)
 
                     embed.defDesc(embed.data.description + `**—** Nos tomamos la libertad de agregarte un role como forma de agradecimiento 😉`);
                 }
-                await this.interaction.reply({ ephemeral: true, content: "Se ha aceptado la sugerencia, se ha enviado un mensaje al usuario y se le ha dado el rol de colaborador." });
+                await this.interaction.reply({ flags: [MessageFlags.Ephemeral], content: "Se ha aceptado la sugerencia, se ha enviado un mensaje al usuario y se le ha dado el rol de colaborador." });
                 break;
             }
 
@@ -152,7 +152,7 @@ ${codeBlock(suggestion.suggestion)}
                     .defColor(Colores.rojo)
                     .defFooter({ text: this.interaction.guild.name, icon: this.interaction.guild.iconURL(), timestamp: true });
 
-                await this.interaction.reply({ ephemeral: true, content: "Se ha rechazado la sugerencia, se ha enviado un mensaje al usuario informándole." });
+                await this.interaction.reply({ flags: [MessageFlags.Ephemeral], content: "Se ha rechazado la sugerencia, se ha enviado un mensaje al usuario informándole." });
                 break;
             }
 
@@ -176,7 +176,7 @@ ${codeBlock(suggestion.suggestion)}
                     .defColor(Colores.rojo)
                     .defFooter({ text: this.interaction.guild.name, icon: this.interaction.guild.iconURL(), timestamp: true });
 
-                await this.interaction.reply({ ephemeral: true, content: "Se ha invalidado la sugerencia, se ha enviado un mensaje al usuario informándole." });
+                await this.interaction.reply({ flags: [MessageFlags.Ephemeral], content: "Se ha invalidado la sugerencia, se ha enviado un mensaje al usuario informándole." });
                 break;
             }
         }
@@ -185,7 +185,7 @@ ${codeBlock(suggestion.suggestion)}
         try {
             await suggester.send({ embeds: [embed] });
         } catch (e) {
-            this.interaction.followUp({ ephemeral: true, content: "No se pueden enviar mensajes a este usuario..." })
+            this.interaction.followUp({ flags: [MessageFlags.Ephemeral], content: "No se pueden enviar mensajes a este usuario..." })
         }
 
         this.doc.save();

@@ -1,3 +1,4 @@
+const { MessageFlags } = require("discord.js");
 const { DiscordLimitationError } = require("../../errors");
 const { Command, Embed, Log, LogReasons, ChannelModules } = require("../../utils")
 const moment = require("moment-timezone");
@@ -16,7 +17,7 @@ command.addOption({
 });
 
 command.execute = async (interaction, models, params, client) => {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
     const { mensajes } = params;
 

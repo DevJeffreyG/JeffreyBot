@@ -1,6 +1,7 @@
 const { Command, Embed, Cooldowns, ErrorEmbed, PrettyCurrency, MinMaxInt } = require("../../utils")
 const Chance = require("chance");
 const { Responses, Colores } = require("../../resources");
+const { MessageFlags } = require("discord.js");
 
 const command = new Command({
     name: "rob",
@@ -23,7 +24,7 @@ command.execute = async (interaction, models, params, client) => {
     const victimMember = usuario.member;
 
     if (victimMember === interaction.member) return await interaction.reply({
-        ephemeral: true, embeds: [
+        flags: [MessageFlags.Ephemeral], embeds: [
             new ErrorEmbed().defDesc("No es un buena idea robarte a ti mismo.")
         ]
     })

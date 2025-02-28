@@ -1,4 +1,4 @@
-const { ButtonStyle, ActionRowBuilder, ButtonBuilder } = require("discord.js");
+const { ButtonStyle, ActionRowBuilder, ButtonBuilder, MessageFlags } = require("discord.js");
 const { Command, isBannedFrom, FindNewId, Embed, Log, ChannelModules, LogReasons, ModuleBans } = require("../../utils");
 const { Colores } = require("../../resources");
 const { codeBlock } = require("discord.js");
@@ -19,7 +19,7 @@ command.addOption({
 
 command.execute = async (interaction, models, params, client) => {
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
     const { Guilds } = models;
     const sugerencia = params.sugerencia.value;

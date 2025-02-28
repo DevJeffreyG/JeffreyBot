@@ -17,7 +17,7 @@ command.addOption({
 
 command.execute = async (interaction, models, params, client) => {
     if (moment().day() != 0) {
-        return interaction.reply({ ephemeral: true, embeds: [new ErrorEmbed().defDesc("**No** puedes invertir hasta que sea domingo.")] });
+        return interaction.reply({ flags: [MessageFlags.Ephemeral], embeds: [new ErrorEmbed().defDesc("**No** puedes invertir hasta que sea domingo.")] });
     }
     await interaction.deferReply();
     const { cantidad } = params

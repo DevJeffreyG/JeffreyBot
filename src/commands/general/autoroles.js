@@ -1,3 +1,4 @@
+const { MessageFlags } = require("discord.js");
 const { DoesntExistsError } = require("../../errors");
 const AutoRole = require("../../handlers/AutoRole");
 const { Colores } = require("../../resources");
@@ -15,7 +16,7 @@ command.addOption({
 })
 
 command.execute = async (interaction, models, params, client) => {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
     const { id } = params;
 

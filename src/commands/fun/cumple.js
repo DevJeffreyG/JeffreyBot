@@ -1,6 +1,6 @@
 const { Command, Confirmation, Embed, ErrorEmbed } = require("../../utils");
 const moment = require("moment-timezone");
-const { time } = require("discord.js");
+const { time, MessageFlags } = require("discord.js");
 
 const command = new Command({
     name: "cumple",
@@ -37,7 +37,7 @@ command.addOption({
 })
 
 command.execute = async (interaction, models, params, client) => {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
     const { subcommand } = params;
 

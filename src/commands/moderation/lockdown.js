@@ -1,4 +1,4 @@
-const { ChannelType, PermissionsBitField, OverwriteType } = require("discord.js");
+const { ChannelType, PermissionsBitField, OverwriteType, MessageFlags } = require("discord.js");
 const { Command, Confirmation, Log, LogReasons, ChannelModules, ErrorEmbed } = require("../../utils");
 const { DiscordLimitationError } = require("../../errors");
 
@@ -8,7 +8,7 @@ const command = new Command({
 })
 
 command.execute = async (interaction, models, params, client) => {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
     const discordError = new DiscordLimitationError(interaction, "editar canal", [
         "No pude editar el canal por un problema con Discord",

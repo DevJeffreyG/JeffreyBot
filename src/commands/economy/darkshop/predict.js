@@ -3,6 +3,7 @@ const { Colores } = require("../../../resources")
 
 const Chance = require("chance")
 const moment = require("moment-timezone")
+const { MessageFlags } = require("discord.js")
 
 const command = new Command({
     name: "predict",
@@ -17,12 +18,12 @@ command.addOption({
 
 command.execute = async (interaction, models, params, client) => {
     if (moment().day() === 0) {
-        return await interaction.reply({ ephemeral: true, embeds: [new ErrorEmbed().defDesc("No es buena idea hacer eso el domingo.")] })
+        return await interaction.reply({ flags: [MessageFlags.Ephemeral], embeds: [new ErrorEmbed().defDesc("No es buena idea hacer eso el domingo.")] })
     }
 
     const { compartir } = params;
 
-    await interaction.deferReply({ ephemeral: !compartir?.value });
+    await interaction.deferReply({ flags: [...(!compartir?.value ? [MessageFlags.Ephemeral] : [])] });
 
     const user = params.getUser();
 

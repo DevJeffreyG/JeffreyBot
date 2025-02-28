@@ -3,6 +3,7 @@ const Chance = require("chance");
 const moment = require("moment-timezone");
 const RouletteItem = require("../../utils/RouletteItem");
 const { Colores } = require("../../resources");
+const { MessageFlags } = require("discord.js");
 
 const command = new Command({
     name: "roulette",
@@ -44,7 +45,7 @@ command.execute = async (interaction, models, params, client) => {
     if (randomItem === -1) {
         user.delCooldown(Cooldowns.Roulette)
         await interaction.deleteReply()
-        return await interaction.followUp({ ephemeral: true, content: "No me la vas a creer, pero no pude encontrar un item indicado para ti :(" })
+        return await interaction.followUp({ flags: [MessageFlags.Ephemeral], content: "No me la vas a creer, pero no pude encontrar un item indicado para ti :(" })
     }
     
     const item = new RouletteItem(interaction, randomItem).build(user, doc);
@@ -53,7 +54,7 @@ command.execute = async (interaction, models, params, client) => {
 
     if (notSelected.size > 0) {
         await interaction.followUp({
-            ephemeral: true, embeds: [
+            flags: [MessageFlags.Ephemeral], embeds: [
                 avoidedItems
             ]
         })

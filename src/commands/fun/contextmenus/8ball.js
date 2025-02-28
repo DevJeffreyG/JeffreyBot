@@ -1,4 +1,4 @@
-const { ApplicationCommandType } = require("discord.js");
+const { ApplicationCommandType, MessageFlags } = require("discord.js");
 const { ContextMenu } = require("../../../utils");
 
 const command = new ContextMenu({
@@ -7,7 +7,7 @@ const command = new ContextMenu({
 })
 
 command.execute = async (interaction, models, params, client) => {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
     params["pregunta"] = {
         value: params.message.content

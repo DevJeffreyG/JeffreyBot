@@ -1,4 +1,4 @@
-const { MessageComponentInteraction, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require("discord.js");
+const { MessageComponentInteraction, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, MessageFlags } = require("discord.js");
 const { Collector, CreateInteractionFilter } = require("../utils");
 
 const ms = require("ms");
@@ -15,7 +15,7 @@ class ManagePreferences {
     }
 
     async handle(preferences) {
-        await this.interaction.deferReply({ ephemeral: true });
+        await this.interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
         this.preferences = preferences;
 
         await this.manage();

@@ -1,4 +1,4 @@
-const { StringSelectMenuInteraction, codeBlock, ButtonInteraction, ActionRowBuilder, StringSelectMenuOptionBuilder, StringSelectMenuBuilder } = require("discord.js");
+const { StringSelectMenuInteraction, codeBlock, ButtonInteraction, ActionRowBuilder, StringSelectMenuOptionBuilder, StringSelectMenuBuilder, MessageFlags } = require("discord.js");
 const { DoesntExistsError, PermissionError } = require("../errors");
 const { Log, LogReasons, ChannelModules, ErrorEmbed, Embed } = require("../utils");
 const { CustomElements } = require("mongoose").models;
@@ -18,7 +18,7 @@ class AutoRole {
 
     async handle(doc) {
         this.doc = doc;
-        await this.interaction.deferReply({ ephemeral: true });
+        await this.interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
         if (this.interaction instanceof ButtonInteraction) await this.#showAutoRoles();
         else if (this.interaction instanceof StringSelectMenuInteraction) await this.work();
@@ -110,7 +110,7 @@ class AutoRole {
                     await this.interaction.member.roles.remove(role);
                     res = true;
                     await this.interaction.followUp({
-                        ephemeral: true,
+                        flags: [MessageFlags.Ephemeral],
                         embeds: [
                             new Embed({
                                 type: "success", data: {
@@ -124,7 +124,7 @@ class AutoRole {
                     await this.interaction.member.roles.add(role);
                     res = true;
                     await this.interaction.followUp({
-                        ephemeral: true,
+                        flags: [MessageFlags.Ephemeral],
                         embeds: [
                             new Embed({
                                 type: "success", data: {

@@ -1,8 +1,8 @@
-const { ButtonStyle, ActionRowBuilder, ButtonBuilder, PermissionsBitField, time, MessageComponentInteraction, StringSelectMenuBuilder } = require("discord.js");
+const { ButtonStyle, ActionRowBuilder, ButtonBuilder, PermissionsBitField, time, MessageComponentInteraction, StringSelectMenuBuilder, MessageFlags } = require("discord.js");
 
 const Embed = require("../utils/Embed");
 
-const { Confirmation, FindNewId, isBannedFrom, CreateInteractionFilter } = require("../utils/functions");
+const { Confirmation, FindNewId, CreateInteractionFilter } = require("../utils/functions");
 
 const Colores = require("../resources/colores.json");
 
@@ -15,7 +15,6 @@ const { DoesntExistsError, ModuleBannedError, ModuleDisabledError, PermissionErr
 const { Collector } = require("../utils");
 
 const ticketCooldown = ms("1m");
-const activeCreatingTicket = new Map();
 
 class Ticket {
     /**
@@ -53,7 +52,7 @@ class Ticket {
         this.user = user;
 
         if (!this.docGuild.moduleIsActive("functions.tickets")) throw new ModuleDisabledError(this.interaction).setEphemeral(true);
-        if (!this.interaction.deferred) await this.interaction.deferReply({ ephemeral: true });
+        if (!this.interaction.deferred) await this.interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
         switch (this.customId) {
             case "createTicket":

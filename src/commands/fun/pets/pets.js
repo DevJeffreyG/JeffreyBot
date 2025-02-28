@@ -1,4 +1,4 @@
-const { CommandInteraction, Client, ActionRowBuilder, ButtonBuilder, ButtonStyle, TextInputStyle, DiscordjsErrorCodes } = require("discord.js");
+const { CommandInteraction, Client, ActionRowBuilder, ButtonBuilder, ButtonStyle, TextInputStyle, DiscordjsErrorCodes, MessageFlags } = require("discord.js");
 const { Command, InteractivePages, Pet, Enum, PetAttacksType, ProgressBar, Embed, Collector, CreateInteractionFilter, Modal, Confirmation } = require("../../../utils");
 const { Colores } = require("../../../resources");
 const { DoesntExistsError } = require("../../../errors");
@@ -135,7 +135,7 @@ command.admin = async (interaction, models, params, client) => {
             });
             if (!r) return;
 
-            await r.deferReply({ ephemeral: true });
+            await r.deferReply({ flags: [MessageFlags.Ephemeral] });
 
             const { name } = new Modal(r).read();
             pet.name = name;
@@ -149,7 +149,7 @@ command.admin = async (interaction, models, params, client) => {
             break;
 
         case "deletePet":
-            await collector.deferReply({ ephemeral: true });
+            await collector.deferReply({ flags: [MessageFlags.Ephemeral] });
             let confirmation = await Confirmation("Regresar mascota", [
                 `Se eliminará a **${pet.name}** de tus mascotas.`,
                 `**❤️${pet.hp} 🍗${pet.hunger} 🗡️${pet.stats.attack} 🛡️${pet.stats.defense}**.`,

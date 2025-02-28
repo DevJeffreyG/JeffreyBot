@@ -1,4 +1,4 @@
-const { ApplicationCommandType, ActionRowBuilder, StringSelectMenuBuilder } = require("discord.js")
+const { ApplicationCommandType, ActionRowBuilder, StringSelectMenuBuilder, MessageFlags } = require("discord.js")
 const { ContextMenu, Enum, Cooldowns, Collector } = require("../../../utils")
 
 const command = new ContextMenu({
@@ -7,7 +7,7 @@ const command = new ContextMenu({
 })
 
 command.execute = async (interaction, models, params, client) => {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
     const { Users } = models
     const member = interaction.guild.members.cache.get(params.user.id)
     const user = await Users.getWork({ user_id: member.id, guild_id: member.guild.id });

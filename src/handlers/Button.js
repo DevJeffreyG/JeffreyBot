@@ -1,5 +1,5 @@
 const { CustomElements } = require("mongoose").models;
-const { ActionRowBuilder, MessageComponentInteraction, ButtonStyle, ButtonBuilder } = require("discord.js");
+const { ActionRowBuilder, MessageComponentInteraction, ButtonStyle, ButtonBuilder, MessageFlags } = require("discord.js");
 const { CustomButton, CustomEmbed} = require("../utils");
 const { InsuficientSetupError } = require("../errors");
 
@@ -13,7 +13,7 @@ class Button {
     }
 
     async handle() {
-        await this.interaction.deferReply({ ephemeral: true })
+        await this.interaction.deferReply({ flags: [MessageFlags.Ephemeral] })
         const elements = await CustomElements.getWork(this.interaction.guild.id);
 
         const button = elements.getButton(this.customid);

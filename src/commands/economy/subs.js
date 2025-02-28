@@ -1,4 +1,4 @@
-const { time, inlineCode, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const { time, inlineCode, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require("discord.js");
 const { Command, Enum, ShopTypes, Shop, InteractivePages, PrettyCurrency, HumanMs, Embed, Collector, CreateInteractionFilter } = require("../../utils");
 const { FetchError } = require("../../errors");
 const { Colores } = require("../../resources");
@@ -88,7 +88,7 @@ command.adminSub = async (interaction, models, params, client) => {
     ])
 
     let msg = await interaction.editReply({
-        ephemeral: true,
+        flags: [MessageFlags.Ephemeral],
         embeds: [
             new Embed()
                 .defDesc(`# Administra tu suscripción a ${sub.sub_info.name}`)
@@ -124,7 +124,7 @@ command.adminSub = async (interaction, models, params, client) => {
     await params.user.save();
     await msg.delete();
     await interaction.followUp({
-        ephemeral: true,
+        flags: [MessageFlags.Ephemeral],
         embeds: [
             new Embed({
                 type: "success", data: {

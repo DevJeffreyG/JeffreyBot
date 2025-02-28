@@ -1,6 +1,6 @@
 const Embed = require("./Embed");
 const Colores = require("../resources/colores.json");
-const { BaseInteraction, GuildChannel, codeBlock, Guild } = require("discord.js");
+const { BaseInteraction, GuildChannel, codeBlock, Guild, MessageFlags } = require("discord.js");
 
 class ErrorEmbed extends Embed {
     /**
@@ -193,14 +193,14 @@ class ErrorEmbed extends Embed {
 
             if (ephemeral && !followup) {
                 try {
-                    return await this.interaction.reply({ content: null, embeds: [this], components: [], ephemeral: true })
+                    return await this.interaction.reply({ content: null, embeds: [this], components: [], flags: [MessageFlags.Ephemeral] })
                 } catch (err) {
                     console.log("Oops!")
                     console.error("🔴 %s", err);
                 }
             } else if (followup) {
                 try {
-                    return await this.interaction.followUp({ content: null, embeds: [this], components: [], ephemeral: ephemeral })
+                    return await this.interaction.followUp({ content: null, embeds: [this], components: [], flags: [...(ephemeral ? [MessageFlags.Ephemeral] : [])] })
                 } catch (err) {
                     console.log("Oops!")
                     console.error("🔴 %s", err);
@@ -211,10 +211,10 @@ class ErrorEmbed extends Embed {
             await this.interaction.editReply({ content: null, embeds: [this], components: [] });
         } catch (err) {
             try {
-                await this.interaction.reply({ content: null, embeds: [this], components: [], ephemeral: true });
+                await this.interaction.reply({ content: null, embeds: [this], components: [], flags: [MessageFlags.Ephemeral] });
             } catch (replyerr) {
                 try {
-                    await this.interaction.followUp({ content: null, embeds: [this], components: [], ephemeral: true })
+                    await this.interaction.followUp({ content: null, embeds: [this], components: [], flags: [MessageFlags.Ephemeral] })
                 } catch (followuperr) {
                     console.log(followuperr);
                     console.log("🔴 NO se envió el ErrorEmbed!")

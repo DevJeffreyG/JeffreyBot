@@ -1,4 +1,4 @@
-const { BaseInteraction, CommandInteraction } = require("discord.js");
+const { BaseInteraction, CommandInteraction, MessageFlags } = require("discord.js");
 const ErrorEmbed = require("../utils/ErrorEmbed");
 
 class JeffreyBotError extends Error {
@@ -28,16 +28,18 @@ class JeffreyBotError extends Error {
 
     async send(options) {
         try {
-            let op = options ?? { ephemeral: this.ephemeral, followup: this.followup }
+            let op = options ?? { flags: [...(this.ephemeral ? [MessageFlags.Ephemeral] : [])], followup: this.followup }
             if (!op) {
-                if (!this.interaction.replied) op.ephemeral = true;
+                if (!this.interaction.replied) op.flags.push(MessageFlags.Ephemeral);
                 else {
-                    if (this.interaction.ephemeral) op.followup = true;
-                    else op.ephemeral = this.interaction.ephemeral;
+                    if (this.interaction.ephemeral) {
+                        op.flags.push(MessageFlags.Ephemeral);
+                        op.followup = true;
+                    }
                 }
             }
 
-            await this.embed.send(options);
+            await this.embed.send(op);
         } catch (error) {
             console.error("🔴 %s", err);
         }
