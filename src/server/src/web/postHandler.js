@@ -12,7 +12,7 @@ const { Guilds, ChangeLogs } = require("mongoose").models;
 module.exports = (app) => {
     const { WSServer } = app;
 
-    app.post("/api/db/update", async (req, res) => {
+    app.post("/api/db/update-guild", async (req, res) => {
         if (!Verify(req)) return res.status(403).send({ message: "Not authorized" });
         try {
             let response = true;

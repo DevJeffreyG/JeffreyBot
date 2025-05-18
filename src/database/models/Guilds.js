@@ -284,7 +284,7 @@ const GuildSchema = new Schema({
                 },
                 skipfirewall: { type: Number, default: 100, validate: positiveWithZeroValidator },
                 pets: {
-                    basic_unlocked: { type: Number, default: 5 },
+                    basic_unlocked: { type: Number, default: 5, validate: positiveWithZeroValidator },
                 },
                 limits: {
                     rob: {

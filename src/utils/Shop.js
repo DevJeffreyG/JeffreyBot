@@ -163,7 +163,7 @@ class Shop {
      * @returns {this}
      */
     filter(fn) {
-        if(fn) this.filterFunction = fn;
+        if (fn) this.filterFunction = fn;
 
         return this
     }
@@ -540,7 +540,7 @@ ${codeBlock(item.description)}
         let stats = null;
 
         // external
-        let getKeyActions = null, getMediaActions = null, getTTSActions = null;
+        let getKeyActions = null, getMediaActions = null, getTTSActions = null, getWsMessageActions = null;
         let actions = [];
         let delays = {};
 
@@ -655,7 +655,11 @@ ${codeBlock(item.description)}
                             new StringSelectMenuOptionBuilder()
                                 .setLabel("TTS")
                                 .setDescription("Permite que se reproduzca un texto con Text-to-Speech")
-                                .setValue(String(ItemTypes.EXTTS))
+                                .setValue(String(ItemTypes.EXTTS)),
+                            new StringSelectMenuOptionBuilder()
+                                .setLabel("WebSocket Message")
+                                .setDescription("Envía un mensaje a un WebSocket")
+                                .setValue(String(ItemTypes.EXWsMessage))
                         )
 
                     getKeyActions = async (inter) => {
@@ -714,6 +718,30 @@ ${codeBlock(item.description)}
                             .defUniqueId("exTTSItemConfig")
                             .setTitle("Configuración del item")
                             .addInput({ id: "voice", value: `${actual.actions.join("\n")}`, label: "Voz a usar en TTS", style: TextInputStyle.Short })
+                            .addInput({ id: "globalUseDelay", value: `${actual.delays.global ? ms(actual.delays.global) : "10m"}`, label: "Delay de uso global", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
+                            .addInput({ id: "individualUseDelay", value: `${actual.delays.individual ? ms(actual.delays.individual) : "10m"}`, label: "Delay de uso individual", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
+                            .show()
+
+                        let c = await inter.awaitModalSubmit({
+                            filter: (i) => i.customId === m.customId && i.user.id === this.interaction.user.id,
+                            time: ms("5m")
+                        }).catch(async err => {
+                            if (err.code === DiscordjsErrorCodes.InteractionCollectorError) await this.interaction.deleteReply();
+                            else throw err;
+                        });
+                        if (!c) return;
+
+                        await c.deferUpdate();
+                        return new Modal(c).read();
+                    }
+
+                    getWsMessageActions = async (inter) => {
+                        const actual = item.use_info.external_info;
+
+                        let m = await new Modal(inter)
+                            .defUniqueId("exWsMessageConfig")
+                            .setTitle("Configuración del item")
+                            .addInput({ id: "message", value: `${actual.actions.join("\n")}`, label: "Mensaje a enviar al WebSocket", style: TextInputStyle.Short })                            
                             .addInput({ id: "globalUseDelay", value: `${actual.delays.global ? ms(actual.delays.global) : "10m"}`, label: "Delay de uso global", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
                             .addInput({ id: "individualUseDelay", value: `${actual.delays.individual ? ms(actual.delays.individual) : "10m"}`, label: "Delay de uso individual", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
                             .show()
@@ -806,6 +834,16 @@ ${codeBlock(item.description)}
                             if (ttsActions.globalUseDelay) delays["global"] = ms(ttsActions.globalUseDelay);
                             if (ttsActions.individualUseDelay) delays["individual"] = ms(ttsActions.individualUseDelay);
                             break;
+
+                        case ItemTypes.EXWsMessage:
+                            let wsMessageActions = await getWsMessageActions(collector);
+                            if (!wsMessageActions) return false;
+
+                            actions = wsMessageActions.message?.split("\n") ?? [];
+
+                            if (wsMessageActions.globalUseDelay) delays["global"] = ms(wsMessageActions.globalUseDelay);
+                            if (wsMessageActions.individualUseDelay) delays["individual"] = ms(wsMessageActions.individualUseDelay);
+                            break
                     }
 
                 }

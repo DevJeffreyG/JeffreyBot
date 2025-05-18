@@ -8,7 +8,7 @@ const Chance = require("chance");
 const { ItemTypes, ItemObjetives, ItemActions, ItemEffects, LogReasons, ChannelModules, ShopTypes, PetAttacksType, Enum, BoostObjetives, ModuleBans } = require("./Enums");
 const { BadCommandError, AlreadyExistsError, DoesntExistsError, FetchError, ExecutionError, ModuleBannedError } = require("../errors");
 
-const { FindNewId, LimitedTime, Subscription, WillBenefit, isDeveloper, CreateInteractionFilter, FindNewIds } = require("./functions");
+const { FindNewId, LimitedTime, Subscription, WillBenefit, isDeveloper, CreateInteractionFilter, FindNewIds, Encrypt } = require("./functions");
 
 const Log = require("./Log");
 const Embed = require("./Embed");
@@ -611,6 +611,7 @@ class Item {
             case ItemTypes.EXMedia:
             case ItemTypes.EXKeyboard:
             case ItemTypes.EXTTS:
+            case ItemTypes.EXWsMessage:
                 console.log("🟩 EX Item!");
                 const cooldowns = this.shop.cooldowns.filter(x => x.item_id === this.item.id);
 
@@ -646,7 +647,7 @@ class Item {
                             guild: this.interaction.guild,
                             user: this.interaction.member.toJSON()
                         })
-                        .set("auth", jwt.sign({ jb: true }, process.env.TOKEN))
+                        .set("auth", Encrypt(jwt.sign({ m: Math.random() * Date.now() }, process.env.TOKEN)))
 
                     if (!q.body) throw new JeffreyBotError(this.interaction, "No hubo cliente a quien enviar la respuesta");
 

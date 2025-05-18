@@ -11,6 +11,7 @@ const Pet = require("../utils/Pet");
 
 const ms = require("ms");
 const moment = require("moment-timezone");
+const crypto = require("crypto");
 
 /* ##### MONGOOSE ######## */
 const { Users, Guilds, DarkShops, Shops, GlobalDatas, CustomElements, Preferences } = require("mongoose").models;
@@ -2244,6 +2245,18 @@ const FinalPeriod = function (line) {
   return d;
 }
 
+const Encrypt = (text) => {
+  const salt = crypto.randomBytes(16);
+  const iv = crypto.randomBytes(12);
+  const key = crypto.pbkdf2Sync(process.env.APP_SECRET, salt, 100000, 32, 'sha256');
+
+  const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+  const encrypted = Buffer.concat([cipher.update(text, 'utf8'), cipher.final()]);
+  const tag = cipher.getAuthTag();
+
+  return Buffer.concat([salt, iv, tag, encrypted]).toString('base64');
+}
+
 module.exports = {
   GetChangesAndCreateFields,
   FetchAuditLogs,
@@ -2283,5 +2296,6 @@ module.exports = {
   CreateInteractionFilter,
   SendDirect,
   FinalPeriod,
-  FindNewIds
+  FindNewIds,
+  Encrypt
 }

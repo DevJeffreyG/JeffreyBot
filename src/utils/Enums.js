@@ -79,7 +79,8 @@ class Enum {
             PetStatsModifier: "Modificador de estadísticas",
             EXKeyboard: "EX: Teclado",
             EXMedia: "EX: Multimedia",
-            EXTTS: "EX: TTS"
+            EXTTS: "EX: TTS",
+            EXWsMessage: "EX: Custom"
         }
 
         for (const prop of Object.keys(this.values)) {
@@ -173,6 +174,7 @@ const Categories = new Enum({
  * - EXKeyboard
  * - EXMedia
  * - EXTTS
+ * - EXWsMessage
  */
 const ItemTypes = new Enum({
     StackOverflow: 1,
@@ -185,7 +187,8 @@ const ItemTypes = new Enum({
     PetStatsModifier: 8,
     EXKeyboard: 9,
     EXMedia: 10,
-    EXTTS: 11
+    EXTTS: 11,
+    EXWsMessage: 12
 }).values
 
 /**
