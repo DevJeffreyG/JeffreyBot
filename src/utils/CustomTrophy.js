@@ -31,8 +31,8 @@ class CustomTrophy {
                     type: "success",
                     data: {
                         desc: [
-                            `Se ha creado el Trofeo. Usa ${this.interaction.client.mentionCommand("elements trophies toggle")} para que se de automáticamente al cumplir los requisitos`,
-                            `Usa ${this.interaction.client.mentionCommand("elements trophies edit")} para hacerle cambios`,
+                            `Se ha creado el Trofeo. Usa ${this.interaction.client.mentionCommand("elements trofeos toggle")} para que se de automáticamente al cumplir los requisitos`,
+                            `Usa ${this.interaction.client.mentionCommand("elements trofeos edit")} para hacerle cambios`,
                             `ID: ${id}`
                         ]
                     }

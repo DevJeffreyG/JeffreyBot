@@ -93,7 +93,7 @@ command.execute = async (interaction, models, params, client) => {
                 const objetive = new Enum(modifier.type === ModifierType.Cooldown ? Cooldowns : Multipliers).translate(modifier.module)
                 const id = modifier.id;
                 const guide = modifier.type === ModifierType.Cooldown ? "La base se __multiplica__ por" : "A la base se le __suma__"
-                const requirement = modifier.req_type === RequirementType.Level ? req : interaction.guild.roles.cache.find(x => x.id === req);
+                const requirement = modifier.req_type === RequirementType.Level ? `\`${req}\`` : interaction.guild.roles.cache.find(x => x.id === req);
 
                 items.set(id, {
                     tipo,
@@ -110,7 +110,7 @@ command.execute = async (interaction, models, params, client) => {
                 title: "Lista de modidificadores",
                 author_icon: interaction.guild.iconURL(),
                 color: Colores.verde,
-                addon: `**— {tipo}**\n**▸ {guide}: {valor}**\n**▸ Modifica: {objetive}**\n**▸ Necesita ({req_type}):** \`{requirement}\`\n||**▸ ID: {id}**||\n\n`
+                addon: `**— {tipo}**\n**▸ {guide}: {valor}**\n**▸ Modifica: {objetive}**\n**▸ Necesita ({req_type}):** {requirement}\n||**▸ ID: {id}**||\n\n`
             }, items, 5)
 
             await interactive.init(interaction);

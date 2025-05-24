@@ -28,6 +28,9 @@ class Handlers {
         this.client = this.interaction.client;
         this.slashCooldowns = this.client.slashCooldowns;
 
+        this.user = null;
+        this.doc = null;
+
         if (init) return this.#startHandler();
     }
 
@@ -66,8 +69,10 @@ class Handlers {
 
         this.identifierCooldown = BigInt(this.interaction.user.id) + BigInt(this.interaction.commandId ?? 1);
 
-        this.user = await Users.getWork({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id })
-        this.doc = await Guilds.getWork(this.interaction.guild.id);
+        if (this.interaction.inGuild()) {
+            this.user = await Users.getWork({ user_id: this.interaction.user.id, guild_id: this.interaction.guild.id })
+            this.doc = await Guilds.getWork(this.interaction.guild.id);
+        }
         this.user_preferences = await Preferences.getWork(this.interaction.user.id);
 
         this.params["mongoose_user_doc"] = this.user;

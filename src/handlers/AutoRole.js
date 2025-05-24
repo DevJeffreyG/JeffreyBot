@@ -102,7 +102,7 @@ class AutoRole {
             if (!role)
                 throw new DoesntExistsError(this.interaction, "El role que te da este AutoRole", "este servidor")
 
-            if (reqRoles && (autorole.req_all ? !this.interaction.member.roles.cache.hasAll(...reqRoles) : !this.interaction.member.roles.cache.hasAny(...reqRoles)))
+            if (reqRoles.length > 0 && (autorole.req_all ? !this.interaction.member.roles.cache.hasAll(...reqRoles) : !this.interaction.member.roles.cache.hasAny(...reqRoles)))
                 throw new PermissionError(this.interaction);
 
             try {
