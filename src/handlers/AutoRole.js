@@ -97,12 +97,12 @@ class AutoRole {
                 throw new DoesntExistsError(this.interaction, "Este AutoRole ya", "el servidor");
 
             const role = this.interaction.guild.roles.cache.get(autorole.role_id);
-            const reqRole = this.interaction.guild.roles.cache.get(autorole.req_id);
+            const reqRoles = this.interaction.guild.roles.cache.filter(x => autorole.req_ids.includes(x.id)).map(x => x.id);
 
             if (!role)
                 throw new DoesntExistsError(this.interaction, "El role que te da este AutoRole", "este servidor")
 
-            if (reqRole && !this.interaction.member.roles.cache.has(reqRole.id))
+            if (reqRoles && (autorole.req_all ? !this.interaction.member.roles.cache.hasAll(...reqRoles) : !this.interaction.member.roles.cache.hasAny(...reqRoles)))
                 throw new PermissionError(this.interaction);
 
             try {

@@ -26,10 +26,20 @@ command.data
                     .setDescription("El texto que aparecerá en el botón")
                     .setRequired(true)
             )
+            .addStringOption(role =>
+                role
+                    .setName("mult_req")
+                    .setDescription("IDs separadas por comas de roles que se requieren para poder agregarse/quitarse el 'role'")
+            )
             .addRoleOption(role =>
                 role
                     .setName("req")
                     .setDescription("El role que se requiere para poder agregarse/quitarse el 'role'")
+            )
+            .addBooleanOption(role =>
+                role
+                    .setName("reqall")
+                    .setDescription("Si son varios roles requeridos, se necesitan todos para poder usar el autorole?")
             )
             .addStringOption(emoji =>
                 emoji
@@ -114,7 +124,7 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply();
     const { Guilds } = models
     const { subcommand } = params;
-    const { embed, server, nombre, emoji, role, req, autorole, toggle, nuevo } = params[subcommand];
+    const { embed, server, nombre, emoji, role, mult_req, req, reqall, autorole, toggle, nuevo } = params[subcommand];
 
     if (server && !client.isThisFetched(server.value)) await FetchThisGuild(client, server.value);
 
@@ -148,7 +158,7 @@ command.execute = async (interaction, models, params, client) => {
 
             //console.log(guild, emote);
 
-            await doc.addAutoRole(nombre.value, role.value, req?.value, emote, newId);
+            await doc.addAutoRole(nombre.value, role.value, mult_req?.value.replace(/\s+/g, "").split(",") ?? [req?.value], reqall?.value, emote, newId);
 
             return await interaction.editReply({
                 content: null, embeds: [
@@ -167,7 +177,7 @@ command.execute = async (interaction, models, params, client) => {
 
             let confirm = [
                 `AutoRole con ID \`${autoRole.id}\`.`,
-                `**NO** se desvinculará de cualquier Elemento Embed creado. Usa ${client.mentionCommand("autoroles link")} para eso.`
+                `**NO** se desvinculará de cualquier Elemento Embed creado. Usa ${client.mentionCommand("autoroles link")} para eso.`,
                 `Esto no se puede deshacer.`
             ]
             let toggletxt = `Toggle Group: **${doc.getOrCreateToggleGroup(autoRole.toggle_group).group_name}**, ID: \`${autoRole.toggle_group}\`.`
@@ -227,6 +237,9 @@ command.execute = async (interaction, models, params, client) => {
                 let toggleGroup = x.toggle_group ? doc.getOrCreateToggleGroup(x.toggle_group) : null;
                 let grupo = x.toggle_group ? `${toggleGroup.group_name} (\`${toggleGroup.id}\`)` : "No tiene";
 
+                let req = interaction.guild.roles.cache.filter(y => x.req_ids?.includes(y.id)).map(role => role) ?? "Nada";
+                let all = x.req_all ? "Sí" : "No";
+
                 let aRole = interaction.guild.roles.cache.get(x.role_id) ?? "Se eliminó el role";
                 let nombre = x.name;
 
@@ -235,7 +248,9 @@ command.execute = async (interaction, models, params, client) => {
                     emote,
                     id: x.id,
                     toggle: grupo,
-                    role: aRole
+                    role: aRole,
+                    req,
+                    all
                 })
             }
 
@@ -243,7 +258,7 @@ command.execute = async (interaction, models, params, client) => {
                 title: "Lista de AutoRoles",
                 author_icon: interaction.guild.iconURL(),
                 color: Colores.verde,
-                addon: `**— {nombre}**\n▸ **ID**: {id}.\n▸ **Toggle**: {toggle}.\n▸ {role}.\n▸ **Emote**: {emote}.\n\n`
+                addon: `**— {nombre}**\n▸ **ID**: {id}.\n▸ **Toggle**: {toggle}.\n▸ {role}.\n▸ **Emote**: {emote}.\n**▸ Role(s) requerido(s)**: {req}\n**▸ Se requieren todos**: {all}\n\n`
             }, items, 3)
 
             await interactive.init(interaction);

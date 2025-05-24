@@ -30,13 +30,15 @@ command.execute = async (interaction, models, params, client) => {
     for (const autorole of autoroles) {
         let name = autorole.name;
         let role = interaction.guild.roles.cache.get(autorole.role_id) ?? "...";
-        let req = interaction.guild.roles.cache.get(autorole.req_id) ?? "Nada";
+        let req = interaction.guild.roles.cache.filter(x => autorole.req_ids.includes(x.id)).map(role => role) ?? "Nada";
+        let all = autorole.req_all ? "Sí" : "No";
         let id = autorole.id;
 
         items.set(id, {
             name,
             role,
             req,
+            all,
             id
         })
     }
@@ -49,7 +51,8 @@ command.execute = async (interaction, models, params, client) => {
         description: ``,
         addon: `**— {name}**
 **▸ Role**: {role}
-**▸ Role requerido**: {req}
+**▸ Role(s) requerido(s)**: {req}
+**▸ Se requieren todos**: {all}
 **▸ ID**: \`{id}\`\n\n`
     }, items, 3);
 
