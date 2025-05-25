@@ -18,7 +18,7 @@ module.exports = async (client, member) => {
         `**${tag}** se ha llevado la pizza.`,
         `**${tag}** stay determined...!`,
         `¿**${tag}** es hater..?`,
-        `**${tag}** no nos hagas un vídeo de 40 minutos...`,
+        `**${tag}** no nos hagas un video de 40 minutos...`,
         `A **${tag}** no le dieron Mod...`,
         `**${tag}** no seas malo`
     ];

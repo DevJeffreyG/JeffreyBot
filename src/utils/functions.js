@@ -439,7 +439,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
               try {
                 await SendDirect(null, member, DirectMessageType.Payments, { embeds: [notEnough] });
               } catch (err) {
-                console.error("🔴 %s", err.message());
+                console.error("🔴 %s", err.stack);
               }
 
               try {
@@ -469,7 +469,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
                   ]
                 }, true)
               } catch (err) {
-                console.error("🔴 %s", err.message());
+                console.error("🔴 %s", err.stack);
               }
 
               await dbUser.addCount("subscriptions_currency", price, false);
@@ -1172,7 +1172,7 @@ const handleNotification = async function (guild) {
 
   const textos = {
     videos: ["Ha llegado el momento, chécalo para evitar que Jeffrey se ponga triste.", "Dale like o comenta algo si te gustó lo suficiente :D", "Espero que nos veamos en la próxima, ¡y que no sea en ██ meses!", "Hazme caso, está bueno. Míralo, a lo bien.", "No sabría decir si es lamentable, espero que no, ¿por qué no lo ves para comprobarlo y me dices qué tal?"],
-    shorts: ["Venga va, que es de los cortos chécalo.", "¡Viva el contenido rápido!", "¿Sólo unos días más para que salga un vídeo real?", "¡Otro vídeo corto para hacer presencia!"],
+    shorts: ["Venga va, que es de los cortos chécalo.", "¡Viva el contenido rápido!", "¿Sólo unos días más para que salga un video real?", "¡Otro video corto para hacer presencia!"],
     twitch: ["¡Ven y di hola!", "¡Ven y saluda!", "¡Pásate!", "¡Esto no pasa todo el tiempo, ven!", "¿QUÉ? LLEGA"],
     emojis: ["⚡", "🔥", "✨", "💚", "🦊", guild.client.Emojis.Badge, "👀", guild.client.Emojis.POG],
     labels: ["¡Me interesa!", "¡Veamos!", "¡Interesante!", "¡Click!", "¡Me sirve!", "¡A ver!"]
@@ -1221,7 +1221,7 @@ const handleNotification = async function (guild) {
       let prop = isShort ? "shorts" : "videos";
 
       let embed = new Embed()
-        .defDesc(`# ${isShort ? "¡NUEVO SHORT!" : "¡NUEVO VÍDEO!"}\n### ${new Chance().pickone(textos.emojis)} ${item.snippet.title}`)
+        .defDesc(`# ${isShort ? "¡NUEVO SHORT!" : "¡NUEVO VIDEO!"}\n### ${new Chance().pickone(textos.emojis)} ${item.snippet.title}`)
         .defColor(Colores.verde)
         .defFooter({ text: `— ${new Chance().pickone(textos[prop])}` })
         .defImage(item.snippet.thumbnails.maxres.url ?? item.snippet.thumbnails.default.url);
@@ -2182,7 +2182,8 @@ const CreateInteractionFilter = function (interaction, message, user) {
  * @returns {Promise<void>}
  */
 const SendDirect = async function (interaction, member, type, options, guildInfo = true) {
-  if (interaction.client.toggles.functionDisabled(ToggleableFunctions.SendDirect)) {
+  const client = interaction?.client ?? member?.client ?? null;
+  if (!client || client.toggles.functionDisabled(ToggleableFunctions.SendDirect)) {
     //console.log("⚪ Se intentó enviar un mensaje directo a %s pero esta función está toggleada.", member.user.username);
     return;
   }

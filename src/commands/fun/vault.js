@@ -29,11 +29,11 @@ command.execute = async (interaction, models, params, client) => {
         const isACode = true || new chance().bool({ likelihood: 80 });
 
         let respRelleno = [
-            "Jeffrey sube vídeo",
+            "Jeffrey sube video",
             "No seas malo",
             "Las rosas son rojas",
             "Los caballos comen manzanas",
-            "¿Sabías que 10 de cada 10 vídeos subidos por Jeffrey, están en YouTube por más de una semana ocultos antes de ser públicos?",
+            "¿Sabías que 10 de cada 10 videos subidos por Jeffrey, están en YouTube por más de una semana ocultos antes de ser públicos?",
             "No tengo dinero. ¿Me donas?",
             "Mindblowing...",
             "En plan, sé que no se usa este comando mucho, pero en plan, adiós, ¿sabes?",

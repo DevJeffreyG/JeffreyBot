@@ -16,7 +16,7 @@ command.addOption({
 })
 
 command.execute = async (interaction, models, params, client) => {
-    if(params.usuario?.member.id === client.user.id) return require("./bank").execute(interaction, models, params, client);
+    if (params.usuario?.member.id === client.user.id) return require("./bank").execute(interaction, models, params, client);
     if (!interaction.deferred) await interaction.deferReply();
     const { Users, CustomElements } = models
     const { usuario } = params;
@@ -123,7 +123,7 @@ command.execute = async (interaction, models, params, client) => {
             if (!boostEmbed.data.fields || boostEmbed.data.fields.length <= 20) {
                 boostEmbed
                     .defField(`🚀 — Boost ${boosttype} de ${boostobj} x${value.toLocaleString("es-CO")}`,
-                        `▸ ${boost.isSub ? "**(SUB)** Se renueva:" : "Hasta:"} ${time(boost.active_until)} (${time(boost.active_until, "R")})${boost.isSub ? `\n▸ **Desde:** ${time(boost.sub_info.active_since, "R")}` : ""}${disabled ? `\n▸ **Desactivado**.` : ""}`, true);
+                        `▸ ${boost.isSub && !boost.sub_info?.isCancelled ? "**(SUB)** Se renueva:" : "Hasta:"} ${time(boost.active_until)} (${time(boost.active_until, "R")})${boost.isSub ? `\n▸ **Desde:** ${time(boost.sub_info.active_since, "R")}` : ""}${disabled ? `\n▸ **Desactivado**.` : ""}`, true);
             } else {
                 boostEmbed.defField("🚀 — ...", `Y unos ${boosts.length - 20} más.`)
                 break;

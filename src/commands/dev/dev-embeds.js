@@ -381,7 +381,7 @@ ${adminRoles.toJSON().join(", ")} • ${modRole}.
             let regla1 = new Embed()
                 .defTitle(`Regla N°1: Mantén un ambiente agradable y con orden, NO hagas Spam, Flood o envíes NSFW.`)
                 .defDesc(`\`I.\` Spam será: la promoción de ti mismo o de alguien más, sólo hazlo si este aporta a la conversación.\n
-\`II.\` Flood será: muchos mensajes, un solo mensaje que ocupe mucho espacio. **No es** flood enviar una imagen, vídeo o GIF. **Pero sí lo es** enviar muchos seguidos que __no aportan nada a la conversación__.\n
+\`II.\` Flood será: muchos mensajes, un solo mensaje que ocupe mucho espacio. **No es** flood enviar una imagen, video o GIF. **Pero sí lo es** enviar muchos seguidos que __no aportan nada a la conversación__.\n
 \`III.\` NSFW (Not Safe for Work) será: gore, pornografía, contenido que pueda incomodar a los usuarios, o cualquier contenido que literalmente no pueda ser visto en el trabajo.\n
 \`IV.\` Mantener un ambiente agradable será: el buen ambiente de las conversaciones (ej: los temas), y del correcto uso de los canales. Por ejemplo, sería mal visto que los usuarios estén charlando y que empieces a usar muchos comandos en medio.`)
                 .defColor(Colores.verde);
@@ -464,7 +464,7 @@ ${adminRoles.toJSON().join(", ")} • ${modRole}.
                     new Embed()
                         .defDesc(`**—** ¡No puede ser! ¡Más roles exclusivos!
 
-🌠 ➟ **¡Vídeos antes de tiempo!**
+🌠 ➟ **¡Videos antes de tiempo!**
 📸 ➟ **¡Sneak Peeks!**`)
                         .defColor(Colores.nocolor)
                 ], files: [viproles.file]

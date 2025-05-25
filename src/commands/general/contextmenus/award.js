@@ -125,7 +125,7 @@ command.execute = async (interaction, models, params, client) => {
             hallEmbed.defImage(firstEmbed.url)
             content = firstEmbed.url;
         } else if (firstEmbed.video && !firstEmbed.thumbnail) { // es un link, que general un video reproducible
-            content = firstEmbed.url + "\n(vídeo)";
+            content = firstEmbed.url + "\n(video)";
         } else if (firstEmbed.video && firstEmbed.thumbnail) { // es un gif
             hallEmbed.defImage(firstEmbed.thumbnail.url)
             content = firstEmbed.url;
