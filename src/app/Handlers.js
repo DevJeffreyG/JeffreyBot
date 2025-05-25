@@ -811,11 +811,11 @@ class Handlers {
     }
 
     async #executeCommand(interaction, models, params, client) {
-        console.log(`-------- ${interaction.commandName} • por ${interaction.user.username} (${interaction.user.id}) • en ${interaction.guild.name} (${interaction.guild.id}) ----------`)
+        console.log(`-------- ${interaction.commandName} • por ${interaction.user.username} (${interaction.user.id}) • en ${interaction.guild?.name ?? "NO SERVER"} (${interaction.guild?.id ?? "NO SERVER"}) ----------`)
 
         if (!this.executedCommand) throw new CommandNotFoundError(interaction);
-        if (!this.interaction.inGuild() && this.executedCommand.category != Categories.DM) interaction.reply({ flags: [MessageFlags.Ephemeral], embeds: [new ErrorEmbed().defDesc("No puedes usar esto en mensajes directos.")] });
-        else if (this.interaction.inGuild() && this.executedCommand.category === Categories.DM && !this.#isDev()) interaction.reply({ flags: [MessageFlags.Ephemeral], embeds: [new ErrorEmbed().defDesc("Usa este comando en los mensajes directos con el bot.")] })
+        if (!this.interaction.inGuild() && this.executedCommand.category != Categories.DM) return interaction.reply({ flags: [MessageFlags.Ephemeral], embeds: [new ErrorEmbed().defDesc("No puedes usar esto en mensajes directos.")] });
+        else if (this.interaction.inGuild() && this.executedCommand.category === Categories.DM && !this.#isDev()) return interaction.reply({ flags: [MessageFlags.Ephemeral], embeds: [new ErrorEmbed().defDesc("Usa este comando en los mensajes directos con el bot.")] })
 
         if (this.executedCommand.category === Categories.DarkShop) {
             if (!this.doc.moduleIsActive("functions.darkshop"))

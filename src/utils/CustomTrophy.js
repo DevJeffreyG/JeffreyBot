@@ -45,11 +45,17 @@ class CustomTrophy {
         const actualTrophy = await this.#fetch(id);
 
         let trophyObj = new CustomTrophy(this.interaction).create(actualTrophy);
+
+        let req = trophyObj.req;
+        let given = trophyObj.given;
+        if (params.req?.value) req.role = params.req.value;
+        if (params.dado?.value) given.role = params.dado.value;
+
         let trophy = new CustomTrophy(this.interaction).create({
             name: params.name?.value ?? trophyObj.name,
             desc: params.desc?.value ?? trophyObj.desc,
-            req: params.req?.value ?? trophyObj.req.role,
-            dado: params.dado?.value ?? trophyObj.given.role
+            req,
+            given
         });
 
         let index = this.doc.trophies.findIndex(x => x.id === id);
@@ -669,22 +675,29 @@ class CustomTrophy {
     }
 
     /**
-     * @param {{name, desc, req, dado}} params 
+     * @param {{name, desc, req, given, dado}} params 
      */
     create(params) {
-        const { name, desc, req, dado } = params;
-
+        const { name, desc, req, dado, given } = params;
         if (!name)
             throw new BadParamsError(this.interaction, "El Trofeo debe tener al menos un nombre");
 
         this.name = name?.value ?? name;
         this.desc = desc?.value ?? desc;
-        this.req = {
-            role: req?.value ?? req?.role ?? null
-        }
-        this.given = {
-            role: dado?.value ?? dado
-        }
+
+        if (typeof req === "string")
+            this.req = {
+                role: req,
+                moment: {},
+                totals: {}
+            }
+        else this.req = req;
+
+        if (dado)
+            this.given = {
+                role: dado
+            }
+        else this.given = given ?? {};
 
         return this
     }
