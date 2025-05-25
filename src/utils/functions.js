@@ -752,14 +752,16 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
     if (moment().isAfter(pollInfo.until)) {
       let c = guild.channels.cache.find(x => x.id === pollInfo.channel_id);
       if (!c) {
-        doc.data.bets.splice(pollsIndex, 1);
+        await poll.deleteOne();
         continue staffPolls;
       }
 
-      let msg = await c.messages.fetch(pollInfo.message_id);
+      let msg = await c.messages.fetch(pollInfo.message_id).catch(err => {
+        console.error("🔴 %s", err);
+      });
 
-      if (msg.size > 1) {
-        doc.data.bets.splice(pollsIndex, 1);
+      if (msg?.size > 1 || !msg) {
+        await poll.deleteOne();
         continue staffPolls;
       }
 
@@ -1769,7 +1771,7 @@ const WillBenefit = async function (member, objetivesToCheck) {
 }
 
 const importImage = function (filename) {
-  let file = new AttachmentBuilder(`./resources/imgs/${filename.toUpperCase()}.png`, { name: `${filename.toLowerCase()}.png` });
+  let file = new AttachmentBuilder(`./src/resources/imgs/${filename.toUpperCase()}.png`, { name: `${filename.toLowerCase()}.png` });
   return {
     attachment: `attachment://${filename.toLowerCase()}.png`,
     file: file

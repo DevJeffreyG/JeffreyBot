@@ -11,7 +11,7 @@ command.execute = async (interaction, models, params, client) => {
     await interaction.reply({
         embeds: [
             new Embed()
-                .defTitle(`Preferencias de ${interaction.member.displayName} (${interaction.user.username})`)
+                .defTitle(`Preferencias de ${interaction.user.displayName} (${interaction.user.username})`)
                 .defColor(Colores.verdejeffrey)
                 .defDesc("Usa los botones para entrar en la configuración que deseas cambiar")
         ],

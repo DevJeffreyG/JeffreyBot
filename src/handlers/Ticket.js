@@ -123,7 +123,7 @@ class Ticket {
         const category = this.guild.channels.cache.get(this.docGuild.getCategory("tickets"));
         const ticketType = topic.toUpperCase();
 
-        if(!category) throw new BadSetupError(this.interaction, "La categoría de **Tickets** no está definida")
+        if (!category) throw new BadSetupError(this.interaction, "La categoría de **Tickets** no está definida")
 
         let general = new Embed()
             .defFooter({ text: `ID del Ticket: ${newId}`, icon: this.guild.iconURL() })
@@ -154,7 +154,7 @@ class Ticket {
 
             general.defAuthor({ text: `Reporte a un usuario.`, title: true });
             giveDetails = `Explica la situación, ¿a quién estás reportando? ¿cuáles son las pruebas y razones del reporte?\nEres libre de mencionarlos si crees que es urgente y pasa mucho tiempo.`
-        } else if (topic === "warn") {            
+        } else if (topic === "warn") {
             // mostrar los WARNS
             let selectMenuWarn = new StringSelectMenuBuilder()
                 .setCustomId("selectWarn")
@@ -307,7 +307,7 @@ class Ticket {
         const interaction = this.interaction;
         if (!this.interaction.member.roles.cache.hasAny(...this.staffRoles)) return interaction.editReply({ content: "Sólo el STAFF puede forzar el cierre del ticket." });
 
-        let confirmation = await Confirmation("Forzar cierre", [`El autor del ticket no lo ha marcado como resuelto`, `¿Estás segur@ de que quieres cerrar el ticket?`], interaction, true);
+        let confirmation = await Confirmation("Forzar cierre", [`El autor del ticket no lo ha marcado como resuelto`, `¿Estás segur@ de que quieres cerrar el ticket?`], interaction);
         if (!confirmation) return;
 
         //interaction.message.channel.delete();
@@ -350,7 +350,7 @@ class Ticket {
 
         await new Log(interaction)
             .setTarget(ChannelModules.StaffLogs)
-            .send({ content: `- **${interaction.member.displayName}** ha forzado el cierre del ticket: ${channel}` });
+            .send({ content: `- **${interaction.member.username}** ha forzado el cierre del ticket: ${channel}` });
 
         return await interaction.editReply({ content: `${this.client.Emojis.Check} Se cerró el Ticket.`, embeds: [], components: [] });
     }
@@ -410,7 +410,7 @@ class Ticket {
         if (!this.docGuild.checkStaff(interaction.member))
             throw new PermissionError(interaction);
 
-        let confirmation = await Confirmation("Abrir ticket", [`¿Estás segur@ de que quieres volver a abrir el ticket?`, `Se mencionará al creador original del ticket`], interaction, true);
+        let confirmation = await Confirmation("Abrir ticket", [`¿Estás segur@ de que quieres volver a abrir el ticket?`, `Se mencionará al creador original del ticket`], interaction);
         if (!confirmation) return;
 
         const ticket = this.docGuild.data.tickets.find(x => x.channel_id === interaction.channel.id);
@@ -452,7 +452,7 @@ class Ticket {
 
         await new Log(interaction)
             .setTarget(ChannelModules.StaffLogs)
-            .send({ content: `- **${interaction.member.displayName}** ha reabierto el ticket: ${channel}` });
+            .send({ content: `- **${interaction.member.username}** ha reabierto el ticket: ${channel}` });
 
         // mencionar al creador original
         return channel.send(`¡${originalCreator}! El STAFF ha vuelto a abrir tu ticket.`);

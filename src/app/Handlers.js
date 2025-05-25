@@ -208,6 +208,8 @@ class Handlers {
         await this.preferences?.handle(this.user_preferences);
         await this.autorole?.handle(this.doc);
 
+        if (!this.interaction.inGuild()) return;
+
         const splittedId = this.interaction.customId.split("-");
         const { Currency, DarkCurrency } = this.client.getCustomEmojis(this.interaction.guild.id);
 
