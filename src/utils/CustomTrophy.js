@@ -6,7 +6,7 @@ const { CommandInteraction, ModalSubmitInteraction, GuildMember, Guild, bold } =
 const Embed = require("./Embed");
 const { BadParamsError, DoesntExistsError } = require("../errors");
 const { Enum, BoostTypes, BoostObjetives, ShopTypes, DirectMessageType, TrophyRequirements } = require("./Enums");
-const { LimitedTime, FindNewId, PrettyCurrency, SendDirect } = require("./functions");
+const { LimitedTime, FindNewId, PrettyCurrency, SendDirect, Confirmation } = require("./functions");
 const { Colores } = require("../resources");
 const HumanMs = require("./HumanMs");
 
@@ -116,6 +116,16 @@ class CustomTrophy {
 
         if (trophy.enabled) trophy.enabled = false
         else trophy.enabled = true;
+
+        let confirmation = await Confirmation("Togglear Trofeo", [
+            `Se ${trophy.enabled ? "activará" : "desactivará"} el Trofeo.`,
+            "Asegúrate de que todos los requerimientos ya fueron modificados.",
+            "Asegúrate que todas las recompensas ya fueron modificadas.",
+            "Se enviará un mensaje directo a los usuarios que desbloqueen el trofeo cumpliendo los requisitos.",
+            "Modificar las recompensas de un Trofeo después de activarlo, no afectará a los usuarios que ya tienen el Trofeo.",
+            "Los Trofeos no serán eliminados a los usuarios en caso de que los requerimientos se modifiquen después que ya los hayan desbloqueado."
+        ], this.interaction)
+        if(!confirmation) return;
 
         await this.doc.save();
 
@@ -691,13 +701,24 @@ class CustomTrophy {
                 moment: {},
                 totals: {}
             }
+        else if (typeof req === "object" && req?.hasOwnProperty("value")) this.req = {
+            role: req.value,
+            moment: {},
+            totals: {}
+        }
         else this.req = req;
 
-        if (dado)
+        if (typeof dado === "string")
             this.given = {
                 role: dado
             }
+        else if (typeof dado === "object" && dado?.hasOwnProperty("value")) this.req = {
+            role: dado.value
+        }
         else this.given = given ?? {};
+
+        if (this.req.role === this.interaction.guild.id) this.req.role = null;
+        if (this.given.role === this.interaction.guild.id) this.given.role = null;
 
         return this
     }
