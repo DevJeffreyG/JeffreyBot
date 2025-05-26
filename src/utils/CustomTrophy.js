@@ -706,13 +706,13 @@ class CustomTrophy {
             moment: {},
             totals: {}
         }
-        else this.req = req;
+        else this.req = req ?? {};
 
         if (typeof dado === "string")
             this.given = {
                 role: dado
             }
-        else if (typeof dado === "object" && dado?.hasOwnProperty("value")) this.req = {
+        else if (typeof dado === "object" && dado?.hasOwnProperty("value")) this.given = {
             role: dado.value
         }
         else this.given = given ?? {};
