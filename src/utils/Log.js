@@ -167,7 +167,8 @@ class Log {
             } catch (err) {
                 rej(err)
             }
-            if (!this.enabled) res(null);
+
+            if (!this.enabled) return res(null);
 
             let msg;
 
@@ -181,9 +182,9 @@ class Log {
             if (!msg && this.channel) throw new BadCommandError(this.interaction, "INVALID CONTENT & EMBED");
             else if (msg) this.#handled = true;
 
-            if (this.#handled) res(msg)
+            if (this.#handled) return res(msg)
             //console.log({ fetched: this.#fetched, channel: this.channel ? true : false });
-            res(null);
+            return res(null);
         })
 
     }
