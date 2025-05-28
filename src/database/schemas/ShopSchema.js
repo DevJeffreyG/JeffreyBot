@@ -6,7 +6,11 @@ const Schema = {
             price: { type: Number, required: true },
             description: { type: String, required: true },
             reply: { type: String, default: "Item usado con éxito", required: true },
-            req_role: { type: String, default: null },
+            required: {
+                role: { type: String, default: null },
+                trophy: { type: Number, default: null },
+                level: { type: Number, default: null }
+            },
             interest: { type: Number, default: 0, required: true },
             use_info: {
                 manualUse: { type: Boolean, default: true },

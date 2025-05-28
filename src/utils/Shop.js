@@ -3,7 +3,7 @@ const { Shops, DarkShops, PetShops, EXShops, Users } = require("mongoose").model
 const { Colores } = require("../resources");
 const { ShopTypes, Enum, ItemTypes, ItemObjetives, ItemActions, YesNo, DirectMessageType } = require("./Enums");
 const InteractivePages = require("./InteractivePages");
-const { BadCommandError, DoesntExistsError, EconomyError, AlreadyExistsError, BadParamsError } = require("../errors");
+const { BadCommandError, DoesntExistsError, EconomyError, AlreadyExistsError, BadParamsError, PermissionError } = require("../errors");
 const { Confirmation, FindNewId, PrettyCurrency, SendDirect } = require("./functions");
 const Embed = require("./Embed");
 const HumanMs = require("./HumanMs");
@@ -204,7 +204,7 @@ class Shop {
                 item_desc: item.description,
                 item_price: price,
                 item_id: item.id,
-                showable: (item.use_info.action !== null && !item.disabled) ?? false,
+                showable: (item.use_info.action !== null && !item.disabled && Shop.fulfillsReqs(item, this.interaction.member, this.#user, this.shopdoc)) ?? false,
                 index
             })
 
@@ -276,7 +276,7 @@ class Shop {
             guild_id: this.interaction.guild.id
         }) : this.#user;
 
-        const member = this.interaction.member;
+        const member = user ? this.interaction.guild.members.cache.get(user.id) : this.interaction.member;
 
         const item = this.shopdoc.findItem(itemId);
 
@@ -287,7 +287,7 @@ class Shop {
 
         let toConfirm = [
             `¿Deseas comprar el item \`${itemName}\`${user ? ` a ${user}` : ""}?`,
-            `Pagarás **${this.config.currency.emoji}${itemPrice}**.`,
+            `${user && this.shopdoc.isSub(item) ? "Pagará" : "Pagarás"} **${this.config.currency.emoji}${itemPrice}**.`,
             `Esta compra no se puede devolver.`
         ]
 
@@ -299,9 +299,9 @@ class Shop {
 
         let price = this.determinePrice(this.#user, item);
 
-        // role requerido
-        if (item.req_role && !member.roles.cache.get(item.req_role))
-            throw new DoesntExistsError(this.interaction, `<@&${item.req_role}>`, "tu usuario")
+        // requerimientos
+        if (!Shop.fulfillsReqs(item, member, inventoryUser, this.shopdoc))
+            throw new PermissionError(this.interaction)
 
         if (!this.#user.affords(price, this.config.currency.user_path))
             throw new EconomyError(
@@ -329,8 +329,8 @@ class Shop {
         inventoryUser.data.inventory.push({ shopType: this.config.info.type, item_id: item.id, use_id: newUseId })
 
         let useHelp = `Úsalo con \`/use ${newUseId}\``;
-        if (user) useHelp = `Úsalo con \`/use ${newUseId}\``;
-        if (this.shopdoc.isSub(item)) useHelp = `Se te seguirá cobrando en el momento que uses/actives la suscripción: \`/use ${newUseId}\``;
+        if (this.shopdoc.isSub(item) && user) useHelp = `Se le seguirá cobrando en el momento que use/active la suscripción: \`/use ${newUseId}\``;
+        else if (this.shopdoc.isSub(item)) useHelp = `Se te seguirá cobrando en el momento que uses/actives la suscripción: \`/use ${newUseId}\``;
 
         let desc = [
             "Pago realizado con éxito",
@@ -394,6 +394,7 @@ class Shop {
                 desc: [
                     "Se ha agregado el item",
                     `No será visible hasta que se agregue el uso: ${this.client.mentionCommand("admin-shop use-info")}`,
+                    `Puedes cambiar los requerimientos de un item con: ${this.client.mentionCommand("admin-shop req-info")}`,
                     `ID: \`${newId}\``
                 ]
             }
@@ -741,7 +742,7 @@ ${codeBlock(item.description)}
                         let m = await new Modal(inter)
                             .defUniqueId("exWsMessageConfig")
                             .setTitle("Configuración del item")
-                            .addInput({ id: "message", value: `${actual.actions.join("\n")}`, label: "Mensaje a enviar al WebSocket", style: TextInputStyle.Short })                            
+                            .addInput({ id: "message", value: `${actual.actions.join("\n")}`, label: "Mensaje a enviar al WebSocket", style: TextInputStyle.Short })
                             .addInput({ id: "globalUseDelay", value: `${actual.delays.global ? ms(actual.delays.global) : "10m"}`, label: "Delay de uso global", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
                             .addInput({ id: "individualUseDelay", value: `${actual.delays.individual ? ms(actual.delays.individual) : "10m"}`, label: "Delay de uso individual", placeholder: "Escribe un número positivo", style: TextInputStyle.Short })
                             .show()
@@ -960,6 +961,32 @@ ${codeBlock(item.description)}
         return this.interaction.editReply({ embeds: [this.#updated], components: [] });
     }
 
+    async required(params) {
+        const item = this.shopdoc.findItem(params.id.value, false);
+
+        if (params.hasOwnProperty("role") && params.role) item.required.role = params.role.value;
+        if (item.required.role === this.interaction.guild.id) item.required.role = null;
+
+        if (params.hasOwnProperty("trofeo") && params.trofeo) item.required.trophy = params.trofeo.value;
+        if (item.required.trophy === 0) item.required.trophy = null;
+
+        if (params.hasOwnProperty("nivel") && params.nivel) item.required.level = params.nivel.value;
+        if (item.required.level === 0) item.required.level = null;
+
+        try {
+            await this.shopdoc.save();
+        } catch (err) {
+            if (err instanceof Error.ValidationError) throw new BadParamsError(this.interaction, [
+                "Revisa los campos",
+                err.message
+            ])
+
+            throw err
+        }
+
+        return this.interaction.editReply({ embeds: [this.#updated], components: [] });
+    }
+
     /** ------------------ UTILIDAD ------------------ */
     #discountsWork(user, precio) {
         const inital_price = precio;
@@ -1074,6 +1101,14 @@ ${codeBlock(item.description)}
                 }
             }
         }
+    }
+
+    static fulfillsReqs(item, member, userDoc, shopDoc) {
+        const role = shopDoc.fulfillsRequirement(item, "role", member.roles.cache.map(role => role.id))
+        const trophy = shopDoc.fulfillsRequirement(item, "trophy", userDoc.getTrophies().map(x => x.element_id))
+        const level = shopDoc.fulfillsRequirement(item, "level", userDoc.getLevel(), ">=")
+
+        return role && trophy && level;
     }
 }
 

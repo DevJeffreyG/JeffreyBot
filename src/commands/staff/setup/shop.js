@@ -142,15 +142,36 @@ command.data
             .setName("edit")
             .setDescription("Edita un item creado")
     )
+    .addSubcommand(req =>
+        req
+            .setName("req-info")
+            .setDescription("Define los requisitos de un item para poder comprarlo/usarlo")
+            .addRoleOption(option =>
+                option
+                    .setName("role")
+                    .setDescription("Un rol requerido. @everyone para eliminarlo.")
+            )
+            .addIntegerOption(option =>
+                option
+                    .setName("trofeo")
+                    .setDescription("La ID de un Trofeo requerido. 0 para eliminario.")
+                    .setMinValue(0)
+            ).addIntegerOption(option =>
+                option
+                    .setName("nivel")
+                    .setDescription("El nivel requerido (>=). 0 para eliminario.")
+                    .setMinValue(0)
+            )
+    )
 
-command.addOptionsTo(["edit", "toggle", "use-info", "del-item"], [
+command.addOptionsTo(["edit", "toggle", "use-info", "del-item", "req-info"], [
     new SlashCommandIntegerOption()
         .setName("id")
         .setDescription("La ID del item")
         .setRequired(true)
 ], true)
 
-command.addOptionsTo(["item-list", "add-discount", "add-item", "del-item", "use-info", "toggle", "edit"], [
+command.addOptionsTo(["item-list", "add-discount", "add-item", "del-item", "use-info", "toggle", "edit", "req-info"], [
     new SlashCommandIntegerOption()
         .setName("tipo")
         .setDescription("El tipo de tienda de este item")
@@ -189,6 +210,9 @@ command.execute = async (interaction, models, params, client) => {
             return await shop.removeItem(id.value);
         case "use-info":
             return await shop.editUse(params[subcommand])
+
+        case "req-info":
+            return await shop.required(params[subcommand]);
 
         case "toggle":
             return await shop.toggleItem(id.value, duracion?.value);

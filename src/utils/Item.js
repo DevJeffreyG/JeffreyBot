@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 const Chance = require("chance");
 
 const { ItemTypes, ItemObjetives, ItemActions, ItemEffects, LogReasons, ChannelModules, ShopTypes, PetAttacksType, Enum, BoostObjetives, ModuleBans } = require("./Enums");
-const { BadCommandError, AlreadyExistsError, DoesntExistsError, FetchError, ExecutionError, ModuleBannedError } = require("../errors");
+const { BadCommandError, AlreadyExistsError, DoesntExistsError, FetchError, ExecutionError, ModuleBannedError, PermissionError } = require("../errors");
 
 const { FindNewId, LimitedTime, Subscription, WillBenefit, isDeveloper, CreateInteractionFilter, FindNewIds, Encrypt } = require("./functions");
 
@@ -943,6 +943,10 @@ class Item {
                 .catch(e => console.error(e));
             return false;
         }
+
+        const Shop = require("./Shop");
+        if (!Shop.fulfillsReqs(this.item, this.interaction.member, this.user, this.shop))
+            throw new PermissionError(this.interaction);
 
         return true;
     }
