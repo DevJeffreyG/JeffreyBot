@@ -527,6 +527,7 @@ class DarkShop {
     async inflationWork() {
         if (!this.doc) await this.#getDoc();
         await this.#fetchInfo();
+        if (this.darkshopDisabled) return;
 
         // revisar el dia de la semana
 
@@ -553,6 +554,7 @@ class DarkShop {
     async getRealInflations() {
         if (!this.doc) await this.#getDoc();
         await this.#fetchInfo();
+        if (this.darkshopDisabled || !this.values) return { inflation: 0, oldinflation: 0 }
 
         let day = String(this.now.day());
 

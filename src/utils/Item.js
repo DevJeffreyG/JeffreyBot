@@ -594,7 +594,7 @@ class Item {
                 let m = await new Modal(ttsInteraction)
                     .defUniqueId(`ttsInput`)
                     .defTitle("TTS")
-                    .addInput({ id: "tts", label: "¿Qué quieres decir?", placeholder: "Exprésate...", style: TextInputStyle.Paragraph, req: true, min: 1, max: 500 })
+                    .addInput({ id: "tts", label: "¿Qué quieres decir?", placeholder: "Exprésate...", style: TextInputStyle.Paragraph, req: true, min: 1, max: 200 })
                     .show();
 
                 let c = await ttsInteraction.awaitModalSubmit({
