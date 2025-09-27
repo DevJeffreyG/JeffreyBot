@@ -78,7 +78,7 @@ class CustomEmbed extends Embed {
                     data: {
                         desc: [
                             `Se ha editado el Embed. Usa ${this.interaction.client.mentionCommand("elements send")} para enviarlo`,
-                            `ID: ${id}`
+                            `ID: \`${id}\``
                         ]
                     }
                 })

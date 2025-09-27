@@ -224,7 +224,11 @@ class InteractivePages {
                     console.error("🔴 %s", err);
                 }
             } else {
-                if (!i.deferred) await i.deferUpdate();
+                try {
+                    if (!i.deferred) await i.deferUpdate();
+                } catch (err) {
+                    console.error("🔴 %s", err);
+                }
             }
 
             if (i.customId === "stop") return collector.stop(EndReasons.StoppedByUser)

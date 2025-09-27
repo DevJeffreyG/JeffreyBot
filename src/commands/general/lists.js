@@ -45,13 +45,18 @@ command.data
             .setName("prestamos")
             .setDescription("Lista de todas los préstamos que tienes")
     )
+    .addSubcommand(sub =>
+        sub
+            .setName("trofeos")
+            .setDescription("Lista de todos los Trofeos de este servidor. Y algunos quiénes lo tienen.")
+    )
 
 command.execute = async (interaction, models, params, client) => {
     await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
     const user = params.getUser();
     const doc = params.getDoc();
-    const { RouletteItems, Users } = models;
+    const { RouletteItems, Users, CustomElements } = models;
     const { subcommand } = params;
 
     switch (subcommand) {
@@ -226,6 +231,43 @@ command.execute = async (interaction, models, params, client) => {
                 author_icon: interaction.member.displayAvatarURL(),
                 color: Colores.verde,
                 addon: `**▸** {debt} a **{interest}%** ({paying}).\n**▸** Con {member} desde {since}.\n**▸** Pago de intereses {next}.\n\n`
+            }, items, 5)
+
+            await interactive.init(interaction);
+            break;
+        }
+
+        case "trofeos": {
+            let items = new Map();
+
+            const custom = await CustomElements.getWork(interaction.guild.id);
+            const guildTrophies = custom.trophies;
+
+            let usersWithTrophies = await Users.find({
+                guild_id: interaction.guild.id,
+                "data.trophies": { "$exists": true, "$not": { "$size": 0 } }
+            });
+
+            for (const t of guildTrophies) {
+                if (!t.enabled) continue;
+
+                let usersWithThisTrophy = usersWithTrophies.filter(x => x.data.trophies.find(y => y.element_id === t.id))
+
+                let members = interaction.guild.members.cache.filter(x => usersWithThisTrophy.find(y => y.user_id === x.id)).toJSON().slice(0, 10)
+
+                items.set(t.id, {
+                    name: t.name,
+                    desc: t.desc ? `\nℹ️ ${t.desc}` : "",
+                    members: members.length > 0 ? `\n**▸** ${members}` : ""
+                })
+            }
+
+            const interactive = new InteractivePages({
+                title: "Lista de Trofeos",
+                footer: `Página {ACTUAL} de {TOTAL}`,
+                author_icon: interaction.member.displayAvatarURL(),
+                color: Colores.verde,
+                addon: `### 🏆 {name}{desc}{members}\n\n`
             }, items, 5)
 
             await interactive.init(interaction);

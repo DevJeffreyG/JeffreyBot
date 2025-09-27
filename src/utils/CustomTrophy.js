@@ -33,7 +33,7 @@ class CustomTrophy {
                         desc: [
                             `Se ha creado el Trofeo. Usa ${this.interaction.client.mentionCommand("elements trofeos toggle")} para que se de automáticamente al cumplir los requisitos`,
                             `Usa ${this.interaction.client.mentionCommand("elements trofeos edit")} para hacerle cambios`,
-                            `ID: ${id}`
+                            `ID: \`${id}\``
                         ]
                     }
                 })
@@ -69,7 +69,7 @@ class CustomTrophy {
                     data: {
                         desc: [
                             `Se ha editado el Trofeo`,
-                            `ID: ${id}`
+                            `ID: \`${id}\``
                         ]
                     }
                 })
@@ -125,7 +125,7 @@ class CustomTrophy {
             "Modificar las recompensas de un Trofeo después de activarlo, no afectará a los usuarios que ya tienen el Trofeo.",
             "Los Trofeos no serán eliminados a los usuarios en caso de que los requerimientos se modifiquen después que ya los hayan desbloqueado."
         ], this.interaction)
-        if(!confirmation) return;
+        if (!confirmation) return;
 
         await this.doc.save();
 

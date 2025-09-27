@@ -74,7 +74,7 @@ class CustomButton extends ButtonBuilder {
                     data: {
                         desc: [
                             `Se ha editado el Botón. Usa ${this.interaction.client.mentionCommand("elements botones link")} para vincularlo a un Embed`,
-                            `ID: ${id}`
+                            `ID: \`${id}\``
                         ]
                     }
                 })

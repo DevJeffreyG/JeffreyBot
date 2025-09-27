@@ -152,7 +152,7 @@ class Top {
                 `💰 Patrimonio: ${PrettyCurrency(this.interaction.guild, user.total)}`,
                 `💵 Usable: ${PrettyCurrency(this.interaction.guild, user.currency)}`,
                 `🔒 Protegido: ${PrettyCurrency(this.interaction.guild, user.secured)}`,
-                `💹 Invertido: ${PrettyCurrency(this.interaction.guild, user.dark_currency, { name: "DarkCurrency" })}➟${PrettyCurrency(this.interaction.guild, user.dark_value)}`,
+                `📊 Invertido: ${PrettyCurrency(this.interaction.guild, user.dark_currency, { name: "DarkCurrency" })}➟${PrettyCurrency(this.interaction.guild, user.dark_value)}`,
                 `|| Obtenido desde siempre: ${PrettyCurrency(this.interaction.guild, user.alltime)} ||`])
 
             this.top.set(user.user_id, {
