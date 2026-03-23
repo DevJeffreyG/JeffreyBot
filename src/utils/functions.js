@@ -2184,6 +2184,22 @@ const CreateInteractionFilter = function (interaction, message, user) {
 const SendDirect = async function (interaction, member, type, options, guildInfo = true) {
   const client = interaction?.client ?? member?.client ?? null;
   if (!client || client.toggles.functionDisabled(ToggleableFunctions.SendDirect)) {
+    let guild = client.guilds.cache.get(Bases.dev.guild)
+    let channel = guild.channels.cache.get(Bases.dev.logs)
+
+    try {
+      await channel.send({
+        embeds: [
+          new Embed()
+            .defAuthor({ text: `Intento de SendDirect`, icon: client.user.displayAvatarURL() })
+            .defDesc(`**▸** Un mensaje directo fue intentado de ser enviado a ${member.user.username} (${member.id}) pero la función está toggleada.\n**▸** Tipo SendDirect: **${new Enum(DirectMessageType).translate(type)}**\n**▸** ${interaction ? `Interacción: ${interaction.commandName}` : "Sin interacción asociada"}`)
+            .defColor(Colores.rojo)
+        ]
+      })
+    } catch (err) {
+      console.error("🔴 %s", err);
+    }
+    
     //console.log("⚪ Se intentó enviar un mensaje directo a %s pero esta función está toggleada.", member.user.username);
     return;
   }
