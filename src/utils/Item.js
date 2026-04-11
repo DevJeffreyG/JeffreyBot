@@ -861,7 +861,7 @@ class Item {
         // como el efecto es negativo, hay que revisar la firewall
         const firewallItem = this.shop.items.find(x => x.use_info.item_info.type === ItemTypes.Firewall)
         const skipFirewallItem = this.shop.items.find(x => x.use_info.item_info.type === ItemTypes.SkipFirewall)
-        const f = x => x.isDarkShop && x.item_id === firewallItem.id && x.active; // filtro
+        const f = x => x.shopType === ShopTypes.DarkShop && x.item_id === firewallItem.id && x.active; // filtro
 
         const firewall = this.victim.data.inventory.find(f);
         const firewallIndex = this.victim.data.inventory.findIndex(f);
@@ -873,7 +873,7 @@ class Item {
             // eliminar el skip, se la salte o no
             if (this.user.hasItem(skipFirewallItem.id, ShopTypes.DarkShop)) {
                 console.log("⚪ Se eliminó el skip de firewall de %s", this.interaction.user.username)
-                let skipIndex = this.user.data.inventory.findIndex(x => x.item_id === skipFirewallItem.id && x.isDarkShop)
+                let skipIndex = this.user.data.inventory.findIndex(x => x.item_id === skipFirewallItem.id && x.shopType === ShopTypes.DarkShop)
 
                 console.log(skipIndex)
                 this.user.data.inventory.splice(skipIndex, 1);
