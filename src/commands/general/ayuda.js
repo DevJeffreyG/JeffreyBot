@@ -95,6 +95,16 @@ command.execute = async (interaction, models, params, client) => {
                 .setStyle(ButtonStyle.Danger)
         )
 
+        let components = [
+                new ActionRowBuilder()
+                    .setComponents(Buttons)
+            ]
+
+        if(SpecialButtons.length > 0) components.push(
+            new ActionRowBuilder()
+                .setComponents(SpecialButtons)
+        )
+
         let msg = await interaction.editReply({
             embeds: [
                 new Embed()
@@ -107,12 +117,7 @@ command.execute = async (interaction, models, params, client) => {
                     .defColor(Colores.cake)
                     .defThumbnail(client.user.displayAvatarURL())
             ],
-            components: [
-                new ActionRowBuilder()
-                    .setComponents(Buttons),
-                new ActionRowBuilder()
-                    .setComponents(SpecialButtons)
-            ]
+            components
         })
 
         const collector = await new Collector(interaction, {
