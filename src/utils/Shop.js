@@ -291,7 +291,7 @@ class Shop {
             `Esta compra no se puede devolver.`
         ]
 
-        if (item.use_info.item_info.type === ItemTypes.Pet) toConfirm.push(`❤️ \`${item.stats.hp}\` 🗡️ \`${item.stats.attack}\` 🛡️ \`${item.stats.defense}\`.`)
+        if (item.use_info.item_info.type === ItemTypes.Pet || item.use_info.item_info.type === ItemTypes.PetStatsModifier) toConfirm.push(`❤️ \`${item.stats.hp}\` 🍗 \`${item.stats.hunger}\` 🗡️ \`${item.stats.attack}\` 🛡️ \`${item.stats.defense}\`.`)
         if (item.interest > 0) toConfirm.push(`Al comprar el item, su precio subirá **${this.config.currency.emoji}${item.interest.toLocaleString("es-CO")}**`)
 
         let confirmation = await Confirmation("Comprar item", toConfirm, this.interaction);
