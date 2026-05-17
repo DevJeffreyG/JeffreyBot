@@ -176,7 +176,7 @@ class RouletteItem {
                     this.user.economy.global.currency *= this.numbers;
                 }
                 else if (this.nonumbers === "%") {
-                    this.nonumbers = "Se sacó el";
+                    this.nonumbers = "Se aplicó el";
                     this.frontend_numbers = `**${this.numbers.toLocaleString("es-CO")}%**`;
 
                     this.user.economy.global.currency *= this.numbers / 100
@@ -229,7 +229,7 @@ class RouletteItem {
                 translated.action = "Multiplica"
                 break;
             case "%":
-                translated.action = "Saca el"
+                translated.action = "Se aplica el"
                 break;
         }
 
