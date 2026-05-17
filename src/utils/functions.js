@@ -392,7 +392,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
     for await (const temprole of temp_roles) {
       let tempRoleIndex = dbUser.data.temp_roles.findIndex(x => x.id === temprole.id);
       let role = guild.roles.cache.find(x => x.id === temprole.role_id);
-      let until = temprole.active_until;
+      let until = moment(temprole.active_until);
 
       const Logger = new Log()
         .setGuild(guild)
@@ -411,6 +411,25 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
             if (role) await member.roles.remove(role);
           } catch (err) {
             Logger.send({ embed: removingRoleErr(err) })
+          }
+
+          try {
+            await new Log()
+              .setChannel(guild.client.logChannel)
+              .setTarget(ChannelModules.ClientLogs)
+              .send({
+                embeds: [
+                  new Embed()
+                    .defDesc(`Se ha quitado el temprole ${role ? role.name : temprole.role_id} a ${member.user.username} (${member.id}) en ${guild.name} porque se acabó el tiempo.
+tempRoleIndex: \`${tempRoleIndex}\`
+temproles: ${codeBlock("json", JSON.stringify(dbUser.data.temp_roles))}`)
+                    .defField("Until", `${until.toDate().toDateString()} - ${time(until.toDate(), "F")}`)
+                    .defField("Now", `${moment().toDate().toDateString()} - ${time(new Date(), "F")}`)
+                    .defColor(Colores.verdeclaro)
+                ]
+              });
+          } catch (err) {
+            console.error("🔴 %s", err);
           }
 
           dbUser.data.temp_roles.splice(tempRoleIndex, 1);
@@ -1987,16 +2006,53 @@ ${codeBlock(message.content)}`)
  * @param {Guild | String} guild 
  */
 const FetchThisGuild = async function (client, guild) {
-  await client.guilds.fetch(guild.id ?? guild);
-  await guild.channels.fetch();
-  await guild.roles.fetch();
-  await guild.members.fetch();
-  await guild.emojis.fetch();
-  await guild.commands.fetch();
+  let error = false;
+  try {
+    await client.guilds.fetch(guild.id ?? guild);
+  } catch (err) {
+    console.error("🔴 Error fetching guild: %s", err);
+    error = true;
+  }
 
-  client.fetchedGuilds.push(guild.id);
+  try {
+    await guild.channels.fetch();
+  } catch (err) {
+    console.error("🔴 Error fetching channels: %s", err);
+    error = true;
+  }
 
-  console.log("💚 %s fetched!", guild.name)
+  try {
+    await guild.roles.fetch();
+  } catch (err) {
+    console.error("🔴 Error fetching roles: %s", err);
+    error = true;
+  }
+
+  try {
+    await guild.members.fetch();
+  } catch (err) {
+    console.error("🔴 Error fetching members: %s", err);
+    error = true;
+  }
+
+  try {
+    await guild.emojis.fetch();
+  } catch (err) {
+    console.error("🔴 Error fetching emojis: %s", err);
+    error = true;
+  }
+
+  try {
+    await guild.commands.fetch();
+  } catch (err) {
+    console.error("🔴 Error fetching commands: %s", err);
+    error = true;
+  }
+
+  if (!error) {
+    client.fetchedGuilds.push(guild.id);
+    console.log("💚 %s fetched!", guild.name)
+  }
 }
 
 /**
@@ -2199,7 +2255,7 @@ const SendDirect = async function (interaction, member, type, options, guildInfo
     } catch (err) {
       console.error("🔴 %s", err);
     }
-    
+
     //console.log("⚪ Se intentó enviar un mensaje directo a %s pero esta función está toggleada.", member.user.username);
     return;
   }
