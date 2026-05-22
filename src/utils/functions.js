@@ -420,7 +420,7 @@ const GlobalDatasWork = async function (guild, justTempRoles = false) {
               .send({
                 embeds: [
                   new Embed()
-                    .defDesc(`Se ha quitado el temprole ${role ? role.name : temprole.role_id} a ${member.user.username} (${member.id}) en ${guild.name} porque se acabó el tiempo.
+                    .defDesc(`Se ha quitado el temprole ${temprole.id} a ${member.user.username} (${member.id}) en ${guild.name} porque se acabó el tiempo.
 tempRoleIndex: \`${tempRoleIndex}\`
 temproles: ${codeBlock("json", JSON.stringify(dbUser.data.temp_roles))}`)
                     .defField("Until", `${until.toDate().toDateString()} - ${time(until.toDate(), "F")}`)
@@ -1075,7 +1075,28 @@ const LimitedTime = async function (victimMember, roleID = 0, duration, activati
 
       // Re-fetch user
       let u = await Users.getWork({ user_id: victimMember.id, guild_id: victimMember.guild.id });
-      u.data.temp_roles.splice(u.data.temp_roles.findIndex(x => x.id === toPush.id), 1);
+      let index = u.data.temp_roles.findIndex(x => x.id === toPush.id);
+
+      try {
+        await new Log()
+          .setChannel(guild.client.logChannel)
+          .setTarget(ChannelModules.ClientLogs)
+          .send({
+            embeds: [
+              new Embed()
+                .defDesc(`[TIMEOUT] Se ha quitado el temprole ${u.data.temp_roles[index].id} a ${victimMember.user.username} (${victimMember.id}) en ${victimMember.guild.name} porque se acabó el tiempo.
+tempRoleIndex: \`${tempRoleIndex}\`
+temproles: ${codeBlock("json", JSON.stringify(u.data.temp_roles))}`)
+                .defField("Until", `${u.data.temp_roles[index].active_until.toDate().toDateString()} - ${time(u.data.temp_roles[index].active_until.toDate(), "F")}`)
+                .defField("Now", `${moment().toDate().toDateString()} - ${time(new Date(), "F")}`)
+                .defColor(Colores.verdeclaro)
+            ]
+          });
+      } catch (err) {
+        console.error("🔴 %s", err);
+      }
+
+      u.data.temp_roles.splice(index, 1);
       await u.save();
     } catch (err) {
       console.error("🔴 %s", err);
@@ -1092,7 +1113,7 @@ const LimitedTime = async function (victimMember, roleID = 0, duration, activati
  * @param {Function} func 
  */
 const TimeoutIf = function (time, func) {
-  if (time > 2147483647) return;
+  if (time > 60000) return;
   setTimeout(func, time);
 }
 
