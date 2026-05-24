@@ -184,7 +184,7 @@ command.execute = async (interaction, models, params, client) => {
                 items.set(debt.id, {
                     member: interaction.guild.members.cache.get(debt.user),
                     debt: PrettyCurrency(interaction.guild, debt.debt),
-                    paying: PrettyCurrency(interaction.guild, Math.round(loan.debt * loan.interest / 100)),
+                    paying: PrettyCurrency(interaction.guild, Math.round(debt.debt * debt.interest / 100)),
                     interest: debt.interest,
                     next: time(debt.pay_in, "R"),
                     since: time(debt.since, "F")
