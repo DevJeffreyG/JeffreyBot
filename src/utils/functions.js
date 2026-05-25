@@ -1038,12 +1038,13 @@ const PetWork = async function (guild) {
  * @param {any} activation_info La del item de la tienda
  * @param {Number} [specialType=false] The special type of this temporary role.
  * @param {Number} [specialObjective=false] The objetive for this special type of temporary role.
- * @param {number} [specialValue=false] The value for the objetive of this special temporary role.
+ * @param {number} [specialValue=false] The value for the objetive of this special temporary role. 
+ * @param {boolean} [save=true] Whether save the user after adding the temporary role or not.
  * @returns Mongoose User document
  */
-const LimitedTime = async function (victimMember, roleID = 0, duration, activation_info, specialType = null, specialObjective = null, specialValue = null) {
+const LimitedTime = async function (victimMember, roleID = 0, duration, activation_info, specialType = null, specialObjective = null, specialValue = null, save = true, userDoc = null) {
   let role = victimMember.guild.roles.cache.find(x => x.id === roleID);
-  let user = await Users.getWork({ user_id: victimMember.id, guild_id: victimMember.guild.id });
+  let user = userDoc ?? await Users.getWork({ user_id: victimMember.id, guild_id: victimMember.guild.id });
 
   let active_until = moment().add(duration === Infinity ? ms("999y") : duration, "ms").startOf("minute").toDate();
 
@@ -1066,7 +1067,7 @@ const LimitedTime = async function (victimMember, roleID = 0, duration, activati
   }
 
   user.data.temp_roles.push(toPush);
-  await user.save();
+  if (save) await user.save();
 
   // timeout, por si pasa el tiempo antes de que el bot pueda reiniciarse
   TimeoutIf(duration, async function () {

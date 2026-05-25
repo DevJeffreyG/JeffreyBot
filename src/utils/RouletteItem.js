@@ -105,7 +105,6 @@ class RouletteItem {
     }
 
     async use() {
-        let save = true;
         let response = null;
         //let value = this.#valueWork();
 
@@ -113,8 +112,6 @@ class RouletteItem {
 
         console.log("🟢 Números:", this.numbers)
         console.log("🟢 No-Números:", this.nonumbers)
-
-        await this.user.addCount("roulette", 1, false);
 
         switch (this.target.constructor) {
             case GuildMemberRoleManager:
@@ -135,9 +132,8 @@ class RouletteItem {
                 } else if (this.nonumbers === '+') {
                     if (temproles) {
                         response = this.addedTemp;
-                        save = false
 
-                        await LimitedTime(this.interaction.member, null, ms(this.item.extra.duration), {}, this.item.extra.boosttype, this.item.extra.boostobj, this.item.extra.boostvalue);
+                        this.user = await LimitedTime(this.interaction.member, null, ms(this.item.extra.duration), {}, this.item.extra.boosttype, this.item.extra.boostobj, this.item.extra.boostvalue, false, this.user);
                     } else
                         this.target.push(this.numbers)
                 }
@@ -187,9 +183,8 @@ class RouletteItem {
                 response = this.success;
                 break;
         }
-
+        
         if (!response) response = this.success;
-        if (save) await this.user.save().catch(e => console.log(e));
 
         await this.interaction.editReply({ embeds: [response] })
         return this;

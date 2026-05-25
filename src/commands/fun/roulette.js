@@ -47,10 +47,12 @@ command.execute = async (interaction, models, params, client) => {
         await interaction.deleteReply()
         return await interaction.followUp({ flags: [MessageFlags.Ephemeral], content: "No me la vas a creer, pero no pude encontrar un item indicado para ti :(" })
     }
-    
+
     const item = new RouletteItem(interaction, randomItem).build(user, doc);
 
-    await item.use()
+    let afterUse = await item.use();
+
+    await afterUse.user.save();
 
     if (notSelected.size > 0) {
         await interaction.followUp({
@@ -65,7 +67,7 @@ command.execute = async (interaction, models, params, client) => {
 
         let start = new Date()
         let i = 0;
-        if(query.length === 0) return -1;
+        if (query.length === 0) return -1;
 
         while (!returnable) {
             i++
@@ -78,11 +80,7 @@ command.execute = async (interaction, models, params, client) => {
 
             //console.log(selected ? "🟢 Selected" : "🔴 Negative");
 
-            let benefit = false;
-
-            if (q.extra?.special === ItemObjetives.Boost) benefit = await WillBenefit(interaction.member, [q.extra.boostobj, BoostObjetives.All])
-
-            returnable = selected && !benefit ? q : null
+            returnable = selected ? q : null
 
             if (moment(date).diff(start, "second") >= 3) returnable = benefit ? -1 : q;
         }
