@@ -13,7 +13,11 @@ command.data
         .addIntegerOption(target => target
             .setName("target")
             .setDescription("Lo que va a ser cambiado si llega a ser seleccionado")
-            .setChoices(...new Enum(ItemObjetives).complexArray())
+            .setChoices(...new Enum(ItemObjetives).complexArray({
+                filterFn: (x) => {
+                    return !x.includes("Role") && x !== "Item";
+                }
+            }))
             .setRequired(true)
         )
         .addStringOption(value => value
@@ -59,8 +63,8 @@ command.execute = async (interaction, models, params, client) => {
         case "roulette-item":
             if (value.value.replace(/[0-9\.]/g, "").length === 0)
                 throw new BadParamsError(interaction, "Dios mío que uses +-*% por favor");
-            if (Number(target.value) === ItemObjetives.Boost && !duration)
-                throw new BadParamsError(interaction, "Si es un Boost, `duration` debe existir")
+            if (Number(target.value) === ItemObjetives.Boost && (!duration || !boosttype || !boostobj || !boostvalue))
+                throw new BadParamsError(interaction, "Si es un Boost, `duration`, `boosttype`, `boostobj` y `boostvalue` deben existir")
 
             if (value.value.replace(/[0-9\.]/g, "") === "%") {
                 let confirmation = await Confirmation("Seguro", ["100% es la cantidad que ya se tiene", "Menos de 100% se resta", "Más de 100% se empieza a subir"], interaction);

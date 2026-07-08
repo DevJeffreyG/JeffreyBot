@@ -21,7 +21,7 @@ Schema.static("findEqual", async function (data) {
 
     for (prop in extra) {
         let isNaN = extra[prop].toString() === "NaN";
-        if(!isNaN) newExtra[prop] = extra[prop];
+        if (!isNaN) newExtra[prop] = extra[prop];
     }
 
     delete newExtra.special
@@ -42,9 +42,13 @@ Schema.static("new", async function (data, id) {
     //console.log(extra)
 
     for (prop in extra) {
-        let isNaN = extra[prop].toString() === "NaN";
-        //console.log(prop, isNaN);
-        newExtra[prop] = isNaN ? null : extra[prop];
+        try {
+            let isNaN = extra[prop].toString() === "NaN";
+            //console.log(prop, isNaN);
+            newExtra[prop] = isNaN ? null : extra[prop];
+        } catch (e) {
+            newExtra[prop] = null;
+        }
     }
 
     return await new this({
