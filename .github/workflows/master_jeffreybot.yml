@@ -5,8 +5,8 @@ name: Build and deploy Node.js app to Azure Web App - jeffreybot
 
 on:
   push:
-    branches:
-      - master
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 jobs:
