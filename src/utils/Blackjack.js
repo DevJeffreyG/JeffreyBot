@@ -239,7 +239,7 @@ class Blackjack {
             this.#getDeck(); // para rellenar, en caso de ser necesario
 
             if (this.ended) try {
-                return i.update();
+                return await i.update();
             } catch (err) {
                 console.error("🔴 %s", err);
             }
