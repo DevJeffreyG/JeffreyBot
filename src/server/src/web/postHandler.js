@@ -2,6 +2,9 @@ const { ApiUpdate } = require("../../../utils/Enums");
 const { UpdateObj } = require("../../../utils/functions");
 const { Verify } = require("../js/Functions");
 
+const { verifySession } = require("../js/middlewares");
+const jwt = require("jsonwebtoken");
+
 const Express = require("express")();
 const { Guilds, ChangeLogs } = require("mongoose").models;
 
@@ -10,10 +13,9 @@ const { Guilds, ChangeLogs } = require("mongoose").models;
  * @param {Express} app 
  */
 module.exports = (app) => {
-    const { WSServer } = app;
+    const { WSServer, SessionManager } = app;
 
-    app.post("/api/db/update-guild", async (req, res) => {
-        if (!Verify(req)) return res.status(403).send({ message: "Not authorized" });
+    app.post("/api/db/update-guild", verifySession, async (req, res) => {
         try {
             let response = true;
             const doc = await Guilds.getWork(req.header("guildid"));
@@ -124,8 +126,7 @@ module.exports = (app) => {
         }
     })
 
-    app.post("/api/db/add-changelog", async (req, res) => {
-        if (!Verify(req)) return res.status(403).send({ message: "Not authorized" });
+    app.post("/api/db/add-changelog", verifySession, async (req, res) => {
         try {
             const { info, changes } = req.body
             let query = await ChangeLogs.create(info, changes)
@@ -136,6 +137,7 @@ module.exports = (app) => {
         }
     })
 
+    // TODO: Check Client functionality
     app.post("/api/ws/item-use", async (req, res) => {
         if (!Verify(req)) return res.status(403).send({ message: "Not authorized" });
 

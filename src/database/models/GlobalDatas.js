@@ -159,4 +159,32 @@ Schema.method("commandToggled", function(name){
     return this.info.commands.find(x => x.name === name);
 })
 
+Schema.static("dashboardFeatures", async function () {
+    return await this.findOne({
+        type: "dashboardFeatures"
+    }) ?? await new this({
+        type: "dashboardFeatures",
+        info: {
+            new: [{ path: String, description: String }],
+            recommended: [{ path: String, description: String }],
+            featured:[{ path: String, description: String }]
+        }
+    }).save();
+});
+
+Schema.static("changeDashboardFeatures", async function (newFeatures) {
+    let doc = await this.findOne({
+        type: "dashboardFeatures"
+    });
+    if (doc) {
+        doc.info = newFeatures;
+        return await doc.save();
+    } else {
+        return await new this({
+            type: "dashboardFeatures",
+            info: newFeatures
+        }).save();
+    }
+});
+
 module.exports = mongoose.model("GlobalDatas", Schema);

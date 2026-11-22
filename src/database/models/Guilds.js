@@ -9,6 +9,9 @@ const { integerValidator, positiveValidator, positiveWithZeroValidator } = requi
 
 const Schema = mongoose.Schema;
 
+const ActiveModulesSchema = require('../helpers/GuildActiveModules');
+const GuildQuantitiesSchema = require('../helpers/GuildQuantities');
+
 const modifiers = {
     type: { type: Number, required: true },
     module: { type: String, required: true },
@@ -17,6 +20,9 @@ const modifiers = {
     req_type: { type: Number, required: true },
     id: { type: Number, sparse: true }
 }
+
+const activeModules = ActiveModulesSchema;
+const quanitities = GuildQuantitiesSchema;
 
 const GuildSchema = new Schema({
     guild_id: { type: String, required: true, unique: true },
@@ -74,7 +80,7 @@ const GuildSchema = new Schema({
                 name: { type: String, required: true },
                 role_id: { type: String, required: true },
                 req_ids: [{ type: String, default: null }],
-                req_all: {type: Boolean, default: false },
+                req_all: { type: Boolean, default: false },
                 emote: { type: String },
                 guild_emote: { type: String, default: null },
                 toggle_group: { type: Number, default: null },
@@ -164,143 +170,13 @@ const GuildSchema = new Schema({
         }
     },
     settings: {
-        active_modules: {
-            functions: {
-                suggestions: { type: Boolean, default: false },
-                tickets: { type: Boolean, default: false },
-                logs: { type: Boolean, default: true },
-                birthdays: { type: Boolean, default: false },
-                darkshop: { type: Boolean, default: false },
-                rep_to_currency: { type: Boolean, default: false },
-                staff_reminders: { type: Boolean, default: true }
-            },
-            logs: {
-                guild: {
-                    messageDelete: { type: Boolean, default: false },
-                    messageUpdate: { type: Boolean, default: false },
-                    // TODO: Agregar más logs
-                },
-                moderation: {
-                    warns: { type: Boolean, default: true },
-                    softwarns: { type: Boolean, default: false },
-                    pardons: { type: Boolean, default: true },
-                    bans: { type: Boolean, default: true },
-                    timeouts: { type: Boolean, default: true },
-                    clears: { type: Boolean, default: true },
-                    automod: { type: Boolean, default: true }
-                },
-                staff: {
-                    tickets: { type: Boolean, default: true },
-                    settings: { type: Boolean, default: true },
-                    errors: { type: Boolean, default: true },
-                    automated_changes: { type: Boolean, default: true }
-                },
-                darkshop: {
-                    sunday: { type: Boolean, default: true },
-                    removed_currency: { type: Boolean, default: false }
-                }
-            },
-            automoderation: {
-                remove_links: { type: Boolean, default: false }
-            }
-        },
+        active_modules: activeModules.mongify(),
         autoroles: {
             channel_id: { type: String },
             message_id: { type: String },
             guild_id: { type: String },
         },
-        quantities: {
-            ignore_notifications: {
-                youtube_videos: { type: Number, default: 14, validate: [positiveValidator, integerValidator] },
-                youtube_shorts: { type: Number, default: 14, validate: [positiveValidator, integerValidator] }
-            },
-            interest_days: {
-                secured: { type: Number, default: 14, validate: [positiveWithZeroValidator, integerValidator] }
-            },
-            blackjack: {
-                consecutive_wins: { type: Number, default: 5, validate: [positiveValidator, integerValidator] }
-            },
-            darkshop: {
-                level: { type: Number, default: 5, validate: positiveWithZeroValidator },
-                baseprice: { type: Number, default: 200, validate: [positiveValidator, integerValidator] }
-            },
-            currency_per_rep: { type: Number, default: 500, validate: [positiveValidator, integerValidator] },
-            adjust_ratio: { type: Number, default: 100, validate: [positiveValidator] },
-            awards: {
-                tier1: {
-                    price: { type: Number, default: 100, validate: [positiveValidator, integerValidator] },
-                    gift: { type: Number, default: 0, validate: [positiveWithZeroValidator, integerValidator] }
-                },
-                tier2: {
-                    price: { type: Number, default: 500, validate: [positiveValidator, integerValidator] },
-                    gift: { type: Number, default: 100, validate: [positiveWithZeroValidator, integerValidator] }
-                },
-                tier3: {
-                    price: { type: Number, default: 1800, validate: [positiveValidator, integerValidator] },
-                    gift: { type: Number, default: 700, validate: [positiveWithZeroValidator, integerValidator] }
-                },
-            },
-            limits: {
-                chat_rewards: {
-                    exp: {
-                        min: { type: Number, default: 5, validate: [positiveValidator, integerValidator] },
-                        max: { type: Number, default: 35, validate: [positiveValidator, integerValidator] }
-                    },
-                    currency: {
-                        min: { type: Number, default: 5, validate: [positiveValidator, integerValidator] },
-                        max: { type: Number, default: 15, validate: [positiveValidator, integerValidator] }
-                    }
-                },
-                currency: {
-                    coins: {
-                        min: { type: Number, default: 1, validate: [positiveValidator, integerValidator] },
-                        max: { type: Number, default: 20, validate: [positiveValidator, integerValidator] }
-                    },
-                    rob: {
-                        min: { type: Number, default: 40, validate: [positiveValidator, integerValidator] },
-                        max: { type: Number, default: 100, validate: [positiveValidator, integerValidator] },
-                    }
-                },
-                pets: {
-                    hunger: {
-                        min: { type: Number, default: 1, validate: [positiveValidator, integerValidator] },
-                        max: { type: Number, default: 3, validate: [positiveValidator, integerValidator] },
-                    }
-                },
-                bets: {
-                    blackjack: {
-                        min: { type: Number, default: 1000, validate: [positiveValidator, integerValidator] },
-                        max: { type: Number, default: Infinity, validate: [positiveValidator] }
-                    },
-                    staff_bets: {
-                        min: { type: Number, default: 10, validate: [positiveValidator, integerValidator] },
-                        max: { type: Number, default: 1000, validate: [positiveValidator] }
-                    }
-                }
-            },
-            percentages: {
-                interests: {
-                    transaction_secured: { type: Number, default: 10, validate: positiveWithZeroValidator },
-                    secured: { type: Number, default: 5, validate: positiveWithZeroValidator },
-                },
-                skipfirewall: { type: Number, default: 100, validate: positiveWithZeroValidator },
-                pets: {
-                    basic_unlocked: { type: Number, default: 5, validate: positiveWithZeroValidator },
-                },
-                limits: {
-                    rob: {
-                        success: {
-                            min: { type: Number, default: 50, validate: [positiveValidator, integerValidator] },
-                            max: { type: Number, default: 80, validate: [positiveValidator, integerValidator] }
-                        },
-                        fail: {
-                            min: { type: Number, default: 20, validate: [positiveValidator, integerValidator] },
-                            max: { type: Number, default: 40, validate: [positiveValidator, integerValidator] }
-                        }
-                    }
-                }
-            }
-        },
+        quantities: quanitities.mongify(),
         notifications: {
             youtube: { type: String },
             twitch: { type: String }
@@ -410,7 +286,7 @@ GuildSchema.pre("save", function () {
 })
 
 GuildSchema.pre("validate", function () {
-    if (!this.settings.quantities.limits.bets.blackjack.max) {
+    if (this.settings.quantities.limits.bets.blackjack.max === 0) {
         this.settings.quantities.limits.bets.blackjack.max = Infinity;
     }
 })
@@ -630,6 +506,17 @@ GuildSchema.method("moduleIsActive", function (query, initial = this.settings.ac
     return general;
 })
 
+GuildSchema.method("getSetting", function (query) {
+    return this.get("settings." + query);
+});
+
+GuildSchema.method("getSettings", function (queries) {
+    return queries.reduce((acc, q) => {
+        acc[q] = this.getSetting(q);
+        return acc;
+    }, {});
+});
+
 GuildSchema.method("getEmoji", function (query) {
     let general = this.emojis;
     const q = query.split(".");
@@ -648,5 +535,62 @@ GuildSchema.method("getEmoji", function (query) {
 GuildSchema.method("toAdjust", function (query) {
     return this.settings.functions.adjust[query];
 })
+
+// new dashboard
+GuildSchema.method("getTotalFunctions", function () {
+    return countBools(this.settings.functions);
+})
+
+GuildSchema.method("getTotalModules", function () {
+    return countBools(this.settings.active_modules);
+})
+
+GuildSchema.static("dashboardGetModulesSchema", function () {
+    return activeModules.dashboard();
+})
+
+GuildSchema.static("dashboardGetQuantitiesSchema", function () {
+    return quanitities.dashboard();
+})
+
+function countBools(obj) {
+    let total = 0;
+    let trueCount = 0;
+
+    function isBoolean(valor) {
+        return (
+            valor &&
+            typeof valor === 'object' &&
+            !Array.isArray(valor) &&
+            valor.type === Boolean
+        );
+    }
+
+    function run_count(node) {
+        if (!node || typeof node !== 'object' || Array.isArray(node)) return;
+
+        for (const key of Object.keys(node)) {
+            const valor = node[key];
+
+            if (isBoolean(valor)) {
+                // Es una propiedad definida como { type: Boolean, default: ... }
+                total++;
+                if (valor.default === true) trueCount++;
+            } else if (typeof valor === 'boolean') {
+                // Es un booleano "plano"
+                total++;
+                if (valor === true) trueCount++;
+            } else if (valor && typeof valor === 'object' && !Array.isArray(valor)) {
+                // Es un objeto anidado (y no es una definición de otro tipo, ej. Number)
+                if (valor.type === undefined) {
+                    run_count(valor);
+                }
+            }
+        }
+    }
+
+    run_count(obj);
+    return { total, active: trueCount };
+}
 
 module.exports = mongoose.model('Guilds', GuildSchema);
