@@ -49,8 +49,8 @@ guildQuantities
     ))
     .addSetting("interest_days.secured", new Setting(
         {
-            name: "Dinero asegurado",
-            help: "Cobrar cada X días los interses a los usuarios que tengan dinero asegurado.",
+            name: "Días: Intereses de Dinero asegurado",
+            help: "Cobrar cada X días los intereses a los usuarios que tengan dinero asegurado.",
         },
         {
             type: Number,
@@ -93,7 +93,7 @@ guildQuantities
     .addSetting("currency_per_rep", new Setting(
         {
             name: "Cantidad de dinero por reputación",
-            help: "Dinero dado por cada punto de reputación que tenga un usuario."
+            help: "Dinero dado por cada punto de reputación que tenga un usuario. (/claimrep)"
         },
         {
             type: Number,
@@ -190,15 +190,15 @@ guildQuantities
     .addSetting("limits.pets.hunger.max", new Setting({ name: "Máximo de hambre dada a la mascota", help: "Esto pasa periódicamente, a todas las mascotas del servidor." }, { type: Number, defaultValue: 3, validators: [positiveValidator, integerValidator] }))
     .addSetting("limits.bets.blackjack.min", new Setting({ name: "Mínimo de apuesta en Blackjack" }, { type: Number, defaultValue: 1000, validators: [positiveValidator, integerValidator] }))
     .addSetting("limits.bets.blackjack.max", new Setting({ name: "Máximo de apuesta en Blackjack" }, { type: Number, defaultValue: Infinity, validators: [positiveValidator, integerOrInfinityValidator] }))
-    .addSetting("limits.bets.staff_bets.min", new Setting({ name: "Mínimo de apuesta en apuestas de STAFF" }, { type: Number, defaultValue: 10, validators: [positiveValidator, integerValidator] }))
-    .addSetting("limits.bets.staff_bets.max", new Setting({ name: "Máximo de apuesta en apuestas de STAFF" }, { type: Number, defaultValue: 1000, validators: [positiveValidator, integerOrInfinityValidator] }))
+    .addSetting("limits.bets.staff_bets.min", new Setting({ name: "Mínimo de puja en apuestas de STAFF" }, { type: Number, defaultValue: 10, validators: [positiveValidator, integerValidator] }))
+    .addSetting("limits.bets.staff_bets.max", new Setting({ name: "Máximo de puja en apuestas de STAFF" }, { type: Number, defaultValue: 1000, validators: [positiveValidator, integerOrInfinityValidator] }))
     .addSetting("percentages.interests.transaction_secured", new Setting({ name: "Porcentaje de intereses por transacción asegurada", help: "El porcentaje de intereses que se cobran por cada transacción de /save o /with." }, { type: Number, defaultValue: 10, validators: [positiveWithZeroValidator] }))
     .addSetting("percentages.interests.secured", new Setting({ name: "Porcentaje de intereses por dinero asegurado", help: "El porcentaje de intereses que se cobran periódicamente por el dinero que se tiene asegurado." }, { type: Number, defaultValue: 5, validators: [positiveWithZeroValidator] }))
     .addSetting("percentages.skipFirewall", new Setting({ name: "Porcentaje de probabilidad de saltarse la Firewall", help: "Para el item especial de la DarkShop, Firewall." }, { type: Number, defaultValue: 100, validators: [positiveWithZeroValidator] }))
-    .addSetting("percentages.pets.basic_unlocked", new Setting({ name: "Desbloquear básico", help: "El porcentaje de probabilidad de que al atacar, una mascota haga más daño de lo normal." }, { type: Number, defaultValue: 5, validators: [positiveWithZeroValidator] }))
-    .addSetting("percentages.limits.rob.success.min", new Setting({ name: "Mínimo de probabilidad de éxito al robar", help: "El porcentaje mínimo de probabilidad de éxito al robar a otro usuario." }, { type: Number, defaultValue: 50, validators: [positiveValidator, integerValidator] }))
-    .addSetting("percentages.limits.rob.success.max", new Setting({ name: "Máximo de probabilidad de éxito al robar", help: "El porcentaje máximo de probabilidad de éxito al robar a otro usuario." }, { type: Number, defaultValue: 90, validators: [positiveValidator, integerValidator] }))
-    .addSetting("percentages.limits.fail.min", new Setting({ name: "Mínimo de probabilidad de fallo al robar", help: "El porcentaje mínimo de probabilidad de fallo al robar a otro usuario." }, { type: Number, defaultValue: 20, validators: [positiveValidator, integerValidator] }))
-    .addSetting("percentages.limits.fail.max", new Setting({ name: "Máximo de probabilidad de fallo al robar", help: "El porcentaje máximo de probabilidad de fallo al robar a otro usuario." }, { type: Number, defaultValue: 40, validators: [positiveValidator, integerValidator] }))
+    .addSetting("percentages.pets.basic_unlocked", new Setting({ name: "Mascotas: Desbloquear básico", help: "La probabilidad de que al atacar, una mascota haga más daño de lo normal." }, { type: Number, defaultValue: 5, validators: [positiveWithZeroValidator] }))
+    .addSetting("percentages.limits.rob.success.min", new Setting({ name: "Porcentaje mínimo de dinero al robar", help: "El porcentaje mínimo de dinero que se roba a otro usuario." }, { type: Number, defaultValue: 50, validators: [positiveValidator, integerValidator] }))
+    .addSetting("percentages.limits.rob.success.max", new Setting({ name: "Porcentaje máximo de dinero al robar", help: "El porcentaje máximo de dinero que se roba a otro usuario." }, { type: Number, defaultValue: 90, validators: [positiveValidator, integerValidator] }))
+    .addSetting("percentages.limits.fail.min", new Setting({ name: "Porcentaje mínimo de dinero al fallar", help: "El porcentaje mínimo de dinero que se pierde al no lograr el robo." }, { type: Number, defaultValue: 20, validators: [positiveValidator, integerValidator] }))
+    .addSetting("percentages.limits.fail.max", new Setting({ name: "Porcentaje máximo de dinero al fallar", help: "El porcentaje máximo de dinero que se pierde al no lograr el robo." }, { type: Number, defaultValue: 40, validators: [positiveValidator, integerValidator] }))
 
 module.exports = guildQuantities;
