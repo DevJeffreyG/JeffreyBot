@@ -1,7 +1,7 @@
 const { GetSession } = require("../js/Functions");
-const { verifySession, verifyGuildAccess } = require("../js/middlewares");
+const { verifySession, verifyGuildAccess, verifyDevAccess } = require("../js/middlewares");
 const mongoose = require("mongoose");
-const { Guilds, GlobalDatas } = mongoose.models;
+const { Guilds, GlobalDatas, ChangeLogs } = mongoose.models;
 
 const ACTIVE_MODULES_PREFIX = "active_modules";
 const QUANTITIES_PREFIX = "quantities";
@@ -116,6 +116,18 @@ function findSetting(path) {
 }
 
 module.exports = (app) => {
+    app.post("/api/db/global/add-changelog", verifySession, verifyDevAccess, async (req, res) => {
+        try {
+            const { info, changes } = req.body
+            let query = await ChangeLogs.create(info, changes)
+
+            res.sendStatus(204);
+        } catch (err) {
+            console.error("🌎", err);
+            res.status(500).send({ message: err.message || "Error al crear el changelog" });
+        }
+    })
+
     app.get("/api/db/schema/guilds/active-modules", verifySession, (req, res) => {
         const schema = Guilds.dashboardGetModulesSchema();
 

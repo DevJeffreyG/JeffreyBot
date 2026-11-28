@@ -107,6 +107,30 @@ async function verifyGuildAccess(req, res, next) {
   }
 }
 
+/**
+ * Autoriza el acceso a rutas exclusivas de desarrolladores.
+ */
+async function verifyDevAccess(req, res, next) {
+  try {
+    const session = GetSession(req.app?.SessionManager, req);
+    const discordUser = session?.getDiscordUser?.();
+
+    if (!discordUser?.id) {
+      return res.status(403).json({ error: "Acceso denegado: sesión de Discord inválida." });
+    }
+
+    if (discordUser.dev !== true) {
+      return res.status(403).json({ error: "Acceso denegado: se requiere acceso de desarrollador." });
+    }
+
+    req.jbSession = session;
+
+    return next();
+  } catch (err) {
+    return next(err);
+  }
+}
+
 const InitLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 30
@@ -115,5 +139,6 @@ const InitLimiter = rateLimit({
 module.exports = {
   verifySession,
   verifyGuildAccess,
+  verifyDevAccess,
   InitLimiter
 }

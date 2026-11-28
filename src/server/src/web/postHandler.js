@@ -3,7 +3,6 @@ const { UpdateObj } = require("../../../utils/functions");
 const { Verify } = require("../js/Functions");
 
 const { verifySession } = require("../js/middlewares");
-const jwt = require("jsonwebtoken");
 
 const Express = require("express")();
 const { Guilds, ChangeLogs } = require("mongoose").models;
@@ -13,7 +12,7 @@ const { Guilds, ChangeLogs } = require("mongoose").models;
  * @param {Express} app 
  */
 module.exports = (app) => {
-    const { WSServer, SessionManager } = app;
+    const { WSServer } = app;
 
     app.post("/api/db/update-guild", verifySession, async (req, res) => {
         try {
@@ -121,17 +120,6 @@ module.exports = (app) => {
 
                 return response
             }
-        } catch (err) {
-            console.error("🌎", err);
-        }
-    })
-
-    app.post("/api/db/add-changelog", verifySession, async (req, res) => {
-        try {
-            const { info, changes } = req.body
-            let query = await ChangeLogs.create(info, changes)
-
-            res.send(query ? true : false);
         } catch (err) {
             console.error("🌎", err);
         }
