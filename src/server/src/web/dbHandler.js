@@ -49,7 +49,7 @@ function validatorFnOf(validator) {
 
 /** 0 es la forma en que el dashboard expresa "sin límite" para estos settings. */
 function normalizeSettingValue(setting, value) {
-    if (value === 0 && validatorIdsOf(setting).includes("integerOrInfinity")) {
+    if (value === 0 && validatorIdsOf(setting).join(";").toLowerCase().includes("infinity")) {
         return Infinity;
     }
 
@@ -80,16 +80,51 @@ function validationErrorMessage(err) {
     return Object.values(err.errors).map(error => error.message)[0] ?? "Valor inválido";
 }
 
+/** JSON no puede representar Infinity: el dashboard lo expresa como 0 ("sin límite"). */
+function serializeSettingValue(setting, value) {
+    if (value === Infinity && validatorIdsOf(setting).join(";").toLowerCase().includes("infinity")) {
+        return 0;
+    }
+
+    return value;
+}
+
+function serializeSettingValues(schema, values) {
+    const serialized = {};
+
+    for (const [path, value] of Object.entries(values ?? {})) {
+        const setting = schema.get(normalizeSettingPath(path));
+        serialized[path] = setting ? serializeSettingValue(setting, value) : value;
+    }
+
+    return serialized;
+}
+
+function serializeSchemaForDashboard(settings) {
+    return settings.map(setting => {
+        const plain = setting.toJSON();
+        if (plain.mongoInfo?.defaultValue === Infinity) {
+            plain.mongoInfo.defaultValue = 0;
+        }
+        return plain;
+    });
+}
+
+function findSetting(path) {
+    const normalized = normalizeSettingPath(path);
+    return getQuantitiesSchema().get(normalized) ?? getActiveModulesSchema().get(normalized);
+}
+
 module.exports = (app) => {
     app.get("/api/db/schema/guilds/active-modules", verifySession, (req, res) => {
         const schema = Guilds.dashboardGetModulesSchema();
 
-        res.send(JSON.stringify(schema));
+        res.send(JSON.stringify(serializeSchemaForDashboard(schema)));
     });
 
     app.get("/api/db/schema/guilds/quantities", verifySession, (req, res) => {
         const schema = Guilds.dashboardGetQuantitiesSchema();
-        res.send(JSON.stringify(schema));
+        res.send(JSON.stringify(serializeSchemaForDashboard(schema)));
     });
 
     app.get("/api/db/global/dashboard-features", verifySession, async (req, res) => {
@@ -104,8 +139,9 @@ module.exports = (app) => {
         if (!guildDoc) return res.status(404).send({ message: "Guild not found" });
 
         let r = guildDoc.getSetting(root);
+        const setting = findSetting(root);
 
-        res.send(JSON.stringify(r));
+        res.send(JSON.stringify(setting ? serializeSettingValue(setting, r) : r));
     })
 
     app.get("/api/db/guilds/:guildId/bulkActiveModules", verifySession, verifyGuildAccess, async (req, res) => {
@@ -120,7 +156,7 @@ module.exports = (app) => {
 
         let r = guildDoc.getSettings(root);
 
-        res.send(JSON.stringify(r));
+        res.send(JSON.stringify(serializeSettingValues(getActiveModulesSchema(), r)));
     });
 
     app.patch("/api/db/guilds/:guildId/bulkActiveModules", verifySession, verifyGuildAccess, async (req, res) => {
@@ -178,7 +214,7 @@ module.exports = (app) => {
             }
 
             console.error("Error updating active modules:", err);
-            return res.status(500).send({ message: "Internal server error" });
+            return res.status(500).send({ message: err?.message || "Internal server error" });
         }
     });
 
@@ -194,7 +230,7 @@ module.exports = (app) => {
 
         let r = guildDoc.getSettings(root);
 
-        res.send(JSON.stringify(r));
+        res.send(JSON.stringify(serializeSettingValues(getQuantitiesSchema(), r)));
     });
 
     app.patch("/api/db/guilds/:guildId/bulkQuantities", verifySession, verifyGuildAccess, async (req, res) => {
@@ -251,7 +287,7 @@ module.exports = (app) => {
             }
 
             console.error("Error updating quantities:", err);
-            return res.status(500).send({ message: "Internal server error" });
+            return res.status(500).send({ message: err?.message || "Internal server error" });
         }
     });
 }
